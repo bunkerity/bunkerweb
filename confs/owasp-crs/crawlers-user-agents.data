@@ -1,0 +1,34 @@
+# Search engine crawlers and other bots
+
+# site ripper
+# http://www.softbytelabs.com/en/BlackWidow/
+black widow
+blackwidow
+# crawler
+# 2006
+prowebwalker
+# generic crawler
+pymills-spider/
+# SEO
+# https://ahrefs.com/robot
+AhrefsBot
+# people database
+# https://pipl.com/bot/
+PiplBot
+# advertising targeting
+# https://www.grapeshot.com/crawler/
+GrapeshotCrawler/2.0
+grapeFX
+# SEO
+# http://www.searchmetrics.com/searchmetricsbot/
+SearchmetricsBot
+# SEO
+# https://moz.com/help/guides/moz-procedures/what-is-rogerbot
+rogerbot
+# SEO
+# http://www.majestic12.co.uk/projects/dsearch/mj12bot.php
+MJ12bot
+# news service
+Owlin bot
+# misbehaving spider
+Lingewoud-550-Spyder
