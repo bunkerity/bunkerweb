@@ -54,6 +54,7 @@ PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS:-yes}"
 PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE:-10M}"
 PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS:-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
 USE_MODSECURITY="${USE_MODSECURITY:-yes}"
+CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY:-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
 
 # replace values
 replace_in_file "/etc/nginx/nginx.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
@@ -215,6 +216,13 @@ if [ "$ERRORS" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/server.conf" "%ERRORS%" ""
 fi
+if [ "$CONTENT_SECURITY_POLICY" != "" ] ; then
+        replace_in_file "/etc/nginx/server.conf" "%CONTENT_SECURITY_POLICY%" "include /etc/nginx/content-security-policy.conf;"
+        replace_in_file "/etc/nginx/content-security-policy.conf" "%CONTENT_SECURITY_POLICY%" "$CONTENT_SECURITY_POLICY"
+else
+        replace_in_file "/etc/nginx/server.conf" "%CONTENT_SECURITY_POLICY%" ""
+fi
+
 
 # start PHP
 if [ "$USE_PHP" = "yes" ] ; then
