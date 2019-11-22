@@ -8,6 +8,76 @@ nginx based Docker image secure by default.
 - Based on alpine and compiled from source (< 100 MB image)
 - Easy to configure with environment variables
 
+## Quickstart guide
+
+### Run HTTP server with default settings
+
+```shell
+docker run -p 80:80 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
+```
+
+Web files are stored in the /www directory, so you need to mount the volume on it.
+
+### Run HTTPS server with automated Let's Encrypt
+```shell
+docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -e SERVER_NAME=www.yourdomain.com -e AUTO_LETS_ENCRYPT=yes bunkerity/bunkerized-nginx
+```
+
+Let's Encrypt needs port 80 to be open to request and sign certificates but nginx will only listen on port 443.
+
+## List of variables
+
+### nginx security
+*SERVER_TOKENS*
+Values : on | off
+Default value : off
+If set to on, nginx will display server version in Server header and default error pages.
+
+*HEADER_SERVER*
+Values : yes | no
+Default value : no
+If set to no, nginx will remove the Server header in HTTP responses.
+
+*ALLOWED_METHODS*
+Values : allowed HTTP methods separated with | char
+Default value : GET|POST|HEAD
+Only the HTTP methods listed here will be accepted by nginx. If not listed, nginx will close the connection.
+
+*DISABLE_DEFAULT_SERVER*
+Values : yes | no
+Default value : no
+If set to yes, nginx will only respond to HTTP request when the Host header match the SERVER_NAME. For example, it will close the connection if a bot access the site with direct ip.
+
+### Security headers
+*X_FRAME_OPTIONS*
+Values : DENY | SAMEORIGIN | ALLOW-FROM https://www.website.net | ALLOWALL
+Default value : DENY
+Policy to be used when the site is displayed through iframe. Can be used to mitigate clickjacking attacks.
+More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options).
+
+*X_XSS_PROTECTION*
+Values : 0 | 1 | 1; mode=block
+Default value : 1; mode=block
+Policy to be used when XSS is detected by the browser. Only works with Internet Explorer.
+More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection).
+
+*X_CONTENT_TYPE_OPTIONS*
+Values : nosniff
+Default value : nosniff
+Tells the browser to be strict about MIME type.
+More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options).
+
+*REFERRER_POLICY*
+Values : no-referrer | no-referrer-when-downgrade | origin | origin-when-cross-origin | same-origin | strict-origin | strict-origin-when-cross-origin | unsafe-url
+Default value : no-referrer
+
+
+*TODO : list variables, default value, explanation, ...*
+
 ## TODO
+- File permissions hardening
+- Secure and HttpOnly cookies
+- Custom nginx configuration
+- Custom TLS certificates
 - Documentation
 - Reverse proxy mode
