@@ -55,6 +55,7 @@ PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE:-10M}"
 PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS:-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
 USE_MODSECURITY="${USE_MODSECURITY:-yes}"
 CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY:-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
+COOKIE_FLAGS="${COOKIE_FLAGS:-* HttpOnly}"
 
 # replace values
 replace_in_file "/etc/nginx/nginx.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
@@ -142,9 +143,9 @@ else
 fi
 replace_in_file "/etc/nginx/server.conf" "%SERVER_NAME%" "$SERVER_NAME"
 replace_in_file "/etc/nginx/server.conf" "%ALLOWED_METHODS%" "$ALLOWED_METHODS"
-if [ ! -f /etc/nginx/geoip.mmdb ] ; then
-	/opt/scripts/geolite.sh
-fi
+#if [ ! -f /etc/nginx/geoip.mmdb ] ; then
+#	/opt/scripts/geolite.sh
+#fi
 if [ "$BLOCK_COUNTRY" != "" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
 	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\n/g') no;"
@@ -221,6 +222,12 @@ if [ "$CONTENT_SECURITY_POLICY" != "" ] ; then
         replace_in_file "/etc/nginx/content-security-policy.conf" "%CONTENT_SECURITY_POLICY%" "$CONTENT_SECURITY_POLICY"
 else
         replace_in_file "/etc/nginx/server.conf" "%CONTENT_SECURITY_POLICY%" ""
+fi
+if [ "$COOKIE_FLAGS" != "" ] ; then
+        replace_in_file "/etc/nginx/server.conf" "%COOKIE_FLAGS%" "include /etc/nginx/cookie-flags.conf;"
+        replace_in_file "/etc/nginx/cookie-flags.conf" "%COOKIE_FLAGS%" "$COOKIE_FLAGS"
+else
+        replace_in_file "/etc/nginx/server.conf" "%COOKIE_FLAGS%" ""
 fi
 
 

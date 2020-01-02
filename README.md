@@ -28,9 +28,9 @@ Let's Encrypt needs port 80 to be open to request and sign certificates but ngin
 ## List of variables
 
 ### nginx security
-*SERVER_TOKENS*
-Values : on | off
-Default value : off
+*SERVER_TOKENS*  
+Values : on | off  
+Default value : off  
 If set to on, nginx will display server version in Server header and default error pages.
 
 *HEADER_SERVER*
@@ -76,7 +76,6 @@ Default value : no-referrer
 
 ## TODO
 - File permissions hardening
-- Secure and HttpOnly cookies
 - Custom nginx configuration
 - Custom TLS certificates
 - Documentation
