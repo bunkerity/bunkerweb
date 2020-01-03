@@ -133,7 +133,7 @@ Default value : default-src 'self'; frame-ancestors 'none'; form-action 'self'; 
 Policy to be used when loading resources (scripts, forms, frames, ...).  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
 
-### Blocking
+### Blocking
 *BLOCK_COUNTRY*  
 Values : <country code 1> <country code 2> ...  
 Default value :  
