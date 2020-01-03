@@ -61,10 +61,10 @@ Sets the maximum body size before nginx returns a 413 error code.
 Setting to 0 means "infinite" body size.
 
 *SERVER_NAME*  
-Values : <first name> <second name> ...
-Default value : www.bunkerity.com
+Values : <first name> <second name> ...  
+Default value : www.bunkerity.com  
 Sets the host names of the webserver. This is the names used by your clients.  
-Usefull when used with AUTO_LETSENCRYPT=yes and/or DISABLE_DEFAULT_SERVER=yes.
+Useful when used with AUTO_LETSENCRYPT=yes and/or DISABLE_DEFAULT_SERVER=yes.
 
 ### HTTPS
 *AUTO_LETS_ENCRYPT*  
