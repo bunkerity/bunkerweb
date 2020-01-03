@@ -87,7 +87,5 @@ Accepted value can be found [here](https://github.com/AirisX/nginx_cookie_flag_m
 
 ## TODO
 - File permissions hardening
-- Custom nginx configuration
 - Custom TLS certificates
 - Documentation
-- Reverse proxy mode

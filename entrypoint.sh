@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "[*] Starting bunkerized-nginx ..."
+
 # replace pattern in file
 function replace_in_file() {
 	# escape slashes
@@ -56,6 +58,7 @@ PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS:-system, exec, shell_exec, passth
 USE_MODSECURITY="${USE_MODSECURITY:-yes}"
 CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY:-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
 COOKIE_FLAGS="${COOKIE_FLAGS:-* HttpOnly}"
+SERVE_FILES="${SERVE_FILES:-yes}"
 
 # replace values
 replace_in_file "/etc/nginx/nginx.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
@@ -229,6 +232,11 @@ if [ "$COOKIE_FLAGS" != "" ] ; then
 else
         replace_in_file "/etc/nginx/server.conf" "%COOKIE_FLAGS%" ""
 fi
+if [ "$SERVE_FILES" = "yes" ] ; then
+        replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" "include /etc/nginx/serve-files.conf;"
+else
+        replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" ""
+fi
 
 
 # start PHP
@@ -241,4 +249,5 @@ crond
 
 # start nginx in foreground
 # when nginx is killed, container get killed too
+echo "[*] Running nginx ..."
 exec /usr/sbin/nginx

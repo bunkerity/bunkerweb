@@ -15,9 +15,8 @@ RUN apk --no-cache add php7-fpm php7-session certbot libstdc++ libmaxminddb geoi
     mkdir /www && \
     adduser -h /dev/null -g '' -s /sbin/nologin -D -H nginx
 
-VOLUME /www
+VOLUME /www /confs
 
-EXPOSE 80
-EXPOSE 443
+EXPOSE 80/tcp 443/tcp
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
