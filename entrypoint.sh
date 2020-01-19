@@ -50,7 +50,7 @@ HTTP2="${HTTP2:-yes}"
 STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY:-max-age=31536000}"
 PHP_EXPOSE="${PHP_EXPOSE:-no}"
 PHP_DISPLAY_ERRORS="${PHP_DISPLAY_ERRORS:-no}"
-PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR:-/www/}"
+PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR:-/www/:/tmp/}"
 PHP_ALLOW_URL_FOPEN="${PHP_ALLOW_URL_FOPEN:-no}"
 PHP_ALLOW_URL_INCLUDE="${PHP_ALLOW_URL_INCLUDE:-no}"
 PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS:-yes}"
@@ -60,6 +60,12 @@ USE_MODSECURITY="${USE_MODSECURITY:-yes}"
 CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY:-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
 COOKIE_FLAGS="${COOKIE_FLAGS:-* HttpOnly}"
 SERVE_FILES="${SERVE_FILES:-yes}"
+WRITE_ACCESS="${WRITE_ACCESS:-no}"
+
+# install additional modules if needed
+if [ "$ADDITIONAL_MODULES" != "" ] ; then
+	apk add $ADDITIONAL_MODULES
+fi
 
 # replace values
 replace_in_file "/etc/nginx/nginx.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
@@ -239,6 +245,11 @@ else
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" ""
 fi
 
+# edit access if needed
+if [ "$WRITE_ACCESS" = "yes" ] ; then
+	chown -R root:nginx /www
+	chmod g+w -R /www
+fi
 
 # start PHP
 if [ "$USE_PHP" = "yes" ] ; then
