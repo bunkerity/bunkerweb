@@ -197,9 +197,7 @@ Default value : system, exec, shell_exec, passthru, phpinfo, show_source, highli
 List of PHP functions blacklisted. They can't be used anywhere in PHP code.
 
 ## TODO
-- run php7-fpm as nginx
 - Edit CONTENT_SECURITY_POLICY default value
-- Possibility to disable stuff with "free" values
 - Custom TLS certificates
 - Documentation
 - Certificate Transparency

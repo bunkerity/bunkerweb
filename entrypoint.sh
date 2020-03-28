@@ -19,48 +19,49 @@ cp /opt/confs/php.ini /etc/php7/php.ini
 echo "" > /etc/crontabs/root
 
 # set default values
-MAX_CLIENT_SIZE="${MAX_CLIENT_SIZE:-10m}"
-SERVER_TOKENS="${SERVER_TOKENS:-off}"
-CACHE="${CACHE:-max=1000 inactive=60s}"
-CACHE_ERRORS="${CACHE_ERRORS:-on}"
-CACHE_USES="${CACHE_USES:-1}"
-CACHE_VALID="${CACHE_VALID:-60s}"
-#CLIENT_CACHE="${CLIENT_CACHE}:-css|gif|htm|html|ico|jpeg|jpg|js|png|svg|tif|tiff|eot|otf|ttf|woff|woff2"
-#CLIENT_CACHE_EXPIRES="${CLIENT_CACHE_EXPIRES}:-1d}"
+MAX_CLIENT_SIZE="${MAX_CLIENT_SIZE-10m}"
+SERVER_TOKENS="${SERVER_TOKENS-off}"
+CACHE="${CACHE-max=1000 inactive=60s}"
+CACHE_ERRORS="${CACHE_ERRORS-on}"
+CACHE_USES="${CACHE_USES-1}"
+CACHE_VALID="${CACHE_VALID-60s}"
+#CLIENT_CACHE="${CLIENT_CACHE}-css|gif|htm|html|ico|jpeg|jpg|js|png|svg|tif|tiff|eot|otf|ttf|woff|woff2"
+#CLIENT_CACHE_EXPIRES="${CLIENT_CACHE_EXPIRES}-1d}"
 #CLIENT_CACHE_CONTROL=
-USE_GZIP="${USE_GZIP:-off}"
-GZIP_COMP_LEVEL="${GZIP_COMP_LEVEL:-6}"
-GZIP_MIN_LENGTH="${GZIP_MIN_LENGTH:-10240}"
-GZIP_TYPES="${GZIP_TYPES:-text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml application/rss+xml application/atom+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml}"
-USE_PHP="${USE_PHP:-yes}"
-HEADER_SERVER="${HEADER_SERVER:-no}"
-X_FRAME_OPTIONS="${X_FRAME_OPTIONS:-DENY}"
-X_XSS_PROTECTION="${X_XSS_PROTECTION:-1; mode=block}"
-X_CONTENT_TYPE_OPTIONS="${X_CONTENT_TYPE_OPTIONS:-nosniff}"
-REFERRER_POLICY="${REFERRER_POLICY:-no-referrer}"
-FEATURE_POLICY="${FEATURE_POLICY:-accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vibrate 'none'; vr 'none'}"
-DISABLE_DEFAULT_SERVER="${DISABLE_DEFAULT_SERVER:-no}"
-SERVER_NAME="${SERVER_NAME:-www.bunkerity.io}"
-ALLOWED_METHODS="${ALLOWED_METHODS:-GET|POST|HEAD}"
-BLOCK_COUNTRY="${BLOCK_COUNTRY:-}"
-BLOCK_USER_AGENT="${BLOCK_USER_AGENT:-yes}"
-BLOCK_TOR_EXIT_NODE="${BLOCK_TOR_EXIT_NODE:-no}"
-AUTO_LETS_ENCRYPT="${AUTO_LETS_ENCRYPT:-no}"
-HTTP2="${HTTP2:-yes}"
-STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY:-max-age=31536000}"
-PHP_EXPOSE="${PHP_EXPOSE:-no}"
-PHP_DISPLAY_ERRORS="${PHP_DISPLAY_ERRORS:-no}"
-PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR:-/www/:/tmp/}"
-PHP_ALLOW_URL_FOPEN="${PHP_ALLOW_URL_FOPEN:-no}"
-PHP_ALLOW_URL_INCLUDE="${PHP_ALLOW_URL_INCLUDE:-no}"
-PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS:-yes}"
-PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE:-10M}"
-PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS:-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
-USE_MODSECURITY="${USE_MODSECURITY:-yes}"
-CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY:-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
-COOKIE_FLAGS="${COOKIE_FLAGS:-* HttpOnly}"
-SERVE_FILES="${SERVE_FILES:-yes}"
-WRITE_ACCESS="${WRITE_ACCESS:-no}"
+USE_GZIP="${USE_GZIP-off}"
+GZIP_COMP_LEVEL="${GZIP_COMP_LEVEL-6}"
+GZIP_MIN_LENGTH="${GZIP_MIN_LENGTH-10240}"
+GZIP_TYPES="${GZIP_TYPES-text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml application/rss+xml application/atom+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml}"
+USE_PHP="${USE_PHP-yes}"
+HEADER_SERVER="${HEADER_SERVER-no}"
+X_FRAME_OPTIONS="${X_FRAME_OPTIONS-DENY}"
+X_XSS_PROTECTION="${X_XSS_PROTECTION-1; mode=block}"
+X_CONTENT_TYPE_OPTIONS="${X_CONTENT_TYPE_OPTIONS-nosniff}"
+REFERRER_POLICY="${REFERRER_POLICY-no-referrer}"
+FEATURE_POLICY="${FEATURE_POLICY-accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vibrate 'none'; vr 'none'}"
+DISABLE_DEFAULT_SERVER="${DISABLE_DEFAULT_SERVER-no}"
+SERVER_NAME="${SERVER_NAME-www.bunkerity.com}"
+ALLOWED_METHODS="${ALLOWED_METHODS-GET|POST|HEAD}"
+BLOCK_COUNTRY="${BLOCK_COUNTRY-}"
+BLOCK_USER_AGENT="${BLOCK_USER_AGENT-yes}"
+BLOCK_TOR_EXIT_NODE="${BLOCK_TOR_EXIT_NODE-no}"
+AUTO_LETS_ENCRYPT="${AUTO_LETS_ENCRYPT-no}"
+HTTP2="${HTTP2-yes}"
+STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY-max-age=31536000}"
+PHP_EXPOSE="${PHP_EXPOSE-no}"
+PHP_DISPLAY_ERRORS="${PHP_DISPLAY_ERRORS-no}"
+PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR-/www/:/tmp/}"
+PHP_ALLOW_URL_FOPEN="${PHP_ALLOW_URL_FOPEN-no}"
+PHP_ALLOW_URL_INCLUDE="${PHP_ALLOW_URL_INCLUDE-no}"
+PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS-yes}"
+PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE-10M}"
+PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
+USE_MODSECURITY="${USE_MODSECURITY-yes}"
+CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
+COOKIE_FLAGS="${COOKIE_FLAGS-* HttpOnly}"
+SERVE_FILES="${SERVE_FILES-yes}"
+WRITE_ACCESS="${WRITE_ACCESS-no}"
+REDIRECT_HTTP_TO_HTTPS="${REDIRECT_HTTP_TO_HTTPS-no}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -204,6 +205,13 @@ else
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
 fi
 
+# TODO : only do this if TLS is used
+if [ "$REDIRECT_HTTP_TO_HTTPS" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%REDIRECT_HTTP_TO_HTTPS%" "include /etc/nginx/redirect-http-to-https.conf;"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%REDIRECT_HTTP_TO_HTTPS%" ""
+fi
+
 if [ "$USE_MODSECURITY" = "yes" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_MODSECURITY%" "include /etc/nginx/modsecurity.conf;"
 else
@@ -253,6 +261,8 @@ fi
 
 # start PHP
 if [ "$USE_PHP" = "yes" ] ; then
+	replace_in_file "/etc/php7/php-fpm.d/www.conf" "user = nobody" "user = nginx"
+	replace_in_file "/etc/php7/php-fpm.d/www.conf" "group = nobody" "group = nginx"
 	php-fpm7
 fi
 
