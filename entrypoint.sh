@@ -182,24 +182,30 @@ else
 fi
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" ""
+
+	FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
+	DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
+	EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$FIRST_SERVER_NAME}"
+
 	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" "include /etc/nginx/auto-lets-encrypt.conf;"
+
 	if [ "$HTTP2" = "yes" ] ; then
 		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%HTTP2%" "http2"
 	else
 		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%HTTP2%" ""
 	fi
-	replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%SERVER_NAME%" "$SERVER_NAME"
+	replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%FIRST_SERVER_NAME%" "$FIRST_SERVER_NAME"
 	if [ "$STRICT_TRANSPORT_SECURITY" != "" ] ; then
 		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%STRICT_TRANSPORT_SECURITY%" "more_set_headers 'Strict-Transport-Security: $STRICT_TRANSPORT_SECURITY';"
 	else
 		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%STRICT_TRANSPORT_SECURITY%" ""
 	fi
-	echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
-	if [ -f /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem ] ; then
+	if [ -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
 		/opt/scripts/certbot-renew.sh
 	else
-		certbot certonly --standalone -n --preferred-challenges http -d $SERVER_NAME --email contact@$SERVER_NAME --agree-tos
+		certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos
 	fi
+	echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" ""
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
