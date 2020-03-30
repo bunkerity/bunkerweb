@@ -197,7 +197,6 @@ Default value : system, exec, shell_exec, passthru, phpinfo, show_source, highli
 List of PHP functions blacklisted. They can't be used anywhere in PHP code.
 
 ## TODO
-- Listen HTTP through env var (remove temp when renewing with certbot - error if redirect also enabled)
 - Block country alternative as maxmind db
 - Test with default wordpress install
 - Test with custom confs reverse proxy

@@ -62,6 +62,7 @@ COOKIE_FLAGS="${COOKIE_FLAGS-* HttpOnly}"
 SERVE_FILES="${SERVE_FILES-yes}"
 WRITE_ACCESS="${WRITE_ACCESS-no}"
 REDIRECT_HTTP_TO_HTTPS="${REDIRECT_HTTP_TO_HTTPS-no}"
+LISTEN_HTTP="${LISTEN_HTTP-yes}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -154,14 +155,12 @@ else
 fi
 replace_in_file "/etc/nginx/server.conf" "%SERVER_NAME%" "$SERVER_NAME"
 replace_in_file "/etc/nginx/server.conf" "%ALLOWED_METHODS%" "$ALLOWED_METHODS"
-#if [ ! -f /etc/nginx/geoip.mmdb ] ; then
-#	/opt/scripts/geolite.sh
-#fi
 if [ "$BLOCK_COUNTRY" != "" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
+	replace_in_file "/etc/nginx/server.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip-server.conf;"
 	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\n/g') no;"
-	echo "0 0 * * * /opt/scripts/geolite.sh" >> /etc/crontabs/root
 else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" ""
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_COUNTRY%" ""
 fi
 if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
@@ -181,7 +180,6 @@ else
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_TOR_EXIT_NODE%" ""
 fi
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" ""
 
 	FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 	DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
@@ -208,14 +206,18 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 	echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" ""
-	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
 fi
 
-# TODO : only do this if TLS is used
-if [ "$REDIRECT_HTTP_TO_HTTPS" = "yes" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%REDIRECT_HTTP_TO_HTTPS%" "include /etc/nginx/redirect-http-to-https.conf;"
+if [ "$LISTEN_HTTP" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
 else
-	replace_in_file "/etc/nginx/nginx.conf" "%REDIRECT_HTTP_TO_HTTPS%" ""
+	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" ""
+fi
+
+if [ "$REDIRECT_HTTP_TO_HTTPS" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%REDIRECT_HTTP_TO_HTTPS%" "include /etc/nginx/redirect-http-to-https.conf;"
+else
+	replace_in_file "/etc/nginx/server.conf" "%REDIRECT_HTTP_TO_HTTPS%" ""
 fi
 
 if [ "$USE_MODSECURITY" = "yes" ] ; then

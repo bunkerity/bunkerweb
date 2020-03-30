@@ -8,7 +8,7 @@ RUN chmod +x /tmp/compile.sh && \
 COPY entrypoint.sh /opt/entrypoint.sh
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
-COPY misc/GeoLite2-Country.mmdb /etc/nginx/geoip.mmdb
+COPY misc/*.mmdb /etc/nginx/geoip.mmdb
 
 RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl && \
     chmod +x /opt/entrypoint.sh /opt/scripts/* && \

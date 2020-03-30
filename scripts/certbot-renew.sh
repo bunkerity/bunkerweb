@@ -7,21 +7,22 @@ function replace_in_file() {
 	sed -i "s/$pattern/$replace/g" "$1"
 }
 
-# check if HTTP to HTTPS is enabled
-# then disable it temporarily
-if grep -q "include /etc/nginx/redirect-http-to-https.conf;" "/etc/nginx/nginx.conf" ; then
-	replace_in_file "/etc/nginx/nginx.conf" "include /etc/nginx/redirect-http-to-https.conf;" "#include /etc/nginx/redirect-http-to-https.conf;"
+# check if HTTP enabled
+# and disable it temporarily if needed
+if grep -q "listen 0.0.0.0:80;" "/etc/nginx/server.conf" ; then
+	replace_in_file "/etc/nginx/server.conf" "listen 0.0.0.0:80;" "#listen 0.0.0.0:80;"
 	if [ -f /run/nginx/nginx.pid ] ; then
 		/usr/sbin/nginx -s reload
+		sleep 10
 	fi
 fi
 
 # ask a new certificate if needed
 certbot renew
 
-# enable HTTP to HTTPS if needed
-if grep -q "#include /etc/nginx/redirect-http-to-https.conf;" "/etc/nginx/nginx.conf" ; then
-	replace_in_file "/etc/nginx/nginx.conf" "#include /etc/nginx/redirect-http-to-https.conf;" "include /etc/nginx/redirect-http-to-https.conf;"
+# enable HTTP again if needed
+if grep -q "#listen 0.0.0.0:80;" "/etc/nginx/server.conf" ; then
+	replace_in_file "/etc/nginx/server.conf" "#listen 0.0.0.0:80;" "listen 0.0.0.0:80;"
 fi
 
 # reload nginx
