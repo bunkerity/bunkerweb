@@ -149,9 +149,11 @@ else
 	replace_in_file "/etc/nginx/server.conf" "%FEATURE_POLICY%" ""
 fi
 if [ "$DISABLE_DEFAULT_SERVER" = "yes" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%DISABLE_DEFAULT_SERVER%" "include /etc/nginx/disable-default-server.conf;"
+	replace_in_file "/etc/nginx/server.conf" "%DISABLE_DEFAULT_SERVER%" "include /etc/nginx/disable-default-server.conf;"
+	SERVER_NAME_PIPE=$(echo $SERVER_NAME | sed "s/ /|/g")
+	replace_in_file "/etc/nginx/disable-default-server.conf" "%SERVER_NAME%" "$SERVER_NAME_PIPE"
 else
-	replace_in_file "/etc/nginx/nginx.conf" "%DISABLE_DEFAULT_SERVER%" ""
+	replace_in_file "/etc/nginx/server.conf" "%DISABLE_DEFAULT_SERVER%" ""
 fi
 replace_in_file "/etc/nginx/server.conf" "%SERVER_NAME%" "$SERVER_NAME"
 replace_in_file "/etc/nginx/server.conf" "%ALLOWED_METHODS%" "$ALLOWED_METHODS"
