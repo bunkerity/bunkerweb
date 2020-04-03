@@ -55,8 +55,9 @@ PHP_ALLOW_URL_FOPEN="${PHP_ALLOW_URL_FOPEN-no}"
 PHP_ALLOW_URL_INCLUDE="${PHP_ALLOW_URL_INCLUDE-no}"
 PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS-yes}"
 PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE-10M}"
-PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
+PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
 USE_MODSECURITY="${USE_MODSECURITY-yes}"
+USE_MODSECURITY_CRS="${USE_MODSECURITY_CRS-yes}"
 CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY-default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer}"
 COOKIE_FLAGS="${COOKIE_FLAGS-* HttpOnly}"
 SERVE_FILES="${SERVE_FILES-yes}"
@@ -224,6 +225,24 @@ fi
 
 if [ "$USE_MODSECURITY" = "yes" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_MODSECURITY%" "include /etc/nginx/modsecurity.conf;"
+	if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "include /modsec-confs/*.conf"
+	else
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" ""
+	fi
+	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
+		if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
+			replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/*.conf"
+		else
+			replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""
+		fi
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
+	else
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" ""
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""
+		replace_in_file "/etc/nginx/modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" ""
+	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_MODSECURITY%" ""
 fi

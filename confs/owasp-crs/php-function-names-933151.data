@@ -218,14 +218,9 @@ gd_info
 get_browser
 get_called_class
 get_class
-get_class_methods
-get_class_vars
 get_declared_classes
 get_declared_interfaces
 get_declared_traits
-get_defined_constants
-get_defined_functions
-get_defined_vars
 get_extension_funcs
 get_headers
 get_html_translation_table

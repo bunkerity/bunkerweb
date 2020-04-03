@@ -61,6 +61,9 @@ floodgate
 # "F-Secure Radar is a turnkey vulnerability scanning and management platform."
 F-Secure Radar
 get-minimal
+# Scanner that looks for existing or hidden web objects
+# https://github.com/OJ/gobuster
+gobuster
 # vuln scanner
 gootkit auto-rooter scanner
 grabber
@@ -77,6 +80,8 @@ internet ninja
 jaascois
 # vuln scanner
 zmeu
+# "Mozilla/5.0 Jorgee", vuln scanner
+Jorgee
 # port scanner
 # https://github.com/robertdavidgraham/masscan
 masscan
@@ -137,6 +142,8 @@ sqlmap
 # sql injection
 # http://sqlninja.sourceforge.net/
 sqlninja
+# https://www.cyber.nj.gov/threat-profiles/trojan-variants/sysscan
+sysscan
 # password cracker
 # http://foofus.net/goons/jmk/medusa/medusa.html
 teh forest lobster
@@ -193,3 +200,6 @@ struts-pwn
 # Detectify website vulnerability scanner
 # https://detectify.com/
 Detectify
+# ZGrab scanner (Mozilla/5.0 zgrab/0.x)
+# https://zmap.io
+zgrab

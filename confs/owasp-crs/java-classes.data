@@ -8,6 +8,8 @@ java.io.CharArrayReader
 java.io.DataInputStream
 java.io.File
 java.io.FileOutputStream
+java.io.FilePermission
+java.io.FileWriter
 java.io.FilterInputStream
 java.io.FilterOutputStream
 java.io.FilterReader
@@ -35,4 +37,7 @@ java.lang.StringBuilder
 java.lang.System
 javax.script.ScriptEngineManager
 org.apache.commons
+org.apache.struts
+org.apache.struts2
 org.omg.CORBA
+java.beans.XMLDecode

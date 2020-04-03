@@ -15,7 +15,7 @@ RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl &
     mkdir /www && \
     adduser -h /dev/null -g '' -s /sbin/nologin -D -H nginx
 
-VOLUME /www /confs
+VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs
 
 EXPOSE 80/tcp 443/tcp
 

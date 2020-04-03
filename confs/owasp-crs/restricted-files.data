@@ -3,7 +3,7 @@
 .htaccess
 .htdigest
 .htpasswd
-# dotfiles (keep in sync with lfi-os-files.data)
+# home level dotfiles (keep in sync with lfi-os-files.data)
 .aptitude/config
 .bash_config
 .bash_history
@@ -107,10 +107,39 @@ wp-config.txt
 /packages.json
 # dotenv
 /.env
-/.env
 # OSX
 /.DS_Store
 # WS FTP
 /.ws_ftp.ini
 # common, old network config file
 .netrc
+# New Top Level dotfiles
+.thunderbird/
+.vmware/
+.kube/
+.java/
+.anydesk/
+.docker/
+.npm/
+.nvm/
+.minikube/
+.atom/
+.aws/config
+.aws/credentials
+.cups/
+.dbus/
+.boto
+.gem/
+.gnonme/
+.gsutil/
+# New Per-Project Files
+.idea
+nbproject/
+bower.json
+.bowerrc
+.eslintrc
+.jshintrc
+.gitlab-ci.yml
+.travis.yml
+database.yml
+Dockerfile

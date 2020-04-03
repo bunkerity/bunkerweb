@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------
-# OWASP ModSecurity Core Rule Set ver.3.1.1
+# OWASP ModSecurity Core Rule Set ver.3.2.0
 # Copyright (c) 2006-2019 Trustwave and contributors. All rights reserved.
 #
 # The OWASP ModSecurity Core Rule Set is distributed under
@@ -141,7 +141,7 @@
 #     phase:2,\
 #     pass,\
 #     nolog,\
-#     ctl:ruleRemoveTargetByTag=CRS;ARGS:pwd"
+#     ctl:ruleRemoveTargetByTag=OWASP_CRS;ARGS:pwd"
 
 #
 # Example Exclusion Rule: Removing a range of rules

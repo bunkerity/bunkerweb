@@ -10,6 +10,11 @@ convert_uudecode
 file_get_contents
 file_put_contents
 fsockopen
+get_class_methods
+get_class_vars
+get_defined_constants
+get_defined_functions
+get_defined_vars
 gzdecode
 gzinflate
 gzuncompress
