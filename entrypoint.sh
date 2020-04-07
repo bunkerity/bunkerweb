@@ -64,6 +64,11 @@ SERVE_FILES="${SERVE_FILES-yes}"
 WRITE_ACCESS="${WRITE_ACCESS-no}"
 REDIRECT_HTTP_TO_HTTPS="${REDIRECT_HTTP_TO_HTTPS-no}"
 LISTEN_HTTP="${LISTEN_HTTP-yes}"
+USE_FAIL2BAN="${USE_FAIL2BAN-yes}"
+FAIL2BAN_STATUS_CODES="${FAIL2BAN_STATUS_CODES-400|401|403|404|405|444}"
+FAIL2BAN_BANTIME="${FAIL2BAN_BANTIME-3600}"
+FAIL2BAN_FINDTIME="${FAIL2BAN_FINDTIME-60}"
+FAIL2BAN_MAXRETRY="${FAIL2BAN_MAXRETRY-10}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -282,6 +287,22 @@ else
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" ""
 fi
 
+# fail2ban setup
+if [ "$USE_FAIL2BAN" = "yes" ] ; then
+	echo "" > /etc/nginx/fail2ban-ip.conf
+	rm -rf /etc/fail2ban/jail.d/*
+	replace_in_file "/etc/nginx/server.conf" "%USE_FAIL2BAN%" "include /etc/nginx/fail2ban-ip.conf;"
+	cp /opt/fail2ban/nginx-action.local /etc/fail2ban/action.d/nginx-action.local
+	cp /opt/fail2ban/nginx-filter.local /etc/fail2ban/filter.d/nginx-filter.local
+	cp /opt/fail2ban/jail.local /etc/fail2ban/jail.local
+	replace_in_file "/etc/fail2ban/jail.local" "%FAIL2BAN_BANTIME%" "$FAIL2BAN_BANTIME"
+	replace_in_file "/etc/fail2ban/jail.local" "%FAIL2BAN_FINDTIME%" "$FAIL2BAN_FINDTIME"
+	replace_in_file "/etc/fail2ban/jail.local" "%FAIL2BAN_MAXRETRY%" "$FAIL2BAN_MAXRETRY"
+	replace_in_file "/etc/fail2ban/filter.d/nginx-filter.local" "%FAIL2BAN_STATUS_CODES%" "$FAIL2BAN_STATUS_CODES"
+else
+	replace_in_file "/etc/nginx/server.conf" "%USE_FAIL2BAN%" ""
+fi
+
 # edit access if needed
 if [ "$WRITE_ACCESS" = "yes" ] ; then
 	chown -R root:nginx /www
@@ -298,7 +319,17 @@ fi
 # start crond
 crond
 
-# start nginx in foreground
-# when nginx is killed, container get killed too
+# start nginx
+/usr/sbin/nginx
 echo "[*] Running nginx ..."
-exec /usr/sbin/nginx
+
+if [ "$USE_FAIL2BAN" = "yes" ] ; then
+	fail2ban-server
+fi
+
+# display logs
+exec tail -f /var/log/access.log
+
+# try to gracefully stop nginx
+echo "[*] Stopping nginx ..."
+/usr/sbin/nginx -s stop

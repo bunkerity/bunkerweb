@@ -9,8 +9,9 @@ COPY entrypoint.sh /opt/entrypoint.sh
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
 COPY misc/*.mmdb /etc/nginx/geoip.mmdb
+COPY fail2ban/ /opt/fail2ban
 
-RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl && \
+RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban && \
     chmod +x /opt/entrypoint.sh /opt/scripts/* && \
     mkdir /www && \
     adduser -h /dev/null -g '' -s /sbin/nologin -D -H nginx

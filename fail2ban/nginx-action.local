@@ -1,0 +1,8 @@
+[Definition]
+
+actionstart = echo "" > /etc/nginx/fail2ban-ip.conf && /usr/sbin/nginx -s reload
+actionstop = echo "" > /etc/nginx/fail2ban-ip.conf && /usr/sbin/nginx -s reload
+actioncheck =
+actionflush = echo "" > /etc/nginx/fail2ban-ip.conf && /usr/sbin/nginx -s reload
+actionban = echo -n "deny <ip>;" >> /etc/nginx/fail2ban-ip.conf && /usr/sbin/nginx -s reload
+actionunban = sed -i "s/deny <ip>;//g" /etc/nginx/fail2ban-ip.conf && /usr/sbin/nginx -s reload
