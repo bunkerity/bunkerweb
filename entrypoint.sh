@@ -2,6 +2,25 @@
 
 echo "[*] Starting bunkerized-nginx ..."
 
+# trap SIGTERM and SIGINT
+function trap_exit() {
+	echo "[*] Catched stop operation"
+	echo "[*] Stopping crond ..."
+	pkill -TERM crond
+	if [ "$USE_PHP" = "yes" ] ; then
+		echo "[*] Stopping php ..."
+		pkill -TERM php-fpm7
+	fi
+	if [ "$USE_FAIL2BAN" = "yes" ] ; then
+		echo "[*] Stopping fail2ban"
+		fail2ban-client stop > /dev/null
+	fi
+	echo "[*] Stopping nginx ..."
+	/usr/sbin/nginx -s stop
+	pkill -TERM tail
+}
+trap "trap_exit" TERM INT
+
 # replace pattern in file
 function replace_in_file() {
 	# escape slashes
@@ -69,6 +88,9 @@ FAIL2BAN_STATUS_CODES="${FAIL2BAN_STATUS_CODES-400|401|403|404|405|444}"
 FAIL2BAN_BANTIME="${FAIL2BAN_BANTIME-3600}"
 FAIL2BAN_FINDTIME="${FAIL2BAN_FINDTIME-60}"
 FAIL2BAN_MAXRETRY="${FAIL2BAN_MAXRETRY-10}"
+USE_CLAMAV_UPLOAD="${USE_CLAMAV_UPLOAD-yes}"
+USE_CLAMAV_SCAN="${USE_CLAMAV_SCAN-yes}"
+CLAMAV_SCAN_REMOVE="${CLAMAV_SCAN_REMOVE-yes}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -303,6 +325,25 @@ else
 	replace_in_file "/etc/nginx/server.conf" "%USE_FAIL2BAN%" ""
 fi
 
+# clamav setup
+if [ "$USE_CLAMAV_UPLOAD" = "yes" ] || [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
+	echo "[*] Updating clamav ..."
+	freshclam > /dev/null 2>&1
+	echo "0 0 * * * /usr/bin/freshclam > /dev/null 2>&1" >> /etc/crontabs/root
+fi
+if [ "$USE_CLAMAV_UPLOAD" = "yes" ] ; then
+	replace_in_file "/etc/nginx/modsecurity-rules.conf" "%USE_CLAMAV_UPLOAD%" "include /etc/nginx/modsecurity-clamav.conf"
+else
+	replace_in_file "/etc/nginx/modsecurity-rules.conf" "%USE_CLAMAV_UPLOAD%" ""
+fi
+if [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
+	if [ "$USE_CLAMAV_SCAN_REMOVE" = "yes" ] ; then
+		echo "0 */1 * * * /usr/bin/clamscan -r -i --no-summary --remove / >> /var/log/clamav.log 2> /dev/null" >> /etc/crontabs/root
+	else
+		echo "0 */1 * * * /usr/bin/clamscan -r -i --no-summary / >> /var/log/clamav.log 2> /dev/null" >> /etc/crontabs/root
+	fi
+fi
+
 # edit access if needed
 if [ "$WRITE_ACCESS" = "yes" ] ; then
 	chown -R root:nginx /www
@@ -320,16 +361,18 @@ fi
 crond
 
 # start nginx
-/usr/sbin/nginx
 echo "[*] Running nginx ..."
+/usr/sbin/nginx
 
+# start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
-	fail2ban-server
+	fail2ban-server > /dev/null
 fi
 
 # display logs
-exec tail -f /var/log/access.log
+tail -f /var/log/access.log &
+wait $!
 
-# try to gracefully stop nginx
-echo "[*] Stopping nginx ..."
-/usr/sbin/nginx -s stop
+# sigterm trapped
+echo "[*] bunkerized-nginx stopped"
+exit 0

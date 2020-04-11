@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BLACKLIST=$(curl "https://iplists.firehol.org/files/tor_exits.ipset")
+BLACKLIST=$(curl -s "https://iplists.firehol.org/files/tor_exits.ipset")
 DATA=""
 for ip in $BLACKLIST ; do
 	DATA="${DATA}deny ${ip};\n"
