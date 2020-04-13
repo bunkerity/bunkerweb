@@ -3,9 +3,12 @@ nginx based Docker image secure by default.
 
 ## Main features
 - HTTPS support with transparent Let's Encrypt automation
-- State-of-the-art web security : HTTP headers, php.ini hardening, version leak, ...
+- State-of-the-art web security : HTTP security headers, php.ini hardening, prevent leaks, ...
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
-- Based on alpine and compiled from source (< 100 MB image)
+- Automatic ban of bad behaviors with fail2ban
+- Block TOR users, bad user-agents, countries, ...
+- Detect bad files with ClamAV
+- Based on alpine and compiled from source
 - Easy to configure with environment variables
 
 ## Quickstart guide
@@ -16,14 +19,42 @@ nginx based Docker image secure by default.
 docker run -p 80:80 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
 ```
 
-Web files are stored in the /www directory, so you need to mount the volume on it.
+Web files are stored in the /www directory, the container will serve files from there.
 
 ### Run HTTPS server with automated Let's Encrypt
 ```shell
-docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -e SERVER_NAME=www.yourdomain.com -e AUTO_LETS_ENCRYPT=yes bunkerity/bunkerized-nginx
+docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -v /where/to/save/certificates:/etc/letsencrypt -e SERVER_NAME=www.yourdomain.com -e AUTO_LETS_ENCRYPT=yes -e REDIRECT_HTTP_TO_HTTPS=yes bunkerity/bunkerized-nginx
 ```
 
-Let's Encrypt needs port 80 to be open to request and sign certificates but nginx will only listen on port 443.
+Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive.  
+If you don't want your webserver to listen on HTTP add the environment variable LISTEN_HTTP with a "no" value. But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
+
+Here you have three environment variables :
+- SERVER_NAME : define the FQDN of your webserver, this is mandatory for Let's Encrypt (www.yourdomain.com should point to your IP address)
+- AUTO_LETS_ENCRYPT : enable automatic Let's Encrypt creation and renewal of certificates
+- REDIRECT_HTTP_TO_HTTPS : enable HTTP to HTTPS redirection
+
+### Reverse proxy
+You can setup a reverse proxy by adding your own custom configurations at http level.  
+For example, this is a dummy reverse proxy configuration :  
+```shell
+if ($host = www.website1.com) {
+	proxy_pass http://192.168.42.10
+}
+
+if ($host = www.website2.com) {
+	proxy_pass http://192.168.42.11
+}
+```
+All files in /http-confs inside the container will be included at http level. You can simply mount a volume where your config files are located :  
+```shell
+docker run -p 80:80 -e SERVER_NAME="www.website1.com www.website2.com" -e SERVE_FILES=no -e DISABLE_DEFAULT_SERVER=yes -v /path/to/http/conf:/http-confs bunkerity/bunkerized-nginx
+```
+
+Here you have three environment variables :
+- SERVER_NAME : list of valid Host headers sent by clients
+- SERVE_FILES : nginx will not serve files from /www directory
+- DISABLE_DEFAULT_SERVER : nginx will not respond to requests if Host header is not in the SERVER_NAME list
 
 ## List of environment variables
 
@@ -46,7 +77,8 @@ Only the HTTP methods listed here will be accepted by nginx. If not listed, ngin
 *DISABLE_DEFAULT_SERVER*  
 Values : yes | no  
 Default value : no  
-If set to yes, nginx will only respond to HTTP request when the Host header match the SERVER_NAME. For example, it will close the connection if a bot access the site with direct ip.
+If set to yes, nginx will only respond to HTTP request when the Host header match a FQDN specified in the SERVER_NAME environment variable.  
+For example, it will close the connection if a bot access the site with direct ip.
 
 *SERVE_FILES*  
 Values : yes | no  
@@ -63,8 +95,14 @@ Setting to 0 means "infinite" body size.
 *SERVER_NAME*  
 Values : <first name> <second name> ...  
 Default value : www.bunkerity.com  
-Sets the host names of the webserver. This is the names used by your clients.  
+Sets the host names of the webserver separated with spaces. This must match the Host header sent by clients.  
 Useful when used with AUTO_LETSENCRYPT=yes and/or DISABLE_DEFAULT_SERVER=yes.
+
+*WRITE_ACCESS*  
+Values : yes | no
+Default value : no
+If set to yes, nginx will be granted write access to the /www directory.  
+Set it to yes if your website uses file upload or creates dynamic files for example.
 
 ### HTTPS
 *AUTO_LETS_ENCRYPT*  
@@ -72,6 +110,17 @@ Values : yes | no
 Default value : no  
 If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
 You will need to redirect both 80 and 443 port to your container and also set the SERVER_NAME environment variable.
+
+*LISTEN_HTTP*  
+Values : yes | no  
+Default value : yes  
+If set to no, nginx will not in listen on HTTP (port 80).  
+Useful if you only want HTTPS access to your website.
+
+*REDIRECT_HTTP_TO_HTTPS*  
+Values : yes | no  
+Default value : no  
+If set to yes, nginx will redirect all HTTP requests to HTTPS.  
 
 *HTTP2*  
 Values : yes | no  
@@ -197,10 +246,10 @@ Default value : system, exec, shell_exec, passthru, phpinfo, show_source, highli
 List of PHP functions blacklisted. They can't be used anywhere in PHP code.
 
 ## TODO
+- Default CSP
 - Test with default wordpress install
 - Test with custom confs reverse proxy
 - Documentation
-- Fail2Ban
 - Custom TLS certificates
 - HSTS preload
 - Web UI
