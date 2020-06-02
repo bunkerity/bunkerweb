@@ -11,6 +11,9 @@ nginx based Docker image secure by default.
 - Based on alpine and compiled from source
 - Easy to configure with environment variables
 
+## Live demo
+You can find a live demo at https://demo-nginx.bunkerity.com.
+
 ## Quickstart guide
 
 ### Run HTTP server with default settings
@@ -35,20 +38,22 @@ Here you have three environment variables :
 - REDIRECT_HTTP_TO_HTTPS : enable HTTP to HTTPS redirection
 
 ### Reverse proxy
-You can setup a reverse proxy by adding your own custom configurations at http level.  
+You can setup a reverse proxy by adding your own custom configurations at server context.  
 For example, this is a dummy reverse proxy configuration :  
 ```shell
-if ($host = www.website1.com) {
-	proxy_pass http://192.168.42.10
-}
+location / {
+	if ($host = www.website1.com) {
+		proxy_pass http://192.168.42.10$request_uri;
+	}
 
-if ($host = www.website2.com) {
-	proxy_pass http://192.168.42.11
+	if ($host = www.website2.com) {
+		proxy_pass http://192.168.42.11$request_uri;
+	}
 }
 ```
-All files in /http-confs inside the container will be included at http level. You can simply mount a volume where your config files are located :  
+All files (ending with .conf) in /server-confs inside the container will be included at server context. You can simply mount a volume where your config files are located :  
 ```shell
-docker run -p 80:80 -e SERVER_NAME="www.website1.com www.website2.com" -e SERVE_FILES=no -e DISABLE_DEFAULT_SERVER=yes -v /path/to/http/conf:/http-confs bunkerity/bunkerized-nginx
+docker run -p 80:80 -e SERVER_NAME="www.website1.com www.website2.com" -e SERVE_FILES=no -e DISABLE_DEFAULT_SERVER=yes -v /path/to/server/conf:/server-confs bunkerity/bunkerized-nginx
 ```
 
 Here you have three environment variables :
@@ -96,7 +101,7 @@ Sets the maximum body size before nginx returns a 413 error code.
 Setting to 0 means "infinite" body size.
 
 `SERVER_NAME`  
-Values : *<first name> <second name> ...*  
+Values : *&lt;first name&gt; &lt;second name&gt; ...*  
 Default value : *www.bunkerity.com*  
 Sets the host names of the webserver separated with spaces. This must match the Host header sent by clients.  
 Useful when used with `AUTO_LETSENCRYPT=yes` and/or `DISABLE_DEFAULT_SERVER=yes`.
@@ -169,37 +174,37 @@ Policy to be used for the Referer header.
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy).
 
 `FEATURE_POLICY`  
-Values : *<directive> <allow list>*  
+Values : *&lt;directive&gt; &lt;allow list&gt;*  
 Default value : *accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vibrate 'none'; vr 'none'*  
 Tells the browser which features can be used on the website.  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy).
 
 `COOKIE_FLAGS`  
-Values : ** HttpOnly* | *MyCookie secure SameSite* | *...*  
-Default value : ** HttpOnly*  
+Values : *\* HttpOnly* | *MyCookie secure SameSite* | *...*  
+Default value : *\* HttpOnly*  
 Adds some security to the cookies set by the server.  
 Accepted value can be found [here](https://github.com/AirisX/nginx_cookie_flag_module).
 
 `STRICT_TRANSPORT_POLICY`  
-Values : *max-age=expireTime [; includeSubDomains] [; preload]*
+Values : *max-age=expireTime [; includeSubDomains] [; preload]*  
 Default value : *max-age=31536000*  
 Tells the browser to use exclusively HTTPS instead of HTTP when communicating with the server.  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security).
 
 `CONTENT_SECURITY_POLICY`  
-Values : *<directive 1>; <directive 2>; ...*
+Values : *\<directive 1\>; \<directive 2\>; ...*  
 Default value : *default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer*  
 Policy to be used when loading resources (scripts, forms, frames, ...).  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
 
 ### Blocking
 `BLOCK_COUNTRY`  
-Values : *<country code 1> <country code 2> ...*  
+Values : *\<country code 1\> \<country code 2\> ...*  
 Default value :  
 Block some countries from accessing your website. Use 2 letters country code separated with space.
 
 `BLOCK_USER_AGENT`  
-Values : *yes* | *no*
+Values : *yes* | *no*  
 Default value : *yes*
 If set to yes, block clients with "bad" user agent.  
 Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list).
@@ -226,45 +231,45 @@ Default value : *no*
 If set to yes, the PHP version will be sent within the X-Powered-By header.
 
 `PHP_OPEN_BASEDIR`  
-Values : *<directory>*  
+Values : *\<directory\>*  
 Default value : */www/*  
 Limits access to files within the given directory. For example include() or fopen() calls outside the directory will fail.
 
 `PHP_ALLOW_URL_FOPEN`  
-Values : *yes* | *no*
-Default value : *no*
+Values : *yes* | *no*  
+Default value : *no*  
 If set to yes, allows using url in fopen() calls (i.e. : ftp://, http://, ...). 
 
 `PHP_ALLOW_URL_INCLUDE`  
-Values : *yes* | *no*
-Default value : *no*
+Values : *yes* | *no*  
+Default value : *no*  
 If set to yes, allows using url in include() calls (i.e. : ftp://, http://, ...). 
 
 `PHP_FILE_UPLOADS`  
-Values : *yes* | *no*
-Default value : *yes*
+Values : *yes* | *no*  
+Default value : *yes*  
 If set to yes, allows clients to upload files.
 
 `PHP_UPLOAD_MAX_FILESIZE`  
-Values : *<size in bytes>* | *XM*
+Values : *<size in bytes>* | *XM*  
 Default value : *10M*  
 Sets the maximum file size allowed when uploading files.
 
 `PHP_DISABLE_FUNCTIONS`  
-Values : *<function 1>, <function 2> ...*  
+Values : *\<function 1\>, \<function 2\> ...*  
 Default value : *system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo*  
 List of PHP functions blacklisted separated with commas. They can't be used anywhere in PHP code.
 
 ### Fail2ban
-`USE_FAIL2BAN` 
+`USE_FAIL2BAN`  
 Values : *yes* | *no*  
 Default value : *yes*  
 If set to yes, fail2ban will be used to block users getting too much "strange" HTTP codes in a period of time.  
 Instead of using iptables which is not possible inside a container, fail2ban will dynamically update nginx to ban/unban IP addresses.  
 If a number (`FAIL2BAN_MAXRETRY`) of "strange" HTTP codes (`FAIL2BAN_STATUS_CODES`) is found between a time interval (`FAIL2BAN_FINDTIME`) then the originating IP address will be ban for a specific period of time (`FAIL2BAN_BANTIME`).
 
-`FAIL2BAN_STATUS_CODES` 
-Values : <HTTP status codes separated with | char>  
+`FAIL2BAN_STATUS_CODES`   
+Values : *\<HTTP status codes separated with | char\>*  
 Default value : *400|401|403|404|405|444*  
 List of "strange" error codes that fail2ban will search for.  
 
@@ -279,11 +284,11 @@ Default : value : *60*
 The time interval, in seconds, to search for "strange" HTTP status codes.  
 
 `FAIL2BAN_MAXRETRY`  
-Values : *<any positive integer>*  
+Values : *\<any positive integer\>*  
 Default : value : *10*  
 The number of "strange" HTTP status codes to find between the time interval.  
 
-### ClamAV
+### ClamAV  
 `USE_CLAMAV_UPLOAD`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -300,10 +305,8 @@ Default value : *yes*
 If set to yes, ClamAV will automatically remove the detected files.  
 
 ## TODO
-- demo website, securityheaders results, ssl results 
 - Default CSP
 - Custom Dockerfile based on bunkerized-nginx
-- Test with custom confs reverse proxy
 - Documentation
 - Custom TLS certificates
 - HSTS preload, HPKP
