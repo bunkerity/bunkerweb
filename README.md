@@ -286,9 +286,9 @@ The time interval, in seconds, to search for "strange" HTTP status codes.
 `FAIL2BAN_MAXRETRY`  
 Values : *\<any positive integer\>*  
 Default : value : *10*  
-The number of "strange" HTTP status codes to find between the time interval.  
+The number of "strange" HTTP status codes to find between the time interval.
 
-### ClamAV  
+### ClamAV
 `USE_CLAMAV_UPLOAD`  
 Values : *yes* | *no*  
 Default value : *yes*  
