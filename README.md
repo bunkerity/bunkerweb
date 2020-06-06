@@ -307,6 +307,7 @@ If set to yes, ClamAV will automatically remove the detected files.
 ## TODO
 - Default CSP
 - Custom Dockerfile based on bunkerized-nginx
+- Auth basic
 - Documentation
 - Custom TLS certificates
 - HSTS preload, HPKP
