@@ -2,6 +2,9 @@
 
 echo "[*] Starting bunkerized-nginx ..."
 
+# execute custom scripts if it's a customized image
+run-parts /opt/entrypoint.d
+
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	echo "[*] Catched stop operation"

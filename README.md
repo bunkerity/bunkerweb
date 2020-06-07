@@ -1,7 +1,6 @@
 # bunkerized-nginx
-nginx based Docker image secure by default.
-
-## Main features
+nginx based Docker image secure by default.  
+Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
 - State-of-the-art web security : HTTP security headers, php.ini hardening, prevent leaks, ...
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
@@ -11,12 +10,33 @@ nginx based Docker image secure by default.
 - Based on alpine and compiled from source
 - Easy to configure with environment variables
 
-## Live demo
+# Table of contents
+- [bunkerized-nginx](#bunkerized-nginx)
+- [Table of contents](#table-of-contents)
+- [Live demo](#live-demo)
+- [Quickstart guide](#quickstart-guide)
+  * [Run HTTP server with default settings](#run-http-server-with-default-settings)
+  * [Run HTTPS server with automated Let's Encrypt](#run-https-server-with-automated-let-s-encrypt)
+  * [Reverse proxy](#reverse-proxy)
+- [Tutorials](#tutorials)
+- [List of environment variables](#list-of-environment-variables)
+  * [nginx](#nginx)
+  * [HTTPS](#https)
+  * [ModSecurity](#modsecurity)
+  * [Security headers](#security-headers)
+  * [Blocking](#blocking)
+  * [PHP](#php)
+  * [Fail2ban](#fail2ban)
+  * [ClamAV](#clamav)
+- [Create your own image](#create-your-own-image)
+- [TODO](#todo)
+
+# Live demo
 You can find a live demo at https://demo-nginx.bunkerity.com.
 
-## Quickstart guide
+# Quickstart guide
 
-### Run HTTP server with default settings
+## Run HTTP server with default settings
 
 ```shell
 docker run -p 80:80 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
@@ -24,7 +44,7 @@ docker run -p 80:80 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
 
 Web files are stored in the /www directory, the container will serve files from there.
 
-### Run HTTPS server with automated Let's Encrypt
+## Run HTTPS server with automated Let's Encrypt
 ```shell
 docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -v /where/to/save/certificates:/etc/letsencrypt -e SERVER_NAME=www.yourdomain.com -e AUTO_LETS_ENCRYPT=yes -e REDIRECT_HTTP_TO_HTTPS=yes bunkerity/bunkerized-nginx
 ```
@@ -37,7 +57,7 @@ Here you have three environment variables :
 - AUTO_LETS_ENCRYPT : enable automatic Let's Encrypt creation and renewal of certificates
 - REDIRECT_HTTP_TO_HTTPS : enable HTTP to HTTPS redirection
 
-### Reverse proxy
+## Reverse proxy
 You can setup a reverse proxy by adding your own custom configurations at server context.  
 For example, this is a dummy reverse proxy configuration :  
 ```shell
@@ -61,12 +81,12 @@ Here you have three environment variables :
 - SERVE_FILES : nginx will not serve files from /www directory
 - DISABLE_DEFAULT_SERVER : nginx will not respond to requests if Host header is not in the SERVER_NAME list
 
-## Tutorials
+# Tutorials
 TODO : link tutorials from bunkerity website
 
-## List of environment variables
+# List of environment variables
 
-### nginx
+## nginx
 `SERVER_TOKENS`  
 Values : *on* | *off*  
 Default value : *off*  
@@ -95,7 +115,7 @@ If set to yes, nginx will serve files from /www directory within the container.
 A use case to not serving files is when you setup bunkerized-nginx as a reverse proxy via a custom configuration.
 
 `MAX_CLIENT_SIZE`  
-Values : *0* | *Xm*  
+Values : *0* | *Xm*  
 Default value : *10m*  
 Sets the maximum body size before nginx returns a 413 error code.  
 Setting to 0 means "infinite" body size.
@@ -112,7 +132,7 @@ Default value : *no*
 If set to yes, nginx will be granted write access to the /www directory.  
 Set it to yes if your website uses file upload or creates dynamic files for example.
 
-### HTTPS
+## HTTPS
 `AUTO_LETS_ENCRYPT`  
 Values : *yes* | *no*  
 Default value : *no*  
@@ -135,7 +155,7 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.
 
-### ModSecurity
+## ModSecurity
 `USE_MODSECURITY`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -148,9 +168,9 @@ Default value : *yes*
 If set to yes, the [OWASP ModSecurity Core Rule Set](https://coreruleset.org/) will be used. It provides generic rules to detect common web attacks.  
 You can customize the CRS (i.e. : add WordPress exclusions) by adding custom .conf files into the /modsec-crs-confs/ directory inside the container (i.e : through a volume).
 
-### Security headers
+## Security headers
 `X_FRAME_OPTIONS`  
-Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net* | *ALLOWALL*  
+Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net* | *ALLOWALL*  
 Default value : *DENY*  
 Policy to be used when the site is displayed through iframe. Can be used to mitigate clickjacking attacks. 
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options).
@@ -168,7 +188,7 @@ Tells the browser to be strict about MIME type.
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options).
 
 `REFERRER_POLICY`  
-Values : *no-referrer* | *no-referrer-when-downgrade* | *origin* | *origin-when-cross-origin* | *same-origin* | *strict-origin* | *strict-origin-when-cross-origin* | *unsafe-url*  
+Values : *no-referrer* | *no-referrer-when-downgrade* | *origin* | *origin-when-cross-origin* | *same-origin* | *strict-origin* | *strict-origin-when-cross-origin* | *unsafe-url*  
 Default value : *no-referrer*  
 Policy to be used for the Referer header.  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy).
@@ -197,7 +217,7 @@ Default value : *default-src 'self'; frame-ancestors 'none'; form-action 'self';
 Policy to be used when loading resources (scripts, forms, frames, ...).  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
 
-### Blocking
+## Blocking
 `BLOCK_COUNTRY`  
 Values : *\<country code 1\> \<country code 2\> ...*  
 Default value :  
@@ -214,7 +234,7 @@ Values : *yes* | *no*
 Default value : *no*  
 Is set to yes, will block TOR clients.
 
-### PHP
+## PHP
 `USE_PHP`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -260,7 +280,7 @@ Values : *\<function 1\>, \<function 2\> ...*
 Default value : *system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo*  
 List of PHP functions blacklisted separated with commas. They can't be used anywhere in PHP code.
 
-### Fail2ban
+## Fail2ban
 `USE_FAIL2BAN`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -288,7 +308,7 @@ Values : *\<any positive integer\>*
 Default : value : *10*  
 The number of "strange" HTTP status codes to find between the time interval.
 
-### ClamAV
+## ClamAV
 `USE_CLAMAV_UPLOAD`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -304,7 +324,27 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, ClamAV will automatically remove the detected files.  
 
-## TODO
+# Create your own image
+
+You can use bunkerity/bunkerized-nginx as a base image for your web application.  
+Here is a Dockerfile example :  
+```
+FROM bunkerity/bunkerized-nginx
+
+# Copy your web files inside the /www folder
+COPY ./some-files/ /www/
+
+# Optional : add your own script to be executed on startup
+COPY ./my-entrypoint.sh /opt/entrypoint.d/
+RUN chmod +x /opt/entrypoint.d/my-entrypoint.sh
+
+# Optional : define some environment variables
+ENV MAX_CLIENT_SIZE 100m
+ENV PHP_UPLOAD_MAX_FILESIZE 100M
+ENV WRITE_ACCESS yes
+```
+
+# TODO
 - Default CSP
 - Custom Dockerfile based on bunkerized-nginx
 - Auth basic

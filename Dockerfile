@@ -13,7 +13,7 @@ COPY fail2ban/ /opt/fail2ban
 
 RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav && \
     chmod +x /opt/entrypoint.sh /opt/scripts/* && \
-    mkdir /www && \
+    mkdir /opt/entrypoint.d && \
     adduser -h /dev/null -g '' -s /sbin/nologin -D -H nginx
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs
