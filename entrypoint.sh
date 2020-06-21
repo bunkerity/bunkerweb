@@ -94,6 +94,11 @@ FAIL2BAN_MAXRETRY="${FAIL2BAN_MAXRETRY-10}"
 USE_CLAMAV_UPLOAD="${USE_CLAMAV_UPLOAD-yes}"
 USE_CLAMAV_SCAN="${USE_CLAMAV_SCAN-yes}"
 CLAMAV_SCAN_REMOVE="${CLAMAV_SCAN_REMOVE-yes}"
+USE_AUTH_BASIC="${USE_AUTH_BASIC-no}"
+AUTH_BASIC_TEXT="{AUTH_BASIC_TEXT-Restricted area}"
+AUTH_BASIC_LOCATION="{AUTH_BASIC_LOCATION-/}"
+AUTH_BASIC_USER="{AUTH_BASIC_USER-changeme}"
+AUTH_BASIC_PASSWORD="{AUTH_BASIC_PASSWORD-changeme}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -310,6 +315,14 @@ if [ "$SERVE_FILES" = "yes" ] ; then
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" "include /etc/nginx/serve-files.conf;"
 else
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" ""
+fi
+if [ "$USE_AUTH_BASIC" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" "include /etc/nginx/auth-basic.conf;"
+	replace_in_file "/etc/nginx/auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+	replace_in_file "/etc/nginx/auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION";
+	htpasswd -b -B -c /etc/nginx/.htpasswd "$AUTH_BASIC_USER" "$AUTH_BASIC_PASSWORD"
+else
+	replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" ""
 fi
 
 # fail2ban setup

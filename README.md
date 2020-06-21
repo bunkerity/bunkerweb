@@ -155,6 +155,31 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.
 
+`USE_AUTH_BASIC`  
+Values : *yes* | *no*  
+Default value : *no*  
+If set to yes, enables HTTP basic authentication at the location `AUTH_BASIC_LOCATION` with user `AUTH_BASIC_USER` and password `AUTH_BASIC_PASSWORD`.
+
+`AUTH_BASIC_LOCATION`  
+Values : */* | */subdir/* | *\<any valid location\>*  
+Default value : */*  
+The location to restrict when `USE_AUTH_BASIC` is set to *yes*. By default, all the website is restricted (*/*).
+
+`AUTH_BASIC_USER`  
+Values : *\<any valid username\>*  
+Default value : *changeme*  
+The username allowed to access `AUTH_BASIC_LOCATION` when `USE_AUTH_BASIC` is set to yes.
+
+`AUTH_BASIC_PASSWORD`  
+Values : *\<any valid password\>*  
+Default value : *changeme*  
+The password of `AUTH_BASIC_USER` when `USE_AUTH_BASIC` is set to yes.
+
+`AUTH_BASIC_TEXT`  
+Values : *\<any valid text\>*  
+Default value : *Restricted area*  
+The text displayed inside the login prompt when `USE_AUTH_BASIC` is set to yes.
+
 ## ModSecurity
 `USE_MODSECURITY`  
 Values : *yes* | *no*  
@@ -345,9 +370,8 @@ ENV WRITE_ACCESS yes
 ```
 
 # TODO
-- Default CSP
-- Custom Dockerfile based on bunkerized-nginx
-- Auth basic
+- Auth basic testing
+- Antibot with recaptcha v3
 - Documentation
 - Custom TLS certificates
 - HSTS preload, HPKP
