@@ -132,29 +132,6 @@ Default value : *no*
 If set to yes, nginx will be granted write access to the /www directory.  
 Set it to yes if your website uses file upload or creates dynamic files for example.
 
-## HTTPS
-`AUTO_LETS_ENCRYPT`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
-You will need to redirect both 80 and 443 port to your container and also set the `SERVER_NAME` environment variable.
-
-`LISTEN_HTTP`  
-Values : *yes* | *no*  
-Default value : *yes*  
-If set to no, nginx will not in listen on HTTP (port 80).  
-Useful if you only want HTTPS access to your website.
-
-`REDIRECT_HTTP_TO_HTTPS`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, nginx will redirect all HTTP requests to HTTPS.  
-
-`HTTP2`  
-Values : *yes* | *no*  
-Default value : *yes*  
-If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.
-
 `USE_AUTH_BASIC`  
 Values : *yes* | *no*  
 Default value : *no*  
@@ -179,6 +156,29 @@ The password of `AUTH_BASIC_USER` when `USE_AUTH_BASIC` is set to yes.
 Values : *\<any valid text\>*  
 Default value : *Restricted area*  
 The text displayed inside the login prompt when `USE_AUTH_BASIC` is set to yes.
+
+## HTTPS
+`AUTO_LETS_ENCRYPT`  
+Values : *yes* | *no*  
+Default value : *no*  
+If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
+You will need to redirect both 80 and 443 port to your container and also set the `SERVER_NAME` environment variable.
+
+`LISTEN_HTTP`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to no, nginx will not in listen on HTTP (port 80).  
+Useful if you only want HTTPS access to your website.
+
+`REDIRECT_HTTP_TO_HTTPS`  
+Values : *yes* | *no*  
+Default value : *no*  
+If set to yes, nginx will redirect all HTTP requests to HTTPS.  
+
+`HTTP2`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.
 
 ## ModSecurity
 `USE_MODSECURITY`  
