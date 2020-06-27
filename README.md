@@ -370,9 +370,13 @@ ENV WRITE_ACCESS yes
 ```
 
 # TODO
-- Auth basic testing
+- nginx compile flags
+- x86 and ARM versions
+- README improve
+- docker tags
+- Tutorials
+- Full documentation
 - Antibot with recaptcha v3
-- Documentation
 - Custom TLS certificates
 - HSTS preload, HPKP
 - Web UI
