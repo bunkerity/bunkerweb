@@ -28,6 +28,8 @@ Non-exhaustive list of features :
   * [PHP](#php)
   * [Fail2ban](#fail2ban)
   * [ClamAV](#clamav)
+  * [Misc](#misc)
+- [Include custom configurations](#include-custom-configurations)
 - [Create your own image](#create-your-own-image)
 - [TODO](#todo)
 
@@ -50,12 +52,12 @@ docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -v /where/to/save/cert
 ```
 
 Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive.  
-If you don't want your webserver to listen on HTTP add the environment variable LISTEN_HTTP with a "no" value. But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
+If you don't want your webserver to listen on HTTP add the environment variable `LISTEN_HTTP` with a "no" value. But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
 
 Here you have three environment variables :
-- SERVER_NAME : define the FQDN of your webserver, this is mandatory for Let's Encrypt (www.yourdomain.com should point to your IP address)
-- AUTO_LETS_ENCRYPT : enable automatic Let's Encrypt creation and renewal of certificates
-- REDIRECT_HTTP_TO_HTTPS : enable HTTP to HTTPS redirection
+- `SERVER_NAME` : define the FQDN of your webserver, this is mandatory for Let's Encrypt (www.yourdomain.com should point to your IP address)
+- `AUTO_LETS_ENCRYPT` : enable automatic Let's Encrypt creation and renewal of certificates
+- `REDIRECT_HTTP_TO_HTTPS` : enable HTTP to HTTPS redirection
 
 ## Reverse proxy
 You can setup a reverse proxy by adding your own custom configurations at server context.  
@@ -77,12 +79,12 @@ docker run -p 80:80 -e SERVER_NAME="www.website1.com www.website2.com" -e SERVE_
 ```
 
 Here you have three environment variables :
-- SERVER_NAME : list of valid Host headers sent by clients
-- SERVE_FILES : nginx will not serve files from /www directory
-- DISABLE_DEFAULT_SERVER : nginx will not respond to requests if Host header is not in the SERVER_NAME list
+- `SERVER_NAME` : list of valid Host headers sent by clients
+- `SERVE_FILES` : nginx will not serve files from the /www directory
+- `DISABLE_DEFAULT_SERVER` : nginx will not respond to requests if Host header is not in the SERVER_NAME list
 
 # Tutorials
-TODO : link tutorials from bunkerity website
+You will find some tutorials about bunkerized-nginx in our [blog](https://www.bunkerity.com/category/bunkerized-nginx/).  
 
 # List of environment variables
 
@@ -127,8 +129,8 @@ Sets the host names of the webserver separated with spaces. This must match the 
 Useful when used with `AUTO_LETSENCRYPT=yes` and/or `DISABLE_DEFAULT_SERVER=yes`.
 
 `WRITE_ACCESS`  
-Values : *yes* | *no*
-Default value : *no*
+Values : *yes* | *no*  
+Default value : *no*  
 If set to yes, nginx will be granted write access to the /www directory.  
 Set it to yes if your website uses file upload or creates dynamic files for example.
 
@@ -291,9 +293,9 @@ Default value : *no*
 If set to yes, the PHP version will be sent within the X-Powered-By header.
 
 `PHP_OPEN_BASEDIR`  
-Values : *\<directory\>*  
-Default value : */www/*  
-Limits access to files within the given directory. For example include() or fopen() calls outside the directory will fail.
+Values : *\<directories separated with : char\>*  
+Default value : */www/:/tmp/*  
+Limits access to files within the given directories. For example include() or fopen() calls outside the directory will fail.
 
 `PHP_ALLOW_URL_FOPEN`  
 Values : *yes* | *no*  
@@ -314,6 +316,11 @@ If set to yes, allows clients to upload files.
 Values : *\<size in bytes\>* | *XM*  
 Default value : *10M*  
 Sets the maximum file size allowed when uploading files.
+
+`PHP_POST_MAX_SIZE`  
+Values : *\<size in bytes\>* | *XM*  
+Default value : *10M*  
+Sets the maximum POST size allowed for clients.
 
 `PHP_DISABLE_FUNCTIONS`  
 Values : *\<function 1\>, \<function 2\> ...*  
@@ -364,6 +371,13 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, ClamAV will automatically remove the detected files.  
 
+## Misc
+`ADDITIONAL_MODULES` 
+Values : *\<list of packages separated with space\>*  
+Default value :  
+You can specify additional modules to install. All [alpine packages](https://pkgs.alpinelinux.org/packages) are valid.  
+A use case is to use this to install PHP extensions (e.g. : php7-json php7-xml php7-curl ...).
+
 # Create your own image
 
 You can use bunkerity/bunkerized-nginx as a base image for your web application.  
@@ -384,8 +398,17 @@ ENV PHP_UPLOAD_MAX_FILESIZE 100M
 ENV WRITE_ACCESS yes
 ```
 
+# Include custom configurations
+Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
+  - /http-confs : http context
+  - /server-confs : server context
+
+You just need to use a volume like this :
+```
+docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
+```
+
 # TODO
-- README improve
 - docker tags
 - Tutorials
 - Full documentation
