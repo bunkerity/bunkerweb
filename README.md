@@ -178,7 +178,22 @@ If set to yes, nginx will redirect all HTTP requests to HTTPS.
 `HTTP2`  
 Values : *yes* | *no*  
 Default value : *yes*  
-If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.
+If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.  
+
+`USE_CUSTOM_HTTPS` 
+Values : *yes* | *no*  
+Default value : *no*  
+If set to yes, HTTPS will be enabled with certificate/key of your choice.  
+
+`CUSTOM_HTTPS_CERT`  
+Values : *\<any valid path inside the container\>*  
+Default value :  
+Full path of the certificate file to use when `USE_CUSTOM_HTTPS` is set to yes.  
+
+`CUSTOM_HTTPS_KEY`  
+Values : *\<any valid path inside the container\>*  
+Default value :  
+Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
 ## ModSecurity
 `USE_MODSECURITY`  
@@ -296,7 +311,7 @@ Default value : *yes*
 If set to yes, allows clients to upload files.
 
 `PHP_UPLOAD_MAX_FILESIZE`  
-Values : *<size in bytes>* | *XM*  
+Values : *\<size in bytes\>* | *XM*  
 Default value : *10M*  
 Sets the maximum file size allowed when uploading files.
 
@@ -330,7 +345,7 @@ The time interval, in seconds, to search for "strange" HTTP status codes.
 
 `FAIL2BAN_MAXRETRY`  
 Values : *\<any positive integer\>*  
-Default : value : *10*  
+Default : value : *20*  
 The number of "strange" HTTP status codes to find between the time interval.
 
 ## ClamAV
@@ -370,13 +385,11 @@ ENV WRITE_ACCESS yes
 ```
 
 # TODO
-- nginx compile flags
-- x86 and ARM versions
 - README improve
 - docker tags
 - Tutorials
 - Full documentation
+- nginx compile flags
 - Antibot with recaptcha v3
-- Custom TLS certificates
 - HSTS preload, HPKP
 - Web UI

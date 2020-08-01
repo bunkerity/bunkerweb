@@ -77,6 +77,7 @@ PHP_ALLOW_URL_FOPEN="${PHP_ALLOW_URL_FOPEN-no}"
 PHP_ALLOW_URL_INCLUDE="${PHP_ALLOW_URL_INCLUDE-no}"
 PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS-yes}"
 PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE-10M}"
+PHP_POST_MAX_SIZE="${PHP_POST_MAX_SIZE-10M}"
 PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
 USE_MODSECURITY="${USE_MODSECURITY-yes}"
 USE_MODSECURITY_CRS="${USE_MODSECURITY_CRS-yes}"
@@ -99,6 +100,7 @@ AUTH_BASIC_TEXT="${AUTH_BASIC_TEXT-Restricted area}"
 AUTH_BASIC_LOCATION="${AUTH_BASIC_LOCATION-/}"
 AUTH_BASIC_USER="${AUTH_BASIC_USER-changeme}"
 AUTH_BASIC_PASSWORD="${AUTH_BASIC_PASSWORD-changeme}"
+USE_HTTPS_CUSTOM="${USE_HTTPS_CUSTOM-no}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -146,6 +148,7 @@ if [ "$USE_PHP" = "yes" ] ; then
 	fi
 	replace_in_file "/etc/php7/php.ini" "%PHP_UPLOAD_MAX_FILESIZE%" "$PHP_UPLOAD_MAX_FILESIZE"
 	replace_in_file "/etc/php7/php.ini" "%PHP_DISABLE_FUNCTIONS%" "$PHP_DISABLE_FUNCTIONS"
+	replace_in_file "/etc/php7/php.ini" "%PHP_POST_MAX_SIZE%" "$PHP_POST_MAX_SIZE"
 else
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" ""
 fi
@@ -245,7 +248,23 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" ""
 fi
-
+if [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%CUSTOM_HTTPS%" "include /etc/nginx/custom-https.conf;"
+	if [ "$HTTP2" = "yes" ] ; then
+		replace_in_file "/etc/nginx/custom-https.conf" "%HTTP2%" "http2"
+	else
+		replace_in_file "/etc/nginx/custom-https.conf" "%HTTP2%" ""
+	fi
+	if [ "$STRICT_TRANSPORT_SECURITY" != "" ] ; then
+		replace_in_file "/etc/nginx/custom-https.conf" "%STRICT_TRANSPORT_SECURITY%" "more_set_headers 'Strict-Transport-Security: $STRICT_TRANSPORT_SECURITY';"
+	else
+		replace_in_file "/etc/nginx/custom-https.conf" "%STRICT_TRANSPORT_SECURITY%" ""
+	fi
+	replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "$HTTPS_CUSTOM_CERT"
+	replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "$HTTPS_CUSTOM_KEY"
+else
+	replace_in_file "/etc/nginx/server.conf" "%CUSTOM_HTTPS%" ""
+fi
 if [ "$LISTEN_HTTP" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
 else
