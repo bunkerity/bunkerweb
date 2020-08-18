@@ -255,7 +255,7 @@ More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Stric
 
 `CONTENT_SECURITY_POLICY`  
 Values : *\<directive 1\>; \<directive 2\>; ...*  
-Default value : *default-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer*  
+Default value : *default-src 'self'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer*  
 Policy to be used when loading resources (scripts, forms, frames, ...).  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
 
