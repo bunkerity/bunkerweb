@@ -3,7 +3,9 @@
 echo "[*] Starting bunkerized-nginx ..."
 
 # execute custom scripts if it's a customized image
-run-parts /opt/entrypoint.d
+for file in /entrypoint.d/* ; do
+    [ -f "$file" ] && [ -x "$file" ] && "$file"
+done
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
@@ -101,6 +103,7 @@ AUTH_BASIC_LOCATION="${AUTH_BASIC_LOCATION-/}"
 AUTH_BASIC_USER="${AUTH_BASIC_USER-changeme}"
 AUTH_BASIC_PASSWORD="${AUTH_BASIC_PASSWORD-changeme}"
 USE_HTTPS_CUSTOM="${USE_HTTPS_CUSTOM-no}"
+ROOT_FOLDER="${ROOT_FOLDER-/www}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -149,6 +152,7 @@ if [ "$USE_PHP" = "yes" ] ; then
 	replace_in_file "/etc/php7/php.ini" "%PHP_UPLOAD_MAX_FILESIZE%" "$PHP_UPLOAD_MAX_FILESIZE"
 	replace_in_file "/etc/php7/php.ini" "%PHP_DISABLE_FUNCTIONS%" "$PHP_DISABLE_FUNCTIONS"
 	replace_in_file "/etc/php7/php.ini" "%PHP_POST_MAX_SIZE%" "$PHP_POST_MAX_SIZE"
+	replace_in_file "/etc/php7/php.ini" "%ROOT_FOLDER%" "$ROOT_FOLDER"
 else
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" ""
 fi
@@ -332,6 +336,7 @@ else
 fi
 if [ "$SERVE_FILES" = "yes" ] ; then
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" "include /etc/nginx/serve-files.conf;"
+        replace_in_file "/etc/nginx/serve-files.conf" "%ROOT_FOLDER%" "$ROOT_FOLDER"
 else
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" ""
 fi

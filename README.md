@@ -116,6 +116,11 @@ Default value : *yes*
 If set to yes, nginx will serve files from /www directory within the container.  
 A use case to not serving files is when you setup bunkerized-nginx as a reverse proxy via a custom configuration.
 
+`ROOT_FOLDER`  
+Values : *\<any valid path to web files\>  
+Default value : */www*  
+The default folder where nginx will search for web files. Don't change it unless you want to make your own image (TODO).
+
 `MAX_CLIENT_SIZE`  
 Values : *0* | *Xm*  
 Default value : *10m*  
@@ -385,17 +390,22 @@ Here is a Dockerfile example :
 ```
 FROM bunkerity/bunkerized-nginx
 
-# Copy your web files inside the /www folder
-COPY ./some-files/ /www/
+# Copy your web files to a folder
+COPY ./web-files/ /opt/web-files
 
 # Optional : add your own script to be executed on startup
-COPY ./my-entrypoint.sh /opt/entrypoint.d/
-RUN chmod +x /opt/entrypoint.d/my-entrypoint.sh
+COPY ./my-entrypoint.sh /entrypoint.d/my-entrypoint.sh
+RUN chmod +x /entrypoint.d/my-entrypoint.sh
 
-# Optional : define some environment variables
+# Mandatory variables to make things working
+ENV ROOT_FOLDER /opt/web-files
+ENV PHP_OPEN_BASEDIR /opt/web-files/:/tmp/
+
+# Optional variables
 ENV MAX_CLIENT_SIZE 100m
 ENV PHP_UPLOAD_MAX_FILESIZE 100M
 ENV WRITE_ACCESS yes
+ENV ADDITIONAL_MODULES php7-mysqli php7-json php7-session
 ```
 
 # Include custom configurations
