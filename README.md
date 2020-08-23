@@ -345,7 +345,7 @@ Values : *\<HTTP status codes separated with | char\>*
 Default value : *400|401|403|404|405|444*  
 List of "strange" error codes that fail2ban will search for.  
 
-`FAIL2BAN_BANTIME`
+`FAIL2BAN_BANTIME`  
 Values : *<number of seconds>*  
 Default value : *3600*  
 The duration time, in seconds, of a ban.  
@@ -377,7 +377,7 @@ Default value : *yes*
 If set to yes, ClamAV will automatically remove the detected files.  
 
 ## Misc
-`ADDITIONAL_MODULES` 
+`ADDITIONAL_MODULES`  
 Values : *\<list of packages separated with space\>*  
 Default value :  
 You can specify additional modules to install. All [alpine packages](https://pkgs.alpinelinux.org/packages) are valid.  
