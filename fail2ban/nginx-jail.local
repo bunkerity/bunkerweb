@@ -1,9 +1,7 @@
-[DEFAULTS]
+[nginx-filter]
 bantime = %FAIL2BAN_BANTIME%
 findtime = %FAIL2BAN_FINDTIME%
 maxretry = %FAIL2BAN_MAXRETRY%
-
-[nginx-filter]
 enabled = true
 action = nginx-action
-logpath = /var/log/access.log
+logpath = /var/log/nginx.log

@@ -2,6 +2,6 @@
 before = common.conf
 
 [Definition]
-failregex = <HOST> - .* \[.*\] ".*" (%FAIL2BAN_STATUS_CODES%) .* ".*" ".*"
+failregex = .* nginx: <HOST> - .* \[.*\] ".*" (%FAIL2BAN_STATUS_CODES%) .* ".*" ".*"
 ignoreregex =
 datepattern = %%d/%%b/%%Y:%%H:%%M:%%S

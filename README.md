@@ -419,10 +419,11 @@ docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
 ```
 
 # TODO
-- docker tags
-- Tutorials
-- Full documentation
+- logrotate
+- readme : custom errors
+- remove nginx on default error pages
 - nginx compile flags
 - Antibot with recaptcha v3
 - HSTS preload, HPKP
 - Web UI
+- Full documentation

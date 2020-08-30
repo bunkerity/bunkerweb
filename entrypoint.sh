@@ -38,6 +38,7 @@ function replace_in_file() {
 cp /opt/confs/*.conf /etc/nginx
 cp -r /opt/confs/owasp-crs /etc/nginx
 cp /opt/confs/php.ini /etc/php7/php.ini
+cp /opt/confs/syslog.conf /etc/syslog.conf
 
 # remove cron jobs
 echo "" > /etc/crontabs/root
@@ -104,6 +105,8 @@ AUTH_BASIC_USER="${AUTH_BASIC_USER-changeme}"
 AUTH_BASIC_PASSWORD="${AUTH_BASIC_PASSWORD-changeme}"
 USE_HTTPS_CUSTOM="${USE_HTTPS_CUSTOM-no}"
 ROOT_FOLDER="${ROOT_FOLDER-/www}"
+SYSLOG_MAXSIZE="${SYSLOG_MAXSIZE-1000}"
+SYSLOG_KEEP="${SYSLOG_KEEP-10}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -352,14 +355,14 @@ fi
 # fail2ban setup
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	echo "" > /etc/nginx/fail2ban-ip.conf
-	rm -rf /etc/fail2ban/jail.d/*
+	rm -rf /etc/fail2ban/jail.d/*.conf
 	replace_in_file "/etc/nginx/server.conf" "%USE_FAIL2BAN%" "include /etc/nginx/fail2ban-ip.conf;"
 	cp /opt/fail2ban/nginx-action.local /etc/fail2ban/action.d/nginx-action.local
 	cp /opt/fail2ban/nginx-filter.local /etc/fail2ban/filter.d/nginx-filter.local
-	cp /opt/fail2ban/jail.local /etc/fail2ban/jail.local
-	replace_in_file "/etc/fail2ban/jail.local" "%FAIL2BAN_BANTIME%" "$FAIL2BAN_BANTIME"
-	replace_in_file "/etc/fail2ban/jail.local" "%FAIL2BAN_FINDTIME%" "$FAIL2BAN_FINDTIME"
-	replace_in_file "/etc/fail2ban/jail.local" "%FAIL2BAN_MAXRETRY%" "$FAIL2BAN_MAXRETRY"
+	cp /opt/fail2ban/nginx-jail.local /etc/fail2ban/jail.d/nginx-jail.local
+	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_BANTIME%" "$FAIL2BAN_BANTIME"
+	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_FINDTIME%" "$FAIL2BAN_FINDTIME"
+	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_MAXRETRY%" "$FAIL2BAN_MAXRETRY"
 	replace_in_file "/etc/fail2ban/filter.d/nginx-filter.local" "%FAIL2BAN_STATUS_CODES%" "$FAIL2BAN_STATUS_CODES"
 else
 	replace_in_file "/etc/nginx/server.conf" "%USE_FAIL2BAN%" ""
@@ -367,8 +370,8 @@ fi
 
 # clamav setup
 if [ "$USE_CLAMAV_UPLOAD" = "yes" ] || [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
-	echo "[*] Updating clamav ..."
-	freshclam > /dev/null 2>&1
+	echo "[*] Updating clamav (in background) ..."
+	freshclam > /dev/null 2>&1 &
 	echo "0 0 * * * /usr/bin/freshclam > /dev/null 2>&1" >> /etc/crontabs/root
 fi
 if [ "$USE_CLAMAV_UPLOAD" = "yes" ] ; then
@@ -390,6 +393,9 @@ if [ "$WRITE_ACCESS" = "yes" ] ; then
 	chmod g+w -R /www
 fi
 
+# start syslogd
+syslogd -S -s "$SYSLOG_MAXSIZE" -b "$SYSLOG_KEEP"
+
 # start PHP
 if [ "$USE_PHP" = "yes" ] ; then
 	replace_in_file "/etc/php7/php-fpm.d/www.conf" "user = nobody" "user = nginx"
@@ -403,6 +409,12 @@ crond
 # start nginx
 echo "[*] Running nginx ..."
 /usr/sbin/nginx
+if [ ! -f "/var/log/nginx.log" ] ; then
+	touch /var/log/nginx.log
+fi
+if [ ! -f "/var/log/php.log" ] && [ "$USE_PHP" = "yes" ] ; then
+	touch /var/log/php.log
+fi
 
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
@@ -410,7 +422,11 @@ if [ "$USE_FAIL2BAN" = "yes" ] ; then
 fi
 
 # display logs
-tail -f /var/log/access.log &
+if [ "$USE_PHP" = "yes" ] ; then
+	tail -f /var/log/nginx.log /var/log/php.log &
+else
+	tail -f /var/log/nginx.log &
+fi
 wait $!
 
 # sigterm trapped
