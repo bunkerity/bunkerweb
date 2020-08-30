@@ -119,7 +119,7 @@ A use case to not serving files is when you setup bunkerized-nginx as a reverse 
 `ROOT_FOLDER`  
 Values : *\<any valid path to web files\>  
 Default value : */www*  
-The default folder where nginx will search for web files. Don't change it unless you want to make your own image (TODO).
+The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
 
 `MAX_CLIENT_SIZE`  
 Values : *0* | *Xm*  
@@ -163,6 +163,12 @@ The password of `AUTH_BASIC_USER` when `USE_AUTH_BASIC` is set to yes.
 Values : *\<any valid text\>*  
 Default value : *Restricted area*  
 The text displayed inside the login prompt when `USE_AUTH_BASIC` is set to yes.
+
+`ERROR_XXX`  
+Values : *\<relative path to the error page\>*  
+Default value :  
+Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace XXX with HTTP code.  
+For example : `ERROR_404=/404.html` means the /404.html page will be displayed when 404 code is generated. The path is relative to the root web folder.
 
 ## HTTPS
 `AUTO_LETS_ENCRYPT`  
@@ -383,6 +389,16 @@ Default value :
 You can specify additional modules to install. All [alpine packages](https://pkgs.alpinelinux.org/packages) are valid.  
 A use case is to use this to install PHP extensions (e.g. : php7-json php7-xml php7-curl ...).
 
+`LOGROTATE_MINSIZE`  
+Values : *x* | *xk* | *xM* | *xG*  
+Default value : 10M  
+The minimum size of a log file before being rotated (no letter = bytes, k = kilobytes, M = megabytes, G = gigabytes).
+
+`LOGROTATE_MAXAGE`  
+Values : *\<any integer\>*  
+Default value : 7  
+The number of days before rotated files are deleted.
+
 # Create your own image
 
 You can use bunkerity/bunkerized-nginx as a base image for your web application.  
@@ -408,6 +424,8 @@ ENV WRITE_ACCESS yes
 ENV ADDITIONAL_MODULES php7-mysqli php7-json php7-session
 ```
 
+You can have a look at (bunkerized-phpmyadmin)[https://github.com/bunkerity/bunkerized-phpmyadmin] which is a secure phpMyAdmin Docker image based on bunkerized-nginx.
+
 # Include custom configurations
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
   - /http-confs : http context
@@ -419,11 +437,9 @@ docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
 ```
 
 # TODO
-- logrotate
-- readme : custom errors
-- remove nginx on default error pages
-- nginx compile flags
+- search for hardcoded /www in configs
 - Antibot with recaptcha v3
 - HSTS preload, HPKP
 - Web UI
 - Full documentation
+- nginx compile flags ?

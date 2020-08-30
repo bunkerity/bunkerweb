@@ -38,7 +38,8 @@ function replace_in_file() {
 cp /opt/confs/*.conf /etc/nginx
 cp -r /opt/confs/owasp-crs /etc/nginx
 cp /opt/confs/php.ini /etc/php7/php.ini
-cp /opt/confs/syslog.conf /etc/syslog.conf
+cp /opt/logs/syslog.conf /etc/syslog.conf
+cp /opt/logs/logrotate.conf /etc/logrotate.conf
 
 # remove cron jobs
 echo "" > /etc/crontabs/root
@@ -105,8 +106,8 @@ AUTH_BASIC_USER="${AUTH_BASIC_USER-changeme}"
 AUTH_BASIC_PASSWORD="${AUTH_BASIC_PASSWORD-changeme}"
 USE_HTTPS_CUSTOM="${USE_HTTPS_CUSTOM-no}"
 ROOT_FOLDER="${ROOT_FOLDER-/www}"
-SYSLOG_MAXSIZE="${SYSLOG_MAXSIZE-1000}"
-SYSLOG_KEEP="${SYSLOG_KEEP-10}"
+LOGROTATE_MINSIZE="${LOGROTATE_MINSIZE-10M}"
+LOGROTATE_MAXAGE="${LOGROTATE_MAXAGE-7}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -317,6 +318,7 @@ for var in $(env) ; do
 		cp /opt/confs/error.conf /etc/nginx/error-${err_code}.conf
 		replace_in_file "/etc/nginx/error-${err_code}.conf" "%CODE%" "$err_code"
 		replace_in_file "/etc/nginx/error-${err_code}.conf" "%PAGE%" "$err_page"
+		replace_in_file "/etc/nginx/error-${err_code}.conf" "%ROOT_FOLDER%" "$ROOT_FOLDER"
 		ERRORS="${ERRORS}include /etc/nginx/error-${err_code}.conf;\n"
 	fi
 done
@@ -394,7 +396,7 @@ if [ "$WRITE_ACCESS" = "yes" ] ; then
 fi
 
 # start syslogd
-syslogd -S -s "$SYSLOG_MAXSIZE" -b "$SYSLOG_KEEP"
+syslogd -S
 
 # start PHP
 if [ "$USE_PHP" = "yes" ] ; then
@@ -420,6 +422,11 @@ fi
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	fail2ban-server > /dev/null
 fi
+
+# setup logrotate
+replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MAXAGE%" "$LOGROTATE_MAXAGE"
+replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MINSIZE%" "$LOGROTATE_MINSIZE"
+echo "0 0 * * * logrotate -f /etc/logrotate.conf > /dev/null 2>&1" >> /etc/crontabs/root
 
 # display logs
 if [ "$USE_PHP" = "yes" ] ; then
