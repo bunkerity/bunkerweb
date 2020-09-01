@@ -1,5 +1,9 @@
 # bunkerized-nginx
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
+
 nginx based Docker image secure by default.  
+
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
 - State-of-the-art web security : HTTP security headers, php.ini hardening, prevent leaks, ...
@@ -437,7 +441,6 @@ docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
 ```
 
 # TODO
-- search for hardcoded /www in configs
 - Antibot with recaptcha v3
 - HSTS preload, HPKP
 - Web UI
