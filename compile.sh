@@ -33,7 +33,7 @@ VERSION="1.18.0"
 wget https://nginx.org/download/nginx-${VERSION}.tar.gz
 tar -xvzf nginx-${VERSION}.tar.gz
 cd nginx-${VERSION}
-./auto/configure --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx/nginx.pid --modules-path=/usr/lib/nginx/modules --with-file-aio --with-http_ssl_module --with-http_v2_module --with-http_realip_module --add-module=/tmp/ModSecurity-nginx --add-module=/tmp/headers-more-nginx-module --add-module=/tmp/ngx_http_geoip2_module --add-module=/tmp/nginx_cookie_flag_module
+./configure --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx/nginx.pid --modules-path=/usr/lib/nginx/modules --with-file-aio --with-http_ssl_module --with-http_v2_module --with-http_realip_module --add-module=/tmp/ModSecurity-nginx --add-module=/tmp/headers-more-nginx-module --add-module=/tmp/ngx_http_geoip2_module --add-module=/tmp/nginx_cookie_flag_module
 make -j $NTASK
 make install
 strip /usr/sbin/nginx
