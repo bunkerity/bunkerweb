@@ -292,55 +292,60 @@ Default value : *no*
 Is set to yes, will block TOR clients.
 
 ## PHP
+`REMOTE_PHP`  
+Values : *\<any valid IP/hostname\>*  
+Default value :  
+Set the IP/hostname address of a remote PHP-FPM to execute .php files. See `USE_PHP` if you want to run a PHP-FPM instance on the same container as bunkerized-nginx.
+
 `USE_PHP`  
 Values : *yes* | *no*  
 Default value : *yes*  
-If set to yes, PHP files will be executed by the server.
+If set to yes, a local PHP-FPM instance will be run inside the container to execute PHP files.
 
 `PHP_DISPLAY_ERRORS`  
 Values : *yes* | *no*  
 Default value : *no*  
-If set to yes, PHP errors will be shown to clients.
+If set to yes, PHP errors will be shown to clients. Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_EXPOSE`  
 Values : *yes* | *no*  
 Default value : *no*  
-If set to yes, the PHP version will be sent within the X-Powered-By header.
+If set to yes, the PHP version will be sent within the X-Powered-By header. Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_OPEN_BASEDIR`  
 Values : *\<directories separated with : char\>*  
 Default value : */www/:/tmp/*  
-Limits access to files within the given directories. For example include() or fopen() calls outside the directory will fail.
+Limits access to files within the given directories. For example include() or fopen() calls outside the directory will fail. Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_ALLOW_URL_FOPEN`  
 Values : *yes* | *no*  
 Default value : *no*  
-If set to yes, allows using url in fopen() calls (i.e. : ftp://, http://, ...). 
+If set to yes, allows using url in fopen() calls (i.e. : ftp://, http://, ...). Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_ALLOW_URL_INCLUDE`  
 Values : *yes* | *no*  
 Default value : *no*  
-If set to yes, allows using url in include() calls (i.e. : ftp://, http://, ...). 
+If set to yes, allows using url in include() calls (i.e. : ftp://, http://, ...). Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_FILE_UPLOADS`  
 Values : *yes* | *no*  
 Default value : *yes*  
-If set to yes, allows clients to upload files.
+If set to yes, allows clients to upload files. Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_UPLOAD_MAX_FILESIZE`  
 Values : *\<size in bytes\>* | *XM*  
 Default value : *10M*  
-Sets the maximum file size allowed when uploading files.
+Sets the maximum file size allowed when uploading files. Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_POST_MAX_SIZE`  
 Values : *\<size in bytes\>* | *XM*  
 Default value : *10M*  
-Sets the maximum POST size allowed for clients.
+Sets the maximum POST size allowed for clients. Only meaningful if `USE_PHP` is set to *yes*.
 
 `PHP_DISABLE_FUNCTIONS`  
 Values : *\<function 1\>, \<function 2\> ...*  
 Default value : *system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo*  
-List of PHP functions blacklisted separated with commas. They can't be used anywhere in PHP code.
+List of PHP functions blacklisted separated with commas. They can't be used anywhere in PHP code. Only meaningful if `USE_PHP` is set to *yes*.
 
 ## Fail2ban
 `USE_FAIL2BAN`  
@@ -445,4 +450,3 @@ docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
 - HSTS preload, HPKP
 - Web UI
 - Full documentation
-- nginx compile flags ?

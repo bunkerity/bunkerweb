@@ -127,6 +127,7 @@ replace_in_file "/etc/nginx/gzip.conf" "%GZIP_MIN_LENGTH%" "$GZIP_MIN_LENGTH"
 replace_in_file "/etc/nginx/gzip.conf" "%GZIP_TYPES%" "$GZIP_TYPES"
 if [ "$USE_PHP" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" "include /etc/nginx/php.conf;"
+	replace_in_file "/etc/nginx/php.conf" "%REMOTE_PHP%" "127.0.0.1"
 	if [ "$PHP_EXPOSE" = "yes" ] ; then
 		replace_in_file "/etc/php7/php.ini" "%PHP_EXPOSE%" "On"
 	else
@@ -157,6 +158,9 @@ if [ "$USE_PHP" = "yes" ] ; then
 	replace_in_file "/etc/php7/php.ini" "%PHP_DISABLE_FUNCTIONS%" "$PHP_DISABLE_FUNCTIONS"
 	replace_in_file "/etc/php7/php.ini" "%PHP_POST_MAX_SIZE%" "$PHP_POST_MAX_SIZE"
 	replace_in_file "/etc/php7/php.ini" "%ROOT_FOLDER%" "$ROOT_FOLDER"
+elif [ "$REMOTE_PHP" != "" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" "include /etc/nginx/php.conf;"
+	replace_in_file "/etc/nginx/php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
 else
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" ""
 fi
