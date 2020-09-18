@@ -8,7 +8,6 @@ RUN chmod +x /tmp/compile.sh && \
 COPY entrypoint.sh /opt/entrypoint.sh
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
-COPY misc/*.mmdb /etc/nginx/geoip.mmdb
 COPY fail2ban/ /opt/fail2ban
 COPY logs/ /opt/logs
 

@@ -208,6 +208,10 @@ if [ "$BLOCK_COUNTRY" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip-server.conf;"
 	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\n/g') no;"
+	echo "0 0 2 * * /opt/scripts/geoip.sh" >> /etc/crontabs/root
+	if [ ! -f /etc/nginx/geoip.mmdb ] ; then
+		/opt/scripts/geoip.sh
+	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" ""
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_COUNTRY%" ""
