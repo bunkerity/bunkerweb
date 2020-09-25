@@ -34,6 +34,18 @@ function replace_in_file() {
 	sed -i "s/$pattern/$replace/g" "$1"
 }
 
+# convert space separated values to LUA
+function spaces_to_lua() {
+	for element in $1 ; do
+		if [ "$result" = "" ] ; then
+			result="$element"
+		else
+			result="${result}, \"${element}\""
+		fi
+	done
+	echo "$result"
+}
+
 # copy stub confs
 cp /opt/confs/*.conf /etc/nginx
 cp -r /opt/confs/owasp-crs /etc/nginx
@@ -108,6 +120,10 @@ USE_HTTPS_CUSTOM="${USE_HTTPS_CUSTOM-no}"
 ROOT_FOLDER="${ROOT_FOLDER-/www}"
 LOGROTATE_MINSIZE="${LOGROTATE_MINSIZE-10M}"
 LOGROTATE_MAXAGE="${LOGROTATE_MAXAGE-7}"
+USE_DNSBL="${USE_DNSBL-yes}"
+DNSBL_CACHE="${DNSBL_CACHE-10m}"
+DNSBL_RESOLVERS="${DNSBL_RESOLVERS-8.8.8.8 8.8.4.4}"
+DNSBL_LIST="${DNSBL_LIST-bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -360,6 +376,17 @@ if [ "$USE_AUTH_BASIC" = "yes" ] ; then
 	htpasswd -b -B -c /etc/nginx/.htpasswd "$AUTH_BASIC_USER" "$AUTH_BASIC_PASSWORD"
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" ""
+fi
+if [ "$USE_DNSBL" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsblcache $DNSBL_CACHE;"
+	replace_in_file "/etc/nginx/server.conf" "%DNSBL%" "include /etc/nginx/dnsbl.conf;"
+	resolvers=$(spaces_to_lua "$DNSBL_RESOLVERS")
+	list=$(spaces_to_lua "$DNSBL_LIST")
+	replace_in_file "/etc/nginx/dnsbl.conf" "%DNSBL_RESOLVERS%" "$resolvers"
+	replace_in_file "/etc/nginx/dnsbl.conf" "%DNSBL_LIST%" "$list"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" ""
+	replace_in_file "/etc/nginx/server.conf" "%DNSBL%" ""
 fi
 
 # fail2ban setup
