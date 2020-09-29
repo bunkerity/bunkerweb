@@ -38,7 +38,7 @@ function replace_in_file() {
 function spaces_to_lua() {
 	for element in $1 ; do
 		if [ "$result" = "" ] ; then
-			result="$element"
+			result="\"${element}\""
 		else
 			result="${result}, \"${element}\""
 		fi
@@ -71,6 +71,7 @@ GZIP_COMP_LEVEL="${GZIP_COMP_LEVEL-6}"
 GZIP_MIN_LENGTH="${GZIP_MIN_LENGTH-10240}"
 GZIP_TYPES="${GZIP_TYPES-text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml application/rss+xml application/atom+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml}"
 USE_PHP="${USE_PHP-yes}"
+REMOTE_PHP_PATH="${REMOTE_PHP_PATH-/app}"
 HEADER_SERVER="${HEADER_SERVER-no}"
 X_FRAME_OPTIONS="${X_FRAME_OPTIONS-DENY}"
 X_XSS_PROTECTION="${X_XSS_PROTECTION-1; mode=block}"
@@ -177,6 +178,7 @@ if [ "$USE_PHP" = "yes" ] ; then
 elif [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" "include /etc/nginx/php.conf;"
 	replace_in_file "/etc/nginx/php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
+	replace_in_file "/etc/nginx/fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
 else
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" ""
 fi

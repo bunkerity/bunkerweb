@@ -150,9 +150,9 @@ Default value : *no*
 If set to yes, enables HTTP basic authentication at the location `AUTH_BASIC_LOCATION` with user `AUTH_BASIC_USER` and password `AUTH_BASIC_PASSWORD`.
 
 `AUTH_BASIC_LOCATION`  
-Values : */* | */subdir/* | *\<any valid location\>*  
-Default value : */*  
-The location to restrict when `USE_AUTH_BASIC` is set to *yes*. By default, all the website is restricted (*/*).
+Values : *sitewide* | */somedir* | *\<any valid location\>*  
+Default value : *sitewide*  
+The location to restrict when `USE_AUTH_BASIC` is set to *yes*. If the special value *sitewide* is used then auth basic will be set at server level outside any location context.
 
 `AUTH_BASIC_USER`  
 Values : *\<any valid username\>*  
@@ -317,6 +317,11 @@ The size of the cache used to keep DNSBL responses.
 Values : *\<any valid IP/hostname\>*  
 Default value :  
 Set the IP/hostname address of a remote PHP-FPM to execute .php files. See `USE_PHP` if you want to run a PHP-FPM instance on the same container as bunkerized-nginx.
+
+`REMOTE_PHP_PATH`  
+Values : *\<any valid absolute path\>*  
+Default value : */app*  
+The path where the PHP files are located inside the server specified in `REMOTE_PHP`.
 
 `USE_PHP`  
 Values : *yes* | *no*  
