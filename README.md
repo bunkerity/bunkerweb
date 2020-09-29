@@ -10,8 +10,9 @@ Non-exhaustive list of features :
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
 - Automatic ban of strange behaviors with fail2ban
 - Block TOR users, bad user-agents, countries, ...
+- Perform automatic DNSBL checks
 - Detect bad files with ClamAV
-- Based on alpine and compiled from source
+- Based on alpine
 - Easy to configure with environment variables
 
 # Table of contents
@@ -290,6 +291,26 @@ Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/n
 Values : *yes* | *no*  
 Default value : *no*  
 Is set to yes, will block TOR clients.
+
+`USE_DNSBL`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to yes, DNSBL checks will be performed to the servers specified in the `DNSBL_LIST` environment variable.  
+
+`DNSBL_LIST`  
+Values : *\<list of DNS zones separated with spaces\>*  
+Default value : *bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org*  
+The list of DNSBL zones to query when `USE_DNSBL` is set to *yes*.
+
+`DNSBL_RESOLVERS`  
+Values : *\<two IP addresses separated with a space\>*  
+Default value : *8.8.8.8 8.8.4.4*  
+The IP addresses of the DNS resolvers to use when `USE_DNSBL` is set to *yes*.
+
+`DNSBL_CACHE`  
+Values : *\< \>*  
+Default value : *10m*  
+The size of the cache used to keep DNSBL responses.
 
 ## PHP
 `REMOTE_PHP`  

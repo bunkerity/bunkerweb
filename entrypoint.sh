@@ -113,7 +113,7 @@ USE_CLAMAV_SCAN="${USE_CLAMAV_SCAN-yes}"
 CLAMAV_SCAN_REMOVE="${CLAMAV_SCAN_REMOVE-yes}"
 USE_AUTH_BASIC="${USE_AUTH_BASIC-no}"
 AUTH_BASIC_TEXT="${AUTH_BASIC_TEXT-Restricted area}"
-AUTH_BASIC_LOCATION="${AUTH_BASIC_LOCATION-/}"
+AUTH_BASIC_LOCATION="${AUTH_BASIC_LOCATION-sitewide}"
 AUTH_BASIC_USER="${AUTH_BASIC_USER-changeme}"
 AUTH_BASIC_PASSWORD="${AUTH_BASIC_PASSWORD-changeme}"
 USE_HTTPS_CUSTOM="${USE_HTTPS_CUSTOM-no}"
@@ -370,9 +370,14 @@ else
         replace_in_file "/etc/nginx/server.conf" "%SERVE_FILES%" ""
 fi
 if [ "$USE_AUTH_BASIC" = "yes" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" "include /etc/nginx/auth-basic.conf;"
-	replace_in_file "/etc/nginx/auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
-	replace_in_file "/etc/nginx/auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION";
+	if [ "$AUTH_BASIC_LOCATION" = "sitewide" ] ; then
+		replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" "include /etc/nginx/auth-basic-sitewide.conf;"
+		replace_in_file "/etc/nginx/auth-basic-sitewide.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+	else
+		replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" "include /etc/nginx/auth-basic.conf;"
+		replace_in_file "/etc/nginx/auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION";
+		replace_in_file "/etc/nginx/auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+	fi
 	htpasswd -b -B -c /etc/nginx/.htpasswd "$AUTH_BASIC_USER" "$AUTH_BASIC_PASSWORD"
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" ""
