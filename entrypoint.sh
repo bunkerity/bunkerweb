@@ -125,6 +125,10 @@ USE_DNSBL="${USE_DNSBL-yes}"
 DNSBL_CACHE="${DNSBL_CACHE-10m}"
 DNSBL_RESOLVERS="${DNSBL_RESOLVERS-8.8.8.8 8.8.4.4}"
 DNSBL_LIST="${DNSBL_LIST-bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org}"
+USE_LIMIT_REQ="${USE_LIMIT_REQ-yes}"
+LIMIT_REQ_RATE="${LIMIT_REQ_RATE-10r/s}"
+LIMIT_REQ_BURST="${LIMIT_REQ_BURST-20}"
+LIMIT_REQ_CACHE="${LIMIT_REQ_CACHE-10m}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -394,6 +398,14 @@ if [ "$USE_DNSBL" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" ""
 	replace_in_file "/etc/nginx/server.conf" "%DNSBL%" ""
+fi
+if [ "$USE_LIMIT_REQ" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" "limit_req_zone \$binary_remote_addr zone=limit:${LIMIT_REQ_CACHE} rate=${LIMIT_REQ_RATE};"
+	replace_in_file "/etc/nginx/server.conf" "%LIMIT_REQ%" "include /etc/nginx/limit-req.conf;"
+	replace_in_file "/etc/nginx/limit-req.conf" "%LIMIT_REQ_BURST%" "$LIMIT_REQ_BURST"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" ""
+	replace_in_file "/etc/nginx/server.conf" "%LIMIT_REQ%" ""
 fi
 
 # fail2ban setup

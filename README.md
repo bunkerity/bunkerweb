@@ -10,9 +10,9 @@ Non-exhaustive list of features :
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
 - Automatic ban of strange behaviors with fail2ban
 - Block TOR users, bad user-agents, countries, ...
-- Perform automatic DNSBL checks
+- Perform automatic DNSBL checks to block known bad IP
+- Prevent bruteforce attacks with rate limiting
 - Detect bad files with ClamAV
-- Based on alpine
 - Easy to configure with environment variables
 
 # Table of contents
@@ -308,9 +308,30 @@ Default value : *8.8.8.8 8.8.4.4*
 The IP addresses of the DNS resolvers to use when `USE_DNSBL` is set to *yes*.
 
 `DNSBL_CACHE`  
-Values : *\< \>*  
+Values : *\<size with units k or m\>*  
 Default value : *10m*  
 The size of the cache used to keep DNSBL responses.
+
+`USE_REQ_LIMIT`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to yes, the amount of HTTP requests made by a user will be limited during a period of time.  
+More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/).
+
+`REQ_LIMIT_RATE`  
+Values : *Xr/s* | *Xr/m*  
+Default value : *10r/s*  
+The rate limit to apply when `USE_REQ_LIMIT` is set to *yes*. Default is 10 requests per second.
+
+`REQ_LIMIT_BURST`  
+Values : *<any valid integer\>*  
+Default value : *20*  
+The number of of requests to put in queue before rejecting requests.
+
+`REQ_LIMIT_CACHE`  
+Values : *Xm* | *Xk*    
+Default value : *10m*  
+The size of the cache to store information about request limiting.
 
 ## PHP
 `REMOTE_PHP`  
