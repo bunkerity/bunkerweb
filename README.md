@@ -320,12 +320,12 @@ More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/).
 
 `REQ_LIMIT_RATE`  
 Values : *Xr/s* | *Xr/m*  
-Default value : *10r/s*  
+Default value : *20r/s*  
 The rate limit to apply when `USE_REQ_LIMIT` is set to *yes*. Default is 10 requests per second.
 
 `REQ_LIMIT_BURST`  
 Values : *<any valid integer\>*  
-Default value : *20*  
+Default value : *40*  
 The number of of requests to put in queue before rejecting requests.
 
 `REQ_LIMIT_CACHE`  

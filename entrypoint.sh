@@ -126,8 +126,8 @@ DNSBL_CACHE="${DNSBL_CACHE-10m}"
 DNSBL_RESOLVERS="${DNSBL_RESOLVERS-8.8.8.8 8.8.4.4}"
 DNSBL_LIST="${DNSBL_LIST-bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org}"
 USE_LIMIT_REQ="${USE_LIMIT_REQ-yes}"
-LIMIT_REQ_RATE="${LIMIT_REQ_RATE-10r/s}"
-LIMIT_REQ_BURST="${LIMIT_REQ_BURST-20}"
+LIMIT_REQ_RATE="${LIMIT_REQ_RATE-20r/s}"
+LIMIT_REQ_BURST="${LIMIT_REQ_BURST-40}"
 LIMIT_REQ_CACHE="${LIMIT_REQ_CACHE-10m}"
 
 # install additional modules if needed
