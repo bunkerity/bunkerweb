@@ -1,4 +1,11 @@
-FROM 386/alpine
+FROM alpine AS builder
+
+ENV QEMU_URL https://github.com/multiarch/qemu-user-static/releases/download/v5.1.0-5/qemu-i386-static.tar.gz
+RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
+
+FROM i386/alpine
+
+COPY --from=builder qemu-i386-static /usr/bin
 
 COPY compile.sh /tmp/compile.sh
 RUN chmod +x /tmp/compile.sh && \
