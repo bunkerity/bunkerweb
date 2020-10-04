@@ -83,7 +83,9 @@ SERVER_NAME="${SERVER_NAME-www.bunkerity.com}"
 ALLOWED_METHODS="${ALLOWED_METHODS-GET|POST|HEAD}"
 BLOCK_COUNTRY="${BLOCK_COUNTRY-}"
 BLOCK_USER_AGENT="${BLOCK_USER_AGENT-yes}"
-BLOCK_TOR_EXIT_NODE="${BLOCK_TOR_EXIT_NODE-no}"
+BLOCK_TOR_EXIT_NODE="${BLOCK_TOR_EXIT_NODE-yes}"
+BLOCK_PROXIES="${BLOCK_PROXIES-yes}"
+BLOCK_ABUSERS="${BLOCK_ABUSERS-yes}"
 AUTO_LETS_ENCRYPT="${AUTO_LETS_ENCRYPT-no}"
 HTTP2="${HTTP2-yes}"
 STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY-max-age=31536000}"
@@ -245,7 +247,7 @@ fi
 if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/block-user-agent.conf;"
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/map-user-agent.conf;"
-	/opt/scripts/user-agents.sh
+	/opt/scripts/user-agents.sh &
 	echo "0 0 * * * /opt/scripts/user-agents.sh" >> /etc/crontabs/root
 else
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_USER_AGENT%" ""
@@ -253,10 +255,24 @@ else
 fi
 if [ "$BLOCK_TOR_EXIT_NODE" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_TOR_EXIT_NODE%" "include /etc/nginx/block-tor-exit-node.conf;"
-	/opt/scripts/exit-nodes.sh
+	/opt/scripts/exit-nodes.sh &
 	echo "0 * * * * /opt/scripts/exit-nodes.sh" >> /etc/crontabs/root
 else
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_TOR_EXIT_NODE%" ""
+fi
+if [ "$BLOCK_PROXIES" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%BLOCK_PROXIES%" "include /etc/nginx/block-proxies.conf;"
+	/opt/scripts/proxies.sh &
+	echo "0 0 * * * /opt/scripts/proxies.sh" >> /etc/crontabs/root
+else
+	replace_in_file "/etc/nginx/server.conf" "%BLOCK_PROXIES%" ""
+fi
+if [ "$BLOCK_ABUSERS" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%BLOCK_ABUSERS%" "include /etc/nginx/block-abusers.conf;"
+	/opt/scripts/abusers.sh &
+	echo "0 0 * * * /opt/scripts/abusers.sh" >> /etc/crontabs/root
+else
+	replace_in_file "/etc/nginx/server.conf" "%BLOCK_ABUSERS%" ""
 fi
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 
