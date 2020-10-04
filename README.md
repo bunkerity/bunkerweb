@@ -9,7 +9,7 @@ Non-exhaustive list of features :
 - State-of-the-art web security : HTTP security headers, php.ini hardening, prevent leaks, ...
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
 - Automatic ban of strange behaviors with fail2ban
-- Block TOR users, bad user-agents, countries, ...
+- Block TOR, proxies, bad user-agents, countries, ...
 - Perform automatic DNSBL checks to block known bad IP
 - Prevent bruteforce attacks with rate limiting
 - Detect bad files with ClamAV
@@ -289,8 +289,21 @@ Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/n
 
 `BLOCK_TOR_EXIT_NODE`  
 Values : *yes* | *no*  
-Default value : *no*  
-Is set to yes, will block TOR clients.
+Default value : *yes*  
+Is set to yes, will block known TOR exit nodes.  
+Blacklist can be found [here](https://iplists.firehol.org/?ipset=tor_exits).
+
+`BLOCK_PROXIES`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Is set to yes, will block known proxies.  
+Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_proxies).
+
+`BLOCK_ABUSERS`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Is set to yes, will block known abusers.  
+Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_abusers_30d).
 
 `USE_DNSBL`  
 Values : *yes* | *no*  
@@ -491,9 +504,3 @@ You just need to use a volume like this :
 ```
 docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
 ```
-
-# TODO
-- Antibot with recaptcha v3
-- HSTS preload, HPKP
-- Web UI
-- Full documentation
