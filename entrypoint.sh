@@ -132,6 +132,14 @@ LIMIT_REQ_RATE="${LIMIT_REQ_RATE-20r/s}"
 LIMIT_REQ_BURST="${LIMIT_REQ_BURST-40}"
 LIMIT_REQ_CACHE="${LIMIT_REQ_CACHE-10m}"
 PROXY_REAL_IP="${PROXY_REAL_IP-no}"
+GENERATE_SELF_SIGNED_SSL="${GENERATE_SELF_SIGNED_SSL-no"}"
+SELF_SIGNED_SSL_EXPIRY="${SELF_SIGNED_SSL_EXPIRY-365}"
+SELF_SIGNED_SSL_COUNTRY="${SELF_SIGNED_SSL_COUNTRY-Switzerland}"
+SELF_SIGNED_SSL_STATE="${SELF_SIGNED_SSL_STATE-Switzerland}"
+SELF_SIGNED_SSL_CITY="${SELF_SIGNED_SSL_CITY-Bern}"
+SELF_SIGNED_SSL_ORG="${SELF_SIGNED_SSL_ORG-AcmeInc}"
+SELF_SIGNED_SSL_OU="${SELF_SIGNED_SSL_OU-IT}"
+SELF_SIGNED_SSL_CN="${SELF_SIGNED_SSL_CN-bunkerity-nginx}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -275,8 +283,7 @@ if [ "$BLOCK_ABUSERS" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_ABUSERS%" ""
 fi
-if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
-
+if [ "$AUTO_LETS_ENCRYPT" = "yes" ] && [ "$USE_CUSTOM_HTTPS" = "no" ]; then
 	FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 	DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
 	EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$FIRST_SERVER_NAME}"
@@ -303,7 +310,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" ""
 fi
-if [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
+if [ "$USE_CUSTOM_HTTPS" = "yes" ] && [ "$AUTO_LETS_ENCRYPT" = "no" ]; then
 	replace_in_file "/etc/nginx/server.conf" "%CUSTOM_HTTPS%" "include /etc/nginx/custom-https.conf;"
 	if [ "$HTTP2" = "yes" ] ; then
 		replace_in_file "/etc/nginx/custom-https.conf" "%HTTP2%" "http2"
@@ -317,6 +324,15 @@ if [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
 	fi
 	replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "$HTTPS_CUSTOM_CERT"
 	replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "$HTTPS_CUSTOM_KEY"
+        if [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
+		mkdir /etc/nginx/self-signed-ssl/
+                openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/self-signed-ssl/key.pem -out /etc/nginx/self-signed-ssl/cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
+		replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "/etc/nginx/self-signed-ssl/cert.pem"
+                replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "/etc/nginx/self-signed-ssl/key.pem"
+        else
+                replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "$HTTPS_CUSTOM_CERT"
+                replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "$HTTPS_CUSTOM_KEY"
+        fi
 else
 	replace_in_file "/etc/nginx/server.conf" "%CUSTOM_HTTPS%" ""
 fi

@@ -218,6 +218,53 @@ Values : *\<any valid path inside the container\>*
 Default value :  
 Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
+`GENERATE_SELF_SIGNED_SSL`
+Values : *yes* | *no*
+Default value : *no*
+If set to yes, HTTPS will be enabled with a container generated self signed SSL.
+
+`SELF_SIGNED_SSL_EXPIRY`
+Values : *integer*
+Default value : *365* (1 year)
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the expiry date for the self generated certificate.
+
+`SELF_SIGNED_SSL_COUNTRY`
+Values : *text*
+Default value : *Switzerland*
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the country for the self generated certificate.
+
+`SELF_SIGNED_SSL_STATE`
+Values : *text*
+Default value : *Switzerland*
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the state for the self generated certificate.
+
+`SELF_SIGNED_SSL_CITY`
+Values : *text*
+Default value : *Bern*
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the city for the self generated certificate.
+
+`SELF_SIGNED_SSL_ORG`
+Values : *text*
+Default value : *AcmeInc*
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the organisation name for the self generated certificate.
+
+`SELF_SIGNED_SSL_OU`
+Values : *text*
+Default value : *IT*
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the organisitional unit for the self generated certificate.
+
+`SELF_SIGNED_SSL_CN`
+Values : *text*
+Default value : *bunkerity-nginx*
+Needs "GENERATE_SELF_SIGNED_SSL" to work.
+Sets the CN server name for the self generated certificate.
+
 ## ModSecurity
 `USE_MODSECURITY`  
 Values : *yes* | *no*  
