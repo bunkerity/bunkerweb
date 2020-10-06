@@ -175,6 +175,11 @@ Default value :
 Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace XXX with HTTP code.  
 For example : `ERROR_404=/404.html` means the /404.html page will be displayed when 404 code is generated. The path is relative to the root web folder.
 
+`PROXY_REAL_IP`
+Values : *yes* | *no*
+Default value : *no*
+Use this kind of environment variable to define whether you're using Nginx inside another proxy, this means you will see "X-Forwarded-For" instead of regular "Remote-Addr" IPs inside your logs. Modsecurity will also then work correctly.
+
 ## HTTPS
 `AUTO_LETS_ENCRYPT`  
 Values : *yes* | *no*  

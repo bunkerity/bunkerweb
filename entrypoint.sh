@@ -131,6 +131,7 @@ USE_LIMIT_REQ="${USE_LIMIT_REQ-yes}"
 LIMIT_REQ_RATE="${LIMIT_REQ_RATE-20r/s}"
 LIMIT_REQ_BURST="${LIMIT_REQ_BURST-40}"
 LIMIT_REQ_CACHE="${LIMIT_REQ_CACHE-10m}"
+PROXY_REAL_IP="${PROXY_REAL_IP-no}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -354,6 +355,14 @@ if [ "$USE_MODSECURITY" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_MODSECURITY%" ""
 fi
+if [ "$PROXY_REAL_IP" = "yes" ] ; then
+        replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" "include /etc/nginx/proxy-real-ip.conf;"
+        replace_in_file "/etc/nginx/server.conf" "%LOG_TYPE%" "proxy"
+else
+        replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" ""
+        replace_in_file "/etc/nginx/server.conf" "%LOG_TYPE%" "combined"
+fi
+
 
 ERRORS=""
 for var in $(env) ; do
