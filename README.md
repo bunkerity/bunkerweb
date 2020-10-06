@@ -175,10 +175,25 @@ Default value :
 Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace XXX with HTTP code.  
 For example : `ERROR_404=/404.html` means the /404.html page will be displayed when 404 code is generated. The path is relative to the root web folder.
 
-`PROXY_REAL_IP`
-Values : *yes* | *no*
-Default value : *no*
-Use this kind of environment variable to define whether you're using Nginx inside another proxy, this means you will see "X-Forwarded-For" instead of regular "Remote-Addr" IPs inside your logs. Modsecurity will also then work correctly.
+`PROXY_REAL_IP`  
+Values : *yes* | *no*  
+Default value : *no*  
+Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Modsecurity, fail2ban and others security tools will also then work correctly.
+
+`PROXY_REAL_IP_FROM`  
+Values : *\<list of trusted IP addresses and/or networks separated with spaces\>*  
+Default value : *192.168.0.0/16 172.16.0.0/12 10.0.0.0/8*  
+When `PROXY_REAL_IP` is set to *yes*, lets you define the trusted IPs/networks allowed to send the correct client address.
+
+`PROXY_REAL_IP_HEADER`  
+Values : *X-Forwarded-For* | *X-Real-IP* | *custom header*  
+Default value : *X-Forwarded-For*  
+When `PROXY_REAL_IP` is set to *yes*, lets you define the header that contains the real client IP address.
+
+`PROXY_REAL_IP_RECURSIVE`  
+Values : *on* | *off*  
+Default value : *on*  
+When `PROXY_REAL_IP` is set to *yes*, setting this to *on* avoid spoofing attacks using the header defined in `PROXY_REAL_IP_HEADER`.
 
 ## HTTPS
 `AUTO_LETS_ENCRYPT`  
@@ -203,7 +218,7 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.  
 
-`USE_CUSTOM_HTTPS` 
+`USE_CUSTOM_HTTPS`  
 Values : *yes* | *no*  
 Default value : *no*  
 If set to yes, HTTPS will be enabled with certificate/key of your choice.  
@@ -218,51 +233,51 @@ Values : *\<any valid path inside the container\>*
 Default value :  
 Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
-`GENERATE_SELF_SIGNED_SSL`
-Values : *yes* | *no*
-Default value : *no*
-If set to yes, HTTPS will be enabled with a container generated self signed SSL.
+`GENERATE_SELF_SIGNED_SSL`  
+Values : *yes* | *no*  
+Default value : *no*  
+If set to yes, HTTPS will be enabled with a container generated self-signed certificate.
 
-`SELF_SIGNED_SSL_EXPIRY`
-Values : *integer*
-Default value : *365* (1 year)
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_EXPIRY`  
+Values : *integer*  
+Default value : *365* (1 year)  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the expiry date for the self generated certificate.
 
-`SELF_SIGNED_SSL_COUNTRY`
-Values : *text*
-Default value : *Switzerland*
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_COUNTRY`  
+Values : *text*  
+Default value : *Switzerland*  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the country for the self generated certificate.
 
-`SELF_SIGNED_SSL_STATE`
-Values : *text*
-Default value : *Switzerland*
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_STATE`  
+Values : *text*  
+Default value : *Switzerland*  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the state for the self generated certificate.
 
-`SELF_SIGNED_SSL_CITY`
-Values : *text*
-Default value : *Bern*
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_CITY`  
+Values : *text*  
+Default value : *Bern*  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the city for the self generated certificate.
 
-`SELF_SIGNED_SSL_ORG`
-Values : *text*
-Default value : *AcmeInc*
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_ORG`  
+Values : *text*  
+Default value : *AcmeInc*  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the organisation name for the self generated certificate.
 
-`SELF_SIGNED_SSL_OU`
-Values : *text*
-Default value : *IT*
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_OU`  
+Values : *text*  
+Default value : *IT*  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the organisitional unit for the self generated certificate.
 
-`SELF_SIGNED_SSL_CN`
-Values : *text*
-Default value : *bunkerity-nginx*
-Needs "GENERATE_SELF_SIGNED_SSL" to work.
+`SELF_SIGNED_SSL_CN`  
+Values : *text*  
+Default value : *bunkerity-nginx*  
+Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the CN server name for the self generated certificate.
 
 ## ModSecurity

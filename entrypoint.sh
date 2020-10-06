@@ -132,6 +132,9 @@ LIMIT_REQ_RATE="${LIMIT_REQ_RATE-20r/s}"
 LIMIT_REQ_BURST="${LIMIT_REQ_BURST-40}"
 LIMIT_REQ_CACHE="${LIMIT_REQ_CACHE-10m}"
 PROXY_REAL_IP="${PROXY_REAL_IP-no}"
+PROXY_REAL_IP_FROM="${PROXY_REAL_IP_FROM-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}"
+PROXY_REAL_IP_HEADER="${PROXY_REAL_IP_HEADER-X-Forwarded-For}"
+PROXY_REAL_IP_RECURSIVE="${PROXY_REAL_IP_RECURSIVE-on}"
 GENERATE_SELF_SIGNED_SSL="${GENERATE_SELF_SIGNED_SSL-no"}"
 SELF_SIGNED_SSL_EXPIRY="${SELF_SIGNED_SSL_EXPIRY-365}"
 SELF_SIGNED_SSL_COUNTRY="${SELF_SIGNED_SSL_COUNTRY-Switzerland}"
@@ -283,59 +286,45 @@ if [ "$BLOCK_ABUSERS" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/server.conf" "%BLOCK_ABUSERS%" ""
 fi
-if [ "$AUTO_LETS_ENCRYPT" = "yes" ] && [ "$USE_CUSTOM_HTTPS" = "no" ]; then
-	FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
-	DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
-	EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$FIRST_SERVER_NAME}"
 
-	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" "include /etc/nginx/auto-lets-encrypt.conf;"
-
+# HTTPS config
+if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
+	replace_in_file "/etc/nginx/server.conf" "%USE_HTTPS%" "include /etc/nginx/https.conf;"
 	if [ "$HTTP2" = "yes" ] ; then
-		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%HTTP2%" "http2"
+		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" "http2"
 	else
-		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%HTTP2%" ""
-	fi
-	replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%FIRST_SERVER_NAME%" "$FIRST_SERVER_NAME"
-	if [ "$STRICT_TRANSPORT_SECURITY" != "" ] ; then
-		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%STRICT_TRANSPORT_SECURITY%" "more_set_headers 'Strict-Transport-Security: $STRICT_TRANSPORT_SECURITY';"
-	else
-		replace_in_file "/etc/nginx/auto-lets-encrypt.conf" "%STRICT_TRANSPORT_SECURITY%" ""
-	fi
-	if [ -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
-		/opt/scripts/certbot-renew.sh
-	else
-		certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos
-	fi
-	echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
-else
-	replace_in_file "/etc/nginx/server.conf" "%AUTO_LETS_ENCRYPT%" ""
-fi
-if [ "$USE_CUSTOM_HTTPS" = "yes" ] && [ "$AUTO_LETS_ENCRYPT" = "no" ]; then
-	replace_in_file "/etc/nginx/server.conf" "%CUSTOM_HTTPS%" "include /etc/nginx/custom-https.conf;"
-	if [ "$HTTP2" = "yes" ] ; then
-		replace_in_file "/etc/nginx/custom-https.conf" "%HTTP2%" "http2"
-	else
-		replace_in_file "/etc/nginx/custom-https.conf" "%HTTP2%" ""
+		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" ""
 	fi
 	if [ "$STRICT_TRANSPORT_SECURITY" != "" ] ; then
-		replace_in_file "/etc/nginx/custom-https.conf" "%STRICT_TRANSPORT_SECURITY%" "more_set_headers 'Strict-Transport-Security: $STRICT_TRANSPORT_SECURITY';"
+		replace_in_file "/etc/nginx/https.conf" "%STRICT_TRANSPORT_SECURITY%" "more_set_headers 'Strict-Transport-Security: $STRICT_TRANSPORT_SECURITY';"
 	else
-		replace_in_file "/etc/nginx/custom-https.conf" "%STRICT_TRANSPORT_SECURITY%" ""
+		replace_in_file "/etc/nginx/https.conf" "%STRICT_TRANSPORT_SECURITY%" ""
 	fi
-	replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "$HTTPS_CUSTOM_CERT"
-	replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "$HTTPS_CUSTOM_KEY"
-        if [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
+	if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
+		FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
+		DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
+		EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$FIRST_SERVER_NAME}"
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_KEY%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/privkey.pem"
+		if [ -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
+			/opt/scripts/certbot-renew.sh
+		else
+			certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos
+		fi
+		echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
+	elif [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_CERT%" "$CUSTOM_HTTPS_CERT"
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_KEY%" "$CUSTOM_HTTPS_KEY"
+	elif [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
 		mkdir /etc/nginx/self-signed-ssl/
                 openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/self-signed-ssl/key.pem -out /etc/nginx/self-signed-ssl/cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
-		replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "/etc/nginx/self-signed-ssl/cert.pem"
-                replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "/etc/nginx/self-signed-ssl/key.pem"
-        else
-                replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_CERT%" "$HTTPS_CUSTOM_CERT"
-                replace_in_file "/etc/nginx/custom-https.conf" "%HTTPS_CUSTOM_KEY%" "$HTTPS_CUSTOM_KEY"
-        fi
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_CERT%" "/etc/nginx/self-signed-ssl/cert.pem"
+                replace_in_file "/etc/nginx/https.conf" "%HTTPS_KEY%" "/etc/nginx/self-signed-ssl/key.pem"
+	fi
 else
-	replace_in_file "/etc/nginx/server.conf" "%CUSTOM_HTTPS%" ""
+	replace_in_file "/etc/nginx/server.conf" "%USE_HTTPS%" ""
 fi
+
 if [ "$LISTEN_HTTP" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
 else
@@ -372,11 +361,16 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_MODSECURITY%" ""
 fi
 if [ "$PROXY_REAL_IP" = "yes" ] ; then
-        replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" "include /etc/nginx/proxy-real-ip.conf;"
-        replace_in_file "/etc/nginx/server.conf" "%LOG_TYPE%" "proxy"
+	replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" "include /etc/nginx/proxy-real-ip.conf;"
+	froms=""
+	for from in $PROXY_REAL_IP_FROM ; do
+		froms="${froms}set_real_ip_from ${from};\n"
+	done
+	replace_in_file "/etc/nginx/proxy-real-ip.conf" "%PROXY_REAL_IP_FROM%" "$froms"
+	replace_in_file "/etc/nginx/proxy-real-ip.conf" "%PROXY_REAL_IP_HEADER%" "$PROXY_REAL_IP_HEADER"
+	replace_in_file "/etc/nginx/proxy-real-ip.conf" "%PROXY_REAL_IP_RECURSIVE%" "$PROXY_REAL_IP_RECURSIVE"
 else
-        replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" ""
-        replace_in_file "/etc/nginx/server.conf" "%LOG_TYPE%" "combined"
+	replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" ""
 fi
 
 
