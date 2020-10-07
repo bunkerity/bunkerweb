@@ -11,7 +11,7 @@ COPY scripts/ /opt/scripts
 COPY fail2ban/ /opt/fail2ban
 COPY logs/ /opt/logs
 
-RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils && \
+RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog && \
     chmod +x /opt/entrypoint.sh /opt/scripts/* && \
     mkdir /opt/entrypoint.d && \
     adduser -h /dev/null -g '' -s /sbin/nologin -D -H nginx

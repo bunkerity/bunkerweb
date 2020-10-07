@@ -50,7 +50,7 @@ function spaces_to_lua() {
 cp /opt/confs/*.conf /etc/nginx
 cp -r /opt/confs/owasp-crs /etc/nginx
 cp /opt/confs/php.ini /etc/php7/php.ini
-cp /opt/logs/syslog.conf /etc/syslog.conf
+cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
 
 # remove cron jobs
@@ -484,8 +484,8 @@ if [ "$WRITE_ACCESS" = "yes" ] ; then
 	chmod g+w -R /www
 fi
 
-# start syslogd
-syslogd -S
+# start rsyslogd
+rsyslogd
 
 # start PHP
 if [ "$USE_PHP" = "yes" ] ; then
@@ -500,8 +500,11 @@ crond
 # start nginx
 echo "[*] Running nginx ..."
 /usr/sbin/nginx
-if [ ! -f "/var/log/nginx.log" ] ; then
-	touch /var/log/nginx.log
+if [ ! -f "/var/log/access.log" ] ; then
+	touch /var/log/access.log
+fi
+if [ ! -f "/var/log/error.log" ] ; then
+	touch /var/log/error.log
 fi
 if [ ! -f "/var/log/php.log" ] && [ "$USE_PHP" = "yes" ] ; then
 	touch /var/log/php.log
@@ -519,9 +522,9 @@ echo "0 0 * * * logrotate -f /etc/logrotate.conf > /dev/null 2>&1" >> /etc/cront
 
 # display logs
 if [ "$USE_PHP" = "yes" ] ; then
-	tail -f /var/log/nginx.log /var/log/php.log &
+	tail -f /var/log/access.log /var/log/error.log /var/log/php.log &
 else
-	tail -f /var/log/nginx.log &
+	tail -f /var/log/access.log /var/log/error.log &
 fi
 wait $!
 

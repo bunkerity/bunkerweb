@@ -4,4 +4,4 @@ findtime = %FAIL2BAN_FINDTIME%
 maxretry = %FAIL2BAN_MAXRETRY%
 enabled = true
 action = nginx-action
-logpath = /var/log/nginx.log
+logpath = /var/log/access.log
