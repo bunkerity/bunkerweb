@@ -9,6 +9,11 @@ manifests:
       architecture: arm
       os: linux
       variant: v7
+  - image: bunkerity/bunkerized-nginx:dev-arm64v8
+    platform:
+      architecture: arm64
+      os: linux
+      variant: v8
   - image: bunkerity/bunkerized-nginx:dev-i386
     platform:
       architecture: 386

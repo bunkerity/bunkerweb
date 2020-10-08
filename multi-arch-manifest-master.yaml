@@ -1,0 +1,21 @@
+image: bunkerity/bunkerized-nginx:master
+manifests:
+  - image: bunkerity/bunkerized-nginx:amd64
+    platform:
+      architecture: amd64
+      os: linux
+  - image: bunkerity/bunkerized-nginx:arm32v7
+    platform:
+      architecture: arm
+      os: linux
+      variant: v7
+  - image: bunkerity/bunkerized-nginx:arm64v8
+    platform:
+      architecture: arm64
+      os: linux
+      variant: v8
+  - image: bunkerity/bunkerized-nginx:i386
+    platform:
+      architecture: 386
+      os: linux
+
