@@ -52,6 +52,7 @@ cp -r /opt/confs/owasp-crs /etc/nginx
 cp /opt/confs/php.ini /etc/php7/php.ini
 cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
+cp /opt/lua/*.lua /usr/local/lib/lua
 
 # remove cron jobs
 echo "" > /etc/crontabs/root
@@ -123,9 +124,16 @@ USE_CUSTOM_HTTPS="${USE_CUSTOM_HTTPS-no}"
 ROOT_FOLDER="${ROOT_FOLDER-/www}"
 LOGROTATE_MINSIZE="${LOGROTATE_MINSIZE-10M}"
 LOGROTATE_MAXAGE="${LOGROTATE_MAXAGE-7}"
+DNS_RESOLVERS="${DNS_RESOLVERS-8.8.8.8 8.8.4.4}"
+USE_WHITELIST_IP="${USE_WHITELIST_IP-yes}"
+WHITELIST_IP_LIST="${WHITELIST_IP_LIST-23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8}"
+USE_WHITELIST_REVERSE="${USE_WHITELIST_REVERSE-yes}"
+WHITELIST_REVERSE_LIST="${WHITELIST_REVERSE_LIST-.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net}"
+USE_BLACKLIST_IP="${USE_BLACKLIST_IP-yes}"
+BLACKLIST_IP_LIST="${BLACKLIST_IP_LIST-}"
+USE_BLACKLIST_REVERSE="${USE_BLACKLIST_REVERSE-yes}"
+BLACKLIST_REVERSE_LIST="${BLACKLIST_REVERSE_LIST-.shodan.io}"
 USE_DNSBL="${USE_DNSBL-yes}"
-DNSBL_CACHE="${DNSBL_CACHE-10m}"
-DNSBL_RESOLVERS="${DNSBL_RESOLVERS-8.8.8.8 8.8.4.4}"
 DNSBL_LIST="${DNSBL_LIST-bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org}"
 USE_LIMIT_REQ="${USE_LIMIT_REQ-yes}"
 LIMIT_REQ_RATE="${LIMIT_REQ_RATE-20r/s}"
@@ -423,17 +431,66 @@ if [ "$USE_AUTH_BASIC" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/server.conf" "%AUTH_BASIC%" ""
 fi
+
+# lua resolvers
+resolvers=$(spaces_to_lua "$DNS_RESOLVERS")
+replace_in_file "/usr/local/lib/lua/dns.lua" "%DNS_RESOLVERS%" "$resolvers"
+
+# whitelist IP
+if [ "$USE_WHITELIST_IP" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%WHITELIST_IP_CACHE%" "lua_shared_dict whitelist_ip_cache 10m;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_WHITELIST_IP%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%WHITELIST_IP_CACHE%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_WHITELIST_IP%" "false"
+fi
+list=$(spaces_to_lua "$WHITELIST_IP_LIST")
+replace_in_file "/usr/local/lib/lua/whitelist.lua" "%WHITELIST_IP_LIST%" "$list"
+
+# whitelist rDNS
+if [ "$USE_WHITELIST_REVERSE" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%WHITELIST_REVERSE_CACHE%" "lua_shared_dict whitelist_reverse_cache 10m;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_WHITELIST_REVERSE%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%WHITELIST_REVERSE_CACHE%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_WHITELIST_REVERSE%" "false"
+fi
+list=$(spaces_to_lua "$WHITELIST_REVERSE_LIST")
+replace_in_file "/usr/local/lib/lua/whitelist.lua" "%WHITELIST_REVERSE_LIST%" "$list"
+
+# blacklist IP
+if [ "$USE_BLACKLIST_IP" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%BLACKLIST_IP_CACHE%" "lua_shared_dict blacklist_ip_cache 10m;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_BLACKLIST_IP%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLACKLIST_IP_CACHE%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_BLACKLIST_IP%" "false"
+fi
+list=$(spaces_to_lua "$BLACKLIST_IP_LIST")
+replace_in_file "/usr/local/lib/lua/blacklist.lua" "%BLACKLIST_IP_LIST%" "$list"
+
+# blacklist rDNS
+if [ "$USE_BLACKLIST_REVERSE" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%BLACKLIST_REVERSE_CACHE%" "lua_shared_dict blacklist_reverse_cache 10m;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_BLACKLIST_REVERSE%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLACKLIST_REVERSE_CACHE%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_BLACKLIST_REVERSE%" "false"
+fi
+list=$(spaces_to_lua "$BLACKLIST_REVERSE_LIST")
+replace_in_file "/usr/local/lib/lua/blacklist.lua" "%BLACKLIST_REVERSE_LIST%" "$list"
+
+# DNSBL
 if [ "$USE_DNSBL" = "yes" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsblcache $DNSBL_CACHE;"
-	replace_in_file "/etc/nginx/server.conf" "%DNSBL%" "include /etc/nginx/dnsbl.conf;"
-	resolvers=$(spaces_to_lua "$DNSBL_RESOLVERS")
-	list=$(spaces_to_lua "$DNSBL_LIST")
-	replace_in_file "/etc/nginx/dnsbl.conf" "%DNSBL_RESOLVERS%" "$resolvers"
-	replace_in_file "/etc/nginx/dnsbl.conf" "%DNSBL_LIST%" "$list"
+	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsbl_cache 10m;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_DNSBL%" "true"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" ""
-	replace_in_file "/etc/nginx/server.conf" "%DNSBL%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_DNSBL%" "false"
 fi
+list=$(spaces_to_lua "$DNSBL_LIST")
+replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
+
 if [ "$USE_LIMIT_REQ" = "yes" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" "limit_req_zone \$binary_remote_addr zone=limit:${LIMIT_REQ_CACHE} rate=${LIMIT_REQ_RATE};"
 	replace_in_file "/etc/nginx/server.conf" "%LIMIT_REQ%" "include /etc/nginx/limit-req.conf;"
