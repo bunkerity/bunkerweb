@@ -2,7 +2,11 @@
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
 
-nginx based Docker image secure by default.  
+<img src="https://img.shields.io/badge/nginx-1.18.0-blue" /> <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" /> <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
+
+nginx Docker image secure by default.  
+
+Avoid the hassle of following security best practices each time you need a web server or reverse proxy. Bunkerized-nginx provides generic security configs, settings and tools so you don't need to do it yourself.
 
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
@@ -36,7 +40,6 @@ Non-exhaustive list of features :
   * [Misc](#misc)
 - [Include custom configurations](#include-custom-configurations)
 - [Create your own image](#create-your-own-image)
-- [TODO](#todo)
 
 # Live demo
 You can find a live demo at https://demo-nginx.bunkerity.com.
@@ -50,6 +53,16 @@ docker run -p 80:80 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
 ```
 
 Web files are stored in the /www directory, the container will serve files from there.
+
+## In combination with PHP
+
+```shell
+docker network create mynet
+docker run --network mynet -p 80:80 -v /path/to/web/files:/www -e REMOTE_PHP=myphp -e REMOTE_PHP_PATH=/app bunkerity/bunkerized-nginx
+docker run --network mynet --name=myphp -v /path/to/web/files:/app php:fpm
+```
+
+The `REMOTE_PHP` environment variable lets you define the address of a remote PHP-FPM instance that will execute the .php files. `REMOTE_PHP_PATH` must be set to the directory where the PHP container will find the files.
 
 ## Run HTTPS server with automated Let's Encrypt
 ```shell
@@ -94,15 +107,20 @@ You will find some tutorials about bunkerized-nginx in our [blog](https://www.bu
 # List of environment variables
 
 ## nginx
-`SERVER_TOKENS`  
-Values : *on* | *off*  
-Default value : *off*  
-If set to on, nginx will display server version in Server header and default error pages.
 
-`HEADER_SERVER`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to no, nginx will remove the Server header in HTTP responses.
+### Misc
+
+`SERVER_NAME`  
+Values : *&lt;first name&gt; &lt;second name&gt; ...*  
+Default value : *www.bunkerity.com*  
+Sets the host names of the webserver separated with spaces. This must match the Host header sent by clients.  
+Useful when used with `AUTO_LETSENCRYPT=yes` and/or `DISABLE_DEFAULT_SERVER=yes`.
+
+`MAX_CLIENT_SIZE`  
+Values : *0* | *Xm*  
+Default value : *10m*  
+Sets the maximum body size before nginx returns a 413 error code.  
+Setting to 0 means "infinite" body size.
 
 `ALLOWED_METHODS`  
 Values : *allowed HTTP methods separated with | char*  
@@ -121,28 +139,38 @@ Default value : *yes*
 If set to yes, nginx will serve files from /www directory within the container.  
 A use case to not serving files is when you setup bunkerized-nginx as a reverse proxy via a custom configuration.
 
-`ROOT_FOLDER`  
-Values : *\<any valid path to web files\>  
-Default value : */www*  
-The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
-
-`MAX_CLIENT_SIZE`  
-Values : *0* | *Xm*  
-Default value : *10m*  
-Sets the maximum body size before nginx returns a 413 error code.  
-Setting to 0 means "infinite" body size.
-
-`SERVER_NAME`  
-Values : *&lt;first name&gt; &lt;second name&gt; ...*  
-Default value : *www.bunkerity.com*  
-Sets the host names of the webserver separated with spaces. This must match the Host header sent by clients.  
-Useful when used with `AUTO_LETSENCRYPT=yes` and/or `DISABLE_DEFAULT_SERVER=yes`.
-
 `WRITE_ACCESS`  
 Values : *yes* | *no*  
 Default value : *no*  
 If set to yes, nginx will be granted write access to the /www directory.  
 Set it to yes if your website uses file upload or creates dynamic files for example.
+
+`ROOT_FOLDER`  
+Values : *\<any valid path to web files\>  
+Default value : */www*  
+The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
+
+### Information leak
+
+`SERVER_TOKENS`  
+Values : *on* | *off*  
+Default value : *off*  
+If set to on, nginx will display server version in Server header and default error pages.
+
+`HEADER_SERVER`  
+Values : *yes* | *no*  
+Default value : *no*  
+If set to no, nginx will remove the Server header in HTTP responses.
+
+### Custom error pages
+
+`ERROR_XXX`  
+Values : *\<relative path to the error page\>*  
+Default value :  
+Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace XXX with HTTP code.  
+For example : `ERROR_404=/404.html` means the /404.html page will be displayed when 404 code is generated. The path is relative to the root web folder.
+
+### HTTP basic authentication
 
 `USE_AUTH_BASIC`  
 Values : *yes* | *no*  
@@ -169,11 +197,7 @@ Values : *\<any valid text\>*
 Default value : *Restricted area*  
 The text displayed inside the login prompt when `USE_AUTH_BASIC` is set to yes.
 
-`ERROR_XXX`  
-Values : *\<relative path to the error page\>*  
-Default value :  
-Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace XXX with HTTP code.  
-For example : `ERROR_404=/404.html` means the /404.html page will be displayed when 404 code is generated. The path is relative to the root web folder.
+### Behind a reverse proxy
 
 `PROXY_REAL_IP`  
 Values : *yes* | *no*  
@@ -196,11 +220,16 @@ Default value : *on*
 When `PROXY_REAL_IP` is set to *yes*, setting this to *on* avoid spoofing attacks using the header defined in `PROXY_REAL_IP_HEADER`.
 
 ## HTTPS
+
+### Let's Encrypt
+
 `AUTO_LETS_ENCRYPT`  
 Values : *yes* | *no*  
 Default value : *no*  
 If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
 You will need to redirect both 80 and 443 port to your container and also set the `SERVER_NAME` environment variable.
+
+### HTTP
 
 `LISTEN_HTTP`  
 Values : *yes* | *no*  
@@ -213,10 +242,7 @@ Values : *yes* | *no*
 Default value : *no*  
 If set to yes, nginx will redirect all HTTP requests to HTTPS.  
 
-`HTTP2`  
-Values : *yes* | *no*  
-Default value : *yes*  
-If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.  
+### Custom certificate
 
 `USE_CUSTOM_HTTPS`  
 Values : *yes* | *no*  
@@ -232,6 +258,8 @@ Full path of the certificate file to use when `USE_CUSTOM_HTTPS` is set to yes.
 Values : *\<any valid path inside the container\>*  
 Default value :  
 Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
+
+## Self-signed certificate
 
 `GENERATE_SELF_SIGNED_SSL`  
 Values : *yes* | *no*  
@@ -280,7 +308,15 @@ Default value : *bunkerity-nginx*
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the CN server name for the self generated certificate.
 
+### Misc
+
+`HTTP2`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.  
+
 ## ModSecurity
+
 `USE_MODSECURITY`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -294,6 +330,7 @@ If set to yes, the [OWASP ModSecurity Core Rule Set](https://coreruleset.org/) w
 You can customize the CRS (i.e. : add WordPress exclusions) by adding custom .conf files into the /modsec-crs-confs/ directory inside the container (i.e : through a volume). Files inside this directory are included before the CRS rules. If you need to tweak (i.e. : SecRuleUpdateTargetById) put .conf files inside the /modsec-confs/ which is included after the CRS rules.
 
 ## Security headers
+
 `X_FRAME_OPTIONS`  
 Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net* | *ALLOWALL*  
 Default value : *DENY*  
@@ -343,10 +380,8 @@ Policy to be used when loading resources (scripts, forms, frames, ...).
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
 
 ## Blocking
-`BLOCK_COUNTRY`  
-Values : *\<country code 1\> \<country code 2\> ...*  
-Default value :  
-Block some countries from accessing your website. Use 2 letters country code separated with space.
+
+### External blacklist
 
 `BLOCK_USER_AGENT`  
 Values : *yes* | *no*  
@@ -372,25 +407,63 @@ Default value : *yes*
 Is set to yes, will block known abusers.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_abusers_30d).
 
+### DNSBL
+
 `USE_DNSBL`  
 Values : *yes* | *no*  
 Default value : *yes*  
-If set to yes, DNSBL checks will be performed to the servers specified in the `DNSBL_LIST` environment variable.  
+If set to *yes*, DNSBL checks will be performed to the servers specified in the `DNSBL_LIST` environment variable.  
 
 `DNSBL_LIST`  
 Values : *\<list of DNS zones separated with spaces\>*  
 Default value : *bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org*  
 The list of DNSBL zones to query when `USE_DNSBL` is set to *yes*.
 
-`DNSBL_RESOLVERS`  
-Values : *\<two IP addresses separated with a space\>*  
-Default value : *8.8.8.8 8.8.4.4*  
-The IP addresses of the DNS resolvers to use when `USE_DNSBL` is set to *yes*.
+### Custom whitelisting
 
-`DNSBL_CACHE`  
-Values : *\<size with units k or m\>*  
-Default value : *10m*  
-The size of the cache used to keep DNSBL responses.
+`USE_WHITELIST_IP`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to *yes*, lets you define custom IP addresses to be whitelisted through the `WHITELIST_IP_LIST` environment variable.
+
+`WHITELIST_IP_LIST`  
+Values : *\<list of IP addresses separated with spaces\>*  
+Default value : *23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8*  
+The list of IP addresses to whitelist when `USE_WHITELIST_IP` is set to *yes*. The default list contains IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/).
+
+`USE_WHITELIST_REVERSE`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to *yes*, lets you define custom reverse DNS suffixes to be whitelisted through the `WHITELIST_REVERSE_LIST` environment variable.
+
+`WHITELIST_REVERSE_LIST`  
+Values : *\<list of reverse DNS suffixes separated with spaces\>*  
+Default value : *.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net*  
+The list of reverse DNS suffixes to whitelist when `USE_WHITELIST_REVERSE` is set to *yes*. The default list contains suffixes of major search engines.
+
+### Custom blacklisting
+
+`USE_BLACKLIST_IP`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to *yes*, lets you define custom IP addresses to be blacklisted through the `BLACKLIST_IP_LIST` environment variable.
+
+`BLACKLIST_IP_LIST`  
+Values : *\<list of IP addresses separated with spaces\>*  
+Default value :  
+The list of IP addresses to blacklist when `USE_BLACKLIST_IP` is set to *yes*.
+
+`USE_BLACKLIST_REVERSE`  
+Values : *yes* | *no*  
+Default value : *yes*  
+If set to *yes*, lets you define custom reverse DNS suffixes to be blacklisted through the `BLACKLIST_REVERSE_LIST` environment variable.
+
+`BLACKLIST_REVERSE_LIST`  
+Values : *\<list of reverse DNS suffixes separated with spaces\>*  
+Default value : *.shodan.io*  
+The list of reverse DNS suffixes to blacklist when `USE_BLACKLIST_REVERSE` is set to *yes*.
+
+### Requests limiting
 
 `USE_REQ_LIMIT`  
 Values : *yes* | *no*  
@@ -413,7 +486,24 @@ Values : *Xm* | *Xk*
 Default value : *10m*  
 The size of the cache to store information about request limiting.
 
+### Countries
+
+`BLOCK_COUNTRY`  
+Values : *\<country code 1\> \<country code 2\> ...*  
+Default value :  
+Block some countries from accessing your website. Use 2 letters country code separated with space.
+
+### Misc
+
+`DNS_RESOLVERS`  
+Values : *\<two IP addresses separated with a space\>*  
+Default value : *8.8.8.8 8.8.4.4*  
+The IP addresses of the DNS resolvers to use when performing reverse DNS lookups.
+
 ## PHP
+
+
+### Remote PHP
 `REMOTE_PHP`  
 Values : *\<any valid IP/hostname\>*  
 Default value :  
@@ -424,9 +514,11 @@ Values : *\<any valid absolute path\>*
 Default value : */app*  
 The path where the PHP files are located inside the server specified in `REMOTE_PHP`.
 
+### Local PHP (will be removed)
+
 `USE_PHP`  
 Values : *yes* | *no*  
-Default value : *yes*  
+Default value : *no*  
 If set to yes, a local PHP-FPM instance will be run inside the container to execute PHP files.
 
 `PHP_DISPLAY_ERRORS`  
@@ -475,6 +567,7 @@ Default value : *system, exec, shell_exec, passthru, phpinfo, show_source, highl
 List of PHP functions blacklisted separated with commas. They can't be used anywhere in PHP code. Only meaningful if `USE_PHP` is set to *yes*.
 
 ## Fail2ban
+
 `USE_FAIL2BAN`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -499,10 +592,11 @@ The time interval, in seconds, to search for "strange" HTTP status codes.
 
 `FAIL2BAN_MAXRETRY`  
 Values : *\<any positive integer\>*  
-Default : value : *20*  
+Default : value : *15*  
 The number of "strange" HTTP status codes to find between the time interval.
 
 ## ClamAV
+
 `USE_CLAMAV_UPLOAD`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -519,11 +613,11 @@ Default value : *yes*
 If set to yes, ClamAV will automatically remove the detected files.  
 
 ## Misc
+
 `ADDITIONAL_MODULES`  
 Values : *\<list of packages separated with space\>*  
 Default value :  
 You can specify additional modules to install. All [alpine packages](https://pkgs.alpinelinux.org/packages) are valid.  
-A use case is to use this to install PHP extensions (e.g. : php7-json php7-xml php7-curl ...).
 
 `LOGROTATE_MINSIZE`  
 Values : *x* | *xk* | *xM* | *xG*  
@@ -560,7 +654,7 @@ ENV WRITE_ACCESS yes
 ENV ADDITIONAL_MODULES php7-mysqli php7-json php7-session
 ```
 
-You can have a look at (bunkerized-phpmyadmin)[https://github.com/bunkerity/bunkerized-phpmyadmin] which is a secure phpMyAdmin Docker image based on bunkerized-nginx.
+You can have a look at [bunkerized-phpmyadmin](https://github.com/bunkerity/bunkerized-phpmyadmin) which is a secure phpMyAdmin Docker image based on bunkerized-nginx.
 
 # Include custom configurations
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
