@@ -25,21 +25,41 @@ Non-exhaustive list of features :
 - [Live demo](#live-demo)
 - [Quickstart guide](#quickstart-guide)
   * [Run HTTP server with default settings](#run-http-server-with-default-settings)
+  * [In combination with PHP](#in-combination-with-php)
   * [Run HTTPS server with automated Let's Encrypt](#run-https-server-with-automated-let-s-encrypt)
   * [Reverse proxy](#reverse-proxy)
 - [Tutorials](#tutorials)
 - [List of environment variables](#list-of-environment-variables)
   * [nginx](#nginx)
+    + [Misc](#misc)
+    + [Information leak](#information-leak)
+    + [Custom error pages](#custom-error-pages)
+    + [HTTP basic authentication](#http-basic-authentication)
+    + [Behind a reverse proxy](#behind-a-reverse-proxy)
   * [HTTPS](#https)
+    + [Let's Encrypt](#let-s-encrypt)
+    + [HTTP](#http)
+    + [Custom certificate](#custom-certificate)
+    + [Self-signed certificate](#self-signed-certificate)
+    + [Misc](#misc-1)
   * [ModSecurity](#modsecurity)
   * [Security headers](#security-headers)
   * [Blocking](#blocking)
+    + [External blacklist](#external-blacklist)
+    + [DNSBL](#dnsbl)
+    + [Custom whitelisting](#custom-whitelisting)
+    + [Custom blacklisting](#custom-blacklisting)
+    + [Requests limiting](#requests-limiting)
+    + [Countries](#countries)
+    + [Misc](#misc-2)
   * [PHP](#php)
+    + [Remote PHP](#remote-php)
+    + [Local PHP (will be removed)](#local-php--will-be-removed-)
   * [Fail2ban](#fail2ban)
   * [ClamAV](#clamav)
-  * [Misc](#misc)
-- [Include custom configurations](#include-custom-configurations)
+  * [Misc](#misc-3)
 - [Create your own image](#create-your-own-image)
+- [Include custom configurations](#include-custom-configurations)
 
 # Live demo
 You can find a live demo at https://demo-nginx.bunkerity.com.
@@ -259,7 +279,7 @@ Values : *\<any valid path inside the container\>*
 Default value :  
 Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
-## Self-signed certificate
+### Self-signed certificate
 
 `GENERATE_SELF_SIGNED_SSL`  
 Values : *yes* | *no*  
