@@ -1,4 +1,4 @@
-image: bunkerity/bunkerized-nginx:master
+image: bunkerity/bunkerized-nginx:latest
 manifests:
   - image: bunkerity/bunkerized-nginx:amd64
     platform:
