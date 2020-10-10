@@ -1,8 +1,9 @@
+local M		= {}
 local resolver	= require "resty.dns.resolver"
 local resolvers	= {%DNS_RESOLVERS%}
 local ip	= ngx.var.remote_addr
 
-function get_reverse()
+function M.get_reverse()
 	local r, err = resolver:new{nameservers=resolvers, retrans=2, timeout=2000}
 	if not r then
 		return ""
@@ -20,7 +21,7 @@ function get_reverse()
 	return rdns
 end
 
-function get_ips(fqdn)
+function M.get_ips(fqdn)
 	local r, err = resolver:new{nameservers=resolvers, retrans=2, timeout=2000}
 	if not r then
 		return ""
@@ -35,6 +36,8 @@ function get_ips(fqdn)
 	return ips
 end
 
-function ip_to_arpa()
+function M.ip_to_arpa()
 	return resolver.arpa_str(ip):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "")
 end
+
+return M

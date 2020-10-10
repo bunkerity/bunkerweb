@@ -22,6 +22,8 @@ function trap_exit() {
 	fi
 	echo "[*] Stopping nginx ..."
 	/usr/sbin/nginx -s stop
+	echo "[*] Stopping rsyslogd ..."
+	pkill -TERM rsyslogd
 	pkill -TERM tail
 }
 trap "trap_exit" TERM INT
@@ -111,7 +113,7 @@ USE_FAIL2BAN="${USE_FAIL2BAN-yes}"
 FAIL2BAN_STATUS_CODES="${FAIL2BAN_STATUS_CODES-400|401|403|404|405|444}"
 FAIL2BAN_BANTIME="${FAIL2BAN_BANTIME-3600}"
 FAIL2BAN_FINDTIME="${FAIL2BAN_FINDTIME-60}"
-FAIL2BAN_MAXRETRY="${FAIL2BAN_MAXRETRY-20}"
+FAIL2BAN_MAXRETRY="${FAIL2BAN_MAXRETRY-15}"
 USE_CLAMAV_UPLOAD="${USE_CLAMAV_UPLOAD-yes}"
 USE_CLAMAV_SCAN="${USE_CLAMAV_SCAN-yes}"
 CLAMAV_SCAN_REMOVE="${CLAMAV_SCAN_REMOVE-yes}"
@@ -143,9 +145,9 @@ PROXY_REAL_IP="${PROXY_REAL_IP-no}"
 PROXY_REAL_IP_FROM="${PROXY_REAL_IP_FROM-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}"
 PROXY_REAL_IP_HEADER="${PROXY_REAL_IP_HEADER-X-Forwarded-For}"
 PROXY_REAL_IP_RECURSIVE="${PROXY_REAL_IP_RECURSIVE-on}"
-GENERATE_SELF_SIGNED_SSL="${GENERATE_SELF_SIGNED_SSL-no"}"
+GENERATE_SELF_SIGNED_SSL="${GENERATE_SELF_SIGNED_SSL-no}"
 SELF_SIGNED_SSL_EXPIRY="${SELF_SIGNED_SSL_EXPIRY-365}"
-SELF_SIGNED_SSL_COUNTRY="${SELF_SIGNED_SSL_COUNTRY-Switzerland}"
+SELF_SIGNED_SSL_COUNTRY="${SELF_SIGNED_SSL_COUNTRY-CH}"
 SELF_SIGNED_SSL_STATE="${SELF_SIGNED_SSL_STATE-Switzerland}"
 SELF_SIGNED_SSL_CITY="${SELF_SIGNED_SSL_CITY-Bern}"
 SELF_SIGNED_SSL_ORG="${SELF_SIGNED_SSL_ORG-AcmeInc}"
@@ -369,7 +371,7 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_MODSECURITY%" ""
 fi
 if [ "$PROXY_REAL_IP" = "yes" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" "include /etc/nginx/proxy-real-ip.conf;"
+	replace_in_file "/etc/nginx/nginx.conf" "%PROXY_REAL_IP%" "include /etc/nginx/proxy-real-ip.conf;"
 	froms=""
 	for from in $PROXY_REAL_IP_FROM ; do
 		froms="${froms}set_real_ip_from ${from};\n"
@@ -378,7 +380,7 @@ if [ "$PROXY_REAL_IP" = "yes" ] ; then
 	replace_in_file "/etc/nginx/proxy-real-ip.conf" "%PROXY_REAL_IP_HEADER%" "$PROXY_REAL_IP_HEADER"
 	replace_in_file "/etc/nginx/proxy-real-ip.conf" "%PROXY_REAL_IP_RECURSIVE%" "$PROXY_REAL_IP_RECURSIVE"
 else
-	replace_in_file "/etc/nginx/server.conf" "%PROXY_REAL_IP%" ""
+	replace_in_file "/etc/nginx/nginx.conf" "%PROXY_REAL_IP%" ""
 fi
 
 
