@@ -153,6 +153,8 @@ SELF_SIGNED_SSL_CITY="${SELF_SIGNED_SSL_CITY-Bern}"
 SELF_SIGNED_SSL_ORG="${SELF_SIGNED_SSL_ORG-AcmeInc}"
 SELF_SIGNED_SSL_OU="${SELF_SIGNED_SSL_OU-IT}"
 SELF_SIGNED_SSL_CN="${SELF_SIGNED_SSL_CN-bunkerity-nginx}"
+ANTIBOT_URI="${ANTIBOT_URI-/challenge}"
+USE_ANTIBOT_COOKIE="${USE_ANTIBOT_COOKIE-yes}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -492,6 +494,16 @@ else
 fi
 list=$(spaces_to_lua "$DNSBL_LIST")
 replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
+
+# antibot uri
+replace_in_file "/etc/nginx/main-lua.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
+
+# antibot via cookie
+if [ "$USE_ANTIBOT_COOKIE" = "yes" ] ; then
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "true"
+else
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "false"
+fi
 
 if [ "$USE_LIMIT_REQ" = "yes" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" "limit_req_zone \$binary_remote_addr zone=limit:${LIMIT_REQ_CACHE} rate=${LIMIT_REQ_RATE};"

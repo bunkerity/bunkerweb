@@ -3,7 +3,7 @@
 NTASK=$(nproc)
 
 # install build dependencies
-apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev
+apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev
 
 # compile and install ModSecurity library
 cd /tmp
@@ -44,6 +44,24 @@ cd /tmp
 git clone https://github.com/openresty/lua-resty-dns.git
 cd lua-resty-dns
 make install
+cd /tmp
+git clone https://github.com/bungle/lua-resty-session.git
+cd lua-resty-session
+cp -r lib/resty/* /usr/local/lib/lua/resty
+cd /tmp
+git clone https://github.com/bungle/lua-resty-random.git
+cd lua-resty-random
+make install
+cd /tmp
+git clone https://github.com/openresty/lua-resty-string.git
+cd lua-resty-string
+make install
+cd /tmp
+git clone https://github.com/openresty/lua-cjson.git
+cd lua-cjson
+make -j $NTASK
+make install
+make install-extra
 cd /tmp
 git clone https://github.com/openresty/lua-nginx-module.git
 export LUAJIT_LIB=/usr/local/lib
