@@ -154,7 +154,7 @@ SELF_SIGNED_SSL_ORG="${SELF_SIGNED_SSL_ORG-AcmeInc}"
 SELF_SIGNED_SSL_OU="${SELF_SIGNED_SSL_OU-IT}"
 SELF_SIGNED_SSL_CN="${SELF_SIGNED_SSL_CN-bunkerity-nginx}"
 ANTIBOT_URI="${ANTIBOT_URI-/challenge}"
-USE_ANTIBOT_COOKIE="${USE_ANTIBOT_COOKIE-yes}"
+USE_ANTIBOT="${USE_ANTIBOT-cookie}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -499,10 +499,20 @@ replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 replace_in_file "/etc/nginx/main-lua.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
 
 # antibot via cookie
-if [ "$USE_ANTIBOT_COOKIE" = "yes" ] ; then
+if [ "$USE_ANTIBOT" = "cookie" ] ; then
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "true"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" ""
+# antibot via javascript
+elif [ "$USE_ANTIBOT" = "javascript" ] ; then
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "true"
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" "include /etc/nginx/antibot-javascript.conf;"
+	replace_in_file "/etc/nginx/antibot-javascript.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
 else
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" ""
 fi
 
 if [ "$USE_LIMIT_REQ" = "yes" ] ; then
