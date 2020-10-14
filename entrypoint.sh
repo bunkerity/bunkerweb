@@ -54,7 +54,7 @@ cp -r /opt/confs/owasp-crs /etc/nginx
 cp /opt/confs/php.ini /etc/php7/php.ini
 cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
-cp /opt/lua/*.lua /usr/local/lib/lua
+cp -r /opt/lua/* /usr/local/lib/lua
 
 # remove cron jobs
 echo "" > /etc/crontabs/root
@@ -502,17 +502,31 @@ replace_in_file "/etc/nginx/main-lua.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
 if [ "$USE_ANTIBOT" = "cookie" ] ; then
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "true"
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_CAPTCHA%" "false"
 	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_CAPTCHA%" ""
 # antibot via javascript
 elif [ "$USE_ANTIBOT" = "javascript" ] ; then
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "false"
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "true"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_CAPTCHA%" "false"
 	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" "include /etc/nginx/antibot-javascript.conf;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_CAPTCHA%" ""
 	replace_in_file "/etc/nginx/antibot-javascript.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
+# antibot via captcha
+elif [ "$USE_ANTIBOT" = "captcha" ] ; then
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_CAPTCHA%" "true"
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_CAPTCHA%" "include /etc/nginx/antibot-captcha.conf;"
+	replace_in_file "/etc/nginx/antibot-captcha.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
 else
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_COOKIE%" "false"
 	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_JAVASCRIPT%" "false"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_ANTIBOT_CAPTCHA%" "false"
 	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_JAVASCRIPT%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%INCLUDE_ANTIBOT_CAPTCHA%" ""
 fi
 
 if [ "$USE_LIMIT_REQ" = "yes" ] ; then

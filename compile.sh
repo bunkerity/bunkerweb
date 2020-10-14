@@ -3,7 +3,7 @@
 NTASK=$(nproc)
 
 # install build dependencies
-apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev
+apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev
 
 # compile and install ModSecurity library
 cd /tmp
@@ -62,6 +62,11 @@ cd lua-cjson
 make -j $NTASK
 make install
 make install-extra
+cd /tmp
+git clone https://github.com/ittner/lua-gd.git
+cd lua-gd
+make -j $NTASK
+make INSTALL_PATH=/usr/local/lib/lua/5.1 install
 cd /tmp
 git clone https://github.com/openresty/lua-nginx-module.git
 export LUAJIT_LIB=/usr/local/lib
