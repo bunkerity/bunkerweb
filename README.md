@@ -19,6 +19,10 @@ Non-exhaustive list of features :
 - Detect bad files with ClamAV
 - Easy to configure with environment variables
 
+Fooling automated tools/scanners :
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/demo.gif?raw=true" />
+
 # Table of contents
 - [bunkerized-nginx](#bunkerized-nginx)
 - [Table of contents](#table-of-contents)
