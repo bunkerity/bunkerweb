@@ -491,17 +491,17 @@ Default value : *yes*
 If set to yes, the amount of HTTP requests made by a user will be limited during a period of time.  
 More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/).
 
-`REQ_LIMIT_RATE`  
+`LIMIT_REQ_RATE`  
 Values : *Xr/s* | *Xr/m*  
 Default value : *20r/s*  
 The rate limit to apply when `USE_REQ_LIMIT` is set to *yes*. Default is 10 requests per second.
 
-`REQ_LIMIT_BURST`  
+`LIMIT_REQ_BURST`  
 Values : *<any valid integer\>*  
 Default value : *40*  
 The number of of requests to put in queue before rejecting requests.
 
-`REQ_LIMIT_CACHE`  
+`LIMIT_REQ_CACHE`  
 Values : *Xm* | *Xk*    
 Default value : *10m*  
 The size of the cache to store information about request limiting.
