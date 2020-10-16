@@ -485,7 +485,7 @@ The list of reverse DNS suffixes to blacklist when `USE_BLACKLIST_REVERSE` is se
 
 ### Requests limiting
 
-`USE_REQ_LIMIT`  
+`USE_LIMIT_REQ`  
 Values : *yes* | *no*  
 Default value : *yes*  
 If set to yes, the amount of HTTP requests made by a user will be limited during a period of time.  
@@ -494,7 +494,7 @@ More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/).
 `LIMIT_REQ_RATE`  
 Values : *Xr/s* | *Xr/m*  
 Default value : *20r/s*  
-The rate limit to apply when `USE_REQ_LIMIT` is set to *yes*. Default is 10 requests per second.
+The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 10 requests per second.
 
 `LIMIT_REQ_BURST`  
 Values : *<any valid integer\>*  
