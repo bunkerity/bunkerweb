@@ -68,6 +68,10 @@ cd lua-gd
 make -j $NTASK
 make INSTALL_PATH=/usr/local/lib/lua/5.1 install
 cd /tmp
+git clone https://github.com/ledgetech/lua-resty-http.git
+cd lua-resty-http
+make install
+cd /tmp
 git clone https://github.com/openresty/lua-nginx-module.git
 export LUAJIT_LIB=/usr/local/lib
 export LUAJIT_INC=/usr/local/include/luajit-2.1
