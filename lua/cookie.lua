@@ -3,11 +3,10 @@ local M         = {}
 local session   = require "resty.session"
 
 function M.session ()
-	local s = session:open()
-	if not s.started then
-		s:start()
+	if not ngx.ctx.session then
+		ngx.ctx.session = session:start()
 	end
-	return s
+	return ngx.ctx.session
 end
 
 function M.is_set (key)

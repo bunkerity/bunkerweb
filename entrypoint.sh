@@ -156,6 +156,7 @@ SELF_SIGNED_SSL_CN="${SELF_SIGNED_SSL_CN-bunkerity-nginx}"
 ANTIBOT_URI="${ANTIBOT_URI-/challenge}"
 USE_ANTIBOT="${USE_ANTIBOT-cookie}"
 ANTIBOT_RECAPTCHA_SCORE="${ANTIBOT_RECAPTCHA_SCORE-0.7}"
+ANTIBOT_SESSION_SECRET="${ANTIBOT_SESSION_SECRET-random}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -497,8 +498,12 @@ fi
 list=$(spaces_to_lua "$DNSBL_LIST")
 replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 
-# antibot uri
+# antibot uri and session secret
 replace_in_file "/etc/nginx/main-lua.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
+if [ "$ANTIBOT_SESSION_SECRET" = "random" ] ; then
+	ANTIBOT_SESSION_SECRET=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
+fi
+replace_in_file "/etc/nginx/main-lua.conf" "%ANTIBOT_SESSION_SECRET%" "$ANTIBOT_SESSION_SECRET"
 
 # antibot via cookie
 if [ "$USE_ANTIBOT" = "cookie" ] ; then
