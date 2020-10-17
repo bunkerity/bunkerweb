@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+
+  mytraefik:
+    image: traefik
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik:/etc/traefik
+
+  mywww1:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    volumes:
+      - ./web1:/www
+    environment:
+      - PROXY_REAL_IP=yes
+      - REMOTE_PHP=myphp1
+      - REMOTE_PHP_PATH=/app
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.port=80'
+      - 'traefik.frontend.rule=Host:web1.domain.com	# replace with your domain
+
+  mywww2:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    volumes:
+      - ./web2:/www
+    environment:
+      - PROXY_REAL_IP=yes
+      - REMOTE_PHP=myphp2
+      - REMOTE_PHP_PATH=/app
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.port=80'
+      - 'traefik.frontend.rule=Host:web2.domain.com	# replace with your domain
+
+  myphp1:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web1:/app
+
+  myphp2:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web2:/app

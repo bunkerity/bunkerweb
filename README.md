@@ -13,6 +13,7 @@ Non-exhaustive list of features :
 - State-of-the-art web security : HTTP security headers, php.ini hardening, prevent leaks, ...
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
 - Automatic ban of strange behaviors with fail2ban
+- Antibot challenge through cookie, javascript, captcha or recaptcha v3
 - Block TOR, proxies, bad user-agents, countries, ...
 - Perform automatic DNSBL checks to block known bad IP
 - Prevent bruteforce attacks with rate limiting
@@ -21,7 +22,7 @@ Non-exhaustive list of features :
 
 Fooling automated tools/scanners :
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/demo.gif?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/demo.gif?raw=true" />
 
 # Table of contents
 - [bunkerized-nginx](#bunkerized-nginx)
@@ -31,15 +32,17 @@ Fooling automated tools/scanners :
   * [Run HTTP server with default settings](#run-http-server-with-default-settings)
   * [In combination with PHP](#in-combination-with-php)
   * [Run HTTPS server with automated Let's Encrypt](#run-https-server-with-automated-let-s-encrypt)
-  * [Reverse proxy](#reverse-proxy)
-- [Tutorials](#tutorials)
+  * [Behind a reverse proxy](#behind-a-reverse-proxy)
+  * [As a reverse proxy](#as-a-reverse-proxy)
+  * [Antibot challenge](#antibot-challenge)
+- [Tutorials and examples](#tutorials-and-examples)
 - [List of environment variables](#list-of-environment-variables)
   * [nginx](#nginx)
     + [Misc](#misc)
     + [Information leak](#information-leak)
     + [Custom error pages](#custom-error-pages)
     + [HTTP basic authentication](#http-basic-authentication)
-    + [Behind a reverse proxy](#behind-a-reverse-proxy)
+    + [Reverse proxy](#reverse-proxy)
   * [HTTPS](#https)
     + [Let's Encrypt](#let-s-encrypt)
     + [HTTP](#http)
@@ -49,6 +52,7 @@ Fooling automated tools/scanners :
   * [ModSecurity](#modsecurity)
   * [Security headers](#security-headers)
   * [Blocking](#blocking)
+    + [Antibot](#antibot)
     + [External blacklist](#external-blacklist)
     + [DNSBL](#dnsbl)
     + [Custom whitelisting](#custom-whitelisting)
@@ -94,14 +98,23 @@ docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -v /where/to/save/cert
 ```
 
 Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive.  
-If you don't want your webserver to listen on HTTP add the environment variable `LISTEN_HTTP` with a "no" value. But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
+If you don't want your webserver to listen on HTTP add the environment variable `LISTEN_HTTP` with a *no* value. But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
 
 Here you have three environment variables :
 - `SERVER_NAME` : define the FQDN of your webserver, this is mandatory for Let's Encrypt (www.yourdomain.com should point to your IP address)
 - `AUTO_LETS_ENCRYPT` : enable automatic Let's Encrypt creation and renewal of certificates
 - `REDIRECT_HTTP_TO_HTTPS` : enable HTTP to HTTPS redirection
 
-## Reverse proxy
+## Behind a reverse proxy
+```shell
+docker run -p 80:80 -v /path/to/web/files:/www -e PROXY_REAL_IP=yes bunkerity/bunkerized-nginx
+```
+
+The `PROXY_REAL_IP` environment variable, when set to *yes*, activates the [ngx_http_realip_module](https://nginx.org/en/docs/http/ngx_http_realip_module.html) to get the real client IP from the reverse proxy.
+
+See [this section](#reverse-proxy) if you need to tweak some values (trusted ip/network, header, ...).
+
+## As a reverse proxy
 You can setup a reverse proxy by adding your own custom configurations at server context.  
 For example, this is a dummy reverse proxy configuration :  
 ```shell
@@ -125,8 +138,16 @@ Here you have three environment variables :
 - `SERVE_FILES` : nginx will not serve files from the /www directory
 - `DISABLE_DEFAULT_SERVER` : nginx will not respond to requests if Host header is not in the SERVER_NAME list
 
-# Tutorials
-You will find some tutorials about bunkerized-nginx in our [blog](https://www.bunkerity.com/category/bunkerized-nginx/).  
+## Antibot challenge
+```shell
+docker run -p 80:80 -v /path/to/web/files:/www -e USE_ANTIBOT=captcha bunkerity/bunkerized-nginx
+```
+
+When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must complete a captcha before accessing the pages. Others challenges are also available : *cookie*, *javascript* or *recaptcha* (more info [here](#antibot)).
+
+# Tutorials and examples
+
+You will some docker-compose.yml examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples) and tutorials about bunkerized-nginx in our [blog](https://www.bunkerity.com/category/bunkerized-nginx/).  
 
 # List of environment variables
 
@@ -221,7 +242,7 @@ Values : *\<any valid text\>*
 Default value : *Restricted area*  
 The text displayed inside the login prompt when `USE_AUTH_BASIC` is set to yes.
 
-### Behind a reverse proxy
+### Reverse proxy
 
 `PROXY_REAL_IP`  
 Values : *yes* | *no*  
@@ -405,6 +426,42 @@ More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Conte
 
 ## Blocking
 
+### Antibot
+
+`USE_ANTIBOT`  
+Values : *no* | *cookie* | *javascript* | *captcha* | *recaptcha*  
+Default value : *no*  
+If set to another allowed value than *no*, users must complete a "challenge" before accessing the pages on your website :
+- *cookie* : asks the users to set a cookie
+- *javascript* : users must execute a javascript code
+- *captcha* : a text captcha must be resolved by the users
+- *recaptcha* : use [Google reCAPTCHA v3](https://developers.google.com/recaptcha/intro) score to allow/deny users 
+
+`ANTIBOT_URI`  
+Values : *\<any valid uri\>*  
+Default value : */challenge*  
+A valid and unused URI to redirect users when `USE_ANTIBOT` is used. Be sure that it doesn't exist on your website.
+
+`ANTIBOT_SESSION_SECRET`  
+Values : *random* | *\<32 chars of your choice\>*  
+Default value : *random*  
+A secret used to generate sessions when `USE_ANTIBOT is set. Using the special *random* value will generate a random one. Be sure to use the same value when you are in a multi-server environment (so sessions are valid in all the servers).
+
+`ANTIBOT_RECAPTCHA_SCORE`  
+Values : *\<0.0 to 1.0\>*  
+Default value : *0.7*  
+The minimum score required when `USE_ANTIBOT` is set to *recaptcha*.
+
+`ANTIBOT_RECAPTCHA_SITEKEY`  
+Values : *\<public key given by Google\>*  
+Default value :  
+The sitekey given by Google when `USE_ANTIBOT` is set to *recaptcha*.
+
+`ANTIBOT_RECAPTCHA_SECRET`  
+Values : *\<private key given by Google\>*  
+Default value :  
+The secret given by Google when `USE_ANTIBOT` is set to *recaptcha*.
+
 ### External blacklist
 
 `BLOCK_USER_AGENT`  
@@ -525,7 +582,6 @@ Default value : *8.8.8.8 8.8.4.4*
 The IP addresses of the DNS resolvers to use when performing reverse DNS lookups.
 
 ## PHP
-
 
 ### Remote PHP
 `REMOTE_PHP`  

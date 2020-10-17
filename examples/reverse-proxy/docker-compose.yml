@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+
+  myreverse:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./http-confs:/www
+    environment:
+      - SERVER_NAME=pma.domain.com app.domain.com	# replace with your domains
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - AUTO_LETS_ENCRYPT=yes
+
+# TODO : pma + nodeJS ?
