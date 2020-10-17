@@ -3,14 +3,15 @@ version: '3'
 services:
 
   mytraefik:
-    image: traefik
+    image: traefik:v1.7.26
     restart: always
     ports:
       - 80:80
       - 443:443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik:/etc/traefik
+      - ./traefik/traefik.toml:/traefik.toml
+      - ./traefik/acme.json:/acme.json
 
   mywww1:
     image: bunkerity/bunkerized-nginx
@@ -24,7 +25,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.port=80'
-      - 'traefik.frontend.rule=Host:web1.domain.com	# replace with your domain
+      - 'traefik.frontend.rule=Host:app1.website.com' # replace with your domain
 
   mywww2:
     image: bunkerity/bunkerized-nginx
@@ -38,7 +39,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.port=80'
-      - 'traefik.frontend.rule=Host:web2.domain.com	# replace with your domain
+      - 'traefik.frontend.rule=Host:app2.website.com' # replace with your domain
 
   myphp1:
     image: php:fpm

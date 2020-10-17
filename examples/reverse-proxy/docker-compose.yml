@@ -9,12 +9,28 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./http-confs:/www
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs
     environment:
-      - SERVER_NAME=pma.domain.com app.domain.com	# replace with your domains
+      - SERVER_NAME=app1.website.com app2.website.com # replace with your domains
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - AUTO_LETS_ENCRYPT=yes
 
-# TODO : pma + nodeJS ?
+  app1:
+    image: node
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./js-app:/home/node/app
+    environment:
+      - NODE_ENV=production
+    command: bash -c "npm install express && node index.js"
+
+  app2:
+    image: phpmyadmin:apache
+    restart: always
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_ABSOLUTE_URI=https://app2.website.com

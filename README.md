@@ -48,7 +48,7 @@ Fooling automated tools/scanners :
     + [HTTP](#http)
     + [Custom certificate](#custom-certificate)
     + [Self-signed certificate](#self-signed-certificate)
-    + [Misc](#misc-1)
+    + [Misc](#misc)
   * [ModSecurity](#modsecurity)
   * [Security headers](#security-headers)
   * [Blocking](#blocking)
@@ -59,13 +59,12 @@ Fooling automated tools/scanners :
     + [Custom blacklisting](#custom-blacklisting)
     + [Requests limiting](#requests-limiting)
     + [Countries](#countries)
-    + [Misc](#misc-2)
   * [PHP](#php)
     + [Remote PHP](#remote-php)
     + [Local PHP (will be removed)](#local-php--will-be-removed-)
   * [Fail2ban](#fail2ban)
   * [ClamAV](#clamav)
-  * [Misc](#misc-3)
+  * [Misc](#misc-2)
 - [Create your own image](#create-your-own-image)
 - [Include custom configurations](#include-custom-configurations)
 
@@ -183,6 +182,11 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, nginx will serve files from /www directory within the container.  
 A use case to not serving files is when you setup bunkerized-nginx as a reverse proxy via a custom configuration.
+
+`DNS_RESOLVERS`  
+Values : *\<two IP addresses separated with a space\>*  
+Default value : *127.0.0.11 8.8.8.8*  
+The IP addresses of the DNS resolvers to use when performing DNS lookups.
 
 `WRITE_ACCESS`  
 Values : *yes* | *no*  
@@ -573,13 +577,6 @@ The size of the cache to store information about request limiting.
 Values : *\<country code 1\> \<country code 2\> ...*  
 Default value :  
 Block some countries from accessing your website. Use 2 letters country code separated with space.
-
-### Misc
-
-`DNS_RESOLVERS`  
-Values : *\<two IP addresses separated with a space\>*  
-Default value : *8.8.8.8 8.8.4.4*  
-The IP addresses of the DNS resolvers to use when performing reverse DNS lookups.
 
 ## PHP
 
