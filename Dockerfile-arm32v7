@@ -1,17 +1,17 @@
-FROM alpine AS builder
+FROM arm32v7/nginx:stable-alpine AS builder
 
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v4.0.0%2Bbalena2/qemu-4.0.0.balena2-arm.tar.gz
 RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
-
-FROM arm32v7/alpine
-
-COPY --from=builder qemu-arm-static /usr/bin
 
 COPY compile.sh /tmp/compile.sh
 RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \
     rm -rf /tmp/*
 
+FROM arm32v7/nginx:stable-alpine
+
+COPY --from=builder qemu-arm-static /usr/bin
+COPY --from=builder /*.so /usr/local/nginx/modules/
 COPY entrypoint.sh /opt/entrypoint.sh
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
@@ -21,8 +21,7 @@ COPY lua/ /opt/lua
 
 RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd && \
     chmod +x /opt/entrypoint.sh /opt/scripts/* && \
-    mkdir /opt/entrypoint.d && \
-    adduser -h /dev/null -g '' -s /sbin/nologin -D -H nginx
+    mkdir /opt/entrypoint.d
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs
 

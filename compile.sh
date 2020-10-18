@@ -76,16 +76,16 @@ git clone https://github.com/openresty/lua-nginx-module.git
 export LUAJIT_LIB=/usr/local/lib
 export LUAJIT_INC=/usr/local/include/luajit-2.1
 
-# compile and install nginx
+# compile and install dynamic modules
 cd /tmp
-VERSION="1.18.0"
-wget https://nginx.org/download/nginx-${VERSION}.tar.gz
-tar -xvzf nginx-${VERSION}.tar.gz
-cd nginx-${VERSION}
-./configure --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx/nginx.pid --modules-path=/usr/lib/nginx/modules --with-file-aio --with-http_ssl_module --with-http_v2_module --with-http_realip_module --add-module=/tmp/ModSecurity-nginx --add-module=/tmp/headers-more-nginx-module --add-module=/tmp/ngx_http_geoip2_module --add-module=/tmp/nginx_cookie_flag_module --add-module=/tmp/lua-nginx-module
-make -j $NTASK
-make install
-strip /usr/sbin/nginx
+wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+tar -xvzf nginx-${NGINX_VERSION}.tar.gz
+cd nginx-$NGINX_VERSION
+CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')
+CONFARGS=${CONFARGS/-Os -fomit-frame-pointer/-Os}
+./configure $CONFARGS --add-dynamic-module=/tmp/ModSecurity-nginx --add-dynamic-module=/tmp/headers-more-nginx-module --add-dynamic-module=/tmp/ngx_http_geoip2_module --add-dynamic-module=/tmp/nginx_cookie_flag_module --add-dynamic-module=/tmp/lua-nginx-module
+make -j $NTASK modules
+cp ./objs/*.so /
 
 # remove build dependencies
 apk del build
