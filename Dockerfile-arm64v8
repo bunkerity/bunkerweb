@@ -1,11 +1,11 @@
-FROM alpine AS builder1
+FROM alpine AS builder
 
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v4.0.0%2Bbalena2/qemu-4.0.0.balena2-aarch64.tar.gz
 RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
 
-FROM arm64v8/nginx:stable-alpine AS builder2
+FROM arm64v8/nginx:stable-alpine
 
-COPY --from=builder1 qemu-aarch64-static /usr/bin
+COPY --from=builder qemu-aarch64-static /usr/bin
 
 COPY nginx-keys/ /tmp/nginx-keys
 COPY compile.sh /tmp/compile.sh
@@ -13,10 +13,6 @@ RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \
     rm -rf /tmp/*
 
-FROM arm64v8/nginx:stable-alpine
-
-COPY --from=builder1 qemu-aarch64-static /usr/bin
-COPY --from=builder2 /*.so /usr/local/nginx/modules/
 COPY entrypoint.sh /opt/entrypoint.sh
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts

@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine AS builder
+FROM nginx:stable-alpine
 
 COPY nginx-keys/ /tmp/nginx-keys
 COPY compile.sh /tmp/compile.sh
@@ -6,9 +6,6 @@ RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \
     rm -rf /tmp/*
 
-FROM nginx:stable-alpine
-
-COPY --from=builder /*.so /usr/local/nginx/modules/
 COPY entrypoint.sh /opt/entrypoint.sh
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts

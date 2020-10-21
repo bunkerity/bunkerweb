@@ -122,7 +122,7 @@ CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')
 CONFARGS=${CONFARGS/-Os -fomit-frame-pointer/-Os}
 ./configure $CONFARGS --add-dynamic-module=/tmp/ModSecurity-nginx --add-dynamic-module=/tmp/headers-more-nginx-module --add-dynamic-module=/tmp/ngx_http_geoip2_module --add-dynamic-module=/tmp/nginx_cookie_flag_module --add-dynamic-module=/tmp/lua-nginx-module
 make -j $NTASK modules
-cp ./objs/*.so /
+cp ./objs/*.so /usr/local/nginx/modules/
 
 # remove build dependencies
 apk del build
