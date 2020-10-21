@@ -7,6 +7,7 @@ FROM arm64v8/nginx:stable-alpine AS builder2
 
 COPY --from=builder1 qemu-aarch64-static /usr/bin
 
+COPY nginx-keys/ /tmp/nginx-keys
 COPY compile.sh /tmp/compile.sh
 RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \

@@ -1,5 +1,6 @@
 FROM nginx:stable-alpine AS builder
 
+COPY nginx-keys/ /tmp/nginx-keys
 COPY compile.sh /tmp/compile.sh
 RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \

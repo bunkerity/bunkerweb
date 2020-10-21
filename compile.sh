@@ -3,7 +3,7 @@
 NTASK=$(nproc)
 
 # install build dependencies
-apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev
+apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg
 
 # compile and install ModSecurity library
 cd /tmp
@@ -79,6 +79,13 @@ export LUAJIT_INC=/usr/local/include/luajit-2.1
 # compile and install dynamic modules
 cd /tmp
 wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz.asc
+gpg --import /tmp/nginx-keys/*.key
+check=$(gpg --verify https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz.asc https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz 2>&1 | grep "^gpg: Good signature from ")
+if [ "$check" = "" ] ; then
+	echo "[!] Wrong signature from nginx source !"
+	exit 1
+fi
 tar -xvzf nginx-${NGINX_VERSION}.tar.gz
 cd nginx-$NGINX_VERSION
 CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')
