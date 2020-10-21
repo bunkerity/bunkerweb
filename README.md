@@ -146,7 +146,7 @@ When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must c
 
 # Tutorials and examples
 
-You will some docker-compose.yml examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples) and tutorials about bunkerized-nginx in our [blog](https://www.bunkerity.com/category/bunkerized-nginx/).  
+You will find some docker-compose.yml examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples) and tutorials about bunkerized-nginx in our [blog](https://www.bunkerity.com/category/bunkerized-nginx/).  
 
 # List of environment variables
 
