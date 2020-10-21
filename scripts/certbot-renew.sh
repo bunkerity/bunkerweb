@@ -9,9 +9,9 @@ function replace_in_file() {
 
 # check if HTTP enabled
 # and disable it temporarily if needed
-if grep -q "listen 0.0.0.0:80;" "/etc/nginx/server.conf" ; then
-	replace_in_file "/etc/nginx/server.conf" "listen 0.0.0.0:80;" "#listen 0.0.0.0:80;"
-	if [ -f /run/nginx/nginx.pid ] ; then
+if grep -q "listen 0.0.0.0:8080;" "/etc/nginx/server.conf" ; then
+	replace_in_file "/etc/nginx/server.conf" "listen 0.0.0.0:8080;" "#listen 0.0.0.0:8080;"
+	if [ -f /tmp/nginx.pid ] ; then
 		/usr/sbin/nginx -s reload
 		sleep 10
 	fi
@@ -21,11 +21,15 @@ fi
 certbot renew
 
 # enable HTTP again if needed
-if grep -q "#listen 0.0.0.0:80;" "/etc/nginx/server.conf" ; then
-	replace_in_file "/etc/nginx/server.conf" "#listen 0.0.0.0:80;" "listen 0.0.0.0:80;"
+if grep -q "#listen 0.0.0.0:8080;" "/etc/nginx/server.conf" ; then
+	replace_in_file "/etc/nginx/server.conf" "#listen 0.0.0.0:8080;" "listen 0.0.0.0:8080;"
 fi
 
+chown -R root:nginx /etc/letsencrypt
+chmod -R 740 /etc/letsencrypt
+find /etc/letsencrypt -type d -exec chmod 750 {} \;
+
 # reload nginx
-if [ -f /run/nginx/nginx.pid ] ; then
+if [ -f /tmp/nginx.pid ] ; then
 	/usr/sbin/nginx -s reload
 fi

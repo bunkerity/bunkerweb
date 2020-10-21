@@ -323,7 +323,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		if [ -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
 			/opt/scripts/certbot-renew.sh
 		else
-			certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos
+			certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port 8080
 		fi
 		echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
 	elif [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
@@ -340,7 +340,7 @@ else
 fi
 
 if [ "$LISTEN_HTTP" = "yes" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:80;"
+	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:8080;"
 else
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" ""
 fi
@@ -621,8 +621,6 @@ fi
 crond
 
 # start nginx
-echo "[*] Running nginx ..."
-/usr/sbin/nginx
 if [ ! -f "/var/log/access.log" ] ; then
 	touch /var/log/access.log
 fi
@@ -632,6 +630,31 @@ fi
 if [ ! -f "/var/log/php.log" ] && [ "$USE_PHP" = "yes" ] ; then
 	touch /var/log/php.log
 fi
+
+# modsec logs
+touch /var/log/modsec_audit.log
+chown root:nginx /var/log/modsec_audit.log
+chmod 760 /var/log/modsec_audit.log
+
+# nginx default error log
+touch /var/log/nginx/error.log
+chown root:nginx /var/log/nginx/error.log
+chmod 760 /var/log/nginx/error.log
+
+# nginx configs (and modules through the symlink)
+chown -R root:nginx /etc/nginx/
+chmod -R 740 /etc/nginx/
+find /etc/nginx -type d -exec chmod 750 {} \;
+
+# let's encrypt
+if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
+	chown -R root:nginx /etc/letsencrypt
+	chmod -R 740 /etc/letsencrypt
+	find /etc/letsencrypt -type d -exec chmod 750 {} \;
+fi
+
+echo "[*] Running nginx ..."
+su -s "/usr/sbin/nginx" nginx
 
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then

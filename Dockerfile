@@ -15,10 +15,13 @@ COPY lua/ /opt/lua
 
 RUN apk --no-cache add php7-fpm certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd && \
     chmod +x /opt/entrypoint.sh /opt/scripts/* && \
-    mkdir /opt/entrypoint.d
+    mkdir /opt/entrypoint.d && \
+    rm -f /var/log/nginx/* && \
+    chown root:nginx /var/log/nginx && \
+    chmod 770 /var/log/nginx
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs
 
-EXPOSE 80/tcp 443/tcp
+EXPOSE 8080/tcp 8443/tcp
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
