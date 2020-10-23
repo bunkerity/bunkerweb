@@ -31,7 +31,7 @@ Fooling automated tools/scanners :
 - [Quickstart guide](#quickstart-guide)
   * [Run HTTP server with default settings](#run-http-server-with-default-settings)
   * [In combination with PHP](#in-combination-with-php)
-  * [Run HTTPS server with automated Let's Encrypt](#run-https-server-with-automated-let-s-encrypt)
+  * [Run HTTPS server with automated Let's Encrypt](#run-https-server-with-automated-lets-encrypt)
   * [Behind a reverse proxy](#behind-a-reverse-proxy)
   * [As a reverse proxy](#as-a-reverse-proxy)
   * [Antibot challenge](#antibot-challenge)
