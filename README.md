@@ -117,6 +117,8 @@ See [this section](#reverse-proxy) if you need to tweak some values (trusted ip/
 You can setup a reverse proxy by adding your own custom configurations at server context.  
 For example, this is a dummy reverse proxy configuration :  
 ```shell
+proxy_set_header Host $host;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 location / {
 	if ($host = www.website1.com) {
 		proxy_pass http://192.168.42.10$request_uri;
@@ -449,7 +451,7 @@ A valid and unused URI to redirect users when `USE_ANTIBOT` is used. Be sure tha
 `ANTIBOT_SESSION_SECRET`  
 Values : *random* | *\<32 chars of your choice\>*  
 Default value : *random*  
-A secret used to generate sessions when `USE_ANTIBOT is set. Using the special *random* value will generate a random one. Be sure to use the same value when you are in a multi-server environment (so sessions are valid in all the servers).
+A secret used to generate sessions when `USE_ANTIBOT` is set. Using the special *random* value will generate a random one. Be sure to use the same value when you are in a multi-server environment (so sessions are valid in all the servers).
 
 `ANTIBOT_RECAPTCHA_SCORE`  
 Values : *\<0.0 to 1.0\>*  
@@ -708,30 +710,19 @@ The number of days before rotated files are deleted.
 
 # Create your own image
 
-You can use bunkerity/bunkerized-nginx as a base image for your web application.  
-Here is a Dockerfile example :  
+You can use bunkerity/bunkerized-nginx as a base image for your web application. Here is a Dockerfile example :  
 ```
 FROM bunkerity/bunkerized-nginx
 
-# Copy your web files to a folder
-COPY ./web-files/ /opt/web-files
-
-# Optional : add your own script to be executed on startup
+# Add your own script to be executed on startup
 COPY ./my-entrypoint.sh /entrypoint.d/my-entrypoint.sh
 RUN chmod +x /entrypoint.d/my-entrypoint.sh
 
-# Mandatory variables to make things working
-ENV ROOT_FOLDER /opt/web-files
-ENV PHP_OPEN_BASEDIR /opt/web-files/:/tmp/
-
-# Optional variables
+# Edit default settings
 ENV MAX_CLIENT_SIZE 100m
-ENV PHP_UPLOAD_MAX_FILESIZE 100M
-ENV WRITE_ACCESS yes
-ENV ADDITIONAL_MODULES php7-mysqli php7-json php7-session
+ENV BLOCK_TOR_EXIT_NODE no
+ENV USE_ANTIBOT captcha
 ```
-
-You can have a look at [bunkerized-phpmyadmin](https://github.com/bunkerity/bunkerized-phpmyadmin) which is a secure phpMyAdmin Docker image based on bunkerized-nginx.
 
 # Include custom configurations
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
@@ -740,5 +731,5 @@ Custom configurations files (ending with .conf suffix) can be added in some dire
 
 You just need to use a volume like this :
 ```
-docker run ... -v /path/to/http/confs:/http-confs ... bunkerity/bunkerized-nginx
+docker run ... -v /path/to/http/confs:/http-confs ... -v /path/to/server/confs:/server-confs ... bunkerity/bunkerized-nginx
 ```
