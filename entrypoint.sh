@@ -12,10 +12,6 @@ function trap_exit() {
 	echo "[*] Catched stop operation"
 	echo "[*] Stopping crond ..."
 	pkill -TERM crond
-	if [ "$USE_PHP" = "yes" ] ; then
-		echo "[*] Stopping php ..."
-		pkill -TERM php-fpm7
-	fi
 	if [ "$USE_FAIL2BAN" = "yes" ] ; then
 		echo "[*] Stopping fail2ban"
 		fail2ban-client stop > /dev/null
@@ -51,7 +47,6 @@ function spaces_to_lua() {
 # copy stub confs
 cp /opt/confs/*.conf /etc/nginx
 cp -r /opt/confs/owasp-crs /etc/nginx
-cp /opt/confs/php.ini /etc/php7/php.ini
 cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
 cp -r /opt/lua/* /usr/local/lib/lua
@@ -73,7 +68,6 @@ USE_GZIP="${USE_GZIP-off}"
 GZIP_COMP_LEVEL="${GZIP_COMP_LEVEL-6}"
 GZIP_MIN_LENGTH="${GZIP_MIN_LENGTH-10240}"
 GZIP_TYPES="${GZIP_TYPES-text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml application/rss+xml application/atom+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml}"
-USE_PHP="${USE_PHP-no}"
 REMOTE_PHP_PATH="${REMOTE_PHP_PATH-/app}"
 HEADER_SERVER="${HEADER_SERVER-no}"
 X_FRAME_OPTIONS="${X_FRAME_OPTIONS-DENY}"
@@ -92,15 +86,6 @@ BLOCK_ABUSERS="${BLOCK_ABUSERS-yes}"
 AUTO_LETS_ENCRYPT="${AUTO_LETS_ENCRYPT-no}"
 HTTP2="${HTTP2-yes}"
 STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY-max-age=31536000}"
-PHP_EXPOSE="${PHP_EXPOSE-no}"
-PHP_DISPLAY_ERRORS="${PHP_DISPLAY_ERRORS-no}"
-PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR-/www/:/tmp/}"
-PHP_ALLOW_URL_FOPEN="${PHP_ALLOW_URL_FOPEN-no}"
-PHP_ALLOW_URL_INCLUDE="${PHP_ALLOW_URL_INCLUDE-no}"
-PHP_FILE_UPLOADS="${PHP_FILE_UPLOADS-yes}"
-PHP_UPLOAD_MAX_FILESIZE="${PHP_UPLOAD_MAX_FILESIZE-10M}"
-PHP_POST_MAX_SIZE="${PHP_POST_MAX_SIZE-10M}"
-PHP_DISABLE_FUNCTIONS="${PHP_DISABLE_FUNCTIONS-system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo}"
 USE_MODSECURITY="${USE_MODSECURITY-yes}"
 USE_MODSECURITY_CRS="${USE_MODSECURITY_CRS-yes}"
 CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY-object-src 'none'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';}"
@@ -174,40 +159,7 @@ replace_in_file "/etc/nginx/gzip.conf" "%USE_GZIP%" "$USE_GZIP"
 replace_in_file "/etc/nginx/gzip.conf" "%GZIP_COMP_LEVEL%" "$GZIP_COMP_LEVEL"
 replace_in_file "/etc/nginx/gzip.conf" "%GZIP_MIN_LENGTH%" "$GZIP_MIN_LENGTH"
 replace_in_file "/etc/nginx/gzip.conf" "%GZIP_TYPES%" "$GZIP_TYPES"
-if [ "$USE_PHP" = "yes" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" "include /etc/nginx/php.conf;"
-	replace_in_file "/etc/nginx/php.conf" "%REMOTE_PHP%" "127.0.0.1"
-	if [ "$PHP_EXPOSE" = "yes" ] ; then
-		replace_in_file "/etc/php7/php.ini" "%PHP_EXPOSE%" "On"
-	else
-		replace_in_file "/etc/php7/php.ini" "%PHP_EXPOSE%" "Off"
-	fi
-	if [ "$PHP_DISPLAY_ERRORS" = "yes" ] ; then
-		replace_in_file "/etc/php7/php.ini" "%PHP_DISPLAY_ERRORS%" "On"
-	else
-		replace_in_file "/etc/php7/php.ini" "%PHP_DISPLAY_ERRORS%" "Off"
-	fi
-	replace_in_file "/etc/php7/php.ini" "%PHP_OPEN_BASEDIR%" "$PHP_OPEN_BASEDIR"
-	if [ "$PHP_ALLOW_URL_FOPEN" = "yes" ] ; then
-		replace_in_file "/etc/php7/php.ini" "%PHP_ALLOW_URL_FOPEN%" "On"
-	else
-		replace_in_file "/etc/php7/php.ini" "%PHP_ALLOW_URL_FOPEN%" "Off"
-	fi
-	if [ "$PHP_ALLOW_URL_INCLUDE" = "yes" ] ; then
-		replace_in_file "/etc/php7/php.ini" "%PHP_ALLOW_URL_INCLUDE%" "On"
-	else
-		replace_in_file "/etc/php7/php.ini" "%PHP_ALLOW_URL_INCLUDE%" "Off"
-	fi
-	if [ "$PHP_FILE_UPLOADS" = "yes" ] ; then
-		replace_in_file "/etc/php7/php.ini" "%PHP_FILE_UPLOADS%" "On"
-	else
-		replace_in_file "/etc/php7/php.ini" "%PHP_FILE_UPLOADS%" "Off"
-	fi
-	replace_in_file "/etc/php7/php.ini" "%PHP_UPLOAD_MAX_FILESIZE%" "$PHP_UPLOAD_MAX_FILESIZE"
-	replace_in_file "/etc/php7/php.ini" "%PHP_DISABLE_FUNCTIONS%" "$PHP_DISABLE_FUNCTIONS"
-	replace_in_file "/etc/php7/php.ini" "%PHP_POST_MAX_SIZE%" "$PHP_POST_MAX_SIZE"
-	replace_in_file "/etc/php7/php.ini" "%ROOT_FOLDER%" "$ROOT_FOLDER"
-elif [ "$REMOTE_PHP" != "" ] ; then
+if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%USE_PHP%" "include /etc/nginx/php.conf;"
 	replace_in_file "/etc/nginx/php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
 	replace_in_file "/etc/nginx/fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
@@ -610,13 +562,6 @@ fi
 # start rsyslogd
 rsyslogd
 
-# start PHP
-if [ "$USE_PHP" = "yes" ] ; then
-	replace_in_file "/etc/php7/php-fpm.d/www.conf" "user = nobody" "user = nginx"
-	replace_in_file "/etc/php7/php-fpm.d/www.conf" "group = nobody" "group = nginx"
-	php-fpm7
-fi
-
 # start crond
 crond
 
@@ -626,9 +571,6 @@ if [ ! -f "/var/log/access.log" ] ; then
 fi
 if [ ! -f "/var/log/error.log" ] ; then
 	touch /var/log/error.log
-fi
-if [ ! -f "/var/log/php.log" ] && [ "$USE_PHP" = "yes" ] ; then
-	touch /var/log/php.log
 fi
 
 # modsec logs
@@ -667,11 +609,7 @@ replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MINSIZE%" "$LOGROTATE_MINSIZE"
 echo "0 0 * * * logrotate -f /etc/logrotate.conf > /dev/null 2>&1" >> /etc/crontabs/root
 
 # display logs
-if [ "$USE_PHP" = "yes" ] ; then
-	tail -f /var/log/access.log /var/log/error.log /var/log/php.log &
-else
-	tail -f /var/log/access.log /var/log/error.log &
-fi
+tail -f /var/log/access.log /var/log/error.log &
 wait $!
 
 # sigterm trapped
