@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+
+  myonion:
+    image: goldy/tor-hidden-service
+    restart: always
+    volumes:
+      - ./hidden-services:/var/lib/tor/hidden_service # .onion address and private key will be located in ./hidden_service
+    environment:
+      - SERVICE1_TOR_SERVICE_HOSTS=80:mywww:80
+      - SERVICE1_TOR_SERVICE_VERSION=3
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    volumes:
+      - ./web-files:/www
+    environment:
+      - BLOCK_TOR_EXIT_NODE=no
+      - BLOCK_ABUSERS=no
+      - BLOCK_PROXIES=no
+      - USE_FAIL2BAN=no
+      - USE_DNSBL=no
+      - USE_WHITELIST_IP=no
+      - USE_WHITELIST_REVERSE=no
+      - USE_BLACKLIST_IP=no
+      - USE_BLACKLIST_REVERSE=no
+      - USE_FAIL2BAN=no
+      - REMOTE_PHP=myphp
+      - REMOTE_PHP_PATH=/app
+
+  myphp:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files:/app
+
