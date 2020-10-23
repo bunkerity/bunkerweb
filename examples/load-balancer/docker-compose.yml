@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  myreverse:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./http-confs:/http-confs
+      - ./server-confs:/server-confs
+    environment:
+      - SERVER_NAME=www.website.com # replace with your domain
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - AUTO_LETS_ENCRYPT=yes
+
+  app1:
+    build: js-app
+    restart: always
+    environment:
+      - NODE_ENV=production
+
+  app2:
+    build: js-app
+    restart: always
+    environment:
+      - NODE_ENV=production
+
+  app3:
+    build: js-app
+    restart: always
+    environment:
+      - NODE_ENV=production
+
