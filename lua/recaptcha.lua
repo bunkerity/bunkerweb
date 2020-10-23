@@ -30,7 +30,7 @@ function M.check (token, recaptcha_secret)
 	local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 		ssl_verify = false,
 		method = "POST",
-		body = "secret=" .. recaptcha_secret .. "&response=" .. token,
+		body = "secret=" .. recaptcha_secret .. "&response=" .. token .. "&remoteip=" .. ngx.var.remote_addr,
 		headers = { ["Content-Type"] = "application/x-www-form-urlencoded" }
 	})
 	if not res then
