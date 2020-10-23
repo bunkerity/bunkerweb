@@ -89,7 +89,8 @@ STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY-max-age=31536000}"
 USE_MODSECURITY="${USE_MODSECURITY-yes}"
 USE_MODSECURITY_CRS="${USE_MODSECURITY_CRS-yes}"
 CONTENT_SECURITY_POLICY="${CONTENT_SECURITY_POLICY-object-src 'none'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';}"
-COOKIE_FLAGS="${COOKIE_FLAGS-* HttpOnly}"
+COOKIE_FLAGS="${COOKIE_FLAGS-* HttpOnly SameSite=Lax}"
+COOKIE_AUTO_SECURE_FLAG="${COOKIE_AUTO_SECURE_FLAG-yes}"
 SERVE_FILES="${SERVE_FILES-yes}"
 WRITE_ACCESS="${WRITE_ACCESS-no}"
 REDIRECT_HTTP_TO_HTTPS="${REDIRECT_HTTP_TO_HTTPS-no}"
@@ -365,8 +366,13 @@ else
         replace_in_file "/etc/nginx/server.conf" "%CONTENT_SECURITY_POLICY%" ""
 fi
 if [ "$COOKIE_FLAGS" != "" ] ; then
-        replace_in_file "/etc/nginx/server.conf" "%COOKIE_FLAGS%" "include /etc/nginx/cookie-flags.conf;"
-        replace_in_file "/etc/nginx/cookie-flags.conf" "%COOKIE_FLAGS%" "$COOKIE_FLAGS"
+	replace_in_file "/etc/nginx/server.conf" "%COOKIE_FLAGS%" "include /etc/nginx/cookie-flags.conf;"
+	if [ "$COOKIE_AUTO_SECURE_FLAG" = "yes" ] ; then
+		if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
+			COOKIE_FLAGS="${COOKIE_FLAGS} Secure"
+		fi
+	fi
+	replace_in_file "/etc/nginx/cookie-flags.conf" "%COOKIE_FLAGS%" "$COOKIE_FLAGS"
 else
         replace_in_file "/etc/nginx/server.conf" "%COOKIE_FLAGS%" ""
 fi
