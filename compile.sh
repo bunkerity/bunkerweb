@@ -46,6 +46,13 @@ git_secure_checkout test/test-cases/secrules-language-tests d03f4c1e930440df46c1
 make -j $NTASK
 make install-strip
 
+# download and install CRS rules
+cd /tmp
+git_secure_clone https://github.com/coreruleset/coreruleset.git 7776fe23f127fd2315bad0e400bdceb2cabb97dc
+cd coreruleset
+cp -r rules /etc/nginx/owasp-crs
+cp crs-setup.conf.example /etc/nginx/owasp-crs.conf
+
 # get nginx modules
 cd /tmp
 # ModSecurity connector for nginx
