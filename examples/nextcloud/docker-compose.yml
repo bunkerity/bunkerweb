@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nc-files:/www
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs         # custom nginx confs at server context to make Nextcloud working
+      - ./modsec-crs-confs:/modsec-crs-confs # custom Core Rule Set confs to add Nextcloud exclusions
+    environment:
+      - SERVER_NAME=www.website.com          # replace with your domain
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - MAX_CLIENT_SIZE=10G
+      - REMOTE_PHP=mync
+      - REMOTE_PHP_PATH=/var/www/html
+      - LIMIT_REQ_RATE=40r/s
+      - LIMIT_REQ_BURST=60
+      - ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT
+
+  mync:
+    image: nextcloud:stable-fpm
+    restart: always
+    volumes:
+      - ./nc-files:/var/www/html
+    environment:
+      - MYSQL_HOST=mydb
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)
+
+  mydb:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)

@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./wp-files:/www
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs         # custom confs at server context for permalinks
+      - ./modsec-crs-confs:/modsec-crs-confs # custom Core Rule Set confs to add Wordpress exclusions
+    environment:
+      - SERVER_NAME=www.website.com          # replace with your domain
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - MAX_CLIENT_SIZE=50m
+      - REMOTE_PHP=mywp
+      - REMOTE_PHP_PATH=/var/www/html
+
+  mywp:
+    image: wordpress:fpm-alpine
+    restart: always
+    volumes:
+      - ./wp-files:/var/www/html
+    environment:
+      - WORDPRESS_DB_HOST=mydb
+      - WORDPRESS_DB_NAME=wp
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=db-user-pwd    # replace with a stronger password (must match MYSQL_PASSWORD)
+      - WORDPRESS_TABLE_PREFIX=prefix_       # best practice : replace with a random prefix
+
+  mydb:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_DATABASE=wp
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
