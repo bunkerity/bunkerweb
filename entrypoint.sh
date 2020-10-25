@@ -571,36 +571,23 @@ rsyslogd
 # start crond
 crond
 
-# start nginx
-if [ ! -f "/var/log/access.log" ] ; then
-	touch /var/log/access.log
-fi
-if [ ! -f "/var/log/error.log" ] ; then
-	touch /var/log/error.log
-fi
+# create empty logs
+touch /var/log/access.log
+touch /var/log/error.log
 
-# modsec logs
-touch /var/log/modsec_audit.log
-chown root:nginx /var/log/modsec_audit.log
-chmod 760 /var/log/modsec_audit.log
-
-# nginx default error log
-touch /var/log/nginx/error.log
-chown root:nginx /var/log/nginx/error.log
-chmod 760 /var/log/nginx/error.log
-
-# nginx configs (and modules through the symlink)
+# fix nginx configs rights (and modules through the symlink)
 chown -R root:nginx /etc/nginx/
 chmod -R 740 /etc/nginx/
 find /etc/nginx -type d -exec chmod 750 {} \;
 
-# let's encrypt
+# fix let's encrypt rights
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 	chown -R root:nginx /etc/letsencrypt
 	chmod -R 740 /etc/letsencrypt
 	find /etc/letsencrypt -type d -exec chmod 750 {} \;
 fi
 
+# start nginx
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
 
