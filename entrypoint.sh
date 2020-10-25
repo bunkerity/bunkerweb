@@ -612,14 +612,14 @@ fi
 # setup logrotate
 replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MAXAGE%" "$LOGROTATE_MAXAGE"
 replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MINSIZE%" "$LOGROTATE_MINSIZE"
-echo "0 0 * * * logrotate -f /etc/logrotate.conf > /dev/null 2>&1 && pkill -HUP rsyslogd && fail2ban-client restart && nginx -s reload" >> /etc/crontabs/root
+echo "0 0 * * * /opt/scripts/logrotate.sh > /dev/null 2>&1" >> /etc/crontabs/root
 
 # display logs
 LOGS="/var/log/access.log /var/log/error.log"
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	LOGS="$LOGS /var/log/fail2ban.log"
 fi
-tail -f $LOGS &
+tail -F $LOGS &
 wait $!
 
 # sigterm trapped
