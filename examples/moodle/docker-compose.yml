@@ -6,8 +6,8 @@ services:
     image: bunkerity/bunkerized-nginx
     restart: always
     ports:
-      - 80:80
-      - 443:443
+      - 80:8080
+      - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./server-confs:/server-confs         # custom confs to reverse proxy to moodle

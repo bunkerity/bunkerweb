@@ -24,7 +24,7 @@ services:
       - REMOTE_PHP_PATH=/app
     labels:
       - 'traefik.enable=true'
-      - 'traefik.port=80'
+      - 'traefik.port=8080'
       - 'traefik.frontend.rule=Host:app1.website.com' # replace with your domain
 
   mywww2:
@@ -38,7 +38,7 @@ services:
       - REMOTE_PHP_PATH=/app
     labels:
       - 'traefik.enable=true'
-      - 'traefik.port=80'
+      - 'traefik.port=8080'
       - 'traefik.frontend.rule=Host:app2.website.com' # replace with your domain
 
   myphp1:

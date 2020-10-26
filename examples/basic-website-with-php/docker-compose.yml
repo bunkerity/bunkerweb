@@ -6,8 +6,8 @@ services:
     image: bunkerity/bunkerized-nginx
     restart: always
     ports:
-      - 80:80
-      - 443:443
+      - 80:8080
+      - 443:88888443
     volumes:
       - ./web-files:/www
       - ./letsencrypt:/etc/letsencrypt

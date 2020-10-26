@@ -8,7 +8,7 @@ services:
     volumes:
       - ./hidden-services:/var/lib/tor/hidden_service # .onion address and private key will be located in ./hidden_service
     environment:
-      - SERVICE1_TOR_SERVICE_HOSTS=80:mywww:80
+      - SERVICE1_TOR_SERVICE_HOSTS=80:mywww:8080
       - SERVICE1_TOR_SERVICE_VERSION=3
 
   mywww:
