@@ -13,6 +13,7 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - ./server-confs:/server-confs         # custom nginx confs at server context to make Nextcloud working
       - ./modsec-crs-confs:/modsec-crs-confs # custom Core Rule Set confs to add Nextcloud exclusions
+      - ./modsec-confs:/modsec-confs         # disable some false positive
     environment:
       - SERVER_NAME=www.website.com          # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
@@ -23,7 +24,7 @@ services:
       - REMOTE_PHP_PATH=/var/www/html
       - LIMIT_REQ_RATE=40r/s
       - LIMIT_REQ_BURST=60
-      - ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT
+      - ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT|MKCOL|MOVE|COPY|PROPPATCH|REPORT
 
   mync:
     image: nextcloud:stable-fpm

@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs         # custom confs to reverse proxy to moodle
+    environment:
+      - SERVER_NAME=www.website.com          # replace with your domain
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - MAX_CLIENT_SIZE=50m
+
+  mymoodle:
+    image: bitnami/moodle
+    restart: always
+    volumes:
+      - ./moodle-files:/bitnami/moodle
+      - ./moodle-data:/bitnami/moodledata
+    environment:
+      - MOODLE_USERNAME=admin                # replace with your moodle admin username
+      - MOODLE_PASSWORD=password             # replace with your moodle admin password
+      - MOODLE_EMAIL=moodle@website.com      # replace with your moodle admin email
+      - MOODLE_SITE_NAME=My Moodle           # replace with your moodle site name
+      - MOODLE_DATABASE_HOST=mydb
+      - MOODLE_DATABASE_NAME=moodle
+      - MOODLE_DATABASE_USER=user
+      - MOODLE_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+
+  mydb:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_DATABASE=moodle
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
