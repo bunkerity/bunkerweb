@@ -46,7 +46,6 @@ function spaces_to_lua() {
 
 # copy stub confs
 cp /opt/confs/*.conf /etc/nginx
-cp -r /opt/confs/owasp-crs /etc/nginx
 cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
 cp -r /opt/lua/* /usr/local/lib/lua
