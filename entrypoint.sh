@@ -304,6 +304,11 @@ fi
 # HTTPS config
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%USE_HTTPS%" "include /etc/nginx/https.conf;"
+
+	mkdir /etc/nginx/forward-secrecy/
+		openssl dhparam -out /etc/nginx/forward-secrecy/ecdh.pem 4096
+	replace_in_file "/etc/nginx/https.conf" "%ECDH_KEY%" "/etc/nginx/forward-secrecy/ecdh.pem"
+	
 	if [ "$HTTP2" = "yes" ] ; then
 		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" "http2"
 	else
