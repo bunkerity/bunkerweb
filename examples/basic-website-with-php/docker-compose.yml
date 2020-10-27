@@ -7,7 +7,7 @@ services:
     restart: always
     ports:
       - 80:8080
-      - 443:88888443
+      - 443:8443
     volumes:
       - ./web-files:/www
       - ./letsencrypt:/etc/letsencrypt

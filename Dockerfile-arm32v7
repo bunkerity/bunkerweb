@@ -25,7 +25,9 @@ RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban c
     mkdir /opt/entrypoint.d && \
     rm -f /var/log/nginx/* && \
     chown root:nginx /var/log/nginx && \
-    chmod 770 /var/log/nginx
+    chmod 750 /var/log/nginx && \
+    touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log && \
+    chown nginx:nginx /var/log/nginx/*.log
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs
 
