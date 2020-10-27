@@ -60,8 +60,6 @@ Fooling automated tools/scanners :
     + [Requests limiting](#requests-limiting)
     + [Countries](#countries)
   * [PHP](#php)
-    + [Remote PHP](#remote-php)
-    + [Local PHP (will be removed)](#local-php--will-be-removed-)
   * [Fail2ban](#fail2ban)
   * [ClamAV](#clamav)
   * [Misc](#misc-2)
@@ -76,7 +74,7 @@ You can find a live demo at https://demo-nginx.bunkerity.com.
 ## Run HTTP server with default settings
 
 ```shell
-docker run -p 80:80 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
+docker run -p 80:8080 -v /path/to/web/files:/www bunkerity/bunkerized-nginx
 ```
 
 Web files are stored in the /www directory, the container will serve files from there.
@@ -85,7 +83,7 @@ Web files are stored in the /www directory, the container will serve files from 
 
 ```shell
 docker network create mynet
-docker run --network mynet -p 80:80 -v /path/to/web/files:/www -e REMOTE_PHP=myphp -e REMOTE_PHP_PATH=/app bunkerity/bunkerized-nginx
+docker run --network mynet -p 80:8080 -v /path/to/web/files:/www -e REMOTE_PHP=myphp -e REMOTE_PHP_PATH=/app bunkerity/bunkerized-nginx
 docker run --network mynet --name=myphp -v /path/to/web/files:/app php:fpm
 ```
 
@@ -93,7 +91,7 @@ The `REMOTE_PHP` environment variable lets you define the address of a remote PH
 
 ## Run HTTPS server with automated Let's Encrypt
 ```shell
-docker run -p 80:80 -p 443:443 -v /path/to/web/files:/www -v /where/to/save/certificates:/etc/letsencrypt -e SERVER_NAME=www.yourdomain.com -e AUTO_LETS_ENCRYPT=yes -e REDIRECT_HTTP_TO_HTTPS=yes bunkerity/bunkerized-nginx
+docker run -p 80:8080 -p 443:8443 -v /path/to/web/files:/www -v /where/to/save/certificates:/etc/letsencrypt -e SERVER_NAME=www.yourdomain.com -e AUTO_LETS_ENCRYPT=yes -e REDIRECT_HTTP_TO_HTTPS=yes bunkerity/bunkerized-nginx
 ```
 
 Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive.  
@@ -106,7 +104,7 @@ Here you have three environment variables :
 
 ## Behind a reverse proxy
 ```shell
-docker run -p 80:80 -v /path/to/web/files:/www -e PROXY_REAL_IP=yes bunkerity/bunkerized-nginx
+docker run -p 80:8080 -v /path/to/web/files:/www -e PROXY_REAL_IP=yes bunkerity/bunkerized-nginx
 ```
 
 The `PROXY_REAL_IP` environment variable, when set to *yes*, activates the [ngx_http_realip_module](https://nginx.org/en/docs/http/ngx_http_realip_module.html) to get the real client IP from the reverse proxy.
@@ -131,7 +129,7 @@ location / {
 ```
 All files (ending with .conf) in /server-confs inside the container will be included at server context. You can simply mount a volume where your config files are located :  
 ```shell
-docker run -p 80:80 -e SERVER_NAME="www.website1.com www.website2.com" -e SERVE_FILES=no -e DISABLE_DEFAULT_SERVER=yes -v /path/to/server/conf:/server-confs bunkerity/bunkerized-nginx
+docker run -p 80:8080 -e SERVER_NAME="www.website1.com www.website2.com" -e SERVE_FILES=no -e DISABLE_DEFAULT_SERVER=yes -v /path/to/server/conf:/server-confs bunkerity/bunkerized-nginx
 ```
 
 Here you have three environment variables :
@@ -141,7 +139,7 @@ Here you have three environment variables :
 
 ## Antibot challenge
 ```shell
-docker run -p 80:80 -v /path/to/web/files:/www -e USE_ANTIBOT=captcha bunkerity/bunkerized-nginx
+docker run -p 80:8080 -v /path/to/web/files:/www -e USE_ANTIBOT=captcha bunkerity/bunkerized-nginx
 ```
 
 When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must complete a captcha before accessing the pages. Others challenges are also available : *cookie*, *javascript* or *recaptcha* (more info [here](#antibot)).
@@ -413,10 +411,15 @@ Tells the browser which features can be used on the website.
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy).
 
 `COOKIE_FLAGS`  
-Values : *\* HttpOnly* | *MyCookie secure SameSite* | *...*  
-Default value : *\* HttpOnly*  
+Values : *\* HttpOnly* | *MyCookie secure SameSite=Lax* | *...*  
+Default value : *\* HttpOnly SameSite=Lax*  
 Adds some security to the cookies set by the server.  
 Accepted value can be found [here](https://github.com/AirisX/nginx_cookie_flag_module).
+
+`COOKIE_AUTO_SECURE_FLAG`  
+Values : *yes* | *no*  
+Default value : *yes*  
+When set to *yes*, the *secure* will be automatically added to cookies when using HTTPS.
 
 `STRICT_TRANSPORT_POLICY`  
 Values : *max-age=expireTime [; includeSubDomains] [; preload]*  
@@ -582,7 +585,6 @@ Block some countries from accessing your website. Use 2 letters country code sep
 
 ## PHP
 
-### Remote PHP
 `REMOTE_PHP`  
 Values : *\<any valid IP/hostname\>*  
 Default value :  
@@ -592,58 +594,6 @@ Set the IP/hostname address of a remote PHP-FPM to execute .php files. See `USE_
 Values : *\<any valid absolute path\>*  
 Default value : */app*  
 The path where the PHP files are located inside the server specified in `REMOTE_PHP`.
-
-### Local PHP (will be removed)
-
-`USE_PHP`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, a local PHP-FPM instance will be run inside the container to execute PHP files.
-
-`PHP_DISPLAY_ERRORS`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, PHP errors will be shown to clients. Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_EXPOSE`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, the PHP version will be sent within the X-Powered-By header. Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_OPEN_BASEDIR`  
-Values : *\<directories separated with : char\>*  
-Default value : */www/:/tmp/*  
-Limits access to files within the given directories. For example include() or fopen() calls outside the directory will fail. Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_ALLOW_URL_FOPEN`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, allows using url in fopen() calls (i.e. : ftp://, http://, ...). Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_ALLOW_URL_INCLUDE`  
-Values : *yes* | *no*  
-Default value : *no*  
-If set to yes, allows using url in include() calls (i.e. : ftp://, http://, ...). Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_FILE_UPLOADS`  
-Values : *yes* | *no*  
-Default value : *yes*  
-If set to yes, allows clients to upload files. Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_UPLOAD_MAX_FILESIZE`  
-Values : *\<size in bytes\>* | *XM*  
-Default value : *10M*  
-Sets the maximum file size allowed when uploading files. Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_POST_MAX_SIZE`  
-Values : *\<size in bytes\>* | *XM*  
-Default value : *10M*  
-Sets the maximum POST size allowed for clients. Only meaningful if `USE_PHP` is set to *yes*.
-
-`PHP_DISABLE_FUNCTIONS`  
-Values : *\<function 1\>, \<function 2\> ...*  
-Default value : *system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo*  
-List of PHP functions blacklisted separated with commas. They can't be used anywhere in PHP code. Only meaningful if `USE_PHP` is set to *yes*.
 
 ## Fail2ban
 
