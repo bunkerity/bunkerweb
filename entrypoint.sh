@@ -84,6 +84,7 @@ BLOCK_PROXIES="${BLOCK_PROXIES-yes}"
 BLOCK_ABUSERS="${BLOCK_ABUSERS-yes}"
 AUTO_LETS_ENCRYPT="${AUTO_LETS_ENCRYPT-no}"
 HTTP2="${HTTP2-yes}"
+HTTPS_PROTOCOLS="${HTTPS_PROTOCOLS-TLSv1.3}"
 STRICT_TRANSPORT_SECURITY="${STRICT_TRANSPORT_SECURITY-max-age=31536000}"
 USE_MODSECURITY="${USE_MODSECURITY-yes}"
 USE_MODSECURITY_CRS="${USE_MODSECURITY_CRS-yes}"
@@ -260,6 +261,11 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" "http2"
 	else
 		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" ""
+	fi
+	if [ "$HTTPS_PROTOCOLS" != "" ] ; then
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_PROTOCOLS%" "$HTTPS_PROTOCOLS"
+	else
+		replace_in_file "/etc/nginx/https.conf" "%HTTPS_PROTOCOLS%" ""
 	fi
 	if [ "$STRICT_TRANSPORT_SECURITY" != "" ] ; then
 		replace_in_file "/etc/nginx/https.conf" "%STRICT_TRANSPORT_SECURITY%" "more_set_headers 'Strict-Transport-Security: $STRICT_TRANSPORT_SECURITY';"

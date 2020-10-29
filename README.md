@@ -364,6 +364,10 @@ Values : *yes* | *no*
 Default value : *yes*  
 If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.  
 
+`HTTPS_PROTOCOLS`  
+Values : *TLSv1.2* | *TLSv1.3* | *TLSv1.2 TLSv1.3*  
+Default value : *TLSv1.2 TLSv1.3*  
+
 ## ModSecurity
 
 `USE_MODSECURITY`  
