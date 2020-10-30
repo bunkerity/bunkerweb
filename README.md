@@ -10,7 +10,7 @@ Avoid the hassle of following security best practices each time you need a web s
 
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
-- State-of-the-art web security : HTTP security headers, php.ini hardening, prevent leaks, ...
+- State-of-the-art web security : HTTP security headers, prevent leaks, TLS hardening, ...
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
 - Automatic ban of strange behaviors with fail2ban
 - Antibot challenge through cookie, javascript, captcha or recaptcha v3
@@ -367,6 +367,7 @@ If set to yes, nginx will use HTTP2 protocol when HTTPS is enabled.
 `HTTPS_PROTOCOLS`  
 Values : *TLSv1.2* | *TLSv1.3* | *TLSv1.2 TLSv1.3*  
 Default value : *TLSv1.2 TLSv1.3*  
+The supported version of TLS. We recommend the default value *TLSv1.2 TLSv1.3* for compatibility reasons.
 
 ## ModSecurity
 
