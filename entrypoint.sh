@@ -263,7 +263,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" ""
 	fi
 	replace_in_file "/etc/nginx/https.conf" "%HTTPS_PROTOCOLS%" "$HTTPS_PROTOCOLS"
-	if [ "$(echo $lel | grep TLSv1.2)" != "" ] ; then
+	if [ "$(echo $HTTPS_PROTOCOLS | grep TLSv1.2)" != "" ] ; then
 		replace_in_file "/etc/nginx/https.conf" "%SSL_DHPARAM%" "ssl_dhparam /etc/nginx/dhparam;"
 		replace_in_file "/etc/nginx/https.conf" "%SSL_CIPHERS%" "ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;"
 	else
