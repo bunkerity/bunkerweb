@@ -15,7 +15,7 @@ Non-exhaustive list of features :
 - Automatic ban of strange behaviors with fail2ban
 - Antibot challenge through cookie, javascript, captcha or recaptcha v3
 - Block TOR, proxies, bad user-agents, countries, ...
-- Perform automatic DNSBL checks to block known bad IP
+- Block known bad IP with DNSBL and CrowdSec
 - Prevent bruteforce attacks with rate limiting
 - Detect bad files with ClamAV
 - Easy to configure with environment variables
@@ -55,6 +55,7 @@ Fooling automated tools/scanners :
     + [Antibot](#antibot)
     + [External blacklist](#external-blacklist)
     + [DNSBL](#dnsbl)
+    + [CrowdSec](#crowdsec)
     + [Custom whitelisting](#custom-whitelisting)
     + [Custom blacklisting](#custom-blacklisting)
     + [Requests limiting](#requests-limiting)
@@ -198,6 +199,16 @@ Set it to yes if your website uses file upload or creates dynamic files for exam
 Values : *\<any valid path to web files\>  
 Default value : */www*  
 The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
+
+`HTTP_PORT`  
+Values : *\<any valid port greater than 1024\>*  
+Default value : *8080*  
+The HTTP port number used by nginx and certbot inside the container.
+
+`HTTPS_PORT`  
+Values : *\<any valid port greater than 1024\>*  
+Default value : *8443*  
+The HTTPS port number used by nginx inside the container.
 
 ### Information leak
 
@@ -513,6 +524,13 @@ If set to *yes*, DNSBL checks will be performed to the servers specified in the 
 Values : *\<list of DNS zones separated with spaces\>*  
 Default value : *bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org*  
 The list of DNSBL zones to query when `USE_DNSBL` is set to *yes*.
+
+### CrowdSec
+
+`USE_CROWDSEC`  
+Values : *yes* | *no*  
+Default value : *no*  
+If set to *yes*, [CrowdSec](https://github.com/crowdsecurity/crowdsec) will be enabled with the [nginx collection](https://hub.crowdsec.net/author/crowdsecurity/collections/nginx). API pulls will be done automaticaly.
 
 ### Custom whitelisting
 
