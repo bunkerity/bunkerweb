@@ -54,6 +54,8 @@ cp -r /opt/lua/* /usr/local/lib/lua
 echo "" > /etc/crontabs/root
 
 # set default values
+HTTP_PORT="${HTTP_PORT-8080}"
+HTTPS_PORT="${HTTPS_PORT-8443}"
 MAX_CLIENT_SIZE="${MAX_CLIENT_SIZE-10m}"
 SERVER_TOKENS="${SERVER_TOKENS-off}"
 CACHE="${CACHE-max=1000 inactive=60s}"
@@ -258,6 +260,7 @@ fi
 # HTTPS config
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
 	replace_in_file "/etc/nginx/server.conf" "%USE_HTTPS%" "include /etc/nginx/https.conf;"
+	replace_in_file "/etc/nginx/https.conf" "%HTTPS_PORT%" "$HTTPS_PORT"
 	if [ "$HTTP2" = "yes" ] ; then
 		replace_in_file "/etc/nginx/https.conf" "%HTTP2%" "http2"
 	else
@@ -285,7 +288,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		if [ -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
 			/opt/scripts/certbot-renew.sh
 		else
-			certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port 8080
+			certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port $HTTP_PORT
 		fi
 		echo "0 0 * * * /opt/scripts/certbot-renew.sh" >> /etc/crontabs/root
 	elif [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
@@ -302,7 +305,7 @@ else
 fi
 
 if [ "$LISTEN_HTTP" = "yes" ] ; then
-	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:8080;"
+	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:${HTTP_PORT};"
 else
 	replace_in_file "/etc/nginx/server.conf" "%LISTEN_HTTP%" ""
 fi
