@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+
+  myreverse:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs
+    environment:
+      - SERVER_NAME=app1.website.com         # replace with your domain
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - AUTO_LETS_ENCRYPT=yes
+
+  mytomcat:
+    image: tomcat
+    restart: always
+    volumes:
+      - ./app:/usr/local/tomcat/webapps/

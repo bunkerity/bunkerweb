@@ -25,6 +25,7 @@ services:
       - LIMIT_REQ_RATE=40r/s
       - LIMIT_REQ_BURST=60
       - ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT|MKCOL|MOVE|COPY|PROPPATCH|REPORT
+      - X_FRAME_OPTIONS=SAMEORIGIN
 
   mync:
     image: nextcloud:stable-fpm
