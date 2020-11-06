@@ -143,6 +143,7 @@ ANTIBOT_URI="${ANTIBOT_URI-/challenge}"
 USE_ANTIBOT="${USE_ANTIBOT-no}"
 ANTIBOT_RECAPTCHA_SCORE="${ANTIBOT_RECAPTCHA_SCORE-0.7}"
 ANTIBOT_SESSION_SECRET="${ANTIBOT_SESSION_SECRET-random}"
+USE_CROWDSEC="${USE_CROWDSEC-no}"
 
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
@@ -567,6 +568,19 @@ if [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
 	fi
 fi
 
+# CrowdSec setup
+if [ "$USE_CROWDSEC" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" "include /etc/nginx/crowdsec.conf;"
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_CROWDSEC%" "true"
+	cp /opt/crowdsec/acquis.yaml /etc/crowdsec/config/acquis.yaml
+	cscli api register >> /etc/crowdsec/config/api.yaml
+	cscli api pull
+	echo "0 0 * * * /usr/local/bin/cscli api pull > /dev/null 2>&1" >> /etc/crontabs/root
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" ""
+	replace_in_file "/etc/nginx/main-lua.conf" "%USE_CROWDSEC%" "false"
+fi
+
 # edit access if needed
 if [ "$WRITE_ACCESS" = "yes" ] ; then
 	chown -R root:nginx /www
@@ -602,6 +616,11 @@ su -s "/usr/sbin/nginx" nginx
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	fail2ban-server > /dev/null
+fi
+
+# start crowdsec
+if [ "$USE_CROWDSEC" = "yes" ] ; then
+	crowdsec
 fi
 
 # setup logrotate

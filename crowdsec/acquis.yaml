@@ -1,0 +1,6 @@
+filenames:
+  - /var/log/access.log
+  - /var/log/error.log
+labels:
+  type: nginx
+---
