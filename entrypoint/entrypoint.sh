@@ -77,6 +77,17 @@ fi
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
 
+# autotest
+if [ "$1" == "test" ] ; then
+	sleep 10
+	echo -n "autotest" > /www/index.html
+	check=$(curl "http://localhost:${HTTP_PORT}" 2> /dev/null)
+	if [ "$check" == "autotest" ] ; then
+		exit 0
+	fi
+	exit 1
+fi
+
 # display logs
 LOGS="/var/log/access.log /var/log/error.log"
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
