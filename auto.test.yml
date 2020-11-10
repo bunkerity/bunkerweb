@@ -1,6 +1,0 @@
-versions: "3"
-
-services:
-  sut:
-    build: .
-    command: test

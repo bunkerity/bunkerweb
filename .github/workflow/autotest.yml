@@ -1,0 +1,19 @@
+name: Automatic test
+
+on:
+  push:
+    branches: [dev, master]
+  pull_request:
+    branches: [dev, master]
+
+jobs:
+  test:
+    runs_on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+      - uses: actions/checkout@v2
+      - name: Build the image
+        run: docker build -t autotest .
+      - name: Run autotest
+        run: docker run autotest test
+
