@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+# load default values
+. /opt/entrypoint/defaults.sh
 
 # load some functions
 . /opt/entrypoint/utils.sh
@@ -20,7 +23,7 @@ fi
 # include server block(s)
 if [ "$MULTISITE" = "yes" ] ; then
 	includes=""
-	for server in "$SERVER_NAME" ; do
+	for server in $SERVER_NAME ; do
 		includes="${includes}include /etc/nginx/${server}/server.conf;\n"
 	done
 	replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "$includes"
@@ -54,7 +57,7 @@ fi
 
 # self-signed certificate
 if [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
-		mkdir /etc/nginx/self-signed-ssl/
+	mkdir /etc/nginx/self-signed-ssl/
         openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/self-signed-ssl/key.pem -out /etc/nginx/self-signed-ssl/cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
 fi
 
@@ -147,6 +150,15 @@ if [ "$(has_value USE_LIMIT_REQ yes)" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" ""
 fi
+
+# DNSBL
+if [ "$(has_value USE_DNSBL yes)" != "" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsbl_cache 10m;"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsbl_cache 10m;"
+fi
+list=$(spaces_to_lua "$DNSBL_LIST")
+replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 
 # fail2ban setup
 if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # replace pattern in file
 function replace_in_file() {
@@ -28,8 +28,8 @@ function has_value() {
 	fi
 	for var in $(env) ; do
 		domain=$(echo "$var" | cut -d '_' -f 1)
-		name=$(echo "$var" | cut -d '=' -f 1 | sed "s/${domain}_//")
-		value=$(echo "$var" | sed "s/${domain}_${name}=//")
+		name=$(echo "$var" | cut -d '=' -f 1 | sed "s~${domain}_~~")
+		value=$(echo "$var" | sed "s~${domain}_${name}=~~")
 		if [ "$name" == "$1" ] && [ "$value" == "$2" ] ; then
 			echo "ok"
 			return 0

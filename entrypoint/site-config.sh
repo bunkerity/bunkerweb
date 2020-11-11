@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+# load default values
+. /opt/entrypoint/defaults.sh
 
 # load some functions
 . /opt/entrypoint/utils.sh
@@ -7,12 +10,13 @@
 NGINX_PREFIX="/etc/nginx/"
 if [ "$MULTISITE" = "yes" ] ; then
 	NGINX_PREFIX="${NGINX_PREFIX}${1}/"
-	for var in env ; do
+	for var in $(env) ; do
 		name=$(echo "$var" | cut -d '=' -f 1)
-		check=$(echo "name" | grep "^$1_")
+		check=$(echo "$name" | grep "^$1_")
 		if [ "$check" != "" ] ; then
-			repl_name=$(echo "$name" | sed "s/${1}_//")
-			repl_value=$(echo "$var" | sed "s/${name}//")
+			repl_name=$(echo "$name" | sed "s~${1}_~~")
+			repl_value=$(echo "$var" | sed "s~${name}=~~")
+			echo "$SERVER_NAME (check ok) : $repl_name - $repl_value"
 			read -r "$repl_name" <<< $repl_value
 		fi
 	done
@@ -24,6 +28,15 @@ if [ "$MULTISITE" = "yes" ] ; then
 	mkdir "$NGINX_PREFIX"
 fi
 cp /opt/confs/site/* "$NGINX_PREFIX"
+
+# replace paths
+replace_in_file "${NGINX_PREFIX}server.conf" "%MAIN_LUA%" "include ${NGINX_PREFIX}main-lua.conf;"
+replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
+if [ "$MULTISITE" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/${1}/*.conf;"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
+fi
 
 # remote PHP
 if [ "$REMOTE_PHP" != "" ] ; then
@@ -149,21 +162,21 @@ fi
 
 # block TOR exit nodes
 if [ "$BLOCK_TOR_EXIT_NODE" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_TOR_EXIT_NODE%" "include ${NGINX_PREFIX}block-tor-exit-node.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_TOR_EXIT_NODE%" "include /etc/nginx/block-tor-exit-node.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_TOR_EXIT_NODE%" ""
 fi
 
 # block proxies
 if [ "$BLOCK_PROXIES" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_PROXIES%" "include ${NGINX_PREFIX}block-proxies.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_PROXIES%" "include /etc/nginx/block-proxies.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_PROXIES%" ""
 fi
 
 # block abusers
 if [ "$BLOCK_ABUSERS" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_ABUSERS%" "include ${NGINX_PREFIX}block-abusers.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_ABUSERS%" "include /etc/nginx/block-abusers.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_ABUSERS%" ""
 fi
@@ -228,13 +241,13 @@ if [ "$USE_MODSECURITY" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" ""
 	fi
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include ${NGINX_PREFIX}owasp-crs.conf"
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
 		if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
 			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/*.conf"
 		else
 			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""
 		fi
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include ${NGINX_PREFIX}owasp-crs/*.conf"
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
 	else
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" ""
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""

@@ -17,7 +17,7 @@ for ua in $BLACKLIST ; do
 done
 DATA_ESCAPED=$(echo "$DATA" | sed 's: :\\\\ :g' | sed 's:\\\\ yes;: yes;:g' | sed 's:\\\\\\ :\\\\ :g')
 
-cp /opt/confs/map-user-agent.conf /etc/nginx/map-user-agent.conf
+cp /opt/confs/global/map-user-agent.conf /etc/nginx/map-user-agent.conf
 replace_in_file "/etc/nginx/map-user-agent.conf" "%BLOCK_USER_AGENT%" "$DATA_ESCAPED"
 
 if [ -f /tmp/nginx.pid ] ; then

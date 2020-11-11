@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # load default values
 . ./opt/entrypoint/defaults.sh
@@ -32,7 +32,7 @@ if [ ! -f "/opt/installed" ] ; then
 	echo "[*] Configuring bunkerized-nginx ..."
 	/opt/entrypoint/global-config.sh
 	if [ "$MULTISITE" = "yes" ] ; then
-		for server in "$SERVER_NAME" ; do
+		for server in $SERVER_NAME ; do
 			/opt/entrypoint/site-config.sh "$server"
 			echo "[*] Multi site - $server configuration done"
 		done
@@ -63,19 +63,21 @@ rsyslogd
 # start crond
 crond
 
+# start nginx
+echo "[*] Running nginx ..."
+su -s "/usr/sbin/nginx" nginx
+
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
+	echo "[*] Running fail2ban ..."
 	fail2ban-server > /dev/null
 fi
 
 # start crowdsec
 if [ "$USE_CROWDSEC" = "yes" ] ; then
+	echo "[*] Running crowdsec ..."
 	crowdsec
 fi
-
-# start nginx
-echo "[*] Running nginx ..."
-su -s "/usr/sbin/nginx" nginx
 
 # autotest
 if [ "$1" == "test" ] ; then

@@ -19,7 +19,7 @@ COPY logs/ /opt/logs
 COPY lua/ /opt/lua
 COPY crowdsec/ /opt/crowdsec
 
-RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd go jq mariadb-connector-c && \
+RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd go jq mariadb-connector-c bash && \
     chmod +x /opt/entrypoint/* /opt/scripts/* && \
     mkdir /opt/entrypoint.d && \
     rm -f /var/log/nginx/* && \

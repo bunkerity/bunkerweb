@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 HTTP_PORT="${HTTP_PORT-8080}"
 HTTPS_PORT="${HTTPS_PORT-8443}"
