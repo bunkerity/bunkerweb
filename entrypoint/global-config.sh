@@ -65,7 +65,7 @@ fi
 if [ "$BLOCK_COUNTRY" != "" ] ; then
 	echo "[*] Updating GeoIP database (in background) ..."
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
-	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\n/g') no;"
+	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\\n/g') no;"
 	echo "0 0 2 * * /opt/scripts/geoip.sh" >> /etc/crontabs/root
 	/opt/scripts/geoip.sh &
 else

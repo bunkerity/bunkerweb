@@ -16,7 +16,6 @@ if [ "$MULTISITE" = "yes" ] ; then
 		if [ "$check" != "" ] ; then
 			repl_name=$(echo "$name" | sed "s~${1}_~~")
 			repl_value=$(echo "$var" | sed "s~${name}=~~")
-			echo "$SERVER_NAME (check ok) : $repl_name - $repl_value"
 			read -r "$repl_name" <<< $repl_value
 		fi
 	done
@@ -31,7 +30,6 @@ cp /opt/confs/site/* "$NGINX_PREFIX"
 
 # replace paths
 replace_in_file "${NGINX_PREFIX}server.conf" "%MAIN_LUA%" "include ${NGINX_PREFIX}main-lua.conf;"
-replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
 if [ "$MULTISITE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/${1}/*.conf;"
 else
@@ -234,16 +232,25 @@ fi
 
 # ModSecurity config
 if [ "$USE_MODSECURITY" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_MODSECURITY%" "include ${NGINX_PREFIX}modsecurity.conf;"
 	if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "include /modsec-confs/*.conf"
+		if [ "$MULTISITE" = "yes" ] ; then
+			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "include /modsec-confs/${1}/*.conf"
+		else
+			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "include /modsec-confs/*.conf"
+		fi
 	else
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" ""
 	fi
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
 		if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
-			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/*.conf"
+			if [ "$MULTISITE" = "yes" ] ; then
+				replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/${1}/*.conf"
+			else
+				replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/*.conf"
+			fi
 		else
 			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""
 		fi
