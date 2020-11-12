@@ -57,6 +57,16 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_GZIP%" ""
 fi
 
+# brotli compression
+if [ "$USE_BROTLI" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_BROTLI%" "include ${NGINX_PREFIX}brotli.conf;"
+	replace_in_file "${NGINX_PREFIX}brotli.conf" "%BROTLI_COMP_LEVEL%" "$BROTLI_COMP_LEVEL"
+	replace_in_file "${NGINX_PREFIX}brotli.conf" "%BROTLI_MIN_LENGTH%" "$BROTLI_MIN_LENGTH"
+	replace_in_file "${NGINX_PREFIX}brotli.conf" "%BROTLI_TYPES%" "$BROTLI_TYPES"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_BROTLI%" ""
+fi
+
 # remote PHP
 if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" "include ${NGINX_PREFIX}php.conf;"

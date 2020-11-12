@@ -63,6 +63,8 @@ git_secure_clone https://github.com/openresty/headers-more-nginx-module.git d6d7
 git_secure_clone https://github.com/leev/ngx_http_geoip2_module.git 1cabd8a1f68ea3998f94e9f3504431970f848fbf
 # cookie
 git_secure_clone https://github.com/AirisX/nginx_cookie_flag_module.git c4ff449318474fbbb4ba5f40cb67ccd54dc595d4
+# brotli
+git_secure_clone https://github.com/google/ngx_brotli.git 9aec15e2aa6feea2113119ba06460af70ab3ea62
 
 # LUA requirements
 git_secure_clone https://github.com/openresty/luajit2.git fe32831adcb3f5fe9259a9ce404fc54e1399bba3
@@ -127,7 +129,7 @@ tar -xvzf nginx-${NGINX_VERSION}.tar.gz
 cd nginx-$NGINX_VERSION
 CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')
 CONFARGS=${CONFARGS/-Os -fomit-frame-pointer/-Os}
-./configure $CONFARGS --add-dynamic-module=/tmp/ModSecurity-nginx --add-dynamic-module=/tmp/headers-more-nginx-module --add-dynamic-module=/tmp/ngx_http_geoip2_module --add-dynamic-module=/tmp/nginx_cookie_flag_module --add-dynamic-module=/tmp/lua-nginx-module
+./configure $CONFARGS --add-dynamic-module=/tmp/ModSecurity-nginx --add-dynamic-module=/tmp/headers-more-nginx-module --add-dynamic-module=/tmp/ngx_http_geoip2_module --add-dynamic-module=/tmp/nginx_cookie_flag_module --add-dynamic-module=/tmp/lua-nginx-module --add-dynamic-module=/tmp/ngx_brotli
 make -j $NTASK modules
 cp ./objs/*.so /usr/lib/nginx/modules
 
