@@ -36,6 +36,17 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
 fi
 
+# client caching
+if [ "$USE_CLIENT_CACHE" = "yes" ] ;
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_CLIENT_CACHE%" "include ${NGINX_PREFIX}client-cache.conf;"
+	replace_in_file "${NGINX_PREFIX}client-cache.conf" "%CLIENT_CACHE_EXTENSIONS%" "$CLIENT_CACHE_EXTENSIONS"
+	replace_in_file "${NGINX_PREFIX}client-cache.conf" "%CLIENT_CACHE_ETAG%" "$CLIENT_CACHE_ETAG"
+	replace_in_file "${NGINX_PREFIX}client-cache.conf" "%CLIENT_CACHE_CONTROL%" "$CLIENT_CACHE_CONTROL"
+
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_CLIENT_CACHE%" ""
+fi
+
 # remote PHP
 if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" "include ${NGINX_PREFIX}php.conf;"
