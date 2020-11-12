@@ -47,6 +47,16 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_CLIENT_CACHE%" ""
 fi
 
+# gzip compression
+if [ "$USE_GZIP" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_GZIP%" "include ${NGINX_PREFIX}gzip.conf;"
+	replace_in_file "${NGINX_PREFIX}gzip.conf" "%GZIP_COMP_LEVEL%" "$GZIP_COMP_LEVEL"
+	replace_in_file "${NGINX_PREFIX}gzip.conf" "%GZIP_MIN_LENGTH%" "$GZIP_MIN_LENGTH"
+	replace_in_file "${NGINX_PREFIX}gzip.conf" "%GZIP_TYPES%" "$GZIP_TYPES"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_GZIP%" ""
+fi
+
 # remote PHP
 if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" "include ${NGINX_PREFIX}php.conf;"

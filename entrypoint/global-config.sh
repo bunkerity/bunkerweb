@@ -38,10 +38,6 @@ replace_in_file "/etc/nginx/cache.conf" "%CACHE%" "$CACHE"
 replace_in_file "/etc/nginx/cache.conf" "%CACHE_ERRORS%" "$CACHE_ERRORS"
 replace_in_file "/etc/nginx/cache.conf" "%CACHE_USES%" "$CACHE_USES"
 replace_in_file "/etc/nginx/cache.conf" "%CACHE_VALID%" "$CACHE_VALID"
-replace_in_file "/etc/nginx/gzip.conf" "%USE_GZIP%" "$USE_GZIP"
-replace_in_file "/etc/nginx/gzip.conf" "%GZIP_COMP_LEVEL%" "$GZIP_COMP_LEVEL"
-replace_in_file "/etc/nginx/gzip.conf" "%GZIP_MIN_LENGTH%" "$GZIP_MIN_LENGTH"
-replace_in_file "/etc/nginx/gzip.conf" "%GZIP_TYPES%" "$GZIP_TYPES"
 
 # let's encrypt setup
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
