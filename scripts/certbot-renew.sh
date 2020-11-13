@@ -7,23 +7,23 @@ function replace_in_file() {
 	sed -i "s/$pattern/$replace/g" "$1"
 }
 
-# check if HTTP enabled
-# and disable it temporarily if needed
-if grep -q "listen" "/etc/nginx/server.conf" ; then
-	replace_in_file "/etc/nginx/server.conf" "listen" "#listen"
-	if [ -f /tmp/nginx.pid ] ; then
-		/usr/sbin/nginx -s reload
-		sleep 10
-	fi
+# disable HTTP
+servers="$(find /etc/nginx -name server.conf)"
+for f in $servers ; do
+	replace_in_file "$f" "listen" "#listen"
+done
+if [ -f /tmp/nginx.pid ] ; then
+	/usr/sbin/nginx -s reload
+	sleep 10
 fi
 
 # ask a new certificate if needed
 certbot renew
 
-# enable HTTP again if needed
-if grep -q "#listen" "/etc/nginx/server.conf" ; then
-	replace_in_file "/etc/nginx/server.conf" "#listen" "listen"
-fi
+# enable HTTP again
+for f in $servers ; do
+	replace_in_file "$f" "#listen" "listen"
+done
 
 chown -R root:nginx /etc/letsencrypt
 chmod -R 740 /etc/letsencrypt

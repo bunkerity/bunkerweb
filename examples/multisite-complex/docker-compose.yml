@@ -1,0 +1,87 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./web-files:/www
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs
+      - ./modsec-confs:/modsec-confs
+      - ./modsec-crs-confs:/modsec-crs-conf
+    environment:
+      - SERVER_NAME=wp.website.com nc.website.com # replace with your domains
+      - MULTISITE=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - wp.website.com_REMOTE_PHP=mywp
+      - wp.website.com_REMOTE_PHP_PATH=/var/www/html
+      - nc.website.com_REMOTE_PHP=mync
+      - nc.website.com_REMOTE_PHP_PATH=/var/www/html
+      - nc.website.com_LIMIT_REQ_RATE=40r/s
+      - nc.website.com_LIMIT_REQ_BURST=60
+      - nc.website.com_ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT|MKCOL|MOVE|COPY|PROPPATCH|REPORT
+      - nc.website.com_X_FRAME_OPTIONS=SAMEORIGIN
+    networks:
+      - net1
+      - net2
+
+  mywp:
+    image: wordpress:fpm-alpine
+    restart: always
+    volumes:
+      - ./web-files/wp.website.com:/var/www/html
+    environment:
+      - WORDPRESS_DB_HOST=mywpdb
+      - WORDPRESS_DB_NAME=wp
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=db-user-pwd    # replace with a stronger password (must match MYSQL_PASSWORD)
+      - WORDPRESS_TABLE_PREFIX=prefix_       # best practice : replace with a random prefix
+    networks:
+      - net1
+
+  mywpdb:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./wp-db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_DATABASE=wp
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+    networks:
+      - net1
+
+  mync:
+    image: nextcloud:stable-fpm
+    restart: always
+    volumes:
+      - ./web-files/nc.website.com:/var/www/html
+    environment:
+      - MYSQL_HOST=myncdb
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)
+    networks:
+      - net2
+
+  myncdb:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - ./nc-db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)
+    networks:
+      - net2

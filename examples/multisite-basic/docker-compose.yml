@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./web-files:/www
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs
+    environment:
+      - SERVER_NAME=app1.website.com app2.website.com app3.website.com # replace with your domains
+      - MULTISITE=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - app1.website.com_REMOTE_PHP=myapp1
+      - app1.website.com_REMOTE_PHP_PATH=/app
+      - app2.website.com_REMOTE_PHP=myapp2
+      - app2.website.com_REMOTE_PHP_PATH=/app
+      - app3.website.com_SERVE_FILES=no
+    networks:
+      - net1
+      - net2
+      - net3
+
+  myapp1:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app1:/app
+    networks:
+      - net1
+
+  myapp2:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app2:/app
+    networks:
+      - net2
+
+  myapp3:
+    image: node
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./js-app:/home/node/app
+    environment:
+      - NODE_ENV=production
+    command: bash -c "npm install express && node index.js"
+    networks:
+      - net3
+
+  networks:
+    net1:
+    net2:
+    net3:
