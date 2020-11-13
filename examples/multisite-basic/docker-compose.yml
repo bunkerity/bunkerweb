@@ -18,11 +18,13 @@ services:
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
       - app1.website.com_REMOTE_PHP=myapp1
       - app1.website.com_REMOTE_PHP_PATH=/app
       - app2.website.com_REMOTE_PHP=myapp2
       - app2.website.com_REMOTE_PHP_PATH=/app
       - app3.website.com_SERVE_FILES=no
+      - app3.website.com_USE_CLIENT_CACHE=no
     networks:
       - net1
       - net2

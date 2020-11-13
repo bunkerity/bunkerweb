@@ -27,6 +27,7 @@ services:
       - USE_BLACKLIST_IP=no
       - USE_BLACKLIST_REVERSE=no
       - USE_FAIL2BAN=no
+      - USE_CLIENT_CACHE=yes
       - REMOTE_PHP=myphp
       - REMOTE_PHP_PATH=/app
 

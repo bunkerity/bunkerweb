@@ -30,7 +30,7 @@ function git_secure_clone() {
 NTASK=$(nproc)
 
 # install build dependencies
-apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg
+apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg brotli-dev
 
 # compile and install ModSecurity library
 cd /tmp

@@ -37,7 +37,7 @@ else
 fi
 
 # client caching
-if [ "$USE_CLIENT_CACHE" = "yes" ] ;
+if [ "$USE_CLIENT_CACHE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_CLIENT_CACHE%" "include ${NGINX_PREFIX}client-cache.conf;"
 	replace_in_file "${NGINX_PREFIX}client-cache.conf" "%CLIENT_CACHE_EXTENSIONS%" "$CLIENT_CACHE_EXTENSIONS"
 	replace_in_file "${NGINX_PREFIX}client-cache.conf" "%CLIENT_CACHE_ETAG%" "$CLIENT_CACHE_ETAG"

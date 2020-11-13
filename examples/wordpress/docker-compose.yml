@@ -19,6 +19,7 @@ services:
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - MAX_CLIENT_SIZE=50m
+      - USE_CLIENT_CACHE=yes
       - REMOTE_PHP=mywp
       - REMOTE_PHP_PATH=/var/www/html
 
