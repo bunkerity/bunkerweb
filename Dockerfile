@@ -28,7 +28,7 @@ RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban c
     touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log && \
     chown nginx:nginx /var/log/nginx/*.log
 
-VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs
+VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /logs-confs
 
 EXPOSE 8080/tcp 8443/tcp
 

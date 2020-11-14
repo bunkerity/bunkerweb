@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+
+  mylog:
+    # image: bunkerity/bunkerized-nginx
+    image: solidginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./log-confs:/logs-confs
+      - ./web-files:/www
+    environment:
+      - SERVER_NAME=app1.website.com app2.website.com # replace with your domains
+      - SERVE_FILES=yes
+      - DISABLE_DEFAULT_SERVER=no
+      - REDIRECT_HTTP_TO_HTTPS=no
+      - AUTO_LETS_ENCRYPT=no
+      - USE_FAIL2BAN=no
+      - USE_CLAMAV_SCAN=no
+      - USE_CLAMAV_UPLOAD=no

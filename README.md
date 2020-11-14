@@ -701,8 +701,14 @@ ENV USE_ANTIBOT captcha
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
   - /http-confs : http context
   - /server-confs : server context
+  - /logs-confs : server log directives to override confs/log-format.conf.default
 
 You just need to use a volume like this :
 ```
-docker run ... -v /path/to/http/confs:/http-confs ... -v /path/to/server/confs:/server-confs ... bunkerity/bunkerized-nginx
+docker run ... \
+           -v /path/to/http/confs:/http-confs \
+           -v /path/to/server/confs:/server-confs \
+           -v /path/to/log/confs:/log-confs \
+           ... \
+           bunkerity/bunkerized-nginx
 ```

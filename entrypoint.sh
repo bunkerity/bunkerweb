@@ -46,6 +46,9 @@ function spaces_to_lua() {
 
 # copy stub confs
 cp /opt/confs/* /etc/nginx
+if [ ! -f /logs-confs/custom-log-format.conf ] ; then
+	cp /opt/confs/log-format.conf.default /logs-confs/log-format.conf
+fi
 cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
 cp -r /opt/lua/* /usr/local/lib/lua

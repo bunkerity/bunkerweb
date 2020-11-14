@@ -1,0 +1,2 @@
+access_log syslog:server=unix:/dev/log,nohostname,facility=local0,severity=notice combined;
+error_log syslog:server=unix:/dev/log,nohostname,facility=local0 warn;
