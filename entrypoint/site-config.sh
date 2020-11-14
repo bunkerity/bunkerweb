@@ -31,7 +31,7 @@ cp /opt/confs/site/* "$NGINX_PREFIX"
 # replace paths
 replace_in_file "${NGINX_PREFIX}server.conf" "%MAIN_LUA%" "include ${NGINX_PREFIX}main-lua.conf;"
 if [ "$MULTISITE" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/${1}/*.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;\ninclude /server-confs/${1}/*.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
 fi
@@ -42,6 +42,25 @@ replace_in_file "{NGINX_PREFIX}server.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZ
 # server tokens
 replace_in_file "{NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
 
+# proxy caching
+if [ "$USE_PROXY_CACHE" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PROXY_CACHE%" "include ${NGINX_PREFIX}proxy-cache.conf;"
+	replace_in_file "${NGINX_PREFIX}proxy-cache.conf" "%PROXY_CACHE_METHODS%" "$PROXY_CACHE_METHODS"
+	replace_in_file "${NGINX_PREFIX}proxy-cache.conf" "%PROXY_CACHE_MIN_USES%" "$PROXY_CACHE_MIN_USES"
+	replace_in_file "${NGINX_PREFIX}proxy-cache.conf" "%PROXY_CACHE_KEY%" "$PROXY_CACHE_KEY"
+	replace_in_file "${NGINX_PREFIX}proxy-cache.conf" "%PROXY_NO_CACHE%" "$PROXY_NO_CACHE"
+	replace_in_file "${NGINX_PREFIX}proxy-cache.conf" "%PROXY_CACHE_BYPASS%" "$PROXY_CACHE_BYPASS"
+	valids=""
+	for valid in $PROXY_CACHE_VALID ; do
+		code="$(echo $valid | cut -d '=' -f 1)"
+		timing="$(echo $valid | cut -d '=' -f 2)"
+		valids="${valids}\nproxy_cache_valid ${code} ${timing};"
+	done
+	replace_in_file "${NGINX_PREFIX}proxy-cache.conf" "%PROXY_CACHE_VALID%" "$valids"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PROXY_CACHE%" ""
+fi
+
 # file metadata caching
 if [ "$USE_OPEN_FILE_CACHE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_OPEN_FILE_CACHE%" "include ${NGINX_PREFIX}open-file-cache.conf;"
@@ -50,7 +69,7 @@ if [ "$USE_OPEN_FILE_CACHE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}open-file-cache.conf" "%OPEN_FILE_CACHE_MIN_USES%" "$OPEN_FILE_CACHE_MIN_USES"
 	replace_in_file "${NGINX_PREFIX}open-file-cache.conf" "%OPEN_FILE_CACHE_VALID%" "$OPEN_FILE_CACHE_VALID"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%OPEN_FILE_CACHE%" ""
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_OPEN_FILE_CACHE%" ""
 fi
 
 # client caching
