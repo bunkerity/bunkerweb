@@ -31,14 +31,6 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "include /etc/nginx/server.conf;"
 fi
 
-# global values
-replace_in_file "/etc/nginx/nginx.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
-replace_in_file "/etc/nginx/nginx.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
-replace_in_file "/etc/nginx/cache.conf" "%CACHE%" "$CACHE"
-replace_in_file "/etc/nginx/cache.conf" "%CACHE_ERRORS%" "$CACHE_ERRORS"
-replace_in_file "/etc/nginx/cache.conf" "%CACHE_USES%" "$CACHE_USES"
-replace_in_file "/etc/nginx/cache.conf" "%CACHE_VALID%" "$CACHE_VALID"
-
 # let's encrypt setup
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 	FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)

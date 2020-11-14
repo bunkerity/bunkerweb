@@ -36,6 +36,23 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
 fi
 
+# max body size
+replace_in_file "{NGINX_PREFIX}server.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
+
+# server tokens
+replace_in_file "{NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
+
+# file metadata caching
+if [ "$USE_OPEN_FILE_CACHE" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_OPEN_FILE_CACHE%" "include ${NGINX_PREFIX}open-file-cache.conf;"
+	replace_in_file "${NGINX_PREFIX}open-file-cache.conf" "%OPEN_FILE_CACHE%" "$OPEN_FILE_CACHE"
+	replace_in_file "${NGINX_PREFIX}open-file-cache.conf" "%OPEN_FILE_CACHE_ERRORS%" "$OPEN_FILE_CACHE_ERRORS"
+	replace_in_file "${NGINX_PREFIX}open-file-cache.conf" "%OPEN_FILE_CACHE_MIN_USES%" "$OPEN_FILE_CACHE_MIN_USES"
+	replace_in_file "${NGINX_PREFIX}open-file-cache.conf" "%OPEN_FILE_CACHE_VALID%" "$OPEN_FILE_CACHE_VALID"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%OPEN_FILE_CACHE%" ""
+fi
+
 # client caching
 if [ "$USE_CLIENT_CACHE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_CLIENT_CACHE%" "include ${NGINX_PREFIX}client-cache.conf;"
