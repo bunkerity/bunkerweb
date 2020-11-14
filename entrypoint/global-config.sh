@@ -32,7 +32,7 @@ else
 fi
 
 # proxy_cache zone
-if [ "$USE_PROXY_CACHE" = "yes" ] ; then
+if [ "$(has_value USE_PROXY_CACHE yes)" = "yes" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%PROXY_CACHE_PATH%" "proxy_cache_path /tmp/proxy_cache keys_zone=proxycache:${PROXY_CACHE_PATH_ZONE_SIZE} ${PROXY_CACHE_PATH_PARAMS};"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%PROXY_CACHE_PATH%" ""

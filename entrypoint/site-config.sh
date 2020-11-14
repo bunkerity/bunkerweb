@@ -42,6 +42,16 @@ replace_in_file "{NGINX_PREFIX}server.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZ
 # server tokens
 replace_in_file "{NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
 
+# reverse proxy
+if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" "include ${NGINX_PREFIX}reverse-proxy.conf"
+	replace_in_file "${NGINX_PREFIX}reverse-proxy.conf" "%REVERSE_PROXY_URL%" "$REVERSE_PROXY_URL"
+	replace_in_file "${NGINX_PREFIX}reverse-proxy.conf" "%REVERSE_PROXY_HOST%" "$REVERSE_PROXY_HOST"
+
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" ""
+fi
+
 # proxy caching
 if [ "$USE_PROXY_CACHE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PROXY_CACHE%" "include ${NGINX_PREFIX}proxy-cache.conf;"
