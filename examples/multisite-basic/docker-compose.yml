@@ -39,7 +39,7 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app1:/app
+      - ./web-files/app1.website.com:/app
     networks:
       - net1
 
@@ -47,7 +47,7 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app2:/app
+      - ./web-files/app2.website.com:/app
     networks:
       - net2
 
@@ -63,7 +63,7 @@ services:
     networks:
       - net3
 
-  networks:
-    net1:
-    net2:
-    net3:
+networks:
+  net1:
+  net2:
+  net3:

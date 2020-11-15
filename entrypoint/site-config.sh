@@ -37,27 +37,29 @@ else
 fi
 
 # max body size
-replace_in_file "{NGINX_PREFIX}server.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
+replace_in_file "${NGINX_PREFIX}server.conf" "%MAX_CLIENT_SIZE%" "$MAX_CLIENT_SIZE"
 
 # server tokens
-replace_in_file "{NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
+replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
 
 # reverse proxy
 if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 	i=1
 	for var in $(env) ; do
-		check=$(echo "$var" | grep "^REVERSE_PROXY_URL")
-		if [ "$check" != "" ] ; then
+		check1=$(echo "$var" | grep "^REVERSE_PROXY_URL")
+		check2=$(echo "$var" | grep "^${1}_REVERSE_PROXY_URL")
+		if [ "$check1" != "" ] || [ "$check2" != "" ] ; then
 			name=$(echo "$var" | cut -d '=' -f 1)
-			value=$(echo "$var" | sed "s/${name}//")
-			host=$(echo "$name" | sed "s/URL/HOST//")
+			value=$(echo "$var" | sed "s/${name}=//")
+			host=$(echo "$name" | sed "s/URL/HOST/")
+			host_value=$(env | grep "^${host}=" | sed "s/${host}=//")
 			cp "${NGINX_PREFIX}reverse-proxy.conf" "${NGINX_PREFIX}reverse-proxy-${i}.conf"
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$value"
-			replace_in_file "${NGINX_PREFIX}reverse-proxy.${i}conf" "%REVERSE_PROXY_HOST%" "${!host}"
+			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
 			i=$(($i + 1))
 		fi
 	done
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" "include ${NGINX_PREFIX}reverse-proxy-*.conf"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" "include ${NGINX_PREFIX}reverse-proxy-*.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" ""
 fi
@@ -127,6 +129,10 @@ fi
 if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" "include ${NGINX_PREFIX}php.conf;"
 	replace_in_file "${NGINX_PREFIX}php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
+	replace_in_file "${NGINX_PREFIX}php.conf" "%FASTCGI_PATH%" "$NGINX_PREFIX"
+	if [ "$MULTISITE" = "yes" ] ; then
+		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf 
+	fi
 	replace_in_file "${NGINX_PREFIX}fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" ""
@@ -321,26 +327,24 @@ fi
 if [ "$USE_MODSECURITY" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_MODSECURITY%" "include ${NGINX_PREFIX}modsecurity.conf;"
+	modsec_custom=""
 	if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
-		if [ "$MULTISITE" = "yes" ] ; then
-			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "include /modsec-confs/${1}/*.conf"
-		else
-			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "include /modsec-confs/*.conf"
-		fi
-	else
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" ""
+		modsec_custom="include /modsec-confs/*.conf\n"
 	fi
+	if [ "$MULTISITE" = "yes" ] && ls /modsec-confs/${1}/*.conf > /dev/null 2>&1 ; then
+		modsec_custom="${modsec_custom}include /modsec-confs/${1}/*.conf\n"
+	fi
+	replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
+		modsec_crs_custom=""
 		if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
-			if [ "$MULTISITE" = "yes" ] ; then
-				replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/${1}/*.conf"
-			else
-				replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "include /modsec-crs-confs/*.conf"
-			fi
-		else
-			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""
+			modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
 		fi
+		if [ "$MULTISITE" = "yes" ] && ls /modsec-crs-confs/${1}/*.conf > /dev/null 2>&1 ; then
+			modsec_crs_custom="${modsec_custom}include /modsec-crs-confs/${1}/*.conf\n"
+		fi
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
 	else
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" ""

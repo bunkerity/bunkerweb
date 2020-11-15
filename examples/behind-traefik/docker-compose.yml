@@ -12,9 +12,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik/traefik.toml:/traefik.toml
       - ./traefik/acme.json:/acme.json
-    networks:
-      - netwww1
-      - netwww2
 
   mywww1:
     image: bunkerity/bunkerized-nginx
@@ -33,9 +30,6 @@ services:
       - 'traefik.enable=true'
       - 'traefik.port=8080'
       - 'traefik.frontend.rule=Host:app1.website.com' # replace with your domain
-    networks:
-      - netwww1
-      - netphp1
 
   mywww2:
     image: bunkerity/bunkerized-nginx
@@ -54,28 +48,15 @@ services:
       - 'traefik.enable=true'
       - 'traefik.port=8080'
       - 'traefik.frontend.rule=Host:app2.website.com' # replace with your domain
-    networks:
-      - netwww2
-      - netphp2
 
   myphp1:
     image: php:fpm
     restart: always
     volumes:
       - ./web1:/app
-    networks:
-      - netphp1
 
   myphp2:
     image: php:fpm
     restart: always
     volumes:
       - ./web2:/app
-    networks:
-      - netphp2
-
-  networks:
-    netwww1:
-    netwww2:
-    netphp1:
-    netphp2:

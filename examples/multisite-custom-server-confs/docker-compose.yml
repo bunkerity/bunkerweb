@@ -13,7 +13,7 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - ./server-confs:/server-confs:ro
       - ./modsec-confs:/modsec-confs:ro
-      - ./modsec-crs-confs:/modsec-crs-conf:ro
+      - ./modsec-crs-confs:/modsec-crs-confs:ro
     environment:
       - SERVER_NAME=wp.website.com nc.website.com # replace with your domains
       - MULTISITE=yes
@@ -88,3 +88,7 @@ services:
       - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)
     networks:
       - net2
+
+networks:
+  net1:
+  net2:
