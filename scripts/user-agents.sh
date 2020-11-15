@@ -19,6 +19,7 @@ DATA_ESCAPED=$(echo "$DATA" | sed 's: :\\\\ :g' | sed 's:\\\\ yes;: yes;:g' | se
 
 cp /opt/confs/global/map-user-agent.conf /etc/nginx/map-user-agent.conf
 replace_in_file "/etc/nginx/map-user-agent.conf" "%BLOCK_USER_AGENT%" "$DATA_ESCAPED"
+cp /etc/nginx/map-user-agent.conf /cache
 
 if [ -f /tmp/nginx.pid ] ; then
 	/usr/sbin/nginx -s reload

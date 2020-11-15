@@ -8,6 +8,7 @@ while read entry ; do
 		echo "deny ${entry};" >> /etc/nginx/block-abusers.conf
 	fi
 done
+cp /etc/nginx/block-abusers.conf /cache
 if [ -f /tmp/nginx.pid ] ; then
 	/usr/sbin/nginx -s reload
 fi

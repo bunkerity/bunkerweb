@@ -8,6 +8,7 @@ while read entry ; do
 		echo "deny ${entry};" >> /etc/nginx/block-tor-exit-node.conf
 	fi
 done
+cp /etc/nginx/block-tor-exit-node.conf /cache
 if [ -f /tmp/nginx.pid ] ; then
 	/usr/sbin/nginx -s reload
 fi

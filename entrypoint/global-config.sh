@@ -58,44 +58,69 @@ fi
 
 # country ban
 if [ "$BLOCK_COUNTRY" != "" ] ; then
-	echo "[*] Updating GeoIP database (in background) ..."
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
 	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\\n/g') no;"
 	echo "0 0 2 * * /opt/scripts/geoip.sh" >> /etc/crontabs/root
-	/opt/scripts/geoip.sh &
+	if [ -f "/cache/geoip.mmdb" ] ; then
+		echo "[*] Copying cached geoip.mmdb ..."
+		cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
+	else
+		echo "[*] Downloading GeoIP database (in background) ..."
+		/opt/scripts/geoip.sh &
+	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" ""
 fi
 
 # block bad UA
 if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
-	echo "[*] Downloading bad user-agent list (in background) ..."
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/map-user-agent.conf;"
-	/opt/scripts/user-agents.sh &
 	echo "0 0 * * * /opt/scripts/user-agents.sh" >> /etc/crontabs/root
+	if [ -f "/cache/map-user-agent.conf" ] ; then
+		echo "[*] Copying cached map-user-agent.conf ..."
+		cp /cache/map-user-agent.conf /etc/nginx/map-user-agent.conf
+	else
+		echo "[*] Downloading bad user-agent list (in background) ..."
+		/opt/scripts/user-agents.sh &
+	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" ""
 fi
 
 # block TOR exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
-	echo "[*] Downloading tor exit nodes list (in background) ..."
-	/opt/scripts/exit-nodes.sh &
 	echo "0 * * * * /opt/scripts/exit-nodes.sh" >> /etc/crontabs/root
+	if [ -f "/cache/block-tor-exit-node.conf" ] ; then
+		echo "[*] Copying cached block-tor-exit-node.conf ..."
+		cp /cache/block-tor-exit-node.conf /etc/nginx/block-tor-exit-node.conf
+	else
+		echo "[*] Downloading tor exit nodes list (in background) ..."
+		/opt/scripts/exit-nodes.sh &
+	fi
 fi
 
 # block proxies
 if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
-	echo "[*] Downloading proxies list (in background) ..."
-	/opt/scripts/proxies.sh &
 	echo "0 0 * * * /opt/scripts/proxies.sh" >> /etc/crontabs/root
+	if [ -f "/cache/block-proxies.conf" ] ; then
+		echo "[*] Copying cached block-proxies.conf ..."
+		cp /cache/block-proxies.conf /etc/nginx/block-proxies.conf
+	else
+		echo "[*] Downloading proxies list (in background) ..."
+		/opt/scripts/proxies.sh &
+	fi
 fi
 
 # block abusers
 if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
-	echo "[*] Downloading abusers list (in background) ..."
-	/opt/scripts/abusers.sh &
 	echo "0 0 * * * /opt/scripts/abusers.sh" >> /etc/crontabs/root
+	if [ -f "/cache/block-abusers.conf" ] ; then
+		echo "[*] Copying cached block-abusers.conf ..."
+		cp /cache/block-abusers.conf /etc/nginx/block-abusers.conf
+	else
+		echo "[*] Downloading abusers list (in background) ..."
+		/opt/scripts/abusers.sh &
+	fi
 fi
 
 # DNS resolvers
