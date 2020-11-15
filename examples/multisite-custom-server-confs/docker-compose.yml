@@ -9,11 +9,11 @@ services:
       - 80:8080
       - 443:8443
     volumes:
-      - ./web-files:/www
+      - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs
-      - ./modsec-confs:/modsec-confs
-      - ./modsec-crs-confs:/modsec-crs-conf
+      - ./server-confs:/server-confs:ro
+      - ./modsec-confs:/modsec-confs:ro
+      - ./modsec-crs-confs:/modsec-crs-conf:ro
     environment:
       - SERVER_NAME=wp.website.com nc.website.com # replace with your domains
       - MULTISITE=yes
@@ -21,6 +21,8 @@ services:
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
       - wp.website.com_REMOTE_PHP=mywp
       - wp.website.com_REMOTE_PHP_PATH=/var/www/html
       - nc.website.com_REMOTE_PHP=mync

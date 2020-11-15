@@ -9,11 +9,11 @@ services:
       - 80:8080
       - 443:8443
     volumes:
-      - ./nc-files:/www
+      - ./nc-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs         # custom nginx confs at server context to make Nextcloud working
-      - ./modsec-crs-confs:/modsec-crs-confs # custom Core Rule Set confs to add Nextcloud exclusions
-      - ./modsec-confs:/modsec-confs         # disable some false positive
+      - ./server-confs:/server-confs:ro         # custom nginx confs at server context to make Nextcloud working
+      - ./modsec-crs-confs:/modsec-crs-confs:ro # custom Core Rule Set confs to add Nextcloud exclusions
+      - ./modsec-confs:/modsec-confs:ro         # disable some false positive
     environment:
       - SERVER_NAME=www.website.com          # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
@@ -27,6 +27,9 @@ services:
       - LIMIT_REQ_BURST=60
       - ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT|MKCOL|MOVE|COPY|PROPPATCH|REPORT
       - X_FRAME_OPTIONS=SAMEORIGIN
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
 
   mync:
     image: nextcloud:stable-fpm

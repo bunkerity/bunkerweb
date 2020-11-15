@@ -10,13 +10,19 @@ services:
       - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs         # custom confs to reverse proxy to moodle
     environment:
       - SERVER_NAME=www.website.com          # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - MAX_CLIENT_SIZE=50m
+      - SERVE_FILES=no
+      - USE_PROXY_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=https://mymoodle:8443
 
   mymoodle:
     image: bitnami/moodle

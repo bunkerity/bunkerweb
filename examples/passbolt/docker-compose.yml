@@ -10,25 +10,31 @@ services:
       - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs              # custom confs to reverse proxy to passbolt
-      - ./modsec-crs-confs:/modsec-crs-confs      # disable some false positive
-      - ./modsec-confs:/modsec-confs              # disable some false positive
+      - ./modsec-crs-confs:/modsec-crs-confs:ro      # disable some false positive
+      - ./modsec-confs:/modsec-confs:ro              # disable some false positive
     environment:
-      - SERVER_NAME=www.website.com               # replace with your domain
+      - SERVER_NAME=www.website.com                  # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - ALLOWED_METHODS=GET|POST|HEAD|PUT|DELETE
+      - SERVE_FILES=no
+      - USE_PROXY_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=https://mypassbolt
 
   mypassbolt:
     image: passbolt/passbolt
     restart: always
     environment:
       - DATASOURCES_DEFAULT_HOST=mydb
-      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd  # replace with a stronger password (must match MYSQL_PASSWORD)
+      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd     # replace with a stronger password (must match MYSQL_PASSWORD)
       - DATASOURCES_DEFAULT_USERNAME=user
       - DATASOURCES_DEFAULT_DATABASE=passbolt
-      - APP_FULL_BASE_URL=https://www.website.com # replace with your URL
+      - APP_FULL_BASE_URL=https://www.website.com    # replace with your URL
 
   mydb:
     image: mariadb
@@ -36,7 +42,7 @@ services:
     volumes:
       - ./db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd           # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd              # replace with a stronger password
       - MYSQL_DATABASE=passbolt
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd                # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd                   # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)

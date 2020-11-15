@@ -44,10 +44,20 @@ replace_in_file "{NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
 
 # reverse proxy
 if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" "include ${NGINX_PREFIX}reverse-proxy.conf"
-	replace_in_file "${NGINX_PREFIX}reverse-proxy.conf" "%REVERSE_PROXY_URL%" "$REVERSE_PROXY_URL"
-	replace_in_file "${NGINX_PREFIX}reverse-proxy.conf" "%REVERSE_PROXY_HOST%" "$REVERSE_PROXY_HOST"
-
+	i=1
+	for var in $(env) ; do
+		check=$(echo "$var" | grep "^REVERSE_PROXY_URL")
+		if [ "$check" != "" ] ; then
+			name=$(echo "$var" | cut -d '=' -f 1)
+			value=$(echo "$var" | sed "s/${name}//")
+			host=$(echo "$name" | sed "s/URL/HOST//")
+			cp "${NGINX_PREFIX}reverse-proxy.conf" "${NGINX_PREFIX}reverse-proxy-${i}.conf"
+			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$value"
+			replace_in_file "${NGINX_PREFIX}reverse-proxy.${i}conf" "%REVERSE_PROXY_HOST%" "${!host}"
+			i=$(($i + 1))
+		fi
+	done
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" "include ${NGINX_PREFIX}reverse-proxy-*.conf"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" ""
 fi

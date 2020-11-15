@@ -15,7 +15,7 @@ services:
     image: bunkerity/bunkerized-nginx
     restart: always
     volumes:
-      - ./web-files:/www
+      - ./web-files:/www:ro
     environment:
       - BLOCK_TOR_EXIT_NODE=no
       - BLOCK_ABUSERS=no
@@ -28,6 +28,8 @@ services:
       - USE_BLACKLIST_REVERSE=no
       - USE_FAIL2BAN=no
       - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
       - REMOTE_PHP=myphp
       - REMOTE_PHP_PATH=/app
 

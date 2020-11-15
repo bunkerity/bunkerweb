@@ -9,9 +9,8 @@ services:
       - 80:8080
       - 443:8443
     volumes:
-      - ./web-files:/www
+      - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs
     environment:
       - SERVER_NAME=app1.website.com app2.website.com app3.website.com # replace with your domains
       - MULTISITE=yes
@@ -19,12 +18,18 @@ services:
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
       - app1.website.com_REMOTE_PHP=myapp1
       - app1.website.com_REMOTE_PHP_PATH=/app
       - app2.website.com_REMOTE_PHP=myapp2
       - app2.website.com_REMOTE_PHP_PATH=/app
       - app3.website.com_SERVE_FILES=no
       - app3.website.com_USE_CLIENT_CACHE=no
+      - app3.website.com_USE_PROXY_CACHE=yes
+      - app3.website.com_USE_REVERSE_PROXY=yes
+      - app3.website.com_REVERSE_PROXY_URL=/
+      - app3.website.com_REVERSE_PROXY_HOST=http://myapp3:3000
     networks:
       - net1
       - net2

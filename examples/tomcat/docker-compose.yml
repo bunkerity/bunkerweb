@@ -10,13 +10,18 @@ services:
       - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs
     environment:
-      - SERVER_NAME=app1.website.com         # replace with your domain
+      - SERVER_NAME=www.website.com                     # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - AUTO_LETS_ENCRYPT=yes
+      - USE_PROXY_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://mytomcat:8080/sample
 
   mytomcat:
     image: tomcat

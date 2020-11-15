@@ -10,13 +10,20 @@ services:
       - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs
     environment:
-      - SERVER_NAME=app1.website.com app2.website.com # replace with your domains
+      - SERVER_NAME=www.website.com                          # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - AUTO_LETS_ENCRYPT=yes
+      - USE_PROXY_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL_1=/app1
+      - REVERSE_PROXY_HOST_1=http://app1:3000
+      - REVERSE_PROXY_URL_2=/app2
+      - REVERSE_PROXY_HOST_2=http://app2
 
   app1:
     image: node
@@ -33,4 +40,4 @@ services:
     restart: always
     environment:
       - PMA_ARBITRARY=1
-      - PMA_ABSOLUTE_URI=https://app2.website.com
+      - PMA_ABSOLUTE_URI=https://www.website.com/app2        # replace with your absolute URI
