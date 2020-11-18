@@ -56,10 +56,16 @@ if [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
         openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/self-signed-ssl/key.pem -out /etc/nginx/self-signed-ssl/cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
 fi
 
-# country ban
-if [ "$BLOCK_COUNTRY" != "" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" "include /etc/nginx/geoip.conf;"
-	replace_in_file "/etc/nginx/geoip.conf" "%BLOCK_COUNTRY%" "$(echo $BLOCK_COUNTRY | sed 's/ / no;\\n/g') no;"
+# country ban/whitelist
+if [ "$BLACKLIST_COUNTRY" != "" ] || [ "$WHITELIST_COUNTRY" != "" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%USE_COUNTRY%" "include /etc/nginx/geoip.conf;"
+	if [ "$WHITELIST_COUNTRY" != "" ] ; then
+		replace_in_file "/etc/nginx/geoip.conf" "%DEFAULT%" "no"
+		replace_in_file "/etc/nginx/geoip.conf" "%COUNTRY%" "$(echo $WHITELIST_COUNTRY | sed 's/ / yes;\\n/g') yes;"
+	else
+		replace_in_file "/etc/nginx/geoip.conf" "%DEFAULT%" "yes"
+		replace_in_file "/etc/nginx/geoip.conf" "%COUNTRY%" "$(echo $BLACKLIST_COUNTRY | sed 's/ / no;\\n/g') no;"
+	fi
 	echo "0 0 2 * * /opt/scripts/geoip.sh" >> /etc/crontabs/root
 	if [ -f "/cache/geoip.mmdb" ] ; then
 		echo "[*] Copying cached geoip.mmdb ..."
@@ -69,7 +75,7 @@ if [ "$BLOCK_COUNTRY" != "" ] ; then
 		/opt/scripts/geoip.sh &
 	fi
 else
-	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_COUNTRY%" ""
+	replace_in_file "/etc/nginx/nginx.conf" "%USE_COUNTRY%" ""
 fi
 
 # block bad UA
