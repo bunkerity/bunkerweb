@@ -239,9 +239,9 @@ replace_in_file "${NGINX_PREFIX}server.conf" "%ALLOWED_METHODS%" "$ALLOWED_METHO
 
 # country ban
 if [ "$BLACKLIST_COUNTRY" != "" ] || [ "$WHITELIST_COUNTRY" != "" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_COUNTRY%" "include ${NGINX_PREFIX}geoip-server.conf;"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_COUNTRY%" "true"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_COUNTRY%" ""
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_COUNTRY%" "false"
 fi
 
 # block bad UA
