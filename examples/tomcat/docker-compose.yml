@@ -21,7 +21,7 @@ services:
       - USE_BROTLI=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://mytomcat:8080/sample
+      - REVERSE_PROXY_HOST=http://mytomcat:8080/sample/
 
   mytomcat:
     image: tomcat

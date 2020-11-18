@@ -26,7 +26,7 @@ services:
       - USE_WHITELIST_REVERSE=no
       - USE_BLACKLIST_IP=no
       - USE_BLACKLIST_REVERSE=no
-      - USE_FAIL2BAN=no
+      - USE_ANTIBOT=captcha
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_BROTLI=yes

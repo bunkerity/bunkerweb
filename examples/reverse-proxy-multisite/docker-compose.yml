@@ -11,7 +11,7 @@ services:
     volumes:
       - ./letsencrypt:/etc/letsencrypt
     environment:
-      - USE_MULTISITE=yes
+      - MULTISITE=yes
       - SERVER_NAME=app1.website.com app2.website.com # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes

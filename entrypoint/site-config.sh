@@ -131,7 +131,8 @@ if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
 	replace_in_file "${NGINX_PREFIX}php.conf" "%FASTCGI_PATH%" "$NGINX_PREFIX"
 	if [ "$MULTISITE" = "yes" ] ; then
-		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf 
+		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf
+		cp /etc/nginx/fastcgi_params ${NGINX_PREFIX}fastcgi_params
 	fi
 	replace_in_file "${NGINX_PREFIX}fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
 else
