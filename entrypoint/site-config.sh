@@ -147,11 +147,15 @@ else
         replace_in_file "${NGINX_PREFIX}server.conf" "%SERVE_FILES%" ""
 fi
 
-# remove server header
-if [ "$HEADER_SERVER" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%HEADER_SERVER%" ""
+# remove headers
+if [ "$REMOVE_HEADERS" != "" ] ; then
+	remove=""
+	for header in $REMOVE_HEADERS ; do
+		remove="${remove}more_clear_headers '$header';\n"
+	done
+	replace_in_file "${NGINX_PREFIX}server.conf" "%REMOVE_HEADERS%" "$remove"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%HEADER_SERVER%" "more_clear_headers 'Server';"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%REMOVE_HEADERS%" ""
 fi
 
 # X-Frame-Options header
