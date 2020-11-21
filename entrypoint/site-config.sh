@@ -198,6 +198,14 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%FEATURE_POLICY%" ""
 fi
 
+# Permissions-Policy header
+if [ "$PERMISSIONS_POLICY" != "" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%PERMISSIONS_POLICY%" "include ${NGINX_PREFIX}permissions-policy.conf;"
+	replace_in_file "${NGINX_PREFIX}permissions-policy.conf" "%PERMISSIONS_POLICY%" "$PERMISSIONS_POLICY"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%PERMISSIONS_POLICY%" ""
+fi
+
 # Content-Security-Policy header
 if [ "$CONTENT_SECURITY_POLICY" != "" ] ; then
         replace_in_file "${NGINX_PREFIX}server.conf" "%CONTENT_SECURITY_POLICY%" "include ${NGINX_PREFIX}content-security-policy.conf;"
