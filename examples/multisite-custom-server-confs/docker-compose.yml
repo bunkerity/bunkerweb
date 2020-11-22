@@ -31,6 +31,7 @@ services:
       - nc.website.com_LIMIT_REQ_BURST=60
       - nc.website.com_ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT|MKCOL|MOVE|COPY|PROPPATCH|REPORT
       - nc.website.com_X_FRAME_OPTIONS=SAMEORIGIN
+      - nc.website.com_FAIL2BAN_STATUS_CODE=400|401|403|405|444
     networks:
       - net1
       - net2

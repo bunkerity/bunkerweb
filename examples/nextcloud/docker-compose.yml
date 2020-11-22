@@ -27,12 +27,12 @@ services:
       - LIMIT_REQ_BURST=60
       - ALLOWED_METHODS=GET|POST|HEAD|PROPFIND|DELETE|PUT|MKCOL|MOVE|COPY|PROPPATCH|REPORT
       - X_FRAME_OPTIONS=SAMEORIGIN
-      - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_BROTLI=yes
+      - FAIL2BAN_STATUS_CODE=400|401|403|405|444
 
   mync:
-    image: nextcloud:stable-fpm
+    image: nextcloud:20-fpm
     restart: always
     volumes:
       - ./nc-files:/var/www/html
