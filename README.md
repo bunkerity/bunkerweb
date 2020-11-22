@@ -51,7 +51,7 @@ Fooling automated tools/scanners :
     + [HTTP](#http)
     + [Custom certificate](#custom-certificate)
     + [Self-signed certificate](#self-signed-certificate)
-    + [Misc](#misc-2)
+    + [Misc](#misc-1)
   * [ModSecurity](#modsecurity)
   * [Security headers](#security-headers)
   * [Blocking](#blocking)
@@ -66,7 +66,7 @@ Fooling automated tools/scanners :
   * [PHP](#php)
   * [Fail2ban](#fail2ban)
   * [ClamAV](#clamav)
-  * [Misc](#misc-3)
+  * [Misc](#misc-2)
 - [Include custom configurations](#include-custom-configurations)
 - [Cache data](#cache-data)
 - [Create your own image](#create-your-own-image)
@@ -90,7 +90,7 @@ Web files are stored in the /www directory, the container will serve files from 
 docker network create mynet
 docker run --network mynet \
            -p 80:8080 \
-           -v /path/to/web/files:/www:ro
+           -v /path/to/web/files:/www:ro \
            -e REMOTE_PHP=myphp \
            -e REMOTE_PHP_PATH=/app \
            bunkerity/bunkerized-nginx
