@@ -35,6 +35,9 @@ RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban c
     touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log && \
     chown nginx:nginx /var/log/nginx/*.log
 
+# Fix CVE-2020-28928
+RUN apk --no-cache add "musl-utils>1.1.24-r2"
+
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache
 
 EXPOSE 8080/tcp 8443/tcp
