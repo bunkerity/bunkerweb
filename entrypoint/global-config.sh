@@ -31,6 +31,9 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "include /etc/nginx/server.conf;"
 fi
 
+# custom log format
+replace_in_file "/etc/nginx/nginx.conf" "%LOG_FORMAT%" "$LOG_FORMAT"
+
 # proxy_cache zone
 if [ "$(has_value USE_PROXY_CACHE yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%PROXY_CACHE_PATH%" "proxy_cache_path /tmp/proxy_cache keys_zone=proxycache:${PROXY_CACHE_PATH_ZONE_SIZE} ${PROXY_CACHE_PATH_PARAMS};"

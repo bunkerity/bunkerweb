@@ -1,6 +1,7 @@
 #!/bin/bash
 
 MULTISITE="${MULTISITE-no}"
+LOG_FORMAT="${LOG_FORMAT-\$remote_addr - \$remote_user \$host [\$time_local] \"$request\" \$status \$body_bytes_sent \"\$http_referer\" \"\$http_user_agent\"}"
 HTTP_PORT="${HTTP_PORT-8080}"
 HTTPS_PORT="${HTTPS_PORT-8443}"
 MAX_CLIENT_SIZE="${MAX_CLIENT_SIZE-10m}"
