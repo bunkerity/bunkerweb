@@ -1,9 +1,5 @@
 #!/bin/sh
 
-if [ ! -f "/etc/nginx/map-referrer.conf" ] ; then
-	echo "" > /etc/nginx/map-referrer.conf
-fi
-
 BLACKLIST="$(curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-referrers.list)"
 DATA=""
 IFS=$'\n'

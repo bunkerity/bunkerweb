@@ -1,9 +1,5 @@
 #!/bin/sh
 
-if [ ! -f "/etc/nginx/map-user-agent.conf" ] ; then
-	echo "" > /etc/nginx/map-user-agent.conf
-fi
-
 BLACKLIST="$(curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list)"
 DATA=""
 IFS=$'\n'
