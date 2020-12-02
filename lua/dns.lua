@@ -10,7 +10,7 @@ function M.get_reverse()
 	end
 	local rdns = ""
 	local answers, err = r:reverse_query(ip)
-	if not answers.errcode then
+	if answers ~= nil and not answers.errcode then
 		for ak, av in ipairs(answers) do
 			if av.ptrdname then
 				rdns = av.ptrdname
@@ -28,9 +28,11 @@ function M.get_ips(fqdn)
 	end
 	local ips = {}
 	local answers, err, tries = r:query(fqdn, nil, {})
-	for ak, av in ipairs(answers) do
-		if av.address then
-			table.insert(ips, av.address)
+	if answers ~= nil then
+		for ak, av in ipairs(answers) do
+			if av.address then
+				table.insert(ips, av.address)
+			end
 		end
 	end
 	return ips
