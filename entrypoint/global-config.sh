@@ -95,6 +95,21 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" ""
 fi
 
+# block bad refferer
+if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" "include /etc/nginx/map-referrer.conf;"
+	echo "0 0 * * * /opt/scripts/referrers.sh" >> /etc/crontabs/root
+	if [ -f "/cache/map-referrer.conf" ] ; then
+		echo "[*] Copying cached map-referrer.conf ..."
+		cp /cache/map-referrer.conf /etc/nginx/map-referrer.conf
+	else
+		echo "[*] Downloading bad referrer list (in background) ..."
+		/opt/scripts/referrers.sh &
+	fi
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" ""
+fi
+
 # block TOR exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
 	echo "0 * * * * /opt/scripts/exit-nodes.sh" >> /etc/crontabs/root

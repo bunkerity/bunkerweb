@@ -264,6 +264,13 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_USER_AGENT%" ""
 fi
 
+# block bad referrer
+if [ "$BLOCK_REFERRER" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_REFERRER%" "include ${NGINX_PREFIX}block-referrer.conf;"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_REFERRER%" ""
+fi
+
 # block TOR exit nodes
 if [ "$BLOCK_TOR_EXIT_NODE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_TOR_EXIT_NODE%" "include /etc/nginx/block-tor-exit-node.conf;"
