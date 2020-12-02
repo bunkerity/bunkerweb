@@ -40,12 +40,14 @@ fi
 
 # let's encrypt setup
 if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
-	FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
-	DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
-	EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$FIRST_SERVER_NAME}"
-	if [ ! -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
-		echo "[*] Performing Let's Encrypt challenge ..."
-		certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port $HTTP_PORT
+	if [ "$MULTISITE" = "no" ] ; then
+		FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
+		DOMAINS_LETS_ENCRYPT=$(echo "$SERVER_NAME" | sed "s/ /,/g")
+		EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$FIRST_SERVER_NAME}"
+		if [ ! -f /etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem ] ; then
+			echo "[*] Performing Let's Encrypt challenge for $SERVER_NAME ..."
+			certbot certonly --standalone -n --preferred-challenges http -d "$DOMAINS_LETS_ENCRYPT" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port $HTTP_PORT
+		fi
 	fi
 	echo "0 0 * * * /opt/scripts/certbot-renew.sh > /dev/null 2>&1" >> /etc/crontabs/root
 fi
@@ -188,6 +190,7 @@ replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 
 # fail2ban setup
 if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then
+	echo "" > /etc/nginx/fail2ban-ip.conf
 	rm -rf /etc/fail2ban/jail.d/*.conf
 	cp /opt/fail2ban/nginx-action.local /etc/fail2ban/action.d/nginx-action.local
 	cp /opt/fail2ban/nginx-filter.local /etc/fail2ban/filter.d/nginx-filter.local

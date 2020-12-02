@@ -308,7 +308,16 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		replace_in_file "${NGINX_PREFIX}https.conf" "%STRICT_TRANSPORT_SECURITY%" ""
 	fi
 	if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
-		FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
+		if [ "$MULTISITE" = "no" ] ; then
+			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
+		else
+			FIRST_SERVER_NAME="$1"
+			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
+			if [ ! -f /etc/letsencrypt/live/${1}/fullchain.pem ] ; then
+				echo "[*] Performing Let's Encrypt challenge for $1 ..."
+				certbot certonly --standalone -n --preferred-challenges http -d "$1" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port $HTTP_PORT
+			fi
+		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/privkey.pem"
 	elif [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
