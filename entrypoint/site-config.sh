@@ -517,8 +517,7 @@ fi
 
 # fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
-	echo "" > ${NGINX_PREFIX}fail2ban-ip.conf
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_FAIL2BAN%" "include ${NGINX_PREFIX}fail2ban-ip.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_FAIL2BAN%" "include /etc/nginx/fail2ban-ip.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_FAIL2BAN%" ""
 fi
