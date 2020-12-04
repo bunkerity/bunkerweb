@@ -53,9 +53,16 @@ if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 			value=$(echo "$var" | sed "s/${name}=//")
 			host=$(echo "$name" | sed "s/URL/HOST/")
 			host_value=$(env | grep "^${host}=" | sed "s/${host}=//")
+			ws=$(echo "$name" | sed "s/URL/WS/")
+			ws_value=$(env | grep "^${ws}=" | sed "s/${ws}=//")
 			cp "${NGINX_PREFIX}reverse-proxy.conf" "${NGINX_PREFIX}reverse-proxy-${i}.conf"
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$value"
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
+			if [ "$ws_value" = "yes" ] ; then
+				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" "proxy_http_version 1.1;\nproxy_set_header Upgrade \$http_upgrade;\nproxy_set_header Connection \$connection_upgrade;\n"
+			else
+				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" ""
+			fi
 			i=$(($i + 1))
 		fi
 	done
