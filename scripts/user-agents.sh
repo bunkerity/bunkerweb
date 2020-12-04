@@ -1,6 +1,7 @@
 #!/bin/sh
 
 BLACKLIST="$(curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list)"
+BLACKLIST="${BLACKLIST}\n$(curl -s https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt)"
 DATA=""
 IFS=$'\n'
 for ua in $BLACKLIST ; do
