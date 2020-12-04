@@ -745,7 +745,7 @@ Default value : *yes*
 Context : *global*, *multisite*  
 When set to *yes*, the *secure* will be automatically added to cookies when using HTTPS.
 
-`STRICT_TRANSPORT_POLICY`  
+`STRICT_TRANSPORT_SECURITY`  
 Values : *max-age=expireTime [; includeSubDomains] [; preload]*  
 Default value : *max-age=31536000*  
 Context : *global*, *multisite*  
