@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import docker, datetime, subprocess, shutil
+import docker, datetime, subprocess, shutil, os
 
 def log(event) :
 	print("[" + datetime.datetime.now().replace(microsecond=0) + "] AUTOCONF - " + event)
@@ -13,7 +13,10 @@ def replace_in_file(file, old_str, new_str) :
 		f.write(data)
 
 def generate(vars) :
-	subprocess.run(["/opt/entrypoint/site-config.sh", vars["SERVER_NAME"]], env=vars)
+	vars_defaults = vars.copy()
+	vars_defaults.update(os.environ)
+	vars_defaults.update(vars)
+	subprocess.run(["/opt/entrypoint/site-config.sh", vars["SERVER_NAME"]], env=vars_defaults)
 	log("Generated config for " + vars["SERVER_NAME"])
 
 def activate(vars) :

@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/etc/letsencrypt
+    environment:
+      - SERVER_NAME=
+      - MULTISITE=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
+
+  myapp1:
+    image: node
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./js-app:/home/node/app
+    environment:
+      - NODE_ENV=production
+    command: bash -c "npm install express && node index.js"
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app1.domain.com"
+      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
+      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
+
+  myapp2:
+    image: node
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./js-app:/home/node/app
+    environment:
+      - NODE_ENV=production
+    command: bash -c "npm install express && node index.js"
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app2.domain.com"
+      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
+      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
+
+  myapp3:
+    image: node
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./js-app:/home/node/app
+    environment:
+      - NODE_ENV=production
+    command: bash -c "npm install express && node index.js"
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app3.domain.com"
+      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
+      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp3:3000"
