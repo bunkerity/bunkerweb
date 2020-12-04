@@ -266,16 +266,16 @@ fi
 
 # block bad UA
 if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_USER_AGENT%" "include ${NGINX_PREFIX}block-user-agent.conf;"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "true"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_USER_AGENT%" ""
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "false"
 fi
 
 # block bad referrer
 if [ "$BLOCK_REFERRER" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_REFERRER%" "include ${NGINX_PREFIX}block-referrer.conf;"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRER%" "true"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_REFERRER%" ""
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRER%" "false"
 fi
 
 # block TOR exit nodes
