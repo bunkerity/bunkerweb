@@ -90,6 +90,11 @@ if [ "$1" == "test" ] ; then
 	exit 1
 fi
 
+# start the autoconf manager
+if [ -f "/var/run/docker.sock" ] ; then
+	/opt/autoconf/autoconf.py &
+fi
+
 # display logs
 LOGS="/var/log/access.log /var/log/error.log"
 if [ "$USE_FAIL2BAN" = "yes" ] ; then

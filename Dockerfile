@@ -18,9 +18,11 @@ COPY fail2ban/ /opt/fail2ban
 COPY logs/ /opt/logs
 COPY lua/ /opt/lua
 COPY crowdsec/ /opt/crowdsec
+COPY autoconf/ /opt/autoconf
 
-RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd go jq mariadb-connector-c bash brotli && \
-    chmod +x /opt/entrypoint/* /opt/scripts/* && \
+RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd go jq mariadb-connector-c bash brotli py3-pip && \
+    pip3 install docker && \
+    chmod +x /opt/entrypoint/* /opt/scripts/* /opt/autoconf/autoconf.py && \
     mkdir /opt/entrypoint.d && \
     rm -f /var/log/nginx/* && \
     chown root:nginx /var/log/nginx && \
