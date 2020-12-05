@@ -26,9 +26,9 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app1.domain.com:/app
+      - ./web-files/app1.website.com:/app
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app1.domain.com" # replace with your domain
+      - "bunkerized-nginx.SERVER_NAME=app1.website.com" # replace with your domain
       - "bunkerized-nginx.REMOTE_PHP=myapp1"
       - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
 
@@ -36,9 +36,9 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app2.domain.com:/app
+      - ./web-files/app2.website.com:/app
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app2.domain.com" # replace with your domain
+      - "bunkerized-nginx.SERVER_NAME=app2.website.com" # replace with your domain
       - "bunkerized-nginx.REMOTE_PHP=myapp2"
       - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
 
@@ -46,8 +46,8 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app3.domain.com:/app
+      - ./web-files/app3.website.com:/app
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app3.domain.com" # replace with your domain
+      - "bunkerized-nginx.SERVER_NAME=app3.website.com" # replace with your domain
       - "bunkerized-nginx.REMOTE_PHP=myapp3"
       - "bunkerized-nginx.REMOTE_PHP_PATH=/app"

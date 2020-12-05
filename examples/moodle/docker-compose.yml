@@ -33,7 +33,7 @@ services:
     environment:
       - MOODLE_USERNAME=admin                # replace with your moodle admin username
       - MOODLE_PASSWORD=password             # replace with your moodle admin password
-      - MOODLE_EMAIL=moodle@website.com      # replace with your moodle admin email
+      - MOODLE_EMAIL=moodle@website.com       # replace with your moodle admin email
       - MOODLE_SITE_NAME=My Moodle           # replace with your moodle site name
       - MOODLE_DATABASE_HOST=mydb
       - MOODLE_DATABASE_NAME=moodle
