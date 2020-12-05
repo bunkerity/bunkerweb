@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/etc/letsencrypt
+      - ./web-files:/www:ro
+    environment:
+      - SERVER_NAME=                                   # must be left blank if you don't want to setup "static" conf
+      - MULTISITE=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+
+  myapp1:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app1.domain.com:/app
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app1.domain.com" # replace with your domain
+      - "bunkerized-nginx.REMOTE_PHP=myapp1"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+
+  myapp2:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app2.domain.com:/app
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app2.domain.com" # replace with your domain
+      - "bunkerized-nginx.REMOTE_PHP=myapp2"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+
+  myapp3:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app3.domain.com:/app
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app3.domain.com" # replace with your domain
+      - "bunkerized-nginx.REMOTE_PHP=myapp3"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"

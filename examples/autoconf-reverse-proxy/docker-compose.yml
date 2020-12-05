@@ -9,10 +9,10 @@ services:
       - 80:8080
       - 443:8443
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/etc/letsencrypt
     environment:
-      - SERVER_NAME=
+      - SERVER_NAME=                                              # must be left blank if you don't want to setup "static" conf
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
@@ -28,7 +28,7 @@ services:
     environment:
       - NODE_ENV=production
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app1.domain.com"
+      - "bunkerized-nginx.SERVER_NAME=app1.domain.com"            # replace with your domain
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
 
@@ -38,7 +38,7 @@ services:
     environment:
       - NODE_ENV=production
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app2.domain.com"
+      - "bunkerized-nginx.SERVER_NAME=app2.domain.com"            # replace with your domain
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
 
@@ -48,6 +48,6 @@ services:
     environment:
       - NODE_ENV=production
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app3.domain.com"
+      - "bunkerized-nginx.SERVER_NAME=app3.domain.com"            # replace with your domain
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp3:3000"
