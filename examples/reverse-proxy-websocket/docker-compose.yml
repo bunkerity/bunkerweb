@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+
+  myreverse:
+    image: bunkerity/bunkerized-nginx:dev
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs:ro                      # redirect /app1 and /app2 to /app1/ and /app2/
+    environment:
+      - SERVER_NAME=www.website.com                          # replace with your domain
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - USE_PROXY_CACHE=yes
+      - USE_GZIP=yes
+      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/ws/
+      - REVERSE_PROXY_HOST=http://myws:8010/
+      - REVERSE_PROXY_WS=yes
+
+  myws:
+    image: ksdn117/web-socket-test
+    restart: always
