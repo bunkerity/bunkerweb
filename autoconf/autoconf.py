@@ -3,7 +3,7 @@
 import docker, datetime, subprocess, shutil, os
 
 def log(event) :
-	print("[" + datetime.datetime.now().replace(microsecond=0) + "] AUTOCONF - " + event)
+	print("[" + str(datetime.datetime.now().replace(microsecond=0)) + "] AUTOCONF - " + event, flush=True)
 
 def replace_in_file(file, old_str, new_str) :
 	with open(file) as f :
@@ -20,12 +20,12 @@ def generate(vars) :
 	log("Generated config for " + vars["SERVER_NAME"])
 
 def activate(vars) :
-	replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;")
+	replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n}")
 	subprocess.run(["/usr/sbin/nginx", "-s", "reload"])
 	log("Activated config for " + vars["SERVER_NAME"])
 
 def deactivate(vars) :
-	replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;", "")
+	replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n", "")
 	subprocess.run(["/usr/sbin/nginx", "-s", "reload"])
 	log("Deactivated config for " + vars["SERVER_NAME"])
 
@@ -36,7 +36,7 @@ def remove(vars) :
 def process(id, event, vars) :
 	global containers
 	if event == "create" :
-		generate(labels)
+		generate(vars)
 		containers.append(id)
 	elif event == "start" :
 		activate(vars)
@@ -55,7 +55,7 @@ for container in client.containers.list(all=True, filters={"label" : "bunkerized
 
 	# Extract bunkerized-nginx.* labels
 	labels = container.labels.copy()
-	for label in labels :
+	for label in container.labels :
 		if not label.startswith("bunkerized-nginx.") :
 			del labels[label]
 	# Remove bunkerized-nginx. on labels
@@ -64,7 +64,7 @@ for container in client.containers.list(all=True, filters={"label" : "bunkerized
 	# Container is restarting or running
 	if container.status == "restarting" or container.status == "running" :
 		process(container.id, "create", vars)
-		process(container.id, "activate", vars)
+		process(container.id, "start", vars)
 
 	# Container is created or exited
 	if container.status == "created" or container.status == "exited" :
@@ -74,28 +74,28 @@ for event in client.events(decode=True) :
 
 	# Process only container events
 	if event["Type"] != "container" :
-			continue
+		continue
 
 	# Check if a bunkerized-nginx.* label is present
 	present = False
 	for label in event["Actor"]["Attributes"] :
-			if label.startswith("bunkerized-nginx.") :
-					present = True
-					break
+		if label.startswith("bunkerized-nginx.") :
+			present = True
+			break
 	if not present :
-			continue
+		continue
 
 	# Only process if we generated a config
 	if not event["id"] in containers and event["Action"] != "create" :
-			continue
+		continue
 
 	# Extract bunkerized-nginx.* labels
 	labels = event["Actor"]["Attributes"].copy()
-	for label in labels :
-			if not label.startswith("bunkerized-nginx.") :
-					del labels[label]
+	for label in event["Actor"]["Attributes"] :
+		if not label.startswith("bunkerized-nginx.") :
+			del labels[label]
 	# Remove bunkerized-nginx. on labels
 	vars = { k.replace("bunkerized-nginx.", "", 1) : v for k, v in labels.items()}
 
 	# Process the event
-	process(event["id"], event["Action"], vars
+	process(event["id"], event["Action"], vars)

@@ -23,42 +23,30 @@ services:
       - USE_REVERSE_PROXY=yes
 
   myapp1:
-    image: node
+    build: js-app
     restart: always
-    working_dir: /home/node/app
-    volumes:
-      - ./js-app:/home/node/app
     environment:
       - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
     labels:
       - "bunkerized-nginx.SERVER_NAME=app1.domain.com"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
 
   myapp2:
-    image: node
+    build: js-app
     restart: always
-    working_dir: /home/node/app
-    volumes:
-      - ./js-app:/home/node/app
     environment:
       - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
     labels:
       - "bunkerized-nginx.SERVER_NAME=app2.domain.com"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
 
   myapp3:
-    image: node
+    build: js-app
     restart: always
-    working_dir: /home/node/app
-    volumes:
-      - ./js-app:/home/node/app
     environment:
       - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
     labels:
       - "bunkerized-nginx.SERVER_NAME=app3.domain.com"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"

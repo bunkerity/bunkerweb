@@ -67,10 +67,14 @@ crond
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
 
+# list of log files to display
+LOGS="/var/log/access.log /var/log/error.log"
+
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	echo "[*] Running fail2ban ..."
 	fail2ban-server > /dev/null
+	LOGS="$LOGS /var/log/fail2ban.log"
 fi
 
 # start crowdsec
@@ -91,15 +95,13 @@ if [ "$1" == "test" ] ; then
 fi
 
 # start the autoconf manager
-if [ -f "/var/run/docker.sock" ] ; then
-	/opt/autoconf/autoconf.py &
+if [ -S "/var/run/docker.sock" ] ; then
+	echo "[*] Running autoconf ..."
+	/opt/autoconf/autoconf.py > /var/log/autoconf.log 2>&1 &
+	LOGS="$LOGS /var/log/autoconf.log"
 fi
 
 # display logs
-LOGS="/var/log/access.log /var/log/error.log"
-if [ "$USE_FAIL2BAN" = "yes" ] ; then
-	LOGS="$LOGS /var/log/fail2ban.log"
-fi
 tail -F $LOGS &
 wait $!
 
