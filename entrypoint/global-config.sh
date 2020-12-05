@@ -206,6 +206,34 @@ fi
 list=$(spaces_to_lua "$DNSBL_LIST")
 replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 
+# disable default site
+if [ "$DISABLE_DEFAULT_SERVER" = "yes" ] && [ "$MULTISITE" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%MULTISITE_DISABLE_DEFAULT_SERVER%" "include /etc/nginx/multisite-disable-default-server.conf;"
+	replace_in_file "/etc/nginx/multisite-disable-default-server.conf" "%LISTEN_HTTP%" "listen 0.0.0.0:${HTTP_PORT} default_server;"
+	if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] || [ "$(has_value USE_CUSTOM_HTTPS yes)" != "" ] || [ "$(has_value GENERATE_SELF_SIGNED_SSL yes)" != "" ] ; then
+		replace_in_file "/etc/nginx/multisite-disable-default-server.conf" "%USE_HTTPS%" "include /etc/nginx/multisite-disable-default-server-https.conf;"
+		replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%HTTPS_PORT%" "$HTTPS_PORT"
+		if [ "$(has_value HTTP2 yes)" != "" ] ; then
+			replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%HTTP2%" "http2"
+		else
+			replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%HTTP2%" ""
+		fi
+		replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%HTTPS_PROTOCOLS%" "$HTTPS_PROTOCOLS"
+		if [ "$(echo $HTTPS_PROTOCOLS | grep TLSv1.2)" != "" ] ; then
+			replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%SSL_DHPARAM%" "ssl_dhparam /etc/nginx/dhparam;"
+			replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%SSL_CIPHERS%" "ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;"
+		else
+			replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%SSL_DHPARAM%" ""
+			replace_in_file "/etc/nginx/multisite-disable-default-server-https.conf" "%SSL_CIPHERS%" ""
+		fi
+		openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/default-key.pem -out /etc/nginx/default-cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
+	else
+		replace_in_file "/etc/nginx/multisite-disable-default-server.conf" "%USE_HTTPS%" ""
+	fi
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%MULTISITE_DISABLE_DEFAULT_SERVER%" ""
+fi
+
 # fail2ban setup
 if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then
 	echo "" > /etc/nginx/fail2ban-ip.conf

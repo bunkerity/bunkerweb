@@ -235,14 +235,10 @@ else
 fi
 
 # disable default server
-if [ "$DISABLE_DEFAULT_SERVER" = "yes" ] ; then
+if [ "$DISABLE_DEFAULT_SERVER" = "yes" ] && [ "$MULTISITE" != "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%DISABLE_DEFAULT_SERVER%" "include ${NGINX_PREFIX}disable-default-server.conf;"
-	if [ "$MULTISITE" == "yes" ] ; then
-		replace_in_file "${NGINX_PREFIX}disable-default-server.conf" "%SERVER_NAME%" "$1"
-	else
-		SERVER_NAME_PIPE=$(echo $SERVER_NAME | sed "s/ /|/g")
-		replace_in_file "${NGINX_PREFIX}disable-default-server.conf" "%SERVER_NAME%" "$SERVER_NAME_PIPE"
-	fi
+	SERVER_NAME_PIPE=$(echo $SERVER_NAME | sed "s/ /|/g")
+	replace_in_file "${NGINX_PREFIX}disable-default-server.conf" "%SERVER_NAME%" "$SERVER_NAME_PIPE"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%DISABLE_DEFAULT_SERVER%" ""
 fi
