@@ -64,6 +64,9 @@ rsyslogd
 crond
 
 # start nginx
+if [ -f "/tmp/nginx.pid" ] ; then
+	nginx -s quit
+fi
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
 
@@ -97,6 +100,7 @@ fi
 # start the autoconf manager
 if [ -S "/var/run/docker.sock" ] ; then
 	echo "[*] Running autoconf ..."
+	touch /var/log/autoconf.log
 	/opt/autoconf/autoconf.py > /var/log/autoconf.log 2>&1 &
 	LOGS="$LOGS /var/log/autoconf.log"
 fi

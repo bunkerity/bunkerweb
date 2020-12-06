@@ -28,7 +28,10 @@ RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban c
     chown root:nginx /var/log/nginx && \
     chmod 750 /var/log/nginx && \
     touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log && \
-    chown nginx:nginx /var/log/nginx/*.log
+    chown nginx:nginx /var/log/nginx/*.log && \
+    mkdir /acme-challenge && \
+    chown root:nginx /acme-challenge && \
+    chmod 750 /acme-challenge
 
 # Fix CVE-2020-28928
 RUN apk --no-cache add "musl-utils>1.1.24-r2"

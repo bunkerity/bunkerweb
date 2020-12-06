@@ -22,6 +22,9 @@ if [ "$MULTISITE" = "yes" ] ; then
 	ROOT_FOLDER="${ROOT_FOLDER}/$1"
 fi
 
+# generate Let's Encrypt certificate before copying configs
+# in case we are in autoconf mode and nginx is already running
+
 # copy stub confs
 if [ "$MULTISITE" = "yes" ] ; then
 	mkdir "$NGINX_PREFIX"
@@ -138,7 +141,7 @@ if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%FASTCGI_PATH%" "include ${NGINX_PREFIX}fastcgi.conf;"
 	replace_in_file "${NGINX_PREFIX}php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
 	if [ "$MULTISITE" = "yes" ] ; then
-		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf
+		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf && chown root:nginx ${NGINX_PREFIX}fastcgi.conf
 	fi
 	replace_in_file "${NGINX_PREFIX}fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
 else
@@ -322,20 +325,23 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
 			FIRST_SERVER_NAME="$1"
-			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
 			if [ ! -f /etc/letsencrypt/live/${1}/fullchain.pem ] ; then
 				echo "[*] Performing Let's Encrypt challenge for $1 ..."
-				certbot certonly --standalone -n --preferred-challenges http -d "$1" --email "$EMAIL_LETS_ENCRYPT" --agree-tos --http-01-port $HTTP_PORT
+				EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
+				/opt/scripts/certbot-new.sh "$1" "$EMAIL_LETS_ENCRYPT"
 			fi
 		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/privkey.pem"
+		replace_in_file "${NGINX_PREFIX}https.conf" "%LETS_ENCRYPT_WEBROOT%" "include ${NGINX_PREFIX}lets-encrypt-webroot.conf;"
 	elif [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "$CUSTOM_HTTPS_CERT"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "$CUSTOM_HTTPS_KEY"
+		replace_in_file "${NGINX_PREFIX}https.conf" "%LETS_ENCRYPT_WEBROOT%" ""
 	elif [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/nginx/self-signed-ssl/cert.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/nginx/self-signed-ssl/key.pem"
+		replace_in_file "${NGINX_PREFIX}https.conf" "%LETS_ENCRYPT_WEBROOT%" ""
 	fi
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_HTTPS%" ""
