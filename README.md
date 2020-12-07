@@ -566,6 +566,12 @@ Context : *global*
 If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
 You will need to redirect the 80 port to 8080 port inside container and also set the `SERVER_NAME` environment variable.
 
+`EMAIL_LETS_ENCRYPT`  
+Values : *contact@yourdomain.com*  
+Default value : *contact@yourdomain.com*  
+Context : *global*, *multisite* 
+Define the contact email address declare in the certificate.
+
 ### HTTP
 
 `LISTEN_HTTP`  
