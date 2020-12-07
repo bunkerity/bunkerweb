@@ -7,6 +7,6 @@ if [ -f /etc/nginx/geoip.mmdb.gz ] ; then
 	gunzip -f /etc/nginx/geoip.mmdb.gz
 	cp /etc/nginx/geoip.mmdb /cache
 	if [ -f /tmp/nginx.pid ] ; then
-		/usr/sbin/nginx -s reload
+		/usr/sbin/nginx -s reload > /dev/null 2>&1
 	fi
 fi

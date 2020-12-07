@@ -11,5 +11,5 @@ echo -e "map \$http_referer \$bad_referrer { hostnames; default no; $DATA }" > /
 cp /etc/nginx/map-referrer.conf /cache
 
 if [ -f /tmp/nginx.pid ] ; then
-	/usr/sbin/nginx -s reload
+	/usr/sbin/nginx -s reload > /dev/null 2>&1
 fi

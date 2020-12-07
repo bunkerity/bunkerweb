@@ -13,5 +13,5 @@ echo -e "map \$http_user_agent \$bad_user_agent { default no; $DATA_ESCAPED }" >
 cp /etc/nginx/map-user-agent.conf /cache
 
 if [ -f /tmp/nginx.pid ] ; then
-	/usr/sbin/nginx -s reload
+	/usr/sbin/nginx -s reload > /dev/null 2>&1
 fi

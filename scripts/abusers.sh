@@ -10,5 +10,5 @@ while read entry ; do
 done
 cp /etc/nginx/block-abusers.conf /cache
 if [ -f /tmp/nginx.pid ] ; then
-	/usr/sbin/nginx -s reload
+	/usr/sbin/nginx -s reload > /dev/null 2>&1
 fi

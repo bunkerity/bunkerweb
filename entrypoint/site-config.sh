@@ -22,9 +22,6 @@ if [ "$MULTISITE" = "yes" ] ; then
 	ROOT_FOLDER="${ROOT_FOLDER}/$1"
 fi
 
-# generate Let's Encrypt certificate before copying configs
-# in case we are in autoconf mode and nginx is already running
-
 # copy stub confs
 if [ "$MULTISITE" = "yes" ] ; then
 	mkdir "$NGINX_PREFIX"

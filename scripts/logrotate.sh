@@ -7,5 +7,5 @@ pkill -HUP rsyslogd
 fail2ban-client flushlogs
 
 if [ -f /tmp/nginx.pid ] ; then
-        /usr/sbin/nginx -s reload
+        /usr/sbin/nginx -s reload > /dev/null 2>&1
 fi

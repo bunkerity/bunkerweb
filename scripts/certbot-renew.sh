@@ -10,5 +10,5 @@ find /etc/letsencrypt -type d -exec chmod 750 {} \;
 
 # reload nginx
 if [ -f /tmp/nginx.pid ] ; then
-	/usr/sbin/nginx -s reload
+	/usr/sbin/nginx -s reload > /dev/null 2>&1
 fi
