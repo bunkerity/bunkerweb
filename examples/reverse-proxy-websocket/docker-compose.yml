@@ -10,7 +10,6 @@ services:
       - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs:ro                      # redirect /app1 and /app2 to /app1/ and /app2/
     environment:
       - SERVER_NAME=www.website.com                          # replace with your domain
       - SERVE_FILES=no

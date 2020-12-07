@@ -19,6 +19,7 @@ Non-exhaustive list of features :
 - Prevent bruteforce attacks with rate limiting
 - Detect bad files with ClamAV
 - Easy to configure with environment variables
+- Automatic configuration with container labels
 
 Fooling automated tools/scanners :
 
@@ -35,6 +36,7 @@ Fooling automated tools/scanners :
   * [As a reverse proxy](#as-a-reverse-proxy)
   * [Behind a reverse proxy](#behind-a-reverse-proxy)
   * [Multisite](#multisite)
+  * [Automatic configuration](#automatic-configuration)
   * [Antibot challenge](#antibot-challenge)
 - [Tutorials and examples](#tutorials-and-examples)
 - [List of environment variables](#list-of-environment-variables)
@@ -95,7 +97,7 @@ docker run --network mynet \
            -e REMOTE_PHP_PATH=/app \
            bunkerity/bunkerized-nginx
 docker run --network mynet \
-           --name=myphp \
+           --name myphp \
            -v /path/to/web/files:/app \
            php:fpm
 ```
@@ -211,6 +213,45 @@ The */where/are/web/files* directory should have a structure like this :
     └── ...
 ```
 
+## Automatic configuration
+
+**This feature exposes, for now, a security risk because you need to mount the docker socket inside the container. You can test it but you should not use it in servers facing the internet.**  
+
+The downside of using environment variables is that you need to recreate a new container each time you want to add or remove aweb service. An alternative is to tell bunkerized-nginx to listen for Docker events by mounting the socket inside the container :  
+
+```shell
+docker network create mynet
+
+docker run -p 80:8080 \
+           -p 443:8443 \
+           --network mynet \
+           -v /where/to/save/certificates:/etc/letsencrypt \
+           -v /where/are/web/files:/www:ro \
+           -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -e SERVER_NAME= \
+           -e MULTISITE=yes \
+           -e AUTO_LETS_ENCRYPT=yes \
+           -e REDIRECT_HTTP_TO_HTTPS=yes \
+           bunkerity/bunkerized-nginx
+```
+
+Please note by setting `SERVER_NAME` to nothing bunkerized-nginx won't create any server block.
+
+You can now create a new container and use labels to dynamically configure bunkerized-nginx :
+
+```shell
+docker run --network mynet \
+           --name myapp \
+           -v /where/are/web/files/app.domain.com:/app \
+           -l bunkerized-nginx.SERVER_NAME=app.domain.com \
+           -l bunkerized-nginx.REMOTE_PHP=myapp \
+           -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+           bunkerity/bunkerized-nginx
+```
+
+Labels for automatic configuration are the same as environment variables but with the "bunkerized-nginx." prefix.
+
+
 ## Antibot challenge
 
 ```shell
@@ -268,11 +309,11 @@ Values : *yes* | *no*
 Default value : *yes*  
 Context : *global*, *multisite*  
 If set to yes, nginx will serve files from /www directory within the container.  
-A use case to not serving files is when you setup bunkerized-nginx as a reverse proxy via a custom configuration.
+A use case to not serving files is when you setup bunkerized-nginx as a reverse proxy.
 
 `DNS_RESOLVERS`  
 Values : *\<two IP addresses separated with a space\>*  
-Default value : *127.0.0.11 8.8.8.8*  
+Default value : *127.0.0.11*  
 Context : *global*  
 The IP addresses of the DNS resolvers to use when performing DNS lookups.
 
@@ -281,6 +322,12 @@ Values : *\<any valid path to web files\>
 Default value : */www*  
 Context : *global*  
 The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
+
+`LOG_FORMAT`  
+Values : *\<any values accepted by the log_format directive\>*  
+Default value : *$remote_addr - $remote_user $host \[$time_local\] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"*  
+Context : *global*  
+The log format used by nginx to generate logs. More info [here](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format).
 
 `HTTP_PORT`  
 Values : *\<any valid port greater than 1024\>*  
@@ -370,6 +417,13 @@ Default value :
 Context : *global*, *multisite*  
 Only valid when `USE_REVERSE_PROXY` is set to *yes*. Let's you define the proxy_pass destination to use when acting as a reverse proxy.  
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_HOST_1`, `REVERSE_PROXY_HOST_2`, `REVERSE_PROXY_HOST_3`, ...
+
+`REVERSE_PROXY_WS`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*, *multisite*  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the corresponding `REVERSE_PROXY_HOST` is a WebSocket server.  
+You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_WS_1`, `REVERSE_PROXY_WS_2`, `REVERSE_PROXY_WS_3`, ...
 
 `PROXY_REAL_IP`  
 Values : *yes* | *no*  
@@ -539,7 +593,7 @@ The key used to uniquely identify a cached response when `USE_PROXY_CACHE` is se
 
 `PROXY_CACHE_VALID`  
 Values : \<*status=time list separated with space*\>  
-Default value : *200=10m 301=10m 301=1h any=1m*  
+Default value : *200=10m 301=10m 302=1h*  
 Context : *global*, *multisite*  
 Define the caching time depending on the HTTP status code (list of status=time separated with space) when `USE_PROXY_CACHE` is set to *yes*.
 
@@ -562,7 +616,7 @@ Conditions that must be met to bypass the cache when `USE_PROXY_CACHE` is set to
 `AUTO_LETS_ENCRYPT`  
 Values : *yes* | *no*  
 Default value : *no*  
-Context : *global*  
+Context : *global*, *multisite*  
 If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
 You will need to redirect the 80 port to 8080 port inside container and also set the `SERVER_NAME` environment variable.
 
@@ -816,7 +870,7 @@ Values : *yes* | *no*
 Default value : *yes*
 Context : *global*, *multisite*  
 If set to yes, block clients with "bad" user agent.  
-Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list).
+Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list) and [here](https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt).
 
 `BLOCK_TOR_EXIT_NODE`  
 Values : *yes* | *no*  
@@ -838,6 +892,13 @@ Default value : *yes*
 Context : *global*, *multisite*  
 Is set to yes, will block known abusers.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_abusers_30d).
+
+`BLOCK_REFERRER`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+Is set to yes, will block known bad referrer header.  
+Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-referrers.list).
 
 ### DNSBL
 
