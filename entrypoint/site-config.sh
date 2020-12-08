@@ -424,11 +424,13 @@ replace_in_file "${NGINX_PREFIX}server.conf" "%ERRORS%" "$ERRORS"
 if [ "$USE_AUTH_BASIC" = "yes" ] ; then
 	if [ "$AUTH_BASIC_LOCATION" = "sitewide" ] ; then
 		replace_in_file "${NGINX_PREFIX}server.conf" "%AUTH_BASIC%" "include ${NGINX_PREFIX}auth-basic-sitewide.conf;"
-		replace_in_file "${NGINX_PREFIX}auth-basic-sitewide.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+		replace_in_file "${NGINX_PREFIX}auth-basic-sitewide.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT"
+		replace_in_file "${NGINX_PREFIX}auth-basic-sitewide.conf" "%NGINX_PREFIX%" "$NGINX_PREFIX"
 	else
 		replace_in_file "${NGINX_PREFIX}server.conf" "%AUTH_BASIC%" "include ${NGINX_PREFIX}auth-basic.conf;"
-		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION";
-		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION"
+		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT"
+		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%NGINX_PREFIX%" "$NGINX_PREFIX"
 	fi
 	htpasswd -b -B -c ${NGINX_PREFIX}.htpasswd "$AUTH_BASIC_USER" "$AUTH_BASIC_PASSWORD"
 else
