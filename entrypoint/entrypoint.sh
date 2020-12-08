@@ -27,6 +27,23 @@ function trap_exit() {
 }
 trap "trap_exit" TERM INT
 
+# trap SIGHUP
+function trap_reload() {
+	echo "[*] Catched reload operation"
+	if [ -f /tmp/nginx.pid ] ; then
+		echo "[*] Reloading nginx ..."
+		/usr/sbin/nginx -s reload
+		if [ $? -eq 0 ] ; then
+			echo "[*] Reload succesfull"
+		else
+			echo "[!] Reload failed"
+		fi
+	else
+		echo "[!] Ignored reload operation because nginx is not running"
+	fi
+}
+trap "trap_reload" HUP
+
 # do the configuration magic if needed
 if [ ! -f "/opt/installed" ] ; then
 	echo "[*] Configuring bunkerized-nginx ..."
