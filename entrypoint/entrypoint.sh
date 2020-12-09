@@ -30,6 +30,9 @@ trap "trap_exit" TERM INT
 # trap SIGHUP
 function trap_reload() {
 	echo "[*] Catched reload operation"
+	if [ "$MULTISITE" = "yes" ] ; then
+		/opt/entrypoint/multisite-config.sh
+	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
 		/usr/sbin/nginx -s reload
@@ -53,6 +56,7 @@ if [ ! -f "/opt/installed" ] ; then
 			/opt/entrypoint/site-config.sh "$server"
 			echo "[*] Multi site - $server configuration done"
 		done
+		/opt/entrypoint/multisite-config.sh
 	else
 		/opt/entrypoint/site-config.sh
 		echo "[*] Single site - $SERVER_NAME configuration done"
@@ -66,13 +70,6 @@ fi
 chown -R root:nginx /etc/nginx/
 chmod -R 740 /etc/nginx/
 find /etc/nginx -type d -exec chmod 750 {} \;
-
-# fix let's encrypt rights
-if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
-	chown -R root:nginx /etc/letsencrypt
-	chmod -R 740 /etc/letsencrypt
-	find /etc/letsencrypt -type d -exec chmod 750 {} \;
-fi
 
 # start rsyslogd
 rsyslogd

@@ -32,23 +32,26 @@ def process(container, event) :
 			else :
 				utils.log("[!] Can't generate config for " + vars["SERVER_NAME"])
 		elif event == "start" :
-			containers[container.id].reload()
-			if config.activate(instances, vars) :
-				utils.log("[*] Activated config for " + vars["SERVER_NAME"])
-			else :
-				utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
+			if container.id in containers :
+				containers[container.id].reload()
+				if config.activate(instances, vars) :
+					utils.log("[*] Activated config for " + vars["SERVER_NAME"])
+				else :
+					utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
 		elif event == "die" :
-			containers[container.id].reload()
-			if config.deactivate(instances, vars) :
-				utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
-			else :
-				utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
+			if container.id in containers :
+				containers[container.id].reload()
+				if config.deactivate(instances, vars) :
+					utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
+				else :
+					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
 		elif event == "destroy" :
-			del containers[container.id]
-			if config.remove(vars) :
-				utils.log("[*] Removed config for " + vars["SERVER_NAME"])
-			else :
-				utils.log("[!] Can't remove config for " + vars["SERVER_NAME"])
+			if container.id in containers :
+				del containers[container.id]
+				if config.remove(vars) :
+					utils.log("[*] Removed config for " + vars["SERVER_NAME"])
+				else :
+					utils.log("[!] Can't remove config for " + vars["SERVER_NAME"])
 
 # Connect to the endpoint
 endpoint = "/var/run/docker.sock"

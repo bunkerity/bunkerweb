@@ -137,9 +137,6 @@ if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" "include ${NGINX_PREFIX}php.conf;"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%FASTCGI_PATH%" "include ${NGINX_PREFIX}fastcgi.conf;"
 	replace_in_file "${NGINX_PREFIX}php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
-	if [ "$MULTISITE" = "yes" ] ; then
-		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf && chown root:nginx ${NGINX_PREFIX}fastcgi.conf
-	fi
 	replace_in_file "${NGINX_PREFIX}fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" ""
@@ -322,11 +319,8 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
 			FIRST_SERVER_NAME="$1"
-			if [ ! -f /etc/letsencrypt/live/${1}/fullchain.pem ] ; then
-				echo "[*] Performing Let's Encrypt challenge for $1 ..."
-				EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
-				/opt/scripts/certbot-new.sh "$1" "$EMAIL_LETS_ENCRYPT"
-			fi
+			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
+			echo -n "$EMAIL_LETS_ENCRYPT" > ${NGINX_PREFIX}email-lets-encrypt.txt
 		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/privkey.pem"
@@ -362,24 +356,22 @@ fi
 if [ "$USE_MODSECURITY" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_MODSECURITY%" "include ${NGINX_PREFIX}modsecurity.conf;"
-	modsec_custom=""
-	if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
-		modsec_custom="include /modsec-confs/*.conf\n"
+	if [ "$MULTISITE" != "yes" ] ; then
+		modsec_custom=""
+		if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
+			modsec_custom="include /modsec-confs/*.conf\n"
+		fi
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	fi
-	if [ "$MULTISITE" = "yes" ] && ls /modsec-confs/${1}/*.conf > /dev/null 2>&1 ; then
-		modsec_custom="${modsec_custom}include /modsec-confs/${1}/*.conf\n"
-	fi
-	replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
-		modsec_crs_custom=""
-		if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
-			modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
+		if [ "$MULTISITE" != "yes" ] ; then
+			modsec_crs_custom=""
+			if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
+				modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
+			fi
+			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		fi
-		if [ "$MULTISITE" = "yes" ] && ls /modsec-crs-confs/${1}/*.conf > /dev/null 2>&1 ; then
-			modsec_crs_custom="${modsec_custom}include /modsec-crs-confs/${1}/*.conf\n"
-		fi
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
 	else
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" ""

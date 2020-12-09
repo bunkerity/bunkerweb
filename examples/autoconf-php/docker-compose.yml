@@ -9,9 +9,9 @@ services:
       - 80:8080
       - 443:8443
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/etc/letsencrypt
       - ./web-files:/www:ro
+      - autoconf:/etc/nginx
     environment:
       - SERVER_NAME=                                   # must be left blank if you don't want to setup "static" conf
       - MULTISITE=yes
@@ -21,6 +21,15 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_BROTLI=yes
+    labels:
+      - "bunkerized-nginx.AUTOCONF"
+
+  myautoconf:
+    image: bunkerity/bunkerized-nginx:autoconf
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - autoconf:/etc/nginx
 
   myapp1:
     image: php:fpm
@@ -51,3 +60,6 @@ services:
       - "bunkerized-nginx.SERVER_NAME=app3.website.com" # replace with your domain
       - "bunkerized-nginx.REMOTE_PHP=myapp3"
       - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+
+volumes:
+  autoconf:
