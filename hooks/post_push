@@ -3,10 +3,12 @@
 curl -Lo manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
 chmod +x manifest-tool
 
-VERSION=$(cat VERSION | tr -d '\n')
-if [ "$SOURCE_BRANCH" = "dev" ] ; then
-	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx:dev-ARCHVARIANT --target bunkerity/bunkerized-nginx:dev
-elif [ "$SOURCE_BRANCH" = "master" ] ; then
-	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx:ARCHVARIANT --target bunkerity/bunkerized-nginx:${VERSION}
-	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx:ARCHVARIANT --target bunkerity/bunkerized-nginx:latest
-fi
+echo "$DOCKER_REPO"
+
+#VERSION=$(cat VERSION | tr -d '\n')
+#if [ "$SOURCE_BRANCH" = "dev" ] ; then
+#	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx:dev-ARCHVARIANT --target bunkerity/bunkerized-nginx:dev
+#elif [ "$SOURCE_BRANCH" = "master" ] ; then
+#	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx:ARCHVARIANT --target bunkerity/bunkerized-nginx:${VERSION}
+#	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx:ARCHVARIANT --target bunkerity/bunkerized-nginx:latest
+#fi

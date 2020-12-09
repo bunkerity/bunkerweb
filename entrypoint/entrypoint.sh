@@ -111,14 +111,6 @@ if [ "$1" == "test" ] ; then
 	exit 1
 fi
 
-# start the autoconf manager
-if [ -S "/var/run/docker.sock" ] ; then
-	echo "[*] Running autoconf ..."
-	touch /var/log/autoconf.log
-	/opt/autoconf/autoconf.py > /var/log/autoconf.log 2>&1 &
-	LOGS="$LOGS /var/log/autoconf.log"
-fi
-
 # display logs
 tail -F $LOGS &
 wait $!
