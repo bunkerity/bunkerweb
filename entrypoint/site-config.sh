@@ -360,7 +360,7 @@ fi
 
 # ModSecurity config
 if [ "$USE_MODSECURITY" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
+	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}modsecurity-rules.conf"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_MODSECURITY%" "include ${NGINX_PREFIX}modsecurity.conf;"
 	modsec_custom=""
 	if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
