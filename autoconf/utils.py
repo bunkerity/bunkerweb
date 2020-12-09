@@ -3,7 +3,7 @@
 import datetime
 
 def log(event) :
-	print("[" + str(datetime.datetime.now().replace(microsecond=0)) + "] AUTOCONF - " + event, flush=True)
+	print("[" + str(datetime.datetime.now().replace(microsecond=0)) + "] " + event, flush=True)
 
 def replace_in_file(file, old_str, new_str) :
 	with open(file) as f :

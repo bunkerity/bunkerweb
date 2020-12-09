@@ -25,7 +25,7 @@ services:
       - "bunkerized-nginx.AUTOCONF"
 
   myautoconf:
-    image: bunkerity/bunkerized-nginx:autoconf
+    image: bunkerity/bunkerized-nginx-autoconf
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
