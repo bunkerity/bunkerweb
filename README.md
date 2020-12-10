@@ -2,7 +2,7 @@
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
 
-<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.0-blue" /> <img src="https://img.shields.io/badge/nginx-1.18.0-blue" /> <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" /> <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" /> <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.1-blue" /> <img src="https://img.shields.io/badge/nginx-1.18.0-blue" /> <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" /> <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" /> <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
 
 nginx Docker image secure by default.  
 
@@ -174,10 +174,10 @@ docker run -p 80:8080 \
            -e AUTO_LETS_ENCRYPT=yes \
            -e REDIRECT_HTTP_TO_HTTPS=yes \
            -e USE_REVERSE_PROXY=yes \
-           -e app1.domain.com_PROXY_URL=/ \
-           -e app1.domain.com_PROXY_HOST=http://myapp1:8000 \
-           -e app2.domain.com_PROXY_URL=/ \
-           -e app2.domain.com_PROXY_HOST=http://myapp2:8000 \
+           -e app1.domain.com_REVERSE_PROXY_URL=/ \
+           -e app1.domain.com_REVERSE_PROXY_HOST=http://myapp1:8000 \
+           -e app2.domain.com_REVERSE_PROXY_URL=/ \
+           -e app2.domain.com_REVERSE_PROXY_HOST=http://myapp2:8000 \
            bunkerity/bunkerized-nginx
 ```
 
