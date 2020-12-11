@@ -32,7 +32,7 @@ RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban c
     chmod 750 /acme-challenge
 
 # Fix CVE-2020-28928 & CVE-2020-8231
-RUN apk --no-cache add "musl-utils>1.1.24-r2" "libcurl>7.67.0-r1"
+RUN apk --no-cache add "musl-utils>1.1.24-r2" "curl>7.67.0-r1"
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache
 
