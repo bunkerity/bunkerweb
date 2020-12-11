@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" class="h-100">
+	
+	{% include "head.html" %}
+
+	<body class="d-flex flex-column h-100">
+
+		{% include "menu.html" %}
+
+		<main class="flex-shrink-0">
+			<div class="container">
+
+				{% block content %}{% endblock %}
+
+			</div>
+		</main>
+
+		{% include "footer.html" %}
+
+		{% include "end.html" %}
+
+	</body>
+
+</html>
