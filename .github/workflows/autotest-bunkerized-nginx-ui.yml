@@ -1,0 +1,26 @@
+name: Automatic test on ui
+
+on:
+  push:
+    branches: [dev, master]
+  pull_request:
+    branches: [dev, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Build the image
+        run: docker build -t autotest-ui -f ui/Dockerfile .
+      - name: Run Trivy security scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'autotest-ui'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+
