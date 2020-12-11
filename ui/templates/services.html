@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+	{% for service in services %}
+	<div class="col row-cols-1 row-cols-md-3">
+		ID = {{ instance["id"] }}<br />
+		Name = {{ instance["name"] }}<br />
+		Status = {{ instance["status"] }}
+	</div>
+	{% endfor %}
+</div>
+
+{% endblock %}
