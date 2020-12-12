@@ -2,14 +2,35 @@
 
 {% block content %}
 
-<div class="row">
+<div class="row justify-content-center">
+
 	{% for service in services %}
+		{% set color = "dark" %}
+		{% if service["status"] == "running" %}
+			{% set color = "success" %}
+		{% elif service["status"] == "created" or service["status"] == "restarting" or service["status"] == "paused" %}
+			{% set color = "warning" %}
+		{% elif service["status"] == "exited" or service["status"] == "dead" %}
+			{% set color = "danger" %}
+		{% endif %}
+
 	<div class="col row-cols-1 row-cols-md-3">
-		ID = {{ instance["id"] }}<br />
-		Name = {{ instance["name"] }}<br />
-		Status = {{ instance["status"] }}
+		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">
+			<div class="card-header border-{{ color }} bg-{{ color }}">{{ service["name"] }}</div>
+			<div class="card-body text-dark">
+				<h5 class="card-title">Status : {{ service["status"] }}</h5>
+				<span class="card-text">
+					Web services : <span class="badge bg-primary">X</span><br />
+					Environment variables :<br />
+					{% for env in service.attrs["Config"]["Env"] %}
+						{{ env }}<br />
+					{% endfor %}
+				</span>
+			</div>
+		</div>
 	</div>
 	{% endfor %}
+
 </div>
 
 {% endblock %}
