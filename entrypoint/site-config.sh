@@ -361,6 +361,9 @@ if [ "$USE_MODSECURITY" = "yes" ] ; then
 		if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
 			modsec_custom="include /modsec-confs/*.conf\n"
 		fi
+		if ls /modsec-confs/${1}/*.conf > /dev/null 2>&1 ; then
+		        modsec_custom="${modsec_custom}include /modsec-confs/${1}/*.conf\n"
+	        fi
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	fi
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
@@ -370,6 +373,9 @@ if [ "$USE_MODSECURITY" = "yes" ] ; then
 			if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
 				modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
 			fi
+			if ls /modsec-crs-confs/${1}/*.conf > /dev/null 2>&1 ; then
+			         modsec_crs_custom="${modsec_custom}include /modsec-crs-confs/${1}/*.conf\n"
+		        fi
 			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		fi
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
