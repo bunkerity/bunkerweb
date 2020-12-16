@@ -20,10 +20,10 @@ COPY lua/ /opt/lua
 COPY crowdsec/ /opt/crowdsec
 
 COPY prepare.sh /tmp/prepare.sh
-RUN chmod +x /tmp/prepares.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
+RUN chmod +x /tmp/prepare.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
 
-# Fix CVE-2020-28928 & CVE-2020-8231
-RUN apk --no-cache add "musl-utils>1.1.24-r2" "curl>7.67.0-r1"
+# Fix CVE-2020-28928, CVE-2020-8231 & CVE-2020-1971
+RUN apk --no-cache add "musl-utils>1.1.24-r2" "curl>7.67.0-r1" "libcrypto1.1>1.1.1g-r0"
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache
 
