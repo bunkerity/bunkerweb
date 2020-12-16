@@ -23,7 +23,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 			if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
 				modsec_custom="include /modsec-confs/*.conf\n"
 			fi
-			if ls /modsec-confs/${1}/*.conf > /dev/null 2>&1 ; then
+			if ls /modsec-confs/${server}/*.conf > /dev/null 2>&1 ; then
 				modsec_custom="${modsec_custom}include /modsec-confs/${server}/*.conf\n"
 			fi
 			replace_in_file "${SERVER_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
@@ -32,7 +32,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 				if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
 					modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
 				fi
-				if ls /modsec-crs-confs/${1}/*.conf > /dev/null 2>&1 ; then
+				if ls /modsec-crs-confs/${server}/*.conf > /dev/null 2>&1 ; then
 					modsec_crs_custom="${modsec_custom}include /modsec-crs-confs/${server}/*.conf\n"
 				fi
 			fi
