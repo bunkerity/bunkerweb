@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# load some functions
 . /opt/scripts/utils.sh
 
 job_log "[CERTBOT] certificates have been renewed"

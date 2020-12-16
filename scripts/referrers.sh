@@ -38,7 +38,6 @@ if [ "$lines" -gt 1 ] ; then
 	fi
 else
 	job_log "[BLACKLIST] can't update referrers list"
-
 fi
 
 rm -f /tmp/map-referrer.conf 2> /dev/null

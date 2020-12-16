@@ -11,7 +11,7 @@ COPY ui/ /opt/entrypoint/
 RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh
 
 # Fix CVE-2020-1971
-RUN apk add "libcrypto1.1>1.1.1g-r0"
+RUN apk add "libcrypto1.1>1.1.1g-r0" "libssl1.1>1.1.1g-r0"
 
 VOLUME /etc/nginx
 

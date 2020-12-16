@@ -40,7 +40,6 @@ if [ "$lines" -gt 1 ] ; then
 	fi
 else
 	job_log "[BLACKLIST] can't update user-agent list"
-
 fi
 
 rm -f /tmp/map-user-agent.conf 2> /dev/null
