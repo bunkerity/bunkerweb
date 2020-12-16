@@ -26,17 +26,8 @@ COPY logs/ /opt/logs
 COPY lua/ /opt/lua
 COPY crowdsec/ /opt/crowdsec
 
-RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd go jq mariadb-connector-c bash brotli && \
-    chmod +x /opt/entrypoint/* /opt/scripts/* && \
-    mkdir /opt/entrypoint.d && \
-    rm -f /var/log/nginx/* && \
-    chown root:nginx /var/log/nginx && \
-    chmod 750 /var/log/nginx && \
-    touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log /var/log/jobs.log && \
-    chown nginx:nginx /var/log/nginx/*.log && \
-    mkdir /acme-challenge && \
-    chown root:nginx /acme-challenge && \
-    chmod 750 /acme-challenge
+COPY prepare.sh /tmp/prepare.sh
+RUN chmod +x /tmp/prepares.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
 
 # Fix CVE-2020-28928 & CVE-2020-8231
 RUN apk --no-cache add "musl-utils>1.1.24-r2" "curl>7.67.0-r1"

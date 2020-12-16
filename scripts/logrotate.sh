@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# load some functions
+. /opt/scripts/utils.sh
+
 logrotate -f /etc/logrotate.conf > /dev/null 2>&1
 
 pkill -HUP rsyslogd
