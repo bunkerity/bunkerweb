@@ -32,7 +32,7 @@ RUN apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban c
     rm -f /var/log/nginx/* && \
     chown root:nginx /var/log/nginx && \
     chmod 750 /var/log/nginx && \
-    touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log && \
+    touch /var/log/nginx/error.log /var/log/nginx/modsec_audit.log /var/log/jobs.log && \
     chown nginx:nginx /var/log/nginx/*.log && \
     mkdir /acme-challenge && \
     chown root:nginx /acme-challenge && \
