@@ -19,7 +19,7 @@ done
 echo -e "map \$http_referer \$bad_referrer { hostnames; default no; $DATA }" > /tmp/map-referrer.conf
 
 # check number of lines
-lines="$(wc -l /etc/nginx/map-referrer.conf | cut -d ' ' -f 1)"
+lines="$(wc -l /tmp/map-referrer.conf | cut -d ' ' -f 1)"
 if [ "$lines" -gt 1 ] ; then
 	mv /tmp/map-referrer.conf /etc/nginx/map-referrer.conf
 	job_log "[BLACKLIST] referrers list updated ($lines entries)"

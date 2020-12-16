@@ -78,8 +78,8 @@ rsyslogd
 crond
 
 # start nginx
-if [ -f "/tmp/nginx.pid" ] ; then
-	nginx -s quit
+if [ -f "/tmp/nginx-temp.pid" ] ; then
+	nginx -c /etc/nginx/nginx-temp.conf -s quit
 fi
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx

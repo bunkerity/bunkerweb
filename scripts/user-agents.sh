@@ -21,7 +21,7 @@ DATA_ESCAPED=$(echo "$DATA" | sed 's: :\\\\ :g' | sed 's:\\\\ yes;: yes;:g' | se
 echo -e "map \$http_user_agent \$bad_user_agent { default no; $DATA_ESCAPED }" > /tmp/map-user-agent.conf
 
 # check number of lines
-lines="$(wc -l /etc/nginx/map-user-agent.conf | cut -d ' ' -f 1)"
+lines="$(wc -l /tmp/map-user-agent.conf | cut -d ' ' -f 1)"
 if [ "$lines" -gt 1 ] ; then
 	mv /tmp/map-user-agent.conf /etc/nginx/map-user-agent.conf
 	job_log "[BLACKLIST] user-agent list updated ($lines entries)"
