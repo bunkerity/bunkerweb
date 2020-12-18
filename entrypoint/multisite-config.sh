@@ -33,7 +33,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 					modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
 				fi
 				if ls /modsec-crs-confs/${server}/*.conf > /dev/null 2>&1 ; then
-					modsec_crs_custom="${modsec_custom}include /modsec-crs-confs/${server}/*.conf\n"
+					modsec_crs_custom="${modsec_crs_custom}include /modsec-crs-confs/${server}/*.conf\n"
 				fi
 			fi
 			replace_in_file "${SERVER_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
