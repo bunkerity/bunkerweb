@@ -14,9 +14,22 @@
 			{% set color = "danger" %}
 		{% endif %}
 
-	<div class="col row-cols-1 row-cols-md-3">
+	<div class="col col-6">
 		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">
-			<div class="card-header border-{{ color }} bg-{{ color }}">{{ service["name"] }}</div>
+			<div class="card-header border-{{ color }} bg-{{ color }}">
+				{{ service["name"] }}
+				<div class="btn-group mx-2 float-end" role="group">
+					<button id="btnGroupDrop1" class="btn btn-sm dropdown-toggle btn-light" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="fas fa-cogs"> manage container</i>
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+						<li><a class="dropdown-item" href="service/start/{{ service["id"] }}">Start</a></li>
+						<li><a class="dropdown-item" href="service/stop/{{ service["id"] }}">Stop</a></li>
+						<li><a class="dropdown-item" href="service/restart/{{ service["id"] }}">Restart</a></li>
+						<li><a class="dropdown-item" href="#">Remove</a></li>
+					</ul>
+				</div>
+			</div>
 			<div class="card-body text-dark">
 				<h5 class="card-title">Status : {{ service["status"] }}</h5>
 				<span class="card-text">
