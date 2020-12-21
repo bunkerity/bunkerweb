@@ -2,15 +2,15 @@
 
 from flask import Flask, render_template, current_app
 
-import wrappers
+import wrappers, utils
 import os
-
 
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 ABSOLUTE_URI = ""
 if "ABSOLUTE_URI" in os.environ :
 	ABSOLUTE_URI = os.environ["ABSOLUTE_URI"]
 app.config["ABSOLUTE_URI"] = ABSOLUTE_URI
+app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 
 @app.route('/')
 @app.route('/home')
