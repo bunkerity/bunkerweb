@@ -2,9 +2,9 @@
 
 {% block content %}
 
-<div class="text-center">
+<!--<div class="text-center">
 	<button class="btn btn-success btn-lg mb-5"><i class="fas fa-plus"></i> new</button>
-</div>
+</div>-->
 
 <div class="row justify-content-center">
 
@@ -38,10 +38,12 @@
 			<div class="card-body text-dark">
 				<h5 class="card-title">Status : {{ instance["status"] }}</h5>
 				<span class="card-text">
-					Web services : <span class="badge bg-primary">X</span><br />
 					Environment variables :<br />
+					{% set envfilter = ["PATH", "NGINX_VERSION", "NJS_VERSION", "PKG_RELEASE"] %}
 					{% for env in instance.attrs["Config"]["Env"] %}
-						{{ env }}<br />
+						{% if not env.startswith("PATH=") and not env.startswith("NGINX_VERSION=") and not env.startswith("NJS_VERSION=") and not env.startswith("PKG_RELEASE=") %}
+							{{ env }}<br />
+						{% endif %}
 					{% endfor %}
 				</span>
 			</div>

@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # load default values
+set -a
 . /opt/entrypoint/defaults.sh
+set +a
 
 # load some functions
 . /opt/entrypoint/utils.sh
@@ -10,6 +12,20 @@
 NGINX_PREFIX="/etc/nginx/"
 if [ "$MULTISITE" = "yes" ] ; then
 	NGINX_PREFIX="${NGINX_PREFIX}${1}/"
+	if [ ! -d "$NGINX_PREFIX" ] ; then
+		mkdir "$NGINX_PREFIX"
+	fi
+	ROOT_FOLDER="${ROOT_FOLDER}/$1"
+fi
+env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION)=" > "${NGINX_PREFIX}nginx.env"
+
+if [ "$MULTISITE" = "yes" ] ; then
+	sed -i "s~^SERVER_NAME=.*~SERVER_NAME=$1~" "${NGINX_PREFIX}nginx.env"
+	for server in $SERVER_NAME ; do
+		if [ "$server" != "$1" ] ; then
+			sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
+		fi
+	done
 	for var in $(env) ; do
 		name=$(echo "$var" | cut -d '=' -f 1)
 		check=$(echo "$name" | grep "^$1_")
@@ -17,15 +33,14 @@ if [ "$MULTISITE" = "yes" ] ; then
 			repl_name=$(echo "$name" | sed "s~${1}_~~")
 			repl_value=$(echo "$var" | sed "s~${name}=~~")
 			read -r "$repl_name" <<< $repl_value
+			sed -i "/^${repl_name}=.*/d" "${NGINX_PREFIX}nginx.env"
+			sed -i "/^${name}=.*/d" "${NGINX_PREFIX}nginx.env"
+			echo "${repl_name}=${repl_value}" >> "${NGINX_PREFIX}nginx.env"
 		fi
 	done
-	ROOT_FOLDER="${ROOT_FOLDER}/$1"
 fi
 
 # copy stub confs
-if [ "$MULTISITE" = "yes" ] ; then
-	mkdir "$NGINX_PREFIX"
-fi
 cp /opt/confs/site/* "$NGINX_PREFIX"
 
 # replace paths

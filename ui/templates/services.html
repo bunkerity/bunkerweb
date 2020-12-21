@@ -2,41 +2,37 @@
 
 {% block content %}
 
+
 <div class="row justify-content-center">
 
 	{% for service in services %}
-		{% set color = "dark" %}
-		{% if service["status"] == "running" %}
-			{% set color = "success" %}
-		{% elif service["status"] == "created" or service["status"] == "restarting" or service["status"] == "paused" %}
-			{% set color = "warning" %}
-		{% elif service["status"] == "exited" or service["status"] == "dead" %}
-			{% set color = "danger" %}
-		{% endif %}
 
 	<div class="col col-6">
-		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">
-			<div class="card-header border-{{ color }} bg-{{ color }}">
-				{{ service["name"] }}
-				<div class="btn-group mx-2 float-end" role="group">
+		<div class="card border-primary mb-3" style="max-width: 80rem;">
+			<div class="card-header border-primary bg-primary">
+				{{ service["SERVER_NAME"] }}
+				<!--<div class="btn-group mx-2 float-end" role="group">
 					<button id="btnGroupDrop1" class="btn btn-sm dropdown-toggle btn-light" data-bs-toggle="dropdown" aria-expanded="false">
 						<i class="fas fa-cogs"> manage container</i>
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-						<li><a class="dropdown-item" href="service/start/{{ service["id"] }}">Start</a></li>
-						<li><a class="dropdown-item" href="service/stop/{{ service["id"] }}">Stop</a></li>
-						<li><a class="dropdown-item" href="service/restart/{{ service["id"] }}">Restart</a></li>
+						<li><a class="dropdown-item" href="#">Start</a></li>
+						<li><a class="dropdown-item" href="#">Stop</a></li>
+						<li><a class="dropdown-item" href="#">Restart</a></li>
 						<li><a class="dropdown-item" href="#">Remove</a></li>
 					</ul>
 				</div>
+				<button class="btn btn-sm mx-2 float-end btn-light"><i class="fas fa-redo-alt"></i> reload nginx</button>-->
 			</div>
 			<div class="card-body text-dark">
-				<h5 class="card-title">Status : {{ service["status"] }}</h5>
+				<h5 class="card-title">Server name : {{ service["SERVER_NAME"] }}</h5>
 				<span class="card-text">
-					Web services : <span class="badge bg-primary">X</span><br />
 					Environment variables :<br />
-					{% for env in service.attrs["Config"]["Env"] %}
-						{{ env }}<br />
+					{% set envfilter = ["PATH", "NGINX_VERSION", "NJS_VERSION", "PKG_RELEASE"] %}
+					{% for k, v in service.items() %}
+						{% if not k.startswith("PATH=") and not k.startswith("NGINX_VERSION=") and not k.startswith("NJS_VERSION=") and not k.startswith("PKG_RELEASE=") %}
+							{{ k + "=" + v }}<br />
+						{% endif %}
 					{% endfor %}
 				</span>
 			</div>

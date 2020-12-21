@@ -27,4 +27,20 @@ def get_instances() :
 	return get_containers("UI")
 
 def get_services() :
-	return get_containers("SERVER_NAME")
+	services = []
+	try :
+		for root, dirs, files in os.walk("/etc/nginx") :
+			for file in files :
+				filepath = os.path.join(root, file)
+				print(filepath, flush=True)
+				if filepath.endswith("/nginx.env") :
+					with open(filepath, "r") as f :
+						service = {}
+						for line in f.readlines() :
+							name = line.split("=")[0]
+							value = line.replace(name + "=", "", 1).strip()
+							service[name] = value
+						services.append(service)
+	except Exception as e :
+		return False, str(e)
+	return True, services
