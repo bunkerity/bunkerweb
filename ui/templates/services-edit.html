@@ -1,0 +1,42 @@
+{% set id_server_name = service["SERVER_NAME"].replace(".", "-") %}
+
+<div class="modal fade" id="modal-edit-id-{{ id_server_name }}" tabindex="-1" aria-labelledby="modal-edit-label-{{ id_server_name }}" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-edit-label-{{ id_server_name }}">View/edit {{ service["SERVER_NAME"] }} configuration</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+{% set check = {"active": "active", "selected": "true"} %}
+{% for category in config["CONFIG"] %}
+	{% set id_category = category.replace(" ", "") %}
+					<li class="nav-item" role="presentation">
+						<a class="nav-link {{ check.active }}" id="edit-{{ id_category }}-{{ id_server_name }}-tab" data-bs-toggle="pill" href="#edit-{{ id_category }}-{{ id_server_name }}" role="tab" aria-controls="edit-{{ id_category }}-{{ id_server_name }}" aria-selected="{{ check.selected }}">{{ category }}</a>
+					</li>
+	{% if check.update({"active": "", "selected": "false"}) %}
+	{% endif %}
+{% endfor %}
+				</ul>
+				<div class="tab-content" id="edit-content-{{ id_server_name }}">
+{% set check = {"class": "show active"} %}
+{% for category in config["CONFIG"] %}
+	{% set id_category = category.replace(" ", "") %}
+					<div class="tab-pane fade {{ check.class }}" id="edit-{{ id_category }}-{{ id_server_name }}" role="tabpanel" aria-labelledby="edit-{{ id_category }}-{{ id_server_name }}-tab">
+	{% for config in config["CONFIG"][category] %}
+						{{ form_service_gen("edit", service["SERVER_NAME"], config["id"], config["label"], config["type"], service[config["env"]])|safe }}
+	{% endfor %}
+					</div>
+	{% if check.update({"class": ""}) %}
+	{% endif %}
+{% endfor %}
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save</button>
+			</div>
+		</div>
+	</div>
+</div>

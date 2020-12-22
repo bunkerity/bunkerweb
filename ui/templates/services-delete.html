@@ -1,0 +1,17 @@
+<div class="modal fade" id="modal-delete-id-{{ service["SERVER_NAME"].replace(".", "-") }}" tabindex="-1" aria-labelledby="modal-delete-label-{{ service["SERVER_NAME"].replace(".", "-") }}" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-delete-label-{{ service["SERVER_NAME"].replace(".", "-") }}">Delete {{ service["SERVER_NAME"] }} configuration</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				Are you sure you want to delete the configuration of {{ service["SERVER_NAME"] }} ?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-danger">Delete</button>
+			</div>
+		</div>
+	</div>
+</div>

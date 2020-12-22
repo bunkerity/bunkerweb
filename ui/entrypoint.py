@@ -3,14 +3,25 @@
 from flask import Flask, render_template, current_app
 
 import wrappers, utils
-import os
+import os, json
 
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 ABSOLUTE_URI = ""
 if "ABSOLUTE_URI" in os.environ :
 	ABSOLUTE_URI = os.environ["ABSOLUTE_URI"]
 app.config["ABSOLUTE_URI"] = ABSOLUTE_URI
+with open("/opt/entrypoint/config.json", "r") as f :
+	config = json.loads(f.read())
+app.config["CONFIG"] = {}
+for k in config :
+	if not config[k]["category"] in app.config["CONFIG"] :
+		app.config["CONFIG"][config[k]["category"]] = []
+	tmp = config[k].copy()
+	tmp["id"] = k
+	app.config["CONFIG"][config[k]["category"]].append(tmp)
+
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
+app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 
 @app.route('/')
 @app.route('/home')
