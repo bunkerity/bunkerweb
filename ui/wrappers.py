@@ -32,7 +32,6 @@ def get_services() :
 		for root, dirs, files in os.walk("/etc/nginx") :
 			for file in files :
 				filepath = os.path.join(root, file)
-				print(filepath, flush=True)
 				if filepath.endswith("/nginx.env") :
 					with open(filepath, "r") as f :
 						service = {}

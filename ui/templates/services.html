@@ -9,22 +9,66 @@
 		<div class="card border-primary mb-3" style="max-width: 80rem;">
 			<div class="card-header border-primary bg-primary text-white">
 				{{ service["SERVER_NAME"] }}
-				<button class="btn btn-sm ms-2 float-end btn-light"><i class="fas fa-trash-alt"></i></button>
-				<button class="btn btn-sm mx-2 float-end btn-light"><i class="fas fa-edit"></i></button>
-				<a class="btn btn-sm mx-2 float-end btn-light" href="http://{{ service["SERVER_NAME"] }}" target="_blank" ><i class="fas fa-eye"></i></a>
+				<button class="btn btn-sm ms-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-delete-id-{{ service["SERVER_NAME"].replace(".", "-") }}"><i class="fas fa-trash-alt"></i></button>
+				<button class="btn btn-sm mx-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-edit-id-{{ service["SERVER_NAME"].replace(".", "-") }}"><i class="fas fa-edit"></i></button>
+				<a class="btn btn-sm mx-2 float-end btn-light" href="http://{{ service["SERVER_NAME"] }}" target="_blank"><i class="fas fa-eye"></i></a>
 			</div>
 			<div class="card-body text-dark">
 				<h5 class="card-title">Summary</h5>
 				<span class="card-text">
 					<div class="row justify-content-center">
-						<div class="col col-6">Serve files</div>
-						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["SERVE_FILES"], "yes") }}"></i></div>
 						<div class="col col-6">Reverse proxy</div>
 						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_REVERSE_PROXY"], "yes") }}"></i></div>
+						<div class="col col-6">Serve files</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["SERVE_FILES"], "yes") }}"></i></div>
+						<div class="col col-6">Remote PHP</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["REMOTE_PHP"], ".+") }}"></i></div>
 						<div class="col col-6">HTTPS</div>
-						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["AUTO_LETS_ENCRYPT"], "yes") }}"></i></div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class([service["AUTO_LETS_ENCRYPT"], service["USE_CUSTOM_HTTPS"], service["GENERATE_SELF_SIGNED_SSL"]], ["yes", "yes", "yes"]) }}"></i></div>
+						<div class="col col-6">ModSecurity</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_MODSECURITY"], "yes") }}"></i></div>
+						<div class="col col-6">Fail2Ban</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_FAIL2BAN"], "yes") }}"></i></div>
+						<div class="col col-6">Limit req</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_LIMIT_REQ"], "yes") }}"></i></div>
+						<div class="col col-6">DNSBL</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_DNSBL"], "yes") }}"></i></div>
 					</div>
 				</span>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-edit-id-{{ service["SERVER_NAME"].replace(".", "-") }}" tabindex="-1" aria-labelledby="modal-edit-label-{{ service["SERVER_NAME"].replace(".", "-") }}" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modal-edit-label-{{ service["SERVER_NAME"].replace(".", "-") }}">View/edit {{ service["SERVER_NAME"] }} configuration</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{{ service }}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-delete-id-{{ service["SERVER_NAME"].replace(".", "-") }}" tabindex="-1" aria-labelledby="modal-delete-label-{{ service["SERVER_NAME"].replace(".", "-") }}" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modal-delete-label-{{ service["SERVER_NAME"].replace(".", "-") }}">Delete {{ service["SERVER_NAME"] }} configuration</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					Are you sure you want to delete the configuration of {{ service["SERVER_NAME"] }} ?
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-danger">Delete</button>
+				</div>
 			</div>
 		</div>
 	</div>

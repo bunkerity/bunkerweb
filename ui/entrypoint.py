@@ -33,7 +33,6 @@ def instances():
 @app.route('/services')
 def services():
 	check, services = wrappers.get_services()
-	print(services, flush=True)
 	if not check :
 		return render_template("error.html", title="Error", error=services)
 	return render_template("services.html", title="Services", services=services)

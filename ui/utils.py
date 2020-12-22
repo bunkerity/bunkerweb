@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime
+import datetime, re
 
 def log(event) :
 	print("[" + str(datetime.datetime.now().replace(microsecond=0)) + "] " + event, flush=True)
@@ -13,6 +13,13 @@ def replace_in_file(file, old_str, new_str) :
 		f.write(data)
 
 def env_to_summary_class(var, value) :
-	if var == value :
+	if type(var) is list and type(value) is list :
+		for i in range(0, len(var)) :
+			if re.search(value[i], var[i]) :
+				return "check text-success"
+		return "times text-danger"
+	if not isinstance(var, str) :
+		return "times text-danger"
+	if re.search(value, var) :
 		return "check text-success"
 	return "times text-danger"
