@@ -2,16 +2,34 @@
 
 {% block content %}
 
+{% if operation != "" %}
+<div class="row justify-content-center">
+	<div class="col col-4 mb-3 text-center">
+		<div class="alert alert-primary alert-dismissible fade show" role="alert">
+			{{ operation }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+
 <div class="row justify-content-center">
 
+	<div class="col col-12 mb-3 text-center">
+		<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-new"><i class="fas fa-plus"></i> New</button>
+	</div>
+
 	{% for service in services %}
+
+		{% set id_server_name = service["SERVER_NAME"].replace(".", "-") %}
 
 	<div class="col col-12 col-lg-4">
 		<div class="card border-primary mb-3" style="max-width: 80rem;">
 			<div class="card-header border-primary bg-primary text-white">
 				{{ service["SERVER_NAME"] }}
-				<button class="btn btn-sm ms-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-delete-id-{{ service["SERVER_NAME"].replace(".", "-") }}"><i class="fas fa-trash-alt"></i></button>
-				<button class="btn btn-sm mx-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-edit-id-{{ service["SERVER_NAME"].replace(".", "-") }}"><i class="fas fa-edit"></i></button>
+				<button class="btn btn-sm ms-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-delete-id-{{ id_server_name }}"><i class="fas fa-trash-alt"></i></button>
+				<button class="btn btn-sm mx-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-edit-id-{{ id_server_name }}"><i class="fas fa-edit"></i></button>
 				<a class="btn btn-sm mx-2 float-end btn-light" href="http://{{ service["SERVER_NAME"] }}" target="_blank"><i class="fas fa-eye"></i></a>
 			</div>
 			<div class="card-body text-dark">
@@ -40,8 +58,8 @@
 		</div>
 	</div>
 
+		{% include "services-new.html" %}
 		{% include "services-edit.html" %}
-
 		{% include "services-delete.html" %}
 
 	{% endfor %}

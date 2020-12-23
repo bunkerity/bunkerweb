@@ -1,0 +1,40 @@
+<div class="modal fade" id="modal-new" tabindex="-1" aria-labelledby="modal-new-label" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-new-label">New configuration</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<ul class="nav nav-pills mb-3" id="pills-tab-new" role="tablist">
+{% set check = {"active": "active", "selected": "true"} %}
+{% for k, v in config["CONFIG"].items() %}
+					<li class="nav-item" role="presentation">
+						<a class="nav-link {{ check.active }}" id="new-{{ v["id"] }}-tab" data-bs-toggle="pill" href="#new-{{ v["id"] }}" role="tab" aria-controls="new-{{ v["id"] }}" aria-selected="{{ check.selected }}">{{ k }}</a>
+					</li>
+	{% if check.update({"active": "", "selected": "false"}) %}
+	{% endif %}
+{% endfor %}
+				</ul>
+				<form id="form-new">
+					<div class="tab-content" id="new-content">
+{% set check = {"class": "show active"} %}
+{% for k, v in config["CONFIG"].items() %}
+						<div class="tab-pane fade {{ check.class }}" id="new-{{ v["id"] }}" role="tabpanel" aria-labelledby="new-{{ v["id"] }}-tab">
+	{% for param in v["params"] %}
+							{{ form_service_gen("new", "", param["id"], param["label"], param["type"], "default", param["env"])|safe }}
+	{% endfor %}
+						</div>
+	{% if check.update({"class": ""}) %}
+	{% endif %}
+{% endfor %}
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onClick="postNew();">Save</button>
+			</div>
+		</div>
+	</div>
+</div>

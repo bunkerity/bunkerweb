@@ -43,3 +43,13 @@ def get_services() :
 	except Exception as e :
 		return False, str(e)
 	return True, services
+
+def new_service(env) :
+	return True, "Web service " + env["SERVER_NAME"] + " has been added."
+
+def edit_service(old_server_name, env) :
+	return True, "Web service " + old_server_name + " has been edited."
+
+def delete_service(server_name) :
+	return True, "Web service " + env["SERVER_NAME"] + " has been deleted."
+

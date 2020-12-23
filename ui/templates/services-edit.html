@@ -1,5 +1,3 @@
-{% set id_server_name = service["SERVER_NAME"].replace(".", "-") %}
-
 <div class="modal fade" id="modal-edit-id-{{ id_server_name }}" tabindex="-1" aria-labelledby="modal-edit-label-{{ id_server_name }}" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
@@ -8,7 +6,7 @@
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+				<ul class="nav nav-pills mb-3" id="pills-tab-edit" role="tablist">
 {% set check = {"active": "active", "selected": "true"} %}
 {% for k, v in config["CONFIG"].items() %}
 					<li class="nav-item" role="presentation">
@@ -18,22 +16,25 @@
 	{% endif %}
 {% endfor %}
 				</ul>
-				<div class="tab-content" id="edit-content-{{ id_server_name }}">
+				<form id="form-edit-{{ id_server_name }}">
+					<input type="hidden" value="{{ service["SERVER_NAME"] }}" name="OLD_SERVER_NAME">
+					<div class="tab-content" id="edit-content-{{ id_server_name }}">
 {% set check = {"class": "show active"} %}
 {% for k, v in config["CONFIG"].items() %}
-					<div class="tab-pane fade {{ check.class }}" id="edit-{{ v["id"] }}-{{ id_server_name }}" role="tabpanel" aria-labelledby="edit-{{ v["id"] }}-{{ id_server_name }}-tab">
+						<div class="tab-pane fade {{ check.class }}" id="edit-{{ v["id"] }}-{{ id_server_name }}" role="tabpanel" aria-labelledby="edit-{{ v["id"] }}-{{ id_server_name }}-tab">
 	{% for param in v["params"] %}
-						{{ form_service_gen("edit", id_server_name, param["id"], param["label"], param["type"], service[param["env"]])|safe }}
+							{{ form_service_gen("edit", id_server_name, param["id"], param["label"], param["type"], service[param["env"]], param["env"])|safe }}
 	{% endfor %}
-					</div>
+						</div>
 	{% if check.update({"class": ""}) %}
 	{% endif %}
 {% endfor %}
-				</div>
+					</div>
+				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save</button>
+				<button type="button" class="btn btn-primary" onClick="postEdit('{{ id_server_name }}');">Save</button>
 			</div>
 		</div>
 	</div>
