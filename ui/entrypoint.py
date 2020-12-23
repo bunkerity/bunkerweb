@@ -11,15 +11,7 @@ if "ABSOLUTE_URI" in os.environ :
 	ABSOLUTE_URI = os.environ["ABSOLUTE_URI"]
 app.config["ABSOLUTE_URI"] = ABSOLUTE_URI
 with open("/opt/entrypoint/config.json", "r") as f :
-	config = json.loads(f.read())
-app.config["CONFIG"] = {}
-for k in config :
-	if not config[k]["category"] in app.config["CONFIG"] :
-		app.config["CONFIG"][config[k]["category"]] = []
-	tmp = config[k].copy()
-	tmp["id"] = k
-	app.config["CONFIG"][config[k]["category"]].append(tmp)
-
+	app.config["CONFIG"] = json.loads(f.read())
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 

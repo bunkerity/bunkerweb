@@ -26,7 +26,7 @@ def env_to_summary_class(var, value) :
 
 def form_service_gen(form, server, id, label, type, value) :
 	if form == "edit" :
-		new_id = "form-edit-" + server.replace(".", "-") + "-" + id
+		new_id = "form-edit-" + server + "-" + id
 	elif form == "new" :
 		new_id = "form-new-" + id
 	if type == "text" :

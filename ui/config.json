@@ -1,512 +1,607 @@
 {
-   "max-client-size":{
-      "category":"Misc",
-      "type":"text",
-      "label":"Max client size",
-      "env":"MAX_CLIENT_SIZE"
-   },
-   "allowed-methods":{
-      "category":"Misc",
-      "type":"text",
-      "label":"Allowed methods",
-      "env":"ALLOWED_METHODS"
-   },
-   "serve-files":{
-      "category":"Misc",
-      "type":"checkbox",
-      "label":"Serve files",
-      "env":"SERVE_FILES"
-   },
-   "remove-headers":{
-      "category":"Info leak",
-      "type":"text",
-      "label":"Remove headers",
-      "env":"REMOVE_HEADERS"
-   },
-   "use-auth-basic":{
-      "category":"Basic auth",
-      "type":"checkbox",
-      "label":"Use auth basic",
-      "env":"USE_AUTH_BASIC"
-   },
-   "auth-basic-location":{
-      "category":"Basic auth",
-      "type":"text",
-      "label":"Auth basic location",
-      "env":"AUTH_BASIC_LOCATION"
-   },
-   "auth-basic-user":{
-      "category":"Basic auth",
-      "type":"text",
-      "label":"Auth basic user",
-      "env":"AUTH_BASIC_USER"
-   },
-   "auth-basic-password":{
-      "category":"Basic auth",
-      "type":"text",
-      "label":"Auth basic password",
-      "env":"AUTH_BASIC_PASSWORD"
-   },
-   "auth-basic-text":{
-      "category":"Basic auth",
-      "type":"text",
-      "label":"Auth basic text",
-      "env":"AUTH_BASIC_TEXT"
-   },
-   "use-reverse-proxy":{
-      "category":"Reverse proxy",
-      "type":"checkbox",
-      "label":"Use reverse proxy",
-      "env":"USE_REVERSE_PROXY"
-   },
-   "reverse-proxy-url":{
-      "category":"Reverse proxy",
-      "type":"text",
-      "label":"Reverse proxy url",
-      "env":"REVERSE_PROXY_URL"
-   },
-   "reverse-proxy-host":{
-      "category":"Reverse proxy",
-      "type":"text",
-      "label":"Reverse proxy host",
-      "env":"REVERSE_PROXY_HOST"
-   },
-   "reverse-proxy-ws":{
-      "category":"Reverse proxy",
-      "type":"checkbox",
-      "label":"Reverse proxy ws",
-      "env":"REVERSE_PROXY_WS"
-   },
-   "proxy-real-ip":{
-      "category":"Reverse proxy",
-      "type":"checkbox",
-      "label":"Proxy real ip",
-      "env":"PROXY_REAL_IP"
-   },
-   "proxy-real-ip-from":{
-      "category":"Reverse proxy",
-      "type":"text",
-      "label":"Proxy real ip from",
-      "env":"PROXY_REAL_IP_FROM"
-   },
-   "proxy-real-ip-header":{
-      "category":"Reverse proxy",
-      "type":"text",
-      "label":"Proxy real ip header",
-      "env":"PROXY_REAL_IP_HEADER"
-   },
-   "proxy-real-ip-recursive":{
-      "category":"Reverse proxy",
-      "type":"text",
-      "label":"Proxy real ip recursive",
-      "env":"PROXY_REAL_IP_RECURSIVE"
-   },
-   "use-gzip":{
-      "category":"Compression",
-      "type":"checkbox",
-      "label":"Use gzip",
-      "env":"USE_GZIP"
-   },
-   "gzip-comp-level":{
-      "category":"Compression",
-      "type":"text",
-      "label":"Gzip comp level",
-      "env":"GZIP_COMP_LEVEL"
-   },
-   "gzip-min-length":{
-      "category":"Compression",
-      "type":"text",
-      "label":"Gzip min length",
-      "env":"GZIP_MIN_LENGTH"
-   },
-   "gzip-types":{
-      "category":"Compression",
-      "type":"text",
-      "label":"Gzip types",
-      "env":"GZIP_TYPES"
-   },
-   "use-brotli":{
-      "category":"Compression",
-      "type":"checkbox",
-      "label":"Use brotli",
-      "env":"USE_BROTLI"
-   },
-   "brotli-comp-level":{
-      "category":"Compression",
-      "type":"text",
-      "label":"Brotli comp level",
-      "env":"BROTLI_COMP_LEVEL"
-   },
-   "brotli-min-length":{
-      "category":"Compression",
-      "type":"text",
-      "label":"Brotli min length",
-      "env":"BROTLI_MIN_LENGTH"
-   },
-   "brotli-types":{
-      "category":"Compression",
-      "type":"text",
-      "label":"Brotli types",
-      "env":"BROTLI_TYPES"
-   },
-   "use-client-cache":{
-      "category":"Cache",
-      "type":"checkbox",
-      "label":"Use client cache",
-      "env":"USE_CLIENT_CACHE"
-   },
-   "client-cache-extensions":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Client cache extensions",
-      "env":"CLIENT_CACHE_EXTENSIONS"
-   },
-   "client-cache-control":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Client cache control",
-      "env":"CLIENT_CACHE_CONTROL"
-   },
-   "client-cache-etag":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Client cache etag",
-      "env":"CLIENT_CACHE_ETAG"
-   },
-   "use-open-file-cache":{
-      "category":"Cache",
-      "type":"checkbox",
-      "label":"Use open file cache",
-      "env":"USE_OPEN_FILE_CACHE"
-   },
-   "open-file-cache":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Open file cache",
-      "env":"OPEN_FILE_CACHE"
-   },
-   "open-file-cache-errors":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Open file cache errors",
-      "env":"OPEN_FILE_CACHE_ERRORS"
-   },
-   "open-file-cache-min-uses":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Open file cache min uses",
-      "env":"OPEN_FILE_CACHE_MIN_USES"
-   },
-   "open-file-cache-valid":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Open file cache valid",
-      "env":"OPEN_FILE_CACHE_VALID"
-   },
-   "use-proxy-cache":{
-      "category":"Cache",
-      "type":"checkbox",
-      "label":"Use proxy cache",
-      "env":"USE_PROXY_CACHE"
-   },
-   "proxy-cache-path-zone-size":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache path zone size",
-      "env":"PROXY_CACHE_PATH_ZONE_SIZE"
-   },
-   "proxy-cache-path-params":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache path params",
-      "env":"PROXY_CACHE_PATH_PARAMS"
-   },
-   "proxy-cache-methods":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache methods",
-      "env":"PROXY_CACHE_METHODS"
-   },
-   "proxy-cache-min-uses":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache min uses",
-      "env":"PROXY_CACHE_MIN_USES"
-   },
-   "proxy-cache-key":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache key",
-      "env":"PROXY_CACHE_KEY"
-   },
-   "proxy-cache-valid":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache valid",
-      "env":"PROXY_CACHE_VALID"
-   },
-   "proxy-no-cache":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy no cache",
-      "env":"PROXY_NO_CACHE"
-   },
-   "proxy-cache-bypass":{
-      "category":"Cache",
-      "type":"text",
-      "label":"Proxy cache bypass",
-      "env":"PROXY_CACHE_BYPASS"
-   },
-   "auto-lets-encrypt":{
-      "category":"HTTPS",
-      "type":"checkbox",
-      "label":"Auto lets encrypt",
-      "env":"AUTO_LETS_ENCRYPT"
-   },
-   "email-lets-encrypt":{
-      "category":"HTTPS",
-      "type":"text",
-      "label":"Email lets encrypt",
-      "env":"EMAIL_LETS_ENCRYPT"
-   },
-   "listen-http":{
-      "category":"",
-      "type":"checkbox",
-      "label":"Listen http",
-      "env":"LISTEN_HTTP"
-   },
-   "redirect-http-to-https":{
-      "category":"HTTPS",
-      "type":"checkbox",
-      "label":"Redirect http to https",
-      "env":"REDIRECT_HTTP_TO_HTTPS"
-   },
-   "http2":{
-      "category":"HTTPS",
-      "type":"checkbox",
-      "label":"HTTP2",
-      "env":"HTTP2"
-   },
-   "https-protocols":{
-      "category":"HTTPS",
-      "type":"text",
-      "label":"HTTPS protocols",
-      "env":"HTTPS_PROTOCOLS"
-   },
-   "use-modsecurity":{
-      "category":"ModSecurity",
-      "type":"checkbox",
-      "label":"Use modsecurity",
-      "env":"USE_MODSECURITY"
-   },
-   "use-modsecurity-crs":{
-      "category":"ModSecurity",
-      "type":"checkbox",
-      "label":"Use modsecurity crs",
-      "env":"USE_MODSECURITY_CRS"
-   },
-   "x-frame-options":{
-      "category":"Headers",
-      "type":"text",
-      "label":"X frame options",
-      "env":"X_FRAME_OPTIONS"
-   },
-   "x-xss-protection":{
-      "category":"Headers",
-      "type":"text",
-      "label":"X xss protection",
-      "env":"X_XSS_PROTECTION"
-   },
-   "x-content-type-options":{
-      "category":"Headers",
-      "type":"text",
-      "label":"X content type options",
-      "env":"X_CONTENT_TYPE_OPTIONS"
-   },
-   "referrer-policy":{
-      "category":"Headers",
-      "type":"text",
-      "label":"Referrer policy",
-      "env":"REFERRER_POLICY"
-   },
-   "feature-policy":{
-      "category":"Headers",
-      "type":"text",
-      "label":"Feature policy",
-      "env":"FEATURE_POLICY"
-   },
-   "permissions-policy":{
-      "category":"Headers",
-      "type":"text",
-      "label":"Permissions policy",
-      "env":"PERMISSIONS_POLICY"
-   },
-   "cookie-flags":{
-      "category":"Headers",
-      "type":"text",
-      "label":"Cookie flags",
-      "env":"COOKIE_FLAGS"
-   },
-   "cookie-auto-secure-flag":{
-      "category":"Headers",
-      "type":"checkbox",
-      "label":"Cookie auto secure flag",
-      "env":"COOKIE_AUTO_SECURE_FLAG"
-   },
-   "strict-transport-security":{
-      "category":"Headers",
-      "type":"text",
-      "label":"Strict transport security",
-      "env":"STRICT_TRANSPORT_SECURITY"
-   },
-   "content-security-policy":{
-      "category":"Headers",
-      "type":"text",
-      "label":"Content security policy",
-      "env":"CONTENT_SECURITY_POLICY"
-   },
-   "use-antibot":{
-      "category":"Antibot",
-      "type":"text",
-      "label":"Use antibot",
-      "env":"USE_ANTIBOT"
-   },
-   "antibot-uri":{
-      "category":"Antibot",
-      "type":"text",
-      "label":"Antibot uri",
-      "env":"ANTIBOT_URI"
-   },
-   "antibot-session-secret":{
-      "category":"Antibot",
-      "type":"text",
-      "label":"Antibot session secret",
-      "env":"ANTIBOT_SESSION_SECRET"
-   },
-   "antibot-recaptcha-score":{
-      "category":"Antibot",
-      "type":"text",
-      "label":"Antibot recaptcha score",
-      "env":"ANTIBOT_RECAPTCHA_SCORE"
-   },
-   "block-user-agent":{
-      "category":"Block",
-      "type":"checkbox",
-      "label":"Block user agent",
-      "env":"BLOCK_USER_AGENT"
-   },
-   "block-tor-exit-node":{
-      "category":"Block",
-      "type":"checkbox",
-      "label":"Block tor exit node",
-      "env":"BLOCK_TOR_EXIT_NODE"
-   },
-   "block-proxies":{
-      "category":"Block",
-      "type":"checkbox",
-      "label":"Block proxies",
-      "env":"BLOCK_PROXIES"
-   },
-   "block-abusers":{
-      "category":"Block",
-      "type":"checkbox",
-      "label":"Block abusers",
-      "env":"BLOCK_ABUSERS"
-   },
-   "block-referrer":{
-      "category":"Block",
-      "type":"checkbox",
-      "label":"Block referrer",
-      "env":"BLOCK_REFERRER"
-   },
-   "use-dnsbl":{
-      "category":"DNSBL",
-      "type":"checkbox",
-      "label":"Use dnsbl",
-      "env":"USE_DNSBL"
-   },
-   "use-crowdsec":{
-      "category":"CrowdSec",
-      "type":"checkbox",
-      "label":"Use crowdsec",
-      "env":"USE_CROWDSEC"
-   },
-   "use-whitelist-ip":{
-      "category":"Whitelist",
-      "type":"checkbox",
-      "label":"Use whitelist ip",
-      "env":"USE_WHITELIST_IP"
-   },
-   "use-whitelist-reverse":{
-      "category":"Whitelist",
-      "type":"checkbox",
-      "label":"Use whitelist reverse",
-      "env":"USE_WHITELIST_REVERSE"
-   },
-   "use-blacklist-ip":{
-      "category":"Blacklist",
-      "type":"checkbox",
-      "label":"Use blacklist ip",
-      "env":"USE_BLACKLIST_IP"
-   },
-   "use-blacklist-reverse":{
-      "category":"Blacklist",
-      "type":"checkbox",
-      "label":"Use blacklist reverse",
-      "env":"USE_BLACKLIST_REVERSE"
-   },
-   "use-limit-req":{
-      "category":"Limit req",
-      "type":"checkbox",
-      "label":"Use limit req",
-      "env":"USE_LIMIT_REQ"
-   },
-   "limit-req-rate":{
-      "category":"Limit req",
-      "type":"text",
-      "label":"Limit req rate",
-      "env":"LIMIT_REQ_RATE"
-   },
-   "limit-req-burst":{
-      "category":"Limit req",
-      "type":"text",
-      "label":"Limit req burst",
-      "env":"LIMIT_REQ_BURST"
-   },
-   "blacklist-country":{
-      "category":"Blacklist",
-      "type":"text",
-      "label":"Blacklist country",
-      "env":"BLACKLIST_COUNTRY"
-   },
-   "whitelist-country":{
-      "category":"Whitelist",
-      "type":"text",
-      "label":"Whitelist country",
-      "env":"WHITELIST_COUNTRY"
-   },
-   "remote-php":{
-      "category":"PHP",
-      "type":"text",
-      "label":"Remote php",
-      "env":"REMOTE_PHP"
-   },
-   "remote-php-path":{
-      "category":"PHP",
-      "type":"text",
-      "label":"Remote php path",
-      "env":"REMOTE_PHP_PATH"
-   },
-   "use-fail2ban":{
-      "category":"PHP",
-      "type":"checkbox",
-      "label":"Use fail2ban",
-      "env":"USE_FAIL2BAN"
-   },
-   "use-clamav-upload":{
-      "category":"ClamAV",
-      "type":"checkbox",
-      "label":"Use clamav upload",
-      "env":"USE_CLAMAV_UPLOAD"
+   "Misc":{
+      "id":"max-client-size",
+      "params":[
+         {
+            "type":"text",
+            "label":"Max client size",
+            "env":"MAX_CLIENT_SIZE",
+            "id":"max-client-size"
+         },
+         {
+            "type":"text",
+            "label":"Allowed methods",
+            "env":"ALLOWED_METHODS",
+            "id":"allowed-methods"
+         },
+         {
+            "type":"checkbox",
+            "label":"Serve files",
+            "env":"SERVE_FILES",
+            "id":"serve-files"
+         }
+      ]
+   },
+   "Info leak":{
+      "id":"remove-headers",
+      "params":[
+         {
+            "type":"text",
+            "label":"Remove headers",
+            "env":"REMOVE_HEADERS",
+            "id":"remove-headers"
+         }
+      ]
+   },
+   "Basic auth":{
+      "id":"use-auth-basic",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use auth basic",
+            "env":"USE_AUTH_BASIC",
+            "id":"use-auth-basic"
+         },
+         {
+            "type":"text",
+            "label":"Auth basic location",
+            "env":"AUTH_BASIC_LOCATION",
+            "id":"auth-basic-location"
+         },
+         {
+            "type":"text",
+            "label":"Auth basic user",
+            "env":"AUTH_BASIC_USER",
+            "id":"auth-basic-user"
+         },
+         {
+            "type":"text",
+            "label":"Auth basic password",
+            "env":"AUTH_BASIC_PASSWORD",
+            "id":"auth-basic-password"
+         },
+         {
+            "type":"text",
+            "label":"Auth basic text",
+            "env":"AUTH_BASIC_TEXT",
+            "id":"auth-basic-text"
+         }
+      ]
+   },
+   "Reverse proxy":{
+      "id":"use-reverse-proxy",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use reverse proxy",
+            "env":"USE_REVERSE_PROXY",
+            "id":"use-reverse-proxy"
+         },
+         {
+            "type":"text",
+            "label":"Reverse proxy url",
+            "env":"REVERSE_PROXY_URL",
+            "id":"reverse-proxy-url"
+         },
+         {
+            "type":"text",
+            "label":"Reverse proxy host",
+            "env":"REVERSE_PROXY_HOST",
+            "id":"reverse-proxy-host"
+         },
+         {
+            "type":"checkbox",
+            "label":"Reverse proxy ws",
+            "env":"REVERSE_PROXY_WS",
+            "id":"reverse-proxy-ws"
+         },
+         {
+            "type":"checkbox",
+            "label":"Proxy real ip",
+            "env":"PROXY_REAL_IP",
+            "id":"proxy-real-ip"
+         },
+         {
+            "type":"text",
+            "label":"Proxy real ip from",
+            "env":"PROXY_REAL_IP_FROM",
+            "id":"proxy-real-ip-from"
+         },
+         {
+            "type":"text",
+            "label":"Proxy real ip header",
+            "env":"PROXY_REAL_IP_HEADER",
+            "id":"proxy-real-ip-header"
+         },
+         {
+            "type":"text",
+            "label":"Proxy real ip recursive",
+            "env":"PROXY_REAL_IP_RECURSIVE",
+            "id":"proxy-real-ip-recursive"
+         }
+      ]
+   },
+   "Compression":{
+      "id":"compression",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use gzip",
+            "env":"USE_GZIP",
+            "id":"use-gzip"
+         },
+         {
+            "type":"text",
+            "label":"Gzip comp level",
+            "env":"GZIP_COMP_LEVEL",
+            "id":"gzip-comp-level"
+         },
+         {
+            "type":"text",
+            "label":"Gzip min length",
+            "env":"GZIP_MIN_LENGTH",
+            "id":"gzip-min-length"
+         },
+         {
+            "type":"text",
+            "label":"Gzip types",
+            "env":"GZIP_TYPES",
+            "id":"gzip-types"
+         },
+         {
+            "type":"checkbox",
+            "label":"Use brotli",
+            "env":"USE_BROTLI",
+            "id":"use-brotli"
+         },
+         {
+            "type":"text",
+            "label":"Brotli comp level",
+            "env":"BROTLI_COMP_LEVEL",
+            "id":"brotli-comp-level"
+         },
+         {
+            "type":"text",
+            "label":"Brotli min length",
+            "env":"BROTLI_MIN_LENGTH",
+            "id":"brotli-min-length"
+         },
+         {
+            "type":"text",
+            "label":"Brotli types",
+            "env":"BROTLI_TYPES",
+            "id":"brotli-types"
+         }
+      ]
+   },
+   "Cache":{
+      "id":"cache",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use client cache",
+            "env":"USE_CLIENT_CACHE",
+            "id":"use-client-cache"
+         },
+         {
+            "type":"text",
+            "label":"Client cache extensions",
+            "env":"CLIENT_CACHE_EXTENSIONS",
+            "id":"client-cache-extensions"
+         },
+         {
+            "type":"text",
+            "label":"Client cache control",
+            "env":"CLIENT_CACHE_CONTROL",
+            "id":"client-cache-control"
+         },
+         {
+            "type":"text",
+            "label":"Client cache etag",
+            "env":"CLIENT_CACHE_ETAG",
+            "id":"client-cache-etag"
+         },
+         {
+            "type":"checkbox",
+            "label":"Use open file cache",
+            "env":"USE_OPEN_FILE_CACHE",
+            "id":"use-open-file-cache"
+         },
+         {
+            "type":"text",
+            "label":"Open file cache",
+            "env":"OPEN_FILE_CACHE",
+            "id":"open-file-cache"
+         },
+         {
+            "type":"text",
+            "label":"Open file cache errors",
+            "env":"OPEN_FILE_CACHE_ERRORS",
+            "id":"open-file-cache-errors"
+         },
+         {
+            "type":"text",
+            "label":"Open file cache min uses",
+            "env":"OPEN_FILE_CACHE_MIN_USES",
+            "id":"open-file-cache-min-uses"
+         },
+         {
+            "type":"text",
+            "label":"Open file cache valid",
+            "env":"OPEN_FILE_CACHE_VALID",
+            "id":"open-file-cache-valid"
+         },
+         {
+            "type":"checkbox",
+            "label":"Use proxy cache",
+            "env":"USE_PROXY_CACHE",
+            "id":"use-proxy-cache"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache path zone size",
+            "env":"PROXY_CACHE_PATH_ZONE_SIZE",
+            "id":"proxy-cache-path-zone-size"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache path params",
+            "env":"PROXY_CACHE_PATH_PARAMS",
+            "id":"proxy-cache-path-params"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache methods",
+            "env":"PROXY_CACHE_METHODS",
+            "id":"proxy-cache-methods"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache min uses",
+            "env":"PROXY_CACHE_MIN_USES",
+            "id":"proxy-cache-min-uses"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache key",
+            "env":"PROXY_CACHE_KEY",
+            "id":"proxy-cache-key"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache valid",
+            "env":"PROXY_CACHE_VALID",
+            "id":"proxy-cache-valid"
+         },
+         {
+            "type":"text",
+            "label":"Proxy no cache",
+            "env":"PROXY_NO_CACHE",
+            "id":"proxy-no-cache"
+         },
+         {
+            "type":"text",
+            "label":"Proxy cache bypass",
+            "env":"PROXY_CACHE_BYPASS",
+            "id":"proxy-cache-bypass"
+         }
+      ]
+   },
+   "HTTPS":{
+      "id":"https",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Auto lets encrypt",
+            "env":"AUTO_LETS_ENCRYPT",
+            "id":"auto-lets-encrypt"
+         },
+         {
+            "type":"text",
+            "label":"Email lets encrypt",
+            "env":"EMAIL_LETS_ENCRYPT",
+            "id":"email-lets-encrypt"
+         },
+         {
+            "type":"checkbox",
+            "label":"Redirect http to https",
+            "env":"REDIRECT_HTTP_TO_HTTPS",
+            "id":"redirect-http-to-https"
+         },
+         {
+            "type":"checkbox",
+            "label":"HTTP2",
+            "env":"HTTP2",
+            "id":"http2"
+         },
+         {
+            "type":"text",
+            "label":"HTTPS protocols",
+            "env":"HTTPS_PROTOCOLS",
+            "id":"https-protocols"
+         },
+         {
+            "type":"checkbox",
+            "label":"Listen http",
+            "env":"LISTEN_HTTP",
+            "id":"listen-http"
+         }
+      ]
+   },
+   "ModSecurity":{
+      "id":"modsecurity",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use modsecurity",
+            "env":"USE_MODSECURITY",
+            "id":"use-modsecurity"
+         },
+         {
+            "type":"checkbox",
+            "label":"Use modsecurity crs",
+            "env":"USE_MODSECURITY_CRS",
+            "id":"use-modsecurity-crs"
+         }
+      ]
+   },
+   "Headers":{
+      "id":"headers",
+      "params":[
+         {
+            "type":"text",
+            "label":"X frame options",
+            "env":"X_FRAME_OPTIONS",
+            "id":"x-frame-options"
+         },
+         {
+            "type":"text",
+            "label":"X xss protection",
+            "env":"X_XSS_PROTECTION",
+            "id":"x-xss-protection"
+         },
+         {
+            "type":"text",
+            "label":"X content type options",
+            "env":"X_CONTENT_TYPE_OPTIONS",
+            "id":"x-content-type-options"
+         },
+         {
+            "type":"text",
+            "label":"Referrer policy",
+            "env":"REFERRER_POLICY",
+            "id":"referrer-policy"
+         },
+         {
+            "type":"text",
+            "label":"Feature policy",
+            "env":"FEATURE_POLICY",
+            "id":"feature-policy"
+         },
+         {
+            "type":"text",
+            "label":"Permissions policy",
+            "env":"PERMISSIONS_POLICY",
+            "id":"permissions-policy"
+         },
+         {
+            "type":"text",
+            "label":"Cookie flags",
+            "env":"COOKIE_FLAGS",
+            "id":"cookie-flags"
+         },
+         {
+            "type":"checkbox",
+            "label":"Cookie auto secure flag",
+            "env":"COOKIE_AUTO_SECURE_FLAG",
+            "id":"cookie-auto-secure-flag"
+         },
+         {
+            "type":"text",
+            "label":"Strict transport security",
+            "env":"STRICT_TRANSPORT_SECURITY",
+            "id":"strict-transport-security"
+         },
+         {
+            "type":"text",
+            "label":"Content security policy",
+            "env":"CONTENT_SECURITY_POLICY",
+            "id":"content-security-policy"
+         }
+      ]
+   },
+   "Antibot":{
+      "id":"Antibot",
+      "params":[
+         {
+            "type":"text",
+            "label":"Use antibot",
+            "env":"USE_ANTIBOT",
+            "id":"use-antibot"
+         },
+         {
+            "type":"text",
+            "label":"Antibot uri",
+            "env":"ANTIBOT_URI",
+            "id":"antibot-uri"
+         },
+         {
+            "type":"text",
+            "label":"Antibot session secret",
+            "env":"ANTIBOT_SESSION_SECRET",
+            "id":"antibot-session-secret"
+         },
+         {
+            "type":"text",
+            "label":"Antibot recaptcha score",
+            "env":"ANTIBOT_RECAPTCHA_SCORE",
+            "id":"antibot-recaptcha-score"
+         }
+      ]
+   },
+   "Block":{
+      "id":"block",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Block user agent",
+            "env":"BLOCK_USER_AGENT",
+            "id":"block-user-agent"
+         },
+         {
+            "type":"checkbox",
+            "label":"Block tor exit node",
+            "env":"BLOCK_TOR_EXIT_NODE",
+            "id":"block-tor-exit-node"
+         },
+         {
+            "type":"checkbox",
+            "label":"Block proxies",
+            "env":"BLOCK_PROXIES",
+            "id":"block-proxies"
+         },
+         {
+            "type":"checkbox",
+            "label":"Block abusers",
+            "env":"BLOCK_ABUSERS",
+            "id":"block-abusers"
+         },
+         {
+            "type":"checkbox",
+            "label":"Block referrer",
+            "env":"BLOCK_REFERRER",
+            "id":"block-referrer"
+         }
+      ]
+   },
+   "DNSBL":{
+      "id":"dnsbl",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use dnsbl",
+            "env":"USE_DNSBL",
+            "id":"use-dnsbl"
+         }
+      ]
+   },
+   "CrowdSec":{
+      "id":"use-crowdsec",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use crowdsec",
+            "env":"USE_CROWDSEC",
+            "id":"use-crowdsec"
+         }
+      ]
+   },
+   "Whitelist":{
+      "id":"whitelist",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use whitelist ip",
+            "env":"USE_WHITELIST_IP",
+            "id":"use-whitelist-ip"
+         },
+         {
+            "type":"checkbox",
+            "label":"Use whitelist reverse",
+            "env":"USE_WHITELIST_REVERSE",
+            "id":"use-whitelist-reverse"
+         },
+         {
+            "type":"text",
+            "label":"Whitelist country",
+            "env":"WHITELIST_COUNTRY",
+            "id":"whitelist-country"
+         }
+      ]
+   },
+   "Blacklist":{
+      "id":"blacklist",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use blacklist ip",
+            "env":"USE_BLACKLIST_IP",
+            "id":"use-blacklist-ip"
+         },
+         {
+            "type":"checkbox",
+            "label":"Use blacklist reverse",
+            "env":"USE_BLACKLIST_REVERSE",
+            "id":"use-blacklist-reverse"
+         },
+         {
+            "type":"text",
+            "label":"Blacklist country",
+            "env":"BLACKLIST_COUNTRY",
+            "id":"blacklist-country"
+         }
+      ]
+   },
+   "Limit req":{
+      "id":"limit-req",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use limit req",
+            "env":"USE_LIMIT_REQ",
+            "id":"use-limit-req"
+         },
+         {
+            "type":"text",
+            "label":"Limit req rate",
+            "env":"LIMIT_REQ_RATE",
+            "id":"limit-req-rate"
+         },
+         {
+            "type":"text",
+            "label":"Limit req burst",
+            "env":"LIMIT_REQ_BURST",
+            "id":"limit-req-burst"
+         }
+      ]
+   },
+   "PHP":{
+      "id":"php",
+      "params":[
+         {
+            "type":"text",
+            "label":"Remote php",
+            "env":"REMOTE_PHP",
+            "id":"remote-php"
+         },
+         {
+            "type":"text",
+            "label":"Remote php path",
+            "env":"REMOTE_PHP_PATH",
+            "id":"remote-php-path"
+         }
+      ]
+   },
+   "Fail2ban":{
+      "id":"fail2ban",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use fail2ban",
+            "env":"USE_FAIL2BAN",
+            "id":"use-fail2ban"
+         }
+      ]
+   },
+   "ClamAV":{
+      "id":"clamav",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use clamav upload",
+            "env":"USE_CLAMAV_UPLOAD",
+            "id":"use-clamav-upload"
+         }
+      ]
    }
 }
