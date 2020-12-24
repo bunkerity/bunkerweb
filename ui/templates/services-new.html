@@ -22,7 +22,7 @@
 {% for k, v in config["CONFIG"].items() %}
 						<div class="tab-pane fade {{ check.class }}" id="new-{{ v["id"] }}" role="tabpanel" aria-labelledby="new-{{ v["id"] }}-tab">
 	{% for param in v["params"] %}
-							{{ form_service_gen("new", "", param["id"], param["label"], param["type"], "default", param["env"])|safe }}
+							{{ form_service_gen("new", "", param["id"], param["label"], param["type"], param["default"], param["env"])|safe }}
 	{% endfor %}
 						</div>
 	{% if check.update({"class": ""}) %}
