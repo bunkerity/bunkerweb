@@ -43,14 +43,38 @@ function getData(id) {
 	return data;
 }
 
-function postNew() {
+function newService() {
 	post("new", "services", getData('form-new'));
 }
 
-function postEdit(id) {
+function editService(id) {
 	post("edit", "services", getData('form-edit-' + id));
 }
 
-function postDelete(id) {
+function deleteService(id) {
 	post("delete", "services", getData('form-delete-' + id));
+}
+
+function reloadInstance(id) {
+	post("reload", "instances", getData('form-instance-' + id));
+}
+
+function startInstance(id) {
+	post("start", "instances", getData('form-instance-' + id));
+	return false;
+}
+
+function stopInstance(id) {
+	post("stop", "instances", getData('form-instance-' + id));
+	return false;
+}
+
+function restartInstance(id) {
+	post("restart", "instances", getData('form-instance-' + id));
+	return false;
+}
+
+function deleteInstance(id) {
+	post("delete", "instances", getData('form-instance-' + id));
+	return false;
 }

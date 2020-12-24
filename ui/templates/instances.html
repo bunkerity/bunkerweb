@@ -2,9 +2,16 @@
 
 {% block content %}
 
-<!--<div class="text-center">
-	<button class="btn btn-success btn-lg mb-5"><i class="fas fa-plus"></i> new</button>
-</div>-->
+{% if operation != "" %}
+<div class="row justify-content-center">
+	<div class="col col-4 mb-3 text-center">
+		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+			{{ operation }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+{% endif %}
 
 <div class="row justify-content-center">
 
@@ -19,6 +26,9 @@
 		{% endif %}
 
 	<div class="col col-6">
+		<form id="form-instance-{{ instance["id"] }}">
+			<input type="hidden" name="INSTANCE_ID" value="{{ instance["id"] }}">
+		</form>
 		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">
 			<div class="card-header border-{{ color }} bg-{{ color }} text-white">
 				{{ instance["name"] }}
@@ -27,13 +37,13 @@
 						<i class="fas fa-cogs"> manage container</i>
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-						<li><a class="dropdown-item" href="instance/start/{{ instance["id"] }}">Start</a></li>
-						<li><a class="dropdown-item" href="instance/stop/{{ instance["id"] }}">Stop</a></li>
-						<li><a class="dropdown-item" href="instance/restart/{{ instance["id"] }}">Restart</a></li>
-						<li><a class="dropdown-item" href="#">Remove</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return stopInstance('{{ instance["id"] }}');">Stop</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return deleteInstance('{{ instance["id"] }}');">Delete</a></li>
 					</ul>
 				</div>
-				<button class="btn btn-sm mx-2 float-end btn-light"><i class="fas fa-redo-alt"></i> reload nginx</button>
+				<button class="btn btn-sm mx-2 float-end btn-light" onClick="reloadInstance('{{ instance["id"] }}');"><i class="fas fa-redo-alt"></i> reload nginx</button>
 			</div>
 			<div class="card-body text-dark">
 				<h5 class="card-title">Status : {{ instance["status"] }}</h5>

@@ -2,8 +2,13 @@
 
 {% block content %}
 
-Something went wrong.
-
-Some information : {{ error }}
+<div class="row justify-content-center">
+	<div class="col col-6 text-center">
+		<div class="alert alert-danger">
+			Something went wrong...<br />
+			{{ error }}
+		</div>
+	</div>
+</div>
 
 {% endblock %}

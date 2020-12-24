@@ -26,12 +26,31 @@ def home():
 		return render_template("error.html", title="Error", error=services)
 	return render_template("home.html", title="Home", instances_number=len(instances), services_number=len(services))
 
-@app.route('/instances')
+@app.route('/instances', methods=["GET", "POST"])
 def instances():
+
+	# Manage instances
+	operation = ""
+	if request.method == "POST" :
+
+		# Check operation
+		if not "operation" in request.form or not request.form["operation"] in ["reload", "start", "stop", "restart", "delete"] :
+			return render_template("error.html", title="Error", error="Missing operation parameter on /instances.")
+
+		# Check that all fields are present
+		if not "INSTANCE_ID" in request.form :
+			return render_template("error.html", title="Error", error="Missing INSTANCE_ID parameter.")
+
+		# Do the operation
+		check, operation = wrappers.operation_instance(request.form)
+		if not check :
+			return render_template("error.html", title="Error", error=operation)
+
+	# Display instances
 	check, instances = wrappers.get_instances()
 	if not check :
 		return render_template("error.html", title="Error", error=instances)
-	return render_template("instances.html", title="Instances", instances=instances)
+	return render_template("instances.html", title="Instances", instances=instances, operation=operation)
 
 @app.route('/services', methods=["GET", "POST"])
 def services():
@@ -65,23 +84,10 @@ def services():
 			if not re.search("^([a-z\-0-9]+\.?)+$", request.form["SERVER_NAME"]) :
 				return render_template("error.html", title="Error", error="Parameter SERVER_NAME doesn't match regex.")
 
-		# Create new service
-		if request.form["operation"] == "new" :
-			check, operation = wrappers.new_service(env)
-			if not check :
-				render_template("error.html", title="Error", error=service)
-
-		# Edit existing service
-		elif request.form["operation"] == "edit" :
-			check, operation = wrappers.edit_service(request.form["OLD_SERVER_NAME"], env)
-			if not check :
-				render_template("error.html", title="Error", error=service)
-
-		# Delete existing service
-		elif request.form["operation"] == "delete" :
-			check, operation = wrappers.delete_service(request.form["SERVER_NAME"])
-			if not check :
-				render_template("error.html", title="Error", error=service)
+		# Do the operation
+		check, operation = wrappers.operation_service(request.form, env)
+		if not check :
+			render_template("error.html", title="Error", error=operation)
 
 	# Display services
 	check, services = wrappers.get_services()
