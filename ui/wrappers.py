@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import utils, config
-import docker, os, stat, sys, subprocess
+import docker, os, stat, sys, subprocess, shutil
 
 def get_client() :
 	endpoint = "/var/run/docker.sock"
@@ -46,7 +46,7 @@ def reload_instances(client) :
 	if not check :
 		return check, instances
 	i = 0
-	for instance in intances :
+	for instance in instances :
 		try :
 			instance.kill(signal="SIGHUP")
 		except docker.errors.APIError as e :
@@ -58,6 +58,7 @@ def new_service(client, env) :
 	proc = subprocess.run(["/opt/entrypoint/site-config.sh", env["SERVER_NAME"]], env=env, capture_output=True)
 	if proc.returncode != 0 :
 		return False, "Error code " + str(proc.returncode) + " while generating config."
+	utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + env["SERVER_NAME"] + "/server.conf;\n}")
 	check, nb = reload_instances(client)
 	if not check :
 		return check, nb
@@ -82,6 +83,7 @@ def delete_service(client, server_name) :
 		shutil.rmtree("/etc/nginx/" + server_name)
 	except Exception as e :
 		return False, str(e)
+	utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + server_name + "/server.conf;\n", "")
 	check, nb = reload_instances(client)
 	if not check :
 		return check, nb

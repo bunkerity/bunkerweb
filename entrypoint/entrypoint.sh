@@ -12,6 +12,7 @@ done
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
+	rm -f "/opt/running" 2> /dev/null
 	echo "[*] Catched stop operation"
 	echo "[*] Stopping crond ..."
 	pkill -TERM crond
@@ -25,7 +26,7 @@ function trap_exit() {
 	pkill -TERM rsyslogd
 	pkill -TERM tail
 }
-trap "trap_exit" TERM INT
+trap "trap_exit" TERM INT QUIT
 
 # trap SIGHUP
 function trap_reload() {
@@ -37,7 +38,7 @@ function trap_reload() {
 		echo "[*] Reloading nginx ..."
 		/usr/sbin/nginx -s reload
 		if [ $? -eq 0 ] ; then
-			echo "[*] Reload succesfull"
+			echo "[*] Reload successfull"
 		else
 			echo "[!] Reload failed"
 		fi
@@ -83,6 +84,11 @@ if [ -f "/tmp/nginx-temp.pid" ] ; then
 fi
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
+if [ "$?" -eq 0 ] ; then
+	touch "/opt/running"
+else
+	rm -f "/opt/running" 2> /dev/null
+fi
 
 # list of log files to display
 LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log"
@@ -113,7 +119,10 @@ fi
 
 # display logs
 tail -F $LOGS &
-wait $!
+pid="$!"
+while [ -f "/opt/running" ] ; do
+	wait "$pid"
+done
 
 # sigterm trapped
 echo "[*] bunkerized-nginx stopped"
