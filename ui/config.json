@@ -106,28 +106,38 @@
             "default":"no"
          },
          {
-            "type":"text",
-            "label":"Reverse proxy url",
-            "env":"REVERSE_PROXY_URL",
-            "regex":".*",
-            "id":"reverse-proxy-url",
-            "default":""
-         },
-         {
-            "type":"text",
-            "label":"Reverse proxy host",
-            "env":"REVERSE_PROXY_HOST",
-            "regex":".*",
-            "id":"reverse-proxy-host",
-            "default":""
-         },
-         {
-            "type":"checkbox",
-            "label":"Reverse proxy ws",
-            "env":"REVERSE_PROXY_WS",
-            "regex":"^(yes|no)$",
-            "id":"reverse-proxy-ws",
-            "default":""
+            "type":"multiple",
+            "label":"Reverse proxy",
+            "id":"reverse-proxy-params",
+            "params":[
+               {
+                  "type":"text",
+                  "label":"Reverse proxy url",
+                  "env":"REVERSE_PROXY_URL",
+                  "regex":".*",
+                  "id":"reverse-proxy-url",
+                  "multiple":"Reverse proxy",
+                  "default":""
+               },
+               {
+                  "type":"text",
+                  "label":"Reverse proxy host",
+                  "env":"REVERSE_PROXY_HOST",
+                  "regex":".*",
+                  "id":"reverse-proxy-host",
+                  "multiple":"Reverse proxy",
+                  "default":""
+               },
+               {
+                  "type":"checkbox",
+                  "label":"Reverse proxy ws",
+                  "env":"REVERSE_PROXY_WS",
+                  "regex":"^(yes|no)$",
+                  "id":"reverse-proxy-ws",
+                  "multiple":"Reverse proxy",
+                  "default":""
+               }
+            ]
          },
          {
             "type":"checkbox",

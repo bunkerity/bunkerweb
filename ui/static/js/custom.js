@@ -29,7 +29,7 @@ function getData(id) {
 	for (var i = 0; i < elements.length; i++) {
 		element = elements[i];
 		if (element["type"] === "checkbox") {
-			if (element["value"] === "on") {
+			if (element["checked"]) {
 				data[element["name"]] = "yes";
 			}
 			else {
@@ -77,4 +77,45 @@ function restartInstance(id) {
 function deleteInstance(id) {
 	post("delete", "instances", getData('form-instance-' + id));
 	return false;
+}
+
+var multiples = {};
+function addMultiple(id, paramsEnc) {
+	var params = JSON.parse(paramsEnc);
+	var div = document.getElementById(id);
+	if (!multiples.hasOwnProperty(id)) {
+		multiples[id] = 0;
+	}
+	multiples[id]++;
+	for (var i = 0; i < params.length; i++) {
+		var input = "";
+		var input_id = id + "-" + params[i]["id"] + "-" + multiples[id].toString();
+		var input_name = params[i]["env"] + "_" + multiples[id].toString();
+		var input_label = params[i]["label"] + " #" + multiples[id].toString();
+		var input_value = params[i]["default"];
+		var pt = "";
+		if (params[i]["type"] == "text") {
+			input = `<input type="text" class="form-control" id="${input_id}" value="${input_value}" name="${input_name}">`;
+		}
+		else if (params[i]["type"] == "checkbox") {
+			if (input_value == "yes") {
+				input_value = "checked";
+			}
+			input = `<div class="form-check form-switch"><input type="checkbox" class="form-check-input" id="${input_id}" name="${input_name}" ${input_value}></div>`;
+			pt = "pt-0";
+		}
+		div.insertAdjacentHTML('beforeend', `<label for="${input_id}" class="col-4 col-form-label ${pt} mb-3" id="label-${input_id}">${input_label}</label><div class="col-8 mb-3" id="input-${input_id}">${input}</div>`);
+	}
+}
+
+function delMultiple(id, paramsEnc) {
+	if (multiples.hasOwnProperty(id) && multiples[id] > 0) {
+		var params = JSON.parse(paramsEnc);
+		for (var i = 0; i < params.length; i++) {
+			var input_id = id + "-" + params[i]["id"] + "-" + multiples[id].toString();
+			document.getElementById("label-" + input_id).remove();
+			document.getElementById("input-" + input_id).remove();
+		}
+		multiples[id]--;
+	}
 }

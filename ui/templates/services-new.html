@@ -22,7 +22,13 @@
 {% for k, v in config["CONFIG"].items() %}
 						<div class="tab-pane fade {{ check.class }}" id="new-{{ v["id"] }}" role="tabpanel" aria-labelledby="new-{{ v["id"] }}-tab">
 	{% for param in v["params"] %}
-							{{ form_service_gen("new", "", param["id"], param["label"], param["type"], param["default"], param["env"])|safe }}
+							<div class="row mb-3" id="form-new-{{ param["id"] }}">
+		{% if param["type"] != "multiple" %}
+								{{ form_service_gen("form-new-" + param["id"], param["label"], param["type"], param["default"], param["env"])|safe }}
+		{% else %}
+								{{ form_service_gen_multiple("form-new-" + param["id"], param["label"], param["params"])|safe }}
+		{% endif %}
+							</div>
 	{% endfor %}
 						</div>
 	{% if check.update({"class": ""}) %}
@@ -33,7 +39,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" onClick="newInstance();">Save</button>
+				<button type="button" class="btn btn-primary" onClick="newService();">Save</button>
 			</div>
 		</div>
 	</div>

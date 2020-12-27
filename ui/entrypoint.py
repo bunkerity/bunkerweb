@@ -14,6 +14,8 @@ with open("/opt/entrypoint/config.json", "r") as f :
 	app.config["CONFIG"] = json.loads(f.read())
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
+app.jinja_env.globals.update(form_service_gen_multiple=utils.form_service_gen_multiple)
+app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service_gen_multiple_values)
 
 @app.route('/')
 @app.route('/home')
@@ -58,6 +60,8 @@ def services():
 	# Manage services
 	operation = ""
 	if request.method == "POST" :
+
+		print(request.form, flush=True)
 
 		# Check operation
 		if not "operation" in request.form or not request.form["operation"] in ["new", "edit", "delete"] :
