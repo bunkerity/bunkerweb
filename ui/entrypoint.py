@@ -20,7 +20,10 @@ app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service
 @app.route('/')
 @app.route('/home')
 def home():
-	check, instances = wrappers.get_instances()
+	check, client = wrappers.get_client()
+	if not check :
+		return render_template("error.html", title="Error", error=client)
+	check, instances = wrappers.get_instances(client)
 	if not check :
 		return render_template("error.html", title="Error", error=instances)
 	check, services = wrappers.get_services()
@@ -30,6 +33,11 @@ def home():
 
 @app.route('/instances', methods=["GET", "POST"])
 def instances():
+
+	# Get the client
+	check, client = wrappers.get_client()
+	if not check :
+		return render_template("error.html", title="Error", error=client)
 
 	# Manage instances
 	operation = ""
@@ -44,12 +52,12 @@ def instances():
 			return render_template("error.html", title="Error", error="Missing INSTANCE_ID parameter.")
 
 		# Do the operation
-		check, operation = wrappers.operation_instance(request.form)
+		check, operation = wrappers.operation_instance(client, request.form)
 		if not check :
 			return render_template("error.html", title="Error", error=operation)
 
 	# Display instances
-	check, instances = wrappers.get_instances()
+	check, instances = wrappers.get_instances(client)
 	if not check :
 		return render_template("error.html", title="Error", error=instances)
 	return render_template("instances.html", title="Instances", instances=instances, operation=operation)
@@ -57,11 +65,14 @@ def instances():
 @app.route('/services', methods=["GET", "POST"])
 def services():
 
+	# Get the client
+	check, client = wrappers.get_client()
+	if not check :
+		return render_template("error.html", title="Error", error=client)
+
 	# Manage services
 	operation = ""
 	if request.method == "POST" :
-
-		print(request.form, flush=True)
 
 		# Check operation
 		if not "operation" in request.form or not request.form["operation"] in ["new", "edit", "delete"] :
@@ -72,11 +83,22 @@ def services():
 		if request.form["operation"] in ["new", "edit"] :
 			for category in current_app.config["CONFIG"] :
 				for param in current_app.config["CONFIG"][category]["params"] :
-					if not param["env"] in request.form :
-						return render_template("error.html", title="Error", error="Missing " + param["env"] + " parameter.")
-					if not re.search(param["regex"], request.form[param["env"]]) :
-						return render_template("error.html", title="Error", error="Parameter " + param["env"] + " doesn't match regex.")
-					env[param["env"]] = request.form[param["env"]]
+					if param["type"] == "multiple" :
+						for param_user in request.form :
+							if param_user.startswith(param["params"][0]["env"]) :
+								suffix = param_user.replace(param["params"][0]["env"], "")
+								for param_multiple in param["params"] :
+									if not param_multiple["env"] + suffix in request.form :
+										return render_template("error.html", title="Error", error="Missing " + param["env"] + " parameter.")
+									if not re.search(param_multiple["regex"], request.form[param_multiple["env"] + suffix]) :
+										return render_template("error.html", title="Error", error="Parameter " + param["env"] + " doesn't match regex.")
+									env[param_multiple["env"] + suffix] = request.form[param_multiple["env"] + suffix]
+					else :
+						if not param["env"] in request.form :
+							return render_template("error.html", title="Error", error="Missing " + param["env"] + " parameter.")
+						if not re.search(param["regex"], request.form[param["env"]]) :
+							return render_template("error.html", title="Error", error="Parameter " + param["env"] + " doesn't match regex.")
+						env[param["env"]] = request.form[param["env"]]
 			if request.form["operation"] == "edit" :
 				if not "OLD_SERVER_NAME" in request.form :
 					return render_template("error.html", title="Error", error="Missing OLD_SERVER_NAME parameter.")
@@ -89,7 +111,7 @@ def services():
 				return render_template("error.html", title="Error", error="Parameter SERVER_NAME doesn't match regex.")
 
 		# Do the operation
-		check, operation = wrappers.operation_service(request.form, env)
+		check, operation = wrappers.operation_service(client, request.form, env)
 		if not check :
 			render_template("error.html", title="Error", error=operation)
 

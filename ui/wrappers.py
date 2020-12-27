@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import utils, config
-import docker, os, stat, sys
+import docker, os, stat, sys, subprocess
 
 def get_client() :
 	endpoint = "/var/run/docker.sock"
@@ -13,18 +13,15 @@ def get_client() :
 		return False, "Can't instantiate DockerClient : " + str(e)
 	return True, client
 
-def get_containers(label) :
-	check, client = get_client()
-	if not check :
-		return check, client
+def get_containers(client, label) :
 	try :
 		containers = client.containers.list(all=True, filters={"label" : "bunkerized-nginx." + label})
 	except docker.errors.APIError as e :
 		return False, "Docker API error " + str(e)
 	return True, containers
 
-def get_instances() :
-	return get_containers("UI")
+def get_instances(client) :
+	return get_containers(client, "UI")
 
 def get_services() :
 	services = []
@@ -44,48 +41,129 @@ def get_services() :
 		return False, str(e)
 	return True, services
 
-def new_service(env) :
+def reload_instances(client) :
+	check, instances = get_instances(client)
+	if not check :
+		return check, instances
+	i = 0
+	for instance in intances :
+		try :
+			instance.kill(signal="SIGHUP")
+		except docker.errors.APIError as e :
+			return False, str(e)
+		i += 1
+	return True, i
+
+def new_service(client, env) :
+	proc = subprocess.run(["/opt/entrypoint/site-config.sh", env["SERVER_NAME"]], env=env, capture_output=True)
+	if proc.returncode != 0 :
+		return False, "Error code " + str(proc.returncode) + " while generating config."
+	check, nb = reload_instances(client)
+	if not check :
+		return check, nb
 	return True, "Web service " + env["SERVER_NAME"] + " has been added."
 
-def edit_service(old_server_name, env) :
+def edit_service(client, old_server_name, env) :
+	check, delete = delete_service(client, old_server_name)
+	if not check :
+		return check, delete
+	check, new = new_service(client, env)
+	if not check :
+		return check, new
+	check, nb = reload_instances(client)
+	if not check :
+		return check, nb
 	return True, "Web service " + old_server_name + " has been edited."
 
-def delete_service(server_name) :
+def delete_service(client, server_name) :
+	if not os.path.isdir("/etc/nginx/" + server_name) :
+		return False, "Config doesn't exist."
+	try :
+		shutil.rmtree("/etc/nginx/" + server_name)
+	except Exception as e :
+		return False, str(e)
+	check, nb = reload_instances(client)
+	if not check :
+		return check, nb
 	return True, "Web service " + server_name + " has been deleted."
 
-def operation_service(form, env) :
+def operation_service(client, form, env) :
 	if form["operation"] == "new" :
-		return new_service(env)
+		return new_service(client, env)
 	if form["operation"] == "edit" :
-		return edit_service(form["OLD_SERVER_NAME"], env)
+		return edit_service(client, form["OLD_SERVER_NAME"], env)
 	if form["operation"] == "delete" :
-		return delete_service(form["SERVER_NAME"])
+		return delete_service(client, form["SERVER_NAME"])
 	return False, "Wrong operation parameter."
 
-def reload_instance(id) :
+def get_instance(client, id) :
+	try :
+		instance = client.containers.get(id)
+		if not "bunkerized-nginx.UI" in instance.labels :
+			raise docker.errors.NotFound()
+	except Exception as e :
+		return False, str(e)
+	return True, instance
+
+def reload_instance(client, id) :
+	check, instance = get_instance(client, id)
+	if not check :
+		return check, instance
+	try :
+		instance.kill(signal="SIGHUP")
+	except docker.errors.APIError as e :
+		return False, str(e)
 	return True, "Instance " + id + " has been reloaded."
 
-def start_instance(id) :
+def start_instance(client, id) :
+	check, instance = get_instance(client, id)
+	if not check :
+		return check, instance
+	try :
+		instance.start()
+	except docker.errors.APIError as e :
+		return False, str(e)
 	return True, "Instance " + id + " has been started."
 
-def stop_instance(id) :
+def stop_instance(client, id) :
+	check, instance = get_instance(client, id)
+	if not check :
+		return check, instance
+	try :
+		instance.stop()
+	except docker.errors.APIError as e :
+		return False, str(e)
 	return True, "Instance " + id + " has been stopped."
 
-def restart_instance(id) :
+def restart_instance(client, id) :
+	check, instance = get_instance(client, id)
+	if not check :
+		return check, instance
+	try :
+		instance.restart()
+	except docker.errors.APIError as e :
+		return False, str(e)
 	return True, "Instance " + id + " has been restarted."
 
-def delete_instance(id) :
+def delete_instance(client, id) :
+	check, instance = get_instance(client, id)
+	if not check :
+		return check, instance
+	try :
+		instance.remove(v=True, force=True)
+	except docker.errors.APIError as e :
+		return False, str(e)
 	return True, "Instance " + id + " has been deleted."
 
-def operation_instance(form) :
+def operation_instance(client, form) :
 	if form["operation"] == "reload" :
-		return reload_instance(form["INSTANCE_ID"])
+		return reload_instance(client, form["INSTANCE_ID"])
 	if form["operation"] == "start" :
-		return start_instance(form["INSTANCE_ID"])
+		return start_instance(client, form["INSTANCE_ID"])
 	if form["operation"] == "stop" :
-		return stop_instance(form["INSTANCE_ID"])
+		return stop_instance(client, form["INSTANCE_ID"])
 	if form["operation"] == "restart" :
-		return restart_instance(form["INSTANCE_ID"])
+		return restart_instance(client, form["INSTANCE_ID"])
 	if form["operation"] == "delete" :
-		return delete_instance(form["INSTANCE_ID"])
+		return delete_instance(client, form["INSTANCE_ID"])
 	return False, "Wrong operation parameter."
