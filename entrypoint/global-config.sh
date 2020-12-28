@@ -291,10 +291,8 @@ fi
 # CrowdSec setup
 if [ "$(has_value USE_CROWDSEC yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" "include /etc/nginx/crowdsec.conf;"
-	cp /opt/crowdsec/acquis.yaml /etc/crowdsec/config/acquis.yaml
-	cscli api register >> /etc/crowdsec/config/api.yaml
-	cscli api pull
-	echo "0 0 * * * /usr/local/bin/cscli api pull > /dev/null 2>&1" >> /etc/crontabs/root
+	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_HOST" "$CROWDSEC_HOST"
+	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_KEY" "$CROWDSEC_KEY"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" ""
 fi

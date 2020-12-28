@@ -100,12 +100,6 @@ if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	LOGS="$LOGS /var/log/fail2ban.log"
 fi
 
-# start crowdsec
-if [ "$USE_CROWDSEC" = "yes" ] ; then
-	echo "[*] Running crowdsec ..."
-	crowdsec
-fi
-
 # autotest
 if [ "$1" == "test" ] ; then
 	sleep 10

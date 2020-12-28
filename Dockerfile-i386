@@ -6,18 +6,12 @@ RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \
     rm -rf /tmp/*
 
-COPY crowdsec/install.sh /tmp/install.sh
-RUN chmod +x /tmp/install.sh && \
-    /tmp/install.sh && \
-    rm -rf /tmp/*
-
 COPY entrypoint/ /opt/entrypoint
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
 COPY fail2ban/ /opt/fail2ban
 COPY logs/ /opt/logs
 COPY lua/ /opt/lua
-COPY crowdsec/ /opt/crowdsec
 
 COPY prepare.sh /tmp/prepare.sh
 RUN chmod +x /tmp/prepare.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
