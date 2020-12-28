@@ -71,9 +71,6 @@ def edit_service(client, old_server_name, env) :
 	check, new = new_service(client, env)
 	if not check :
 		return check, new
-	check, nb = reload_instances(client)
-	if not check :
-		return check, nb
 	return True, "Web service " + old_server_name + " has been edited."
 
 def delete_service(client, server_name) :

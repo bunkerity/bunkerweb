@@ -80,6 +80,7 @@ def services():
 
 		# Check that all fields are present and they match the corresponding regex
 		env = {}
+		env["MULTISITE"] = "yes"
 		if request.form["operation"] in ["new", "edit"] :
 			for category in current_app.config["CONFIG"] :
 				for param in current_app.config["CONFIG"][category]["params"] :
