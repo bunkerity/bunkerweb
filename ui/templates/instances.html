@@ -4,7 +4,7 @@
 
 {% if operation != "" %}
 <div class="row justify-content-center">
-	<div class="col col-4 mb-3 text-center">
+	<div class="col col-12 col-md-4 mb-3 text-center">
 		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
 			{{ operation }}
 			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -25,7 +25,7 @@
 			{% set color = "danger" %}
 		{% endif %}
 
-	<div class="col col-6">
+	<div class="col col-12 col-lg-6">
 		<form id="form-instance-{{ instance["id"] }}">
 			<input type="hidden" name="INSTANCE_ID" value="{{ instance["id"] }}">
 		</form>
