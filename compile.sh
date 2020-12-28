@@ -118,26 +118,20 @@ cd /tmp
 git_secure_clone https://github.com/diegonehab/luasocket.git 5b18e475f38fcf28429b1cc4b17baee3b9793a62
 cd luasocket
 make -j $NTASK
-mkdir /usr/local/lib/lua/socket
-cp src/*.lua /usr/local/lib/lua/socket
-cp src/*.so /usr/local/lib/lua/5.1/
-mv /usr/local/lib/lua/5.1/socket*.so /usr/local/lib/5.1/socket.so
-mv /usr/local/lib/lua/5.1/mime*.so /usr/local/lib/5.1/mime.so
+make CDIR_linux=lib/lua/5.1 LDIR_linux=lib/lua install
 cd /tmp
 git_secure_clone https://github.com/brunoos/luasec.git c6704919bdc85f3324340bdb35c2795a02f7d625
 cd luasec
 make linux -j $NTASK
-cp src/ssl.so /usr/local/lib/lua/5.1
-mkdir /usr/local/lib/lua/ssl
-cp src/*.lua /usr/local/lib/lua
+make LUACPATH=/usr/local/lib/lua/5.1 LUAPATH=/usr/local/lib/lua install
 cd /tmp
 git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 71c4247d6b66234e3f3426b2ea721ad50c741579
 cd lua-cs-bouncer
 mkdir /usr/local/lib/lua/crowdsec
 cp lib/*.lua /usr/local/lib/lua/crowdsec
 cp template.conf /usr/local/lib/lua/crowdsec/crowdsec.conf
-sed -i 's/^API_URL=.*/API_URL=%CROWDSEC_HOST%/:' /usr/local/lib/lua/crowdsec/crowdsec.conf
-sed -i 's/^API_KEY=.*/API_KEY=%CROWDSEC_KEY%/:' /usr/local/lib/lua/crowdsec/crowdsec.conf
+sed -i 's/^API_URL=.*/API_URL=%CROWDSEC_HOST%/' /usr/local/lib/lua/crowdsec/crowdsec.conf
+sed -i 's/^API_KEY=.*/API_KEY=%CROWDSEC_KEY%/' /usr/local/lib/lua/crowdsec/crowdsec.conf
 sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 cd /tmp

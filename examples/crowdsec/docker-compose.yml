@@ -22,7 +22,7 @@ services:
       - USE_GZIP=yes
       - USE_BROTLI=yes
       - USE_CROWDSEC=yes
-      - CROWDSEC_HOST=mycrowdsec
+      - CROWDSEC_HOST=http://mycrowdsec:8080
       - CROWDSEC_KEY=                                 # you need to generate it (see bouncer_key.sh)
       - app1.website.com_REMOTE_PHP=myapp1
       - app1.website.com_REMOTE_PHP_PATH=/app
