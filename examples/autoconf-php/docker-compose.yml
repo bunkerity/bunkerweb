@@ -30,6 +30,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - autoconf:/etc/nginx
+    depends_on:
+      - mywww
 
   myapp1:
     image: php:fpm

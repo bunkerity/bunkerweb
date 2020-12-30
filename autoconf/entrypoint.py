@@ -72,11 +72,20 @@ try :
 except docker.errors.APIError as e :
 	utils.log("[!] Docker API error " + str(e))
 	sys.exit(3)
+# Process instances first
+for instance in before :
+	if "bunkerized-nginx.AUTOCONF" in instance.labels :
+		if instance.status in ("restarting", "running", "created", "exited") :
+			process(instance, "create")
+		if instance.status == "running" :
+			process(instance, "start")
+# Containers after
 for container in before :
-	if container.status in ("restarting", "running", "created", "exited") :
-		process(container, "create")
-	if container.status == "running" :
-		process(container, "start")
+	if "bunkerized-nginx.SERVER_NAME" in container.labels :
+		if container.status in ("restarting", "running", "created", "exited") :
+			process(container, "create")
+		if container.status == "running" :
+			process(container, "start")
 
 # Process events received from Docker
 try :

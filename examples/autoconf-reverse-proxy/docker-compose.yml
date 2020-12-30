@@ -21,6 +21,8 @@ services:
       - USE_GZIP=yes
       - USE_BROTLI=yes
       - USE_REVERSE_PROXY=yes
+    labels:
+      - "bunkerized-nginx.AUTOCONF"
 
   myautoconf:
     image: bunkerity/bunkerized-nginx-autoconf
@@ -28,6 +30,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - autoconf:/etc/nginx
+    depends_on:
+      - mywww
 
   myapp1:
     build: js-app

@@ -14,6 +14,9 @@ find /etc/nginx -type d -exec chmod 750 {} \;
 if [ "$MULTISITE" = "yes" ] ; then
 	servers=$(find /etc/nginx -name "server.conf" | cut -d '/' -f 4)
 	for server in $servers ; do
+		if [ "$server" = "server.conf" ] ; then
+			continue
+		fi
 		SERVER_PREFIX="/etc/nginx/${server}/"
 		if grep "/etc/letsencrypt/live" ${SERVER_PREFIX}https.conf > /dev/null && [ ! -f /etc/letsencrypt/live/${server}/fullchain.pem ] ; then
 			/opt/scripts/certbot-new.sh "$server" "$(cat ${SERVER_PREFIX}email-lets-encrypt.txt)"
