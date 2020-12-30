@@ -37,6 +37,7 @@ Fooling automated tools/scanners :
   * [Behind a reverse proxy](#behind-a-reverse-proxy)
   * [Multisite](#multisite)
   * [Automatic configuration](#automatic-configuration)
+  * [Web UI](#web-ui)
   * [Antibot challenge](#antibot-challenge)
 - [Tutorials and examples](#tutorials-and-examples)
 - [List of environment variables](#list-of-environment-variables)
@@ -242,9 +243,9 @@ docker run -p 80:8080 \
            bunkerity/bunkerized-nginx
 ```
 
-When setting `SERVER_NAME` to nothing bunkerized-nginx won't create any server block (we only want automatic configuration). 
+When setting `SERVER_NAME` to nothing bunkerized-nginx won't create any server block (in case we only want automatic configuration). 
 
-Once bunkerized-nginx create, let's setup the autoconf container :
+Once bunkerized-nginx is created, let's setup the autoconf container :
 
 ```shell
 docker run -v /var/run/docker.sock:/var/run/docker.sock:ro \
@@ -319,7 +320,7 @@ docker run -p 80:8080 \
 
 The `AUTH_BASIC` environment variables let you define a login/password that must be provided before accessing to the web UI. At the moment, there is no authentication mechanism integrated into bunkerized-nginx-ui.
 
-We can now create the bunkerized-nginx-ui container that will host the web UI behind bunkerized-nginx (
+We can now create the bunkerized-nginx-ui container that will host the web UI behind bunkerized-nginx :
 
 ```shell
 docker run --network mynet \
@@ -404,7 +405,7 @@ The default folder where nginx will search for web files. Don't change it unless
 
 `LOG_FORMAT`  
 Values : *\<any values accepted by the log_format directive\>*  
-Default value : *$remote_addr - $remote_user $host \[$time_local\] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"*  
+Default value : *$host $remote_addr - $remote_user \[$time_local\] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"*  
 Context : *global*  
 The log format used by nginx to generate logs. More info [here](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format).
 
@@ -999,7 +1000,19 @@ The list of DNSBL zones to query when `USE_DNSBL` is set to *yes*.
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*, *multisite*  
-If set to *yes*, [CrowdSec](https://github.com/crowdsecurity/crowdsec) will be enabled with the [nginx collection](https://hub.crowdsec.net/author/crowdsecurity/collections/nginx). API pulls will be done automaticaly.
+If set to *yes*, [CrowdSec](https://github.com/crowdsecurity/crowdsec) will be enabled. Please note that you need a CrowdSec instance running see example [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/crowdsec).
+
+`CROWDSEC_HOST`  
+Values : *\<full URL to the CrowdSec instance API\>*  
+Default value :  
+Context : *global*  
+The full URL to the CrowdSec API.
+
+`CROWDSEC_KEY`  
+Values : *\<CrowdSec bouncer key\>*  
+Default value :  
+Context : *global*  
+The CrowdSec key given by *cscli bouncer add BouncerName*.
 
 ### Custom whitelisting
 
