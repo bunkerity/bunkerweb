@@ -1063,6 +1063,12 @@ Default : value : *15*
 Context : *global*  
 The number of "strange" HTTP status codes to find between the time interval.
 
+`FAIL2BAN_IGNOREIP`  
+Values : *\<list of IP addresses or subnet separated with spaces\>*   
+Default value : 127.0.0.1/8 192.168.0.0/16 172.16.0.0/16  
+Context : *global*  
+IPs or subnet which should never be ban by fail2ban.
+
 ## ClamAV
 
 `USE_CLAMAV_UPLOAD`  
