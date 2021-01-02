@@ -547,6 +547,14 @@ else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%LIMIT_REQ%" ""
 fi
 
+# connection limiting
+if [ "$USE_LIMIT_CONN" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}server.conf" "%LIMIT_CONN%" "include ${NGINX_PREFIX}limit-conn.conf;"
+	replace_in_file "${NGINX_PREFIX}limit-conn.conf" "%LIMIT_CONN_MAX%" "$LIMIT_CONN_MAX"
+else
+	replace_in_file "${NGINX_PREFIX}server.conf" "%LIMIT_CONN%" ""
+fi
+
 # fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_FAIL2BAN%" "include /etc/nginx/fail2ban-ip.conf;"
