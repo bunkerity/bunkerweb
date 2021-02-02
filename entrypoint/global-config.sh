@@ -271,6 +271,7 @@ if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then
 	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_BANTIME%" "$FAIL2BAN_BANTIME"
 	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_FINDTIME%" "$FAIL2BAN_FINDTIME"
 	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_MAXRETRY%" "$FAIL2BAN_MAXRETRY"
+	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_IGNOREIP%" "$FAIL2BAN_IGNOREIP"
 	replace_in_file "/etc/fail2ban/filter.d/nginx-filter.local" "%FAIL2BAN_STATUS_CODES%" "$FAIL2BAN_STATUS_CODES"
 fi
 
@@ -291,10 +292,8 @@ fi
 # CrowdSec setup
 if [ "$(has_value USE_CROWDSEC yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" "include /etc/nginx/crowdsec.conf;"
-	cp /opt/crowdsec/acquis.yaml /etc/crowdsec/config/acquis.yaml
-	cscli api register >> /etc/crowdsec/config/api.yaml
-	cscli api pull
-	echo "0 0 * * * /usr/local/bin/cscli api pull > /dev/null 2>&1" >> /etc/crontabs/root
+	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_HOST%" "$CROWDSEC_HOST"
+	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_KEY%" "$CROWDSEC_KEY"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" ""
 fi

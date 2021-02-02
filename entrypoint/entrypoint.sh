@@ -12,6 +12,7 @@ done
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
+	rm -f "/opt/running" 2> /dev/null
 	echo "[*] Catched stop operation"
 	echo "[*] Stopping crond ..."
 	pkill -TERM crond
@@ -25,7 +26,27 @@ function trap_exit() {
 	pkill -TERM rsyslogd
 	pkill -TERM tail
 }
-trap "trap_exit" TERM INT
+trap "trap_exit" TERM INT QUIT
+
+# trap SIGHUP
+function trap_reload() {
+	echo "[*] Catched reload operation"
+	if [ "$MULTISITE" = "yes" ] ; then
+		/opt/entrypoint/multisite-config.sh
+	fi
+	if [ -f /tmp/nginx.pid ] ; then
+		echo "[*] Reloading nginx ..."
+		/usr/sbin/nginx -s reload
+		if [ $? -eq 0 ] ; then
+			echo "[*] Reload successfull"
+		else
+			echo "[!] Reload failed"
+		fi
+	else
+		echo "[!] Ignored reload operation because nginx is not running"
+	fi
+}
+trap "trap_reload" HUP
 
 # do the configuration magic if needed
 if [ ! -f "/opt/installed" ] ; then
@@ -36,6 +57,7 @@ if [ ! -f "/opt/installed" ] ; then
 			/opt/entrypoint/site-config.sh "$server"
 			echo "[*] Multi site - $server configuration done"
 		done
+		/opt/entrypoint/multisite-config.sh
 	else
 		/opt/entrypoint/site-config.sh
 		echo "[*] Single site - $SERVER_NAME configuration done"
@@ -50,13 +72,6 @@ chown -R root:nginx /etc/nginx/
 chmod -R 740 /etc/nginx/
 find /etc/nginx -type d -exec chmod 750 {} \;
 
-# fix let's encrypt rights
-if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
-	chown -R root:nginx /etc/letsencrypt
-	chmod -R 740 /etc/letsencrypt
-	find /etc/letsencrypt -type d -exec chmod 750 {} \;
-fi
-
 # start rsyslogd
 rsyslogd
 
@@ -64,26 +79,25 @@ rsyslogd
 crond
 
 # start nginx
-if [ -f "/tmp/nginx.pid" ] ; then
-	nginx -s quit
+if [ -f "/tmp/nginx-temp.pid" ] ; then
+	nginx -c /etc/nginx/nginx-temp.conf -s quit
 fi
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
+if [ "$?" -eq 0 ] ; then
+	touch "/opt/running"
+else
+	rm -f "/opt/running" 2> /dev/null
+fi
 
 # list of log files to display
-LOGS="/var/log/access.log /var/log/error.log"
+LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log"
 
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
 	echo "[*] Running fail2ban ..."
 	fail2ban-server > /dev/null
 	LOGS="$LOGS /var/log/fail2ban.log"
-fi
-
-# start crowdsec
-if [ "$USE_CROWDSEC" = "yes" ] ; then
-	echo "[*] Running crowdsec ..."
-	crowdsec
 fi
 
 # autotest
@@ -97,17 +111,12 @@ if [ "$1" == "test" ] ; then
 	exit 1
 fi
 
-# start the autoconf manager
-if [ -S "/var/run/docker.sock" ] ; then
-	echo "[*] Running autoconf ..."
-	touch /var/log/autoconf.log
-	/opt/autoconf/autoconf.py > /var/log/autoconf.log 2>&1 &
-	LOGS="$LOGS /var/log/autoconf.log"
-fi
-
 # display logs
 tail -F $LOGS &
-wait $!
+pid="$!"
+while [ -f "/opt/running" ] ; do
+	wait "$pid"
+done
 
 # sigterm trapped
 echo "[*] bunkerized-nginx stopped"

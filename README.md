@@ -2,7 +2,7 @@
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
 
-<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.0-blue" /> <img src="https://img.shields.io/badge/nginx-1.18.0-blue" /> <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" /> <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" /> <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.2-blue" /> <img src="https://img.shields.io/badge/nginx-1.18.0-blue" /> <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" /> <a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a> <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" /> <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
 
 nginx Docker image secure by default.  
 
@@ -18,7 +18,7 @@ Non-exhaustive list of features :
 - Block known bad IP with DNSBL and CrowdSec
 - Prevent bruteforce attacks with rate limiting
 - Detect bad files with ClamAV
-- Easy to configure with environment variables
+- Easy to configure with environment variables or web UI
 - Automatic configuration with container labels
 
 Fooling automated tools/scanners :
@@ -37,6 +37,7 @@ Fooling automated tools/scanners :
   * [Behind a reverse proxy](#behind-a-reverse-proxy)
   * [Multisite](#multisite)
   * [Automatic configuration](#automatic-configuration)
+  * [Web UI](#web-ui)
   * [Antibot challenge](#antibot-challenge)
 - [Tutorials and examples](#tutorials-and-examples)
 - [List of environment variables](#list-of-environment-variables)
@@ -174,10 +175,10 @@ docker run -p 80:8080 \
            -e AUTO_LETS_ENCRYPT=yes \
            -e REDIRECT_HTTP_TO_HTTPS=yes \
            -e USE_REVERSE_PROXY=yes \
-           -e app1.domain.com_PROXY_URL=/ \
-           -e app1.domain.com_PROXY_HOST=http://myapp1:8000 \
-           -e app2.domain.com_PROXY_URL=/ \
-           -e app2.domain.com_PROXY_HOST=http://myapp2:8000 \
+           -e app1.domain.com_REVERSE_PROXY_URL=/ \
+           -e app1.domain.com_REVERSE_PROXY_HOST=http://myapp1:8000 \
+           -e app2.domain.com_REVERSE_PROXY_URL=/ \
+           -e app2.domain.com_REVERSE_PROXY_HOST=http://myapp2:8000 \
            bunkerity/bunkerized-nginx
 ```
 
@@ -215,9 +216,15 @@ The */where/are/web/files* directory should have a structure like this :
 
 ## Automatic configuration
 
-**This feature exposes, for now, a security risk because you need to mount the docker socket inside the container. You can test it but you should not use it in servers facing the internet.**  
+The downside of using environment variables is that you need to recreate a new container each time you want to add or remove a web service. An alternative is to use the *bunkerized-nginx-autoconf* image which listens for Docker events and "automagically" generates the configuration.
 
-The downside of using environment variables is that you need to recreate a new container each time you want to add or remove aweb service. An alternative is to tell bunkerized-nginx to listen for Docker events by mounting the socket inside the container :  
+First we need a volume that will store the configurations :
+
+```shell
+docker volume create nginx_conf
+```
+
+Then we run bunkerized-nginx with the `bunkerized-nginx.AUTOCONF` label, mount the created volume at /etc/nginx and set some default configurations for our services (e.g. : automatic Let's Encrypt and HTTP to HTTPS redirect) : 
 
 ```shell
 docker network create mynet
@@ -227,17 +234,28 @@ docker run -p 80:8080 \
            --network mynet \
            -v /where/to/save/certificates:/etc/letsencrypt \
            -v /where/are/web/files:/www:ro \
-           -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -v nginx_conf:/etc/nginx \
            -e SERVER_NAME= \
            -e MULTISITE=yes \
            -e AUTO_LETS_ENCRYPT=yes \
            -e REDIRECT_HTTP_TO_HTTPS=yes \
+           -l bunkerized.nginx.AUTOCONF \
            bunkerity/bunkerized-nginx
 ```
 
-Please note by setting `SERVER_NAME` to nothing bunkerized-nginx won't create any server block.
+When setting `SERVER_NAME` to nothing bunkerized-nginx won't create any server block (in case we only want automatic configuration). 
 
-You can now create a new container and use labels to dynamically configure bunkerized-nginx :
+Once bunkerized-nginx is created, let's setup the autoconf container :
+
+```shell
+docker run -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -v nginx_conf:/etc/nginx \
+           bunkerity/bunkerized-nginx-autoconf
+```
+
+We can now create a new container and use labels to dynamically configure bunkerized-nginx. Labels for automatic configuration are the same as environment variables but with the "bunkerized-nginx." prefix.
+
+Here is a PHP example :
 
 ```shell
 docker run --network mynet \
@@ -246,11 +264,73 @@ docker run --network mynet \
            -l bunkerized-nginx.SERVER_NAME=app.domain.com \
            -l bunkerized-nginx.REMOTE_PHP=myapp \
            -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+           php:fpm
+```
+
+And a reverse proxy example :
+
+```shell
+docker run --network mynet \
+           --name anotherapp \
+           -l bunkerized-nginx.SERVER_NAME=app2.domain.com \
+           -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
+           -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
+           -l bunkerized-nginx.REVERSE_PROXY_HOST=http://anotherapp
+           tutum/hello-world
+```
+
+## Web UI
+
+**This feature exposes, for now, a security risk because you need to mount the docker socket inside a container exposing a web application. You can test it but you should not use it in servers facing the internet.**  
+
+A dedicated image, *bunkerized-nginx-ui*, lets you manage bunkerized-nginx instances and services configurations through a web user interface. This feature is still in beta, feel free to open a new issue if you find a bug and/or you have an idea to improve it. 
+
+First we need a volume that will store the configurations :
+
+```shell
+docker volume create nginx_conf
+```
+
+Then, we can create the bunkerized-nginx instance with the `bunkerized-nginx.UI` label and a reverse proxy configuration for our web UI :
+
+```shell
+docker network create mynet
+
+docker run -p 80:8080 \
+           -p 443:8443 \
+           --network mynet \
+           -v nginx_conf:/etc/nginx \
+           -v /where/are/web/files:/www:ro \
+           -v /where/to/save/certificates:/etc/letsencrypt \
+           -e SERVER_NAME=admin.domain.com \
+           -e MULTISITE=yes \
+           -e AUTO_LETS_ENCRYPT=yes \
+           -e REDIRECT_HTTP_TO_HTTPS=yes \
+           -e DISABLE_DEFAULT_SERVER=yes \
+           -e admin.domain.com_SERVE_FILES=no \
+           -e admin.domain.com_USE_AUTH_BASIC=yes \
+           -e admin.domain.com_AUTH_BASIC_USER=admin \
+           -e admin.domain.com_AUTH_BASIC_PASSWORD=password \
+           -e admin.domain.com_USE_REVERSE_PROXY=yes \
+           -e admin.domain.com_REVERSE_PROXY_URL=/webui/ \
+           -e admin.domain.com_REVERSE_PROXY_HOST=http://myui:5000/ \
+           -l bunkerized-nginx.UI \
            bunkerity/bunkerized-nginx
 ```
 
-Labels for automatic configuration are the same as environment variables but with the "bunkerized-nginx." prefix.
+The `AUTH_BASIC` environment variables let you define a login/password that must be provided before accessing to the web UI. At the moment, there is no authentication mechanism integrated into bunkerized-nginx-ui.
 
+We can now create the bunkerized-nginx-ui container that will host the web UI behind bunkerized-nginx :
+
+```shell
+docker run --network mynet \
+           -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -v nginx_conf:/etc/nginx \
+           -e ABSOLUTE_URI=https://admin.domain.com/webui/ \
+           bunkerity/bunkerized-nginx-ui
+```
+
+After that, the web UI should be accessible from https://admin.domain.com/webui/.
 
 ## Antibot challenge
 
@@ -262,7 +342,7 @@ When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must c
 
 # Tutorials and examples
 
-You will find some docker-compose.yml examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples) and tutorials about bunkerized-nginx in our [blog](https://www.bunkerity.com/category/bunkerized-nginx/).  
+You will find some docker-compose.yml examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples).  
 
 # List of environment variables
 
@@ -325,7 +405,7 @@ The default folder where nginx will search for web files. Don't change it unless
 
 `LOG_FORMAT`  
 Values : *\<any values accepted by the log_format directive\>*  
-Default value : *$remote_addr - $remote_user $host \[$time_local\] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"*  
+Default value : *$host $remote_addr - $remote_user \[$time_local\] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"*  
 Context : *global*  
 The log format used by nginx to generate logs. More info [here](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format).
 
@@ -814,7 +894,7 @@ More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Stric
 
 `CONTENT_SECURITY_POLICY`  
 Values : *\<directive 1\>; \<directive 2\>; ...*  
-Default value : *default-src 'self'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts; reflected-xss block; base-uri 'self'; referrer no-referrer*  
+Default value : *object-src 'none'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts allow-popups; base-uri 'self';*  
 Context : *global*, *multisite*  
 Policy to be used when loading resources (scripts, forms, frames, ...).  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
@@ -920,7 +1000,19 @@ The list of DNSBL zones to query when `USE_DNSBL` is set to *yes*.
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*, *multisite*  
-If set to *yes*, [CrowdSec](https://github.com/crowdsecurity/crowdsec) will be enabled with the [nginx collection](https://hub.crowdsec.net/author/crowdsecurity/collections/nginx). API pulls will be done automaticaly.
+If set to *yes*, [CrowdSec](https://github.com/crowdsecurity/crowdsec) will be enabled. Please note that you need a CrowdSec instance running see example [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/crowdsec).
+
+`CROWDSEC_HOST`  
+Values : *\<full URL to the CrowdSec instance API\>*  
+Default value :  
+Context : *global*  
+The full URL to the CrowdSec API.
+
+`CROWDSEC_KEY`  
+Values : *\<CrowdSec bouncer key\>*  
+Default value :  
+Context : *global*  
+The CrowdSec key given by *cscli bouncer add BouncerName*.
 
 ### Custom whitelisting
 
@@ -1062,6 +1154,12 @@ Values : *\<any positive integer\>*
 Default : value : *15*  
 Context : *global*  
 The number of "strange" HTTP status codes to find between the time interval.
+
+`FAIL2BAN_IGNOREIP`  
+Values : *\<list of IP addresses or subnet separated with spaces\>*  
+Default value : 127.0.0.1/8 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8  
+Context : *global*  
+IPs or subnet which should never be ban by fail2ban.
 
 ## ClamAV
 

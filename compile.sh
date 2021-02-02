@@ -30,7 +30,7 @@ function git_secure_clone() {
 NTASK=$(nproc)
 
 # install build dependencies
-apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg brotli-dev outils-signify
+apk add --no-cache --virtual build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev outils-signify
 
 # turn the detached message off
 git config --global advice.detachedHead false
@@ -113,6 +113,30 @@ cd /tmp
 git_secure_clone https://github.com/ledgetech/lua-resty-http.git 984fdc26054376384e3df238fb0f7dfde01cacf1
 cd lua-resty-http
 make install
+cd /tmp
+git_secure_clone https://github.com/Neopallium/lualogging.git cadc4e8fd652be07a65b121a3e024838db330c15
+cd lualogging
+cp -r src/* /usr/local/lib/lua
+cd /tmp
+git_secure_clone https://github.com/diegonehab/luasocket.git 5b18e475f38fcf28429b1cc4b17baee3b9793a62
+cd luasocket
+make -j $NTASK
+make CDIR_linux=lib/lua/5.1 LDIR_linux=lib/lua install
+cd /tmp
+git_secure_clone https://github.com/brunoos/luasec.git c6704919bdc85f3324340bdb35c2795a02f7d625
+cd luasec
+make linux -j $NTASK
+make LUACPATH=/usr/local/lib/lua/5.1 LUAPATH=/usr/local/lib/lua install
+cd /tmp
+git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 71c4247d6b66234e3f3426b2ea721ad50c741579
+cd lua-cs-bouncer
+mkdir /usr/local/lib/lua/crowdsec
+cp lib/*.lua /usr/local/lib/lua/crowdsec
+cp template.conf /usr/local/lib/lua/crowdsec/crowdsec.conf
+sed -i 's/^API_URL=.*/API_URL=%CROWDSEC_HOST%/' /usr/local/lib/lua/crowdsec/crowdsec.conf
+sed -i 's/^API_KEY=.*/API_KEY=%CROWDSEC_KEY%/' /usr/local/lib/lua/crowdsec/crowdsec.conf
+sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
+sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 cd /tmp
 git_secure_clone https://github.com/openresty/lua-nginx-module.git 2d23bc4f0a29ed79aaaa754c11bffb1080aa44ba
 export LUAJIT_LIB=/usr/local/lib

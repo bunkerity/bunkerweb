@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # load default values
+set -a
 . /opt/entrypoint/defaults.sh
+set +a
 
 # load some functions
 . /opt/entrypoint/utils.sh
@@ -10,6 +12,20 @@
 NGINX_PREFIX="/etc/nginx/"
 if [ "$MULTISITE" = "yes" ] ; then
 	NGINX_PREFIX="${NGINX_PREFIX}${1}/"
+	if [ ! -d "$NGINX_PREFIX" ] ; then
+		mkdir "$NGINX_PREFIX"
+	fi
+	ROOT_FOLDER="${ROOT_FOLDER}/$1"
+fi
+env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION)=" > "${NGINX_PREFIX}nginx.env"
+
+if [ "$MULTISITE" = "yes" ] ; then
+	sed -i "s~^SERVER_NAME=.*~SERVER_NAME=$1~" "${NGINX_PREFIX}nginx.env"
+	for server in $SERVER_NAME ; do
+		if [ "$server" != "$1" ] ; then
+			sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
+		fi
+	done
 	for var in $(env) ; do
 		name=$(echo "$var" | cut -d '=' -f 1)
 		check=$(echo "$name" | grep "^$1_")
@@ -17,15 +33,14 @@ if [ "$MULTISITE" = "yes" ] ; then
 			repl_name=$(echo "$name" | sed "s~${1}_~~")
 			repl_value=$(echo "$var" | sed "s~${name}=~~")
 			read -r "$repl_name" <<< $repl_value
+			sed -i "/^${repl_name}=.*/d" "${NGINX_PREFIX}nginx.env"
+			sed -i "/^${name}=.*/d" "${NGINX_PREFIX}nginx.env"
+			echo "${repl_name}=${repl_value}" >> "${NGINX_PREFIX}nginx.env"
 		fi
 	done
-	ROOT_FOLDER="${ROOT_FOLDER}/$1"
 fi
 
 # copy stub confs
-if [ "$MULTISITE" = "yes" ] ; then
-	mkdir "$NGINX_PREFIX"
-fi
 cp /opt/confs/site/* "$NGINX_PREFIX"
 
 # replace paths
@@ -58,6 +73,7 @@ if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 			cp "${NGINX_PREFIX}reverse-proxy.conf" "${NGINX_PREFIX}reverse-proxy-${i}.conf"
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$value"
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
+			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HEADERS%" "include ${NGINX_PREFIX}reverse-proxy-headers.conf;"
 			if [ "$ws_value" = "yes" ] ; then
 				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" "proxy_http_version 1.1;\nproxy_set_header Upgrade \$http_upgrade;\nproxy_set_header Connection \"Upgrade\";\n"
 			else
@@ -137,9 +153,6 @@ if [ "$REMOTE_PHP" != "" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" "include ${NGINX_PREFIX}php.conf;"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%FASTCGI_PATH%" "include ${NGINX_PREFIX}fastcgi.conf;"
 	replace_in_file "${NGINX_PREFIX}php.conf" "%REMOTE_PHP%" "$REMOTE_PHP"
-	if [ "$MULTISITE" = "yes" ] ; then
-		cp /etc/nginx/fastcgi.conf ${NGINX_PREFIX}fastcgi.conf && chown root:nginx ${NGINX_PREFIX}fastcgi.conf
-	fi
 	replace_in_file "${NGINX_PREFIX}fastcgi.conf" "\$document_root" "${REMOTE_PHP_PATH}/"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_PHP%" ""
@@ -322,11 +335,8 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
 			FIRST_SERVER_NAME="$1"
-			if [ ! -f /etc/letsencrypt/live/${1}/fullchain.pem ] ; then
-				echo "[*] Performing Let's Encrypt challenge for $1 ..."
-				EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
-				/opt/scripts/certbot-new.sh "$1" "$EMAIL_LETS_ENCRYPT"
-			fi
+			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
+			echo -n "$EMAIL_LETS_ENCRYPT" > ${NGINX_PREFIX}email-lets-encrypt.txt
 		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/privkey.pem"
@@ -360,26 +370,24 @@ fi
 
 # ModSecurity config
 if [ "$USE_MODSECURITY" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}/modsecurity-rules.conf"
+	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}modsecurity-rules.conf"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_MODSECURITY%" "include ${NGINX_PREFIX}modsecurity.conf;"
-	modsec_custom=""
-	if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
-		modsec_custom="include /modsec-confs/*.conf\n"
+	if [ "$MULTISITE" != "yes" ] ; then
+		modsec_custom=""
+		if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then
+			modsec_custom="include /modsec-confs/*.conf\n"
+		fi
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	fi
-	if [ "$MULTISITE" = "yes" ] && ls /modsec-confs/${1}/*.conf > /dev/null 2>&1 ; then
-		modsec_custom="${modsec_custom}include /modsec-confs/${1}/*.conf\n"
-	fi
-	replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
-		modsec_crs_custom=""
-		if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
-			modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
+		if [ "$MULTISITE" != "yes" ] ; then
+			modsec_crs_custom=""
+			if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
+				modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
+			fi
+			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		fi
-		if [ "$MULTISITE" = "yes" ] && ls /modsec-crs-confs/${1}/*.conf > /dev/null 2>&1 ; then
-			modsec_crs_custom="${modsec_custom}include /modsec-crs-confs/${1}/*.conf\n"
-		fi
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
 	else
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" ""
@@ -424,11 +432,13 @@ replace_in_file "${NGINX_PREFIX}server.conf" "%ERRORS%" "$ERRORS"
 if [ "$USE_AUTH_BASIC" = "yes" ] ; then
 	if [ "$AUTH_BASIC_LOCATION" = "sitewide" ] ; then
 		replace_in_file "${NGINX_PREFIX}server.conf" "%AUTH_BASIC%" "include ${NGINX_PREFIX}auth-basic-sitewide.conf;"
-		replace_in_file "${NGINX_PREFIX}auth-basic-sitewide.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+		replace_in_file "${NGINX_PREFIX}auth-basic-sitewide.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT"
+		replace_in_file "${NGINX_PREFIX}auth-basic-sitewide.conf" "%NGINX_PREFIX%" "$NGINX_PREFIX"
 	else
 		replace_in_file "${NGINX_PREFIX}server.conf" "%AUTH_BASIC%" "include ${NGINX_PREFIX}auth-basic.conf;"
-		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION";
-		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT";
+		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_LOCATION%" "$AUTH_BASIC_LOCATION"
+		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%AUTH_BASIC_TEXT%" "$AUTH_BASIC_TEXT"
+		replace_in_file "${NGINX_PREFIX}auth-basic.conf" "%NGINX_PREFIX%" "$NGINX_PREFIX"
 	fi
 	htpasswd -b -B -c ${NGINX_PREFIX}.htpasswd "$AUTH_BASIC_USER" "$AUTH_BASIC_PASSWORD"
 else

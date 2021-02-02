@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if operation != "" %}
+<div class="row justify-content-center">
+	<div class="col col-12 col-md-4 mb-3 text-center">
+		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+			{{ operation }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+
+<div class="row justify-content-center">
+
+	<div class="col col-12 mb-3 text-center">
+		<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-new"><i class="fas fa-plus"></i> New</button>
+	</div>
+
+	{% for service in services %}
+
+		{% set id_server_name = service["SERVER_NAME"].replace(".", "-") %}
+
+	<div class="col col-12 col-lg-4">
+		<div class="card border-primary mb-3" style="max-width: 80rem;">
+			<div class="card-header border-primary bg-primary text-white">
+				{{ service["SERVER_NAME"] }}
+				<button class="btn btn-sm ms-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-delete-id-{{ id_server_name }}"><i class="fas fa-trash-alt"></i></button>
+				<button class="btn btn-sm mx-2 float-end btn-light" data-bs-toggle="modal" data-bs-target="#modal-edit-id-{{ id_server_name }}"><i class="fas fa-edit"></i></button>
+				<a class="btn btn-sm mx-2 float-end btn-light" href="http://{{ service["SERVER_NAME"] }}" target="_blank"><i class="fas fa-eye"></i></a>
+			</div>
+			<div class="card-body text-dark">
+				<h5 class="card-title">Summary</h5>
+				<span class="card-text">
+					<div class="row justify-content-center">
+						<div class="col col-6">Reverse proxy</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_REVERSE_PROXY"], "yes") }}"></i></div>
+						<div class="col col-6">Serve files</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["SERVE_FILES"], "yes") }}"></i></div>
+						<div class="col col-6">Remote PHP</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["REMOTE_PHP"], ".+") }}"></i></div>
+						<div class="col col-6">HTTPS</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class([service["AUTO_LETS_ENCRYPT"], service["USE_CUSTOM_HTTPS"], service["GENERATE_SELF_SIGNED_SSL"]], ["yes", "yes", "yes"]) }}"></i></div>
+						<div class="col col-6">ModSecurity</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_MODSECURITY"], "yes") }}"></i></div>
+						<div class="col col-6">Fail2Ban</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_FAIL2BAN"], "yes") }}"></i></div>
+						<div class="col col-6">Limit req</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_LIMIT_REQ"], "yes") }}"></i></div>
+						<div class="col col-6">DNSBL</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_DNSBL"], "yes") }}"></i></div>
+					</div>
+				</span>
+			</div>
+		</div>
+	</div>
+
+		{% include "services-new.html" %}
+		{% include "services-edit.html" %}
+		{% include "services-delete.html" %}
+
+	{% endfor %}
+
+</div>
+
+{% endblock %}

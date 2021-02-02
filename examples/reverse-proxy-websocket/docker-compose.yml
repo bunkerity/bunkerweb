@@ -3,7 +3,7 @@ version: '3'
 services:
 
   myreverse:
-    image: bunkerity/bunkerized-nginx:dev
+    image: bunkerity/bunkerized-nginx
     restart: always
     ports:
       - 80:8080

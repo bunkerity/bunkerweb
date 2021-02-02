@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if operation != "" %}
+<div class="row justify-content-center">
+	<div class="col col-12 col-md-4 mb-3 text-center">
+		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+			{{ operation }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+<div class="row justify-content-center">
+
+	{% for instance in instances %}
+		{% set color = "dark" %}
+		{% if instance["status"] == "running" %}
+			{% set color = "success" %}
+		{% elif instance["status"] == "created" or instance["status"] == "restarting" or instance["status"] == "paused" %}
+			{% set color = "warning" %}
+		{% elif instance["status"] == "exited" or instance["status"] == "dead" %}
+			{% set color = "danger" %}
+		{% endif %}
+
+	<div class="col col-12 col-lg-6">
+		<form id="form-instance-{{ instance["id"] }}">
+			<input type="hidden" name="INSTANCE_ID" value="{{ instance["id"] }}">
+		</form>
+		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">
+			<div class="card-header border-{{ color }} bg-{{ color }} text-white">
+				{{ instance["name"] }}
+				<div class="btn-group mx-2 float-end" role="group">
+					<button id="btnGroupDrop1" class="btn btn-sm dropdown-toggle btn-light" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="fas fa-cogs"> manage container</i>
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+						<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return stopInstance('{{ instance["id"] }}');">Stop</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return deleteInstance('{{ instance["id"] }}');">Delete</a></li>
+					</ul>
+				</div>
+				<button class="btn btn-sm mx-2 float-end btn-light" onClick="reloadInstance('{{ instance["id"] }}');"><i class="fas fa-redo-alt"></i> reload nginx</button>
+			</div>
+			<div class="card-body text-dark">
+				<h5 class="card-title">Status : {{ instance["status"] }}</h5>
+				<span class="card-text">
+					Environment variables :<br />
+					{% set envfilter = ["PATH", "NGINX_VERSION", "NJS_VERSION", "PKG_RELEASE"] %}
+					{% for env in instance.attrs["Config"]["Env"] %}
+						{% if not env.startswith("PATH=") and not env.startswith("NGINX_VERSION=") and not env.startswith("NJS_VERSION=") and not env.startswith("PKG_RELEASE=") %}
+							{{ env }}<br />
+						{% endif %}
+					{% endfor %}
+				</span>
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+
+</div>
+
+{% endblock %}

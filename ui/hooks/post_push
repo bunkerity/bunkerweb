@@ -1,0 +1,12 @@
+#!/bin/bash
+
+curl -Lo manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
+chmod +x manifest-tool
+
+VERSION=$(cat VERSION | tr -d '\n')
+if [ "$SOURCE_BRANCH" = "dev" ] ; then
+	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx-ui:dev-ARCHVARIANT --target bunkerity/bunkerized-nginx-ui:dev
+elif [ "$SOURCE_BRANCH" = "master" ] ; then
+	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx-ui:ARCHVARIANT --target bunkerity/bunkerized-nginx-ui:${VERSION}
+	./manifest-tool push from-args --ignore-missing --platforms linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8 --template bunkerity/bunkerized-nginx-ui:ARCHVARIANT --target bunkerity/bunkerized-nginx-ui:latest
+fi
