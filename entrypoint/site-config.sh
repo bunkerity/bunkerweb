@@ -276,6 +276,11 @@ fi
 # block bad UA
 if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "true"
+	if [ "$WHITELIST_USERAGENT_LIST" != "" ] ; then
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USERAGENT_LIST%" "$WHITELIST_USERAGENT_LIST"
+	else
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USERAGENT_LIST%" ""
+	fi
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "false"
 fi
