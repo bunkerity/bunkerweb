@@ -125,7 +125,7 @@ cd luasec
 make linux -j $NTASK
 make LUACPATH=/usr/local/lib/lua/5.1 LUAPATH=/usr/local/lib/lua install
 cd /tmp
-git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 71c4247d6b66234e3f3426b2ea721ad50c741579
+git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 3c235c813fc453dcf51a391bc9e9a36ca77958b0
 cd lua-cs-bouncer
 mkdir /usr/local/lib/lua/crowdsec
 cp lib/*.lua /usr/local/lib/lua/crowdsec
