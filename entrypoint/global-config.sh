@@ -100,7 +100,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 			/opt/scripts/certbot-new.sh "$DOMAINS_LETS_ENCRYPT" "$EMAIL_LETS_ENCRYPT"
 		fi
 	fi
-	echo "0 0 * * * /opt/scripts/certbot-renew.sh > /dev/null 2>&1" >> /etc/crontabs/root
+	echo "$AUTO_LETS_ENCRYPT_CRON /opt/scripts/certbot-renew.sh > /dev/null 2>&1" >> /etc/crontabs/root
 fi
 
 # self-signed certificate
@@ -119,7 +119,7 @@ if [ "$BLACKLIST_COUNTRY" != "" ] || [ "$WHITELIST_COUNTRY" != "" ] ; then
 		replace_in_file "/etc/nginx/geoip.conf" "%DEFAULT%" "yes"
 		replace_in_file "/etc/nginx/geoip.conf" "%COUNTRY%" "$(echo $BLACKLIST_COUNTRY | sed 's/ / no;\\n/g') no;"
 	fi
-	echo "0 0 2 * * /opt/scripts/geoip.sh" >> /etc/crontabs/root
+	echo "$GEOIP_CRON /opt/scripts/geoip.sh" >> /etc/crontabs/root
 	if [ -f "/cache/geoip.mmdb" ] ; then
 		echo "[*] Copying cached geoip.mmdb ..."
 		cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
@@ -134,7 +134,7 @@ fi
 # block bad UA
 if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/map-user-agent.conf;"
-	echo "0 0 * * * /opt/scripts/user-agents.sh" >> /etc/crontabs/root
+	echo "$BLOCK_USER_AGENT_CRON /opt/scripts/user-agents.sh" >> /etc/crontabs/root
 	if [ -f "/cache/map-user-agent.conf" ] ; then
 		echo "[*] Copying cached map-user-agent.conf ..."
 		cp /cache/map-user-agent.conf /etc/nginx/map-user-agent.conf
@@ -149,7 +149,7 @@ fi
 # block bad refferer
 if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" "include /etc/nginx/map-referrer.conf;"
-	echo "0 0 * * * /opt/scripts/referrers.sh" >> /etc/crontabs/root
+	echo "$BLOCK_REFERRER_CRON /opt/scripts/referrers.sh" >> /etc/crontabs/root
 	if [ -f "/cache/map-referrer.conf" ] ; then
 		echo "[*] Copying cached map-referrer.conf ..."
 		cp /cache/map-referrer.conf /etc/nginx/map-referrer.conf
@@ -163,7 +163,7 @@ fi
 
 # block TOR exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
-	echo "0 * * * * /opt/scripts/exit-nodes.sh" >> /etc/crontabs/root
+	echo "$BLOCK_TOR_EXIT_NODE_CRON /opt/scripts/exit-nodes.sh" >> /etc/crontabs/root
 	if [ -f "/cache/block-tor-exit-node.conf" ] ; then
 		echo "[*] Copying cached block-tor-exit-node.conf ..."
 		cp /cache/block-tor-exit-node.conf /etc/nginx/block-tor-exit-node.conf
@@ -175,7 +175,7 @@ fi
 
 # block proxies
 if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
-	echo "0 0 * * * /opt/scripts/proxies.sh" >> /etc/crontabs/root
+	echo "$BLOCK_PROXIES_CRON /opt/scripts/proxies.sh" >> /etc/crontabs/root
 	if [ -f "/cache/block-proxies.conf" ] ; then
 		echo "[*] Copying cached block-proxies.conf ..."
 		cp /cache/block-proxies.conf /etc/nginx/block-proxies.conf
@@ -187,7 +187,7 @@ fi
 
 # block abusers
 if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
-	echo "0 0 * * * /opt/scripts/abusers.sh" >> /etc/crontabs/root
+	echo "$BLOCK_ABUSERS_CRON /opt/scripts/abusers.sh" >> /etc/crontabs/root
 	if [ -f "/cache/block-abusers.conf" ] ; then
 		echo "[*] Copying cached block-abusers.conf ..."
 		cp /cache/block-abusers.conf /etc/nginx/block-abusers.conf
@@ -279,13 +279,13 @@ fi
 if [ "$(has_value USE_CLAMAV_UPLOAD yes)" != "" ] || [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
 	echo "[*] Updating clamav (in background) ..."
 	freshclam > /dev/null 2>&1 &
-	echo "0 0 * * * /usr/bin/freshclam > /dev/null 2>&1" >> /etc/crontabs/root
+	echo "$CLAMAV_UPDATE_CRON /usr/bin/freshclam > /dev/null 2>&1" >> /etc/crontabs/root
 fi
 if [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
 	if [ "$USE_CLAMAV_SCAN_REMOVE" = "yes" ] ; then
-		echo "0 */1 * * * /usr/bin/clamscan -r -i --no-summary --remove / >> /var/log/clamav.log 2>&1" >> /etc/crontabs/root
+		echo "$USE_CLAMAV_SCAN_CRON /usr/bin/clamscan -r -i --no-summary --remove / >> /var/log/clamav.log 2>&1" >> /etc/crontabs/root
 	else
-		echo "0 */1 * * * /usr/bin/clamscan -r -i --no-summary / >> /var/log/clamav.log 2>&1" >> /etc/crontabs/root
+		echo "$USE_CLAMAV_SCAN_CRON /usr/bin/clamscan -r -i --no-summary / >> /var/log/clamav.log 2>&1" >> /etc/crontabs/root
 	fi
 fi
 
@@ -305,4 +305,4 @@ touch /var/log/error.log
 # setup logrotate
 replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MAXAGE%" "$LOGROTATE_MAXAGE"
 replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MINSIZE%" "$LOGROTATE_MINSIZE"
-echo "0 0 * * * /opt/scripts/logrotate.sh > /dev/null 2>&1" >> /etc/crontabs/root
+echo "$LOGROTATE_CRON /opt/scripts/logrotate.sh > /dev/null 2>&1" >> /etc/crontabs/root

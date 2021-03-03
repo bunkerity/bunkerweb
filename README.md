@@ -700,6 +700,12 @@ Context : *global*, *multisite*
 If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
 You will need to redirect the 80 port to 8080 port inside container and also set the `SERVER_NAME` environment variable.
 
+`AUTO_LETS_ENCRYPT_CRON`  
+Values : *\<cron expression\>*   
+Default value : 0 2 * * *  
+Context : *global*  
+Cron expression of how often lets encrypt is asking for being renewed.
+
 `EMAIL_LETS_ENCRYPT`  
 Values : *contact@yourdomain.com*  
 Default value : *contact@yourdomain.com*  
@@ -947,10 +953,16 @@ The secret given by Google when `USE_ANTIBOT` is set to *recaptcha*.
 
 `BLOCK_USER_AGENT`  
 Values : *yes* | *no*  
-Default value : *yes*
+Default value : *yes*  
 Context : *global*, *multisite*  
 If set to yes, block clients with "bad" user agent.  
 Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list) and [here](https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt).
+
+`BLOCK_USER_AGENT_CRON`  
+Values : *\<cron expression\>*   
+Default value : 5 0 * * * *  
+Context : *global*  
+Cron expression of how often blocklist user agent is updated.
 
 `BLOCK_TOR_EXIT_NODE`  
 Values : *yes* | *no*  
@@ -959,12 +971,24 @@ Context : *global*, *multisite*
 Is set to yes, will block known TOR exit nodes.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=tor_exits).
 
+`BLOCK_TOR_EXIT_NODE_CRON`  
+Values : *\<cron expression\>*   
+Default value : 15 0 * * * *  
+Context : *global*  
+Cron expression of how often blocklist tor exit node is updated.
+
 `BLOCK_PROXIES`  
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
 Is set to yes, will block known proxies.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_proxies).
+
+`BLOCK_PROXIES_CRON`  
+Values : *\<cron expression\>*   
+Default value : 20 0 * * * *  
+Context : *global*  
+Cron expression of how often blocklist proxies is updated.
 
 `BLOCK_ABUSERS`  
 Values : *yes* | *no*  
@@ -973,12 +997,24 @@ Context : *global*, *multisite*
 Is set to yes, will block known abusers.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_abusers_30d).
 
+`BLOCK_ABUSERS_CRON`  
+Values : *\<cron expression\>*   
+Default value : 30 0 * * * *  
+Context : *global*  
+Cron expression of how often blocklist abusers is updated.
+
 `BLOCK_REFERRER`  
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
 Is set to yes, will block known bad referrer header.  
 Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-referrers.list).
+
+`BLOCK_REFERRER_CRON`  
+Values : *\<cron expression\>*   
+Default value : 10 0 * * * *  
+Context : *global*  
+Cron expression of how often blocklist referrer is updated.
 
 ### DNSBL
 
@@ -1107,6 +1143,12 @@ Default value :
 Context : *global*, *multisite*  
 Only allow specific countries accessing your website. Use 2 letters country code separated with space.
 
+`GEOIP_CRON`  
+Values : *\<cron expression\>*   
+Default value : 30 2 2 * *
+Context : *global*  
+Cron expression of how often geoip will update its database.
+
 ## PHP
 
 `REMOTE_PHP`  
@@ -1167,7 +1209,7 @@ IPs or subnet which should never be ban by fail2ban.
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
-If set to yes, ClamAV will scan every file uploads and block the upload if the file is detected.  
+If set to yes, ClamAV will scan every file uploads and block the upload if the file is detected.
 
 `USE_CLAMAV_SCAN`  
 Values : *yes* | *no*  
@@ -1175,11 +1217,23 @@ Default value : *yes*
 Context : *global*  
 If set to yes, ClamAV will scan all the files inside the container every day.  
 
+`USE_CLAMAV_SCAN_CRON`  
+Values : *\<cron expression\>*   
+Default value : 40 */1 * * * 
+Context : *global*  
+Cron expression of how often ClamAV will scan all the files inside the container.  
+
 `CLAMAV_SCAN_REMOVE`  
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*  
 If set to yes, ClamAV will automatically remove the detected files.  
+
+`CLAMAV_UPDATE_CRON`  
+Values : *\<cron expression\>*   
+Default value : 0 3 * * *
+Context : *global*  
+Cron expression of how often ClamAV will update its database.
 
 ## Misc
 
@@ -1200,6 +1254,12 @@ Values : *\<any integer\>*
 Default value : 7  
 Context : *global*  
 The number of days before rotated files are deleted.
+
+`LOGROTATE_CRON`  
+Values : *\<cron expression\>*   
+Default value : 0 4 * * *
+Context : *global*  
+Cron expression of how often Logrotate will rotate files.
 
 # Include custom configurations
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
