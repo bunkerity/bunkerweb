@@ -26,10 +26,10 @@ function has_value() {
 		echo "ok"
 		return 0
 	fi
-	for var in $(env) ; do
+	for var in $(compgen -e) ; do
 		domain=$(echo "$var" | cut -d '_' -f 1)
 		name=$(echo "$var" | cut -d '=' -f 1 | sed "s~${domain}_~~")
-		value=$(echo "$var" | sed "s~${domain}_${name}=~~")
+		value=$(echo "${!var}")
 		if [ "$name" == "$1" ] && [ "$value" == "$2" ] ; then
 			echo "ok"
 			return 0
