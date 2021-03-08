@@ -50,7 +50,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${1}/*.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
-	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${1}/*.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;"
 fi
 
 # max body size

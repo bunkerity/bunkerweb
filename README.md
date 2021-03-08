@@ -1226,7 +1226,7 @@ The number of days before rotated files are deleted.
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
   - /http-confs : http context
   - /server-confs : server context
-  - /pre-server-confs : before server context (add map or upstream config)
+  - /pre-server-confs : before server context (add map or upstream config for example)
 
 You just need to use a volume like this :
 ```shell
