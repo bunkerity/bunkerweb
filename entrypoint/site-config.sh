@@ -26,12 +26,12 @@ if [ "$MULTISITE" = "yes" ] ; then
 			sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
 		fi
 	done
-	for var in $(env) ; do
-		name=$(echo "$var" | cut -d '=' -f 1)
+	for var in $(compgen -e) ; do
+		name=$(echo "$var")
 		check=$(echo "$name" | grep "^$1_")
 		if [ "$check" != "" ] ; then
 			repl_name=$(echo "$name" | sed "s~${1}_~~")
-			repl_value=$(echo "$var" | sed "s~${name}=~~")
+			repl_value=$(echo "${!var}")
 			read -r "$repl_name" <<< $repl_value
 			sed -i "/^${repl_name}=.*/d" "${NGINX_PREFIX}nginx.env"
 			sed -i "/^${name}=.*/d" "${NGINX_PREFIX}nginx.env"
