@@ -245,6 +245,13 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" ""
 fi
 
+# connection limiting
+if [ "$(has_value USE_LIMIT_CONN yes)" != "" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_CONN_ZONE%" "limit_conn_zone \$binary_remote_addr zone=ddos:${LIMIT_CONN_CACHE};"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_CONN_ZONE%" ""
+fi
+
 # DNSBL
 if [ "$(has_value USE_DNSBL yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsbl_cache 10m;"

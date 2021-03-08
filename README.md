@@ -1085,13 +1085,34 @@ The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 10 requ
 Values : *<any valid integer\>*  
 Default value : *40*  
 Context : *global*, *multisite*  
-The number of of requests to put in queue before rejecting requests.
+The number of requests to put in queue before rejecting requests.
 
 `LIMIT_REQ_CACHE`  
 Values : *Xm* | *Xk*    
 Default value : *10m*  
 Context : *global*  
 The size of the cache to store information about request limiting.
+
+### Connections limiting
+
+`USE_LIMIT_CONN`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+If set to yes, the number of connections made by an ip will be limited during a period of time. (ie. Very small/weak ddos protection)  
+More info connections limiting [here](http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html).
+
+`LIMIT_CONN_MAX`  
+Values : *<any valid integer\>*  
+Default value : *40*  
+Context : *global*, *multisite*  
+The maximum number of connections per ip to put in queue before rejecting requests.
+
+`LIMIT_CONN_CACHE`  
+Values : *Xm* | *Xk*    
+Default value : *10m*  
+Context : *global*  
+The size of the cache to store information about connection limiting.
 
 ### Countries
 
