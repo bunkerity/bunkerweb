@@ -684,6 +684,14 @@
             "regex":"^([A-Z]{2} ?)*$",
             "id":"whitelist-country",
             "default":""
+         },
+         {
+            "type":"text",
+            "label":"Whitelist user agent list",
+            "env":"WHITELIST_USERAGENT_LIST",
+            "regex":".*",
+            "id":"whitelist-user-agent-list",
+            "default":""
          }
       ]
    },
