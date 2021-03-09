@@ -1,57 +1,8 @@
 #!/usr/bin/python3
 
+from AutoConf import AutoConf
 import utils, config
 import docker, os, stat, sys
-
-def process(container, event) :
-	global instances, containers
-
-	# Process instance event
-	if "bunkerized-nginx.AUTOCONF" in container.labels :
-		if event == "create" :
-			instances[container.id] = container
-			utils.log("[*] bunkerized-nginx instance created : " + container.name + " / " + container.id)
-		elif event == "start" :
-			instances[container.id].reload()
-			utils.log("[*] bunkerized-nginx instance started : " + container.name + " / " + container.id)
-		elif event == "die" :
-			instances[container.id].reload()
-			utils.log("[*] bunkerized-nginx instance stopped : " + container.name + " / " + container.id)
-		elif event == "destroy" :
-			del instances[container.id]
-			utils.log("[*] bunkerized-nginx instance removed : " + container.name + " / " + container.id)
-
-	# Process container event
-	elif "bunkerized-nginx.SERVER_NAME" in container.labels :
-		# Convert labels to env vars
-		vars = { k.replace("bunkerized-nginx.", "", 1) : v for k, v in container.labels.items() if k.startswith("bunkerized-nginx.")}
-		if event == "create" :
-			if config.generate(instances, vars) :
-				utils.log("[*] Generated config for " + vars["SERVER_NAME"])
-				containers[container.id] = container
-			else :
-				utils.log("[!] Can't generate config for " + vars["SERVER_NAME"])
-		elif event == "start" :
-			if container.id in containers :
-				containers[container.id].reload()
-				if config.activate(instances, vars) :
-					utils.log("[*] Activated config for " + vars["SERVER_NAME"])
-				else :
-					utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
-		elif event == "die" :
-			if container.id in containers :
-				containers[container.id].reload()
-				if config.deactivate(instances, vars) :
-					utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
-				else :
-					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
-		elif event == "destroy" :
-			if container.id in containers :
-				del containers[container.id]
-				if config.remove(vars) :
-					utils.log("[*] Removed config for " + vars["SERVER_NAME"])
-				else :
-					utils.log("[!] Can't remove config for " + vars["SERVER_NAME"])
 
 # Connect to the endpoint
 endpoint = "/var/run/docker.sock"
@@ -64,54 +15,44 @@ except Exception as e :
 	utils.log("[!] Can't instantiate DockerClient : " + str(e))
 	sys.exit(2)
 
+# Check if we are in Swarm mode
+swarm = os.getenv("SWARM_MODE") == "yes"
+
+# Our object to process events
+autoconf = AutoConf(swarm)
+
 # Get all bunkerized-nginx instances and web services created before
-instances = {}
-containers = {}
 try :
-	before = client.containers.list(all=True, filters={"label" : "bunkerized-nginx.AUTOCONF"}) + client.containers.list(all=True, filters={"label" : "bunkerized-nginx.SERVER_NAME"})
+	if swarm :
+		before = client.services.list(filters={"label" : "bunkerized-nginx.AUTOCONF"}) + client.services.list(filters={"label" : "bunkerized-nginx.SERVER_NAME"})
+	else :
+		before = client.containers.list(all=True, filters={"label" : "bunkerized-nginx.AUTOCONF"}) + client.containers.list(filters={"label" : "bunkerized-nginx.SERVER_NAME"})
 except docker.errors.APIError as e :
 	utils.log("[!] Docker API error " + str(e))
 	sys.exit(3)
-# Process instances first
-for instance in before :
-	if "bunkerized-nginx.AUTOCONF" in instance.labels :
-		if instance.status in ("restarting", "running", "created", "exited") :
-			process(instance, "create")
-		if instance.status == "running" :
-			process(instance, "start")
-# Containers after
-for container in before :
-	if "bunkerized-nginx.SERVER_NAME" in container.labels :
-		if container.status in ("restarting", "running", "created", "exited") :
-			process(container, "create")
-		if container.status == "running" :
-			process(container, "start")
+
+# Process them before events
+autoconf.pre_process(before)
 
 # Process events received from Docker
 try :
 	for event in client.events(decode=True) :
 
-		# Process only container events
-		if event["Type"] != "container" :
+		# Process only container/service events
+		if (swarm and event["Type"] != "service") or (not swarm and event["Type"] != "container") :
 			continue
 
-		# Get Container object
+		# Get Container/Service object
 		try :
-			container = client.containers.get(event["id"])
+			if swarm :
+				server = client.services.get(service_id=event["Actor"]["ID"])
+			else :
+				server = client.containers.get(event["id"])
 		except docker.errors.NotFound as e :
 			continue
 
-		# Check if there is an interesting label
-		interesting = False
-		for label in container.labels :
-			if label in ("bunkerized-nginx.SERVER_NAME", "bunkerized-nginx.AUTOCONF") :
-				interesting = True
-				break
-		if not interesting :
-			continue
-
 		# Process the event
-		process(container, event["Action"])
+		autoconf.process(server, event["Action"])
 
 except docker.errors.APIError as e :
 	utils.log("[!] Docker API error " + str(e))
