@@ -79,18 +79,24 @@ class Config :
 		return False
 
 	def __reload(self, instances) :
-		# Send SIGHUP to all running instances
 		ret = True
 		for instance_id, instance in instances.items() :
+			# Reload the instance object just in case
+			instance.reload()
+			# Reload via API
 			if self.__swarm :
-				# TODO : send POST requests on http://service-name:8000/reload ?
-				#name = instance.attrs["Spec"]["Attrs"]
-				#req = requests.post("http://" + name + ":8000/reload")
-				#if req and req.status_code == 200 :
-				#	utils.log("[*] ")
-				#else :
-				#
-				#pass
+				# Send POST request on http://serviceName.NodeID.TaskID:8000/reload
+				name = instance.name
+				for task in instance.tasks() :
+					nodeID = task["NodeID"]
+					taskID = task["ID"]
+					fqdn = name + "." + nodeID + "." + taskID
+					req = requests.post("http://" + fqdn + ":8000/reload")
+					if req and req.status_code == 200 :
+						utils.log("[*] Sent reload order to instance " + fqdn + " (service.node.task)")
+					else :
+						utils.log("[!] Can't reload : API error for instance " + fqdn + " (service.node.task)")
+			# Send SIGHUP to running instance
 			elif instance.status == "running" :
 				try :
 					instance.kill("SIGHUP")

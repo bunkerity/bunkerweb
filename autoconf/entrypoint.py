@@ -18,6 +18,9 @@ except Exception as e :
 # Check if we are in Swarm mode
 swarm = os.getenv("SWARM_MODE") == "yes"
 
+# Setup cron tasks if we are in Swarm mode
+# TODO
+
 # Our object to process events
 autoconf = AutoConf(swarm)
 
