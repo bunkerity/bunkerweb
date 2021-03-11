@@ -72,7 +72,6 @@ Fooling automated tools/scanners :
   * [Misc](#misc-2)
 - [Include custom configurations](#include-custom-configurations)
 - [Cache data](#cache-data)
-- [Create your own image](#create-your-own-image)
 
 # Live demo
 You can find a live demo at https://demo-nginx.bunkerity.com.
