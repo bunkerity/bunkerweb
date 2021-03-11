@@ -836,7 +836,7 @@ You can customize the CRS (i.e. : add WordPress exclusions) by adding custom .co
 ## Security headers
 
 `X_FRAME_OPTIONS`  
-Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net* | *ALLOWALL*  
+Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net*
 Default value : *DENY*  
 Context : *global*, *multisite*  
 Policy to be used when the site is displayed through iframe. Can be used to mitigate clickjacking attacks. 
