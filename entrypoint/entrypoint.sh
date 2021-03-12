@@ -103,7 +103,7 @@ rsyslogd
 crond
 
 # wait until config has been generated if we are in swarm mode
-if [ "$SWARM_MODE" != "yes" ] ; then
+if [ "$SWARM_MODE" = "yes" ] ; then
 	echo "[*] Waiting until config has been generated ..."
 	while [ ! -f "/etc/nginx/autoconf" ] ; do
 		sleep 1
@@ -112,7 +112,7 @@ fi
 
 # stop temp config if needed
 if [ -f "/tmp/nginx-temp.pid" ] ; then
-	nginx -c /etc/nginx/nginx-temp.conf -s quit
+	nginx -c /tmp/nginx-temp.conf -s quit
 fi
 
 # run nginx

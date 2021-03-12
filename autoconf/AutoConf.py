@@ -1,4 +1,5 @@
 from Config import Config
+import utils
 
 class AutoConf :
 
@@ -40,9 +41,9 @@ class AutoConf :
 
 	def __get_infos(self, obj) :
 		if self.__swarm :
-        	        id = obj["Actor"]["ID"]
-			name = obj["Actor"]["Attributes"]["name"]
-	                labels = obj.attrs["Spec"]["Labels"]
+			id = obj.id
+			name = obj.name
+			labels = obj.attrs["Spec"]["Labels"]
 		else :
 			id = obj.id
 			name = obj.name
@@ -51,11 +52,10 @@ class AutoConf :
 
 	def __process_instance(self, instance, event, id, name, labels) :
 		if event == "create" :
-			self.__instances[id] = obj
+			self.__instances[id] = instance
 			if self.__swarm :
-				if self.__config.global(self.__instances) :
+				if self.__config.globalconf(self.__instances) :
 					utils.log("[*] global config generated")
-					self.__config.reload(self.__instances)
 				else :
 					utils.log("[!] can't generate global config")
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
@@ -102,7 +102,7 @@ class AutoConf :
 					if self.__config.deactivate(instances, vars) :
 						utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
 					else :
-						utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])+
+						utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
 				del self.__servers[id]
 				if self.__config.remove(vars) :
 					utils.log("[*] Removed config for " + vars["SERVER_NAME"])

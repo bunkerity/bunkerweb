@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from AutoConf import AutoConf
-import utils, config
+import utils
 import docker, os, stat, sys
 
 # Connect to the endpoint

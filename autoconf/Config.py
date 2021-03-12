@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import utils
-import subprocess, shutil, os, traceback
+import subprocess, shutil, os, traceback, requests
 
 class Config :
 
@@ -9,21 +9,24 @@ class Config :
 		self.__swarm = swarm
 		self.__api = api
 
-	def global(self, instances) :
+	def globalconf(self, instances) :
 		try :
 			for instance_id, instance in instances.items() :
 				env = instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]
 				break
-			vars
+			vars = {}
 			for var_value in env :
 				var = var_value.split("=")[0]
 				value = var_value.replace(var + "=", "", 1)
 				vars[var] = value
-			proc = subprocess.run(["/opt/entrypoint/global-config"], vars["SERVER_NAME"]], env=vars, capture_output=True)
-			return proc.returncode == 0
+			proc = subprocess.run(["/opt/entrypoint/global-config.sh"], env=vars, capture_output=True)
+			if proc.returncode == 0 :
+				with open("/etc/nginx/autoconf", "w") as f :
+					f.write("ok")
+				return True
 		except Exception as e :
 			traceback.print_exc()
-			utils.log("[!] Error while generating config : " + str(e))
+			utils.log("[!] Error while generating global config : " + str(e))
 		return False
 
 	def generate(self, instances, vars) :
@@ -49,7 +52,7 @@ class Config :
 				return proc.returncode == 0
 		except Exception as e :
 			traceback.print_exc()
-			utils.log("[!] Error while generating config : " + str(e))
+			utils.log("[!] Error while generating site config : " + str(e))
 		return False
 
 	def activate(self, instances, vars) :
@@ -110,7 +113,7 @@ class Config :
 					nodeID = task["NodeID"]
 					taskID = task["ID"]
 					fqdn = name + "." + nodeID + "." + taskID
-					req = requests.post("http://" + fqdn + ":8080" + api + "/reload")
+					req = requests.post("http://" + fqdn + ":8080" + self.__api + "/reload")
 					if req and req.status_code == 200 :
 						utils.log("[*] Sent reload order to instance " + fqdn + " (service.node.task)")
 					else :

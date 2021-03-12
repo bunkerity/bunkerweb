@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# load default values
+. /opt/entrypoint/defaults.sh
+
+# load some functions
+. /opt/entrypoint/utils.sh
+
+# copy stub confs
 cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
 cp /opt/logs/logrotate.conf /etc/logrotate.conf
 

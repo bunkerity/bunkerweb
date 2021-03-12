@@ -2,6 +2,8 @@
 
 echo "[*] Starting autoconf ..."
 
+cp /opt/confs/nginx/* /etc/nginx
+
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	echo "[*] Catched stop operation"
