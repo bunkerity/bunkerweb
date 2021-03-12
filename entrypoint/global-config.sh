@@ -7,8 +7,6 @@
 . /opt/entrypoint/utils.sh
 
 # copy stub confs
-cp /opt/logs/rsyslog.conf /etc/rsyslog.conf
-cp /opt/logs/logrotate.conf /etc/logrotate.conf
 cp -r /opt/lua/* /usr/local/lib/lua
 cp /opt/confs/global/* /etc/nginx/
 
@@ -310,17 +308,9 @@ if [ "$USE_API" = "yes" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_API%" "include /etc/nginx/api.conf;"
 	if [ "$API_URI" = "random" ] ; then
 		API_URI="/$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"
+		echo "[*] Generated API URI : $API_URI"
 	fi
-	replace_in_file "/usr/local/lib/lua/api.lua" "%API_URI%" "$API_URI"
+	replace_in_file "/etc/nginx/api.conf" "%API_URI%" "$API_URI"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_API%" ""
 fi
-
-# create empty logs
-touch /var/log/access.log
-touch /var/log/error.log
-
-# setup logrotate
-replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MAXAGE%" "$LOGROTATE_MAXAGE"
-replace_in_file "/etc/logrotate.conf" "%LOGROTATE_MINSIZE%" "$LOGROTATE_MINSIZE"
-echo "$LOGROTATE_CRON /opt/scripts/logrotate.sh > /dev/null 2>&1" >> /etc/crontabs/root

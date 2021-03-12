@@ -31,7 +31,7 @@ trap "trap_exit" TERM INT QUIT
 # trap SIGHUP
 function trap_reload() {
 	echo "[*] Catched reload operation"
-	if [ "$MULTISITE" = "yes" ] ; then
+	if [ "$MULTISITE" = "yes" ] && [ "$SWARM_MODE" != "yes" ] ; then
 		/opt/entrypoint/multisite-config.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
@@ -50,17 +50,28 @@ trap "trap_reload" HUP
 
 # do the configuration magic if needed
 if [ ! -f "/opt/installed" ] ; then
+
 	echo "[*] Configuring bunkerized-nginx ..."
-	/opt/entrypoint/global-config.sh
-	if [ "$MULTISITE" = "yes" ] ; then
-		for server in $SERVER_NAME ; do
-			/opt/entrypoint/site-config.sh "$server"
-			echo "[*] Multi site - $server configuration done"
-		done
-		/opt/entrypoint/multisite-config.sh
-	else
-		/opt/entrypoint/site-config.sh
-		echo "[*] Single site - $SERVER_NAME configuration done"
+
+	# logs config
+	/opt/entrypoint/logs.sh
+
+	# only do config if we are not in swarm mode
+	if [ "$SWARM_MODE" = "no" ] ; then
+		# global config
+		/opt/entrypoint/global-config.sh
+		# multisite configs
+		if [ "$MULTISITE" = "yes" ] ; then
+			for server in $SERVER_NAME ; do
+				/opt/entrypoint/site-config.sh "$server"
+				echo "[*] Multi site - $server configuration done"
+			done
+			/opt/entrypoint/multisite-config.sh
+		# singlesite config
+		else
+			/opt/entrypoint/site-config.sh
+			echo "[*] Single site - $SERVER_NAME configuration done"
+		fi
 	fi
 	touch /opt/installed
 else
@@ -78,16 +89,23 @@ rsyslogd
 # start crond
 crond
 
-# start nginx
+# wait until config has been generated if we are in swarm mode
+if [ "$SWARM_MODE" != "yes" ] ; then
+	echo "[*] Waiting until config has been generated ..."
+	while [ ! -f "/etc/nginx/autoconf" ] ; do
+		sleep 1
+	done
+fi
+
 if [ -f "/tmp/nginx-temp.pid" ] ; then
 	nginx -c /etc/nginx/nginx-temp.conf -s quit
 fi
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
 if [ "$?" -eq 0 ] ; then
-	touch "/opt/running"
+	echo "[*] nginx successfully started !"
 else
-	rm -f "/opt/running" 2> /dev/null
+	echo "[!] nginx failed to start"
 fi
 
 # list of log files to display
@@ -114,7 +132,7 @@ fi
 # display logs
 tail -F $LOGS &
 pid="$!"
-while [ -f "/opt/running" ] ; do
+while [ -f "/tmp/nginx.pid" ] ; do
 	wait "$pid"
 done
 

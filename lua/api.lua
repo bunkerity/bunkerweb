@@ -1,5 +1,5 @@
 local M		= {}
-local api_uri	= "%API_URI%"
+local api_uri	= ngx.var.api_uri
 local api_list	= {}
 
 api_list["^/reload$"] = function ()
