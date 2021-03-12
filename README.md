@@ -72,7 +72,6 @@ Fooling automated tools/scanners :
   * [Misc](#misc-2)
 - [Include custom configurations](#include-custom-configurations)
 - [Cache data](#cache-data)
-- [Create your own image](#create-your-own-image)
 
 # Live demo
 You can find a live demo at https://demo-nginx.bunkerity.com.
@@ -837,7 +836,7 @@ You can customize the CRS (i.e. : add WordPress exclusions) by adding custom .co
 ## Security headers
 
 `X_FRAME_OPTIONS`  
-Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net* | *ALLOWALL*  
+Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net*
 Default value : *DENY*  
 Context : *global*, *multisite*  
 Policy to be used when the site is displayed through iframe. Can be used to mitigate clickjacking attacks. 
