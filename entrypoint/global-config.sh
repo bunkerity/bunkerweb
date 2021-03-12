@@ -305,6 +305,17 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" ""
 fi
 
+# API
+if [ "$USE_API" = "yes" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%USE_API%" "include /etc/nginx/api.conf;"
+	if [ "$API_URI" = "random" ] ; then
+		API_URI="/$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"
+	fi
+	replace_in_file "/usr/local/lib/lua/api.lua" "%API_URI%" "$API_URI"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%USE_API%" ""
+fi
+
 # create empty logs
 touch /var/log/access.log
 touch /var/log/error.log
