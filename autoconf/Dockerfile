@@ -1,18 +1,17 @@
 FROM alpine
 
-RUN apk add py3-pip apache2-utils bash && \
+RUN apk add py3-pip apache2-utils bash certbot curl logrotate && \
     pip3 install docker && \
     mkdir /opt/entrypoint && \
-    mkdir -p /opt/confs/site
+    mkdir -p /opt/confs/site && \
+    mkdir -p /opt/confs/global
 
 COPY confs/site/ /opt/confs/site
+COPY confs/global/ /opt/confs/global
 COPY entrypoint/* /opt/entrypoint/
 COPY autoconf/* /opt/entrypoint/
 RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh
 
-# Fix CVE-2020-1971
-RUN apk add "libcrypto1.1>1.1.1g-r0" "libssl1.1>1.1.1g-r0"
+VOLUME /etc/nginx /etc/letsencrypt
 
-VOLUME /etc/nginx
-
-ENTRYPOINT ["/opt/entrypoint/entrypoint.py"]
+ENTRYPOINT ["/opt/entrypoint/entrypoint.sh"]

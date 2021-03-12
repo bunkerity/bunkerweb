@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # load default values
-set -a
 . /opt/entrypoint/defaults.sh
-set +a
 
 # load some functions
 . /opt/entrypoint/utils.sh

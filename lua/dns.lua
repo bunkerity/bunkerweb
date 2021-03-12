@@ -1,6 +1,6 @@
 local M		= {}
 local resolver	= require "resty.dns.resolver"
-local resolvers	= {%DNS_RESOLVERS%}
+local resolvers = {%DNS_RESOLVERS%}
 local ip	= ngx.var.remote_addr
 
 function M.get_reverse()

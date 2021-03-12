@@ -7,7 +7,6 @@
 . /opt/entrypoint/utils.sh
 
 # copy stub confs
-cp -r /opt/lua/* /usr/local/lib/lua
 cp /opt/confs/global/* /etc/nginx/
 
 # remove cron jobs
@@ -16,12 +15,6 @@ echo "" > /etc/crontabs/root
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
 	apk add $ADDITIONAL_MODULES
-fi
-
-# start nginx with temp conf for let's encrypt challenges
-if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] ; then
-	replace_in_file "/etc/nginx/nginx-temp.conf" "%HTTP_PORT%" "$HTTP_PORT"
-	nginx -c /etc/nginx/nginx-temp.conf
 fi
 
 # include server block(s)
@@ -196,8 +189,6 @@ if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
 fi
 
 # DNS resolvers
-resolvers=$(spaces_to_lua "$DNS_RESOLVERS")
-replace_in_file "/usr/local/lib/lua/dns.lua" "%DNS_RESOLVERS%" "$resolvers"
 replace_in_file "/etc/nginx/nginx.conf" "%DNS_RESOLVERS%" "$DNS_RESOLVERS"
 
 # whitelist IP
@@ -206,8 +197,6 @@ if [ "$(has_value USE_WHITELIST_IP yes)" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%WHITELIST_IP_CACHE%" ""
 fi
-list=$(spaces_to_lua "$WHITELIST_IP_LIST")
-replace_in_file "/usr/local/lib/lua/whitelist.lua" "%WHITELIST_IP_LIST%" "$list"
 
 # whitelist rDNS
 if [ "$(has_value USE_WHITELIST_REVERSE yes)" != "" ] ; then
@@ -215,8 +204,6 @@ if [ "$(has_value USE_WHITELIST_REVERSE yes)" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%WHITELIST_REVERSE_CACHE%" ""
 fi
-list=$(spaces_to_lua "$WHITELIST_REVERSE_LIST")
-replace_in_file "/usr/local/lib/lua/whitelist.lua" "%WHITELIST_REVERSE_LIST%" "$list"
 
 # blacklist IP
 if [ "$(has_value USE_BLACKLIST_IP yes)" != "" ] ; then
@@ -224,8 +211,6 @@ if [ "$(has_value USE_BLACKLIST_IP yes)" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLACKLIST_IP_CACHE%" ""
 fi
-list=$(spaces_to_lua "$BLACKLIST_IP_LIST")
-replace_in_file "/usr/local/lib/lua/blacklist.lua" "%BLACKLIST_IP_LIST%" "$list"
 
 # blacklist rDNS
 if [ "$(has_value USE_BLACKLIST_REVERSE yes)" != "" ] ; then
@@ -233,8 +218,6 @@ if [ "$(has_value USE_BLACKLIST_REVERSE yes)" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLACKLIST_REVERSE_CACHE%" ""
 fi
-list=$(spaces_to_lua "$BLACKLIST_REVERSE_LIST")
-replace_in_file "/usr/local/lib/lua/blacklist.lua" "%BLACKLIST_REVERSE_LIST%" "$list"
 
 # request limiting
 if [ "$(has_value USE_LIMIT_REQ yes)" != "" ] ; then
@@ -256,8 +239,6 @@ if [ "$(has_value USE_DNSBL yes)" != "" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%DNSBL_CACHE%" "lua_shared_dict dnsbl_cache 10m;"
 fi
-list=$(spaces_to_lua "$DNSBL_LIST")
-replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 
 # disable default site
 if [ "$DISABLE_DEFAULT_SERVER" = "yes" ] && [ "$MULTISITE" = "yes" ] ; then
@@ -269,36 +250,11 @@ fi
 # fail2ban setup
 if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then
 	echo "" > /etc/nginx/fail2ban-ip.conf
-	rm -rf /etc/fail2ban/jail.d/*.conf
-	cp /opt/fail2ban/nginx-action.local /etc/fail2ban/action.d/nginx-action.local
-	cp /opt/fail2ban/nginx-filter.local /etc/fail2ban/filter.d/nginx-filter.local
-	cp /opt/fail2ban/nginx-jail.local /etc/fail2ban/jail.d/nginx-jail.local
-	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_BANTIME%" "$FAIL2BAN_BANTIME"
-	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_FINDTIME%" "$FAIL2BAN_FINDTIME"
-	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_MAXRETRY%" "$FAIL2BAN_MAXRETRY"
-	replace_in_file "/etc/fail2ban/jail.d/nginx-jail.local" "%FAIL2BAN_IGNOREIP%" "$FAIL2BAN_IGNOREIP"
-	replace_in_file "/etc/fail2ban/filter.d/nginx-filter.local" "%FAIL2BAN_STATUS_CODES%" "$FAIL2BAN_STATUS_CODES"
-fi
-
-# clamav setup
-if [ "$(has_value USE_CLAMAV_UPLOAD yes)" != "" ] || [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
-	echo "[*] Updating clamav (in background) ..."
-	freshclam > /dev/null 2>&1 &
-	echo "$CLAMAV_UPDATE_CRON /usr/bin/freshclam > /dev/null 2>&1" >> /etc/crontabs/root
-fi
-if [ "$USE_CLAMAV_SCAN" = "yes" ] ; then
-	if [ "$USE_CLAMAV_SCAN_REMOVE" = "yes" ] ; then
-		echo "$USE_CLAMAV_SCAN_CRON /usr/bin/clamscan -r -i --no-summary --remove / >> /var/log/clamav.log 2>&1" >> /etc/crontabs/root
-	else
-		echo "$USE_CLAMAV_SCAN_CRON /usr/bin/clamscan -r -i --no-summary / >> /var/log/clamav.log 2>&1" >> /etc/crontabs/root
-	fi
 fi
 
 # CrowdSec setup
 if [ "$(has_value USE_CROWDSEC yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" "include /etc/nginx/crowdsec.conf;"
-	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_HOST%" "$CROWDSEC_HOST"
-	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_KEY%" "$CROWDSEC_KEY"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_CROWDSEC%" ""
 fi

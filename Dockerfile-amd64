@@ -16,7 +16,7 @@ COPY lua/ /opt/lua
 COPY prepare.sh /tmp/prepare.sh
 RUN chmod +x /tmp/prepare.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
 
-VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pre-server-confs
+VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pre-server-confs /acme-challenge
 
 EXPOSE 8080/tcp 8443/tcp
 

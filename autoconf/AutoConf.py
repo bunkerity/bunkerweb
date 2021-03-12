@@ -2,11 +2,11 @@ from Config import Config
 
 class AutoConf :
 
-	def __init__(self, swarm) :
+	def __init__(self, swarm, api) :
 		self.__swarm = swarm
 		self.__instances = {}
 		self.__sites = {}
-		self.__config = Config(self.__swarm)
+		self.__config = Config(self.__swarm, api)
 
 	def pre_process(self, objs) :
 		for instance in objs :
@@ -52,6 +52,12 @@ class AutoConf :
 	def __process_instance(self, instance, event, id, name, labels) :
 		if event == "create" :
 			self.__instances[id] = obj
+			if self.__swarm :
+				if self.__config.global(self.__instances) :
+					utils.log("[*] global config generated")
+					self.__config.reload(self.__instances)
+				else :
+					utils.log("[!] can't generate global config")
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
 		elif event == "start" :
 			self.__instances[id].reload()

@@ -12,7 +12,6 @@ done
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
-	rm -f "/opt/running" 2> /dev/null
 	echo "[*] Catched stop operation"
 	echo "[*] Stopping crond ..."
 	pkill -TERM crond
@@ -56,6 +55,19 @@ if [ ! -f "/opt/installed" ] ; then
 	# logs config
 	/opt/entrypoint/logs.sh
 
+	# lua config
+	# TODO : move variables from /usr/local/lib/lua + multisite support ?
+	/opt/entrypoint/lua.sh
+
+	# fail2ban config
+	/opt/entrypoint/fail2ban.sh
+
+	# clamav config
+	/opt/entrypoint/clamav.sh
+
+	# start temp nginx to solve Let's Encrypt challenges if needed
+	/opt/entrypoint/nginx-temp.sh
+
 	# only do config if we are not in swarm mode
 	if [ "$SWARM_MODE" = "no" ] ; then
 		# global config
@@ -73,6 +85,7 @@ if [ ! -f "/opt/installed" ] ; then
 			echo "[*] Single site - $SERVER_NAME configuration done"
 		fi
 	fi
+
 	touch /opt/installed
 else
 	echo "[*] Skipping configuration process"
@@ -97,9 +110,12 @@ if [ "$SWARM_MODE" != "yes" ] ; then
 	done
 fi
 
+# stop temp config if needed
 if [ -f "/tmp/nginx-temp.pid" ] ; then
 	nginx -c /etc/nginx/nginx-temp.conf -s quit
 fi
+
+# run nginx
 echo "[*] Running nginx ..."
 su -s "/usr/sbin/nginx" nginx
 if [ "$?" -eq 0 ] ; then
