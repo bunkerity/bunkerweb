@@ -50,8 +50,9 @@ make install-strip
 cd /tmp
 git_secure_clone https://github.com/coreruleset/coreruleset.git 7776fe23f127fd2315bad0e400bdceb2cabb97dc
 cd coreruleset
-cp -r rules /etc/nginx/owasp-crs
-cp crs-setup.conf.example /etc/nginx/owasp-crs.conf
+mkdir /opt/owasp
+cp -r rules /opt/owasp/crs
+cp crs-setup.conf.example /opt/owasp/crs.conf
 
 # get nginx modules
 cd /tmp

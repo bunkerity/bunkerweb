@@ -385,7 +385,7 @@ if [ "$USE_MODSECURITY" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
 	fi
 	if [ "$USE_MODSECURITY_CRS" = "yes" ] ; then
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /etc/nginx/owasp-crs.conf"
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" "include /opt/owasp/crs.conf"
 		if [ "$MULTISITE" != "yes" ] ; then
 			modsec_crs_custom=""
 			if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
@@ -393,7 +393,7 @@ if [ "$USE_MODSECURITY" = "yes" ] ; then
 			fi
 			replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" "$modsec_crs_custom"
 		fi
-		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /etc/nginx/owasp-crs/*.conf"
+		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS_RULES%" "include /opt/owasp/crs/*.conf"
 	else
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CRS%" ""
 		replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_CRS%" ""

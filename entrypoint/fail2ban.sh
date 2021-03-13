@@ -8,7 +8,6 @@
 
 # fail2ban setup
 if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then
-	rm -rf /etc/fail2ban/jail.d/*.conf
 	cp /opt/fail2ban/nginx-action.local /etc/fail2ban/action.d/nginx-action.local
 	cp /opt/fail2ban/nginx-filter.local /etc/fail2ban/filter.d/nginx-filter.local
 	cp /opt/fail2ban/nginx-jail.local /etc/fail2ban/jail.d/nginx-jail.local

@@ -11,7 +11,9 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     pip3 install docker requests && \
     mkdir /opt/entrypoint && \
     mkdir -p /opt/confs/site && \
-    mkdir -p /opt/confs/global
+    mkdir -p /opt/confs/global && \
+    addgroup -g 101 nginx && \
+    adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx
 
 COPY confs/site/ /opt/confs/site
 COPY entrypoint/* /opt/entrypoint/

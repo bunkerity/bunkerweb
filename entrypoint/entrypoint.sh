@@ -35,7 +35,7 @@ function trap_reload() {
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
-		/usr/sbin/nginx -s reload
+		nginx -s reload
 		if [ $? -eq 0 ] ; then
 			echo "[*] Reload successfull"
 		else
@@ -91,13 +91,8 @@ else
 	echo "[*] Skipping configuration process"
 fi
 
-# fix nginx configs rights (and modules through the symlink)
-chown -R root:nginx /etc/nginx/
-chmod -R 740 /etc/nginx/
-find /etc/nginx -type d -exec chmod 750 {} \;
-
 # start rsyslogd
-rsyslogd
+rsyslogd -i /tmp/rsyslogd.pid
 
 # start crond
 crond
@@ -117,7 +112,7 @@ fi
 
 # run nginx
 echo "[*] Running nginx ..."
-su -s "/usr/sbin/nginx" nginx
+nginx
 if [ "$?" -eq 0 ] ; then
 	echo "[*] nginx successfully started !"
 else

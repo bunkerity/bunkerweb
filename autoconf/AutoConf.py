@@ -5,6 +5,7 @@ class AutoConf :
 
 	def __init__(self, swarm, api) :
 		self.__swarm = swarm
+		self.__servers = {}
 		self.__instances = {}
 		self.__sites = {}
 		self.__config = Config(self.__swarm, api)
@@ -72,11 +73,11 @@ class AutoConf :
 	def __process_server(self, instance, event, id, name, labels) :
 		vars = { k.replace("bunkerized-nginx.", "", 1) : v for k, v in labels.items() if k.startswith("bunkerized-nginx.")}
 		if event == "create" :
-			if self.__config.generate(instances, vars) :
+			if self.__config.generate(self.__instances, vars) :
 				utils.log("[*] Generated config for " + vars["SERVER_NAME"])
-				self.__servers[id] = obj
+				self.__servers[id] = instance
 				if self.__swarm :
-					if self.__config.activate(instances, vars) :
+					if self.__config.activate(self.__instances, vars) :
 						utils.log("[*] Activated config for " + vars["SERVER_NAME"])
 					else :
 						utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
@@ -85,21 +86,21 @@ class AutoConf :
 		elif event == "start" :
 			if id in self.__servers :
 				self.__servers[id].reload()
-				if self.__config.activate(instances, vars) :
+				if self.__config.activate(self.__instances, vars) :
 					utils.log("[*] Activated config for " + vars["SERVER_NAME"])
 				else :
 					utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
 		elif event == "die" :
 			if id in self.__servers :
 				self.__servers[id].reload()
-				if self.__config.deactivate(instances, vars) :
+				if self.__config.deactivate(self.__instances, vars) :
 					utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
 				else :
 					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
 		elif event == "destroy" or event == "remove" :
 			if id in self.__servers :
 				if self.__swarm :
-					if self.__config.deactivate(instances, vars) :
+					if self.__config.deactivate(self.__instances, vars) :
 						utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
 					else :
 						utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])

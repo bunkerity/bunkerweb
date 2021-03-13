@@ -5,7 +5,9 @@ function replace_in_file() {
 	# escape slashes
 	pattern=$(echo "$2" | sed "s/\//\\\\\//g")
 	replace=$(echo "$3" | sed "s/\//\\\\\//g")
-	sed -i "s/$pattern/$replace/g" "$1"
+	sed "s/$pattern/$replace/g" "$1" > /tmp/sed
+	cat /tmp/sed > "$1"
+	rm /tmp/sed
 }
 
 # convert space separated values to LUA

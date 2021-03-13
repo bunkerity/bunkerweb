@@ -9,9 +9,6 @@
 # copy stub confs
 cp /opt/confs/global/* /etc/nginx/
 
-# remove cron jobs
-echo "" > /etc/crontabs/root
-
 # install additional modules if needed
 if [ "$ADDITIONAL_MODULES" != "" ] ; then
 	apk add $ADDITIONAL_MODULES
@@ -53,7 +50,6 @@ if [ "$MULTISITE" = "yes" ] ; then
 			replace_in_file "/etc/nginx/multisite-default-server-https.conf" "%SSL_CIPHERS%" ""
 		fi
 		openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/default-key.pem -out /etc/nginx/default-cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
-		chmod +r /etc/nginx/default-key.pem
 		if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] ; then
 			replace_in_file "/etc/nginx/multisite-default-server-https.conf" "%LETS_ENCRYPT_WEBROOT%" "include /etc/nginx/multisite-default-server-lets-encrypt-webroot.conf;"
 		else
@@ -92,14 +88,13 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 			/opt/scripts/certbot-new.sh "$DOMAINS_LETS_ENCRYPT" "$EMAIL_LETS_ENCRYPT"
 		fi
 	fi
-	echo "$AUTO_LETS_ENCRYPT_CRON /opt/scripts/certbot-renew.sh > /dev/null 2>&1" >> /etc/crontabs/root
+	echo "$AUTO_LETS_ENCRYPT_CRON /opt/scripts/certbot-renew.sh > /dev/null 2>&1" >> /etc/crontabs/nginx
 fi
 
 # self-signed certificate
 if [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
 	mkdir /etc/nginx/self-signed-ssl/
         openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/self-signed-ssl/key.pem -out /etc/nginx/self-signed-ssl/cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
-	chmod +r /etc/nginx/self-signed-ssl/key.pem
 fi
 
 # country ban/whitelist
@@ -112,7 +107,7 @@ if [ "$BLACKLIST_COUNTRY" != "" ] || [ "$WHITELIST_COUNTRY" != "" ] ; then
 		replace_in_file "/etc/nginx/geoip.conf" "%DEFAULT%" "yes"
 		replace_in_file "/etc/nginx/geoip.conf" "%COUNTRY%" "$(echo $BLACKLIST_COUNTRY | sed 's/ / no;\\n/g') no;"
 	fi
-	echo "$GEOIP_CRON /opt/scripts/geoip.sh" >> /etc/crontabs/root
+	echo "$GEOIP_CRON /opt/scripts/geoip.sh" >> /etc/crontabs/nginx
 	if [ -f "/cache/geoip.mmdb" ] ; then
 		echo "[*] Copying cached geoip.mmdb ..."
 		cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
@@ -127,7 +122,7 @@ fi
 # block bad UA
 if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/map-user-agent.conf;"
-	echo "$BLOCK_USER_AGENT_CRON /opt/scripts/user-agents.sh" >> /etc/crontabs/root
+	echo "$BLOCK_USER_AGENT_CRON /opt/scripts/user-agents.sh" >> /etc/crontabs/nginx
 	if [ -f "/cache/map-user-agent.conf" ] ; then
 		echo "[*] Copying cached map-user-agent.conf ..."
 		cp /cache/map-user-agent.conf /etc/nginx/map-user-agent.conf
@@ -142,7 +137,7 @@ fi
 # block bad refferer
 if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" "include /etc/nginx/map-referrer.conf;"
-	echo "$BLOCK_REFERRER_CRON /opt/scripts/referrers.sh" >> /etc/crontabs/root
+	echo "$BLOCK_REFERRER_CRON /opt/scripts/referrers.sh" >> /etc/crontabs/nginx
 	if [ -f "/cache/map-referrer.conf" ] ; then
 		echo "[*] Copying cached map-referrer.conf ..."
 		cp /cache/map-referrer.conf /etc/nginx/map-referrer.conf
@@ -156,7 +151,7 @@ fi
 
 # block TOR exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
-	echo "$BLOCK_TOR_EXIT_NODE_CRON /opt/scripts/exit-nodes.sh" >> /etc/crontabs/root
+	echo "$BLOCK_TOR_EXIT_NODE_CRON /opt/scripts/exit-nodes.sh" >> /etc/crontabs/nginx
 	if [ -f "/cache/block-tor-exit-node.conf" ] ; then
 		echo "[*] Copying cached block-tor-exit-node.conf ..."
 		cp /cache/block-tor-exit-node.conf /etc/nginx/block-tor-exit-node.conf
@@ -168,7 +163,7 @@ fi
 
 # block proxies
 if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
-	echo "$BLOCK_PROXIES_CRON /opt/scripts/proxies.sh" >> /etc/crontabs/root
+	echo "$BLOCK_PROXIES_CRON /opt/scripts/proxies.sh" >> /etc/crontabs/nginx
 	if [ -f "/cache/block-proxies.conf" ] ; then
 		echo "[*] Copying cached block-proxies.conf ..."
 		cp /cache/block-proxies.conf /etc/nginx/block-proxies.conf
@@ -180,7 +175,7 @@ fi
 
 # block abusers
 if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
-	echo "$BLOCK_ABUSERS_CRON /opt/scripts/abusers.sh" >> /etc/crontabs/root
+	echo "$BLOCK_ABUSERS_CRON /opt/scripts/abusers.sh" >> /etc/crontabs/nginx
 	if [ -f "/cache/block-abusers.conf" ] ; then
 		echo "[*] Copying cached block-abusers.conf ..."
 		cp /cache/block-abusers.conf /etc/nginx/block-abusers.conf

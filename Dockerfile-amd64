@@ -20,4 +20,6 @@ VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pr
 
 EXPOSE 8080/tcp 8443/tcp
 
+USER nginx
+
 ENTRYPOINT ["/opt/entrypoint/entrypoint.sh"]

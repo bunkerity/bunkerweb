@@ -6,11 +6,6 @@
 # load some functions
 . /opt/entrypoint/utils.sh
 
-# fix nginx configs rights (and modules through the symlink)
-chown -R root:nginx /etc/nginx/
-chmod -R 740 /etc/nginx/
-find /etc/nginx -type d -exec chmod 750 {} \;
-
 if [ "$MULTISITE" = "yes" ] ; then
 	servers=$(find /etc/nginx -name "server.conf" | cut -d '/' -f 4)
 	for server in $servers ; do
@@ -30,7 +25,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 				modsec_custom="${modsec_custom}include /modsec-confs/${server}/*.conf\n"
 			fi
 			replace_in_file "${SERVER_PREFIX}modsecurity-rules.conf" "%MODSECURITY_INCLUDE_CUSTOM_RULES%" "$modsec_custom"
-			if grep "owasp-crs.conf" ${SERVER_PREFIX}modsecurity-rules.conf > /dev/null ; then
+			if grep "owasp/crs.conf" ${SERVER_PREFIX}modsecurity-rules.conf > /dev/null ; then
 				modsec_crs_custom=""
 				if ls /modsec-crs-confs/*.conf > /dev/null 2>&1 ; then
 					modsec_crs_custom="include /modsec-crs-confs/*.conf\n"
