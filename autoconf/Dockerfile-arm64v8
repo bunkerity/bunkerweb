@@ -7,7 +7,7 @@ FROM arm64v8/alpine
 
 COPY --from=builder qemu-aarch64-static /usr/bin
 
-RUN apk add py3-pip apache2-utils bash certbot curl logrotate && \
+RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     pip3 install docker requests && \
     mkdir /opt/entrypoint && \
     mkdir -p /opt/confs/site && \

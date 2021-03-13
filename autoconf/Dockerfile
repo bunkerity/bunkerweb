@@ -4,7 +4,7 @@ FROM alpine
 
 COPY --from=builder /etc/nginx/ /opt/confs/nginx
 
-RUN apk add py3-pip apache2-utils bash certbot curl logrotate && \
+RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     pip3 install docker requests && \
     mkdir /opt/entrypoint && \
     mkdir -p /opt/confs/site && \

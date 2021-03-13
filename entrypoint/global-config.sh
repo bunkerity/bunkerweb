@@ -53,6 +53,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 			replace_in_file "/etc/nginx/multisite-default-server-https.conf" "%SSL_CIPHERS%" ""
 		fi
 		openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/default-key.pem -out /etc/nginx/default-cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
+		chmod +r /etc/nginx/default-key.pem
 		if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] ; then
 			replace_in_file "/etc/nginx/multisite-default-server-https.conf" "%LETS_ENCRYPT_WEBROOT%" "include /etc/nginx/multisite-default-server-lets-encrypt-webroot.conf;"
 		else
@@ -98,6 +99,7 @@ fi
 if [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
 	mkdir /etc/nginx/self-signed-ssl/
         openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/nginx/self-signed-ssl/key.pem -out /etc/nginx/self-signed-ssl/cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
+	chmod +r /etc/nginx/self-signed-ssl/key.pem
 fi
 
 # country ban/whitelist

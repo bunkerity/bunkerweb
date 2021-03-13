@@ -2,7 +2,7 @@
 
 echo "[*] Starting autoconf ..."
 
-cp /opt/confs/nginx/* /etc/nginx
+cp -r /opt/confs/nginx/* /etc/nginx
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
@@ -21,6 +21,9 @@ echo "" > /etc/crontabs/root
 # setup logrotate
 touch /var/log/jobs.log
 echo "0 0 * * * /usr/sbin/logrotate -f /etc/logrotate.conf > /dev/null 2>&1" >> /etc/crontabs/root
+
+# start cron
+crond
 
 # run autoconf app
 /opt/entrypoint/app.py &
