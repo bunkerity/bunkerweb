@@ -15,7 +15,9 @@ fi
 DATA=""
 IFS=$'\n'
 for ua in $BLACKLIST ; do
-        DATA="${DATA}~*${ua} yes;\n"
+	if [ "$AUTO_LETS_ENCRYPT" = "yes" ] && [ "${ua}" -ne "letsencrypt" ] ; then
+        	DATA="${DATA}~*${ua} yes;\n"
+	fi
 done
 DATA_ESCAPED=$(echo "$DATA" | sed 's: :\\\\ :g' | sed 's:\\\\ yes;: yes;:g' | sed 's:\\\\\\ :\\\\ :g')
 echo -e "map \$http_user_agent \$bad_user_agent { default no; $DATA_ESCAPED }" > /tmp/map-user-agent.conf
