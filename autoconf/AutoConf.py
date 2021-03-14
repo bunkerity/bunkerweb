@@ -1,5 +1,6 @@
 from Config import Config
 import utils
+import os
 
 class AutoConf :
 
@@ -54,11 +55,11 @@ class AutoConf :
 	def __process_instance(self, instance, event, id, name, labels) :
 		if event == "create" :
 			self.__instances[id] = instance
-			if self.__swarm :
-				if self.__config.globalconf(self.__instances) :
-					utils.log("[*] global config generated")
+			if self.__swarm and len(self.__instances) == 0 :
+				if self.__config.initconf(self.__instances) :
+					utils.log("[*] initial config succeeded")
 				else :
-					utils.log("[!] can't generate global config")
+					utils.log("[!] initial config failed")
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
 		elif event == "start" :
 			self.__instances[id].reload()
@@ -68,6 +69,11 @@ class AutoConf :
 			utils.log("[*] bunkerized-nginx instance stopped : " + name + " / " + id)
 		elif event == "destroy" or event == "remove" :
 			del self.__instances[id]
+			if self.__swarm and len(self.__instances) == 0 :
+				with open("/etc/crontabs/nginx", "w") as f :
+					f.write("")
+				if os.path.exists("/etc/nginx/autoconf") :
+					os.remove("/etc/nginx/autoconf")
 			utils.log("[*] bunkerized-nginx instance removed : " + name + " / " + id)
 
 	def __process_server(self, instance, event, id, name, labels) :

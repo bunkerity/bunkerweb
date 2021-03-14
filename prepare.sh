@@ -7,6 +7,7 @@ apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clama
 mkdir /opt/entrypoint.d
 
 # prepare /www
+mkdir /www
 chown -R root:nginx /www
 chmod -R 770 /www
 

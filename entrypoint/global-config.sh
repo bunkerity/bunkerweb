@@ -103,13 +103,6 @@ if [ "$BLACKLIST_COUNTRY" != "" ] || [ "$WHITELIST_COUNTRY" != "" ] ; then
 		replace_in_file "/etc/nginx/geoip.conf" "%COUNTRY%" "$(echo $BLACKLIST_COUNTRY | sed 's/ / no;\\n/g') no;"
 	fi
 	echo "$GEOIP_CRON /opt/scripts/geoip.sh" >> /etc/crontabs/nginx
-	if [ -f "/cache/geoip.mmdb" ] ; then
-		echo "[*] Copying cached geoip.mmdb ..."
-		cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
-	else
-		echo "[*] Downloading GeoIP database (in background) ..."
-		/opt/scripts/geoip.sh &
-	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_COUNTRY%" ""
 fi
@@ -118,13 +111,6 @@ fi
 if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/map-user-agent.conf;"
 	echo "$BLOCK_USER_AGENT_CRON /opt/scripts/user-agents.sh" >> /etc/crontabs/nginx
-	if [ -f "/cache/map-user-agent.conf" ] ; then
-		echo "[*] Copying cached map-user-agent.conf ..."
-		cp /cache/map-user-agent.conf /etc/nginx/map-user-agent.conf
-	else
-		echo "[*] Downloading bad user-agent list (in background) ..."
-		/opt/scripts/user-agents.sh &
-	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" ""
 fi
@@ -133,13 +119,6 @@ fi
 if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" "include /etc/nginx/map-referrer.conf;"
 	echo "$BLOCK_REFERRER_CRON /opt/scripts/referrers.sh" >> /etc/crontabs/nginx
-	if [ -f "/cache/map-referrer.conf" ] ; then
-		echo "[*] Copying cached map-referrer.conf ..."
-		cp /cache/map-referrer.conf /etc/nginx/map-referrer.conf
-	else
-		echo "[*] Downloading bad referrer list (in background) ..."
-		/opt/scripts/referrers.sh &
-	fi
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" ""
 fi
@@ -147,37 +126,16 @@ fi
 # block TOR exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
 	echo "$BLOCK_TOR_EXIT_NODE_CRON /opt/scripts/exit-nodes.sh" >> /etc/crontabs/nginx
-	if [ -f "/cache/block-tor-exit-node.conf" ] ; then
-		echo "[*] Copying cached block-tor-exit-node.conf ..."
-		cp /cache/block-tor-exit-node.conf /etc/nginx/block-tor-exit-node.conf
-	else
-		echo "[*] Downloading tor exit nodes list (in background) ..."
-		/opt/scripts/exit-nodes.sh &
-	fi
 fi
 
 # block proxies
 if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
 	echo "$BLOCK_PROXIES_CRON /opt/scripts/proxies.sh" >> /etc/crontabs/nginx
-	if [ -f "/cache/block-proxies.conf" ] ; then
-		echo "[*] Copying cached block-proxies.conf ..."
-		cp /cache/block-proxies.conf /etc/nginx/block-proxies.conf
-	else
-		echo "[*] Downloading proxies list (in background) ..."
-		/opt/scripts/proxies.sh &
-	fi
 fi
 
 # block abusers
 if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
 	echo "$BLOCK_ABUSERS_CRON /opt/scripts/abusers.sh" >> /etc/crontabs/nginx
-	if [ -f "/cache/block-abusers.conf" ] ; then
-		echo "[*] Copying cached block-abusers.conf ..."
-		cp /cache/block-abusers.conf /etc/nginx/block-abusers.conf
-	else
-		echo "[*] Downloading abusers list (in background) ..."
-		/opt/scripts/abusers.sh &
-	fi
 fi
 
 # DNS resolvers

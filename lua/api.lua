@@ -1,6 +1,10 @@
 local M		= {}
 local api_list	= {}
 
+api_list["^/ping$"] = function ()
+	return true
+end
+
 api_list["^/reload$"] = function ()
 	return os.execute("/usr/sbin/nginx -s reload") == 0
 end

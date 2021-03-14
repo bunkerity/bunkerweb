@@ -72,6 +72,8 @@ if [ ! -f "/opt/installed" ] ; then
 	if [ "$SWARM_MODE" = "no" ] ; then
 		# global config
 		/opt/entrypoint/global-config.sh
+		# background jobs
+		/opt/entrypoint/jobs.sh
 		# multisite configs
 		if [ "$MULTISITE" = "yes" ] ; then
 			for server in $SERVER_NAME ; do
