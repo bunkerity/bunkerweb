@@ -6,6 +6,10 @@ apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clama
 # custom entrypoint
 mkdir /opt/entrypoint.d
 
+# prepare /www
+chown -R root:nginx /www
+chmod -R 770 /www
+
 # prepare /opt
 chown -R root:nginx /opt
 find /opt -type f -exec chmod 0740 {} \;

@@ -336,6 +336,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		replace_in_file "${NGINX_PREFIX}https.conf" "%STRICT_TRANSPORT_SECURITY%" ""
 	fi
 	if [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_LETS_ENCRYPT%" "true"
 		if [ "$MULTISITE" = "no" ] ; then
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
@@ -347,15 +348,18 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/privkey.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%LETS_ENCRYPT_WEBROOT%" "include ${NGINX_PREFIX}lets-encrypt-webroot.conf;"
 	elif [ "$USE_CUSTOM_HTTPS" = "yes" ] ; then
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_LETS_ENCRYPT%" "false"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "$CUSTOM_HTTPS_CERT"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "$CUSTOM_HTTPS_KEY"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%LETS_ENCRYPT_WEBROOT%" ""
 	elif [ "$GENERATE_SELF_SIGNED_SSL" = "yes" ] ; then
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_LETS_ENCRYPT%" "false"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/nginx/self-signed-ssl/cert.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_KEY%" "/etc/nginx/self-signed-ssl/key.pem"
 		replace_in_file "${NGINX_PREFIX}https.conf" "%LETS_ENCRYPT_WEBROOT%" ""
 	fi
 else
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_LETS_ENCRYPT%" "false"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_HTTPS%" ""
 fi
 

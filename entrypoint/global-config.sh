@@ -9,11 +9,6 @@
 # copy stub confs
 cp /opt/confs/global/* /etc/nginx/
 
-# install additional modules if needed
-if [ "$ADDITIONAL_MODULES" != "" ] ; then
-	apk add $ADDITIONAL_MODULES
-fi
-
 # include server block(s)
 if [ "$MULTISITE" = "yes" ] ; then
 	includes=""
