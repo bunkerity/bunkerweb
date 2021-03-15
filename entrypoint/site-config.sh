@@ -60,12 +60,12 @@ replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
 # reverse proxy
 if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 	i=1
-	for var in $(env) ; do
+	for var in $(compgen -e) ; do
 		check1=$(echo "$var" | grep "^REVERSE_PROXY_URL")
 		check2=$(echo "$var" | grep "^${1}_REVERSE_PROXY_URL")
 		if [ "$check1" != "" ] || [ "$check2" != "" ] ; then
-			name=$(echo "$var" | cut -d '=' -f 1)
-			value=$(echo "$var" | sed "s/${name}=//")
+			name=$(echo "$var")
+			value=$(echo "${!var}")
 			host=$(echo "$name" | sed "s/URL/HOST/")
 			host_value=$(env | grep "^${host}=" | sed "s/${host}=//")
 			ws=$(echo "$name" | sed "s/URL/WS/")
@@ -423,11 +423,11 @@ fi
 
 # custom errors
 ERRORS=""
-for var in $(env) ; do
-	var_name=$(echo "$var" | cut -d '=' -f 1 | cut -d '_' -f 1)
+for var in $(compgen -e) ; do
+	var_name=$(echo "$var" | cut -d '_' -f 1)
 	if [ "z${var_name}" = "zERROR" ] ; then
-		err_code=$(echo "$var" | cut -d '=' -f 1 | cut -d '_' -f 2)
-		err_page=$(echo "$var" | cut -d '=' -f 2)
+		err_code=$(echo "$var" | cut -d '_' -f 2)
+		err_page=$(echo "${!var}")
 		cp /opt/confs/error.conf ${NGINX_PREFIX}error-${err_code}.conf
 		replace_in_file "${NGINX_PREFIX}error-${err_code}.conf" "%CODE%" "$err_code"
 		replace_in_file "${NGINX_PREFIX}error-${err_code}.conf" "%PAGE%" "$err_page"
