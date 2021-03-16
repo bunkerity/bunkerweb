@@ -3,6 +3,14 @@
 # load some functions
 . /opt/scripts/utils.sh
 
+# if we are running nginx
+if [ -f /tmp/nginx.pid ] ; then
+	RELOAD="/usr/sbin/nginx -s reload > /dev/null 2>&1"
+# if we are in autoconf
+elif [ -f /tmp/autoconf.sock ] ; then
+	RELOAD="/opt/entrypoint/reload.py"
+fi
+
 # MMDB from https://db-ip.com/db/download/ip-to-country-lite
 URL="https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz"
 wget -O /tmp/geoip.mmdb.gz "$URL" > /dev/null 2>&1
@@ -13,8 +21,8 @@ if [ "$?" -eq 0 ] && [ -f /tmp/geoip.mmdb.gz ] ; then
 		exit 1
 	fi
 	mv /tmp/geoip.mmdb /etc/nginx
-	if [ -f /tmp/nginx.pid ] ; then
-		/usr/sbin/nginx -s reload > /dev/null 2>&1
+	if [ "$RELOAD" != "" ] ; then
+		$RELOAD
 		if [ "$?" -eq 0 ] ; then
 			cp /etc/nginx/geoip.mmdb /cache
 			job_log "[NGINX] successfull nginx reload after GeoIP DB update"
@@ -22,7 +30,7 @@ if [ "$?" -eq 0 ] && [ -f /tmp/geoip.mmdb.gz ] ; then
 			job_log "[NGINX] failed nginx reload after GeoIP DB update"
 			if [ -f /cache/geoip.mmdb ] ; then
 				cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
-				/usr/sbin/nginx -s reload > /dev/null 2>&1
+				$RELOAD
 			fi
 		fi
 	else

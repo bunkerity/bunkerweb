@@ -92,8 +92,9 @@ class Config :
 			# Include the server conf
 			utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n}")
 
-			return self.__reload(instances)
+			return self.reload(instances)
 		except Exception as e :
+			traceback.print_exc()
 			utils.log("[!] Error while activating config : " + str(e))
 		return False
 
@@ -107,9 +108,10 @@ class Config :
 			# Remove the include
 			utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n", "")
 
-			return self.__reload(instances)
+			return self.reload(instances)
 
 		except Exception as e :
+			traceback.print_exc()
 			utils.log("[!] Error while deactivating config : " + str(e))
 		return False
 
@@ -127,13 +129,13 @@ class Config :
 			utils.log("[!] Error while deactivating config : " + str(e))
 		return False
 
-	def __reload(self, instances) :
-		return self.__api(instances, "/reload")
+	def reload(self, instances) :
+		return self.__api_call(instances, "/reload")
 
 	def __status(self, instances) :
-		return self.__api(instances, "/status")
+		return self.__api_call(instances, "/status")
 
-	def __api(self, instances, path) :
+	def __api_call(self, instances, path) :
 		ret = True
 		for instance_id, instance in instances.items() :
 			# Reload the instance object just in case
@@ -146,7 +148,11 @@ class Config :
 					nodeID = task["NodeID"]
 					taskID = task["ID"]
 					fqdn = name + "." + nodeID + "." + taskID
-					req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
+					req = False
+					try :
+						req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
+					except :
+						pass
 					if req and req.status_code == 200 :
 						utils.log("[*] Sent reload order to instance " + fqdn + " (service.node.task)")
 					else :

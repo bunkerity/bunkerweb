@@ -11,6 +11,9 @@ class AutoConf :
 		self.__sites = {}
 		self.__config = Config(self.__swarm, api)
 
+	def reload(self) :
+		return self.__config.reload(self.instances)
+
 	def pre_process(self, objs) :
 		for instance in objs :
 			(id, name, labels) = self.__get_infos(instance)

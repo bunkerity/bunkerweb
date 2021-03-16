@@ -5,14 +5,17 @@
 
 job_log "[CERTBOT] certificates have been renewed"
 
-# fix rights
-chown -R root:nginx /etc/letsencrypt
-chmod -R 740 /etc/letsencrypt
-find /etc/letsencrypt -type d -exec chmod 750 {} \;
+# if we are running nginx
+if [ -f /tmp/nginx.pid ] ; then
+	RELOAD="/usr/sbin/nginx -s reload > /dev/null 2>&1"
+# if we are in autoconf
+elif [ -f /tmp/autoconf.sock ] ; then
+	RELOAD="echo reload > /tmp/autoconf.sock"
+fi
 
 # reload nginx
-if [ -f /tmp/nginx.pid ] ; then
-	/usr/sbin/nginx -s reload > /dev/null 2>&1
+if [ "$RELOAD" != "" ] ; then
+	$RELOAD
 	if [ "$?" -eq 0 ] ; then
 		job_log "[NGINX] successfull nginx reload after certbot renew"
 	else

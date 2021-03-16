@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 from AutoConf import AutoConf
+from ReloadServer import run_reload_server
 import utils
-import docker, os, stat, sys
+import docker, os, stat, sys, select, threading
 
 # Connect to the endpoint
 endpoint = "/var/run/docker.sock"
@@ -23,6 +24,9 @@ api = ""
 if swarm :
 	api = os.getenv("API_URI")
 autoconf = AutoConf(swarm, api)
+lock = threading.Lock()
+if swarm :
+	(server, thread) = run_reload_server(autoconf, lock)
 
 # Get all bunkerized-nginx instances and web services created before
 try :
@@ -35,7 +39,8 @@ except docker.errors.APIError as e :
 	sys.exit(3)
 
 # Process them before events
-autoconf.pre_process(before)
+with lock :
+	autoconf.pre_process(before)
 
 # Process events received from Docker
 try :
@@ -55,7 +60,8 @@ try :
 			continue
 
 		# Process the event
-		autoconf.process(server, event["Action"])
+		with lock :
+			autoconf.process(server, event["Action"])
 
 except docker.errors.APIError as e :
 	utils.log("[!] Docker API error " + str(e))
