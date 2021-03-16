@@ -504,6 +504,14 @@ Context : *global*, *multisite*
 Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the corresponding `REVERSE_PROXY_HOST` is a WebSocket server.  
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_WS_1`, `REVERSE_PROXY_WS_2`, `REVERSE_PROXY_WS_3`, ...
 
+`REVERSE_PROXY_HEADERS`  
+Values : *\<list of custom headers separated with a semicolon\>* 
+Examples : Access-Control-Allow-Origin 'https://mydomain.dev'; Custom_Api_Header 'test';
+Default value : ""  
+Context : *global*, *multisite*  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the corresponding `REVERSE_PROXY_HOST` is a WebSocket server.  
+You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_HEADERS_1`, `REVERSE_PROXY_HEADERS_2`, `REVERSE_PROXY_HEADERS_3`, ...
+
 `PROXY_REAL_IP`  
 Values : *yes* | *no*  
 Default value : *no*  
