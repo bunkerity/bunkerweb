@@ -23,7 +23,7 @@ class Config :
 			if self.globalconf(instances) :
 				i = 0
 				started = False
-				while i < 5 :
+				while i < 10 :
 					if self.__ping(instances) :
 						started = True
 						break

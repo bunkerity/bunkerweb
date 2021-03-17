@@ -17,7 +17,13 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     chmod 770 /var/log/letsencrypt && \
     mkdir /var/lib/letsencrypt && \
     chown root:nginx /var/lib/letsencrypt && \
-    chmod 770 /var/lib/letsencrypt
+    chmod 770 /var/lib/letsencrypt && \
+    mkdir /cache && \
+    chown root:nginx /cache && \
+    chmod 770 /cache && \
+    touch /var/log/jobs.log && \
+    chown root:nginx /var/log/jobs.log && \
+    chmod 770 /var/log/jobs.log
 
 COPY scripts/* /opt/scripts/
 COPY confs/site/ /opt/confs/site

@@ -1,4 +1,8 @@
+FROM nginx:stable-alpine AS builder
+
 FROM i386/alpine
+
+COPY --from=builder /etc/nginx/ /opt/confs/nginx
 
 RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     pip3 install docker requests && \
@@ -14,10 +18,12 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     chown root:nginx /var/lib/letsencrypt && \
     chmod 770 /var/lib/letsencrypt
 
+COPY scripts/* /opt/scripts/
+COPY confs/global/ /opt/confs/global
 COPY confs/site/ /opt/confs/site
 COPY entrypoint/* /opt/entrypoint/
 COPY autoconf/* /opt/entrypoint/
-RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh
+RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh /opt/scripts/*.sh
 
 VOLUME /etc/nginx
 

@@ -10,7 +10,7 @@ cp /etc/nginx/block-tor-exit-node.conf /cache
 if [ -f /tmp/nginx.pid ] ; then
 	RELOAD="/usr/sbin/nginx -s reload > /dev/null 2>&1"
 # if we are in autoconf
-elif [ -f /tmp/autoconf.sock ] ; then
+elif [ -S /tmp/autoconf.sock ] ; then
 	RELOAD="/opt/entrypoint/reload.py"
 fi
 

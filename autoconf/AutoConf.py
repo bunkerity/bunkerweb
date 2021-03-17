@@ -12,7 +12,7 @@ class AutoConf :
 		self.__config = Config(self.__swarm, api)
 
 	def reload(self) :
-		return self.__config.reload(self.instances)
+		return self.__config.reload(self.__instances)
 
 	def pre_process(self, objs) :
 		for instance in objs :
