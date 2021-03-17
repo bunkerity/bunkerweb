@@ -31,6 +31,9 @@ chmod -R 770 /var/log/nginx
 touch /var/log/access.log /var/log/error.log /var/log/jobs.log /var/log/fail2ban.log
 chown nginx:nginx /var/log/*.log
 chmod 770 /var/log/*.log
+mkdir /var/log/letsencrypt
+chown nginx:nginx /var/log/letsencrypt
+chmod 770 /var/log/letsencrypt
 
 # prepare /acme-challenge
 mkdir /acme-challenge
@@ -41,6 +44,11 @@ chmod 770 /acme-challenge
 mkdir /etc/letsencrypt
 chown root:nginx /etc/letsencrypt
 chmod 770 /etc/letsencrypt
+
+# prepare /var/lib/letsencrypt
+mkdir /var/lib/letsencrypt
+chown root:nginx /var/lib/letsencrypt
+chmod 770 /var/lib/letsencrypt
 
 # prepare /etc/fail2ban
 rm -rf /etc/fail2ban/jail.d/*.conf

@@ -58,7 +58,7 @@ class AutoConf :
 	def __process_instance(self, instance, event, id, name, labels) :
 		if event == "create" :
 			self.__instances[id] = instance
-			if self.__swarm and len(self.__instances) == 0 :
+			if self.__swarm and len(self.__instances) == 1 :
 				if self.__config.initconf(self.__instances) :
 					utils.log("[*] initial config succeeded")
 				else :

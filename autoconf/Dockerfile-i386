@@ -6,7 +6,13 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     mkdir -p /opt/confs/site && \
     mkdir -p /opt/confs/global && \
     addgroup -g 101 nginx && \
-    adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx
+    adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx && \
+    mkdir /var/log/letsencrypt && \
+    chown root:nginx /var/log/letsencrypt && \
+    chmod 770 /var/log/letsencrypt && \
+    mkdir /var/lib/letsencrypt && \
+    chown root:nginx /var/lib/letsencrypt && \
+    chmod 770 /var/lib/letsencrypt
 
 COPY confs/site/ /opt/confs/site
 COPY entrypoint/* /opt/entrypoint/

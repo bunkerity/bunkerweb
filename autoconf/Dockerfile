@@ -9,13 +9,21 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     mkdir /opt/entrypoint && \
     mkdir -p /opt/confs/site && \
     mkdir -p /opt/confs/global && \
+    mkdir /opt/scripts && \
     addgroup -g 101 nginx && \
-    adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx
+    adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx && \
+    mkdir /var/log/letsencrypt && \
+    chown root:nginx /var/log/letsencrypt && \
+    chmod 770 /var/log/letsencrypt && \
+    mkdir /var/lib/letsencrypt && \
+    chown root:nginx /var/lib/letsencrypt && \
+    chmod 770 /var/lib/letsencrypt
 
+COPY scripts/* /opt/scripts/
 COPY confs/site/ /opt/confs/site
 COPY confs/global/ /opt/confs/global
 COPY entrypoint/* /opt/entrypoint/
 COPY autoconf/* /opt/entrypoint/
-RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh
+RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh /opt/scripts/*.sh
 
 ENTRYPOINT ["/opt/entrypoint/entrypoint.sh"]

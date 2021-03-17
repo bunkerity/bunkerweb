@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import utils
-import subprocess, shutil, os, traceback, requests
+import subprocess, shutil, os, traceback, requests, time
 
 class Config :
 
@@ -24,13 +24,18 @@ class Config :
 				i = 0
 				started = False
 				while i < 5 :
-					if self.__status(instances) :
+					if self.__ping(instances) :
 						started = True
+						break
 					i = i + 1
 					time.sleep(i)
 				if started :
 					proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/jobs.sh", "nginx"], env=vars, capture_output=True)
 					return proc.returncode == 0
+				else :
+					utils.log("[!] bunkerized-nginx instances are not started")
+			else :
+				utils.log("[!] Can't generate global conf")
 		except Exception as e :
 			traceback.print_exc()
 			utils.log("[!] Error while initializing config : " + str(e))
@@ -74,8 +79,8 @@ class Config :
 			vars_defaults.update(vars)
 			# Call site-config.sh to generate the config
 			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " " + vars["SERVER_NAME"], "nginx"], env=vars_defaults, capture_output=True)
-			if proc.returncode == 0 :
-				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], capture_output=True)
+			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" :
+				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], env=vars_defaults, capture_output=True)
 				return proc.returncode == 0
 		except Exception as e :
 			traceback.print_exc()
@@ -132,8 +137,8 @@ class Config :
 	def reload(self, instances) :
 		return self.__api_call(instances, "/reload")
 
-	def __status(self, instances) :
-		return self.__api_call(instances, "/status")
+	def __ping(self, instances) :
+		return self.__api_call(instances, "/ping")
 
 	def __api_call(self, instances, path) :
 		ret = True
@@ -154,9 +159,9 @@ class Config :
 					except :
 						pass
 					if req and req.status_code == 200 :
-						utils.log("[*] Sent reload order to instance " + fqdn + " (service.node.task)")
+						utils.log("[*] Sent API order " + path + " to instance " + fqdn + " (service.node.task)")
 					else :
-						utils.log("[!] Can't reload : API error for instance " + fqdn + " (service.node.task)")
+						utils.log("[!] Can't send API order " + path + " to instance " + fqdn + " (service.node.task)")
 						ret = False
 			# Send SIGHUP to running instance
 			elif instance.status == "running" :
