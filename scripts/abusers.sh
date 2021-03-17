@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/scripts/utils.sh
+. /opt/entrypoint/utils.sh
 
 # copy old conf to cache
 cp /etc/nginx/block-abusers.conf /cache

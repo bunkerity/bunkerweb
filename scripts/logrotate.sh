@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/scripts/utils.sh
+. /opt/entrypoint/utils.sh
 
 logrotate -f /etc/logrotate.conf > /dev/null 2>&1
 

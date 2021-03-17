@@ -28,6 +28,7 @@ class Config :
 						started = True
 						break
 					i = i + 1
+					utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact nginx instances")
 					time.sleep(i)
 				if started :
 					proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/jobs.sh", "nginx"], env=vars, capture_output=True)

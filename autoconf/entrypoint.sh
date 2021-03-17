@@ -2,7 +2,9 @@
 
 echo "[*] Starting autoconf ..."
 
-cp -r /opt/confs/nginx/* /etc/nginx
+if [ "$SWARM_MODE" = "yes" ] ; then
+	cp -r /opt/confs/nginx/* /etc/nginx
+fi
 
 # trap SIGTERM and SIGINT
 function trap_exit() {

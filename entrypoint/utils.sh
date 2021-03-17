@@ -28,13 +28,19 @@ function has_value() {
 		echo "ok"
 		return 0
 	fi
-	for var in $(compgen -e) ; do
+	for var in $(env | grep -E "^.*_${1}=") ; do
 		domain=$(echo "$var" | cut -d '_' -f 1)
-		name=$(echo "$var" | cut -d '=' -f 1 | sed "s~${domain}_~~")
-		value=$(echo "${!var}")
-		if [ "$name" == "$1" ] && [ "$value" == "$2" ] ; then
+		value=$(echo "$var" | sed "s~^${domain}_${1}=~~")
+		if [ "$value" == "$2" ] ; then
 			echo "ok"
 			return 0
 		fi
 	done
+}
+
+# log to jobs.log
+function job_log() {
+	when="$(date '+[%Y-%m-%d %H:%M:%S]')"
+	what="$1"
+	echo "$when $what" >> /var/log/jobs.log
 }

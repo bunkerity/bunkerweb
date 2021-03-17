@@ -3,6 +3,9 @@
 # install dependencies
 apk --no-cache add certbot libstdc++ libmaxminddb geoip pcre yajl fail2ban clamav apache2-utils rsyslog openssl lua libgd go jq mariadb-connector-c bash brotli
 
+# temp fix ?
+chmod 644 /usr/lib/python3.8/site-packages/fail2ban-*/*
+
 # custom entrypoint
 mkdir /opt/entrypoint.d
 
@@ -34,6 +37,9 @@ chmod 770 /var/log/*.log
 mkdir /var/log/letsencrypt
 chown nginx:nginx /var/log/letsencrypt
 chmod 770 /var/log/letsencrypt
+touch /var/log/clamav.log
+chown root:nginx /var/log/clamav.log
+chmod 770 /var/log/clamav.log
 
 # prepare /acme-challenge
 mkdir /acme-challenge
@@ -78,3 +84,11 @@ chown root:nginx /etc/rsyslog.conf
 touch /etc/crontabs/nginx
 chown root:nginx /etc/crontabs/nginx
 chmod 660 /etc/crontabs/nginx
+
+# prepare /var/log/clamav
+chown root:nginx /var/log/clamav
+chmod 770 /var/log/clamav
+
+# prepare /var/lib/clamav
+chown root:nginx /var/lib/clamav
+chmod 770 /var/lib/clamav

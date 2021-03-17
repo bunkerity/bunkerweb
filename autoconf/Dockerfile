@@ -23,8 +23,11 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     chmod 770 /cache && \
     touch /var/log/jobs.log && \
     chown root:nginx /var/log/jobs.log && \
-    chmod 770 /var/log/jobs.log
+    chmod 770 /var/log/jobs.log && \
+    chown -R root:nginx /opt/confs/nginx && \
+    chmod -R 770 /opt/confs/nginx
 
+COPY autoconf/misc/logrotate.conf /etc/logrotate.conf
 COPY scripts/* /opt/scripts/
 COPY confs/site/ /opt/confs/site
 COPY confs/global/ /opt/confs/global

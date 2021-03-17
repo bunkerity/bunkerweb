@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/scripts/utils.sh
+. /opt/entrypoint/utils.sh
 
 # ask new certificates if needed
 certbot renew --deploy-hook /opt/scripts/certbot-renew-hook.sh

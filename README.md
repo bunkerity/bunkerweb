@@ -1083,11 +1083,11 @@ Default value : *.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .c
 Context : *global*  
 The list of reverse DNS suffixes to whitelist when `USE_WHITELIST_REVERSE` is set to *yes*. The default list contains suffixes of major search engines.
 
-`WHITELIST_USERAGENT_LIST`
-Values : *"useragent1", "^[user]agent2"*
-Default value : **
+`WHITELIST_USER_AGENT`  
+Values : *\<list of regexes separated with spaces\>*  
+Default value :  
 Context : *global*, *multisite*  
-Whitelist user agent from be blocked by `BLOCK_USER_AGENT`
+Whitelist user agent from being blocked by `BLOCK_USER_AGENT`.
 
 ### Custom blacklisting
 

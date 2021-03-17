@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/scripts/utils.sh
+. /opt/entrypoint/utils.sh
 
 # save old conf
 cp /etc/nginx/map-referrer.conf /cache

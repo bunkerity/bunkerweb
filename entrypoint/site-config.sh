@@ -24,12 +24,12 @@ if [ "$MULTISITE" = "yes" ] ; then
 			sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
 		fi
 	done
-	for var in $(compgen -e) ; do
+	for var in $(cut -d '=' -f 1 "${NGINX_PREFIX}nginx.env") ; do
 		name=$(echo "$var")
 		check=$(echo "$name" | grep "^$1_")
 		if [ "$check" != "" ] ; then
 			repl_name=$(echo "$name" | sed "s~${1}_~~")
-			repl_value=$(echo "${!var}")
+			repl_value=$(env | grep -E "^${name}=" | sed "s~^${name}=~~")
 			read -r "$repl_name" <<< $repl_value
 			sed -i "/^${repl_name}=.*/d" "${NGINX_PREFIX}nginx.env"
 			sed -i "/^${name}=.*/d" "${NGINX_PREFIX}nginx.env"
@@ -76,10 +76,13 @@ if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$value"
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
 			if [ "$custom_headers_value" != "" ] ; then
-			  IFS=';' ;for header_value in $(echo "$custom_headers_value") ; do
-			    replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "more_set_headers $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
-			  done
-			  replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" ""
+			  	IFS_=$IFS
+				IFS=';'
+				for header_value in $(echo "$custom_headers_value") ; do
+					replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "more_set_headers $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
+				done
+				IFS=$IFS_
+				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" ""
 			fi
 			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HEADERS%" "include ${NGINX_PREFIX}reverse-proxy-headers.conf;"
 			if [ "$ws_value" = "yes" ] ; then
@@ -284,13 +287,15 @@ fi
 # block bad UA
 if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "true"
-	if [ "$WHITELIST_USERAGENT_LIST" != "" ] ; then
-		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USERAGENT_LIST%" "$WHITELIST_USERAGENT_LIST"
+	if [ "$WHITELIST_USER_AGENT" != "" ] ; then
+		list=$(spaces_to_lua "$WHITELIST_USER_AGENT")
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" "$list"
 	else
-		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USERAGENT_LIST%" ""
+		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" ""
 	fi
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "false"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" ""
 fi
 
 # block bad referrer

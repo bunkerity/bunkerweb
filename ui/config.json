@@ -687,10 +687,10 @@
          },
          {
             "type":"text",
-            "label":"Whitelist user agent list",
-            "env":"WHITELIST_USERAGENT_LIST",
+            "label":"Whitelist user agent",
+            "env":"WHITELIST_USER_AGENT",
             "regex":".*",
-            "id":"whitelist-user-agent-list",
+            "id":"whitelist-user-agent",
             "default":""
          }
       ]

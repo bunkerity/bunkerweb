@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/scripts/utils.sh
+. /opt/entrypoint/utils.sh
 
 # if we are running nginx
 if [ -f /tmp/nginx.pid ] ; then
