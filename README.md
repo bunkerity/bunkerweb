@@ -1,8 +1,16 @@
-# bunkerized-nginx
+<p align="center">
+	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
+</p>
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
-
-<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.2-blue" /> <img src="https://img.shields.io/badge/nginx-1.18.0-blue" /> <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" /> <a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a> <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" /> <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+<p align="center">
+	<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.3-blue" />
+	<img src="https://img.shields.io/badge/nginx-1.18.0-blue" />
+	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
+	<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a>
+	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
+	<img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+	<img src="https://img.shields.io/twitter/follow/bunkerity?style=social" />
+</p>
 
 nginx Docker image secure by default.  
 
@@ -27,7 +35,6 @@ Fooling automated tools/scanners :
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/demo.gif?raw=true" />
 
 # Table of contents
-- [bunkerized-nginx](#bunkerized-nginx)
 - [Table of contents](#table-of-contents)
 - [Live demo](#live-demo)
 - [Quickstart guide](#quickstart-guide)
@@ -90,7 +97,7 @@ You can find a live demo at https://demo-nginx.bunkerity.com.
 docker run -p 80:8080 -v /path/to/web/files:/www:ro bunkerity/bunkerized-nginx
 ```
 
-Web files are stored in the /www directory, the container will serve files from there.
+Web files are stored in the /www directory, the container will serve files from there. Please note that *bunkerized-nginx* doesn't run as root but with an unprivileged user with UID/GID 101 therefore you should set the rights of */path/to/web/files* accordingly.
 
 ## In combination with PHP
 
@@ -123,8 +130,9 @@ docker run -p 80:8080 \
            bunkerity/bunkerized-nginx
 ```
 
-Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive.  
-If you don't want your webserver to listen on HTTP add the environment variable `LISTEN_HTTP` with a *no* value. But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
+Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive. Please note that *bunkerized-nginx* doesn't run as root but with an unprivileged user with UID/GID 101 therefore you should set the rights of */where/to/save/certificates* accordingly.
+
+If you don't want your webserver to listen on HTTP add the environment variable `LISTEN_HTTP` with a *no* value (e.g. HTTPS only). But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
 
 Here you have three environment variables :
 - `SERVER_NAME` : define the FQDN of your webserver, this is mandatory for Let's Encrypt (www.yourdomain.com should point to your IP address)

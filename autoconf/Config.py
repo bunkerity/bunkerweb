@@ -83,6 +83,7 @@ class Config :
 			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" and self.__swarm :
 				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], env=vars_defaults, capture_output=True)
 				return proc.returncode == 0
+			return proc.returncode == 0
 		except Exception as e :
 			traceback.print_exc()
 			utils.log("[!] Error while generating site config : " + str(e))
