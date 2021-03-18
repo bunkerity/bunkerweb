@@ -15,27 +15,21 @@ if [ "$MULTISITE" = "yes" ] ; then
 	fi
 	ROOT_FOLDER="${ROOT_FOLDER}/$1"
 fi
-env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION)=" > "${NGINX_PREFIX}nginx.env"
 
 if [ "$MULTISITE" = "yes" ] ; then
-	sed -i "s~^SERVER_NAME=.*~SERVER_NAME=$1~" "${NGINX_PREFIX}nginx.env"
+ 	for var in $(env | cut -d '=' -f 1 | grep -E "^${1}_") ; do
+		repl_name=$(echo "$var" | sed "s~${1}_~~")
+		repl_value=$(env | grep -E "^${var}=" | sed "s~^${var}=~~")
+		read -r "$repl_name" <<< $repl_value
+	done
+fi
+
+set | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "${NGINX_PREFIX}nginx.env"
+if [ "$MULTISITE" = "yes" ] ; then
 	for server in $SERVER_NAME ; do
-		if [ "$server" != "$1" ] ; then
-			sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
-		fi
+		sed -i "~^${server}_.*=.*~d" "${NGINX_PREFIX}nginx.env"
 	done
-	for var in $(cut -d '=' -f 1 "${NGINX_PREFIX}nginx.env") ; do
-		name=$(echo "$var")
-		check=$(echo "$name" | grep "^${1}_")
-		if [ "$check" != "" ] ; then
-			repl_name=$(echo "$name" | sed "s~${1}_~~")
-			repl_value=$(env | grep -E "^${name}=" | sed "s~^${name}=~~")
-			read -r "$repl_name" <<< $repl_value
-			sed -i "/^${repl_name}=.*/d" "${NGINX_PREFIX}nginx.env"
-			sed -i "/^${name}=.*/d" "${NGINX_PREFIX}nginx.env"
-			echo "${repl_name}=${repl_value}" >> "${NGINX_PREFIX}nginx.env"
-		fi
-	done
+	sed -i "~^SERVER_NAME=.*~SERVER_NAME=${1}~" "${NGINX_PREFIX}nginx.env"
 fi
 
 # copy stub confs

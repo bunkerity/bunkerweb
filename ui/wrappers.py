@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import utils, config
+import utils
 import docker, os, stat, sys, subprocess, shutil
 
 def get_client() :
@@ -55,7 +55,7 @@ def reload_instances(client) :
 	return True, i
 
 def new_service(client, env) :
-	proc = subprocess.run(["/opt/entrypoint/site-config.sh", env["SERVER_NAME"]], env=env, capture_output=True)
+	proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " " + env["SERVER_NAME"], "nginx"], env=env, capture_output=True)
 	if proc.returncode != 0 :
 		return False, "Error code " + str(proc.returncode) + " while generating config."
 	utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + env["SERVER_NAME"] + "/server.conf;\n}")
