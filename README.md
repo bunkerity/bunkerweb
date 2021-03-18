@@ -20,6 +20,7 @@ Non-exhaustive list of features :
 - Detect bad files with ClamAV
 - Easy to configure with environment variables or web UI
 - Automatic configuration with container labels
+- Docker Swarm support
 
 Fooling automated tools/scanners :
 
@@ -37,9 +38,13 @@ Fooling automated tools/scanners :
   * [Behind a reverse proxy](#behind-a-reverse-proxy)
   * [Multisite](#multisite)
   * [Automatic configuration](#automatic-configuration)
+  * [Swarm mode](#swarm-mode)
   * [Web UI](#web-ui)
   * [Antibot challenge](#antibot-challenge)
+  * [Hardening](#hardening)
 - [Tutorials and examples](#tutorials-and-examples)
+- [Include custom configurations](#include-custom-configurations)
+- [Cache data](#cache-data)
 - [List of environment variables](#list-of-environment-variables)
   * [nginx](#nginx)
     + [Misc](#misc)
@@ -65,13 +70,14 @@ Fooling automated tools/scanners :
     + [Custom whitelisting](#custom-whitelisting)
     + [Custom blacklisting](#custom-blacklisting)
     + [Requests limiting](#requests-limiting)
+    + [Connections limiting](#connections-limiting)
     + [Countries](#countries)
   * [PHP](#php)
   * [Fail2ban](#fail2ban)
   * [ClamAV](#clamav)
+  * [Logrotate](#logrotate)
+  * [Cron jobs](#cron-jobs)
   * [Misc](#misc-2)
-- [Include custom configurations](#include-custom-configurations)
-- [Cache data](#cache-data)
 
 # Live demo
 You can find a live demo at https://demo-nginx.bunkerity.com.
@@ -278,6 +284,91 @@ docker run --network mynet \
            tutum/hello-world
 ```
 
+## Swarm mode
+
+Automatic configuration through labels is also supported in swarm mode. The *bunkerized-nginx-autoconf* is used to listen for Swarm events (e.g. service create/rm) and "automagically" edit configurations files and reload nginx.
+
+As a use case we will assume the following :
+- Some managers are also workers (they will only run the *autoconf* container for obvious security reasons)
+- The bunkerized-nginx service will be deployed on all workers (global mode) so clients can connect to each of them (e.g. load balancing, CDN, edge proxy, ...)
+- There is a shared folder mounted on managers and workers (e.g. NFS, GlusterFS, CephFS, ...)
+
+Let's start by creating the network to allow communications between our services :
+```shell
+docker network create -d overlay mynet
+```
+
+We can now create the *autoconf* service that will listen to swarm events :
+```shell
+docker service create --name autoconf \
+                      --network mynet \
+                      --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
+                      --mount type=bind,source=/shared/confs,destination=/etc/nginx \
+                      --mount type=bind,source=/shared/letsencrypt,destination=/etc/letsencrypt \
+                      --mount type=bind,source=/shared/acme-challenge,destination=/acme-challenge \
+                      -e SWARM_MODE=yes \
+                      -e API_URI=/ChangeMeToSomethingHardToGuess \
+                      --replicas 1 \
+                      --constraint node.role==manager \
+                      bunkerity/bunkerized-nginx-autoconf
+```
+
+**You need to change `API_URI` to something hard to guess since there is no other security mechanism to protect the API at the moment.**
+
+When *autoconf* is created, it's time for the *bunkerized-nginx* service to be up :
+
+```shell
+docker service create --name nginx \
+                      --network mynet \
+                      -p published=80,target=8080,mode=host \
+                      -p published=443,target=8443,mode=host \
+                      --mount type=bind,source=/shared/confs,destination=/etc/nginx \
+                      --mount type=bind,source=/shared/letsencrypt,destination=/etc/letsencrypt,ro \
+                      --mount type=bind,source=/shared/acme-challenge,destination=/acme-challenge,ro \
+                      --mount type=bind,source=/shared/www,destination=/www,ro \
+                      -e SWARM_MODE=yes \
+                      -e USE_API=yes \
+                      -e API_URI=/ChangeMeToSomethingHardToGuess \
+                      -e MULTISITE=yes \
+                      -e SERVER_NAME= \
+                      -e AUTO_LETS_ENCRYPT=yes \
+                      -e REDIRECT_HTTP_TO_HTTPS=yes \
+                      -l bunkerized-nginx.AUTOCONF \
+                      --mode global \
+                      --constraint node.role==worker \
+                      bunkerity/bunkerized-nginx
+```
+
+The `API_URI` value must be the same as the one specified for the *autoconf* service.
+
+We can now create a new service and use labels to dynamically configure bunkerized-nginx. Labels for automatic configuration are the same as environment variables but with the "bunkerized-nginx." prefix.
+
+Here is a PHP example :
+
+```shell
+docker service create --name myapp \
+                      --network mynet \
+                      --mount type=bind,source=/shared/www/app.domain.com,destination=/app \
+                      -l bunkerized-nginx.SERVER_NAME=app.domain.com \
+                      -l bunkerized-nginx.REMOTE_PHP=myapp \
+                      -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+                      --constraint node.role==worker \
+                      php:fpm
+```
+
+And a reverse proxy example :
+
+```shell
+docker service create --name anotherapp \
+                      --network mynet \
+                      -l bunkerized-nginx.SERVER_NAME=app2.domain.com \
+                      -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
+                      -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
+                      -l bunkerized-nginx.REVERSE_PROXY_HOST=http://anotherapp \
+                      --constraint node.role==worker \
+                      tutum/hello-world
+```
+
 ## Web UI
 
 **This feature exposes, for now, a security risk because you need to mount the docker socket inside a container exposing a web application. You can test it but you should not use it in servers facing the internet.**  
@@ -339,9 +430,53 @@ docker run -p 80:8080 -v /path/to/web/files:/www -e USE_ANTIBOT=captcha bunkerit
 
 When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must complete a captcha before accessing the pages. Others challenges are also available : *cookie*, *javascript* or *recaptcha* (more info [here](#antibot)).
 
+## Hardening
+
+By default, *bunkerized-nginx* runs as non-root user inside the container and should not use any of the default [capabilities](https://docs.docker.com/engine/security/#linux-kernel-capabilities) allowed by Docker. You can safely remove all capabilities to harden the container :
+
+```shell
+docker run ... --drop-cap=all ... bunkerity/bunkerized-nginx
+```
+
 # Tutorials and examples
 
-You will find some docker-compose.yml examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples).  
+You will find some docker-compose examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples).  
+
+# Include custom configurations
+Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
+  - /http-confs : http context
+  - /server-confs : server context
+  - /pre-server-confs : before server context (add map or upstream config for example)
+
+You just need to use a volume like this :
+```shell
+docker run ... -v /path/to/http/confs:/http-confs:ro ... -v /path/to/server/confs:/server-confs:ro ... bunkerity/bunkerized-nginx
+```
+
+When `MULTISITE` is set to *yes*, .conf files inside the /server-confs directory are loaded by all the server blocks. You can also set custom configuration for a specific server block by adding files in a subdirectory named as the host defined in the `SERVER_NAME` environment variable. Here is an example :
+
+```shell
+docker run ... -v /path/to/server/confs:/server-confs:ro ... -e MULTISITE=yes -e "SERVER_NAME=app1.domain.com app2.domain.com" ... bunkerity/bunkerized-nginx
+```
+
+The */path/to/server/confs* directory should have a structure like this :
+```
+/path/to/server/confs
+├── app1.domain.com
+│   └── custom.conf
+│   └── ...
+└── app2.domain.com
+    └── custom.conf
+    └── ...
+```
+
+# Cache data
+
+You can store cached data (blacklists, geoip DB, ...) to avoid downloading them again after a container deletion by mounting a volume on the /cache directory :
+
+```shell
+docker run ... -v /path/to/cache:/cache ... bunkerity/bunkerized-nginx
+```
 
 # List of environment variables
 
@@ -379,7 +514,7 @@ Only the HTTP methods listed here will be accepted by nginx. If not listed, ngin
 `DISABLE_DEFAULT_SERVER`  
 Values : *yes* | *no*  
 Default value : *no*  
-Context : *global*, *multisite*  
+Context : *global*  
 If set to yes, nginx will only respond to HTTP request when the Host header match a FQDN specified in the `SERVER_NAME` environment variable.  
 For example, it will close the connection if a bot access the site with direct ip.
 
@@ -397,7 +532,7 @@ Context : *global*
 The IP addresses of the DNS resolvers to use when performing DNS lookups.
 
 `ROOT_FOLDER`  
-Values : *\<any valid path to web files\>  
+Values : *\<any valid path to web files\>*  
 Default value : */www*  
 Context : *global*  
 The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
@@ -412,7 +547,7 @@ The log format used by nginx to generate logs. More info [here](http://nginx.org
 Values : *\<any valid port greater than 1024\>*  
 Default value : *8080*  
 Context : *global*  
-The HTTP port number used by nginx and certbot inside the container.
+The HTTP port number used by nginx inside the container.
 
 `HTTPS_PORT`  
 Values : *\<any valid port greater than 1024\>*  
@@ -707,12 +842,6 @@ Context : *global*, *multisite*
 If set to yes, automatic certificate generation and renewal will be setup through Let's Encrypt. This will enable HTTPS on your website for free.  
 You will need to redirect the 80 port to 8080 port inside container and also set the `SERVER_NAME` environment variable.
 
-`AUTO_LETS_ENCRYPT_CRON`  
-Values : *\<cron expression\>*   
-Default value : 0 2 * * *  
-Context : *global*  
-Cron expression of how often lets encrypt is asking for being renewed.
-
 `EMAIL_LETS_ENCRYPT`  
 Values : *contact@yourdomain.com*  
 Default value : *contact@yourdomain.com*  
@@ -965,24 +1094,12 @@ Context : *global*, *multisite*
 If set to yes, block clients with "bad" user agent.  
 Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list) and [here](https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt).
 
-`BLOCK_USER_AGENT_CRON`  
-Values : *\<cron expression\>*   
-Default value : 5 0 * * * *  
-Context : *global*  
-Cron expression of how often blocklist user agent is updated.
-
 `BLOCK_TOR_EXIT_NODE`  
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
 Is set to yes, will block known TOR exit nodes.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=tor_exits).
-
-`BLOCK_TOR_EXIT_NODE_CRON`  
-Values : *\<cron expression\>*   
-Default value : 15 0 * * * *  
-Context : *global*  
-Cron expression of how often blocklist tor exit node is updated.
 
 `BLOCK_PROXIES`  
 Values : *yes* | *no*  
@@ -991,12 +1108,6 @@ Context : *global*, *multisite*
 Is set to yes, will block known proxies.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_proxies).
 
-`BLOCK_PROXIES_CRON`  
-Values : *\<cron expression\>*   
-Default value : 20 0 * * * *  
-Context : *global*  
-Cron expression of how often blocklist proxies is updated.
-
 `BLOCK_ABUSERS`  
 Values : *yes* | *no*  
 Default value : *yes*  
@@ -1004,24 +1115,12 @@ Context : *global*, *multisite*
 Is set to yes, will block known abusers.  
 Blacklist can be found [here](https://iplists.firehol.org/?ipset=firehol_abusers_30d).
 
-`BLOCK_ABUSERS_CRON`  
-Values : *\<cron expression\>*   
-Default value : 30 0 * * * *  
-Context : *global*  
-Cron expression of how often blocklist abusers is updated.
-
 `BLOCK_REFERRER`  
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
 Is set to yes, will block known bad referrer header.  
 Blacklist can be found [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-referrers.list).
-
-`BLOCK_REFERRER_CRON`  
-Values : *\<cron expression\>*   
-Default value : 10 0 * * * *  
-Context : *global*  
-Cron expression of how often blocklist referrer is updated.
 
 ### DNSBL
 
@@ -1177,12 +1276,6 @@ Default value :
 Context : *global*, *multisite*  
 Only allow specific countries accessing your website. Use 2 letters country code separated with space.
 
-`GEOIP_CRON`  
-Values : *\<cron expression\>*   
-Default value : 30 2 2 * *
-Context : *global*  
-Cron expression of how often geoip will update its database.
-
 ## PHP
 
 `REMOTE_PHP`  
@@ -1251,31 +1344,13 @@ Default value : *yes*
 Context : *global*  
 If set to yes, ClamAV will scan all the files inside the container every day.  
 
-`USE_CLAMAV_SCAN_CRON`  
-Values : *\<cron expression\>*   
-Default value : 40 */1 * * * 
-Context : *global*  
-Cron expression of how often ClamAV will scan all the files inside the container.  
-
 `CLAMAV_SCAN_REMOVE`  
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*  
 If set to yes, ClamAV will automatically remove the detected files.  
 
-`CLAMAV_UPDATE_CRON`  
-Values : *\<cron expression\>*   
-Default value : 0 3 * * *
-Context : *global*  
-Cron expression of how often ClamAV will update its database.
-
-## Misc
-
-`ADDITIONAL_MODULES`  
-Values : *\<list of packages separated with space\>*  
-Default value :  
-Context : *global*  
-You can specify additional modules to install. All [alpine packages](https://pkgs.alpinelinux.org/packages) are valid.  
+## Logrotate
 
 `LOGROTATE_MINSIZE`  
 Values : *x* | *xk* | *xM* | *xG*  
@@ -1289,44 +1364,84 @@ Default value : 7
 Context : *global*  
 The number of days before rotated files are deleted.
 
+## Cron jobs
+
+`AUTO_LETS_ENCRYPT_CRON`  
+Values : *\<cron expression\>*   
+Default value : *15 0 \* \* \**  
+Context : *global*  
+Cron expression of how often certbot will try to renew the certificates.
+
+`BLOCK_USER_AGENT_CRON`  
+Values : *\<cron expression\>*   
+Default value : *30 0 \* \* \* \**  
+Context : *global*  
+Cron expression of how often the blacklist of user agent is updated.
+
+`BLOCK_TOR_EXIT_NODE_CRON`  
+Values : *\<cron expression\>*   
+Default value : *0 \*/1 \* \* \* \**  
+Context : *global*  
+Cron expression of how often the blacklist of tor exit node is updated.
+
+`BLOCK_PROXIES_CRON`  
+Values : *\<cron expression\>*   
+Default value : *0 3 \* \* \* \**  
+Context : *global*  
+Cron expression of how often the blacklist of proxies is updated.
+
+`BLOCK_ABUSERS_CRON`  
+Values : *\<cron expression\>*   
+Default value : *0 2 \* \* \* \**  
+Context : *global*  
+Cron expression of how often the blacklist of abusers is updated.
+
+`BLOCK_REFERRER_CRON`  
+Values : *\<cron expression\>*   
+Default value : *45 0 \* \* \* \**  
+Context : *global*  
+Cron expression of how often the blacklist of referrer is updated.
+
+`GEOIP_CRON`  
+Values : *\<cron expression\>*  
+Default value : *0 4 2 \* \**  
+Context : *global*  
+Cron expression of how often the GeoIP database is updated.
+
+`USE_CLAMAV_SCAN_CRON`  
+Values : *\<cron expression\>*   
+Default value : *30 1 \* \* \**  
+Context : *global*  
+Cron expression of how often ClamAV will scan all the files inside the container.
+
+`CLAMAV_UPDATE_CRON`  
+Values : *\<cron expression\>*   
+Default value : *0 1 \* \* \**  
+Context : *global*  
+Cron expression of how often ClamAV will update its database.
+
 `LOGROTATE_CRON`  
 Values : *\<cron expression\>*   
-Default value : 0 4 * * *
+Default value : *0 0 \* \* \**  
 Context : *global*  
 Cron expression of how often Logrotate will rotate files.
 
-# Include custom configurations
-Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
-  - /http-confs : http context
-  - /server-confs : server context
-  - /pre-server-confs : before server context (add map or upstream config for example)
+## misc
 
-You just need to use a volume like this :
-```shell
-docker run ... -v /path/to/http/confs:/http-confs:ro ... -v /path/to/server/confs:/server-confs:ro ... bunkerity/bunkerized-nginx
-```
+`SWARM_MODE`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*  
+Only set to *yes* when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
 
-When `MULTISITE` is set to *yes*, .conf files inside the /server-confs directory are loaded by all the server blocks. You can also set custom configuration for a specific server block by adding files in a subdirectory named as the host defined in the `SERVER_NAME` environment variable. Here is an example :
+`USE_API`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*  
+Only set to *yes* when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
 
-```shell
-docker run ... -v /path/to/server/confs:/server-confs:ro ... -e MULTISITE=yes -e "SERVER_NAME=app1.domain.com app2.domain.com" ... bunkerity/bunkerized-nginx
-```
-
-The */path/to/server/confs* directory should have a structure like this :
-```
-/path/to/server/confs
-├── app1.domain.com
-│   └── custom.conf
-│   └── ...
-└── app2.domain.com
-    └── custom.conf
-    └── ...
-```
-
-# Cache data
-
-You can store cached data (blacklists, geoip DB, ...) to avoid downloading them again after a container deletion by mounting a volume on the /cache directory :
-
-```shell
-docker run ... -v /path/to/cache:/cache ... bunkerity/bunkerized-nginx
-```
+`API_URI`  
+Values : *random* | *\<any valid URI path\>*  
+Default value : *random*  
+Context : *global*  
+Set it to a random path when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).

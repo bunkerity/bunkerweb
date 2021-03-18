@@ -136,6 +136,15 @@
                   "id":"reverse-proxy-ws",
                   "multiple":"Reverse proxy",
                   "default":""
+               },
+               {
+                  "type":"text",
+                  "label":"Reverse proxy custom headers",
+                  "env":"REVERSE_PROXY_HEADERS",
+                  "regex":".*",
+                  "id":"reverse-proxy-headers",
+                  "multiple":"Reverse proxy",
+                  "default":""
                }
             ]
          },
@@ -721,6 +730,27 @@
             "regex":"^([A-Z]{2} ?)*$",
             "id":"blacklist-country",
             "default":""
+         }
+      ]
+   },
+   "Limit conn":{
+      "id":"limit-conn",
+      "params":[
+         {
+            "type":"checkbox",
+            "label":"Use limit conn",
+            "env":"USE_LIMIT_CONN",
+            "regex":"^(yes|no)$",
+            "id":"use-limit-conn",
+            "default":"yes"
+         },
+         {
+            "type":"text",
+            "label":"Limit conn max",
+            "env":"LIMIT_CONN_MAX",
+            "regex":"^\\d+$",
+            "id":"limit-conn-max",
+            "default":"40"
          }
       ]
    },

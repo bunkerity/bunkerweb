@@ -80,7 +80,7 @@ class Config :
 			vars_defaults.update(vars)
 			# Call site-config.sh to generate the config
 			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " " + vars["SERVER_NAME"], "nginx"], env=vars_defaults, capture_output=True)
-			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" :
+			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" and self.__swarm :
 				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], env=vars_defaults, capture_output=True)
 				return proc.returncode == 0
 		except Exception as e :
@@ -151,6 +151,8 @@ class Config :
 				# Send POST request on http://serviceName.NodeID.TaskID:8000/reload
 				name = instance.name
 				for task in instance.tasks() :
+					if task["Status"]["State"] != "running" :
+						continue
 					nodeID = task["NodeID"]
 					taskID = task["ID"]
 					fqdn = name + "." + nodeID + "." + taskID
