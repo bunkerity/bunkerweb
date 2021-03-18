@@ -9,7 +9,7 @@
 	<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a>
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
 	<img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
-	<img src="https://img.shields.io/twitter/follow/bunkerity?style=social" />
+	<a href="https://twitter.com/bunkerity"><img src="https://img.shields.io/twitter/follow/bunkerity?style=social" /></a>
 </p>
 
 nginx Docker image secure by default.  
