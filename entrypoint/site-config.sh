@@ -26,7 +26,7 @@ if [ "$MULTISITE" = "yes" ] ; then
 	done
 	for var in $(cut -d '=' -f 1 "${NGINX_PREFIX}nginx.env") ; do
 		name=$(echo "$var")
-		check=$(echo "$name" | grep "^$1_")
+		check=$(echo "$name" | grep "^${1}_")
 		if [ "$check" != "" ] ; then
 			repl_name=$(echo "$name" | sed "s~${1}_~~")
 			repl_value=$(env | grep -E "^${name}=" | sed "s~^${name}=~~")
@@ -60,38 +60,34 @@ replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_TOKENS%" "$SERVER_TOKENS"
 # reverse proxy
 if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 	i=1
-	for var in $(compgen -e) ; do
-		check1=$(echo "$var" | grep "^REVERSE_PROXY_URL")
-		check2=$(echo "$var" | grep "^${1}_REVERSE_PROXY_URL")
-		if [ "$check1" != "" ] || [ "$check2" != "" ] ; then
-			name=$(echo "$var")
-			value=$(echo "${!var}")
-			host=$(echo "$name" | sed "s/URL/HOST/")
-			host_value=$(env | grep "^${host}=" | sed "s/${host}=//")
-			custom_headers=$(echo "$name" | sed "s/URL/HEADERS/")
-			custom_headers_value=$(env | grep "^${host}=" | sed "s/${host}=//")
-			ws=$(echo "$name" | sed "s/URL/WS/")
-			ws_value=$(env | grep "^${ws}=" | sed "s/${ws}=//")
-			cp "${NGINX_PREFIX}reverse-proxy.conf" "${NGINX_PREFIX}reverse-proxy-${i}.conf"
-			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$value"
-			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
-			if [ "$custom_headers_value" != "" ] ; then
-			  	IFS_=$IFS
-				IFS=';'
-				for header_value in $(echo "$custom_headers_value") ; do
-					replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "more_set_headers $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
-				done
-				IFS=$IFS_
-				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" ""
-			fi
-			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HEADERS%" "include ${NGINX_PREFIX}reverse-proxy-headers.conf;"
-			if [ "$ws_value" = "yes" ] ; then
-				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" "proxy_http_version 1.1;\nproxy_set_header Upgrade \$http_upgrade;\nproxy_set_header Connection \"Upgrade\";\n"
-			else
-				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" ""
-			fi
-			i=$(($i + 1))
+	for var in $(set | cut -d '=' -f 1 | grep "^REVERSE_PROXY_URL") ; do
+		url=$(echo "$var")
+		url_value=$(echo "${!var}")
+		host=$(echo "$var" | sed "s/URL/HOST/")
+		host_value=$(echo "${!host}")
+		custom_headers=$(echo "$var" | sed "s/URL/HEADERS/")
+		custom_headers_value=$(echo "${!custom_headers}")
+		ws=$(echo "$var" | sed "s/URL/WS/")
+		ws_value=$(echo "${!ws}")
+		cp "${NGINX_PREFIX}reverse-proxy.conf" "${NGINX_PREFIX}reverse-proxy-${i}.conf"
+		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$url_value"
+		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
+		if [ "$custom_headers_value" != "" ] ; then
+		  	IFS_=$IFS
+			IFS=';'
+			for header_value in $(echo "$custom_headers_value") ; do
+				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "more_set_headers $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
+			done
+			IFS=$IFS_
 		fi
+		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" ""
+		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HEADERS%" "include ${NGINX_PREFIX}reverse-proxy-headers.conf;"
+		if [ "$ws_value" = "yes" ] ; then
+			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" "proxy_http_version 1.1;\nproxy_set_header Upgrade \$http_upgrade;\nproxy_set_header Connection \"Upgrade\";\n"
+		else
+			replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_WS%" ""
+		fi
+		i=$(($i + 1))
 	done
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_REVERSE_PROXY%" "include ${NGINX_PREFIX}reverse-proxy-*.conf;"
 else
