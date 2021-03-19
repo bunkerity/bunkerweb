@@ -1290,7 +1290,7 @@ Only allow specific countries accessing your website. Use 2 letters country code
 Values : *\<any valid IP/hostname\>*  
 Default value :  
 Context : *global*, *multisite*  
-Set the IP/hostname address of a remote PHP-FPM to execute .php files. See `USE_PHP` if you want to run a PHP-FPM instance on the same container as bunkerized-nginx.
+Set the IP/hostname address of a remote PHP-FPM to execute .php files.
 
 `REMOTE_PHP_PATH`  
 Values : *\<any valid absolute path\>*  
