@@ -27,9 +27,9 @@ fi
 set | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "${NGINX_PREFIX}nginx.env"
 if [ "$MULTISITE" = "yes" ] ; then
 	for server in $SERVER_NAME ; do
-		sed -i "~^${server}_.*=.*~d" "${NGINX_PREFIX}nginx.env"
+		sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
 	done
-	sed -i "~^SERVER_NAME=.*~SERVER_NAME=${1}~" "${NGINX_PREFIX}nginx.env"
+	sed -i "s~^SERVER_NAME=.*~SERVER_NAME=${1}~" "${NGINX_PREFIX}nginx.env"
 fi
 
 # copy stub confs
