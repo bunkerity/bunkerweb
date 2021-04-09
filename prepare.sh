@@ -68,7 +68,7 @@ chown -R root:nginx /var/run/fail2ban /var/lib/fail2ban
 chmod -R 770 /var/run/fail2ban /var/lib/fail2ban
 
 # prepare /usr/local/lib/lua
-chown root:nginx /usr/local/lib/lua
+chown -R root:nginx /usr/local/lib/lua
 chmod 770 /usr/local/lib/lua
 find /usr/local/lib/lua -type f -name "*.conf" -exec chmod 0760 {} \;
 find /usr/local/lib/lua -type f -name "*.lua" -exec chmod 0760 {} \;
