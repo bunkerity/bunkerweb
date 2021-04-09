@@ -9,16 +9,17 @@
 # get nginx path and override multisite variables
 NGINX_PREFIX="/etc/nginx/"
 if [ "$MULTISITE" = "yes" ] ; then
-	NGINX_PREFIX="${NGINX_PREFIX}${1}/"
+	first_server="$1"
+	if [ ! -f "/usr/sbin/nginx" ] ; then
+		first_server=$(echo "$1" | cut -d ' ' -f 1)
+	fi
+	NGINX_PREFIX="${NGINX_PREFIX}${first_server}/"
 	if [ ! -d "$NGINX_PREFIX" ] ; then
 		mkdir "$NGINX_PREFIX"
 	fi
-	ROOT_FOLDER="${ROOT_FOLDER}/$1"
-fi
-
-if [ "$MULTISITE" = "yes" ] ; then
- 	for var in $(env | cut -d '=' -f 1 | grep -E "^${1}_") ; do
-		repl_name=$(echo "$var" | sed "s~${1}_~~")
+	ROOT_FOLDER="${ROOT_FOLDER}/$first_server"
+ 	for var in $(env | cut -d '=' -f 1 | grep -E "^${first_server}_") ; do
+		repl_name=$(echo "$var" | sed "s~${first_server}_~~")
 		repl_value=$(env | grep -E "^${var}=" | sed "s~^${var}=~~")
 		read -r "$repl_name" <<< $repl_value
 	done
@@ -38,8 +39,8 @@ cp /opt/confs/site/* "$NGINX_PREFIX"
 # replace paths
 replace_in_file "${NGINX_PREFIX}server.conf" "%MAIN_LUA%" "include ${NGINX_PREFIX}main-lua.conf;"
 if [ "$MULTISITE" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;\ninclude /server-confs/${1}/*.conf;"
-	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${1}/*.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;\ninclude /server-confs/${first_server}/*.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${first_server}/*.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;"
@@ -351,8 +352,10 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		if [ "$MULTISITE" = "no" ] ; then
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
-			FIRST_SERVER_NAME="$1"
-			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
+			FIRST_SERVER_NAME="$first_server"
+			if [ "$EMAIL_LETS_ENCRYPT" == "" ] ; then
+				EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$first_server}"
+			fi
 			echo -n "$EMAIL_LETS_ENCRYPT" > ${NGINX_PREFIX}email-lets-encrypt.txt
 		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"

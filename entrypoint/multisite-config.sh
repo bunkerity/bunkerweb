@@ -14,7 +14,8 @@ if [ "$MULTISITE" = "yes" ] ; then
 		fi
 		SERVER_PREFIX="/etc/nginx/${server}/"
 		if grep "/etc/letsencrypt/live" ${SERVER_PREFIX}https.conf > /dev/null && [ ! -f /etc/letsencrypt/live/${server}/fullchain.pem ] ; then
-			/opt/scripts/certbot-new.sh "$server" "$(cat ${SERVER_PREFIX}email-lets-encrypt.txt)"
+			domains=$(cat ${SERVER_PREFIX}server.conf | sed -nE 's/^.*server_name (.*);$/\1/p' | sed "s/ /,/g")
+			/opt/scripts/certbot-new.sh "$domains" "$(cat ${SERVER_PREFIX}email-lets-encrypt.txt)"
 		fi
 		if grep "modsecurity.conf" ${SERVER_PREFIX}server.conf > /dev/null ; then
 			modsec_custom=""
