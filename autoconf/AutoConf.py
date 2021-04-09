@@ -43,7 +43,6 @@ class AutoConf :
 						self.__process_server(server, "start", id, name, labels)
 
 	def process(self, obj, event) :
-		utils.log("process - " + event)
 		(id, name, labels) = self.__get_infos(obj)
 		if "bunkerized-nginx.AUTOCONF" in labels :
 			self.__process_instance(obj, event, id, name, labels)
@@ -93,6 +92,7 @@ class AutoConf :
 				utils.log("[*] Generated config for " + vars["SERVER_NAME"])
 				self.__servers[id] = instance
 				if self.__swarm :
+					utils.log("[*] Activating config for " + vars["SERVER_NAME"] + " ...")
 					if self.__config.activate(self.__instances, vars) :
 						utils.log("[*] Activated config for " + vars["SERVER_NAME"])
 					else :
@@ -116,7 +116,6 @@ class AutoConf :
 				else :
 					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
 		elif event == "destroy" or event == "remove" :
-			utils.log(event)
 			if id in self.__servers :
 				if self.__swarm :
 					utils.log("[*] Deactivating config for " + vars["SERVER_NAME"])
