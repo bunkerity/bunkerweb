@@ -68,10 +68,10 @@ if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$url_value"
 		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
 		if [ "$custom_headers_value" != "" ] ; then
-		  	IFS_=$IFS
+			IFS_$IFS
 			IFS=';'
-			for header_value in $(echo "$custom_headers_value") ; do
-				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "more_set_headers $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
+			for header_value in $(echo $custom_headers_value) ; do
+				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "proxy_set_header $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
 			done
 			IFS=$IFS_
 		fi

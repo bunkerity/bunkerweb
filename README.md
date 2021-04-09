@@ -447,10 +447,10 @@ By default, *bunkerized-nginx* runs as non-root user inside the container and sh
 docker run ... --drop-cap=all ... bunkerity/bunkerized-nginx
 ```
 
-## User namespace remap
-Another hardening trick is [user namespace remapping](https://docs.docker.com/engine/security/userns-remap/) : it allows you to map the UID/GID of users inside a container to another UID/GID on the host. For example, you can map the user nginx with UID 101 inside the container to a non-existent user with UID 100101 on the host.
+### User namespace remap
+Another hardening trick is [user namespace remapping](https://docs.docker.com/engine/security/userns-remap/) : it allows you to map the UID/GID of users inside a container to another UID/GID on the host. For example, you can map the user nginx with UID/GID 101 inside the container to a non-existent user with UID/GID 100101 on the host.
 
-Let's assume you have the /etc/subuid and /etc/subgid like this :  
+Let's assume you have the /etc/subuid and /etc/subgid files like this :  
 ```
 user:100000:65536
 ```
@@ -665,11 +665,10 @@ Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the co
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_WS_1`, `REVERSE_PROXY_WS_2`, `REVERSE_PROXY_WS_3`, ...
 
 `REVERSE_PROXY_HEADERS`  
-Values : *\<list of custom headers separated with a semicolon\>* 
-Examples : Access-Control-Allow-Origin 'https://mydomain.dev'; Custom_Api_Header 'test';
-Default value : ""  
+Values : *\<list of custom headers separated with a semicolon like this : header1 value1;header2 value2...\>* 
+Default value :  
 Context : *global*, *multisite*  
-Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the corresponding `REVERSE_PROXY_HOST` is a WebSocket server.  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*.  
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_HEADERS_1`, `REVERSE_PROXY_HEADERS_2`, `REVERSE_PROXY_HEADERS_3`, ...
 
 `PROXY_REAL_IP`  
