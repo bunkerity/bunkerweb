@@ -1196,6 +1196,12 @@ Default value :
 Context : *global*, *multisite*  
 Whitelist user agent from being blocked by `BLOCK_USER_AGENT`.
 
+`WHITELIST_URI`  
+Values : *\<list of URI separated with spaces\>*  
+Default value :  
+Context : *global*, *multisite*  
+URI listed here have security checks like bad user-agents, bad IP, ... disabled. Useful when using callbacks for example.
+
 ### Custom blacklisting
 
 `USE_BLACKLIST_IP`  

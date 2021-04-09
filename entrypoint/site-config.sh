@@ -288,6 +288,14 @@ else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" ""
 fi
 
+# whitelist URI
+if [ "$WHITELIST_URI" != "" ] ; then
+	list=$(spaces_to_lua "$WHITELIST_URI")
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_URI%" "$list"
+else
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_URI%" ""
+fi
+
 # block bad referrer
 if [ "$BLOCK_REFERRER" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRER%" "true"
