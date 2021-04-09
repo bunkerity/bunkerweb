@@ -440,10 +440,27 @@ When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must c
 
 ## Hardening
 
+### Drop capabilities
 By default, *bunkerized-nginx* runs as non-root user inside the container and should not use any of the default [capabilities](https://docs.docker.com/engine/security/#linux-kernel-capabilities) allowed by Docker. You can safely remove all capabilities to harden the container :
 
 ```shell
 docker run ... --drop-cap=all ... bunkerity/bunkerized-nginx
+```
+
+## User namespace remap
+Another hardening trick is [user namespace remapping](https://docs.docker.com/engine/security/userns-remap/) : it allows you to map the UID/GID of users inside a container to another UID/GID on the host. For example, you can map the user nginx with UID 101 inside the container to a non-existent user with UID 100101 on the host.
+
+Let's assume you have the /etc/subuid and /etc/subgid like this :  
+```
+user:100000:65536
+```
+It means that everything done inside the container will be remapped to UID/GID 100101 (100000 + 101) on the host.
+
+Please note that you must set the rights on the volumes (e.g. : /etc/letsencrypt, /www, ...) according to the remapped UID/GID :  
+```shell
+$ chown root:100101 /path/to/letsencrypt
+$ chmod 770 /path/to/letsencrypt
+$ docker run ... -v /path/to/letsencrypt:/etc/letsencrypt ... bunkerity/bunkerized-nginx
 ```
 
 # Tutorials and examples
@@ -1234,18 +1251,18 @@ The list of reverse DNS suffixes to blacklist when `USE_BLACKLIST_REVERSE` is se
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
-If set to yes, the amount of HTTP requests made by a user will be limited during a period of time.  
-More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/).
+If set to yes, the amount of HTTP requests made by a user for a given resource will be limited during a period of time.  
+More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/) (the key used is $binary_remote_addr$uri).
 
 `LIMIT_REQ_RATE`  
 Values : *Xr/s* | *Xr/m*  
-Default value : *20r/s*  
+Default value : *1r/s*  
 Context : *global*, *multisite*  
 The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 10 requests per second.
 
 `LIMIT_REQ_BURST`  
 Values : *<any valid integer\>*  
-Default value : *40*  
+Default value : *2*  
 Context : *global*, *multisite*  
 The number of requests to put in queue before rejecting requests.
 
