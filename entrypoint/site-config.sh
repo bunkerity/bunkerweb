@@ -353,9 +353,7 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
 			FIRST_SERVER_NAME="$first_server"
-			if [ "$EMAIL_LETS_ENCRYPT" == "" ] ; then
-				EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$first_server}"
-			fi
+			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$first_server}"
 			echo -n "$EMAIL_LETS_ENCRYPT" > ${NGINX_PREFIX}email-lets-encrypt.txt
 		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"

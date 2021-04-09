@@ -1,4 +1,4 @@
-<p align="center">
+bla<p align="center">
 	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
 </p>
 
@@ -1173,10 +1173,10 @@ Context : *global*, *multisite*
 If set to *yes*, lets you define custom IP addresses to be whitelisted through the `WHITELIST_IP_LIST` environment variable.
 
 `WHITELIST_IP_LIST`  
-Values : *\<list of IP addresses separated with spaces\>*  
+Values : *\<list of IP addresses and/or network CIDR blocks separated with spaces\>*  
 Default value : *23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8*  
 Context : *global*  
-The list of IP addresses to whitelist when `USE_WHITELIST_IP` is set to *yes*. The default list contains IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/).
+The list of IP addresses and/or network CIDR blocks to whitelist when `USE_WHITELIST_IP` is set to *yes*. The default list contains IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/).
 
 `USE_WHITELIST_REVERSE`  
 Values : *yes* | *no*  
@@ -1211,10 +1211,10 @@ Context : *global*, *multisite*
 If set to *yes*, lets you define custom IP addresses to be blacklisted through the `BLACKLIST_IP_LIST` environment variable.
 
 `BLACKLIST_IP_LIST`  
-Values : *\<list of IP addresses separated with spaces\>*  
+Values : *\<list of IP addresses and/or network CIDR blocks separated with spaces\>*  
 Default value :  
 Context : *global*  
-The list of IP addresses to blacklist when `USE_BLACKLIST_IP` is set to *yes*.
+The list of IP addresses and/or network CIDR blocks to blacklist when `USE_BLACKLIST_IP` is set to *yes*.
 
 `USE_BLACKLIST_REVERSE`  
 Values : *yes* | *no*  
