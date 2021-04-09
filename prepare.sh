@@ -40,6 +40,7 @@ chmod 770 /var/log/letsencrypt
 touch /var/log/clamav.log
 chown root:nginx /var/log/clamav.log
 chmod 770 /var/log/clamav.log
+find /var/log -type f -exec chmod 0774 {} \;
 
 # prepare /acme-challenge
 mkdir /acme-challenge
@@ -69,6 +70,8 @@ chmod -R 770 /var/run/fail2ban /var/lib/fail2ban
 # prepare /usr/local/lib/lua
 chown root:nginx /usr/local/lib/lua
 chmod 770 /usr/local/lib/lua
+find /usr/local/lib/lua -type f -exec chmod 0760 {} \;
+find /usr/local/lib/lua -type d -exec chmod 0770 {} \;
 
 # prepare /cache
 mkdir /cache
