@@ -171,7 +171,7 @@ fi
 
 # request limiting
 if [ "$(has_value USE_LIMIT_REQ yes)" != "" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" "limit_req_zone \$binary_remote_addr zone=limit:${LIMIT_REQ_CACHE} rate=${LIMIT_REQ_RATE};"
+	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" "limit_req_zone \$binary_remote_addr\$uri zone=limit:${LIMIT_REQ_CACHE} rate=${LIMIT_REQ_RATE};"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%LIMIT_REQ_ZONE%" ""
 fi
