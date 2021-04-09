@@ -52,6 +52,12 @@ if [ ! -f "/opt/installed" ] ; then
 
 	echo "[*] Configuring bunkerized-nginx ..."
 
+	# check permissions
+	/opt/entrypoint/permissions.sh
+	if [ "$?" -ne 0 ] ; then
+		exit 1
+	fi
+
 	# logs config
 	/opt/entrypoint/logs.sh
 
