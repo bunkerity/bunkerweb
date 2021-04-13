@@ -22,24 +22,28 @@ function M.reverse_cached ()
 end
 
 function M.check_ip ()
-	local blacklist = iputils.parse_cidrs(ip_list)
-	if iputils.ip_in_cidrs(ip, blacklist) then
-		ngx.shared.blacklist_ip_cache:set(ip, "ko", 86400)
-		ngx.log(ngx.WARN, "ip " .. ip .. " is in blacklist")
-		return true
+	if #ip_list > 0 then
+		local blacklist = iputils.parse_cidrs(ip_list)
+		if iputils.ip_in_cidrs(ip, blacklist) then
+			ngx.shared.blacklist_ip_cache:set(ip, "ko", 86400)
+			ngx.log(ngx.WARN, "ip " .. ip .. " is in blacklist")
+			return true
+		end
 	end
 	ngx.shared.blacklist_ip_cache:set(ip, "ok", 86400)
 	return false
 end
 
 function M.check_reverse ()
-	local rdns = dns.get_reverse()
-	if rdns ~= "" then
-		for k, v in ipairs(reverse_list) do
-			if rdns:sub(-#v) == v then
-				ngx.shared.blacklist_reverse_cache:set(ip, "ko", 86400)
-				ngx.log(ngx.WARN, "reverse " .. rdns .. " is in blacklist")
-				return true
+	if #reverse_list > 0 then
+		local rdns = dns.get_reverse()
+		if rdns ~= "" then
+			for k, v in ipairs(reverse_list) do
+				if rdns:sub(-#v) == v then
+					ngx.shared.blacklist_reverse_cache:set(ip, "ko", 86400)
+					ngx.log(ngx.WARN, "reverse " .. rdns .. " is in blacklist")
+					return true
+				end
 			end
 		end
 	end
