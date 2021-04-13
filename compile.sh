@@ -136,10 +136,11 @@ sed -i 's/^API_KEY=.*/API_KEY=%CROWDSEC_KEY%/' /usr/local/lib/lua/crowdsec/crowd
 sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 cd /tmp
-git_secure_clone https://github.com/openresty/lua-nginx-module.git 2d23bc4f0a29ed79aaaa754c11bffb1080aa44ba
-cd /tmp
 git_secure_clone https://github.com/hamishforbes/lua-resty-iputils.git 3151d6485e830421266eee5c0f386c32c835dba4
+cd lua-resty-iputils
 make LUA_LIB_DIR=/usr/local/lib/lua install
+cd /tmp
+git_secure_clone https://github.com/openresty/lua-nginx-module.git 2d23bc4f0a29ed79aaaa754c11bffb1080aa44ba
 export LUAJIT_LIB=/usr/local/lib
 export LUAJIT_INC=/usr/local/include/luajit-2.1
 
