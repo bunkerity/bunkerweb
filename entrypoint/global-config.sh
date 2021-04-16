@@ -10,14 +10,18 @@
 cp /opt/confs/global/* /etc/nginx/
 
 # include server block(s)
-if [ "$MULTISITE" = "yes" ] ; then
-	includes=""
-	for server in $SERVER_NAME ; do
-		includes="${includes}include /etc/nginx/${server}/server.conf;\n"
-	done
-	replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "$includes"
+if [ "$SWARM_MODE" = "no" ] ; then
+	if [ "$MULTISITE" = "yes" ] ; then
+		includes=""
+		for server in $SERVER_NAME ; do
+			includes="${includes}include /etc/nginx/${server}/server.conf;\n"
+		done
+		replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "$includes"
+	else
+		replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "include /etc/nginx/server.conf;"
+	fi
 else
-	replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" "include /etc/nginx/server.conf;"
+	replace_in_file "/etc/nginx/nginx.conf" "%INCLUDE_SERVER%" ""
 fi
 
 # setup default server block if multisite

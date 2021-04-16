@@ -1,4 +1,4 @@
-bla<p align="center">
+<p align="center">
 	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
 </p>
 

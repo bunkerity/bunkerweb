@@ -53,7 +53,11 @@ if [ ! -f "/opt/installed" ] ; then
 	echo "[*] Configuring bunkerized-nginx ..."
 
 	# check permissions
-	/opt/entrypoint/permissions.sh
+	if [ "$SWARM_MODE" = "no" ] ; then
+		/opt/entrypoint/permissions.sh
+	else
+		/opt/entrypoint/permissions-swarm.sh
+	fi
 	if [ "$?" -ne 0 ] ; then
 		exit 1
 	fi
