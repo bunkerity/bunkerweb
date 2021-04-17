@@ -207,6 +207,7 @@ docker run -p 80:8080 \
            -v /where/are/web/files:/www:ro \
            -e SERVER_NAME=app1.domain.com app2.domain.com \
            -e MULTISITE=yes \
+           -e ROOT_SITE_SUBFOLDER=app \   # optional subfolder level web root
            -e AUTO_LETS_ENCRYPT=yes \
            -e REDIRECT_HTTP_TO_HTTPS=yes \
            -e app1.domain.com_REMOTE_PHP=php1 \
@@ -218,13 +219,17 @@ docker run -p 80:8080 \
 
 The */where/are/web/files* directory should have a structure like this :
 ```shell
-/where/are/web/files
+/where/are/web/files/
 ├── app1.domain.com
-│   └── index.php
-│   └── ...
+│   ├── app/
+│   │   └── index.php
+│   │   └── ...
+│   └── mysql/
 └── app2.domain.com
-    └── index.php
-    └── ...
+│   ├── app/
+│   │   └── index.php
+│   │   └── ...
+│   └── mysql/
 ```
 
 ## Automatic configuration
