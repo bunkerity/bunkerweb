@@ -9,18 +9,20 @@ services:
       - 80:8080
       - 443:8443
     volumes:
+      - ./app:/www:ro                                              # serve files from site subdirectories
       - ./letsencrypt:/etc/letsencrypt
       - autoconf:/etc/nginx
     environment:
-      - SERVER_NAME=                                              # must be left blank if you don't want to setup "static" conf
+      - SERVER_NAME=                                               # must be left blank if you don't want to setup "static" conf
+      - DISABLE_DEFAULT_SERVER=yes
       - MULTISITE=yes
+      - SERVE_FILES=yes
+      - SITE_ROOT_SUBFOLDER=web-files
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
-      - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_BROTLI=yes
-      - USE_REVERSE_PROXY=yes
     labels:
       - "bunkerized-nginx.AUTOCONF"
 
@@ -34,32 +36,35 @@ services:
       - mywww
 
   myapp1:
-    build: js-app
+    image: php:fpm
     restart: always
-    environment:
-      - NODE_ENV=production
+    volumes:
+      - ./app/app1.website.com:/app
     labels:
       - "bunkerized-nginx.SERVER_NAME=app1.website.com"            # replace with your domain
-      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
+      - "bunkerized-nginx.USE_REVERSE_PROXY=no"
+      - "bunkerized-nginx.REMOTE_PHP=myapp1"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app/web-files"
 
   myapp2:
-    build: js-app
+    build: app/app2.website.com/js-app
     restart: always
     environment:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app2.website.com"            # replace with your domain
+      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
 
   myapp3:
-    build: js-app
+    build: app/app3.website.com/js-app
     restart: always
     environment:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app3.website.com"            # replace with your domain
+      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp3:3000"
 

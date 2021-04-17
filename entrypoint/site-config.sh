@@ -14,6 +14,9 @@ if [ "$MULTISITE" = "yes" ] ; then
 		mkdir "$NGINX_PREFIX"
 	fi
 	ROOT_FOLDER="${ROOT_FOLDER}/$1"
+	if [ ! $SITE_ROOT_SUBFOLDER = "" ] ; then
+		ROOT_FOLDER="${ROOT_FOLDER}/${SITE_ROOT_SUBFOLDER}"
+	fi
 fi
 
 if [ "$MULTISITE" = "yes" ] ; then
@@ -164,6 +167,7 @@ fi
 if [ "$SERVE_FILES" = "yes" ] ; then
         replace_in_file "${NGINX_PREFIX}server.conf" "%SERVE_FILES%" "include ${NGINX_PREFIX}serve-files.conf;"
         replace_in_file "${NGINX_PREFIX}serve-files.conf" "%ROOT_FOLDER%" "$ROOT_FOLDER"
+        replace_in_file "${NGINX_PREFIX}serve-files.conf" "%ROOT_SITE_SUBFOLDER%" "$ROOT_SITE_SUBFOLDER"
 else
         replace_in_file "${NGINX_PREFIX}server.conf" "%SERVE_FILES%" ""
 fi

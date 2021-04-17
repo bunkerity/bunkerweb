@@ -545,6 +545,12 @@ Default value : */www*
 Context : *global*  
 The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
 
+`ROOT_SITE_SUBFOLDER`  
+Values : *\<any valid directory name\>*  
+Default value :  
+Context : *multisite*
+The subfolder where nginx will search for site web files.
+
 `LOG_FORMAT`  
 Values : *\<any values accepted by the log_format directive\>*  
 Default value : *$host $remote_addr - $remote_user \[$time_local\] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"*  
