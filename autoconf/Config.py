@@ -107,13 +107,16 @@ class Config :
 
 	def activate(self, instances, vars, reload=True) :
 		try :
+			# Get first server name
+			first_server_name = vars["SERVER_NAME"].split(" ")[0]
+
 			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + vars["SERVER_NAME"] + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf doesn't exist")
+			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
+				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
 				return False
 
 			# Include the server conf
-			utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n}")
+			utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + first_server_name + "/server.conf;\n}")
 
 			# Reload
 			if not reload or self.reload(instances) :
@@ -126,13 +129,16 @@ class Config :
 
 	def deactivate(self, instances, vars) :
 		try :
+			# Get first server name
+			first_server_name = vars["SERVER_NAME"].split(" ")[0]
+
 			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + vars["SERVER_NAME"] + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf doesn't exist")
+			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
+				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
 				return False
 
 			# Remove the include
-			utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n", "")
+			utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + first_server_name + "/server.conf;\n", "")
 
 			# Reload
 			if self.reload(instances) :
