@@ -95,7 +95,7 @@ class Config :
 			vars_defaults.update(vars_instances)
 			vars_defaults.update(vars)
 			# Call site-config.sh to generate the config
-			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " " + vars["SERVER_NAME"], "nginx"], env=vars_defaults, capture_output=True)
+			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " \"" + vars["SERVER_NAME"] + "\"", "nginx"], env=vars_defaults, capture_output=True)
 			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" and self.__swarm :
 				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], env=vars_defaults, capture_output=True)
 			if proc.returncode == 0 :

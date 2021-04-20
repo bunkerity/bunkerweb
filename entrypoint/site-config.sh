@@ -9,10 +9,7 @@
 # get nginx path and override multisite variables
 NGINX_PREFIX="/etc/nginx/"
 if [ "$MULTISITE" = "yes" ] ; then
-	first_server="$1"
-	if [ ! -f "/usr/sbin/nginx" ] ; then
-		first_server=$(echo "$1" | cut -d ' ' -f 1)
-	fi
+	first_server=$(echo "$1" | cut -d ' ' -f 1)
 	NGINX_PREFIX="${NGINX_PREFIX}${first_server}/"
 	if [ ! -d "$NGINX_PREFIX" ] ; then
 		mkdir "$NGINX_PREFIX"
