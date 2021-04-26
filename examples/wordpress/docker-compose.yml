@@ -13,6 +13,7 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - ./server-confs:/server-confs:ro         # custom confs at server context for permalinks
       - ./modsec-crs-confs:/modsec-crs-confs:ro # custom Core Rule Set confs to add Wordpress exclusions
+      - ./modsec-confs:/modsec-confs:ro         # avoid some FP with CRS
     environment:
       - SERVER_NAME=www.website.com             # replace with your domain
       - AUTO_LETS_ENCRYPT=yes

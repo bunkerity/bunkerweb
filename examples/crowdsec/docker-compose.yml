@@ -34,7 +34,7 @@ services:
       - net2
 
   mycrowdsec:
-    image: crowdsecurity/crowdsec:v1.0.2
+    image: crowdsecurity/crowdsec:v1.0.13
     restart: always
     volumes:
       - ./acquis.yaml:/etc/crowdsec/acquis.yaml

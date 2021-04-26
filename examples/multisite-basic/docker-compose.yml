@@ -25,7 +25,6 @@ services:
       - app2.website.com_REMOTE_PHP=myapp2
       - app2.website.com_REMOTE_PHP_PATH=/app
       - app3.website.com_SERVE_FILES=no
-      - app3.website.com_USE_CLIENT_CACHE=no
       - app3.website.com_USE_PROXY_CACHE=yes
       - app3.website.com_USE_REVERSE_PROXY=yes
       - app3.website.com_REVERSE_PROXY_URL=/
