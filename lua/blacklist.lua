@@ -2,6 +2,7 @@ local M			= {}
 local dns		= require "dns"
 local iputils		= require "resty.iputils"
 local ip_list 		= {%BLACKLIST_IP_LIST%}
+local blacklist		= iputils.parse_cidrs(ip_list)
 local reverse_list	= {%BLACKLIST_REVERSE_LIST%}
 local ip		= ngx.var.remote_addr
 
@@ -23,7 +24,6 @@ end
 
 function M.check_ip ()
 	if #ip_list > 0 then
-		local blacklist = iputils.parse_cidrs(ip_list)
 		if iputils.ip_in_cidrs(ip, blacklist) then
 			ngx.shared.blacklist_ip_cache:set(ip, "ko", 86400)
 			ngx.log(ngx.WARN, "ip " .. ip .. " is in blacklist")
