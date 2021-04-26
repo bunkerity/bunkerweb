@@ -157,7 +157,7 @@ fi
 tar -xvzf nginx-${NGINX_VERSION}.tar.gz
 cd nginx-$NGINX_VERSION
 CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')
-CONFARGS=${CONFARGS/-Os -fomit-frame-pointer/-Os}
+CONFARGS=${CONFARGS/-Os -fomit-frame-pointer -g/-Os}
 ./configure $CONFARGS --add-dynamic-module=/tmp/ModSecurity-nginx --add-dynamic-module=/tmp/headers-more-nginx-module --add-dynamic-module=/tmp/ngx_http_geoip2_module --add-dynamic-module=/tmp/nginx_cookie_flag_module --add-dynamic-module=/tmp/lua-nginx-module --add-dynamic-module=/tmp/ngx_brotli
 make -j $NTASK modules
 cp ./objs/*.so /usr/lib/nginx/modules

@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM nginx:1.20.0-alpine
 
 COPY nginx-keys/ /tmp/nginx-keys
 COPY compile.sh /tmp/compile.sh
