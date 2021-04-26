@@ -151,13 +151,16 @@ class Config :
 
 	def remove(self, vars) :
 		try :
+			# Get first server name
+			first_server_name = vars["SERVER_NAME"].split(" ")[0]
+
 			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + vars["SERVER_NAME"] + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf doesn't exist")
+			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
+				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
 				return False
 
 			# Remove the folder
-			shutil.rmtree("/etc/nginx/" + vars["SERVER_NAME"])
+			shutil.rmtree("/etc/nginx/" + first_server_name)
 			return True
 		except Exception as e :
 			utils.log("[!] Error while deactivating config : " + str(e))
