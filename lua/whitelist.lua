@@ -26,7 +26,7 @@ function M.check_ip ()
 	if #ip_list > 0 then
 		if iputils.ip_in_cidrs(ip, whitelist) then
 			ngx.shared.whitelist_ip_cache:set(ip, "ok", 86400)
-			ngx.log(ngx.WARN, "ip " .. ip .. " is in whitelist")
+			ngx.log(ngx.NOTICE, "ip " .. ip .. " is in whitelist")
 			return true
 		end
 	end
@@ -50,7 +50,7 @@ function M.check_reverse ()
 				for k, v in ipairs(ips) do
 					if v == ip then
 						ngx.shared.whitelist_reverse_cache:set(ip, "ok", 86400)
-						ngx.log(ngx.WARN, "reverse " .. rdns .. " is in whitelist")
+						ngx.log(ngx.NOTICE, "reverse " .. rdns .. " is in whitelist")
 						return true
 					end
 				end

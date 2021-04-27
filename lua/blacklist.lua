@@ -26,7 +26,7 @@ function M.check_ip ()
 	if #ip_list > 0 then
 		if iputils.ip_in_cidrs(ip, blacklist) then
 			ngx.shared.blacklist_ip_cache:set(ip, "ko", 86400)
-			ngx.log(ngx.WARN, "ip " .. ip .. " is in blacklist")
+			ngx.log(ngx.NOTICE, "ip " .. ip .. " is in blacklist")
 			return true
 		end
 	end
@@ -41,7 +41,7 @@ function M.check_reverse ()
 			for k, v in ipairs(reverse_list) do
 				if rdns:sub(-#v) == v then
 					ngx.shared.blacklist_reverse_cache:set(ip, "ko", 86400)
-					ngx.log(ngx.WARN, "reverse " .. rdns .. " is in blacklist")
+					ngx.log(ngx.NOTICE, "reverse " .. rdns .. " is in blacklist")
 					return true
 				end
 			end
