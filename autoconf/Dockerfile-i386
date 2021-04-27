@@ -9,8 +9,12 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     mkdir /opt/entrypoint && \
     mkdir -p /opt/confs/site && \
     mkdir -p /opt/confs/global && \
+    mkdir /opt/scripts && \
     addgroup -g 101 nginx && \
     adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx && \
+    mkdir /etc/letsencrypt && \
+    chown root:nginx /etc/letsencrypt && \
+    chmod 770 /etc/letsencrypt && \
     mkdir /var/log/letsencrypt && \
     chown root:nginx /var/log/letsencrypt && \
     chmod 770 /var/log/letsencrypt && \
@@ -24,7 +28,10 @@ RUN apk add py3-pip apache2-utils bash certbot curl logrotate openssl && \
     chown root:nginx /var/log/jobs.log && \
     chmod 770 /var/log/jobs.log && \
     chown -R root:nginx /opt/confs/nginx && \
-    chmod -R 770 /opt/confs/nginx
+    chmod -R 770 /opt/confs/nginx && \
+    mkdir /acme-challenge && \
+    chown root:nginx /acme-challenge && \
+    chmod 770 /acme-challenge
 
 COPY autoconf/misc/logrotate.conf /etc/logrotate.conf
 COPY scripts/* /opt/scripts/

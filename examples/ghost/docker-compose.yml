@@ -25,6 +25,6 @@ services:
   myghost:
     image: ghost:alpine
     volumes:
-      - ./data-ghost:/
+      - ./data-ghost:/var/lib/ghost/content
     environment:
       - url=https://www.website.com                          # replace with your domain
