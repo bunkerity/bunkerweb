@@ -3,13 +3,17 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.3-blue" />
-	<img src="https://img.shields.io/badge/nginx-1.18.0-blue" />
-	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
+        <img src="https://img.shields.io/badge/bunkerized--nginx-1.2.4-blue" />
+        <img src="https://img.shields.io/badge/nginx-1.20.0-blue" />
+        <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
+        <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
+        <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+</p>
+
+<p align="center">
 	<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a>
-	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
-	<img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
-	<a href="https://twitter.com/bunkerity"><img src="https://img.shields.io/twitter/follow/bunkerity?style=social" /></a>
+        <a href="https://www.bunkerity.com"><img src="https://img.shields.io/badge/website-www.bunkerity.com-blue" /></a>  
+        <a href="https://twitter.com/bunkerity"><img src="https://img.shields.io/twitter/follow/bunkerity?style=social" /></a>
 </p>
 
 nginx Docker image secure by default.  
@@ -34,9 +38,13 @@ Fooling automated tools/scanners :
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/demo.gif?raw=true" />
 
+You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do some security tests.
+
 # Table of contents
+<details>
+	<summary>Click to show</summary>
+
 - [Table of contents](#table-of-contents)
-- [Live demo](#live-demo)
 - [Quickstart guide](#quickstart-guide)
   * [Run HTTP server with default settings](#run-http-server-with-default-settings)
   * [In combination with PHP](#in-combination-with-php)
@@ -85,9 +93,7 @@ Fooling automated tools/scanners :
   * [Logrotate](#logrotate)
   * [Cron jobs](#cron-jobs)
   * [Misc](#misc-2)
-
-# Live demo
-You can find a live demo at https://demo-nginx.bunkerity.com.
+</details>
 
 # Quickstart guide
 
@@ -465,7 +471,7 @@ $ docker run ... -v /path/to/letsencrypt:/etc/letsencrypt ... bunkerity/bunkeriz
 
 # Tutorials and examples
 
-You will find some docker-compose examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples).  
+You will find some docker-compose examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples) and tutorials on our [blog](https://www.bunkerity.com/blog).  
 
 # Include custom configurations
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
@@ -892,19 +898,19 @@ If set to yes, nginx will redirect all HTTP requests to HTTPS.
 `USE_CUSTOM_HTTPS`  
 Values : *yes* | *no*  
 Default value : *no*  
-Context : *global*  
+Context : *global*, *multisite*  
 If set to yes, HTTPS will be enabled with certificate/key of your choice.  
 
 `CUSTOM_HTTPS_CERT`  
 Values : *\<any valid path inside the container\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 Full path of the certificate file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
 `CUSTOM_HTTPS_KEY`  
 Values : *\<any valid path inside the container\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
 ### Self-signed certificate
@@ -1257,7 +1263,7 @@ More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/) 
 Values : *Xr/s* | *Xr/m*  
 Default value : *1r/s*  
 Context : *global*, *multisite*  
-The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 10 requests per second.
+The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 1 request to the same URI and from the same IP per second.
 
 `LIMIT_REQ_BURST`  
 Values : *<any valid integer\>*  
@@ -1277,12 +1283,12 @@ The size of the cache to store information about request limiting.
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
-If set to yes, the number of connections made by an ip will be limited during a period of time. (ie. Very small/weak ddos protection)  
+If set to yes, the number of connections made by an ip will be limited during a period of time. (ie. very small/weak ddos protection)  
 More info connections limiting [here](http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html).
 
 `LIMIT_CONN_MAX`  
 Values : *<any valid integer\>*  
-Default value : *40*  
+Default value : *50*  
 Context : *global*, *multisite*  
 The maximum number of connections per ip to put in queue before rejecting requests.
 
@@ -1380,6 +1386,14 @@ Default value : *yes*
 Context : *global*  
 If set to yes, ClamAV will automatically remove the detected files.  
 
+## Syslog
+
+`REMOTE_SYSLOG`  
+Values : *\<any IP/hostname\>*  
+Default value :  
+Context : *global*  
+When defined, rsyslog will send logs (access.log and error.log) to the corresponding IP/hostname using syslog UDP protocol.
+
 ## Logrotate
 
 `LOGROTATE_MINSIZE`  
@@ -1475,3 +1489,9 @@ Values : *random* | *\<any valid URI path\>*
 Default value : *random*  
 Context : *global*  
 Set it to a random path when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+
+`API_WHITELIST_IP`  
+Values : *\<list of IP/CIDR separated with space\>*  
+Default value : *192.168.0.0/16 172.16.0.0/12 10.0.0.0/8*  
+Context : *global*  
+List of IP/CIDR block allowed to send API order using the `API_URI` uri.
