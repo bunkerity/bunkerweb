@@ -21,7 +21,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - app1.website.com_REMOTE_PHP=myapp1
       - app1.website.com_REMOTE_PHP_PATH=/app
       - app2.website.com_REMOTE_PHP=myapp2

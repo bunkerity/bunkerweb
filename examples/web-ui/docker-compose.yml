@@ -20,7 +20,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - admin.website.com_SERVE_FILES=no
       - admin.website.com_USE_AUTH_BASIC=yes
       - admin.website.com_AUTH_BASIC_USER=admin                # change it to something hard to guess

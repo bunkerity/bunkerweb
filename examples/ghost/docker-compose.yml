@@ -10,7 +10,6 @@ services:
       - 443:8443
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      #- ./modsec-crs-confs:/modsec-crs-confs:ro              # fix FP with CRS
     environment:
       - SERVER_NAME=www.website.com                          # replace with your domain
       - SERVE_FILES=no
@@ -18,9 +17,7 @@ services:
       - REDIRECT_HTTP_TO_HTTPS=yes
       - AUTO_LETS_ENCRYPT=yes
       - USE_PROXY_CACHE=yes
-      - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://myghost:2368/

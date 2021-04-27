@@ -23,7 +23,6 @@ services:
       - PROXY_REAL_IP=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - REMOTE_PHP=myphp1
       - REMOTE_PHP_PATH=/app
     labels:
@@ -41,7 +40,6 @@ services:
       - PROXY_REAL_IP=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - REMOTE_PHP=myphp2
       - REMOTE_PHP_PATH=/app
     labels:

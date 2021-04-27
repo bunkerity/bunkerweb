@@ -22,7 +22,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - wp.website.com_REMOTE_PHP=mywp
       - wp.website.com_REMOTE_PHP_PATH=/var/www/html
       - nc.website.com_REMOTE_PHP=mync
