@@ -220,8 +220,6 @@ if [ "$USE_API" = "yes" ] ; then
 		API_URI="/$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"
 		echo "[*] Generated API URI : $API_URI"
 	fi
-	list=$(spaces_to_lua "$API_WHITELIST_IP")
-	replace_in_file "/usr/local/lib/lua/api.lua" "%API_WHITELIST_IP%" "$list"
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_API%" ""
 fi
