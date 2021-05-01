@@ -15,8 +15,8 @@ elif [ -S /tmp/autoconf.sock ] ; then
 fi
 
 # generate new conf
-BLACKLIST="$(curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list)
-$(curl -s https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt)"
+BLACKLIST="$(curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list;
+curl -s https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt | sort -u)"
 if [ "$?" -ne 0 ] ; then
 	job_log "[BLACKLIST] can't update user-agent list"
 fi
