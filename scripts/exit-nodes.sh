@@ -15,13 +15,9 @@ elif [ -S /tmp/autoconf.sock ] ; then
 fi
 
 # generate the new conf
-curl -s "https://iplists.firehol.org/files/tor_exits.ipset" | grep -v "^\#.*" |
-while read entry ; do
-	check=$(echo $entry | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?[0-9]*$")
-	if [ "$check" != "" ] ; then
-		echo "deny ${entry};" >> /tmp/block-tor-exit-node.conf
-	fi
-done
+curl -s "https://iplists.firehol.org/files/tor_exits.ipset" | \
+	grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?[0-9]*$") \
+	sed 's/^/deny /;s/$/;/' > /tmp/block-tor-exit-node.conf
 
 # check if we have at least 1 line
 lines="$(wc -l /tmp/block-tor-exit-node.conf | cut -d ' ' -f 1)"
