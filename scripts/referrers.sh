@@ -19,12 +19,7 @@ BLACKLIST="$(curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ulti
 if [ "$?" -ne 0 ] ; then
 	job_log "[BLACKLIST] can't update referrers list"
 fi
-DATA=""
-IFS=$'\n'
-for ref in $BLACKLIST ; do
-        DATA="${DATA}\"~${ref}\" yes;\n"
-done
-echo -e "map \$http_referer \$bad_referrer { hostnames; default no; $DATA }" > /tmp/map-referrer.conf
+echo -e "map \$http_referer \$bad_referrer { hostnames; default no; $(echo $DATA | sed 's/^/"~/;s/$/" yes;/') }" > /tmp/map-referrer.conf
 
 # check number of lines
 lines="$(wc -l /tmp/map-referrer.conf | cut -d ' ' -f 1)"
