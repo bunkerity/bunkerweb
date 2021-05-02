@@ -20,25 +20,42 @@ class Config :
 				var = var_value.split("=")[0]
 				value = var_value.replace(var + "=", "", 1)
 				vars[var] = value
-			if self.globalconf(instances) :
-				i = 0
-				started = False
-				while i < 10 :
-					if self.__ping(instances) :
-						started = True
-						break
-					i = i + 1
-					utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact nginx instances")
-					time.sleep(i)
-				if started :
-					proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/jobs.sh", "nginx"], env=vars, capture_output=True)
-					return proc.returncode == 0
-				else :
-					utils.log("[!] bunkerized-nginx instances are not started")
+
+			utils.log("[*] Generating global config ...")
+			if not self.globalconf(instances) :
+				utils.log("[!] Can't generate global config")
+				return False
+			utils.log("[*] Generated global config")
+
+			if "SERVER_NAME" in vars and vars["SERVER_NAME"] != "" :
+				for server in vars["SERVER_NAME"].split(" ") :
+					vars_site = vars.copy()
+					vars_site["SERVER_NAME"] = server
+					utils.log("[*] Generating config for " + vars["SERVER_NAME"] + " ...")
+					if not self.generate(instances, vars_site) or not self.activate(instances, vars_site, reload=False) :
+						utils.log("[!] Can't generate/activate site config for " + server)
+						return False
+					utils.log("[*] Generated config for " + vars["SERVER_NAME"])
+			with open("/etc/nginx/autoconf", "w") as f :
+				f.write("ok")
+
+			utils.log("[*] Waiting for bunkerized-nginx tasks ...")
+			i = 1
+			started = False
+			while i <= 10 :
+				time.sleep(i)
+				if self.__ping(instances) :
+					started = True
+					break
+				i = i + 1
+				utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx tasks")
+			if started :
+				utils.log("[*] bunkerized-nginx tasks started")
+				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/jobs.sh", "nginx"], env=vars, capture_output=True)
+				return proc.returncode == 0
 			else :
-				utils.log("[!] Can't generate global conf")
+				utils.log("[!] bunkerized-nginx tasks are not started")
 		except Exception as e :
-			traceback.print_exc()
 			utils.log("[!] Error while initializing config : " + str(e))
 		return False
 
@@ -54,12 +71,11 @@ class Config :
 				vars[var] = value
 			proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/global-config.sh", "nginx"], env=vars, capture_output=True)
 			if proc.returncode == 0 :
-				with open("/etc/nginx/autoconf", "w") as f :
-					f.write("ok")
 				return True
+			else :
+				utils.log("[*] Error while generating global config : return code = " + str(proc.returncode))
 		except Exception as e :
-			traceback.print_exc()
-			utils.log("[!] Error while generating global config : " + str(e))
+			utils.log("[!] Exception while generating global config : " + str(e))
 		return False
 
 	def generate(self, instances, vars) :
@@ -79,61 +95,76 @@ class Config :
 			vars_defaults.update(vars_instances)
 			vars_defaults.update(vars)
 			# Call site-config.sh to generate the config
-			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " " + vars["SERVER_NAME"], "nginx"], env=vars_defaults, capture_output=True)
+			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " \"" + vars["SERVER_NAME"] + "\"", "nginx"], env=vars_defaults, capture_output=True)
 			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" and self.__swarm :
 				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], env=vars_defaults, capture_output=True)
-				return proc.returncode == 0
-			return proc.returncode == 0
+			if proc.returncode == 0 :
+				return True
+			utils.log("[!] Error while generating site config for " + vars["SERVER_NAME"] + "  : return code = " + str(proc.returncode))
 		except Exception as e :
-			traceback.print_exc()
-			utils.log("[!] Error while generating site config : " + str(e))
+			utils.log("[!] Exception while generating site config : " + str(e))
 		return False
 
-	def activate(self, instances, vars) :
+	def activate(self, instances, vars, reload=True) :
 		try :
+			# Get first server name
+			first_server_name = vars["SERVER_NAME"].split(" ")[0]
+
 			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + vars["SERVER_NAME"] + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf doesn't exist")
+			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
+				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
 				return False
 
 			# Include the server conf
-			utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n}")
+			utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + first_server_name + "/server.conf;\n}")
 
-			return self.reload(instances)
+			# Reload
+			if not reload or self.reload(instances) :
+				return True
+
 		except Exception as e :
-			traceback.print_exc()
-			utils.log("[!] Error while activating config : " + str(e))
+			utils.log("[!] Exception while activating config : " + str(e))
+
 		return False
 
 	def deactivate(self, instances, vars) :
 		try :
+			# Get first server name
+			first_server_name = vars["SERVER_NAME"].split(" ")[0]
+
 			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + vars["SERVER_NAME"] + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf doesn't exist")
+			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
+				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
 				return False
 
 			# Remove the include
-			utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf;\n", "")
+			utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + first_server_name + "/server.conf;\n", "")
 
-			return self.reload(instances)
+			# Reload
+			if self.reload(instances) :
+				return True
 
 		except Exception as e :
-			traceback.print_exc()
-			utils.log("[!] Error while deactivating config : " + str(e))
+			utils.log("[!] Exception while deactivating config : " + str(e))
+
 		return False
 
-	def remove(self, instances, vars) :
+	def remove(self, vars) :
 		try :
+			# Get first server name
+			first_server_name = vars["SERVER_NAME"].split(" ")[0]
+
 			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + vars["SERVER_NAME"] + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + vars["SERVER_NAME"] + "/server.conf doesn't exist")
+			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
+				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
 				return False
 
 			# Remove the folder
-			shutil.rmtree("/etc/nginx/" + vars["SERVER_NAME"])
+			shutil.rmtree("/etc/nginx/" + first_server_name)
 			return True
 		except Exception as e :
 			utils.log("[!] Error while deactivating config : " + str(e))
+
 		return False
 
 	def reload(self, instances) :
@@ -149,7 +180,7 @@ class Config :
 			instance.reload()
 			# Reload via API
 			if self.__swarm :
-				# Send POST request on http://serviceName.NodeID.TaskID:8000/reload
+				# Send POST request on http://serviceName.NodeID.TaskID:8000/action
 				name = instance.name
 				for task in instance.tasks() :
 					if task["Status"]["State"] != "running" :

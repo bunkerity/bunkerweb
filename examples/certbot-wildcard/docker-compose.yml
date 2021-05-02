@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./web-files:/www:ro
+      - ./letsencrypt:/letsencrypt:ro
+    environment:
+      - SERVER_NAME=app1.website.com app2.website.com # replace with your domains
+      - MULTISITE=yes
+      - USE_CUSTOM_HTTPS=yes
+      - CUSTOM_HTTPS_CERT=/letsencrypt/live/website.com/fullchain.pem
+      - CUSTOM_HTTPS_KEY=/letsencrypt/live/website.com/privkey.pem
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - app1.website.com_REMOTE_PHP=myapp1
+      - app1.website.com_REMOTE_PHP_PATH=/app
+      - app2.website.com_REMOTE_PHP=myapp2
+      - app2.website.com_REMOTE_PHP_PATH=/app
+
+  myapp1:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app1.website.com:/app
+
+  myapp2:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app2.website.com:/app

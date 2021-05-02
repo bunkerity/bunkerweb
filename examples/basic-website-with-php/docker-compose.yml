@@ -18,7 +18,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - REMOTE_PHP=myphp
       - REMOTE_PHP_PATH=/app
 

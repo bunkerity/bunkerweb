@@ -20,7 +20,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - USE_CROWDSEC=yes
       - CROWDSEC_HOST=http://mycrowdsec:8080
       - CROWDSEC_KEY=                                 # you need to generate it (see bouncer_key.sh)
@@ -34,7 +33,7 @@ services:
       - net2
 
   mycrowdsec:
-    image: crowdsecurity/crowdsec:v1.0.2
+    image: crowdsecurity/crowdsec:v1.0.13
     restart: always
     volumes:
       - ./acquis.yaml:/etc/crowdsec/acquis.yaml

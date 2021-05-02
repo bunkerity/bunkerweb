@@ -2,6 +2,12 @@
 
 echo "[*] Starting autoconf ..."
 
+# check permissions
+su -s "/opt/entrypoint/permissions.sh" nginx
+if [ "$?" -ne 0 ] ; then
+	exit 1
+fi
+
 if [ "$SWARM_MODE" = "yes" ] ; then
 	cp -r /opt/confs/nginx/* /etc/nginx
 	chown -R root:nginx /etc/nginx

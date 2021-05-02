@@ -38,3 +38,9 @@ if [ "$(has_value USE_CROWDSEC yes)" != "" ] ; then
 	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_HOST%" "$CROWDSEC_HOST"
 	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_KEY%" "$CROWDSEC_KEY"
 fi
+
+# Whitelist IP for API
+if [ "$USE_API" = "yes" ] ; then
+	list=$(spaces_to_lua "$API_WHITELIST_IP")
+	replace_in_file "/usr/local/lib/lua/api.lua" "%API_WHITELIST_IP%" "$list"
+fi

@@ -9,19 +9,17 @@
 # get nginx path and override multisite variables
 NGINX_PREFIX="/etc/nginx/"
 if [ "$MULTISITE" = "yes" ] ; then
-	NGINX_PREFIX="${NGINX_PREFIX}${1}/"
+	first_server=$(echo "$1" | cut -d ' ' -f 1)
+	NGINX_PREFIX="${NGINX_PREFIX}${first_server}/"
 	if [ ! -d "$NGINX_PREFIX" ] ; then
 		mkdir "$NGINX_PREFIX"
 	fi
-	ROOT_FOLDER="${ROOT_FOLDER}/$1"
+	ROOT_FOLDER="${ROOT_FOLDER}/$first_server"
 	if [ ! $SITE_ROOT_SUBFOLDER = "" ] ; then
 		ROOT_FOLDER="${ROOT_FOLDER}/${SITE_ROOT_SUBFOLDER}"
 	fi
-fi
-
-if [ "$MULTISITE" = "yes" ] ; then
- 	for var in $(env | cut -d '=' -f 1 | grep -E "^${1}_") ; do
-		repl_name=$(echo "$var" | sed "s~${1}_~~")
+ 	for var in $(env | cut -d '=' -f 1 | grep -E "^${first_server}_") ; do
+		repl_name=$(echo "$var" | sed "s~${first_server}_~~")
 		repl_value=$(env | grep -E "^${var}=" | sed "s~^${var}=~~")
 		read -r "$repl_name" <<< $repl_value
 	done
@@ -30,9 +28,9 @@ fi
 set | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "${NGINX_PREFIX}nginx.env"
 if [ "$MULTISITE" = "yes" ] ; then
 	for server in $SERVER_NAME ; do
-		sed -i "~^${server}_.*=.*~d" "${NGINX_PREFIX}nginx.env"
+		sed -i "/^${server}_.*=.*/d" "${NGINX_PREFIX}nginx.env"
 	done
-	sed -i "~^SERVER_NAME=.*~SERVER_NAME=${1}~" "${NGINX_PREFIX}nginx.env"
+	sed -i "s~^SERVER_NAME=.*~SERVER_NAME=${1}~" "${NGINX_PREFIX}nginx.env"
 fi
 
 # copy stub confs
@@ -41,8 +39,8 @@ cp /opt/confs/site/* "$NGINX_PREFIX"
 # replace paths
 replace_in_file "${NGINX_PREFIX}server.conf" "%MAIN_LUA%" "include ${NGINX_PREFIX}main-lua.conf;"
 if [ "$MULTISITE" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;\ninclude /server-confs/${1}/*.conf;"
-	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${1}/*.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;\ninclude /server-confs/${first_server}/*.conf;"
+	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${first_server}/*.conf;"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;"
@@ -70,10 +68,10 @@ if [ "$USE_REVERSE_PROXY" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_URL%" "$url_value"
 		replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_HOST%" "$host_value"
 		if [ "$custom_headers_value" != "" ] ; then
-		  	IFS_=$IFS
+			IFS_=$IFS
 			IFS=';'
-			for header_value in $(echo "$custom_headers_value") ; do
-				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "more_set_headers $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
+			for header_value in $(echo $custom_headers_value) ; do
+				replace_in_file "${NGINX_PREFIX}reverse-proxy-${i}.conf" "%REVERSE_PROXY_CUSTOM_HEADERS%" "proxy_set_header $header_value;\n%REVERSE_PROXY_CUSTOM_HEADERS%"
 			done
 			IFS=$IFS_
 		fi
@@ -292,6 +290,14 @@ else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" ""
 fi
 
+# whitelist URI
+if [ "$WHITELIST_URI" != "" ] ; then
+	list=$(spaces_to_lua "$WHITELIST_URI")
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_URI%" "$list"
+else
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_URI%" ""
+fi
+
 # block bad referrer
 if [ "$BLOCK_REFERRER" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRER%" "true"
@@ -347,8 +353,8 @@ if [ "$AUTO_LETS_ENCRYPT" = "yes" ] || [ "$USE_CUSTOM_HTTPS" = "yes" ] || [ "$GE
 		if [ "$MULTISITE" = "no" ] ; then
 			FIRST_SERVER_NAME=$(echo "$SERVER_NAME" | cut -d " " -f 1)
 		else
-			FIRST_SERVER_NAME="$1"
-			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$1}"
+			FIRST_SERVER_NAME="$first_server"
+			EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$first_server}"
 			echo -n "$EMAIL_LETS_ENCRYPT" > ${NGINX_PREFIX}email-lets-encrypt.txt
 		fi
 		replace_in_file "${NGINX_PREFIX}https.conf" "%HTTPS_CERT%" "/etc/letsencrypt/live/${FIRST_SERVER_NAME}/fullchain.pem"

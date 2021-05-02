@@ -3,13 +3,17 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/bunkerized--nginx-1.2.3-blue" />
-	<img src="https://img.shields.io/badge/nginx-1.18.0-blue" />
-	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
+        <img src="https://img.shields.io/badge/bunkerized--nginx-1.2.4-blue" />
+        <img src="https://img.shields.io/badge/nginx-1.20.0-blue" />
+        <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
+        <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
+        <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+</p>
+
+<p align="center">
 	<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a>
-	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
-	<img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
-	<a href="https://twitter.com/bunkerity"><img src="https://img.shields.io/twitter/follow/bunkerity?style=social" /></a>
+        <a href="https://www.bunkerity.com"><img src="https://img.shields.io/badge/website-www.bunkerity.com-blue" /></a>  
+        <a href="https://twitter.com/bunkerity"><img src="https://img.shields.io/twitter/follow/bunkerity?style=social" /></a>
 </p>
 
 nginx Docker image secure by default.  
@@ -34,9 +38,13 @@ Fooling automated tools/scanners :
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/demo.gif?raw=true" />
 
+You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do some security tests.
+
 # Table of contents
+<details>
+	<summary>Click to show</summary>
+
 - [Table of contents](#table-of-contents)
-- [Live demo](#live-demo)
 - [Quickstart guide](#quickstart-guide)
   * [Run HTTP server with default settings](#run-http-server-with-default-settings)
   * [In combination with PHP](#in-combination-with-php)
@@ -85,9 +93,7 @@ Fooling automated tools/scanners :
   * [Logrotate](#logrotate)
   * [Cron jobs](#cron-jobs)
   * [Misc](#misc-2)
-
-# Live demo
-You can find a live demo at https://demo-nginx.bunkerity.com.
+</details>
 
 # Quickstart guide
 
@@ -445,15 +451,32 @@ When `USE_ANTIBOT` is set to *captcha*, every users visiting your website must c
 
 ## Hardening
 
+### Drop capabilities
 By default, *bunkerized-nginx* runs as non-root user inside the container and should not use any of the default [capabilities](https://docs.docker.com/engine/security/#linux-kernel-capabilities) allowed by Docker. You can safely remove all capabilities to harden the container :
 
 ```shell
 docker run ... --drop-cap=all ... bunkerity/bunkerized-nginx
 ```
 
+### User namespace remap
+Another hardening trick is [user namespace remapping](https://docs.docker.com/engine/security/userns-remap/) : it allows you to map the UID/GID of users inside a container to another UID/GID on the host. For example, you can map the user nginx with UID/GID 101 inside the container to a non-existent user with UID/GID 100101 on the host.
+
+Let's assume you have the /etc/subuid and /etc/subgid files like this :  
+```
+user:100000:65536
+```
+It means that everything done inside the container will be remapped to UID/GID 100101 (100000 + 101) on the host.
+
+Please note that you must set the rights on the volumes (e.g. : /etc/letsencrypt, /www, ...) according to the remapped UID/GID :  
+```shell
+$ chown root:100101 /path/to/letsencrypt
+$ chmod 770 /path/to/letsencrypt
+$ docker run ... -v /path/to/letsencrypt:/etc/letsencrypt ... bunkerity/bunkerized-nginx
+```
+
 # Tutorials and examples
 
-You will find some docker-compose examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples).  
+You will find some docker-compose examples in the [examples directory](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples) and tutorials on our [blog](https://www.bunkerity.com/blog).  
 
 # Include custom configurations
 Custom configurations files (ending with .conf suffix) can be added in some directory inside the container :
@@ -659,11 +682,10 @@ Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the co
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_WS_1`, `REVERSE_PROXY_WS_2`, `REVERSE_PROXY_WS_3`, ...
 
 `REVERSE_PROXY_HEADERS`  
-Values : *\<list of custom headers separated with a semicolon\>* 
-Examples : Access-Control-Allow-Origin 'https://mydomain.dev'; Custom_Api_Header 'test';
-Default value : ""  
+Values : *\<list of custom headers separated with a semicolon like this : header1 value1;header2 value2...\>* 
+Default value :  
 Context : *global*, *multisite*  
-Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the corresponding `REVERSE_PROXY_HOST` is a WebSocket server.  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*.  
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_HEADERS_1`, `REVERSE_PROXY_HEADERS_2`, `REVERSE_PROXY_HEADERS_3`, ...
 
 `PROXY_REAL_IP`  
@@ -887,19 +909,19 @@ If set to yes, nginx will redirect all HTTP requests to HTTPS.
 `USE_CUSTOM_HTTPS`  
 Values : *yes* | *no*  
 Default value : *no*  
-Context : *global*  
+Context : *global*, *multisite*  
 If set to yes, HTTPS will be enabled with certificate/key of your choice.  
 
 `CUSTOM_HTTPS_CERT`  
 Values : *\<any valid path inside the container\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 Full path of the certificate file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
 `CUSTOM_HTTPS_KEY`  
 Values : *\<any valid path inside the container\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.  
 
 ### Self-signed certificate
@@ -1184,10 +1206,10 @@ Context : *global*, *multisite*
 If set to *yes*, lets you define custom IP addresses to be whitelisted through the `WHITELIST_IP_LIST` environment variable.
 
 `WHITELIST_IP_LIST`  
-Values : *\<list of IP addresses separated with spaces\>*  
+Values : *\<list of IP addresses and/or network CIDR blocks separated with spaces\>*  
 Default value : *23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8*  
 Context : *global*  
-The list of IP addresses to whitelist when `USE_WHITELIST_IP` is set to *yes*. The default list contains IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/).
+The list of IP addresses and/or network CIDR blocks to whitelist when `USE_WHITELIST_IP` is set to *yes*. The default list contains IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/).
 
 `USE_WHITELIST_REVERSE`  
 Values : *yes* | *no*  
@@ -1207,6 +1229,12 @@ Default value :
 Context : *global*, *multisite*  
 Whitelist user agent from being blocked by `BLOCK_USER_AGENT`.
 
+`WHITELIST_URI`  
+Values : *\<list of URI separated with spaces\>*  
+Default value :  
+Context : *global*, *multisite*  
+URI listed here have security checks like bad user-agents, bad IP, ... disabled. Useful when using callbacks for example.
+
 ### Custom blacklisting
 
 `USE_BLACKLIST_IP`  
@@ -1216,10 +1244,10 @@ Context : *global*, *multisite*
 If set to *yes*, lets you define custom IP addresses to be blacklisted through the `BLACKLIST_IP_LIST` environment variable.
 
 `BLACKLIST_IP_LIST`  
-Values : *\<list of IP addresses separated with spaces\>*  
+Values : *\<list of IP addresses and/or network CIDR blocks separated with spaces\>*  
 Default value :  
 Context : *global*  
-The list of IP addresses to blacklist when `USE_BLACKLIST_IP` is set to *yes*.
+The list of IP addresses and/or network CIDR blocks to blacklist when `USE_BLACKLIST_IP` is set to *yes*.
 
 `USE_BLACKLIST_REVERSE`  
 Values : *yes* | *no*  
@@ -1239,18 +1267,18 @@ The list of reverse DNS suffixes to blacklist when `USE_BLACKLIST_REVERSE` is se
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
-If set to yes, the amount of HTTP requests made by a user will be limited during a period of time.  
-More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/).
+If set to yes, the amount of HTTP requests made by a user for a given resource will be limited during a period of time.  
+More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/) (the key used is $binary_remote_addr$uri).
 
 `LIMIT_REQ_RATE`  
 Values : *Xr/s* | *Xr/m*  
-Default value : *20r/s*  
+Default value : *1r/s*  
 Context : *global*, *multisite*  
-The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 10 requests per second.
+The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 1 request to the same URI and from the same IP per second.
 
 `LIMIT_REQ_BURST`  
 Values : *<any valid integer\>*  
-Default value : *40*  
+Default value : *2*  
 Context : *global*, *multisite*  
 The number of requests to put in queue before rejecting requests.
 
@@ -1266,12 +1294,12 @@ The size of the cache to store information about request limiting.
 Values : *yes* | *no*  
 Default value : *yes*  
 Context : *global*, *multisite*  
-If set to yes, the number of connections made by an ip will be limited during a period of time. (ie. Very small/weak ddos protection)  
+If set to yes, the number of connections made by an ip will be limited during a period of time. (ie. very small/weak ddos protection)  
 More info connections limiting [here](http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html).
 
 `LIMIT_CONN_MAX`  
 Values : *<any valid integer\>*  
-Default value : *40*  
+Default value : *50*  
 Context : *global*, *multisite*  
 The maximum number of connections per ip to put in queue before rejecting requests.
 
@@ -1301,7 +1329,7 @@ Only allow specific countries accessing your website. Use 2 letters country code
 Values : *\<any valid IP/hostname\>*  
 Default value :  
 Context : *global*, *multisite*  
-Set the IP/hostname address of a remote PHP-FPM to execute .php files. See `USE_PHP` if you want to run a PHP-FPM instance on the same container as bunkerized-nginx.
+Set the IP/hostname address of a remote PHP-FPM to execute .php files.
 
 `REMOTE_PHP_PATH`  
 Values : *\<any valid absolute path\>*  
@@ -1368,6 +1396,14 @@ Values : *yes* | *no*
 Default value : *yes*  
 Context : *global*  
 If set to yes, ClamAV will automatically remove the detected files.  
+
+## Syslog
+
+`REMOTE_SYSLOG`  
+Values : *\<any IP/hostname\>*  
+Default value :  
+Context : *global*  
+When defined, rsyslog will send logs (access.log and error.log) to the corresponding IP/hostname using syslog UDP protocol.
 
 ## Logrotate
 
@@ -1464,3 +1500,9 @@ Values : *random* | *\<any valid URI path\>*
 Default value : *random*  
 Context : *global*  
 Set it to a random path when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+
+`API_WHITELIST_IP`  
+Values : *\<list of IP/CIDR separated with space\>*  
+Default value : *192.168.0.0/16 172.16.0.0/12 10.0.0.0/8*  
+Context : *global*  
+List of IP/CIDR block allowed to send API order using the `API_URI` uri.

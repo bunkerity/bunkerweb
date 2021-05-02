@@ -20,7 +20,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
     labels:
       - "bunkerized-nginx.AUTOCONF"
 

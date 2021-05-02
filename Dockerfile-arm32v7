@@ -3,7 +3,7 @@ FROM alpine AS builder
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v4.0.0%2Bbalena2/qemu-4.0.0.balena2-arm.tar.gz
 RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
 
-FROM arm32v7/nginx:stable-alpine
+FROM arm32v7/nginx:1.20.0-alpine
 
 COPY --from=builder qemu-arm-static /usr/bin
 
@@ -23,10 +23,13 @@ COPY lua/ /opt/lua
 COPY prepare.sh /tmp/prepare.sh
 RUN chmod +x /tmp/prepare.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
 
+# fix CVE-2021-20205
+RUN apk add "libjpeg-turbo>=2.1.0-r0"
+
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pre-server-confs /acme-challenge
 
 EXPOSE 8080/tcp 8443/tcp
 
-USER nginx
+USER nginx:nginx
 
 ENTRYPOINT ["/opt/entrypoint/entrypoint.sh"]

@@ -44,6 +44,7 @@ with lock :
 
 # Process events received from Docker
 try :
+	utils.log("[*] Listening for Docker events ...")
 	for event in client.events(decode=True) :
 
 		# Process only container/service events
@@ -53,11 +54,15 @@ try :
 		# Get Container/Service object
 		try :
 			if swarm :
-				server = client.services.get(service_id=event["Actor"]["ID"])
+				id = service_id=event["Actor"]["ID"]
+				server = client.services.get(service_id=id)
 			else :
-				server = client.containers.get(event["id"])
+				id = event["id"]
+				server = client.containers.get(id)
 		except docker.errors.NotFound as e :
-			continue
+			server = autoconf.get_server(id)
+			if not server :
+				continue
 
 		# Process the event
 		with lock :

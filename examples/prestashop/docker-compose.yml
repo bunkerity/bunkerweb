@@ -20,9 +20,10 @@ services:
       - MAX_CLIENT_SIZE=50m
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - REMOTE_PHP=myprestashop
       - REMOTE_PHP_PATH=/var/www/html
+      - LIMIT_REQ_RATE=5r/s
+      - LIMIT_REQ_BURST=10
 
   myprestashop:
     image: prestashop/prestashop:1.7-fpm

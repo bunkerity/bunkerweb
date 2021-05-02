@@ -52,6 +52,16 @@ if [ ! -f "/opt/installed" ] ; then
 
 	echo "[*] Configuring bunkerized-nginx ..."
 
+	# check permissions
+	if [ "$SWARM_MODE" = "no" ] ; then
+		/opt/entrypoint/permissions.sh
+	else
+		/opt/entrypoint/permissions-swarm.sh
+	fi
+	if [ "$?" -ne 0 ] ; then
+		exit 1
+	fi
+
 	# logs config
 	/opt/entrypoint/logs.sh
 
@@ -122,7 +132,7 @@ else
 fi
 
 # list of log files to display
-LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log"
+LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log /var/log/nginx/modsec_audit.log"
 
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then

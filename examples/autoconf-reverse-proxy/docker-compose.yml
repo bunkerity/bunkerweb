@@ -21,8 +21,9 @@ services:
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - USE_CLIENT_CACHE=yes
+      - USE_PROXY_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
+      - USE_REVERSE_PROXY=yes
     labels:
       - "bunkerized-nginx.AUTOCONF"
 

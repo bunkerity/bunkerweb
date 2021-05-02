@@ -20,7 +20,7 @@ function M.check ()
 			local a,b,c,d = v2:match("([%d]+).([%d]+).([%d]+).([%d]+)")
 			if a == "127" then
 				ngx.shared.dnsbl_cache:set(ip, "ko", 86400)
-				ngx.log(ngx.WARN, "ip " .. ip .. " is in DNSBL " .. v)
+				ngx.log(ngx.NOTICE, "ip " .. ip .. " is in DNSBL " .. v)
 				return true
 			end
 		end

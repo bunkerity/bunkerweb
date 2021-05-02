@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./joomla-files:/www:ro
+      - ./letsencrypt:/etc/letsencrypt
+    environment:
+      - SERVER_NAME=www.website.com             # replace with your domain
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - MAX_CLIENT_SIZE=50m
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - REMOTE_PHP=myjoomla
+      - REMOTE_PHP_PATH=/var/www/html
+
+  myjoomla:
+    image: joomla:fpm-alpine
+    restart: always
+    volumes:
+      - ./joomla-files:/var/www/html
+    environment:
+      - JOOMLA_DB_HOST=mydb
+      - JOOMLA_DB_NAME=joomladb
+      - JOOMLA_DB_USER=user
+      - JOOMLA_DB_PASSWORD=db-user-pwd          # replace with a stronger password (must match MYSQL_PASSWORD)
+
+  mydb:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd         # replace with a stronger password
+      - MYSQL_DATABASE=joomladb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd              # replace with a stronger password (must match JOOMLA_DB_PASSWORD)

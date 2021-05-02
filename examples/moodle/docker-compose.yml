@@ -18,8 +18,8 @@ services:
       - MAX_CLIENT_SIZE=50m
       - SERVE_FILES=no
       - USE_PROXY_CACHE=yes
+      - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_BROTLI=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=https://mymoodle:8443
