@@ -20,7 +20,7 @@ curl -s https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Cr
 if [ "$?" -ne 0 ] ; then
 	job_log "[BLACKLIST] can't update user-agent list"
 fi
-echo -e "map \$http_user_agent \$bad_user_agent { default no; $(echo $BLACKLIST | sed 's:\([^\\]\) :\1\\\\ :;s:^:~*:;s:$: yes;:') }" > /tmp/map-user-agent.conf
+echo -e "map \$http_user_agent \$bad_user_agent { default no; $(echo $BLACKLIST | sed 's: :\\ :g;s:^:~*:;s:$: yes;:') }" > /tmp/map-user-agent.conf
 
 # check number of lines
 lines="$(wc -l /tmp/map-user-agent.conf | cut -d ' ' -f 1)"

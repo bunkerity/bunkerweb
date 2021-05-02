@@ -16,7 +16,7 @@ fi
 
 # generate the new conf
 curl -s "https://iplists.firehol.org/files/firehol_abusers_30d.netset" | \
-	grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?[0-9]*$") \
+	grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?[0-9]*$" | \
 	sed 's/^/deny /;s/$/;/' > /tmp/block-abusers.conf
 
 # check if we have at least 1 line
