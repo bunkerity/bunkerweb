@@ -22,6 +22,10 @@ if [ "$MULTISITE" = "yes" ] ; then
 	done
 fi
 
+if [ "$ROOT_SITE_SUBFOLDER" != "" ] ; then
+	ROOT_FOLDER="${ROOT_FOLDER}/${ROOT_SITE_SUBFOLDER}"
+fi
+
 set | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "${NGINX_PREFIX}nginx.env"
 if [ "$MULTISITE" = "yes" ] ; then
 	for server in $SERVER_NAME ; do

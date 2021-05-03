@@ -258,7 +258,7 @@ docker run -p 80:8080 \
            -e MULTISITE=yes \
            -e AUTO_LETS_ENCRYPT=yes \
            -e REDIRECT_HTTP_TO_HTTPS=yes \
-           -l bunkerized.nginx.AUTOCONF \
+           -l bunkerized-nginx.AUTOCONF \
            bunkerity/bunkerized-nginx
 ```
 
@@ -567,6 +567,12 @@ Values : *\<any valid path to web files\>*
 Default value : */www*  
 Context : *global*  
 The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
+
+`ROOT_SITE_SUBFOLDER`  
+Values : *\<any valid directory name\>*  
+Default value :  
+Context : *global*, *multisite*  
+The subfolder where nginx will search for site web files.
 
 `LOG_FORMAT`  
 Values : *\<any values accepted by the log_format directive\>*  
