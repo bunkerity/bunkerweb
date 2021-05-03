@@ -5,7 +5,7 @@
 
 # if we are running nginx
 if [ -f /tmp/nginx.pid ] ; then
-	RELOAD="/usr/sbin/nginx -s reload > /dev/null 2>&1"
+	RELOAD="/usr/sbin/nginx -s reload"
 # if we are in autoconf
 elif [ -S /tmp/autoconf.sock ] ; then
 	RELOAD="/opt/entrypoint/reload.py"
@@ -22,7 +22,7 @@ if [ "$?" -eq 0 ] && [ -f /tmp/geoip.mmdb.gz ] ; then
 	fi
 	mv /tmp/geoip.mmdb /etc/nginx
 	if [ "$RELOAD" != "" ] ; then
-		$RELOAD
+		$RELOAD > /dev/null 2>&1
 		if [ "$?" -eq 0 ] ; then
 			cp /etc/nginx/geoip.mmdb /cache
 			job_log "[NGINX] successfull nginx reload after GeoIP DB update"
@@ -30,7 +30,7 @@ if [ "$?" -eq 0 ] && [ -f /tmp/geoip.mmdb.gz ] ; then
 			job_log "[NGINX] failed nginx reload after GeoIP DB update"
 			if [ -f /cache/geoip.mmdb ] ; then
 				cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
-				$RELOAD
+				$RELOAD > /dev/null 2>&1
 			fi
 		fi
 	else
