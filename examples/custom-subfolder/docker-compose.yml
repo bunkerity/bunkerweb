@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+
+  myreverse:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./apps:/www:ro
+      - ./letsencrypt:/etc/letsencrypt
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=app1.website.com app2.website.com app3.website.com # replace with your domains
+      - DISABLE_DEFAULT_SERVER=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - ROOT_SITE_SUBFOLDER=web-files
+      - app1.website.com_REMOTE_PHP=app1
+      - app1.website.com_REMOTE_PHP_PATH=/var/www/html
+      - app2.website.com_REMOTE_PHP=app2
+      - app2.website.com_REMOTE_PHP_PATH=/var/www/html
+      - app3.website.com_REMOTE_PHP=app3
+      - app3.website.com_REMOTE_PHP_PATH=/var/www/html
+      - app3.website.com_ROOT_SITE_SUBFOLDER=another-folder
+
+  app1:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./apps/app1.website.com/web-files:/var/www/html
+
+  app2:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./apps/app2.website.com/web-files:/var/www/html
+
+  app3:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./apps/app3.website.com/another-folder:/var/www/html
