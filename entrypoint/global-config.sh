@@ -224,3 +224,7 @@ if [ "$USE_API" = "yes" ] ; then
 else
 	replace_in_file "/etc/nginx/nginx.conf" "%USE_API%" ""
 fi
+
+# performance tuning
+replace_in_file "/etc/nginx/nginx.conf" "%WORKER_CONNECTIONS%" "$WORKER_CONNECTIONS"
+replace_in_file "/etc/nginx/nginx.conf" "%WORKER_RLIMIT_NOFILE%" "$WORKER_RLIMIT_NOFILE"

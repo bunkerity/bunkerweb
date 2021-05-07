@@ -398,6 +398,7 @@ fi
 if [ "$USE_MODSECURITY" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}modsecurity.conf" "%MODSEC_RULES_FILE%" "${NGINX_PREFIX}modsecurity-rules.conf"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_MODSECURITY%" "include ${NGINX_PREFIX}modsecurity.conf;"
+	replace_in_file "${NGINX_PREFIX}modsecurity-rules.conf" "%MODSECURITY_SEC_AUDIT_ENGINE%" "$MODSECURITY_SEC_AUDIT_ENGINE"
 	if [ "$MULTISITE" != "yes" ] ; then
 		modsec_custom=""
 		if ls /modsec-confs/*.conf > /dev/null 2>&1 ; then

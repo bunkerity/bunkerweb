@@ -916,7 +916,7 @@ If set to yes, HTTPS will be enabled with certificate/key of your choice.
 Values : *\<any valid path inside the container\>*  
 Default value :  
 Context : *global*, *multisite*  
-Full path of the certificate file to use when `USE_CUSTOM_HTTPS` is set to yes.  
+Full path of the certificate or bundle file to use when `USE_CUSTOM_HTTPS` is set to yes. If your chain of trust contains one or more intermediate certificate(s), you will need to bundle them into a single file (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)).  
 
 `CUSTOM_HTTPS_KEY`  
 Values : *\<any valid path inside the container\>*  
