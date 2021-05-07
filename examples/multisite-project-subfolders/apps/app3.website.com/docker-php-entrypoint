@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "[*] my-php started"
+exec "$@"
