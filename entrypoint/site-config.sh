@@ -307,23 +307,23 @@ fi
 
 # block TOR exit nodes
 if [ "$BLOCK_TOR_EXIT_NODE" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_TOR_EXIT_NODE%" "include /etc/nginx/block-tor-exit-node.conf;"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_TOR_EXIT_NODES%" "true"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_TOR_EXIT_NODE%" ""
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_TOR_EXIT_NODES%" "false"
 fi
 
 # block proxies
 if [ "$BLOCK_PROXIES" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_PROXIES%" "include /etc/nginx/block-proxies.conf;"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_PROXIES%" "true"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_PROXIES%" ""
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_PROXIES%" "false"
 fi
 
 # block abusers
 if [ "$BLOCK_ABUSERS" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_ABUSERS%" "include /etc/nginx/block-abusers.conf;"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_ABUSERS%" "true"
 else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%BLOCK_ABUSERS%" ""
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_ABUSERS%" "false"
 fi
 
 # HTTPS config

@@ -130,16 +130,31 @@ fi
 # block TOR exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
 	echo "$BLOCK_TOR_EXIT_NODE_CRON /opt/scripts/exit-nodes.sh" >> /etc/crontabs/nginx
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_TOR_EXIT_NODES%" "lua_shared_dict tor_exit_nodes_data 1m;"
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_TOR_EXIT_NODES%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_TOR_EXIT_NODES%" ""
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_TOR_EXIT_NODES%" "false"
 fi
 
 # block proxies
 if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
 	echo "$BLOCK_PROXIES_CRON /opt/scripts/proxies.sh" >> /etc/crontabs/nginx
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_PROXIES%" "lua_shared_dict proxies_data 250m;"
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_PROXIES%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_PROXIES%" ""
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_PROXIES%" "false"
 fi
 
 # block abusers
 if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
 	echo "$BLOCK_ABUSERS_CRON /opt/scripts/abusers.sh" >> /etc/crontabs/nginx
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_ABUSERS%" "lua_shared_dict abusers_data 50m;"
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_ABUSERS%" "true"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_ABUSERS%" ""
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_ABUSERS%" "false"
 fi
 
 # DNS resolvers

@@ -132,7 +132,7 @@ else
 fi
 
 # list of log files to display
-LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log /var/log/nginx/modsec_audit.log"
+LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log /var/log/nginx/error.log /var/log/nginx/modsec_audit.log"
 
 # start fail2ban
 if [ "$USE_FAIL2BAN" = "yes" ] ; then
