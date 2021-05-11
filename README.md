@@ -294,7 +294,7 @@ docker run --network mynet \
            -l bunkerized-nginx.SERVER_NAME=app2.domain.com \
            -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
            -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
-           -l bunkerized-nginx.REVERSE_PROXY_HOST=http://anotherapp
+           -l bunkerized-nginx.REVERSE_PROXY_HOST=http://anotherapp \
            tutum/hello-world
 ```
 

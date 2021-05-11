@@ -31,6 +31,9 @@ services:
       - autoconf:/etc/nginx
     depends_on:
       - mywww
+      - myapp1
+      - myapp2
+      - myapp3
 
   myapp1:
     image: php:fpm
