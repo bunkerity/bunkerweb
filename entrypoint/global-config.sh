@@ -113,18 +113,22 @@ fi
 
 # block bad UA
 if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" "include /etc/nginx/map-user-agent.conf;"
 	echo "$BLOCK_USER_AGENT_CRON /opt/scripts/user-agents.sh" >> /etc/crontabs/nginx
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENTS%" "lua_shared_dict user_agents_data 1m; lua_shared_dict user_agents_cache 10m;"
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_USER_AGENTS%" "true"
 else
-	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENT%" ""
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_USER_AGENTS%" ""
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_USER_AGENTS%" "false"
 fi
 
 # block bad refferer
 if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
-	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" "include /etc/nginx/map-referrer.conf;"
 	echo "$BLOCK_REFERRER_CRON /opt/scripts/referrers.sh" >> /etc/crontabs/nginx
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRERS%" "lua_shared_dict referrers_data 1m; lua_shared_dict referrers_cache 10m;"
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_REFERRERS%" "true"
 else
-	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRER%" ""
+	replace_in_file "/etc/nginx/nginx.conf" "%BLOCK_REFERRERS%" ""
+	replace_in_file "/etc/nginx/init-lua.conf" "%USE_REFERRERS%" "false"
 fi
 
 # block TOR exit nodes

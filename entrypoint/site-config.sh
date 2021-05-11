@@ -278,7 +278,7 @@ fi
 
 # block bad UA
 if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "true"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENTS%" "true"
 	if [ "$WHITELIST_USER_AGENT" != "" ] ; then
 		list=$(spaces_to_lua "$WHITELIST_USER_AGENT")
 		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" "$list"
@@ -286,7 +286,7 @@ if [ "$BLOCK_USER_AGENT" = "yes" ] ; then
 		replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" ""
 	fi
 else
-	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENT%" "false"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_USER_AGENTS%" "false"
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_USER_AGENT%" ""
 fi
 
@@ -300,7 +300,7 @@ fi
 
 # block bad referrer
 if [ "$BLOCK_REFERRER" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRER%" "true"
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRERS%" "true"
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_REFERRER%" "false"
 fi
