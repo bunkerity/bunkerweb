@@ -24,6 +24,7 @@ services:
       - app1.website.com_REMOTE_PHP_PATH=/var/www/html
       - app2.website.com_REMOTE_PHP=app2
       - app2.website.com_REMOTE_PHP_PATH=/var/www/html
+      - app2.website.com_ROOT_SITE_SUBFOLDER=    # no subfolder
       - app3.website.com_REMOTE_PHP=app3
       - app3.website.com_REMOTE_PHP_PATH=/var/www/html
       - app3.website.com_ROOT_SITE_SUBFOLDER=another-folder
@@ -32,16 +33,28 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./apps/app1.website.com/web-files:/var/www/html
+      - ./apps/app1.website.com/web-files:/var/www/html    # app1 project web root
+
+  app1_db:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./apps/app1.website.com/db-data:/var/lib/mysql    # app1 project data
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd         # replace with a stronger password
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd              # replace with a stronger password
 
   app2:
     image: php:fpm
     restart: always
     volumes:
-      - ./apps/app2.website.com/web-files:/var/www/html
+      - ./apps/app2.website.com:/var/www/html    # app2 project with no subfolder
 
   app3:
-    image: php:fpm
+    build: apps/app3.website.com/.    # project with custom built image
+    image: my-php
     restart: always
     volumes:
-      - ./apps/app3.website.com/another-folder:/var/www/html
+      - ./apps/app3.website.com/another-folder:/var/www/html    # app3 project web root
