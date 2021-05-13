@@ -6,6 +6,11 @@ RUN chmod +x /tmp/compile.sh && \
     /tmp/compile.sh && \
     rm -rf /tmp/*
 
+COPY dependencies.sh /tmp/dependencies.sh
+RUN chmod +x /tmp/dependencies.sh && \
+    /tmp/dependencies.sh && \
+    rm -rf /tmp/dependencies.sh
+
 COPY entrypoint/ /opt/entrypoint
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
@@ -14,7 +19,9 @@ COPY logs/ /opt/logs
 COPY lua/ /opt/lua
 
 COPY prepare.sh /tmp/prepare.sh
-RUN chmod +x /tmp/prepare.sh && /tmp/prepare.sh && rm -f /tmp/prepare.sh
+RUN chmod +x /tmp/prepare.sh && \
+    /tmp/prepare.sh && \
+    rm -f /tmp/prepare.sh
 
 # fix CVE-2021-20205
 RUN apk add "libjpeg-turbo>=2.1.0-r0"

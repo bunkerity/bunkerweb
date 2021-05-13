@@ -5,25 +5,13 @@
 
 echo "[*] Starting bunkerized-nginx ..."
 
-# execute custom scripts if it's a customized image
-for file in /entrypoint.d/* ; do
-    [ -f "$file" ] && [ -x "$file" ] && "$file"
-done
-
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	echo "[*] Catched stop operation"
 	echo "[*] Stopping crond ..."
 	pkill -TERM crond
-	if [ "$USE_FAIL2BAN" = "yes" ] ; then
-		echo "[*] Stopping fail2ban"
-		fail2ban-client stop > /dev/null
-	fi
 	echo "[*] Stopping nginx ..."
 	/usr/sbin/nginx -s stop
-	echo "[*] Stopping rsyslogd ..."
-	pkill -TERM rsyslogd
-	pkill -TERM tail
 }
 trap "trap_exit" TERM INT QUIT
 
@@ -62,15 +50,9 @@ if [ ! -f "/opt/installed" ] ; then
 		exit 1
 	fi
 
-	# logs config
-	/opt/entrypoint/logs.sh
-
 	# lua config
 	# TODO : move variables from /usr/local/lib/lua + multisite support ?
 	/opt/entrypoint/lua.sh
-
-	# fail2ban config
-	/opt/entrypoint/fail2ban.sh
 
 	# clamav config
 	/opt/entrypoint/clamav.sh
@@ -103,9 +85,6 @@ else
 	echo "[*] Skipping configuration process"
 fi
 
-# start rsyslogd
-rsyslogd -i /tmp/rsyslogd.pid
-
 # start crond
 crond
 
@@ -124,22 +103,13 @@ fi
 
 # run nginx
 echo "[*] Running nginx ..."
-nginx
-if [ "$?" -eq 0 ] ; then
-	echo "[*] nginx successfully started !"
-else
-	echo "[!] nginx failed to start"
-fi
-
-# list of log files to display
-LOGS="/var/log/access.log /var/log/error.log /var/log/jobs.log /var/log/nginx/error.log /var/log/nginx/modsec_audit.log"
-
-# start fail2ban
-if [ "$USE_FAIL2BAN" = "yes" ] ; then
-	echo "[*] Running fail2ban ..."
-	fail2ban-server > /dev/null
-	LOGS="$LOGS /var/log/fail2ban.log"
-fi
+nginx &
+pid="$!"
+#if [ "$?" -eq 0 ] ; then
+#	echo "[*] nginx successfully started !"
+#else
+#	echo "[!] nginx failed to start"
+#fi
 
 # autotest
 if [ "$1" == "test" ] ; then
@@ -152,9 +122,8 @@ if [ "$1" == "test" ] ; then
 	exit 1
 fi
 
-# display logs
-tail -F $LOGS &
-pid="$!"
+# wait for nginx
+wait "$pid"
 while [ -f "/tmp/nginx.pid" ] ; do
 	wait "$pid"
 done

@@ -92,7 +92,7 @@ $ docker run -p 80:8080 \
 
 ## Bad behaviors detection
 
-TODO
+When attackers search for and/or exploit vulnerabilities they might generate some suspicious HTTP status codes that a "regular" user won't generate within a period of time. If we detect that kind of behavior we can ban the offending IP address and force the attacker to come with a new one.
 
 ## Antibot challenge
 
