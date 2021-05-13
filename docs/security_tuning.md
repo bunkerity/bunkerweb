@@ -94,6 +94,13 @@ $ docker run -p 80:8080 \
 
 When attackers search for and/or exploit vulnerabilities they might generate some suspicious HTTP status codes that a "regular" user won't generate within a period of time. If we detect that kind of behavior we can ban the offending IP address and force the attacker to come with a new one.
 
+That kind of security measure is implemented and enabled by default in bunkerized-nginx. Here is the list of the related environment variables and their default value :
+- `USE_BAD_BEHAVIOR=yes` : enable/disable "bad behavior" detection and automatic ban of IP
+- `BAD_BEHAVIOR_STATUS_CODES=400 401 403 404 405 429 444` : the list of HTTP status codes considered as "suspicious"
+- `BAD_BEHAVIOR_THRESHOLD=10` : the number of "suspicious" HTTP status codes required before we ban the corresponding IP address
+- `BAD_BEHAVIOR_BAN_TIME=86400` : the duration time (in seconds) of the ban
+- `BAD_BEHAVIOR_COUNT_TIME=60` : the duration time (in seconds) to wait before resetting the counter of "suspicious" HTTP status codes for a given IP 
+
 ## Antibot challenge
 
 Attackers will certainly use automated tools to exploit/find some vulnerabilities on your web service. One countermeasure is to challenge the users to detect if it looks like a bot. It might be effective against script kiddies or "lazy" attackers.
