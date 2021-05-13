@@ -38,7 +38,7 @@ fi
 cp /opt/confs/site/* "$NGINX_PREFIX"
 
 # replace paths
-replace_in_file "${NGINX_PREFIX}server.conf" "%MAIN_LUA%" "include ${NGINX_PREFIX}main-lua.conf;"
+replace_in_file "${NGINX_PREFIX}server.conf" "%INCLUDE_LUA%" "include ${NGINX_PREFIX}main-lua.conf;\ninclude ${NGINX_PREFIX}log-lua.conf;"
 if [ "$MULTISITE" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%SERVER_CONF%" "include /server-confs/*.conf;\ninclude /server-confs/${first_server}/*.conf;"
 	replace_in_file "${NGINX_PREFIX}server.conf" "%PRE_SERVER_CONF%" "include /pre-server-confs/*.conf;\ninclude /pre-server-confs/${first_server}/*.conf;"
@@ -562,6 +562,15 @@ else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%INCLUDE_ANTIBOT_RECAPTCHA%" ""
 fi
 
+# bad behavior
+if [ "$USE_BAD_BEHAVIOR" = "yes" ] ; then
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_BAD_BEHAVIOR%" "true"
+	replace_in_file "${NGINX_PREFIX}log-lua.conf" "%USE_BAD_BEHAVIOR%" "true"
+else
+	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_BAD_BEHAVIOR%" "false"
+	replace_in_file "${NGINX_PREFIX}log-lua.conf" "%USE_BAD_BEHAVIOR%" "false"
+fi
+
 # request limiting
 if [ "$USE_LIMIT_REQ" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}server.conf" "%LIMIT_REQ%" "include ${NGINX_PREFIX}limit-req.conf;"
@@ -576,13 +585,6 @@ if [ "$USE_LIMIT_CONN" = "yes" ] ; then
 	replace_in_file "${NGINX_PREFIX}limit-conn.conf" "%LIMIT_CONN_MAX%" "$LIMIT_CONN_MAX"
 else
 	replace_in_file "${NGINX_PREFIX}server.conf" "%LIMIT_CONN%" ""
-fi
-
-# fail2ban
-if [ "$USE_FAIL2BAN" = "yes" ] ; then
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_FAIL2BAN%" "include /etc/nginx/fail2ban-ip.conf;"
-else
-	replace_in_file "${NGINX_PREFIX}server.conf" "%USE_FAIL2BAN%" ""
 fi
 
 # clamav scan uploaded files

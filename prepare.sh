@@ -28,7 +28,6 @@ ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log
 ln -s /proc/1/fd/1 /var/log/access.log
 ln -s /proc/1/fd/2 /var/log/error.log
 ln -s /proc/1/fd/1 /var/log/jobs.log
-ln -s /proc/1/fd/1 /var/log/fail2ban.log
 ln -s /proc/1/fd/1 /var/log/clamav.log
 mkdir /var/log/letsencrypt
 chown nginx:nginx /var/log/letsencrypt

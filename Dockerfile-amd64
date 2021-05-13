@@ -14,8 +14,6 @@ RUN chmod +x /tmp/dependencies.sh && \
 COPY entrypoint/ /opt/entrypoint
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
-COPY fail2ban/ /opt/fail2ban
-COPY logs/ /opt/logs
 COPY lua/ /opt/lua
 
 COPY prepare.sh /tmp/prepare.sh

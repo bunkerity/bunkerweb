@@ -46,8 +46,8 @@
 						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class([service["AUTO_LETS_ENCRYPT"], service["USE_CUSTOM_HTTPS"], service["GENERATE_SELF_SIGNED_SSL"]], ["yes", "yes", "yes"]) }}"></i></div>
 						<div class="col col-6">ModSecurity</div>
 						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_MODSECURITY"], "yes") }}"></i></div>
-						<div class="col col-6">Fail2Ban</div>
-						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_FAIL2BAN"], "yes") }}"></i></div>
+						<div class="col col-6">Bad behavior</div>
+						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_BAD_BEHAVIOR"], "yes") }}"></i></div>
 						<div class="col col-6">Limit req</div>
 						<div class="col col-6 text-center"><i class="fas fa-{{ env_to_summary_class(service["USE_LIMIT_REQ"], "yes") }}"></i></div>
 						<div class="col col-6">DNSBL</div>

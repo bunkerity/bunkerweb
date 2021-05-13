@@ -33,6 +33,13 @@ replace_in_file "/usr/local/lib/lua/blacklist.lua" "%BLACKLIST_REVERSE_LIST%" "$
 list=$(spaces_to_lua "$DNSBL_LIST")
 replace_in_file "/usr/local/lib/lua/dnsbl.lua" "%DNSBL_LIST%" "$list"
 
+# bad behavior
+list=$(spaces_to_lua "$BAD_BEHAVIOR_STATUS_CODES")
+replace_in_file "/usr/local/lib/lua/behavior.lua" "%STATUS_CODES%" "$list"
+replace_in_file "/usr/local/lib/lua/behavior.lua" "%THRESHOLD%" "$BAD_BEHAVIOR_THRESHOLD"
+replace_in_file "/usr/local/lib/lua/behavior.lua" "%BAN_TIME%" "$BAD_BEHAVIOR_BAN_TIME"
+replace_in_file "/usr/local/lib/lua/behavior.lua" "%COUNT_TIME%" "$BAD_BEHAVIOR_COUNT_TIME"
+
 # CrowdSec setup
 if [ "$(has_value USE_CROWDSEC yes)" != "" ] ; then
 	replace_in_file "/usr/local/lib/lua/crowdsec/crowdsec.conf" "%CROWDSEC_HOST%" "$CROWDSEC_HOST"

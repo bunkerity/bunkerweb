@@ -220,9 +220,11 @@ else
 	replace_in_file "/etc/nginx/multisite-default-server.conf" "%MULTISITE_DISABLE_DEFAULT_SERVER%" ""
 fi
 
-# fail2ban setup
-if [ "$(has_value USE_FAIL2BAN yes)" != "" ] ; then
-	echo "" > /etc/nginx/fail2ban-ip.conf
+# bad behavior
+if [ "$(has_value USE_BAD_BEHAVIOR yes)" != "" ] ; then
+	replace_in_file "/etc/nginx/nginx.conf" "%BAD_BEHAVIOR%" "lua_shared_dict behavior_ban 10m;\nlua_shared_dict behavior_count 10m;"
+else
+	replace_in_file "/etc/nginx/nginx.conf" "%BAD_BEHAVIOR%" ""
 fi
 
 # CrowdSec setup

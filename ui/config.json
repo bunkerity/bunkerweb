@@ -804,19 +804,6 @@
          }
       ]
    },
-   "Fail2ban":{
-      "id":"fail2ban",
-      "params":[
-         {
-            "type":"checkbox",
-            "label":"Use fail2ban",
-            "env":"USE_FAIL2BAN",
-            "regex":"^(yes|no)$",
-            "id":"use-fail2ban",
-            "default":"yes"
-         }
-      ]
-   },
    "ClamAV":{
       "id":"clamav",
       "params":[

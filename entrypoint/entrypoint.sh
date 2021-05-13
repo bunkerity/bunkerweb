@@ -105,11 +105,6 @@ fi
 echo "[*] Running nginx ..."
 nginx &
 pid="$!"
-#if [ "$?" -eq 0 ] ; then
-#	echo "[*] nginx successfully started !"
-#else
-#	echo "[!] nginx failed to start"
-#fi
 
 # autotest
 if [ "$1" == "test" ] ; then

@@ -20,7 +20,7 @@ services:
       - BLOCK_TOR_EXIT_NODE=no
       - BLOCK_ABUSERS=no
       - BLOCK_PROXIES=no
-      - USE_FAIL2BAN=no
+      - USE_BAD_BEHAVIOR=no
       - USE_DNSBL=no
       - USE_WHITELIST_IP=no
       - USE_WHITELIST_REVERSE=no
