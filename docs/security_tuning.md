@@ -2,6 +2,14 @@
 
 bunkerized-nginx comes with a set of predefined security settings that you can (and you should) tune to meet your own use case.
 
+## Miscellaneous
+
+Here is a list of miscellaneous environment variables related more or less to security :
+- `MAX_CLIENT_SIZE=10m` : maximum size of client body
+- `ALLOWED_METHODS=GET|POST|HEAD` : list of HTTP methos that clients are allowed to use
+- `DISABLE_DEFAULT_SERVER=no` : enable/disable the default server (i.e. : should your server respond to unknown Host header ?)
+- `SERVER_TOKENS=off` : enable/disable sending the version number of nginx
+
 ## HTTPS
 
 ### Settings
@@ -57,6 +65,8 @@ $ docker run -p 80:8080 \
 
 Some important HTTP headers related to client security are sent with a default value. Sometimes it can break a web application or can be tuned to provide even more security. The complete list is available [here](#TODO).
 
+You can also remove headers (e.g. : too verbose ones) by using the `REMOVE_HEADERS` environment variable which takes a list of header name separated with space (default value = `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
+
 ## ModSecurity
 
 ModSecurity is integrated and enabled by default alongside the OWASP Core Rule Set within bunkerized-nginx. To change this behaviour you can use the `USE_MODSECURITY=no` or `USE_MODSECURITY_CRS=no` environment variables.
@@ -108,6 +118,95 @@ Attackers will certainly use automated tools to exploit/find some vulnerabilitie
 You can use the `USE_ANTIBOT` environment variable to add that kind of checks whenever a new client is connecting. The available challenges are : `cookie`, `javascript`, `captcha` and `recaptcha`. More info [here](#TODO).
 
 ## External blacklists
+
+### DNSBL
+
+Automatic checks on external DNS BlackLists are enabled by default with the `USE_DNSBL=yes` environment variable. The list of DNSBL zones is also configurable, you just need to edit the `DNSBL_LIST` environment variable which contains the following value by default `bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org`.
+
+### CrowdSec
+
+CrowdSec is not enabled by default because it's more than an external blacklists and needs some extra work to get it working. But bunkerized-nginx is fully working with CrowdSec, here are the related environment variables :
+- `USE_CROWDSEC=no` : enable/disable CrowdSec checks before we authorize a client
+- `CROWDSEC_HOST=` : full URL to your CrowdSec instance API
+- `CROWDSEC_KEY=` : bouncer key given from **cscli bouncer add MyBouncer**
+
+If you want to give it a try, you have a concrete example on how to use CrowdSec with bunkerized-nginx [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/crowdsec).
+
+### User-Agents
+
+Sometimes script kiddies or lazy attackers don't put a "legitimate" value inside the **User-Agent** HTTP header so we can block them. This is controlled with the `BLOCK_USER_AGENT=yes` environment variable. The blacklist is composed of two files from [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list) and [here](https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt).
+
+If a legitimate User-Agent is blacklisted, you can use the `WHITELIST_USER_AGENT` while still keeping the `BLOCK_USER_AGENT=yes` (more info [here](#TODO)).
+
+### TOR exit nodes
+
+Blocking TOR exit nodes might not be a good decision depending on your use case. We decided to enable it by default with the `BLOCK_TOR_EXIT_NODE=yes` environment variable. If privacy is a concern for you and/or your clients, you can override the default value (i.e : `BLOCK_TOR_EXIT_NODE=no`).
+
+Please note that you have a concrete example on how to use bunkerized-nginx with a .onion hidden service [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/tor-hidden-service).
+
+### Proxies
+
+This list contains IP addresses and networks known to be open proxies (downloaded from [here](https://iplists.firehol.org/files/firehol_proxies.netset)). Unless privacy is important for you and/or your clients, you should keep the default environment variable `BLOCK_PROXIES=yes`.
+
+### Abusers
+
+This list contains IP addresses and networks known to be abusing (downloaded from [here](https://iplists.firehol.org/files/firehol_abusers_30d.netset)). You can control this feature with the `BLOCK_ABUSERS` environment variable (default : `yes`).
+
+### Referrers
+
+This list contains bad referrers domains known for spamming (downloaded from [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-referrers.list)). If one value is found inside the **Referer** HTTP header, request will be blocked. You can control this feature with the `BLOCK_REFERRER` environment variable (default = `yes`).
+
+## Limiting
+
+### Requests
+
+To limit bruteforce attacks we decided to use the [rate limiting feature in nginx](https://www.nginx.com/blog/rate-limiting-nginx/) so attackers will be limited to X request(s)/s for the same resource. That kind of protection might be useful against other attacks too (e.g. : blind SQL injection).
+
+Here is the list of related environment variables and their default value :
+- `USE_LIMIT_REQ=yes` : enable/disable request limiting
+- `LIMIT_REQ_RATE=1r/s` : the rate to apply for the same resource
+- `LIMIT_REQ_BURST=2` : the number of request tu put in a queue before effectively rejecting requests
+
+### Connections
+
+Opening too many connections from the same IP address might be considered as suspicious (unless it's a shared IP and everyone is sending requests to your web service). It can be a dos/ddos attempt too. Bunkerized-nginx levarages the [ngx_http_conn_module](http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html) from nginx to prevent users opening too many connections. 
+
+Here is the list of related environment variables and their default value :
+- `USE_LIMIT_CONN=yes` : enable disable connection limiting
+- `LIMIT_CONN_MAX=50` : maximum number of connections per IP
+
+## Country
+
+If the location of your clients is known, you may want to add another security layer by whitelisting or blacklisting some countries. You can use the `BLACKLIST_COUNTRY` or `WHITELIST_COUNTRY` environment variables depending on your approach. They both take a list of 2 letters country code separated with space.
+
+## Authentication
+
+You can quickly protect sensitive resources (e.g. : admin panels) by requiring HTTP authentication. Here is the list of related environment variables and their default value :
+- `USE_AUTH_BASIC=no` : enable/disable auth basic
+- `AUTH_BASIC_LOCATION=sitewide` : location of the sensitive resource (e.g. `/admin`) or `sitewide` to force authentication on the whole service
+- `AUTH_BASIC_USER=changeme` : the username required
+- `AUTH_BASIC_PASSWORD=changeme` : the password required
+- `AUTH_BASIC_TEXT=Restricted area` : the text that will be displayed to the user
+
+## Whitelisting
+
+Adding extra security can sometimes trigger false positives. Also, it might be not useful to do the security checks for specific clients because we decided to trust them. Bunkerized-nginx supports two types of whitelist : by IP address and by reverse DNS.
+
+Here is the list of related environment variables and their default value : 
+- `USE_WHITELIST_IP=yes` : enable/disable whitelisting by IP address
+- `WHITELIST_IP_LIST=23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8` : list of IP addresses and/or network CIDR blocks to whitelist (default contains the IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/)).
+- `USE_WHITELIST_REVERSE=yes` : enable/disable whitelisting by reverse DNS
+- `WHITELIST_REVERSE_LIST=.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net` : the list of reverse DNS suffixes to trust (default contains the list of major search engines crawlers).
+
+## Blacklisting
+
+Sometimes it isn't necessary to spend some resources for a particular client because we know for sure that he is malicious. Bunkerized-nginx nginx supports two types of blacklisting : by IP address and by reverse DNS.
+
+Here is the list of related environment variables and their default value : 
+- `USE_BLACKLIST_IP=yes` : enable/disable blacklisting by IP address
+- `BLACKLIST_IP_LIST=` : list of IP addresses and/or network CIDR blocks to blacklist
+- `USE_BLACKLIST_REVERSE=yes` : enable/disable blacklisting by reverse DNS
+- `BLACKLIST_REVERSE_LIST=.shodan.io` : the list of reverse DNS suffixes to never trust.
 
 ## Container hardening
 

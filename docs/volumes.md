@@ -17,7 +17,7 @@ Read-only : yes
 
 Mountpoint : `/etc/letsencrypt`
 
-Description :
+Description :  
 When `AUTO_LETS_ENCRYPT=yes`, certbot will save configurations, certificates and keys inside the `/etc/letsencrypt` folder. It's a common practise to save it so you can remount it in case of a container restart and certbot won't generate new certificate(s).
 
 Examples : [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/basic-website-with-php)
@@ -78,7 +78,7 @@ Read-only : yes
 
 Mountpoint : `/cache`
 
-Description :
+Description :  
 Depending of the settings you use, bunkerized-nginx may download external content (e.g. : blacklists, GeoIP DB, ...). To avoid downloading it again in case of a container restart, you can save the data on the host.
 
 Read-only : no
