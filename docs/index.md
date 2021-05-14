@@ -6,7 +6,7 @@
 introduction
 quickstart_guide
 security_tuning
-common_problems
+troubleshooting
 volumes
 environment_variables
 ```
