@@ -35,11 +35,12 @@ If you have security constraints (e.g : local network, custom PKI, ...) you can 
 - `CUSTOM_HTTPS_CERT=/path/inside/container/to/cert.pem`
 - `CUSTOM_HTTPS_KEY=/path/inside/container/to/key.pem`
 
-Here is a dummy example on how to use custom certificates : 
+Here is a an example on how to use custom certificates : 
 
 ```shell
 $ ls /etc/ssl/my-web-app
 cert.pem key.pem
+
 $ docker run -p 80:8080 \
              -p 443:8443 \
              -v /etc/ssl/my-web-app:/certs:ro \
@@ -63,7 +64,7 @@ $ docker run -p 80:8080 \
 
 ## Headers
 
-Some important HTTP headers related to client security are sent with a default value. Sometimes it can break a web application or can be tuned to provide even more security. The complete list is available [here](#TODO).
+Some important HTTP headers related to client security are sent with a default value. Sometimes it can break a web application or can be tuned to provide even more security. The complete list is available [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#security-headers).
 
 You can also remove headers (e.g. : too verbose ones) by using the `REMOVE_HEADERS` environment variable which takes a list of header name separated with space (default value = `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
 
@@ -115,7 +116,7 @@ That kind of security measure is implemented and enabled by default in bunkerize
 
 Attackers will certainly use automated tools to exploit/find some vulnerabilities on your web service. One countermeasure is to challenge the users to detect if it looks like a bot. It might be effective against script kiddies or "lazy" attackers.
 
-You can use the `USE_ANTIBOT` environment variable to add that kind of checks whenever a new client is connecting. The available challenges are : `cookie`, `javascript`, `captcha` and `recaptcha`. More info [here](#TODO).
+You can use the `USE_ANTIBOT` environment variable to add that kind of checks whenever a new client is connecting. The available challenges are : `cookie`, `javascript`, `captcha` and `recaptcha`. More info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#antibot).
 
 ## External blacklists
 
@@ -136,7 +137,7 @@ If you want to give it a try, you have a concrete example on how to use CrowdSec
 
 Sometimes script kiddies or lazy attackers don't put a "legitimate" value inside the **User-Agent** HTTP header so we can block them. This is controlled with the `BLOCK_USER_AGENT=yes` environment variable. The blacklist is composed of two files from [here](https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list) and [here](https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt).
 
-If a legitimate User-Agent is blacklisted, you can use the `WHITELIST_USER_AGENT` while still keeping the `BLOCK_USER_AGENT=yes` (more info [here](#TODO)).
+If a legitimate User-Agent is blacklisted, you can use the `WHITELIST_USER_AGENT` while still keeping the `BLOCK_USER_AGENT=yes` (more info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#custom-whitelisting)).
 
 ### TOR exit nodes
 
@@ -194,9 +195,9 @@ Adding extra security can sometimes trigger false positives. Also, it might be n
 
 Here is the list of related environment variables and their default value : 
 - `USE_WHITELIST_IP=yes` : enable/disable whitelisting by IP address
-- `WHITELIST_IP_LIST=23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8` : list of IP addresses and/or network CIDR blocks to whitelist (default contains the IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/)).
+- `WHITELIST_IP_LIST=23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8` : list of IP addresses and/or network CIDR blocks to whitelist (default contains the IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/))
 - `USE_WHITELIST_REVERSE=yes` : enable/disable whitelisting by reverse DNS
-- `WHITELIST_REVERSE_LIST=.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net` : the list of reverse DNS suffixes to trust (default contains the list of major search engines crawlers).
+- `WHITELIST_REVERSE_LIST=.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net` : the list of reverse DNS suffixes to trust (default contains the list of major search engines crawlers)
 
 ## Blacklisting
 
@@ -206,7 +207,7 @@ Here is the list of related environment variables and their default value :
 - `USE_BLACKLIST_IP=yes` : enable/disable blacklisting by IP address
 - `BLACKLIST_IP_LIST=` : list of IP addresses and/or network CIDR blocks to blacklist
 - `USE_BLACKLIST_REVERSE=yes` : enable/disable blacklisting by reverse DNS
-- `BLACKLIST_REVERSE_LIST=.shodan.io` : the list of reverse DNS suffixes to never trust.
+- `BLACKLIST_REVERSE_LIST=.shodan.io` : the list of reverse DNS suffixes to never trust
 
 ## Container hardening
 

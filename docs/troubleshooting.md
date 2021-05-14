@@ -6,7 +6,7 @@ When troubleshooting, the logs are your best friends. We try our best to provide
 
 ## Permissions
 
-Don't forget that bunkerized-nginx runs as an unprivileged user with UID/GID 101. Double check the permissions of files and folders for each volumes (see the [volumes list](#TODO)).
+Don't forget that bunkerized-nginx runs as an unprivileged user with UID/GID 101. Double check the permissions of files and folders for each volumes (see the [volumes list](https://bunkerized-nginx.readthedocs.io/en/latest/volumes.html)).
 
 ## ModSecurity
 
@@ -29,5 +29,5 @@ It's a common case that a bot gets flagged as suspicious and can't access your w
 - `WHITELIST_URI`
 - `WHITELIST_USER_AGENT`
 
-More information [here](#).
+More information [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#custom-whitelisting).
 

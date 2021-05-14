@@ -6,18 +6,24 @@
 docker run -p 80:8080 -v /path/to/web/files:/www:ro bunkerity/bunkerized-nginx
 ```
 
-Web files are stored in the /www directory, the container will serve files from there. Please note that *bunkerized-nginx* doesn't run as root but with an unprivileged user with UID/GID 101 therefore you should set the rights of */path/to/web/files* accordingly.
+Web files are stored in the /www directory, the container will serve files from there. Please note that *bunkerized-nginx* doesn't run as root but as an unprivileged user with UID/GID 101 therefore you should set the rights of */path/to/web/files* accordingly.
 
 ## In combination with PHP
 
 ```shell
 docker network create mynet
+```
+
+```shell
 docker run --network mynet \
            -p 80:8080 \
            -v /path/to/web/files:/www:ro \
            -e REMOTE_PHP=myphp \
            -e REMOTE_PHP_PATH=/app \
            bunkerity/bunkerized-nginx
+```
+
+```shell
 docker run --network mynet \
            --name myphp \
            -v /path/to/web/files:/app \
@@ -39,7 +45,7 @@ docker run -p 80:8080 \
            bunkerity/bunkerized-nginx
 ```
 
-Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive. Please note that *bunkerized-nginx* doesn't run as root but with an unprivileged user with UID/GID 101 therefore you should set the rights of */where/to/save/certificates* accordingly.
+Certificates are stored in the /etc/letsencrypt directory, you should save it on your local drive. Please note that *bunkerized-nginx* doesn't run as root but as an unprivileged user with UID/GID 101 therefore you should set the rights of */where/to/save/certificates* accordingly.
 
 If you don't want your webserver to listen on HTTP add the environment variable `LISTEN_HTTP` with a *no* value (e.g. HTTPS only). But Let's Encrypt needs the port 80 to be opened so redirecting the port is mandatory.
 
@@ -81,7 +87,7 @@ docker run -p 80:8080 \
 
 The `PROXY_REAL_IP` environment variable, when set to *yes*, activates the [ngx_http_realip_module](https://nginx.org/en/docs/http/ngx_http_realip_module.html) to get the real client IP from the reverse proxy.
 
-See [this section](#reverse-proxy) if you need to tweak some values (trusted ip/network, header, ...).
+See [this section](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#reverse-proxy) if you need to tweak some values (trusted ip/network, header, ...).
 
 ## Multisite
 
@@ -197,7 +203,7 @@ docker run --network mynet \
            -l bunkerized-nginx.SERVER_NAME=app2.domain.com \
            -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
            -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
-           -l bunkerized-nginx.REVERSE_PROXY_HOST=http://anotherapp
+           -l bunkerized-nginx.REVERSE_PROXY_HOST=http://anotherapp \
            tutum/hello-world
 ```
 

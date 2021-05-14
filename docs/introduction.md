@@ -6,13 +6,13 @@
 
 nginx Docker image secure by default.  
 
-Avoid the hassle of following security best practices each time you need a web server or reverse proxy. Bunkerized-nginx provides generic security configs, settings and tools so you don't need to do it yourself.
+Avoid the hassle of following security best practices "by hand" each time you need a web server or reverse proxy. Bunkerized-nginx provides generic security configs, settings and tools so you don't need to do it yourself.
 
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
 - State-of-the-art web security : HTTP security headers, prevent leaks, TLS hardening, ...
 - Integrated ModSecurity WAF with the OWASP Core Rule Set
-- Automatic ban of strange behaviors with fail2ban
+- Automatic ban of strange behaviors
 - Antibot challenge through cookie, javascript, captcha or recaptcha v3
 - Block TOR, proxies, bad user-agents, countries, ...
 - Block known bad IP with DNSBL and CrowdSec
