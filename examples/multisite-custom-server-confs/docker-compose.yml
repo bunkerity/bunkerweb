@@ -32,7 +32,7 @@ services:
       - nc.website.com_LIMIT_REQ_BURST=10
       - nc.website.com_ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
       - nc.website.com_X_FRAME_OPTIONS=SAMEORIGIN
-      - nc.website.com_BAD_BEHAVIOR_STATUS_CODE=400|401|403|405|444
+      - nc.website.com_BAD_BEHAVIOR_STATUS_CODES=400|401|403|405|444
     networks:
       - net1
       - net2
