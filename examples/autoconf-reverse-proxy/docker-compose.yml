@@ -8,6 +8,8 @@ services:
     ports:
       - 80:8080
       - 443:8443
+    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - autoconf:/etc/nginx

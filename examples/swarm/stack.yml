@@ -4,6 +4,8 @@ services:
 
   autoconf:
     image: bunkerity/bunkerized-nginx-autoconf
+    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /shared/confs:/etc/nginx
@@ -31,6 +33,8 @@ services:
         target: 8443
         mode: host
         protocol: tcp
+    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
     volumes:
       - /shared/confs:/etc/nginx
       - /shared/letsencrypt:/etc/letsencrypt:ro
