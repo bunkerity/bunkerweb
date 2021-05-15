@@ -51,6 +51,8 @@ $ docker run -p 80:8080 \
              bunkerity/bunkerized-nginx
 ```
 
+Please note that if you have one or more intermediate certificate(s) in your chain of trust, you will need to provide the bundle to `CUSTOM_HTTPS_CERT` (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)).
+
 ### Self-signed certificate
 
 This method is not recommended in production but can be used to quickly deploy HTTPS for testing purposes. Just use the `GENERATE_SELF_SIGNED_SSL=yes` environment variable and bunkerized-nginx will generate a self-signed certificate for you :
