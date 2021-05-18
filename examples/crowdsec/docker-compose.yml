@@ -3,8 +3,18 @@ version: '3'
 services:
 
   mywww:
-    image: bunkerity/bunkerized-nginx
+    image: debug
     restart: always
+    # mandatory for crowdsec :
+    # you need to redirect Docker logs to the syslog server
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://10.10.10.254:514"
+    depends_on:
+      - mysyslog
+      - myapp1
+      - myapp2
     ports:
       - 80:8080
       - 443:8443
@@ -13,7 +23,6 @@ services:
     volumes:
       - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
-      - nginx_logs:/var/log
     environment:
       - SERVER_NAME=app1.website.com app2.website.com # replace with your domains
       - MULTISITE=yes
@@ -24,15 +33,15 @@ services:
       - USE_GZIP=yes
       - USE_CROWDSEC=yes
       - CROWDSEC_HOST=http://mycrowdsec:8080
-      - CROWDSEC_KEY=                                 # you need to generate it (see bouncer_key.sh)
+      - CROWDSEC_KEY=                                # you need to generate it (see bouncer_key.sh)
       - app1.website.com_REMOTE_PHP=myapp1
       - app1.website.com_REMOTE_PHP_PATH=/app
       - app2.website.com_REMOTE_PHP=myapp2
       - app2.website.com_REMOTE_PHP_PATH=/app
     networks:
-      - net0
-      - net1
-      - net2
+      net0:
+      net1:
+      net2:
 
   mycrowdsec:
     image: crowdsecurity/crowdsec:v1.0.13
@@ -45,6 +54,16 @@ services:
       - REGISTER_TO_ONLINE_API=true
     networks:
       - net0
+
+  mysyslog:
+    image: balabit/syslog-ng
+    restart: always
+    volumes:
+     - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf 
+     - nginx_logs:/var/log
+    networks:
+      net0:
+        ipv4_address: 10.10.10.254
 
   myapp1:
     image: php:fpm
@@ -64,6 +83,10 @@ services:
 
 networks:
   net0:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.10.0/24
   net1:
   net2:
 
