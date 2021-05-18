@@ -24,5 +24,3 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-          skip-dirs: '/usr/lib/go'
-

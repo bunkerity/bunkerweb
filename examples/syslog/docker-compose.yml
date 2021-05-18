@@ -5,8 +5,6 @@ services:
   mywww:
     image: bunkerity/bunkerized-nginx
     restart: always
-    # mandatory for crowdsec :
-    # you need to redirect Docker logs to the syslog server
     logging:
       driver: syslog
       options:
@@ -43,24 +41,12 @@ services:
       net1:
       net2:
 
-  mycrowdsec:
-    image: crowdsecurity/crowdsec:v1.0.13
-    restart: always
-    volumes:
-      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
-      - nginx_logs:/var/log:ro
-    environment:
-      - COLLECTIONS=crowdsecurity/nginx
-      - REGISTER_TO_ONLINE_API=true
-    networks:
-      - net0
-
   mysyslog:
     image: balabit/syslog-ng
     restart: always
     volumes:
      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf 
-     - nginx_logs:/var/log
+     - ./log:/var/log
     networks:
       net0:
         ipv4_address: 10.10.10.254

@@ -13,6 +13,8 @@ if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] || [ "$SWARM_MODE" = "yes" ] ;
 	if [ "$SWARM_MODE" = "yes" ] ; then
 		replace_in_file "/tmp/nginx-temp.conf" "%USE_API%" "include /tmp/api.conf;"
 		replace_in_file "/tmp/api.conf" "%API_URI%" "$API_URI"
+		list=$(spaces_to_lua "$API_WHITELIST_IP")
+		replace_in_file "/tmp/api.conf" "%API_WHITELIST_IP%" "$list"
 	else
 		replace_in_file "/tmp/nginx-temp.conf" "%USE_API%" ""
 	fi
