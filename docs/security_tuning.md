@@ -220,6 +220,13 @@ By default, *bunkerized-nginx* runs as non-root user inside the container and sh
 docker run ... --drop-cap=all ... bunkerity/bunkerized-nginx
 ```
 
+### No new privileges
+Bunkerized-nginx should never tries to gain additional privileges through setuid/setgid executables. You can safely add the **no-new-privileges** [security configuration](https://docs.docker.com/engine/reference/run/#security-configuration) when creating the container :
+
+```shell
+docker run ... --security-opt no-new-privileges ... bunkerity/bunkerized-nginx
+```
+
 ### User namespace remap
 Another hardening trick is [user namespace remapping](https://docs.docker.com/engine/security/userns-remap/) : it allows you to map the UID/GID of users inside a container to another UID/GID on the host. For example, you can map the user nginx with UID/GID 101 inside the container to a non-existent user with UID/GID 100101 on the host.
 
@@ -235,3 +242,4 @@ $ chown root:100101 /path/to/letsencrypt
 $ chmod 770 /path/to/letsencrypt
 $ docker run ... -v /path/to/letsencrypt:/etc/letsencrypt ... bunkerity/bunkerized-nginx
 ```
+

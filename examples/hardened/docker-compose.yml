@@ -7,11 +7,9 @@ services:
     # dropping all capabilities
     cap_drop:
       - ALL
-    # root fs as RO
-    read_only: true
-    # mandatory directories as RW
-    tmpfs:
-      - /tmp:mode=770,uid=0,gid=101
+    # disable setuid/setgid
+    security_opt:
+      - no-new-privileges
     restart: always
     ports:
       - 80:8080

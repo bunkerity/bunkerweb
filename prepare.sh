@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# custom entrypoint
-mkdir /opt/entrypoint.d
-
 # prepare /www
 mkdir /www
 chown -R root:nginx /www
@@ -55,7 +52,6 @@ chmod 770 /var/lib/letsencrypt
 # prepare /usr/local/lib/lua
 chown -R root:nginx /usr/local/lib/lua
 chmod 770 /usr/local/lib/lua
-find /usr/local/lib/lua -type f -name "*.conf" -exec chmod 0760 {} \;
 find /usr/local/lib/lua -type f -name "*.lua" -exec chmod 0760 {} \;
 find /usr/local/lib/lua -type d -exec chmod 0770 {} \;
 
