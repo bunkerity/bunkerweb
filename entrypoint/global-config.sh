@@ -66,8 +66,9 @@ else
 	replace_in_file "/etc/nginx/nginx.conf" "%MULTISITE_DEFAULT_SERVER%" ""
 fi
 
-# custom log format
+# logging
 replace_in_file "/etc/nginx/nginx.conf" "%LOG_FORMAT%" "$LOG_FORMAT"
+replace_in_file "/etc/nginx/nginx.conf" "%LOG_LEVEL%" "$LOG_LEVEL"
 
 # proxy_cache zone
 if [ "$(has_value USE_PROXY_CACHE yes)" != "" ] ; then

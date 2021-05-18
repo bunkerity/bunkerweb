@@ -69,6 +69,12 @@ Default value : *$host $remote_addr - $remote_user \[$time_local\] "$request" $s
 Context : *global*  
 The log format used by nginx to generate logs. More info [here](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format).
 
+`LOG_LEVEL`  
+Values : *debug, info, notice, warn, error, crit, alert, or emerg*  
+Default value : *info*  
+Context : *global*  
+The level of logging : *debug* means more logs and *emerg* means less logs. More info [here](https://nginx.org/en/docs/ngx_core_module.html#error_log).
+
 `HTTP_PORT`  
 Values : *\<any valid port greater than 1024\>*  
 Default value : *8080*  

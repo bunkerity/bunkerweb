@@ -2,6 +2,7 @@
 
 MULTISITE="${MULTISITE-no}"
 LOG_FORMAT="${LOG_FORMAT-\$host \$remote_addr - \$remote_user [\$time_local] \"\$request\" \$status \$body_bytes_sent \"\$http_referer\" \"\$http_user_agent\"}"
+LOG_LEVEL="${LOG_LEVEL-info}"
 HTTP_PORT="${HTTP_PORT-8080}"
 HTTPS_PORT="${HTTPS_PORT-8443}"
 MAX_CLIENT_SIZE="${MAX_CLIENT_SIZE-10m}"
