@@ -230,6 +230,9 @@ fi
 # CrowdSec setup
 if [ "$(has_value USE_CROWDSEC yes)" != "" ] ; then
 	replace_in_file "/etc/nginx/init-lua.conf" "%USE_CROWDSEC%" "true"
+	cp /opt/crowdsec/crowdsec.conf /etc/nginx
+	replace_in_file "/etc/nginx/crowdsec.conf" "%CROWDSEC_HOST%" "$CROWDSEC_HOST"
+	replace_in_file "/etc/nginx/crowdsec.conf" "%CROWDSEC_KEY%" "$CROWDSEC_KEY"
 else
 	replace_in_file "/etc/nginx/init-lua.conf" "%USE_CROWDSEC%" "false"
 fi

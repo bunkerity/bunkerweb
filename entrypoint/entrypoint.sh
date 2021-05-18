@@ -50,10 +50,6 @@ if [ ! -f "/opt/installed" ] ; then
 		exit 1
 	fi
 
-	# lua config
-	# TODO : move variables from /usr/local/lib/lua + multisite support ?
-	/opt/entrypoint/lua.sh
-
 	# clamav config
 	/opt/entrypoint/clamav.sh
 

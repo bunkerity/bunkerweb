@@ -1,4 +1,3 @@
-
 local M         = {}
 local session   = require "resty.session"
 

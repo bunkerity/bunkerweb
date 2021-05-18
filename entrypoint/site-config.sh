@@ -474,6 +474,8 @@ if [ "$USE_WHITELIST_IP" = "yes" ] ; then
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_WHITELIST_IP%" "false"
 fi
+list=$(spaces_to_lua "$WHITELIST_IP_LIST")
+replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_IP_LIST%" "$list"
 
 # whitelist rDNS
 if [ "$USE_WHITELIST_REVERSE" = "yes" ] ; then
@@ -481,6 +483,8 @@ if [ "$USE_WHITELIST_REVERSE" = "yes" ] ; then
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_WHITELIST_REVERSE%" "false"
 fi
+list=$(spaces_to_lua "$WHITELIST_REVERSE_LIST")
+replace_in_file "${NGINX_PREFIX}main-lua.conf" "%WHITELIST_REVERSE_LIST%" "$list"
 
 # blacklist IP
 if [ "$USE_BLACKLIST_IP" = "yes" ] ; then
@@ -488,6 +492,8 @@ if [ "$USE_BLACKLIST_IP" = "yes" ] ; then
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_BLACKLIST_IP%" "false"
 fi
+list=$(spaces_to_lua "$BLACKLIST_IP_LIST")
+replace_in_file "${NGINX_PREFIX}main-lua.conf" "%BLACKLIST_IP_LIST%" "$list"
 
 # blacklist rDNS
 if [ "$USE_BLACKLIST_REVERSE" = "yes" ] ; then
@@ -495,6 +501,8 @@ if [ "$USE_BLACKLIST_REVERSE" = "yes" ] ; then
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_BLACKLIST_REVERSE%" "false"
 fi
+list=$(spaces_to_lua "$BLACKLIST_REVERSE_LIST")
+replace_in_file "${NGINX_PREFIX}main-lua.conf" "%BLACKLIST_REVERSE_LIST%" "$list"
 
 # DNSBL
 if [ "$USE_DNSBL" = "yes" ] ; then
@@ -502,6 +510,8 @@ if [ "$USE_DNSBL" = "yes" ] ; then
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_DNSBL%" "false"
 fi
+list=$(spaces_to_lua "$DNSBL_LIST")
+replace_in_file "${NGINX_PREFIX}main-lua.conf" "%DNSBL_LIST%" "$list"
 
 # antibot uri and session secret
 replace_in_file "${NGINX_PREFIX}main-lua.conf" "%ANTIBOT_URI%" "$ANTIBOT_URI"
@@ -570,6 +580,11 @@ else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_BAD_BEHAVIOR%" "false"
 	replace_in_file "${NGINX_PREFIX}log-lua.conf" "%USE_BAD_BEHAVIOR%" "false"
 fi
+list=$(spaces_to_lua "$BAD_BEHAVIOR_STATUS_CODES")
+replace_in_file "${NGINX_PREFIX}log-lua.conf" "%BAD_BEHAVIOR_STATUS_CODES%" "$list"
+replace_in_file "${NGINX_PREFIX}log-lua.conf" "%BAD_BEHAVIOR_THRESHOLD%" "$BAD_BEHAVIOR_THRESHOLD"
+replace_in_file "${NGINX_PREFIX}log-lua.conf" "%BAD_BEHAVIOR_BAN_TIME%" "$BAD_BEHAVIOR_BAN_TIME"
+replace_in_file "${NGINX_PREFIX}log-lua.conf" "%BAD_BEHAVIOR_COUNT_TIME%" "$BAD_BEHAVIOR_COUNT_TIME"
 
 # request limiting
 if [ "$USE_LIMIT_REQ" = "yes" ] ; then
@@ -600,3 +615,7 @@ if [ "$USE_CROWDSEC" = "yes" ] ; then
 else
 	replace_in_file "${NGINX_PREFIX}main-lua.conf" "%USE_CROWDSEC%" "false"
 fi
+
+# DNS resolvers
+resolvers=$(spaces_to_lua "$DNS_RESOLVERS")
+replace_in_file "${NGINX_PREFIX}main-lua.conf" "%DNS_RESOLVERS%" "$resolvers"

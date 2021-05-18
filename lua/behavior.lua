@@ -1,14 +1,10 @@
-local M			= {}
-local status_codes	= {%STATUS_CODES%}
-local threshold		= %THRESHOLD%
-local count_time	= %COUNT_TIME%
-local ban_time		= %BAN_TIME%
+local M	= {}
 
 function M.is_banned ()
 	return ngx.shared.behavior_ban:get(ngx.var.remote_addr) == true
 end
 
-function M.count ()
+function M.count (status_codes, threshold, count_time, ban_time)
 	for k, v in ipairs(status_codes) do
 		if v == tostring(ngx.status) then
 			local count = ngx.shared.behavior_count:get(ngx.var.remote_addr)
