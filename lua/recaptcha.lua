@@ -3,26 +3,25 @@ local http	= require "resty.http"
 local cjson	= require "cjson"
 
 function M.get_code (antibot_uri, recaptcha_sitekey)
-	return string.format([[
-		<html>
-			<head>
-				<script src="https://www.google.com/recaptcha/api.js?render=%s"></script>
-			</head>
-			<body>
-				<form method="POST" action="%s" id="form">
-					<input type="hidden" name="token" id="token">
-				</form>
-				<script>
-					grecaptcha.ready(function() {
-						grecaptcha.execute('%s', {action: 'recaptcha'}).then(function(token) {
-							document.getElementById("token").value = token;
-							document.getElementById("form").submit();
-						});;
-					});
-				</script>
-			</body>
-		</html>
-	]], recaptcha_sitekey, antibot_uri, recaptcha_sitekey)
+	-- get template
+	local f = io.open("/antibot/recaptcha.html", "r")
+	local template = f:read("*all")
+	f:close()
+
+	-- get recaptcha code
+	f = io.open("/antibot/recaptcha-head.data", "r")
+	local recaptcha_head = f:read("*all")
+	f:close()
+	f = io.open("/antibot/recaptcha-body.data", "r")
+	local recaptcha_body = f:read("*all")
+	f:close()
+
+	-- edit recaptcha code
+	recaptcha_head = string.format(recaptcha_head, recaptcha_sitekey)
+	recaptcha_body = string.format(recaptcha_body, antibot_uri, recaptcha_sitekey)
+
+	-- return template + edited recaptcha code
+	return template:gsub("%%RECAPTCHA_HEAD%%", recaptcha_head):gsub("%%RECAPTCHA_BODY%%", recaptcha_body)
 end
 
 function M.check (token, recaptcha_secret)

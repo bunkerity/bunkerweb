@@ -1,0 +1,43 @@
+<html>
+	<head>
+		<title>Website protection</title>
+		<style>
+			body {
+				background-color: #1d70b7;
+			}
+			.centered {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				text-align: center;
+			}
+			.loader {
+				border: 16px solid #1d70b7;
+				border-top: 16px solid #2dab66;
+				border-radius: 50%;
+				width: 120px;
+				height: 120px;
+				animation: spin 2s linear infinite;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
+			}
+		</style>
+	</head>
+	<body>
+		<div class="centered" style="color: white;">
+			<div class="loader"></div>
+			<noscript>
+				<h1 style="color: red;">In order to access this website, you need to enable JavaScript.</h1>
+			</noscript>
+			<h1>Please wait while we are doing some security checks...</h1>
+			&#128737;&#65039; this website is protected with <a href="https://github.com/bunkerity/bunkerized-nginx" target="_blank">bunkerized-nginx</a> &#128737;&#65039;
+		</div>
+		%JAVASCRIPT%
+	</body>
+</html>

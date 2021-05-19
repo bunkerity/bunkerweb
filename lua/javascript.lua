@@ -7,42 +7,28 @@ function M.get_challenge ()
 	local random = ""
 	local rand = 0
 	for i = 1, 20 do
-			rand = math.random(1, #charset)
-			random = random .. charset:sub(rand, rand)
+		rand = math.random(1, #charset)
+		random = random .. charset:sub(rand, rand)
 	end
 	return random
 end
 
 function M.get_code (challenge, antibot_uri, original_uri)
-	return string.format([[
-		<html>
-			<head>
-			</head>
-			<body>
-				<script>
-					async function digestMessage(message) {
-						const msgUint8 = new TextEncoder().encode(message);
-						const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-						const hashArray = Array.from(new Uint8Array(hashBuffer));
-						const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-						return hashHex;
-					}
-					(async () => {
-						const digestHex = await digestMessage('%s');
-						xhr = new XMLHttpRequest();
-						xhr.open('POST', '%s');
-						xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-						xhr.onload = function() {
-							if (xhr.status === 200) {
-								window.location.replace('%s');
-							}
-						};
-						xhr.send(encodeURI('challenge=' + digestHex));
-					})();
-				</script>
-			</body>
-		</html>
-	]], challenge, antibot_uri, original_uri)
+	-- get template
+	local f = io.open("/antibot/javascript.html", "r")
+	local template = f:read("*all")
+	f:close()
+
+	-- get JS code
+	f = io.open("/antibot/javascript.data", "r")
+	local javascript = f:read("*all")
+	f:close()
+
+	-- edit JS code
+	javascript = string.format(javascript, challenge, antibot_uri, original_uri)
+
+	-- return template + edited JS code
+	return template:gsub("%%JAVASCRIPT%%", javascript)
 end
 
 function M.check (challenge, user)

@@ -1,0 +1,5 @@
+<form method="POST" action="%s">
+	<img src="data:image/jpeg;base64,%s" /><br>
+	Captcha : <input type="text" name="captcha" /><br />
+	<input type="submit" value="send" />
+</form>

@@ -10,19 +10,21 @@ function M.get_challenge ()
 end
 
 function M.get_code (img, antibot_uri)
-	return string.format([[
-		<html>
-			<head>
-			</head>
-			<body>
-				<form method="POST" action="%s">
-				Img = <img src="data:image/jpeg;base64,%s" /><br />
-				Enter captcha : <input type="text" name="captcha" /><br />
-				<input type="submit" value="send" />
-				</form>
-			</body>
-		</html>
-	]], antibot_uri, base64.encode(img))
+	-- get template
+	local f = io.open("/antibot/captcha.html", "r")
+	local template = f:read("*all")
+	f:close()
+
+	-- get captcha code
+	f = io.open("/antibot/captcha.data", "r")
+	local captcha_data = f:read("*all")
+	f:close()
+
+	-- edit captcha code
+	captcha_data = string.format(captcha_data, antibot_uri, base64.encode(img))
+
+	-- return template + edited captcha code
+	return template:gsub("%%CAPTCHA%%", captcha_data)
 end
 
 function M.check (captcha_user, captcha_valid)

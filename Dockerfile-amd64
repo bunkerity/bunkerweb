@@ -15,6 +15,7 @@ COPY entrypoint/ /opt/entrypoint
 COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
 COPY lua/ /usr/local/lib/lua
+COPY antibot/ /antibot
 
 COPY prepare.sh /tmp/prepare.sh
 RUN chmod +x /tmp/prepare.sh && \
