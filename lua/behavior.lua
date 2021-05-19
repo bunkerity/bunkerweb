@@ -1,4 +1,5 @@
-local M	= {}
+local M		= {}
+local logger	= require "logger"
 
 function M.is_banned ()
 	return ngx.shared.behavior_ban:get(ngx.var.remote_addr) == true
@@ -14,14 +15,14 @@ function M.count (status_codes, threshold, count_time, ban_time)
 			count = count + 1
 			local ok, err = ngx.shared.behavior_count:set(ngx.var.remote_addr, count, count_time)
 			if not ok then
-				ngx.log(ngx.ERR, "[BEHAVIOR] not enough memory allocated to behavior_ip_count")
+				logger.log(ngx.ERR, "BEHAVIOR", "not enough memory allocated to behavior_ip_count")
 				return
 			end
 			if count >= threshold then
-				ngx.log(ngx.NOTICE, "[BEHAVIOR] threshold reached for " .. ngx.var.remote_addr .. " (" .. count .. " / " .. threshold .. ") : IP is banned for " .. ban_time .. " seconds")
+				logger.log(ngx.WARN, "BEHAVIOR", "threshold reached for " .. ngx.var.remote_addr .. " (" .. count .. " / " .. threshold .. ") : IP is banned for " .. ban_time .. " seconds")
 				local ok, err = ngx.shared.behavior_ban:safe_set(ngx.var.remote_addr, true, ban_time)
 				if not ok then
-					ngx.log(ngx.ERR, "[BEHAVIOR] not enough memory allocated to behavior_ip_ban")
+					logger.log(ngx.ERR, "BEHAVIOR", "not enough memory allocated to behavior_ip_ban")
 					return
 				end
 			end

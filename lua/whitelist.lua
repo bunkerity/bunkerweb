@@ -1,6 +1,7 @@
-local M			= {}
-local dns		= require "dns"
-local iputils		= require "resty.iputils"
+local M		= {}
+local dns	= require "dns"
+local iputils	= require "resty.iputils"
+local logger	= require "logger"
 
 function M.ip_cached_ok ()
 	return ngx.shared.whitelist_ip_cache:get(ngx.var.remote_addr) == "ok"
@@ -23,7 +24,7 @@ function M.check_ip (ip_list)
 		local whitelist	= iputils.parse_cidrs(ip_list)
 		if iputils.ip_in_cidrs(ngx.var.remote_addr, whitelist) then
 			ngx.shared.whitelist_ip_cache:set(ngx.var.remote_addr, "ok", 86400)
-			ngx.log(ngx.NOTICE, "ip " .. ngx.var.remote_addr .. " is in whitelist")
+			logger.log(ngx.NOTICE, "WHITELIST", "ip " .. ngx.var.remote_addr .. " is in whitelist")
 			return true
 		end
 	end
@@ -47,7 +48,7 @@ function M.check_reverse (reverse_list, resolvers)
 				for k, v in ipairs(ips) do
 					if v == ngx.var.remote_addr then
 						ngx.shared.whitelist_reverse_cache:set(ngx.var.remote_addr, "ok", 86400)
-						ngx.log(ngx.NOTICE, "reverse " .. rdns .. " is in whitelist")
+						logger.log(ngx.NOTICE, "WHITELIST", "reverse " .. rdns .. " is in whitelist")
 						return true
 					end
 				end

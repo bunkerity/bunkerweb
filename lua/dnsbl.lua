@@ -1,5 +1,6 @@
 local M		= {}
 local dns	= require "dns"
+local logger	= require "logger"
 
 function M.cached_ko ()
 	return ngx.shared.dnsbl_cache:get(ngx.var.remote_addr) == "ko"
@@ -18,7 +19,7 @@ function M.check (dnsbls, resolvers)
 			local a,b,c,d = v2:match("([%d]+).([%d]+).([%d]+).([%d]+)")
 			if a == "127" then
 				ngx.shared.dnsbl_cache:set(ngx.var.remote_addr, "ko", 86400)
-				ngx.log(ngx.NOTICE, "ip " .. ngx.var.remote_addr .. " is in DNSBL " .. v)
+				logger.log(ngx.WARN, "DNSBL", "ip " .. ngx.var.remote_addr .. " is in DNSBL " .. v)
 				return true
 			end
 		end

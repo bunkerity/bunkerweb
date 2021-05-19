@@ -1,5 +1,6 @@
 local M		= {}
 local iputils	= require "resty.iputils"
+local logger	= require "logger"
 
 function M.flush_dict (dict)
 	local keys = dict:get_keys(0)
@@ -12,7 +13,7 @@ function M.load_ip (path, dict)
 	M.flush_dict(dict)
 	local file = io.open(path, "r")
 	if not file then
-		ngx.log(ngx.ERR, "[INIT] can't open " .. path)
+		logger.log(ngx.ERR, "INIT", "can't open " .. path)
 	else
 		io.input(file)
 		local i = 0
@@ -24,7 +25,7 @@ function M.load_ip (path, dict)
 				while bin_ip <= upper do
 					local ok, err = dict:safe_set(bin_ip, true, 0)
 					if not ok then
-						ngx.log(ngx.ERR, "[INIT] not enough memory allocated to load data from " .. path) 
+						logger.log(ngx.ERR, "INIT", "not enough memory allocated to load data from " .. path) 
 						continue = false
 						break
 					end
@@ -40,7 +41,7 @@ function M.load_ip (path, dict)
 				break
 			end
 		end
-		ngx.log(ngx.ERR, "[INIT] *NOT AN ERROR* loaded " .. tostring(i) .. " IPs from " .. path)
+		logger.log(ngx.ERR, "INIT", "*NOT AN ERROR* loaded " .. tostring(i) .. " IPs from " .. path)
 		io.close(file)
 	end
 end
@@ -49,19 +50,19 @@ function M.load_raw (path, dict)
 	M.flush_dict(dict)
 	local file = io.open(path, "r")
 	if not file then
-		ngx.log(ngx.ERR, "[INIT] can't open " .. path)
+		logger.log(ngx.ERR, "INIT", "can't open " .. path)
 	else
 		io.input(file)
 		local i = 0
 		for line in io.lines() do
 			local ok, err = dict:safe_set(line, true, 0)
 			if not ok then
-				ngx.log(ngx.ERR, "[INIT] not enough memory allocated to load data from " .. path) 
+				logger.log(ngx.ERR, "INIT", "not enough memory allocated to load data from " .. path) 
 				break
 			end
 			i = i + 1
 		end
-		ngx.log(ngx.ERR, "[INIT] *NOT AN ERROR* loaded " .. tostring(i) .. " entries from " .. path)
+		logger.log(ngx.ERR, "INIT", "*NOT AN ERROR* loaded " .. tostring(i) .. " entries from " .. path)
 		io.close(file)
 	end
 end
