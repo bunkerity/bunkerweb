@@ -7,7 +7,15 @@
 		return hashHex;
 	}
 	(async () => {
-		const digestHex = await digestMessage('%s');
+		const nonce = '%s';
+		var i = 0;
+		while (true) {
+			var digestHex = await digestMessage(nonce + i.toString());
+			if (digestHex.startsWith("0000")) {
+				break;
+			}
+			i++;
+		}
 		xhr = new XMLHttpRequest();
 		xhr.open('POST', '%s');
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -16,6 +24,6 @@
 				window.location.replace('%s');
 			}
 		};
-		xhr.send(encodeURI('challenge=' + digestHex));
+		xhr.send(encodeURI('challenge=' + i.toString()));
 	})();
 </script>
