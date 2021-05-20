@@ -1,0 +1,972 @@
+{
+    "Antibot": {
+        "id": "Antibot",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_ANTIBOT",
+                "id": "use-antibot",
+                "label": "Use antibot",
+                "regex": "^(no|cookie|javascript|captcha|recaptcha)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "/challenge",
+                "env": "ANTIBOT_URI",
+                "id": "antibot-uri",
+                "label": "Antibot uri",
+                "regex": "^/([A-Za-z0-9\\-]/?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "random",
+                "env": "ANTIBOT_SESSION_SECRET",
+                "id": "antibot-session-secret",
+                "label": "Antibot session secret",
+                "regex": "^([\\S]+)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "ANTIBOT_RECAPTCHA_SITEKEY",
+                "id": "antibot-recaptcha-sitekey",
+                "label": "Antibot recaptcha sitekey",
+                "regex": "^([\\S]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "ANTIBOT_RECAPTCHA_SECRET",
+                "id": "antibot-recaptcha-secret",
+                "label": "Antibot recaptcha secret",
+                "regex": "^([\\S]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "0.7",
+                "env": "ANTIBOT_RECAPTCHA_SCORE",
+                "id": "antibot-recaptcha-score",
+                "label": "Antibot recaptcha score",
+                "regex": "^0\\.\\d$",
+                "type": "text"
+            }
+        ]
+    },
+    "Basic auth": {
+        "id": "auth-basic",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_AUTH_BASIC",
+                "id": "use-auth-basic",
+                "label": "Use auth basic",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "sitewide",
+                "env": "AUTH_BASIC_LOCATION",
+                "id": "auth-basic-location",
+                "label": "Auth basic location",
+                "regex": "^(sitewide|/[A-Za-z0-9/]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "changeme",
+                "env": "AUTH_BASIC_USER",
+                "id": "auth-basic-user",
+                "label": "Auth basic user",
+                "regex": "^([A-Za-z0-9\\-_]+)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "changeme",
+                "env": "AUTH_BASIC_PASSWORD",
+                "id": "auth-basic-password",
+                "label": "Auth basic password",
+                "regex": "^([\\S]+)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "Restricted area",
+                "env": "AUTH_BASIC_TEXT",
+                "id": "auth-basic-text",
+                "label": "Auth basic text",
+                "regex": "^([\\S ]+)$",
+                "type": "text"
+            }
+        ]
+    },
+    "Blacklist": {
+        "id": "blacklist",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_BLACKLIST_IP",
+                "id": "use-blacklist-ip",
+                "label": "Use blacklist ip",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "BLACKLIST_IP_LIST",
+                "id": "blacklist-ip-list",
+                "label": "Blacklist ip list",
+                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_BLACKLIST_REVERSE",
+                "id": "use-blacklist-reverse",
+                "label": "Use blacklist reverse",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": ".shodan.io",
+                "env": "BLACKLIST_REVERSE_LIST",
+                "id": "blacklist-reverse-list",
+                "label": "Blacklist reverse list",
+                "regex": "^([a-z\\-0-9\\.]+ ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "",
+                "env": "BLACKLIST_COUNTRY",
+                "id": "blacklist-country",
+                "label": "Blacklist country",
+                "regex": "^([A-Z]{2} ?)*$",
+                "type": "text"
+            }
+        ]
+    },
+    "Block": {
+        "id": "block",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "BLOCK_USER_AGENT",
+                "id": "block-user-agent",
+                "label": "Block user agent",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "BLOCK_TOR_EXIT_NODE",
+                "id": "block-tor-exit-node",
+                "label": "Block tor exit node",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "BLOCK_PROXIES",
+                "id": "block-proxies",
+                "label": "Block proxies",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "BLOCK_ABUSERS",
+                "id": "block-abusers",
+                "label": "Block abusers",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "BLOCK_REFERRER",
+                "id": "block-referrer",
+                "label": "Block referrer",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+        ]
+    },
+    "Cache": {
+        "id": "cache",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_CLIENT_CACHE",
+                "id": "use-client-cache",
+                "label": "Use client cache",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
+                "env": "CLIENT_CACHE_EXTENSIONS",
+                "id": "client-cache-extensions",
+                "label": "Client cache extensions",
+                "regex": "^([a-z0-9]\\|?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "public, max-age=15552000",
+                "env": "CLIENT_CACHE_CONTROL",
+                "id": "client-cache-control",
+                "label": "Client cache control",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "on",
+                "env": "CLIENT_CACHE_ETAG",
+                "id": "client-cache-etag",
+                "label": "Client cache etag",
+                "regex": "^(on|off)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_OPEN_FILE_CACHE",
+                "id": "use-open-file-cache",
+                "label": "Use open file cache",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "max=1000 inactive=20s",
+                "env": "OPEN_FILE_CACHE",
+                "id": "open-file-cache",
+                "label": "Open file cache",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "on",
+                "env": "OPEN_FILE_CACHE_ERRORS",
+                "id": "open-file-cache-errors",
+                "label": "Open file cache errors",
+                "regex": "^(on|off)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "2",
+                "env": "OPEN_FILE_CACHE_MIN_USES",
+                "id": "open-file-cache-min-uses",
+                "label": "Open file cache min uses",
+                "regex": "^([1-9]+)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "30s",
+                "env": "OPEN_FILE_CACHE_VALID",
+                "id": "open-file-cache-valid",
+                "label": "Open file cache valid",
+                "regex": "^\\d+(ms|s|m|h|d|w|M|y)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_PROXY_CACHE",
+                "id": "use-proxy-cache",
+                "label": "Use proxy cache",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "10m",
+                "env": "PROXY_CACHE_PATH_ZONE_SIZE",
+                "id": "proxy-cache-path-zone-size",
+                "label": "Proxy cache path zone size",
+                "regex": "^[0-9]+(k|K|m|M|g|G)?$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "max_size=100m",
+                "env": "PROXY_CACHE_PATH_PARAMS",
+                "id": "proxy-cache-path-params",
+                "label": "Proxy cache path params",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "GET HEAD",
+                "env": "PROXY_CACHE_METHODS",
+                "id": "proxy-cache-methods",
+                "label": "Proxy cache methods",
+                "regex": "^((GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE) ?)+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "2",
+                "env": "PROXY_CACHE_MIN_USES",
+                "id": "proxy-cache-min-uses",
+                "label": "Proxy cache min uses",
+                "regex": "^([1-9]+)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "\\$scheme\\$host\\$request_uri",
+                "env": "PROXY_CACHE_KEY",
+                "id": "proxy-cache-key",
+                "label": "Proxy cache key",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "200=10m 301=10m 302=1h",
+                "env": "PROXY_CACHE_VALID",
+                "id": "proxy-cache-valid",
+                "label": "Proxy cache valid",
+                "regex": "^(\\d{3}=\\d+(ms|s|m|h|d|w|M|y) ?)+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "\\$http_authorization",
+                "env": "PROXY_NO_CACHE",
+                "id": "proxy-no-cache",
+                "label": "Proxy no cache",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "\\$http_authorization",
+                "env": "PROXY_CACHE_BYPASS",
+                "id": "proxy-cache-bypass",
+                "label": "Proxy cache bypass",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            }
+        ]
+    },
+    "ClamAV": {
+        "id": "clamav",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_CLAMAV_UPLOAD",
+                "id": "use-clamav-upload",
+                "label": "Use clamav upload",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+        ]
+    },
+    "Compression": {
+        "id": "compression",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_GZIP",
+                "id": "use-gzip",
+                "label": "Use gzip",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "5",
+                "env": "GZIP_COMP_LEVEL",
+                "id": "gzip-comp-level",
+                "label": "Gzip comp level",
+                "regex": "^[1-9]$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "1000",
+                "env": "GZIP_MIN_LENGTH",
+                "id": "gzip-min-length",
+                "label": "Gzip min length",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
+                "env": "GZIP_TYPES",
+                "id": "gzip-types",
+                "label": "Gzip types",
+                "regex": "^([a-z/\\+\\-\\.] ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_BROTLI",
+                "id": "use-brotli",
+                "label": "Use brotli",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "6",
+                "env": "BROTLI_COMP_LEVEL",
+                "id": "brotli-comp-level",
+                "label": "Brotli comp level",
+                "regex": "^[1-9]$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "1000",
+                "env": "BROTLI_MIN_LENGTH",
+                "id": "brotli-min-length",
+                "label": "Brotli min length",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
+                "env": "BROTLI_TYPES",
+                "id": "brotli-types",
+                "label": "Brotli types",
+                "regex": "^([a-z/\\+\\-\\.] ?)*$",
+                "type": "text"
+            }
+        ]
+    },
+    "CrowdSec": {
+        "id": "use-crowdsec",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_CROWDSEC",
+                "id": "use-crowdsec",
+                "label": "Use crowdsec",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+            {
+                "context": "global",
+                "default": "",
+                "env": "CROWDSEC_HOST",
+                "id": "crowdsec-host",
+                "label": "CrowdSec host",
+                "regex": "^(https?://[\\S]+:?\\d*)?$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "",
+                "env": "CROWDSEC_KEY",
+                "id": "crowdsec-key",
+                "label": "CrowdSec key",
+                "regex": "^([\\S])*$",
+                "type": "text"
+            }
+        ]
+    },
+    "DNSBL": {
+        "id": "dnsbl",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_DNSBL",
+                "id": "use-dnsbl",
+                "label": "Use dnsbl",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
+                "env": "DNSBL_LIST",
+                "id": "dnsbl-list",
+                "label": "dnsbl list",
+                "regex": "^([a-z\\-0-9\\.]+ ?)*$",
+                "type": "text"
+            }
+        ]
+    },
+    "HTTPS": {
+        "id": "https",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "AUTO_LETS_ENCRYPT",
+                "id": "auto-lets-encrypt",
+                "label": "Auto lets encrypt",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "EMAIL_LETS_ENCRYPT",
+                "id": "email-lets-encrypt",
+                "label": "Email lets encrypt",
+                "regex": "^([a-z0-9\\-\\.]+@([a-z\\-0-9]+\\.?)|.{0})$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "REDIRECT_HTTP_TO_HTTPS",
+                "id": "redirect-http-to-https",
+                "label": "Redirect http to https",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "HTTP2",
+                "id": "http2",
+                "label": "HTTP2",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "TLSv1.2 TLSv1.3",
+                "env": "HTTPS_PROTOCOLS",
+                "id": "https-protocols",
+                "label": "HTTPS protocols",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "LISTEN_HTTP",
+                "id": "listen-http",
+                "label": "Listen http",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+        ]
+    },
+    "Headers": {
+        "id": "headers",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "DENY",
+                "env": "X_FRAME_OPTIONS",
+                "id": "x-frame-options",
+                "label": "X frame options",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "1; mode=block",
+                "env": "X_XSS_PROTECTION",
+                "id": "x-xss-protection",
+                "label": "X xss protection",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "nosniff",
+                "env": "X_CONTENT_TYPE_OPTIONS",
+                "id": "x-content-type-options",
+                "label": "X content type options",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no-referrer",
+                "env": "REFERRER_POLICY",
+                "id": "referrer-policy",
+                "label": "Referrer policy",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vibrate 'none'; vr 'none'",
+                "env": "FEATURE_POLICY",
+                "id": "feature-policy",
+                "label": "Feature policy",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "accelerometer=(), ambient-light-sensor=(), autoplay=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker=(), sync-xhr=(), usb=(), vibrate=(), vr=()",
+                "env": "PERMISSIONS_POLICY",
+                "id": "permissions-policy",
+                "label": "Permissions policy",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "* HttpOnly SameSite=Lax",
+                "env": "COOKIE_FLAGS",
+                "id": "cookie-flags",
+                "label": "Cookie flags",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "COOKIE_AUTO_SECURE_FLAG",
+                "id": "cookie-auto-secure-flag",
+                "label": "Cookie auto secure flag",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "max-age=31536000",
+                "env": "STRICT_TRANSPORT_SECURITY",
+                "id": "strict-transport-security",
+                "label": "Strict transport security",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "object-src 'none'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts allow-popups; base-uri 'self';",
+                "env": "CONTENT_SECURITY_POLICY",
+                "id": "content-security-policy",
+                "label": "Content security policy",
+                "regex": "^([\\S ]*)$",
+                "type": "text"
+            }
+        ]
+    },
+    "Info leak": {
+        "id": "info-leak",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
+                "env": "REMOVE_HEADERS",
+                "id": "remove-headers",
+                "label": "Remove headers",
+                "regex": "^([A-Za-z0-9\\-] ?)*$",
+                "type": "text"
+            }
+        ]
+    },
+    "Limit conn": {
+        "id": "limit-conn",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_LIMIT_CONN",
+                "id": "use-limit-conn",
+                "label": "Use limit conn",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "40",
+                "env": "LIMIT_CONN_MAX",
+                "id": "limit-conn-max",
+                "label": "Limit conn max",
+                "regex": "^\\d+$",
+                "type": "text"
+            }
+        ]
+    },
+    "Limit req": {
+        "id": "limit-req",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_LIMIT_REQ",
+                "id": "use-limit-req",
+                "label": "Use limit req",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "20r/s",
+                "env": "LIMIT_REQ_RATE",
+                "id": "limit-req-rate",
+                "label": "Limit req rate",
+                "regex": "^\\d+r/(ms|s|m|h|d)$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "40",
+                "env": "LIMIT_REQ_BURST",
+                "id": "limit-req-burst",
+                "label": "Limit req burst",
+                "regex": "^\\d+$",
+                "type": "text"
+            }
+        ]
+    },
+    "Misc": {
+        "id": "misc",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "www.bunkerity.com",
+                "env": "SERVER_NAME",
+                "id": "server-name",
+                "label": "Server name",
+                "regex": "^([a-z\\-0-9]+\\.?)+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "10m",
+                "env": "MAX_CLIENT_SIZE",
+                "id": "max-client-size",
+                "label": "Max client size",
+                "regex": "^[0-9]+(k|K|m|M|g|G)?$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "GET|POST|HEAD",
+                "env": "ALLOWED_METHODS",
+                "id": "allowed-methods",
+                "label": "Allowed methods",
+                "regex": "^((GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE)\\|?)+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "SERVE_FILES",
+                "id": "serve-files",
+                "label": "Serve files",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+        ]
+    },
+    "ModSecurity": {
+        "id": "modsecurity",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_MODSECURITY",
+                "id": "use-modsecurity",
+                "label": "Use modsecurity",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_MODSECURITY_CRS",
+                "id": "use-modsecurity-crs",
+                "label": "Use modsecurity crs",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+        ]
+    },
+    "PHP": {
+        "id": "php",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "REMOTE_PHP",
+                "id": "remote-php",
+                "label": "Remote php",
+                "regex": "^([a-z\\-0-9]+\\.?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "/app",
+                "env": "REMOTE_PHP_PATH",
+                "id": "remote-php-path",
+                "label": "Remote php path",
+                "regex": "^/([A-Za-z0-9\\-]/?)*$",
+                "type": "text"
+            }
+        ]
+    },
+    "Reverse proxy": {
+        "id": "reverse-proxy",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_REVERSE_PROXY",
+                "id": "use-reverse-proxy",
+                "label": "Use reverse proxy",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "id": "reverse-proxy-params",
+                "label": "Reverse proxy",
+                "params": [
+                    {
+                        "context": "multisite",
+                        "default": "",
+                        "env": "REVERSE_PROXY_URL",
+                        "id": "reverse-proxy-url",
+                        "label": "Reverse proxy url",
+                        "multiple": "Reverse proxy",
+                        "regex": ".*",
+                        "type": "text"
+                    },
+                    {
+                        "context": "multisite",
+                        "default": "",
+                        "env": "REVERSE_PROXY_HOST",
+                        "id": "reverse-proxy-host",
+                        "label": "Reverse proxy host",
+                        "multiple": "Reverse proxy",
+                        "regex": ".*",
+                        "type": "text"
+                    },
+                    {
+                        "context": "multisite",
+                        "default": "",
+                        "env": "REVERSE_PROXY_WS",
+                        "id": "reverse-proxy-ws",
+                        "label": "Reverse proxy ws",
+                        "multiple": "Reverse proxy",
+                        "regex": "^(yes|no)$",
+                        "type": "checkbox"
+                    },
+                    {
+                        "context": "multisite",
+                        "default": "",
+                        "env": "REVERSE_PROXY_HEADERS",
+                        "id": "reverse-proxy-headers",
+                        "label": "Reverse proxy custom headers",
+                        "multiple": "Reverse proxy",
+                        "regex": ".*",
+                        "type": "text"
+                    }
+                ],
+                "type": "multiple"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "PROXY_REAL_IP",
+                "id": "proxy-real-ip",
+                "label": "Proxy real ip",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
+                "env": "PROXY_REAL_IP_FROM",
+                "id": "proxy-real-ip-from",
+                "label": "Proxy real ip from",
+                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "X-Forwarded-For",
+                "env": "PROXY_REAL_IP_HEADER",
+                "id": "proxy-real-ip-header",
+                "label": "Proxy real ip header",
+                "regex": "^([A-Za-z0-9\\-])+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "on",
+                "env": "PROXY_REAL_IP_RECURSIVE",
+                "id": "proxy-real-ip-recursive",
+                "label": "Proxy real ip recursive",
+                "regex": "^(on|off)$",
+                "type": "text"
+            }
+        ]
+    },
+    "Whitelist": {
+        "id": "whitelist",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_WHITELIST_IP",
+                "id": "use-whitelist-ip",
+                "label": "Use whitelist ip",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_WHITELIST_REVERSE",
+                "id": "use-whitelist-reverse",
+                "label": "Use whitelist reverse",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "WHITELIST_COUNTRY",
+                "id": "whitelist-country",
+                "label": "Whitelist country",
+                "regex": "^([A-Z]{2} ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "WHITELIST_USER_AGENT",
+                "id": "whitelist-user-agent",
+                "label": "Whitelist user agent",
+                "regex": ".*",
+                "type": "text"
+            }
+        ]
+    }
+}
