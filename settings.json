@@ -386,6 +386,24 @@
                 "label": "Use clamav upload",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "yes",
+                "env": "USE_CLAMAV_SCAN",
+                "id": "use-clamav-scan",
+                "label": "Use clamav scan",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "yes",
+                "env": "CLAMAV_SCAN_REMOVE",
+                "id": "clamav-scan-remove",
+                "label": "Clamav scan remove",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
             }
         ]
     },
@@ -566,7 +584,7 @@
                 "env": "HTTPS_PROTOCOLS",
                 "id": "https-protocols",
                 "label": "HTTPS protocols",
-                "regex": "^([\\S ]*)$",
+                "regex": "^(TLSv1.2|TLSv1.3|TLSv1.2 TLSv1.3)$",
                 "type": "text"
             },
             {
@@ -575,6 +593,42 @@
                 "env": "LISTEN_HTTP",
                 "id": "listen-http",
                 "label": "Listen http",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_CUSTOM_HTTPS",
+                "id": "use-custom-https",
+                "label": "Custom TLS certificate",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "CUSTOM_HTTPS_CERT",
+                "id": "custom-https-cert",
+                "label": "Custom TLS certificate path",
+                "regex": "^[A-Za-z\\.0-9\\/]*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "CUSTOM_HTTPS_KEY",
+                "id": "custom-https-key",
+                "label": "Custom TLS certificate key",
+                "regex": "^[A-Za-z\\.0-9\\/]*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "GENERATE_SELF_SIGNED_SSL",
+                "id": "generate-self-signed-ssl",
+                "label": "Generate a self-signed TLS certificate",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
             }
@@ -666,7 +720,7 @@
             },
             {
                 "context": "multisite",
-                "default": "object-src 'none'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts allow-popups; base-uri 'self';",
+                "default": "object-src 'none'; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content; sandbox allow-forms allow-same-origin allow-scripts allow-popups allow-downloads; base-uri 'self';",
                 "env": "CONTENT_SECURITY_POLICY",
                 "id": "content-security-policy",
                 "label": "Content security policy",
@@ -686,6 +740,15 @@
                 "label": "Remove headers",
                 "regex": "^([A-Za-z0-9\\-] ?)*$",
                 "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "no",
+                "env": "DISABLE_DEFAULT_SERVER",
+                "id": "disable-default-server",
+                "label": "Disable default server",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
             }
         ]
     },
@@ -703,11 +766,20 @@
             },
             {
                 "context": "multisite",
-                "default": "40",
+                "default": "50",
                 "env": "LIMIT_CONN_MAX",
                 "id": "limit-conn-max",
                 "label": "Limit conn max",
                 "regex": "^\\d+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "10m",
+                "env": "LIMIT_CONN_CACHE",
+                "id": "limit-conn-cache",
+                "label": "Limit conn cache",
+                "regex": "^[0-9]+(k|K|m|M|g|G)?$",
                 "type": "text"
             }
         ]
@@ -726,7 +798,7 @@
             },
             {
                 "context": "multisite",
-                "default": "20r/s",
+                "default": "1r/s",
                 "env": "LIMIT_REQ_RATE",
                 "id": "limit-req-rate",
                 "label": "Limit req rate",
@@ -735,11 +807,20 @@
             },
             {
                 "context": "multisite",
-                "default": "40",
+                "default": "2",
                 "env": "LIMIT_REQ_BURST",
                 "id": "limit-req-burst",
                 "label": "Limit req burst",
                 "regex": "^\\d+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "10m",
+                "env": "LIMIT_REQ_CACHE",
+                "id": "limit-req-cache",
+                "label": "Limit req cache",
+                "regex": "^[0-9]+(k|K|m|M|g|G)?$",
                 "type": "text"
             }
         ]
@@ -771,7 +852,7 @@
                 "env": "ALLOWED_METHODS",
                 "id": "allowed-methods",
                 "label": "Allowed methods",
-                "regex": "^((GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE)\\|?)+$",
+                "regex": "^([A-Z]+\\|?)+$",
                 "type": "text"
             },
             {
@@ -928,6 +1009,267 @@
             }
         ]
     },
+    "Bad behavior": {
+        "id": "bad-behavior",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_BAD_BEHAVIOR",
+                "id": "use-bad-behavior",
+                "label": "Use bad behavior",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "86400",
+                "env": "BAD_BEHAVIOR_BAN_TIME",
+                "id": "bad-behavior-ban-time",
+                "label": "Ban duration time",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "60",
+                "env": "BAD_BEHAVIOR_COUNT_TIME",
+                "id": "bad-behavior-count-time",
+                "label": "Count time",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "400 401 403 404 405 429 444",
+                "env": "BAD_BEHAVIOR_STATUS_CODES",
+                "id": "bad-behavior-status-codes",
+                "label": "Status codes",
+                "regex": "^([0-9]{3} ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "10",
+                "env": "BAD_BEHAVIOR_THRESHOLD",
+                "id": "bad-behavior-threshold",
+                "label": "Threshold",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            }
+        ]
+    },
+    "API": {
+        "id": "api",
+        "params": [
+            {
+                "context": "global",
+                "default": "no",
+                "env": "USE_API",
+                "id": "use-api",
+                "label": "Enable API",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
+                "env": "API_WHITELIST_IP",
+                "id": "api-whitelist-ip",
+                "label": "API whitelist IP",
+                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "random",
+                "env": "API_URI",
+                "id": "api-uri",
+                "label": "API URI",
+                "regex": "^(random|\\/[A-Za-z0-9\\-\\/]+)$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "no",
+                "env": "SWARM_MODE",
+                "id": "swarm-mode",
+                "label": "Swarm mode",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            }
+        ]
+    },
+    "CRON": {
+        "id": "cron",
+        "params": [
+            {
+                "context": "global",
+                "default": "15 0 * * *",
+                "env": "AUTO_LETS_ENCRYPT_CRON",
+                "id": "auto-lets-encrypt-cron",
+                "label": "Cron for certbot",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "30 0 * * *",
+                "env": "BLOCK_USER_AGENT_CRON",
+                "id": "block-user-agent-cron",
+                "label": "Cron for User-Agent",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "0 */1 * * *",
+                "env": "BLOCK_TOR_EXIT_NODE_CRON",
+                "id": "block-tor-exit-node-cron",
+                "label": "Cron for TOR exit nodes",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "0 3 * * *",
+                "env": "BLOCK_PROXIES_CRON",
+                "id": "block-proxies-cron",
+                "label": "Cron for proxies",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "0 2 * * *",
+                "env": "BLOCK_ABUSERS_CRON",
+                "id": "block-abusers-cron",
+                "label": "Cron for abusers",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "45 0 * * *",
+                "env": "BLOCK_REFERRER_CRON",
+                "id": "block-referrer-cron",
+                "label": "Cron for referrer",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "0 4 2 * *",
+                "env": "GEOIP_CRON",
+                "id": "block-geoip-cron",
+                "label": "Cron for GeoIP",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "30 1 * * *",
+                "env": "USE_CLAMAV_SCAN_CRON",
+                "id": "use-clamav-scan-cron",
+                "label": "Cron for ClamAV scan",
+                "regex": "^\\S+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "0 1 * * *",
+                "env": "CLAMAV_UPDATE_CRON",
+                "id": "clamav-update-cron",
+                "label": "Cron for ClamAV update",
+                "regex": "^\\S+$",
+                "type": "text"
+            }
+    },
+    "nginx": {
+        "id": "nginx",
+        "params": [
+            {
+                "context": "global",
+                "default": "no",
+                "env": "MULTISITE",
+                "id": "multisite",
+                "label": "Multisite",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "127.0.0.11",
+                "env": "DNS_RESOLVERS",
+                "id": "dns-resolvers",
+                "label": "DNS Resolvers",
+                "regex": "^(\\d+.\\d+.\\d+.\\d+ ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
+                "env": "LOG_FORMAT",
+                "id": "log-format",
+                "label": "Log format",
+                "regex": "^.*$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "info",
+                "env": "LOG_LEVEL",
+                "id": "log-level",
+                "label": "Log level",
+                "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "/www",
+                "env": "ROOT_FOLDER",
+                "id": "root-folder",
+                "label": "Root folder",
+                "regex": "^.*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "ROOT_SITE_SUBFOLDER",
+                "id": "root-site-subfolder",
+                "label": "Root site subfolder",
+                "regex": "^.*$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "off",
+                "env": "SERVER_TOKENS",
+                "id": "server-tokens",
+                "label": "Server tokens",
+                "regex": "^(on|off)$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "8080",
+                "env": "HTTP_PORT",
+                "id": "http-port",
+                "label": "HTTP port",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "8443",
+                "env": "HTTPS_PORT",
+                "id": "https-port",
+                "label": "HTTPS port",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            }
+    }
     "Whitelist": {
         "id": "whitelist",
         "params": [
@@ -942,12 +1284,30 @@
             },
             {
                 "context": "multisite",
+                "default": "23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8",
+                "env": "WHITELIST_IP_LIST",
+                "id": "whitelist-ip-list",
+                "label": "Whitelist ip list",
+                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
                 "default": "yes",
                 "env": "USE_WHITELIST_REVERSE",
                 "id": "use-whitelist-reverse",
                 "label": "Use whitelist reverse",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": ".googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net",
+                "env": "WHITELIST_REVERSE_LIST",
+                "id": "whitelist-reverse-list",
+                "label": "Whitelist reverse list",
+                "regex": "^([a-z\\-0-9\\.]+ ?)*$",
+                "type": "text"
             },
             {
                 "context": "multisite",
@@ -965,6 +1325,15 @@
                 "id": "whitelist-user-agent",
                 "label": "Whitelist user agent",
                 "regex": ".*",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "WHITELIST_URI",
+                "id": "whitelist-uri",
+                "label": "Whitelist URI",
+                "regex": "^(\S ?)*$",
                 "type": "text"
             }
         ]
