@@ -21,9 +21,17 @@ class Templator :
 			if os.path.isfile(filename) :
 				relative_filename = filename.replace(self.__input_path, "").replace(type + "/", "")
 				template = self.__template_env.get_template(type + "/" + relative_filename)
-				output = template.render(real_config)
+				template.globals["has_value"] = Templator.has_value
+				output = template.render(real_config, all=real_config)
 				if "/" in relative_filename :
 					directory = relative_filename.replace(relative_filename.split("/")[-1], "")
 					pathlib.Path(output_path + "/" + directory).mkdir(parents=True, exist_ok=True)
 				with open(output_path + "/" + relative_filename, "w") as f :
 					f.write(output)
+
+	@jinja2.contextfunction
+	def has_value(context, name, value) :
+		for k, v in context.items() :
+			if (k == name or k.endswith("_" + name)) and v == value :
+				return True
+		return False
