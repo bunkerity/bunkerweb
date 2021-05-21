@@ -495,7 +495,7 @@
                 "label": "Use crowdsec",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
-            }
+            },
             {
                 "context": "global",
                 "default": "",
@@ -1184,6 +1184,7 @@
                 "regex": "^\\S+$",
                 "type": "text"
             }
+        ]
     },
     "nginx": {
         "id": "nginx",
@@ -1269,7 +1270,8 @@
                 "regex": "^[0-9]+$",
                 "type": "text"
             }
-    }
+        ]
+    },
     "Whitelist": {
         "id": "whitelist",
         "params": [
@@ -1333,7 +1335,7 @@
                 "env": "WHITELIST_URI",
                 "id": "whitelist-uri",
                 "label": "Whitelist URI",
-                "regex": "^(\S ?)*$",
+                "regex": "^(\\S ?)*$",
                 "type": "text"
             }
         ]
