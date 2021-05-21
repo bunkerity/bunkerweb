@@ -1,6 +1,6 @@
 import json, re
 
-class Settings :
+class Configurator :
 
 	def __init__(self) :
 		self.__settings = {}

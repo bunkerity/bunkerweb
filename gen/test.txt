@@ -1,0 +1,1 @@
+./main.py --settings /opt/work/bunkerized-nginx/settings.json --templates /opt/work/bunkerized-nginx/confs2 --output /tmp/debug --variables /tmp/variables.env

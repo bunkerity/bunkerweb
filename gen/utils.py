@@ -1,0 +1,10 @@
+def load_variables(path) :
+	variables = {}
+	with open(path) as f :
+		lines = f.read().splitlines()
+	for line in lines :
+		var = line.split("=")[0]
+		value = line[len(var)+1:]
+		variables[var] = value
+	return variables
+
