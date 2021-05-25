@@ -40,4 +40,9 @@ class Configurator :
 			real_var = var
 		elif var[len(var.split("_")[0])+1:] in self.__settings :
 			real_var = var[len(var.split("_")[0])+1:]
+		elif re.search("\\_\d+$", var) and ("_".join(var.split("_")[:-1]) in self.__settings or "_".join(var.split("_")[:-1][1:]) in self.__settings) :
+			if "_".join(var.split("_")[:-1]) in self.__settings :
+				real_var = "_".join(var.split("_")[:-1])
+			else :
+				real_var = "_".join(var.split("_")[:-1][1:])
 		return real_var != "" and re.search(self.__settings[real_var]["regex"], value) and (not multisite_only or self.__settings[real_var]["context"] == "multisite")

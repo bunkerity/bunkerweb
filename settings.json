@@ -749,6 +749,15 @@
                 "label": "Disable default server",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "ERRORS",
+                "id": "errors",
+                "label": "Custom error pages (code1=/page1 code2=/page2 ...)",
+                "regex": ".*",
+                "type": "text"
             }
         ]
     },
