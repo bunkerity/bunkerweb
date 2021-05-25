@@ -13,6 +13,7 @@ if __name__ == "__main__" :
 	parser.add_argument("--settings", default="/opt/settings.json", type=str, help="path to the files containing the default settings")
 	parser.add_argument("--templates", default="/opt/confs", type=str, help="directory containing the templates files")
 	parser.add_argument("--output", default="/etc/nginx", type=str, help="where to write the rendered files")
+	parser.add_argument("--target", default="/etc/nginx", type=str, help="where nginx will search for configurations files")
 	parser.add_argument("--variables", default="/opt/variables.env", type=str, help="path to the file containing environment variables")
 	args = parser.parse_args()
 
@@ -51,16 +52,25 @@ if __name__ == "__main__" :
 	print(config)
 
 	# Generate the files from templates and config
-	templator = Templator(config, args.templates)
-	templator.render_global(args.output)
+	templator = Templator(config, args.templates, args.output, args.target)
+	templator.render_global()
 	if config["MULTISITE"] == "no" :
-		templator.render_site(args.output, config["SERVER_NAME"])
+		templator.render_site()
 	else :
+		# Compute a dict of first_server: [list of server_name]
+		map_servers = {}
 		for server_name in config["SERVER_NAME"].split(" ") :
-			real_server_name = server_name
-			if server_name + "_SERVER_NAME" in variables :
-				real_server_name = variables[server_name + "_SERVER_NAME"]
-			templator.render_site(args.output, real_server_name)
+			if server_name + "_SERVER_NAME" in config :
+				map_servers[server_name] = config[server_name + "_SERVER_NAME"].split(" ")
+		for server_name in config["SERVER_NAME"].split(" ") :
+			if server_name in map_servers :
+				continue
+			for first_server, servers in map_servers.items() :
+				if server_name in servers :
+					continue
+			map_servers[server_name] = [server_name]
+		for first_server, servers in map_servers.items() :
+			templator.render_site(" ".join(servers), first_server)
 
 	# We're done
 	print("[*] Generation done !")
