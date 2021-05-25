@@ -1,4 +1,4 @@
-import jinja2, glob, os, pathlib, copy
+import jinja2, glob, os, pathlib, copy, crypt
 
 class Templator :
 
@@ -30,11 +30,15 @@ class Templator :
 		real_config["NGINX_PREFIX"] = self.__target_path
 		if real_config["MULTISITE"] == "yes" and type == "site" :
 			real_config["NGINX_PREFIX"] += first_server + "/"
+			for variable, value in self.__config.items() :
+				if variable.startswith(first_server + "_") :
+					real_config[variable.replace(first_server + "_", "", 1)] = value
 		for filename in glob.iglob(self.__input_path + "/" + type + "**/**", recursive=True) :
 			if os.path.isfile(filename) :
 				relative_filename = filename.replace(self.__input_path, "").replace(type + "/", "")
 				template = self.__template_env.get_template(type + "/" + relative_filename)
 				template.globals["has_value"] = Templator.has_value
+				template.globals["sha512_crypt"] = Templator.sha512_crypt
 				output = template.render(real_config, all=real_config)
 				if real_config["MULTISITE"] == "yes" and type == "site" :
 					relative_filename = first_server + "/" + relative_filename
@@ -50,3 +54,6 @@ class Templator :
 			if (k == name or k.endswith("_" + name)) and v == value :
 				return True
 		return False
+
+	def sha512_crypt(password) :
+		return crypt.crypt(password, crypt.mksalt(crypt.METHOD_SHA512))
