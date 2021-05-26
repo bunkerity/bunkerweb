@@ -895,6 +895,15 @@
                 "label": "Use modsecurity crs",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "RelevantOnly",
+                "env": "MODSECURITY_SEC_AUDIT_ENGINE",
+                "id": "modsecurity-sec-audit-engine",
+                "label": "SecAuditEngine directive",
+                "regex": "^(On|Off|RelevantOnly)$",
+                "type": "text"
             }
         ]
     },
@@ -1276,6 +1285,24 @@
                 "env": "HTTPS_PORT",
                 "id": "https-port",
                 "label": "HTTPS port",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "2048",
+                "env": "WORKER_RLIMIT_NOFILE",
+                "id": "worker-rlimit-nofile",
+                "label": "worker_rlimit_nofile directive",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "1024",
+                "env": "WORKER_CONNECTIONS",
+                "id": "worker-connections",
+                "label": "worker_connections directive",
                 "regex": "^[0-9]+$",
                 "type": "text"
             }

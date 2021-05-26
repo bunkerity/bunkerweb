@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# load default values
-. ./opt/entrypoint/defaults.sh
-
 # load some functions
 . /opt/entrypoint/utils.sh
 

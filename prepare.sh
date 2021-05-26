@@ -10,7 +10,9 @@ chown -R root:nginx /opt
 find /opt -type f -exec chmod 0740 {} \;
 find /opt -type d -exec chmod 0750 {} \;
 chmod ugo+x /opt/entrypoint/* /opt/scripts/*
+chmod ugo+x /opt/gen/main.py
 chmod 770 /opt
+chmod 440 /opt/settings.json
 
 # prepare /etc/nginx
 chown -R root:nginx /etc/nginx

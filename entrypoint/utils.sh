@@ -24,18 +24,20 @@ function spaces_to_lua() {
 
 # check if at least one env var (global or multisite) has a specific value
 function has_value() {
-	if [ "${!1}" == "$2" ] ; then
-		echo "ok"
-		return 0
-	fi
-	for var in $(env | grep -E "^.*_${1}=") ; do
-		domain=$(echo "$var" | cut -d '_' -f 1)
-		value=$(echo "$var" | sed "s~^${domain}_${1}=~~")
-		if [ "$value" == "$2" ] ; then
+	if [ -f "/etc/nginx/site.env" ] ; then
+		if [ $(grep "^${1}=${2}$" /etc/nginx/site.env) != "" ] ; then
 			echo "ok"
 			return 0
 		fi
-	done
+	else
+		servers=$(find /etc/nginx -name "site.env" | cut -d '/' -f 4)
+		for server in $servers ; do
+			if [ $(grep "^${1}=${2}$" /etc/nginx/$server/site.env) != "" ] ; then
+				echo "ok"
+				return 0
+			fi
+		done
+	fi
 }
 
 # log to jobs.log

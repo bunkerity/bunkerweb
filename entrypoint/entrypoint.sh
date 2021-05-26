@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# load default values
-. ./opt/entrypoint/defaults.sh
-
 echo "[*] Starting bunkerized-nginx ..."
 
 # trap SIGTERM and SIGINT
@@ -19,7 +16,7 @@ trap "trap_exit" TERM INT QUIT
 function trap_reload() {
 	echo "[*] Catched reload operation"
 	if [ "$MULTISITE" = "yes" ] && [ "$SWARM_MODE" != "yes" ] ; then
-		/opt/entrypoint/multisite-config.sh
+		/opt/entrypoint/certbot.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
@@ -41,7 +38,7 @@ if [ ! -f "/opt/installed" ] ; then
 	echo "[*] Configuring bunkerized-nginx ..."
 
 	# check permissions
-	if [ "$SWARM_MODE" = "no" ] ; then
+	if [ "$SWARM_MODE" != "yes" ] ; then
 		/opt/entrypoint/permissions.sh
 	else
 		/opt/entrypoint/permissions-swarm.sh
@@ -57,23 +54,18 @@ if [ ! -f "/opt/installed" ] ; then
 	/opt/entrypoint/nginx-temp.sh
 
 	# only do config if we are not in swarm mode
-	if [ "$SWARM_MODE" = "no" ] ; then
-		# global config
-		/opt/entrypoint/global-config.sh
+	if [ "$SWARM_MODE" != "yes" ] ; then
+		# export the variables
+		env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "/tmp/variables.env"
+
+		# call the generator
+		/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env
+
 		# background jobs
 		/opt/entrypoint/jobs.sh
-		# multisite configs
-		if [ "$MULTISITE" = "yes" ] ; then
-			for server in $SERVER_NAME ; do
-				/opt/entrypoint/site-config.sh "$server"
-				echo "[*] Multi site - $server configuration done"
-			done
-			/opt/entrypoint/multisite-config.sh
-		# singlesite config
-		else
-			/opt/entrypoint/site-config.sh
-			echo "[*] Single site - $SERVER_NAME configuration done"
-		fi
+
+		# certbot
+		/opt/entrypoint/certbot.sh
 	fi
 
 	touch /opt/installed
