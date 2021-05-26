@@ -3,6 +3,14 @@
 # load some functions
 . /opt/entrypoint/utils.sh
 
+if [ $(grep "^SWARM_MODE=yes$" /etc/nginx/global.env) != "" ] && [ -f /usr/sbin/nginx ] ; then
+	exit 0
+fi
+
+if [ "$(has_value BLOCK_USER_AGENT yes)" = "" ] ; then
+	exit 0
+fi
+
 # save old conf
 cp /etc/nginx/user-agents.list /cache
 

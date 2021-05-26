@@ -1,0 +1,7 @@
+15 0 * * * /opt/scripts/certbot-renew.sh > /dev/null 2>&1
+30 0 * * * /opt/scripts/user-agents.sh > /dev/null 2>&1
+45 0 * * * /opt/scripts/referrers.sh > /dev/null 2>&1
+0 1 * * * /opt/scripts/abusers.sh > /dev/null 2>&1
+0 2 * * * /opt/scripts/proxies.sh > /dev/null 2>&1
+0 */1 * * * /opt/scripts/exit-nodes.sh > /dev/null 2>&1
+0 3 2 * * /opt/scripts/geoip.sh > /dev/null 2>&1

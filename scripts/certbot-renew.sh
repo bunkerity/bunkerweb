@@ -3,6 +3,14 @@
 # load some functions
 . /opt/entrypoint/utils.sh
 
+if [ $(grep "^SWARM_MODE=yes$" /etc/nginx/global.env) != "" ] && [ -f /usr/sbin/nginx ] ; then
+	exit 0
+fi
+
+if [ "$(has_value AUTO_LETS_ENCRYPT yes)" = "" ] ; then
+	exit 0
+fi
+
 # ask new certificates if needed
 certbot renew --deploy-hook /opt/scripts/certbot-renew-hook.sh
 

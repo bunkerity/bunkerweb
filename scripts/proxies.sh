@@ -3,6 +3,14 @@
 # load some functions
 . /opt/entrypoint/utils.sh
 
+if [ $(grep "^SWARM_MODE=yes$" /etc/nginx/global.env) != "" ] && [ -f /usr/sbin/nginx ] ; then
+	exit 0
+fi
+
+if [ "$(has_value BLOCK_PROXIES yes)" = "" ] ; then
+	exit 0
+fi
+
 # copy old conf to cache
 cp /etc/nginx/proxies.list /cache
 

@@ -10,6 +10,10 @@ services:
     # disable setuid/setgid
     security_opt:
       - no-new-privileges
+    # read-only file system
+    read_only: true
+    tmpfs:
+      - /tmp
     restart: always
     ports:
       - 80:8080
@@ -17,6 +21,7 @@ services:
     # bunkerized-nginx runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
     volumes:
+      - cache:/cache
       - nginx_conf:/etc/nginx
       - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
@@ -38,3 +43,4 @@ services:
 
 volumes:
   nginx_conf:
+  cache:

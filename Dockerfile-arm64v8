@@ -25,6 +25,7 @@ COPY scripts/ /opt/scripts
 COPY lua/ /usr/local/lib/lua
 COPY antibot/ /antibot
 COPY settings.json /opt
+COPY misc/cron /etc/crontabs/nginx
 
 COPY prepare.sh /tmp/prepare.sh
 RUN chmod +x /tmp/prepare.sh && \

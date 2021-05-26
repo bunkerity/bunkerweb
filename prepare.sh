@@ -15,6 +15,11 @@ chmod 770 /opt
 chmod 440 /opt/settings.json
 
 # prepare /etc/nginx
+for file in $(ls /etc/nginx) ; do
+	if [ -f /etc/nginx/$file ] && [ ! -f /opt/confs/global/$file ] ; then
+		cp /etc/nginx/$file /opt/confs/global
+	fi
+done
 chown -R root:nginx /etc/nginx
 chmod -R 770 /etc/nginx
 
@@ -27,14 +32,9 @@ ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log
 ln -s /proc/1/fd/1 /var/log/access.log
 ln -s /proc/1/fd/2 /var/log/error.log
 ln -s /proc/1/fd/1 /var/log/jobs.log
-ln -s /proc/1/fd/1 /var/log/clamav.log
 mkdir /var/log/letsencrypt
 chown nginx:nginx /var/log/letsencrypt
 chmod 770 /var/log/letsencrypt
-rm -rf /var/log/clamav/*
-chown root:nginx /var/log/clamav
-chmod 770 /var/log/clamav
-ln -s /proc/1/fd/1 /var/log/freshclam.log
 
 # prepare /acme-challenge
 mkdir /acme-challenge
@@ -63,10 +63,5 @@ chown root:nginx /cache
 chmod 770 /cache
 
 # prepare /etc/crontabs/nginx
-touch /etc/crontabs/nginx
 chown root:nginx /etc/crontabs/nginx
-chmod 660 /etc/crontabs/nginx
-
-# prepare /var/lib/clamav
-chown root:nginx /var/lib/clamav
-chmod 770 /var/lib/clamav
+chmod 440 /etc/crontabs/nginx

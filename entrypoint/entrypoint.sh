@@ -17,6 +17,7 @@ function trap_reload() {
 	echo "[*] Catched reload operation"
 	if [ "$MULTISITE" = "yes" ] && [ "$SWARM_MODE" != "yes" ] ; then
 		/opt/entrypoint/certbot.sh
+		/opt/entrypoint/jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
@@ -33,7 +34,7 @@ function trap_reload() {
 trap "trap_reload" HUP
 
 # do the configuration magic if needed
-if [ ! -f "/opt/installed" ] ; then
+if [ ! -f "/etc/nginx/global.env" ] ; then
 
 	echo "[*] Configuring bunkerized-nginx ..."
 
@@ -46,9 +47,6 @@ if [ ! -f "/opt/installed" ] ; then
 	if [ "$?" -ne 0 ] ; then
 		exit 1
 	fi
-
-	# clamav config
-	/opt/entrypoint/clamav.sh
 
 	# start temp nginx to solve Let's Encrypt challenges if needed
 	/opt/entrypoint/nginx-temp.sh
@@ -67,8 +65,6 @@ if [ ! -f "/opt/installed" ] ; then
 		# certbot
 		/opt/entrypoint/certbot.sh
 	fi
-
-	touch /opt/installed
 else
 	echo "[*] Skipping configuration process"
 fi
@@ -98,7 +94,7 @@ pid="$!"
 if [ "$1" == "test" ] ; then
 	sleep 10
 	echo -n "autotest" > /www/index.html
-	check=$(curl "http://localhost:${HTTP_PORT}" 2> /dev/null)
+	check=$(curl "http://localhost:8080")
 	if [ "$check" == "autotest" ] ; then
 		exit 0
 	fi
