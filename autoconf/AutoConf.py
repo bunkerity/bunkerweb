@@ -1,7 +1,6 @@
 from Config import Config
 import utils
 import os
-
 class AutoConf :
 
 	def __init__(self, swarm, api) :
