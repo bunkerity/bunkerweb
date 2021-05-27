@@ -94,7 +94,7 @@ pid="$!"
 if [ "$1" == "test" ] ; then
 	sleep 10
 	echo -n "autotest" > /www/index.html
-	check=$(curl "http://localhost:8080")
+	check=$(curl -H "User-Agent: legit" "http://localhost:8080")
 	if [ "$check" == "autotest" ] ; then
 		exit 0
 	fi
