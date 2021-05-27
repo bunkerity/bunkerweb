@@ -1,5 +1,4 @@
-# TODO : hard tests, jobs, check state when generating env, ...
-
+# TODO : hard tests, jobs if swarm mode, check state when generating env, ...
 from Config import Config
 import utils
 import os
@@ -23,17 +22,28 @@ class AutoConf :
 	def __gen_env(self) :
 		self.__env.clear()
 		# TODO : check actual state (e.g. : running ?)
-		for instance in self.__instances :
-			(id, name, labels) = self.__get_infos(self.__instances[instance])
-			for label in labels :
-				if label.startswith("bunkerized-nginx.") :
-					self.__env[label.replace("bunkerized-nginx.", "", 1)] = labels[label]
+		for id, instance in self.__instances.items() :
+			env = []
+			if self.__swarm :
+				env = instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]
+			else :
+				env = instance.attrs["Config"]["Env"]
+			for entry in env :
+				self.__env[entry.split("=")[0]] = entry.replace(entry.split("=")[0] + "=", "", 1)
+		if not "SERVER_NAME" in self.__env or self.__env["SERVER_NAME"] == "" :
+			self.__env["SERVER_NAME"] = []
+		else :
+			self.__env["SERVER_NAME"] = self.__env["SERVER_NAME"].split(" ")
 		for server in self.__servers :
 			(id, name, labels) = self.__get_infos(self.__servers[server])
 			first_server = labels["bunkerized-nginx.SERVER_NAME"].split(" ")[0]
 			for label in labels :
 				if label.startswith("bunkerized-nginx.") :
 					self.__env[first_server + "_" + label.replace("bunkerized-nginx.", "", 1)] = labels[label]
+			for server_name in labels["bunkerized-nginx.SERVER_NAME"].split(" ") :
+				if not server_name in self.__env["SERVER_NAME"] :
+					self.__env["SERVER_NAME"].append(server_name)
+		self.__env["SERVER_NAME"] = " ".join(self.__env["SERVER_NAME"])
 
 	def pre_process(self, objs) :
 		for instance in objs :

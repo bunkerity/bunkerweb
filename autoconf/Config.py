@@ -60,7 +60,7 @@ class Config :
 
 	def generate(self, env) :
 		try :
-			# Write environment variables to fs
+			# Write environment variables to a file
 			with open("/tmp/variables.env", "w") as f :
 				for k, v in env.items() :
 					f.write(k + "=" + v + "\n")
@@ -68,8 +68,13 @@ class Config :
 			# Call the generator
 			proc = subprocess.run(["/bin/su", "-c", "/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env", "nginx"], capture_output=True)
 
-			# Print stdout/stderr just in case
-			# TODO
+			# Print stdout/stderr
+			stdout = proc.stdout.decode("ascii")
+			stderr = proc.stderr.decode("ascii")
+			if proc.stdout != "":
+				utils.log("[*] Generator output : " + stdout)
+			if proc.stderr != "" :
+				utils.log("[*] Generator error : " + stderr)
 
 			# We're done
 			if proc.returncode == 0 :
@@ -78,50 +83,6 @@ class Config :
 
 		except Exception as e :
 			utils.log("[!] Exception while generating site config : " + str(e))
-		return False
-
-	def activate(self, instances, vars, reload=True) :
-		try :
-			# Get first server name
-			first_server_name = vars["SERVER_NAME"].split(" ")[0]
-
-			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
-				return False
-
-			# Include the server conf
-			utils.replace_in_file("/etc/nginx/nginx.conf", "}", "include /etc/nginx/" + first_server_name + "/server.conf;\n}")
-
-			# Reload
-			if not reload or self.reload(instances) :
-				return True
-
-		except Exception as e :
-			utils.log("[!] Exception while activating config : " + str(e))
-
-		return False
-
-	def deactivate(self, instances, vars) :
-		try :
-			# Get first server name
-			first_server_name = vars["SERVER_NAME"].split(" ")[0]
-
-			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
-				return False
-
-			# Remove the include
-			utils.replace_in_file("/etc/nginx/nginx.conf", "include /etc/nginx/" + first_server_name + "/server.conf;\n", "")
-
-			# Reload
-			if self.reload(instances) :
-				return True
-
-		except Exception as e :
-			utils.log("[!] Exception while deactivating config : " + str(e))
-
 		return False
 
 	def reload(self, instances) :

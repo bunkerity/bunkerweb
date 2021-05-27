@@ -56,7 +56,7 @@ if __name__ == "__main__" :
 	templator.render_global()
 	if config["MULTISITE"] == "no" :
 		templator.render_site()
-	else :
+	elif config["SERVER_NAME"] != "" :
 		# Compute a dict of first_server: [list of server_name]
 		map_servers = {}
 		for server_name in config["SERVER_NAME"].split(" ") :
