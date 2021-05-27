@@ -843,7 +843,7 @@
                 "env": "SERVER_NAME",
                 "id": "server-name",
                 "label": "Server name",
-                "regex": "^([a-z\\-0-9]+\\.? ?)+$",
+                "regex": "^([a-z\\-0-9]+\\.? ?)*$",
                 "type": "text"
             },
             {

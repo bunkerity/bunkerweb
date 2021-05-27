@@ -1,3 +1,5 @@
+# TODO : hard tests, jobs, check state when generating env, ...
+
 from Config import Config
 import utils
 import os
@@ -7,7 +9,7 @@ class AutoConf :
 		self.__swarm = swarm
 		self.__servers = {}
 		self.__instances = {}
-		self.__sites = {}
+		self.__env = {}
 		self.__config = Config(self.__swarm, api)
 
 	def get_server(self, id) :
@@ -17,6 +19,21 @@ class AutoConf :
 
 	def reload(self) :
 		return self.__config.reload(self.__instances)
+
+	def __gen_env(self) :
+		self.__env.clear()
+		# TODO : check actual state (e.g. : running ?)
+		for instance in self.__instances :
+			(id, name, labels) = self.__get_infos(self.__instances[instance])
+			for label in labels :
+				if label.startswith("bunkerized-nginx.") :
+					self.__env[label.replace("bunkerized-nginx.", "", 1)] = labels[label]
+		for server in self.__servers :
+			(id, name, labels) = self.__get_infos(self.__servers[server])
+			first_server = labels["bunkerized-nginx.SERVER_NAME"].split(" ")[0]
+			for label in labels :
+				if label.startswith("bunkerized-nginx.") :
+					self.__env[first_server + "_" + label.replace("bunkerized-nginx.", "", 1)] = labels[label]
 
 	def pre_process(self, objs) :
 		for instance in objs :
@@ -60,22 +77,32 @@ class AutoConf :
 		return (id, name, labels)
 
 	def __process_instance(self, instance, event, id, name, labels) :
+
 		if event == "create" :
 			self.__instances[id] = instance
+			self.__gen_env()
 			if self.__swarm and len(self.__instances) == 1 :
-				if self.__config.initconf(self.__instances) :
+				if self.__config.generate(self.__env) :
 					utils.log("[*] Initial config succeeded")
+					with open("/etc/nginx/autoconf", "w") as f :
+						f.write("ok")
 				else :
 					utils.log("[!] Initial config failed")
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
+
 		elif event == "start" :
 			self.__instances[id].reload()
+			self.__gen_env()
 			utils.log("[*] bunkerized-nginx instance started : " + name + " / " + id)
+
 		elif event == "die" :
 			self.__instances[id].reload()
+			self.__gen_env()
 			utils.log("[*] bunkerized-nginx instance stopped : " + name + " / " + id)
+
 		elif event == "destroy" or event == "remove" :
 			del self.__instances[id]
+			self.__gen_env()
 			if self.__swarm and len(self.__instances) == 0 :
 				with open("/etc/crontabs/nginx", "w") as f :
 					f.write("")
@@ -84,47 +111,59 @@ class AutoConf :
 			utils.log("[*] bunkerized-nginx instance removed : " + name + " / " + id)
 
 	def __process_server(self, instance, event, id, name, labels) :
+
 		vars = { k.replace("bunkerized-nginx.", "", 1) : v for k, v in labels.items() if k.startswith("bunkerized-nginx.")}
+
 		if event == "create" :
 			utils.log("[*] Generating config for " + vars["SERVER_NAME"] + " ...")
-			if self.__config.generate(self.__instances, vars) :
+			self.__servers[id] = instance
+			self.__gen_env()
+			if self.__config.generate(self.__env) :
 				utils.log("[*] Generated config for " + vars["SERVER_NAME"])
-				self.__servers[id] = instance
 				if self.__swarm :
 					utils.log("[*] Activating config for " + vars["SERVER_NAME"] + " ...")
-					if self.__config.activate(self.__instances, vars) :
+					if self.__config.reload(self.__instances) :
 						utils.log("[*] Activated config for " + vars["SERVER_NAME"])
 					else :
-						utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
+ 						utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
 			else :
 				utils.log("[!] Can't generate config for " + vars["SERVER_NAME"])
+				del self.__servers[id]
+				self.__gen_env()
+				self.__config.generate(self.__env)
+
 		elif event == "start" :
 			if id in self.__servers :
 				self.__servers[id].reload()
 				utils.log("[*] Activating config for " + vars["SERVER_NAME"] + " ...")
-				if self.__config.activate(self.__instances, vars) :
+				self.__gen_env()
+				if self.__config.reload(self.__instances) :
 					utils.log("[*] Activated config for " + vars["SERVER_NAME"])
 				else :
 					utils.log("[!] Can't activate config for " + vars["SERVER_NAME"])
+
 		elif event == "die" :
 			if id in self.__servers :
 				self.__servers[id].reload()
 				utils.log("[*] Deactivating config for " + vars["SERVER_NAME"])
-				if self.__config.deactivate(self.__instances, vars) :
+				self.__gen_env()
+				if self.__config.reload() :
 					utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
 				else :
 					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
+
 		elif event == "destroy" or event == "remove" :
 			if id in self.__servers :
-				if self.__swarm :
-					utils.log("[*] Deactivating config for " + vars["SERVER_NAME"])
-					if self.__config.deactivate(self.__instances, vars) :
-						utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
-					else :
-						utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
-				del self.__servers[id]
 				utils.log("[*] Removing config for " + vars["SERVER_NAME"])
-				if self.__config.remove(vars) :
+				del self.__servers[id]
+				self.__gen_env()
+				if self.__config.generate(self.__env) :
 					utils.log("[*] Removed config for " + vars["SERVER_NAME"])
 				else :
 					utils.log("[!] Can't remove config for " + vars["SERVER_NAME"])
+				utils.log("[*] Deactivating config for " + vars["SERVER_NAME"])
+				if self.__config.reload(self.__instances) :
+					utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
+				else :
+					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
+

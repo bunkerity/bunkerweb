@@ -9,7 +9,6 @@ class Config :
 		self.__swarm = swarm
 		self.__api = api
 
-
 	def initconf(self, instances) :
 		try :
 			for instance_id, instance in instances.items() :
@@ -59,48 +58,24 @@ class Config :
 			utils.log("[!] Error while initializing config : " + str(e))
 		return False
 
-	def globalconf(self, instances) :
+	def generate(self, env) :
 		try :
-			for instance_id, instance in instances.items() :
-				env = instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]
-				break
-			vars = {}
-			for var_value in env :
-				var = var_value.split("=")[0]
-				value = var_value.replace(var + "=", "", 1)
-				vars[var] = value
-			proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/global-config.sh", "nginx"], env=vars, capture_output=True)
-			if proc.returncode == 0 :
-				return True
-			else :
-				utils.log("[*] Error while generating global config : return code = " + str(proc.returncode))
-		except Exception as e :
-			utils.log("[!] Exception while generating global config : " + str(e))
-		return False
+			# Write environment variables to fs
+			with open("/tmp/variables.env", "w") as f :
+				for k, v in env.items() :
+					f.write(k + "=" + v + "\n")
 
-	def generate(self, instances, vars) :
-		try :
-			# Get env vars from bunkerized-nginx instances
-			vars_instances = {}
-			for instance_id, instance in instances.items() :
-				if self.__swarm :
-					env = instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]
-				else :
-					env = instance.attrs["Config"]["Env"]
-				for var_value in env :
-					var = var_value.split("=")[0]
-					value = var_value.replace(var + "=", "", 1)
-					vars_instances[var] = value
-			vars_defaults = vars.copy()
-			vars_defaults.update(vars_instances)
-			vars_defaults.update(vars)
-			# Call site-config.sh to generate the config
-			proc = subprocess.run(["/bin/su", "-s", "/bin/sh", "-c", "/opt/entrypoint/site-config.sh" + " \"" + vars["SERVER_NAME"] + "\"", "nginx"], env=vars_defaults, capture_output=True)
-			if proc.returncode == 0 and vars_defaults["MULTISITE"] == "yes" and self.__swarm :
-				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/multisite-config.sh", "nginx"], env=vars_defaults, capture_output=True)
+			# Call the generator
+			proc = subprocess.run(["/bin/su", "-c", "/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env", "nginx"], capture_output=True)
+
+			# Print stdout/stderr just in case
+			# TODO
+
+			# We're done
 			if proc.returncode == 0 :
 				return True
 			utils.log("[!] Error while generating site config for " + vars["SERVER_NAME"] + "  : return code = " + str(proc.returncode))
+
 		except Exception as e :
 			utils.log("[!] Exception while generating site config : " + str(e))
 		return False
@@ -146,24 +121,6 @@ class Config :
 
 		except Exception as e :
 			utils.log("[!] Exception while deactivating config : " + str(e))
-
-		return False
-
-	def remove(self, vars) :
-		try :
-			# Get first server name
-			first_server_name = vars["SERVER_NAME"].split(" ")[0]
-
-			# Check if file exists
-			if not os.path.isfile("/etc/nginx/" + first_server_name + "/server.conf") :
-				utils.log("[!] /etc/nginx/" + first_server_name + "/server.conf doesn't exist")
-				return False
-
-			# Remove the folder
-			shutil.rmtree("/etc/nginx/" + first_server_name)
-			return True
-		except Exception as e :
-			utils.log("[!] Error while deactivating config : " + str(e))
 
 		return False
 

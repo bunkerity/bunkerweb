@@ -2,7 +2,7 @@
 
 # create nginx user
 addgroup -g 101 nginx
-adduser -h /var/cache/nginx -g nginx -s /sbin/nologin -G nginx -D -H -u 101 nginx
+adduser -h /var/cache/nginx -g nginx -s /bin/sh -G nginx -D -H -u 101 nginx
 
 # prepare /opt
 chown -R root:nginx /opt
