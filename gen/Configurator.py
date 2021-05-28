@@ -24,7 +24,7 @@ class Configurator :
 			if self.__check_var(var, value) :
 				self.__variables[var] = value
 			else :
-				print("Problem with " + var + "=" + value)
+				print("Ignoring " + var + "=" + value)
 
 	def get_config(self) :
 		config = {}

@@ -1,23 +1,31 @@
-FROM alpine AS builder
+FROM alpine AS builder1
 
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v4.0.0%2Bbalena2/qemu-4.0.0.balena2-aarch64.tar.gz
 RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
 
+FROM nginx:1.20.1-alpine AS builder2
+
 FROM arm64v8/alpine
 
-COPY --from=builder qemu-aarch64-static /usr/bin
+COPY --from=builder1 qemu-aarch64-static /usr/bin
+COPY --from=builder2 /etc/nginx/ /opt/confs/nginx
 
-RUN apk add py3-pip apache2-utils bash && \
-    pip3 install docker flask && \
-    mkdir /opt/entrypoint && \
-    mkdir -p /opt/confs/site
+COPY ui/dependencies.sh /tmp
+RUN chmod +x /tmp/dependencies.sh && \
+    /tmp/dependencies.sh && \
+    rm -f /tmp/dependencies.sh
 
+COPY gen/ /opt/gen
+#COPY entrypoint/ /opt/entrypoint
+#COPY confs/global/ /opt/confs/global
 COPY confs/site/ /opt/confs/site
-COPY entrypoint/* /opt/entrypoint/
-COPY ui/ /opt/entrypoint/
-RUN chmod +x /opt/entrypoint/*.py /opt/entrypoint/*.sh
+COPY ui/* /opt/entrypoint/
+COPY settings.json /opt
 
-VOLUME /etc/nginx
+COPY ui/prepare.sh /tmp
+     chmod +x /tmp/prepare && \
+     /tmp/prepare.sh && \
+     rm -f /tmp/prepare.sh
 
 EXPOSE 5000
 

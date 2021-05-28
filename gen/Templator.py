@@ -9,7 +9,7 @@ class Templator :
 		self.__target_path = target_path
 		if not self.__target_path.endswith("/") :
 			self.__target_path += "/"
-		self.__template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=self.__input_path))
+		self.__template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=self.__input_path), trim_blocks=True, lstrip_blocks=True)
 
 	def render_global(self) :
 		return self.__render("global")
