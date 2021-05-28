@@ -74,7 +74,7 @@ services:
           - "node.role==worker"
       labels:
         - "bunkerized-nginx.SERVER_NAME=app1.website.com"
-        - "bunkerized-nginx.REMOTE_PHP=php"
+        - "bunkerized-nginx.REMOTE_PHP=app1"
         - "bunkerized-nginx.REMOTE_PHP_PATH=/www"
 
   app2:

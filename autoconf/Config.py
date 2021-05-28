@@ -9,35 +9,8 @@ class Config :
 		self.__swarm = swarm
 		self.__api = api
 
-	def initconf(self, instances) :
+	def swarm_wait(self, instances) :
 		try :
-			for instance_id, instance in instances.items() :
-				env = instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]
-				break
-			vars = {}
-			for var_value in env :
-				var = var_value.split("=")[0]
-				value = var_value.replace(var + "=", "", 1)
-				vars[var] = value
-
-			utils.log("[*] Generating global config ...")
-			if not self.globalconf(instances) :
-				utils.log("[!] Can't generate global config")
-				return False
-			utils.log("[*] Generated global config")
-
-			if "SERVER_NAME" in vars and vars["SERVER_NAME"] != "" :
-				for server in vars["SERVER_NAME"].split(" ") :
-					vars_site = vars.copy()
-					vars_site["SERVER_NAME"] = server
-					utils.log("[*] Generating config for " + vars["SERVER_NAME"] + " ...")
-					if not self.generate(instances, vars_site) or not self.activate(instances, vars_site, reload=False) :
-						utils.log("[!] Can't generate/activate site config for " + server)
-						return False
-					utils.log("[*] Generated config for " + vars["SERVER_NAME"])
-			with open("/etc/nginx/autoconf", "w") as f :
-				f.write("ok")
-
 			utils.log("[*] Waiting for bunkerized-nginx tasks ...")
 			i = 1
 			started = False
@@ -50,12 +23,18 @@ class Config :
 				utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx tasks")
 			if started :
 				utils.log("[*] bunkerized-nginx tasks started")
-				proc = subprocess.run(["/bin/su", "-s", "/opt/entrypoint/jobs.sh", "nginx"], env=vars, capture_output=True)
+				proc = subprocess.run(["/bin/su", "-c", "/opt/entrypoint/jobs.sh", "nginx"], capture_output=True)
+				stdout = proc.stdout.decode("ascii")
+				stderr = proc.stderr.decode("ascii")
+				if stdout != "" :
+					utils.log("[*] Jobs output : " + stdout)
+				if stderr != "" :
+					utils.log("[!] Jobs error : " + stderr)
 				return proc.returncode == 0
 			else :
 				utils.log("[!] bunkerized-nginx tasks are not started")
 		except Exception as e :
-			utils.log("[!] Error while initializing config : " + str(e))
+			utils.log("[!] Error while waiting for Swarm tasks : " + str(e))
 		return False
 
 	def generate(self, env) :
@@ -71,9 +50,9 @@ class Config :
 			# Print stdout/stderr
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
-			if proc.stdout != "":
+			if stdout != "":
 				utils.log("[*] Generator output : " + stdout)
-			if proc.stderr != "" :
+			if stderr != "" :
 				utils.log("[*] Generator error : " + stderr)
 
 			# We're done
@@ -111,7 +90,7 @@ class Config :
 						req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
 					except :
 						pass
-					if req and req.status_code == 200 :
+					if req and req.status_code == 200 and req.text == "ok" :
 						utils.log("[*] Sent API order " + path + " to instance " + fqdn + " (service.node.task)")
 					else :
 						utils.log("[!] Can't send API order " + path + " to instance " + fqdn + " (service.node.task)")

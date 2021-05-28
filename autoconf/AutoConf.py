@@ -96,6 +96,11 @@ class AutoConf :
 					utils.log("[*] Initial config succeeded")
 					with open("/etc/nginx/autoconf", "w") as f :
 						f.write("ok")
+					if not self.__config.swarm_wait(self.__instances) :
+						utils.log("[!] Removing bunkerized-nginx instances from list")
+						del self.__instances[id]
+						os.remove("/etc/nginx/autoconf")
+
 				else :
 					utils.log("[!] Initial config failed")
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
