@@ -15,8 +15,7 @@ trap "trap_exit" TERM INT QUIT
 # trap SIGHUP
 function trap_reload() {
 	echo "[*] Catched reload operation"
-	if [ "$MULTISITE" = "yes" ] && [ "$SWARM_MODE" != "yes" ] ; then
-		/opt/entrypoint/certbot.sh
+	if [ "$SWARM_MODE" != "yes" ] ; then
 		/opt/entrypoint/jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
@@ -59,11 +58,8 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 		# call the generator
 		/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env
 
-		# background jobs
+		# external jobs
 		/opt/entrypoint/jobs.sh
-
-		# certbot
-		/opt/entrypoint/certbot.sh
 	fi
 else
 	echo "[*] Skipping configuration process"

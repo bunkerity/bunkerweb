@@ -27,7 +27,7 @@ function has_value() {
 	envs=$(find /etc/nginx -name "*.env")
 	for file in $envs ; do
 		if [ "$(grep "^${1}=${2}$" $file)" != "" ] ; then
-			echo "ok"
+			echo "$file"
 			return 0
 		fi
 	done

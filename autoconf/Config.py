@@ -27,9 +27,11 @@ class Config :
 				stdout = proc.stdout.decode("ascii")
 				stderr = proc.stderr.decode("ascii")
 				if stdout != "" :
-					utils.log("[*] Jobs output : " + stdout)
+					for line in stdout.split("\n") :
+						utils.log("[*] Jobs output : " + stdout)
 				if stderr != "" :
-					utils.log("[!] Jobs error : " + stderr)
+					for line in stderr.split("\n") :
+						utils.log("[!] Jobs error : " + stderr)
 				return proc.returncode == 0
 			else :
 				utils.log("[!] bunkerized-nginx tasks are not started")
@@ -51,14 +53,16 @@ class Config :
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
 			if stdout != "":
-				utils.log("[*] Generator output : " + stdout)
+				for line in stdout.split("\n") :
+					utils.log("[*] Generator output : " + stdout)
 			if stderr != "" :
-				utils.log("[*] Generator error : " + stderr)
+				for line in stderr.split("\n") :
+					utils.log("[*] Generator error : " + stderr)
 
 			# We're done
 			if proc.returncode == 0 :
 				return True
-			utils.log("[!] Error while generating site config for " + vars["SERVER_NAME"] + "  : return code = " + str(proc.returncode))
+			utils.log("[!] Error while generating site config for " + env["SERVER_NAME"] + " : return code = " + str(proc.returncode))
 
 		except Exception as e :
 			utils.log("[!] Exception while generating site config : " + str(e))
