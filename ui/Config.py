@@ -5,7 +5,7 @@ class Config :
     def __init__(self) :
         with open("/opt/settings.json", "r") as f :
             self.__settings = json.loads(f.read())
-    
+
     def __env_to_dict(self, filename) :
         with open(filename, "r") as f :
             env = f.read()
@@ -36,6 +36,13 @@ class Config :
         if stderr != "" or proc.returncode != 0 :
             raise Exception("Error from generator (return code = " + str(proc.returncode) + ") : " + stderr)
 
+    def get_config(self) :
+        config = self.__env_to_dict("/etc/nginx/global.env")
+        for service in self.get_services() :
+            for k, v in service.items() :
+                config[service["FIRST_SERVER"] + "_" + k] = v
+        return config
+
     def get_settings(self) :
         return self.__settings
 
@@ -60,7 +67,7 @@ class Config :
                             check = True
             if not check :
                 raise Exception("Variable " + k + " is not valid.")
-    
+
     def new_service(self, variables) :
         global_env = self.__env_to_dict("/etc/nginx/global.env")
         services = self.get_services()
@@ -88,4 +95,4 @@ class Config :
         if not found :
             raise Exception("Can't delete missing " + server_name + " configuration.")
         self.__gen_conf(global_env, new_services)
-    
+

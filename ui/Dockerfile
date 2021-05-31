@@ -16,8 +16,8 @@ COPY settings.json /opt
 
 COPY ui/prepare.sh /tmp
 RUN chmod +x /tmp/prepare.sh && \
-     /tmp/prepare.sh && \
-     rm -f /tmp/prepare.sh
+    /tmp/prepare.sh && \
+    rm -f /tmp/prepare.sh
 
 EXPOSE 5000
 
