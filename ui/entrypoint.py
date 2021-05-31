@@ -2,7 +2,8 @@
 
 from flask import Flask, render_template, current_app, request
 
-import wrappers, utils
+from Docker import Docker
+import Docker, wrappers, utils
 import os, json, re
 
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
@@ -10,8 +11,9 @@ ABSOLUTE_URI = ""
 if "ABSOLUTE_URI" in os.environ :
 	ABSOLUTE_URI = os.environ["ABSOLUTE_URI"]
 app.config["ABSOLUTE_URI"] = ABSOLUTE_URI
-with open("/opt/entrypoint/config.json", "r") as f :
+with open("/opt/settings.json", "r") as f :
 	app.config["CONFIG"] = json.loads(f.read())
+app.config["DOCKER"] = Docker()
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 app.jinja_env.globals.update(form_service_gen_multiple=utils.form_service_gen_multiple)
@@ -19,48 +21,48 @@ app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service
 
 @app.route('/')
 @app.route('/home')
-def home():
-	check, client = wrappers.get_client()
-	if not check :
-		return render_template("error.html", title="Error", error=client)
-	check, instances = wrappers.get_instances(client)
-	if not check :
-		return render_template("error.html", title="Error", error=instances)
-	check, services = wrappers.get_services()
-	if not check :
-		return render_template("error.html", title="Error", error=services)
-	return render_template("home.html", title="Home", instances_number=len(instances), services_number=len(services))
+def home() :
+	try :
+		instances_number = len(app.config["DOCKER"].get_instances())
+		services_number = 0 # TODO
+		return render_template("home.html", title="Home", instances_number=instances_number, services_number=services_number)
+	except Exception as e :
+		return render_template("error.html", title="Error", error=e)
 
 @app.route('/instances', methods=["GET", "POST"])
-def instances():
+def instances() :
+	try :
+		# Manage instances
+		operation = ""
+		if request.method == "POST" :
 
-	# Get the client
-	check, client = wrappers.get_client()
-	if not check :
-		return render_template("error.html", title="Error", error=client)
+			# Check operation
+			if not "operation" in request.form or not request.form["operation"] in ["reload", "start", "stop", "restart", "delete"] :
+				return render_template("error.html", title="Error", error="Missing operation parameter on /instances.")
 
-	# Manage instances
-	operation = ""
-	if request.method == "POST" :
+			# Check that all fields are present
+			if not "INSTANCE_ID" in request.form :
+				return render_template("error.html", title="Error", error="Missing INSTANCE_ID parameter.")
 
-		# Check operation
-		if not "operation" in request.form or not request.form["operation"] in ["reload", "start", "stop", "restart", "delete"] :
-			return render_template("error.html", title="Error", error="Missing operation parameter on /instances.")
+			# Do the operation
+			if request.form["operation"] == "reload" :
+				app.config["DOCKER"].reload(request_form["INSTANCE_ID"])
+			elif request.form["operation"] == "start" :
+				app.config["DOCKER"].start(request_form["INSTANCE_ID"])
+			elif request.form["operation"] == "stop" :
+				app.config["DOCKER"].stop(request_form["INSTANCE_ID"])
+			elif request.form["operation"] == "restart" :
+				app.config["DOCKER"].restart(request_form["INSTANCE_ID"])
+			elif request.form["operation"] == "delete" :
+				app.config["DOCKER"].remove(request_form["INSTANCE_ID"])
 
-		# Check that all fields are present
-		if not "INSTANCE_ID" in request.form :
-			return render_template("error.html", title="Error", error="Missing INSTANCE_ID parameter.")
+		# Display instances
+		instances = app.config["DOCKER"].get_instances()
+		return render_template("instances.html", title="Instances", instances=instances, operation="todo")
 
-		# Do the operation
-		check, operation = wrappers.operation_instance(client, request.form)
-		if not check :
-			return render_template("error.html", title="Error", error=operation)
+	except Exception as e :
+		return render_template("error.html", title="Error", error=e)
 
-	# Display instances
-	check, instances = wrappers.get_instances(client)
-	if not check :
-		return render_template("error.html", title="Error", error=instances)
-	return render_template("instances.html", title="Instances", instances=instances, operation=operation)
 
 @app.route('/services', methods=["GET", "POST"])
 def services():
