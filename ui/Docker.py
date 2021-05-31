@@ -17,16 +17,21 @@ class Docker :
 		return self.__client.containers.get(id)
 
 	def reload_instance(self, id) :
-		return self.get_instance(id).kill(signal="SIGHUP")
+		self.get_instance(id).kill(signal="SIGHUP")
+		return "Instance " + id + " has been reloaded."
 
 	def start_instance(self, id) :
-		return self.get_instance(id).start()
+		self.get_instance(id).start()
+		return "Instance " + id + " has been started."
 
 	def stop_instance(self, id) :
-		return self.get_instance(id).stop()
+		self.get_instance(id).stop()
+		return "Instance " + id + " has been stopped."
 
 	def restart_instance(self, id) :
-		return self.get_instance(id).restart()
+		self.get_instance(id).restart()
+		return "Instance " + id + " has been restarted."
 
-	def remove_instance(self, id) :
-		return self.get_instance(id).remove(v=True, force=True)
+	def delete_instance(self, id) :
+		self.get_instance(id).remove(v=True, force=True)
+		return "Instance " + id + " has been deleted."

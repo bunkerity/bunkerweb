@@ -8,7 +8,7 @@
 			<div class="modal-body">
 				<ul class="nav nav-pills mb-3" id="pills-tab-new" role="tablist">
 {% set check = {"active": "active", "selected": "true"} %}
-{% for k, v in config["CONFIG"].items() %}
+{% for k, v in config["CONFIG"].get_config().items() %}
 					<li class="nav-item" role="presentation">
 						<a class="nav-link {{ check.active }}" id="new-{{ v["id"] }}-tab" data-bs-toggle="pill" href="#new-{{ v["id"] }}" role="tab" aria-controls="new-{{ v["id"] }}" aria-selected="{{ check.selected }}">{{ k }}</a>
 					</li>
@@ -19,7 +19,7 @@
 				<form id="form-new">
 					<div class="tab-content" id="new-content">
 {% set check = {"class": "show active"} %}
-{% for k, v in config["CONFIG"].items() %}
+{% for k, v in config["CONFIG"].get_config().items() %}
 						<div class="tab-pane fade {{ check.class }}" id="new-{{ v["id"] }}" role="tabpanel" aria-labelledby="new-{{ v["id"] }}-tab">
 	{% for param in v["params"] %}
 							<div class="row mb-3" id="form-new-{{ param["id"] }}">
