@@ -8,7 +8,7 @@
 			<div class="modal-body">
 				<ul class="nav nav-pills mb-3" id="pills-tab-edit" role="tablist">
 {% set check = {"active": "active", "selected": "true"} %}
-{% for k, v in config["CONFIG"].get_config().items() %}
+{% for k, v in config["CONFIG"].get_settings().items() %}
 					<li class="nav-item" role="presentation">
 						<a class="nav-link {{ check.active }}" id="edit-{{ v["id"] }}-{{ id_server_name }}-tab" data-bs-toggle="pill" href="#edit-{{ v["id"] }}-{{ id_server_name }}" role="tab" aria-controls="edit-{{ v["id"] }}-{{ id_server_name }}" aria-selected="{{ check.selected }}">{{ k }}</a>
 					</li>
@@ -20,7 +20,7 @@
 					<input type="hidden" value="{{ service["SERVER_NAME"] }}" name="OLD_SERVER_NAME">
 					<div class="tab-content" id="edit-content-{{ id_server_name }}">
 {% set check = {"class": "show active"} %}
-{% for k, v in config["CONFIG"].get_config().items() %}
+{% for k, v in config["CONFIG"].get_settings().items() %}
 						<div class="tab-pane fade {{ check.class }}" id="edit-{{ v["id"] }}-{{ id_server_name }}" role="tabpanel" aria-labelledby="edit-{{ v["id"] }}-{{ id_server_name }}-tab">
 	{% for param in v["params"] %}
 							<div class="row mb-3" id="form-edit-{{ id_server_name }}-{{ param["id"] }}">

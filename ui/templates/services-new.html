@@ -8,7 +8,7 @@
 			<div class="modal-body">
 				<ul class="nav nav-pills mb-3" id="pills-tab-new" role="tablist">
 {% set check = {"active": "active", "selected": "true"} %}
-{% for k, v in config["CONFIG"].get_config().items() %}
+{% for k, v in config["CONFIG"].get_settings().items() %}
 					<li class="nav-item" role="presentation">
 						<a class="nav-link {{ check.active }}" id="new-{{ v["id"] }}-tab" data-bs-toggle="pill" href="#new-{{ v["id"] }}" role="tab" aria-controls="new-{{ v["id"] }}" aria-selected="{{ check.selected }}">{{ k }}</a>
 					</li>
@@ -19,14 +19,26 @@
 				<form id="form-new">
 					<div class="tab-content" id="new-content">
 {% set check = {"class": "show active"} %}
-{% for k, v in config["CONFIG"].get_config().items() %}
+{% for k, v in config["CONFIG"].get_settings().items() %}
 						<div class="tab-pane fade {{ check.class }}" id="new-{{ v["id"] }}" role="tabpanel" aria-labelledby="new-{{ v["id"] }}-tab">
 	{% for param in v["params"] %}
 							<div class="row mb-3" id="form-new-{{ param["id"] }}">
-		{% if param["type"] != "multiple" %}
-								{{ form_service_gen("form-new-" + param["id"], param["label"], param["type"], param["default"], param["env"])|safe }}
-		{% else %}
+		{% if param["type"] != "multiple" and param["context"] == "multisite" %}
+			{% set default = {"value": param["default"]} %}
+			{% if param["env"] in config["CONFIG"].get_config() %}
+				{% set x = default.update({"value": config["CONFIG"].get_config()[param["env"]]}) %}
+			{% endif %}
+								{{ form_service_gen("form-new-" + param["id"], param["label"], param["type"], default["value"], param["env"])|safe }}
+		{% elif param["type"] == "multiple" %}
+			{% set gen = {"value": False} %}
+			{% for param in param["params"] %}
+				{% if param["context"] == "multisite" %}
+					{% set x = gen.update({"value": True}) %}
+				{% endif %}
+			{% endfor %}
+			{% if gen["value"] %}
 								{{ form_service_gen_multiple("form-new-" + param["id"], param["label"], param["params"])|safe }}
+			{% endif %}
 		{% endif %}
 							</div>
 	{% endfor %}

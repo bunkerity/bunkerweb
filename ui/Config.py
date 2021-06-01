@@ -1,4 +1,4 @@
-import json, uuid, glob
+import json, uuid, glob, copy
 
 class Config :
 
@@ -36,15 +36,11 @@ class Config :
         if stderr != "" or proc.returncode != 0 :
             raise Exception("Error from generator (return code = " + str(proc.returncode) + ") : " + stderr)
 
-    def get_config(self) :
-        config = self.__env_to_dict("/etc/nginx/global.env")
-        for service in self.get_services() :
-            for k, v in service.items() :
-                config[service["FIRST_SERVER"] + "_" + k] = v
-        return config
-
     def get_settings(self) :
         return self.__settings
+    
+    def get_config(self) :
+        return self.__env_to_dict("/etc/nginx/global.env")
 
     def get_services(self) :
         services = []

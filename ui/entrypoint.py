@@ -5,7 +5,7 @@ from flask import Flask, render_template, current_app, request
 from Docker import Docker
 from Config import Config
 import utils
-import os, json, re
+import os, json, re, traceback
 
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 ABSOLUTE_URI = ""
@@ -104,4 +104,4 @@ def services():
 		return render_template("services.html", title="Services", services=services, operation=operation)
 
 	except Exception as e :
-		return render_template("error.html", title="Error", error=str(e))
+		return render_template("error.html", title="Error", error=str(e) + traceback.format_exc())
