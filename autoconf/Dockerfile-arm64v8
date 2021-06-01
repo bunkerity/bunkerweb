@@ -3,12 +3,9 @@ FROM alpine AS builder
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v4.0.0%2Bbalena2/qemu-4.0.0.balena2-aarch64.tar.gz
 RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
 
-FROM nginx:1.20.1-alpine AS builder2
-
 FROM arm64v8/alpine
 
 COPY --from=builder qemu-aarch64-static /usr/bin
-COPY --from=builder2 /etc/nginx/ /opt/confs/nginx
 
 COPY autoconf/dependencies.sh /tmp
 RUN chmod +x /tmp/dependencies.sh && \

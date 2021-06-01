@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import argparse, os, sys
+import argparse, os, sys, shutil
 
 import utils
 from Configurator import Configurator
@@ -50,6 +50,14 @@ if __name__ == "__main__" :
 	configurator.load_variables(variables)
 	config = configurator.get_config()
 	print(config)
+
+	# Remove old config
+	for filename in os.listdir(args.output):
+		file_path = os.path.join(args.output, filename)
+		if os.path.isfile(file_path) or os.path.islink(file_path):
+			os.unlink(file_path)
+		elif os.path.isdir(file_path):
+			shutil.rmtree(file_path)
 
 	# Generate the files from templates and config
 	templator = Templator(config, args.templates, args.output, args.target)

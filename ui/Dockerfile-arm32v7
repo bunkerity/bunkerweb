@@ -1,14 +1,11 @@
-FROM alpine AS builder1
+FROM alpine AS builder
 
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v4.0.0%2Bbalena2/qemu-4.0.0.balena2-arm.tar.gz
 RUN apk add curl && curl -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
 
-FROM nginx:1.20.1-alpine AS builder2
-
 FROM arm32v7/alpine
 
-COPY --from=builder1 qemu-arm-static /usr/bin
-COPY --from=builder2 /etc/nginx/ /opt/confs/nginx
+COPY --from=builder qemu-arm-static /usr/bin
 
 COPY ui/dependencies.sh /tmp
 RUN chmod +x /tmp/dependencies.sh && \
@@ -17,6 +14,7 @@ RUN chmod +x /tmp/dependencies.sh && \
 
 COPY gen/ /opt/gen
 COPY confs/site/ /opt/confs/site
+COPY confs/global/ /opt/confs/global
 COPY ui/ /opt/entrypoint
 COPY settings.json /opt
 

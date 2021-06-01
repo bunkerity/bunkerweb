@@ -1,4 +1,4 @@
-import json, uuid, glob, copy
+import json, uuid, glob, copy, re, subprocess
 
 class Config :
 
@@ -25,10 +25,16 @@ class Config :
 
     def __gen_conf(self, global_conf, services_conf) :
         conf = copy.deepcopy(global_conf)
+        servers = conf["SERVER_NAME"].split(" ")
+        if conf["SERVER_NAME"] == "" :
+            servers = []
         for service in services_conf :
             first_server = service["SERVER_NAME"].split(" ")[0]
+            if not first_server in servers :
+                servers.append(first_server)
             for k, v in service.items() :
                 conf[first_server + "_" + k] = v
+        conf["SERVER_NAME"] = " ".join(servers)
         env_file = "/tmp/" + str(uuid.uuid4()) + ".env"
         self.__dict_to_env(env_file, conf)
         proc = subprocess.run(["/bin/su", "-c", "/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables " + env_file, "nginx"], capture_output=True)
@@ -38,7 +44,7 @@ class Config :
 
     def get_settings(self) :
         return self.__settings
-    
+
     def get_config(self) :
         return self.__env_to_dict("/etc/nginx/global.env")
 
@@ -54,10 +60,10 @@ class Config :
             check = False
             for category in self.__settings :
                 for param in self.__settings[category]["params"] :
-                    if type != "multiple" :
+                    if param["type"] != "multiple" :
                         real_params = [param]
                     else :
-                        real_params = param
+                        real_params = param["params"]
                     for real_param in real_params :
                         if k == real_param["env"] and real_param["context"] == "multisite" and re.search(real_param["regex"], v) :
                             check = True
@@ -72,10 +78,12 @@ class Config :
                 raise Exception("Service " + service["SERVER_NAME"] + " already exists.")
         services.append(variables)
         self.__gen_conf(global_env, services)
+        return "Configuration for " + variables["SERVER_NAME"] + " has been generated."
 
     def edit_service(self, old_server_name, variables) :
         self.delete_service(old_server_name)
         self.new_service(variables)
+        return "Configuration for " + old_server_name + " has been edited."
 
 
     def delete_service(self, server_name) :
@@ -90,5 +98,10 @@ class Config :
                 new_services.append(service)
         if not found :
             raise Exception("Can't delete missing " + server_name + " configuration.")
+        new_servers = global_env["SERVER_NAME"].split(" ")
+        if server_name in new_servers :
+            new_servers.remove(server_name)
+        global_env["SERVER_NAME"] = " ".join(new_servers)
         self.__gen_conf(global_env, new_services)
+        return "Configuration for " + server_name + " has been deleted."
 

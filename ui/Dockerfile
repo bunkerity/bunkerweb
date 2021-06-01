@@ -1,8 +1,4 @@
-FROM nginx:1.20.1-alpine AS builder
-
 FROM alpine
-
-COPY --from=builder /etc/nginx/ /opt/confs/nginx
 
 COPY ui/dependencies.sh /tmp
 RUN chmod +x /tmp/dependencies.sh && \
@@ -11,6 +7,7 @@ RUN chmod +x /tmp/dependencies.sh && \
 
 COPY gen/ /opt/gen
 COPY confs/site/ /opt/confs/site
+COPY confs/global/ /opt/confs/global
 COPY ui/ /opt/entrypoint
 COPY settings.json /opt
 

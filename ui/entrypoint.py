@@ -5,7 +5,7 @@ from flask import Flask, render_template, current_app, request
 from Docker import Docker
 from Config import Config
 import utils
-import os, json, re, traceback
+import os, json, re, copy, traceback
 
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 ABSOLUTE_URI = ""
@@ -76,7 +76,7 @@ def services():
 				raise Exception("Missing operation parameter on /services.")
 
 			# Check variables
-			variables = copy.deepcopy(request.form)
+			variables = copy.deepcopy(request.form.to_dict())
 			if not "OLD_SERVER_NAME" in request.form and request.form["operation"] == "edit" :
 					raise Exception("Missing OLD_SERVER_NAME parameter.")
 			if request.form["operation"] in ["new", "edit"] :
@@ -98,6 +98,10 @@ def services():
 				operation = app.config["CONFIG"].edit_service(request.form["OLD_SERVER_NAME"], variables)
 			elif request.form["operation"] == "delete" :
 				operation = app.config["CONFIG"].delete_service(request.form["SERVER_NAME"])
+			
+			# Reload containers
+			for instance in app.config["DOCKER"].get_instances() :
+				app.config["DOCKER"].reload_instance(instance.id)
 
 		# Display services
 		services = app.config["CONFIG"].get_services()

@@ -1,8 +1,4 @@
-FROM nginx:1.20.1-alpine AS builder
-
 FROM alpine
-
-COPY --from=builder /etc/nginx/ /opt/confs/nginx
 
 COPY autoconf/dependencies.sh /tmp
 RUN chmod +x /tmp/dependencies.sh && \

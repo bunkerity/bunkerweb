@@ -29,6 +29,7 @@ services:
       - admin.website.com_USE_REVERSE_PROXY=yes
       - admin.website.com_REVERSE_PROXY_URL=/admin/            # change it to something hard to guess
       - admin.website.com_REVERSE_PROXY_HOST=http://myui:5000/  
+      - admin.website.com_USE_MODSECURITY=no
     labels:
       - "bunkerized-nginx.UI"
 
