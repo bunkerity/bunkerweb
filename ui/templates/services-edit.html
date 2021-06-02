@@ -23,15 +23,25 @@
 {% for k, v in config["CONFIG"].get_settings().items() %}
 						<div class="tab-pane fade {{ check.class }}" id="edit-{{ v["id"] }}-{{ id_server_name }}" role="tabpanel" aria-labelledby="edit-{{ v["id"] }}-{{ id_server_name }}-tab">
 	{% for param in v["params"] %}
-							<div class="row mb-3" id="form-edit-{{ id_server_name }}-{{ param["id"] }}">
 		{% if param["type"] != "multiple" and param["context"] == "multisite" %}
+							<div class="row mb-3" id="form-edit-{{ id_server_name }}-{{ param["id"] }}">
 								{{ form_service_gen("form-edit-" + id_server_name + "-" + param["id"], param["label"], param["type"], service[param["env"]], param["env"])|safe }}
-		{% elif param["context"] == "multisite" %}
+							</div>
+		{% elif param["type"] == "multiple" %}
+			{% set gen = {"value": False} %}
+			{% for param2 in param["params"] %}
+				{% if param2["context"] == "multisite" %}
+					{% set x = gen.update({"value": True}) %}
+				{% endif %}
+			{% endfor %}
+			{% if gen["value"] %}
+							<div class="row mb-3" id="form-edit-{{ id_server_name }}-{{ param["id"] }}">
 								{{ form_service_gen_multiple("form-edit-" + id_server_name + "-" + param["id"], param["label"], param["params"])|safe }}
-			{% if template_data.update({"javascript": template_data.javascript + form_service_gen_multiple_values("form-edit-" + id_server_name + "-" + param["id"], param["params"], service)}) %}
+				{% if template_data.update({"javascript": template_data.javascript + form_service_gen_multiple_values("form-edit-" + id_server_name + "-" + param["id"], param["params"], service)}) %}
+				{% endif %}
+							</div>
 			{% endif %}
 		{% endif %}
-							</div>
 	{% endfor %}
 						</div>
 	{% if check.update({"class": ""}) %}

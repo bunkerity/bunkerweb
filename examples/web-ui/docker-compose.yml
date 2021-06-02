@@ -5,6 +5,8 @@ services:
   mywww:
     image: bunkerity/bunkerized-nginx
     restart: always
+    depends_on:
+      - myui
     ports:
       - 80:8080
       - 443:8443
@@ -36,7 +38,6 @@ services:
     image: bunkerity/bunkerized-nginx-ui
     restart: always
     depends_on:
-      - mywww
       - myuiproxy
     volumes:
       - autoconf:/etc/nginx

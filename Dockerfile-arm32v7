@@ -24,6 +24,7 @@ COPY confs/ /opt/confs
 COPY scripts/ /opt/scripts
 COPY lua/ /usr/local/lib/lua
 COPY antibot/ /antibot
+COPY defaults/ /defaults
 COPY settings.json /opt
 COPY misc/cron /etc/crontabs/nginx
 

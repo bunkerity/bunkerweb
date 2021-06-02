@@ -968,7 +968,7 @@
                     },
                     {
                         "context": "multisite",
-                        "default": "",
+                        "default": "no",
                         "env": "REVERSE_PROXY_WS",
                         "id": "reverse-proxy-ws",
                         "label": "Reverse proxy ws",

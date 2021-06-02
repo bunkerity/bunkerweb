@@ -22,25 +22,27 @@
 {% for k, v in config["CONFIG"].get_settings().items() %}
 						<div class="tab-pane fade {{ check.class }}" id="new-{{ v["id"] }}" role="tabpanel" aria-labelledby="new-{{ v["id"] }}-tab">
 	{% for param in v["params"] %}
-							<div class="row mb-3" id="form-new-{{ param["id"] }}">
 		{% if param["type"] != "multiple" and param["context"] == "multisite" %}
+							<div class="row mb-3" id="form-new-{{ param["id"] }}">
 			{% set default = {"value": param["default"]} %}
 			{% if param["env"] in config["CONFIG"].get_config() %}
 				{% set x = default.update({"value": config["CONFIG"].get_config()[param["env"]]}) %}
 			{% endif %}
 								{{ form_service_gen("form-new-" + param["id"], param["label"], param["type"], default["value"], param["env"])|safe }}
+							</div>
 		{% elif param["type"] == "multiple" %}
 			{% set gen = {"value": False} %}
-			{% for param in param["params"] %}
-				{% if param["context"] == "multisite" %}
+			{% for param2 in param["params"] %}
+				{% if param2["context"] == "multisite" %}
 					{% set x = gen.update({"value": True}) %}
 				{% endif %}
 			{% endfor %}
 			{% if gen["value"] %}
+							<div class="row mb-3" id="form-new-{{ param["id"] }}">
 								{{ form_service_gen_multiple("form-new-" + param["id"], param["label"], param["params"])|safe }}
+							</div>
 			{% endif %}
 		{% endif %}
-							</div>
 	{% endfor %}
 						</div>
 	{% if check.update({"class": ""}) %}

@@ -39,6 +39,7 @@ class Config :
         self.__dict_to_env(env_file, conf)
         proc = subprocess.run(["/bin/su", "-c", "/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables " + env_file, "nginx"], capture_output=True)
         stderr = proc.stderr.decode("ascii")
+        #stdout = proc.stdout.decode("ascii")
         if stderr != "" or proc.returncode != 0 :
             raise Exception("Error from generator (return code = " + str(proc.returncode) + ") : " + stderr)
 
@@ -60,12 +61,17 @@ class Config :
             check = False
             for category in self.__settings :
                 for param in self.__settings[category]["params"] :
+                    multiple = False
                     if param["type"] != "multiple" :
                         real_params = [param]
                     else :
                         real_params = param["params"]
+                        multiple = True
                     for real_param in real_params :
-                        if k == real_param["env"] and real_param["context"] == "multisite" and re.search(real_param["regex"], v) :
+                        if (((not multiple and k == real_param["env"]) or
+                                (multiple and re.search("^" + real_param["env"] + "_" + "[0-9]+$", k))) and
+                                real_param["context"] == "multisite" and
+                                re.search(real_param["regex"], v)) :
                             check = True
             if not check :
                 raise Exception("Variable " + k + " is not valid.")
