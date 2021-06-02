@@ -294,8 +294,6 @@ docker service create --name anotherapp \
 
 ## Web UI
 
-**This feature exposes, for now, a security risk because you need to mount the docker socket inside a container exposing a web application. You can test it but you should not use it in servers facing the internet.**  
-
 A dedicated image, *bunkerized-nginx-ui*, lets you manage bunkerized-nginx instances and services configurations through a web user interface. This feature is still in beta, feel free to open a new issue if you find a bug and/or you have an idea to improve it. 
 
 First we need a volume that will store the configurations :
@@ -320,6 +318,7 @@ docker run -p 80:8080 \
            -e AUTO_LETS_ENCRYPT=yes \
            -e REDIRECT_HTTP_TO_HTTPS=yes \
            -e DISABLE_DEFAULT_SERVER=yes \
+           -e admin.domain.com_USE_MODSECURITY=no \
            -e admin.domain.com_SERVE_FILES=no \
            -e admin.domain.com_USE_AUTH_BASIC=yes \
            -e admin.domain.com_AUTH_BASIC_USER=admin \
@@ -331,7 +330,7 @@ docker run -p 80:8080 \
            bunkerity/bunkerized-nginx
 ```
 
-The `AUTH_BASIC` environment variables let you define a login/password that must be provided before accessing to the web UI. At the moment, there is no authentication mechanism integrated into bunkerized-nginx-ui.
+The `AUTH_BASIC` environment variables let you define a login/password that must be provided before accessing to the web UI. At the moment, there is no authentication mechanism integrated into bunkerized-nginx-ui so **using auth basic with a strong password coupled with a "hard to guess" URI is strongly recommended**.
 
 We can now create the bunkerized-nginx-ui container that will host the web UI behind bunkerized-nginx :
 

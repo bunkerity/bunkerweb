@@ -12,7 +12,6 @@ services:
     # don't forget to edit the permissions of the files and folders accordingly
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./web-files:/www:ro
       - autoconf:/etc/nginx
     environment:
       - SERVER_NAME=admin.website.com                          # replace with your domain
@@ -36,11 +35,23 @@ services:
   myui:
     image: bunkerity/bunkerized-nginx-ui
     restart: always
+    depends_on:
+      - mywww
+      - myuiproxy
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - autoconf:/etc/nginx
     environment:
       - ABSOLUTE_URI=https://admin.website.com/admin/          # change it to your full URI
+      - DOCKER_HOST=tcp://myuiproxy:2375
+
+  myuiproxy:
+    image: tecnativa/docker-socket-proxy
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - POST=1
+      - CONTAINERS=1
 
 volumes:
   autoconf:

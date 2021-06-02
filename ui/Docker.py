@@ -2,8 +2,8 @@ import docker
 
 class Docker :
 
-	def __init__(self) :
-		self.__client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
+	def __init__(self, docker_host) :
+		self.__client = docker.DockerClient(base_url=docker_host)
 
 	def get_instances(self) :
 		return self.__client.containers.list(all=True, filters={"label" : "bunkerized-nginx.UI"})

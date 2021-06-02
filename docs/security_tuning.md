@@ -211,6 +211,37 @@ Here is the list of related environment variables and their default value :
 - `USE_BLACKLIST_REVERSE=yes` : enable/disable blacklisting by reverse DNS
 - `BLACKLIST_REVERSE_LIST=.shodan.io` : the list of reverse DNS suffixes to never trust
 
+## Web UI
+
+Mounting the docker socket in a container which is facing the network, like we do with the [web UI](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html#web-ui), is not a good security practice. In case of a vulnerability inside the application, attackers can freely use the Docker socket and the whole host can be compromised.
+
+A possible workaround is to use the [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy) image which acts as a reverse proxy between the application and the Docker socket. It can allow/deny the requests made to the Docker API.
+
+Before starting the web UI, you need to fire up the docker-socket-proxy (we also need a network because of inter-container communication) :
+
+```shell
+docker network create mynet
+```
+
+```shell
+docker run --name mysocketproxy \
+           --network mynet \
+           -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -e POST=1 \
+           -e CONTAINERS=1 \
+           tecnativa/docker-socket-proxy
+```
+
+You can now start the web UI container and use the `DOCKER_HOST` environment variable to define the Docker API endpoint :
+
+```shell
+docker run --network mynet \
+           -v autoconf:/etc/nginx \
+           -e ABSOLUTE_URI=https://my.webapp.com/admin/ \
+           -e DOCKER_HOST=tcp://mysocketproxy:2375 \
+           bunkerity/bunkerized-nginx-ui
+```
+
 ## Container hardening
 
 ### Drop capabilities
