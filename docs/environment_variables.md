@@ -87,6 +87,18 @@ Default value : *8443*
 Context : *global*  
 The HTTPS port number used by nginx inside the container.
 
+`WORKER_CONNECTIONS`
+Values : *\<any positive integer\>*  
+Default value : 1024  
+Context : *global*  
+Sets the value of the [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) directive.
+
+`WORKER_RLIMIT_NOFILE`
+Values : *\<any positive integer\>*  
+Default value : 2048  
+Context : *global*  
+Sets the value of the [worker_rlimit_nofile](https://nginx.org/en/docs/ngx_core_module.html#worker_rlimit_nofile) directive.
+
 ### Information leak
 
 `SERVER_TOKENS`  
@@ -182,7 +194,7 @@ You can set multiple url/host by adding a suffix number to the variable name lik
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*, *multisite*  
-Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Modsecurity, fail2ban and others security tools will also then work correctly.
+Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Ssecurity tools will also then work correctly.
 
 `PROXY_REAL_IP_FROM`  
 Values : *\<list of trusted IP addresses and/or networks separated with spaces\>*  
@@ -500,6 +512,12 @@ Default value : *yes*
 Context : *global*, *multisite*  
 If set to yes, the [OWASP ModSecurity Core Rule Set](https://coreruleset.org/) will be used. It provides generic rules to detect common web attacks.  
 You can customize the CRS (i.e. : add WordPress exclusions) by adding custom .conf files into the /modsec-crs-confs/ directory inside the container (i.e : through a volume). Files inside this directory are included before the CRS rules. If you need to tweak (i.e. : SecRuleUpdateTargetById) put .conf files inside the /modsec-confs/ which is included after the CRS rules.
+
+`MODSECURITY_SEC_AUDIT_ENGINE`  
+Values : *On* | *Off* | *RelevantOnly*  
+Default value : *RelevantOnly*  
+Context : *global*, *multisite*  
+Sets the value of the [SecAuditEngine directive](https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual-%28v2.x%29#SecAuditEngine) of ModSecurity.
 
 ## Security headers
 
@@ -858,82 +876,6 @@ Values : *<any positive integer>*
 Default value : *60*  
 Context : *global*  
 The duration time (in seconds) before the counter of "suspicious" HTTP is reset.
-
-## ClamAV
-
-`USE_CLAMAV_UPLOAD`  
-Values : *yes* | *no*  
-Default value : *yes*  
-Context : *global*, *multisite*  
-If set to yes, ClamAV will scan every file uploads and block the upload if the file is detected.
-
-`USE_CLAMAV_SCAN`  
-Values : *yes* | *no*  
-Default value : *yes*  
-Context : *global*  
-If set to yes, ClamAV will scan all the files inside the container every day.  
-
-`CLAMAV_SCAN_REMOVE`  
-Values : *yes* | *no*  
-Default value : *yes*  
-Context : *global*  
-If set to yes, ClamAV will automatically remove the detected files.  
-
-## Cron jobs
-
-`AUTO_LETS_ENCRYPT_CRON`  
-Values : *\<cron expression\>*   
-Default value : *15 0 \* \* \**  
-Context : *global*  
-Cron expression of how often certbot will try to renew the certificates.
-
-`BLOCK_USER_AGENT_CRON`  
-Values : *\<cron expression\>*   
-Default value : *30 0 \* \* \* \**  
-Context : *global*  
-Cron expression of how often the blacklist of user agent is updated.
-
-`BLOCK_TOR_EXIT_NODE_CRON`  
-Values : *\<cron expression\>*   
-Default value : *0 \*/1 \* \* \* \**  
-Context : *global*  
-Cron expression of how often the blacklist of tor exit node is updated.
-
-`BLOCK_PROXIES_CRON`  
-Values : *\<cron expression\>*   
-Default value : *0 3 \* \* \* \**  
-Context : *global*  
-Cron expression of how often the blacklist of proxies is updated.
-
-`BLOCK_ABUSERS_CRON`  
-Values : *\<cron expression\>*   
-Default value : *0 2 \* \* \* \**  
-Context : *global*  
-Cron expression of how often the blacklist of abusers is updated.
-
-`BLOCK_REFERRER_CRON`  
-Values : *\<cron expression\>*   
-Default value : *45 0 \* \* \* \**  
-Context : *global*  
-Cron expression of how often the blacklist of referrer is updated.
-
-`GEOIP_CRON`  
-Values : *\<cron expression\>*  
-Default value : *0 4 2 \* \**  
-Context : *global*  
-Cron expression of how often the GeoIP database is updated.
-
-`USE_CLAMAV_SCAN_CRON`  
-Values : *\<cron expression\>*   
-Default value : *30 1 \* \* \**  
-Context : *global*  
-Cron expression of how often ClamAV will scan all the files inside the container.
-
-`CLAMAV_UPDATE_CRON`  
-Values : *\<cron expression\>*   
-Default value : *0 1 \* \* \**  
-Context : *global*  
-Cron expression of how often ClamAV will update its database.
 
 ## misc
 

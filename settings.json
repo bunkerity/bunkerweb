@@ -375,38 +375,6 @@
             }
         ]
     },
-    "ClamAV": {
-        "id": "clamav",
-        "params": [
-            {
-                "context": "multisite",
-                "default": "yes",
-                "env": "USE_CLAMAV_UPLOAD",
-                "id": "use-clamav-upload",
-                "label": "Use clamav upload",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "global",
-                "default": "yes",
-                "env": "USE_CLAMAV_SCAN",
-                "id": "use-clamav-scan",
-                "label": "Use clamav scan",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "global",
-                "default": "yes",
-                "env": "CLAMAV_SCAN_REMOVE",
-                "id": "clamav-scan-remove",
-                "label": "Clamav scan remove",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            }
-        ]
-    },
     "Compression": {
         "id": "compression",
         "params": [
