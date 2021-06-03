@@ -34,6 +34,10 @@ class Templator :
 		if type == "site" and self.__config_global["MULTISITE"] == "yes" :
 			site_config = copy.deepcopy(self.__config_sites[first_server])
 			real_config.update(site_config)
+		elif type == "global" and self.__config_global["MULTISITE"] == "yes" and self.__config_global["SERVER_NAME"] != "" :
+			for k, v in self.__config_sites.items() :
+				for k2, v2 in v.items() :
+					real_config[k + "_" + k2] = v2
 		if not server_name is None :
 			real_config["SERVER_NAME"] = server_name
 		if not first_server is None :

@@ -130,10 +130,6 @@ git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 3c235c813fc
 cd lua-cs-bouncer
 mkdir /usr/local/lib/lua/crowdsec
 cp lib/*.lua /usr/local/lib/lua/crowdsec
-mkdir /opt/crowdsec
-cp template.conf /opt/crowdsec/crowdsec.conf
-sed -i 's/^API_URL=.*/API_URL=%CROWDSEC_HOST%/' /opt/crowdsec/crowdsec.conf
-sed -i 's/^API_KEY=.*/API_KEY=%CROWDSEC_KEY%/' /opt/crowdsec/crowdsec.conf
 sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 cd /tmp
