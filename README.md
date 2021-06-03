@@ -11,12 +11,17 @@
         <img src="https://img.shields.io/readthedocs/bunkerized-nginx" />
 </p>
 
+<h3>
 <p align="center">
-        <a href="https://bunkerized-nginx.readthedocs.io"><img src="https://img.shields.io/badge/documentation-bunkerized--nginx.readthedocs.io-blue" /></a>  
-	<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org"><img src="https://img.shields.io/badge/matrix%20chat-%23bunkerized--nginx%3Amatrix.org-blue" /></a>
-        <a href="https://www.bunkerity.com"><img src="https://img.shields.io/badge/website-www.bunkerity.com-blue" /></a>  
-        <a href="https://twitter.com/bunkerity"><img src="https://img.shields.io/twitter/follow/bunkerity?style=social" /></a>
+		<a href="https://bunkerized-nginx.readthedocs.io">Documentation</a>
+		<span> | </span>
+		<a href="https://www.bunkerity.com/category/bunkerized-nginx/">Blog posts</a>
+		<span> | </span>
+		<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org">Community chat</a>
+		<span> | </span>
+		<a href="https://coso.me/bunkerity">Follow us</a>
 </p>
+</h3>
 
 nginx Docker image secure by default.  
 
