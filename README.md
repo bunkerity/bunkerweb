@@ -11,8 +11,8 @@
         <img src="https://img.shields.io/readthedocs/bunkerized-nginx" />
 </p>
 
-<h3>
 <p align="center">
+	<strong>
 		<a href="https://bunkerized-nginx.readthedocs.io">Documentation</a>
 		<span> | </span>
 		<a href="https://www.bunkerity.com/category/bunkerized-nginx/">Blog posts</a>
@@ -20,8 +20,8 @@
 		<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org">Community chat</a>
 		<span> | </span>
 		<a href="https://coso.me/bunkerity">Follow us</a>
+	</strong>
 </p>
-</h3>
 
 nginx Docker image secure by default.  
 
@@ -63,6 +63,8 @@ You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do so
   * [Web UI](#web-ui)
 - [Security tuning](#security-tuning)
 - [Going further](#going-further)
+- [License](#license)
+- [Contributing](#contributing)
 </details>
 
 # Quickstart guide
@@ -420,3 +422,11 @@ bunkerized-nginx comes with a set of predefined security settings that you can (
 - [Official documentation](https://bunkerized-nginx.readthedocs.io/)
 - [Full concrete examples](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples)
 - [Tutorials in our blog](https://www.bunkerity.com/blog)
+
+# License
+
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/LICENSE.md).
+
+# Contributing
+
+If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/CONTRIBUTING.md) to get started.
