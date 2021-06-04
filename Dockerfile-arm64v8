@@ -36,7 +36,7 @@ RUN chmod +x /tmp/prepare.sh && \
 # Fix CVE-2021-22901, CVE-2021-22898 and CVE-2021-22897
 RUN apk add "curl>=7.77.0-r0"
 
-VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pre-server-confs /acme-challenge
+VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pre-server-confs /acme-challenge /plugins
 
 EXPOSE 8080/tcp 8443/tcp
 

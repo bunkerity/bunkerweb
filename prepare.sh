@@ -65,3 +65,8 @@ chmod 770 /cache
 # prepare /etc/crontabs/nginx
 chown root:nginx /etc/crontabs/nginx
 chmod 440 /etc/crontabs/nginx
+
+# prepare /plugins
+mkdir /plugins
+chown root:nginx /plugins
+chmod 770 /plugins
