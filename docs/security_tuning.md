@@ -248,6 +248,10 @@ docker run --network mynet \
            bunkerity/bunkerized-nginx-ui
 ```
 
+## Plugins
+
+Some security features can be added through the plugins system (e.g. : ClamAV). You will find more info in the [plugins section](https://bunkerized-nginx.readthedocs.io/en/latest/plugins.html).
+
 ## Container hardening
 
 You will find a ready to use docker-compose.yml file focused on container hardening [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/hardened).

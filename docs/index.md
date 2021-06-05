@@ -9,4 +9,5 @@ security_tuning
 troubleshooting
 volumes
 environment_variables
+plugins
 ```

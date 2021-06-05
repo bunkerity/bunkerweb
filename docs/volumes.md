@@ -82,3 +82,10 @@ Description :
 Depending of the settings you use, bunkerized-nginx may download external content (e.g. : blacklists, GeoIP DB, ...). To avoid downloading it again in case of a container restart, you can save the data on the host.
 
 Read-only : no
+
+## Plugins
+
+Mountpoint : `/plugins`
+
+Description :  
+This volume is used to extend bunkerized-nginx with [additional plugins](https://bunkerized-nginx.readthedocs.io/en/latest/plugins.html). Please note that you will need to have a subdirectory for each plugin you want to enable.

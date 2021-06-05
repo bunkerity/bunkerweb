@@ -17,6 +17,7 @@ Non-exhaustive list of features :
 - Block TOR, proxies, bad user-agents, countries, ...
 - Block known bad IP with DNSBL and CrowdSec
 - Prevent bruteforce attacks with rate limiting
+- Plugin system for external security checks (e.g. : ClamAV)
 - Easy to configure with environment variables or web UI
 - Automatic configuration with container labels
 - Docker Swarm support
