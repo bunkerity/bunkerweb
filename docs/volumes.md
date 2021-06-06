@@ -89,3 +89,5 @@ Mountpoint : `/plugins`
 
 Description :  
 This volume is used to extend bunkerized-nginx with [additional plugins](https://bunkerized-nginx.readthedocs.io/en/latest/plugins.html). Please note that you will need to have a subdirectory for each plugin you want to enable.
+
+Read-only : yes

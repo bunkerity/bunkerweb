@@ -78,7 +78,7 @@ Under the hood, bunkerized-nginx uses the [lua nginx module](https://github.com/
 
 ### Dependencies
 
-Since the core already uses some external libraries you can use it in your own plugins too (see the [compile.sh](https://github.com/bunkerity/bunkerized-nginx/blob/master/compile.sh file) and the [core lua files](https://github.com/bunkerity/bunkerized-nginx/tree/master/lua)).
+Since the core already uses some external libraries you can use it in your own plugins too (see the [compile.sh](https://github.com/bunkerity/bunkerized-nginx/blob/master/compile.sh) file and the [core lua files](https://github.com/bunkerity/bunkerized-nginx/tree/master/lua)).
 
 In case you need to add dependencies, you can do it by placing the corresponding files into the same folder of your main plugin code. Here is an example with a file named **dependency.lua** :
 

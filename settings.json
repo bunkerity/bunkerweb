@@ -579,7 +579,7 @@
                 "env": "CUSTOM_HTTPS_CERT",
                 "id": "custom-https-cert",
                 "label": "Custom TLS certificate path",
-                "regex": "^[A-Za-z\\.0-9\\/]*$",
+                "regex": "^[A-Za-z\\.0-9\\/\\-]*$",
                 "type": "text"
             },
             {
@@ -588,7 +588,7 @@
                 "env": "CUSTOM_HTTPS_KEY",
                 "id": "custom-https-key",
                 "label": "Custom TLS certificate key",
-                "regex": "^[A-Za-z\\.0-9\\/]*$",
+                "regex": "^[A-Za-z\\.0-9\\/\\-]*$",
                 "type": "text"
             },
             {

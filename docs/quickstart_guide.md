@@ -296,13 +296,27 @@ docker service create --name anotherapp \
 
 A dedicated image, *bunkerized-nginx-ui*, lets you manage bunkerized-nginx instances and services configurations through a web user interface. This feature is still in beta, feel free to open a new issue if you find a bug and/or you have an idea to improve it. 
 
-First we need a volume that will store the configurations :
+First we need a volume that will store the configurations and a network because bunkerized-nginx will be used as a reverse proxy for the web UI :
 
 ```shell
 docker volume create nginx_conf
+docker network create mynet
 ```
 
-Then, we can create the bunkerized-nginx instance with the `bunkerized-nginx.UI` label and a reverse proxy configuration for our web UI :
+Let's create the bunkerized-nginx-ui container that will host the web UI behind bunkerized-nginx :
+
+```shell
+docker run --network mynet \
+           --name myui \
+           -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -v nginx_conf:/etc/nginx \
+           -e ABSOLUTE_URI=https://admin.domain.com/webui/ \
+           bunkerity/bunkerized-nginx-ui
+```
+
+You will need to edit the `ABSOLUTE_URI` environment variable to reflect your actual URI of the web UI.
+
+We can now setup the bunkerized-nginx instance with the `bunkerized-nginx.UI` label and a reverse proxy configuration for our web UI :
 
 ```shell
 docker network create mynet
@@ -332,14 +346,4 @@ docker run -p 80:8080 \
 
 The `AUTH_BASIC` environment variables let you define a login/password that must be provided before accessing to the web UI. At the moment, there is no authentication mechanism integrated into bunkerized-nginx-ui so **using auth basic with a strong password coupled with a "hard to guess" URI is strongly recommended**.
 
-We can now create the bunkerized-nginx-ui container that will host the web UI behind bunkerized-nginx :
-
-```shell
-docker run --network mynet \
-           -v /var/run/docker.sock:/var/run/docker.sock:ro \
-           -v nginx_conf:/etc/nginx \
-           -e ABSOLUTE_URI=https://admin.domain.com/webui/ \
-           bunkerity/bunkerized-nginx-ui
-```
-
-After that, the web UI should be accessible from https://admin.domain.com/webui/.
+Web UI should now be accessible from https://admin.domain.com/webui/.
