@@ -12,7 +12,7 @@ if [ "$(has_value BLOCK_USER_AGENT yes)" = "" ] ; then
 fi
 
 # save old conf
-cp /etc/nginx/user-agents.list /cache
+cp /etc/nginx/user-agents.list /tmp/user-agents.list.bak
 
 # generate new conf
 BLACKLIST="$( (curl -s https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list ; curl -s https://raw.githubusercontent.com/JayBizzle/Crawler-Detect/master/raw/Crawlers.txt) | sort -u | sed 's:\\ : :g;s:\\\.:%\.:g;s:\\\\:\\:g;s:\\/:/:g;s:\-:%\-:g')"
@@ -34,23 +34,24 @@ fi
 # check number of lines
 lines="$(wc -l /tmp/user-agents.list | cut -d ' ' -f 1)"
 if [ "$lines" -gt 1 ] ; then
-	mv /tmp/user-agents.list /etc/nginx/user-agents.list
+	cp /tmp/user-agents.list /etc/nginx/user-agents.list
 	job_log "[BLACKLIST] user-agent list updated ($lines entries)"
 	if [ "$RELOAD" != "" ] ; then
 		$RELOAD > /dev/null 2>&1
 		if [ "$?" -eq 0 ] ; then
-			cp /etc/nginx/user-agents.list /cache
+			cp /tmp/user-agents.list /cache
 			job_log "[NGINX] successfull nginx reload after user-agent list update"
 		else
-			cp /cache/user-agents.list /etc/nginx
+			#cp /tmp/user-agents.list.bak /etc/nginx
 			job_log "[NGINX] failed nginx reload after user-agent list update fallback to old list"
 			$RELOAD > /dev/null 2>&1
 		fi
 	else
-		cp /etc/nginx/user-agents.list /cache
+		cp /tmp/user-agents.list /cache
 	fi
 else
 	job_log "[BLACKLIST] can't update user-agent list"
 fi
 
 rm -f /tmp/user-agents.list 2> /dev/null
+rm -f /tmp/user-agents.list.bak 2> /dev/null

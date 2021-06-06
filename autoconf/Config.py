@@ -9,8 +9,26 @@ class Config :
 		self.__swarm = swarm
 		self.__api = api
 
+	def __jobs(self) :
+		utils.log("[*] Starting jobs ...")
+		proc = subprocess.run(["/bin/su", "-c", "/opt/entrypoint/jobs.sh", "nginx"], capture_output=True)
+		stdout = proc.stdout.decode("ascii")
+		stderr = proc.stderr.decode("ascii")
+		if stdout != "" :
+			utils.log("[*] Jobs stdout :")
+			utils.log(stdout)
+		if stderr != "" :
+			utils.log("[!] Jobs stderr :")
+			utils.log(stderr)
+		if proc.returncode != 0 :
+			utils.log("[!] Jobs error : return code != 0")
+			return False
+		return True
+
 	def swarm_wait(self, instances) :
 		try :
+			with open("/etc/nginx/autoconf", "w") as f :
+				f.write("ok")
 			utils.log("[*] Waiting for bunkerized-nginx tasks ...")
 			i = 1
 			started = False
@@ -23,16 +41,7 @@ class Config :
 				utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx tasks")
 			if started :
 				utils.log("[*] bunkerized-nginx tasks started")
-				proc = subprocess.run(["/bin/su", "-c", "/opt/entrypoint/jobs.sh", "nginx"], capture_output=True)
-				stdout = proc.stdout.decode("ascii")
-				stderr = proc.stderr.decode("ascii")
-				if stdout != "" :
-					for line in stdout.split("\n") :
-						utils.log("[*] Jobs output : " + stdout)
-				if stderr != "" :
-					for line in stderr.split("\n") :
-						utils.log("[!] Jobs error : " + stderr)
-				return proc.returncode == 0
+				return True
 			else :
 				utils.log("[!] bunkerized-nginx tasks are not started")
 		except Exception as e :
@@ -52,15 +61,17 @@ class Config :
 			# Print stdout/stderr
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
-			if stdout != "":
-				for line in stdout.split("\n") :
-					utils.log("[*] Generator output : " + stdout)
+			if stdout != "" :
+				utils.log("[*] Generator output :")
+				utils.log(stdout)
 			if stderr != "" :
-				for line in stderr.split("\n") :
-					utils.log("[*] Generator error : " + stderr)
+				utils.log("[*] Generator error :")
+				utils.log(error)
 
 			# We're done
 			if proc.returncode == 0 :
+				if self.__swarm :
+					return self.__jobs()
 				return True
 			utils.log("[!] Error while generating site config for " + env["SERVER_NAME"] + " : return code = " + str(proc.returncode))
 

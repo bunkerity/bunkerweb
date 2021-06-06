@@ -9,7 +9,6 @@ if [ "$?" -ne 0 ] ; then
 fi
 
 if [ "$SWARM_MODE" = "yes" ] ; then
-	cp -r /opt/confs/nginx/* /etc/nginx
 	chown -R root:nginx /etc/nginx
 	chmod -R 770 /etc/nginx
 fi

@@ -49,7 +49,7 @@ if __name__ == "__main__" :
 	variables = utils.load_variables(args.variables)
 	configurator.load_variables(variables)
 	config = configurator.get_config()
-	print(config)
+	#print(config)
 
 	# Remove old config
 	for filename in os.listdir(args.output):

@@ -884,7 +884,7 @@
                 "env": "REMOTE_PHP",
                 "id": "remote-php",
                 "label": "Remote php",
-                "regex": "^([a-z\\-0-9]+\\.?)*$",
+                "regex": "^([a-z\\-0-9\\_]+\\.?)*$",
                 "type": "text"
             },
             {

@@ -12,7 +12,7 @@ if [ "$(has_value BLOCK_PROXIES yes)" = "" ] ; then
 fi
 
 # copy old conf to cache
-cp /etc/nginx/proxies.list /cache
+cp /etc/nginx/proxies.list /tmp/proxies.list.bak
 
 # generate the new conf
 curl -s "https://iplists.firehol.org/files/firehol_proxies.netset" | \
@@ -31,24 +31,25 @@ lines="$(wc -l /tmp/proxies.list | cut -d ' ' -f 1)"
 if [ "$lines" -gt 1 ] ; then
 	job_log "[BLACKLIST] proxies list updated ($lines entries)"
 	# reload nginx with the new config
-	mv /tmp/proxies.list /etc/nginx/proxies.list
+	cp /tmp/proxies.list /etc/nginx/proxies.list
 	if [ "$RELOAD" != "" ] ; then
 		$RELOAD > /dev/null 2>&1
 		# new config is ok : save it in the cache
 		if [ "$?" -eq 0 ] ; then
-			cp /etc/nginx/proxies.list /cache
+			cp /tmp/proxies.list /cache
 			job_log "[NGINX] successfull nginx reload after proxies list update"
 		else
 			job_log "[NGINX] failed nginx reload after proxies list update fallback to old list"
-			cp /cache/proxies.list /etc/nginx
+			#cp /tmp/proxies.list.bak /etc/nginx
 			$RELOAD > /dev/null 2>&1
 		fi
 	else
-		cp /etc/nginx/proxies.list /cache
+		cp /tmp/proxies.list /cache
 	fi
 else
 	job_log "[BLACKLIST] can't update proxies list"
 fi
 
 rm -f /tmp/proxies.list 2> /dev/null
+rm -f /tmp/proxies.list.bak 2> /dev/null
 

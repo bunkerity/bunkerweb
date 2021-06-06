@@ -14,7 +14,7 @@ Any environment variable tagged as *multisite* context can be used for a specifi
 `SERVER_NAME`  
 Values : *&lt;first name&gt; &lt;second name&gt; ...*  
 Default value : *www.bunkerity.com*  
-Context : *global*  
+Context : *global*, *multisite*  
 Sets the host names of the webserver separated with spaces. This must match the Host header sent by clients.  
 Useful when used with `MULTISITE=yes` and/or `AUTO_LETSENCRYPT=yes` and/or `DISABLE_DEFAULT_SERVER=yes`.
 
@@ -55,7 +55,7 @@ The IP addresses of the DNS resolvers to use when performing DNS lookups.
 Values : *\<any valid path to web files\>*  
 Default value : */www*  
 Context : *global*  
-The default folder where nginx will search for web files. Don't change it unless you want to make your own image.
+The default folder where nginx will search for web files. Don't change it unless you know what you are doing.
 
 `ROOT_SITE_SUBFOLDER`  
 Values : *\<any valid directory name\>*  
@@ -115,12 +115,12 @@ List of header to remove when sending responses to clients.
 
 ### Custom error pages
 
-`ERROR_XXX`  
-Values : *\<relative path to the error page\>*  
+`ERRORS`  
+Values : *\<error1=/page1 error2=/page2\>*  
 Default value :  
 Context : *global*, *multisite*  
-Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace XXX with HTTP code.  
-For example : `ERROR_404=/404.html` means the /404.html page will be displayed when 404 code is generated. The path is relative to the root web folder.
+Use this kind of environment variable to define custom error page depending on the HTTP error code. Replace errorX with HTTP code.  
+Example : `ERRORS=404=/404.html 403=/403.html` the /404.html page will be displayed when 404 code is generated (same for 403 and /403.html page). The path is relative to the root web folder.
 
 ### HTTP basic authentication
 
@@ -431,55 +431,55 @@ Full path of the key file to use when `USE_CUSTOM_HTTPS` is set to yes.
 `GENERATE_SELF_SIGNED_SSL`  
 Values : *yes* | *no*  
 Default value : *no*  
-Context : *global*  
+Context : *global*, *multisite*  
 If set to yes, HTTPS will be enabled with a container generated self-signed certificate.
 
 `SELF_SIGNED_SSL_EXPIRY`  
 Values : *integer*  
 Default value : *365* (1 year)  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the expiry date for the self generated certificate.
 
 `SELF_SIGNED_SSL_COUNTRY`  
 Values : *text*  
 Default value : *Switzerland*  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the country for the self generated certificate.
 
 `SELF_SIGNED_SSL_STATE`  
-Values : *text*  
+Values : *text*, *multisite*  
 Default value : *Switzerland*  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the state for the self generated certificate.
 
 `SELF_SIGNED_SSL_CITY`  
 Values : *text*  
 Default value : *Bern*  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the city for the self generated certificate.
 
 `SELF_SIGNED_SSL_ORG`  
 Values : *text*  
 Default value : *AcmeInc*  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the organisation name for the self generated certificate.
 
 `SELF_SIGNED_SSL_OU`  
 Values : *text*  
 Default value : *IT*  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the organisitional unit for the self generated certificate.
 
 `SELF_SIGNED_SSL_CN`  
 Values : *text*  
 Default value : *bunkerity-nginx*  
-Context : *global*  
+Context : *global*, *multisite*  
 Needs `GENERATE_SELF_SIGNED_SSL` to work.
 Sets the CN server name for the self generated certificate.
 
@@ -625,13 +625,13 @@ The minimum score required when `USE_ANTIBOT` is set to *recaptcha*.
 `ANTIBOT_RECAPTCHA_SITEKEY`  
 Values : *\<public key given by Google\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 The sitekey given by Google when `USE_ANTIBOT` is set to *recaptcha*.
 
 `ANTIBOT_RECAPTCHA_SECRET`  
 Values : *\<private key given by Google\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 The secret given by Google when `USE_ANTIBOT` is set to *recaptcha*.
 
 ### External blacklists
@@ -682,7 +682,7 @@ If set to *yes*, DNSBL checks will be performed to the servers specified in the 
 `DNSBL_LIST`  
 Values : *\<list of DNS zones separated with spaces\>*  
 Default value : *bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org*  
-Context : *global*  
+Context : *global*, *multisite*  
 The list of DNSBL zones to query when `USE_DNSBL` is set to *yes*.
 
 ### CrowdSec
@@ -716,7 +716,7 @@ If set to *yes*, lets you define custom IP addresses to be whitelisted through t
 `WHITELIST_IP_LIST`  
 Values : *\<list of IP addresses and/or network CIDR blocks separated with spaces\>*  
 Default value : *23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8*  
-Context : *global*  
+Context : *global*, *multisite*  
 The list of IP addresses and/or network CIDR blocks to whitelist when `USE_WHITELIST_IP` is set to *yes*. The default list contains IP addresses of the [DuckDuckGo crawler](https://help.duckduckgo.com/duckduckgo-help-pages/results/duckduckbot/).
 
 `USE_WHITELIST_REVERSE`  
@@ -728,7 +728,7 @@ If set to *yes*, lets you define custom reverse DNS suffixes to be whitelisted t
 `WHITELIST_REVERSE_LIST`  
 Values : *\<list of reverse DNS suffixes separated with spaces\>*  
 Default value : *.googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net*  
-Context : *global*  
+Context : *global*, *multisite*  
 The list of reverse DNS suffixes to whitelist when `USE_WHITELIST_REVERSE` is set to *yes*. The default list contains suffixes of major search engines.
 
 `WHITELIST_USER_AGENT`  
@@ -754,7 +754,7 @@ If set to *yes*, lets you define custom IP addresses to be blacklisted through t
 `BLACKLIST_IP_LIST`  
 Values : *\<list of IP addresses and/or network CIDR blocks separated with spaces\>*  
 Default value :  
-Context : *global*  
+Context : *global*, *multisite*  
 The list of IP addresses and/or network CIDR blocks to blacklist when `USE_BLACKLIST_IP` is set to *yes*.
 
 `USE_BLACKLIST_REVERSE`  
@@ -766,7 +766,7 @@ If set to *yes*, lets you define custom reverse DNS suffixes to be blacklisted t
 `BLACKLIST_REVERSE_LIST`  
 Values : *\<list of reverse DNS suffixes separated with spaces\>*  
 Default value : *.shodan.io*  
-Context : *global*  
+Context : *global*, *multisite*  
 The list of reverse DNS suffixes to blacklist when `USE_BLACKLIST_REVERSE` is set to *yes*.
 
 ### Requests limiting
@@ -856,25 +856,25 @@ If set to yes, bunkerized-nginx will block users getting too much "suspicious" H
 `BAD_BEHAVIOR_STATUS_CODES`   
 Values : *\<HTTP status codes separated with space\>*  
 Default value : *400 401 403 404 405 429 444*  
-Context : *global*  
+Context : *global*, *multisite*  
 List of HTTP status codes considered as "suspicious".   
 
 `BAD_BEHAVIOR_THRESHOLD`  
 Values : *<any positive integer>*  
 Default value : *10*  
-Context : *global*  
+Context : *global*, *multisite*  
 The number of "suspicious" HTTP status code before the corresponding IP is banned.
 
 `BAD_BEHAVIOR_BAN_TIME`  
 Values : *<any positive integer>*  
 Default value : *86400*  
-Context : *global*  
+Context : *global*, *multisite*  
 The duration time (in seconds) of a ban when the corresponding IP has reached the `BAD_BEHAVIOR_THRESHOLD`.
 
 `BAD_BEHAVIOR_COUNT_TIME`  
 Values : *<any positive integer>*  
 Default value : *60*  
-Context : *global*  
+Context : *global*, *multisite*  
 The duration time (in seconds) before the counter of "suspicious" HTTP is reset.
 
 ## misc

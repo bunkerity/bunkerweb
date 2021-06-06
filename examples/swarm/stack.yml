@@ -11,6 +11,7 @@ services:
       - /shared/confs:/etc/nginx
       - /shared/letsencrypt:/etc/letsencrypt
       - /shared/acme-challenge:/acme-challenge
+      - /shared/cache:/cache
     environment:
       - SWARM_MODE=yes
       - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
@@ -36,10 +37,11 @@ services:
     # bunkerized-nginx runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
     volumes:
-      - /shared/confs:/etc/nginx
+      - /shared/confs:/etc/nginx:ro
       - /shared/letsencrypt:/etc/letsencrypt:ro
       - /shared/acme-challenge:/acme-challenge:ro
       - /shared/www:/www:ro
+      - /shared/cache:/cache:ro
     environment:
       - SWARM_MODE=yes
       - USE_API=yes

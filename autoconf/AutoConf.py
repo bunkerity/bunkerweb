@@ -1,4 +1,3 @@
-# TODO : hard tests, jobs if swarm mode, check state when generating env, ...
 from Config import Config
 import utils
 import os
@@ -94,13 +93,9 @@ class AutoConf :
 			if self.__swarm and len(self.__instances) == 1 :
 				if self.__config.generate(self.__env) :
 					utils.log("[*] Initial config succeeded")
-					with open("/etc/nginx/autoconf", "w") as f :
-						f.write("ok")
 					if not self.__config.swarm_wait(self.__instances) :
 						utils.log("[!] Removing bunkerized-nginx instances from list")
 						del self.__instances[id]
-						os.remove("/etc/nginx/autoconf")
-
 				else :
 					utils.log("[!] Initial config failed")
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
@@ -118,11 +113,6 @@ class AutoConf :
 		elif event == "destroy" or event == "remove" :
 			del self.__instances[id]
 			self.__gen_env()
-			if self.__swarm and len(self.__instances) == 0 :
-				with open("/etc/crontabs/nginx", "w") as f :
-					f.write("")
-				if os.path.exists("/etc/nginx/autoconf") :
-					os.remove("/etc/nginx/autoconf")
 			utils.log("[*] bunkerized-nginx instance removed : " + name + " / " + id)
 
 	def __process_server(self, instance, event, id, name, labels) :

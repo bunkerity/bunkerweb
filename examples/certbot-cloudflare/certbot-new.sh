@@ -3,8 +3,8 @@
 # you need to run it before starting bunkerized-nginx to get the first certificate
 
 # edit according to your values
-DOMAINS="kakou-corp.fr,*.kakou-corp.fr"
-EMAIL="contact@kakou-corp.fr"
+DOMAINS="website.com,*.website.com"
+EMAIL="contact@website.com"
 SERVICE="mywww"
 
 # ask for the certificate
