@@ -15,7 +15,7 @@ fi
 if [ -f /tmp/nginx.pid ] ; then
 	RELOAD="/usr/sbin/nginx -s reload"
 # if we are in autoconf
-elif [ -S /tmp/autoconf.sock ] ; then
+elif [ -S /tmp/autoconf.sock ] && [ -f "/etc/nginx/autoconf" ] ; then
 	RELOAD="/opt/entrypoint/reload.py"
 fi
 

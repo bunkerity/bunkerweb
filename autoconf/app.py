@@ -39,8 +39,7 @@ except docker.errors.APIError as e :
 	sys.exit(3)
 
 # Process them before events
-with lock :
-	autoconf.pre_process(before)
+autoconf.pre_process(before)
 
 # Process events received from Docker
 try :
@@ -65,8 +64,7 @@ try :
 				continue
 
 		# Process the event
-		with lock :
-			autoconf.process(server, event["Action"])
+		autoconf.process(server, event["Action"])
 
 except docker.errors.APIError as e :
 	utils.log("[!] Docker API error " + str(e))
