@@ -14,6 +14,8 @@ services:
   mywww:
     image: bunkerity/bunkerized-nginx
     restart: always
+    depends_on:
+      - myphp
     # bunkerized-nginx runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
     volumes:

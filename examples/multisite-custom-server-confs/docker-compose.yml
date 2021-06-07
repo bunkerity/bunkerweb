@@ -5,6 +5,9 @@ services:
   mywww:
     image: bunkerity/bunkerized-nginx
     restart: always
+    depends_on:
+      - mywp
+      - mync
     ports:
       - 80:8080
       - 443:8443

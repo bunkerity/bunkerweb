@@ -5,6 +5,10 @@ services:
   myreverse:
     image: bunkerity/bunkerized-nginx
     restart: always
+    depends_on:
+      - app1
+      - app2
+      - app3
     ports:
       - 80:8080
       - 443:8443
