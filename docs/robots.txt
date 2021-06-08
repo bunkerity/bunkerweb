@@ -1,0 +1,5 @@
+User-agent: *
+
+Disallow: /en/dev/
+
+Sitemap: https://bunkerized-nginx.readthedocs.io/sitemap.xml

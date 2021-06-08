@@ -82,8 +82,12 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# for sitemap
 branch = get_git_branch()
 if branch == "master" :
 	html_baseurl = 'https://bunkerized-nginx.readthedocs.io/en/latest/'
 else :
 	html_baseurl = 'https://bunkerized-nginx.readthedocs.io/en/dev/'
+
+# custom robots.txt
+html_extra_path = ['robots.txt']
