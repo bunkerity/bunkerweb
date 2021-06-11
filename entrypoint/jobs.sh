@@ -69,7 +69,7 @@ fi
 
 
 # GeoIP
-if [ "$(has_value BLACKLIST_COUNTRY .+)" != "" ] || [ "$(has_value WHITELIST_COUNTRY .+)" != "" ] ; then
+if [ "$(has_value BLACKLIST_COUNTRY ".\+")" != "" ] || [ "$(has_value WHITELIST_COUNTRY ".\+")" != "" ] ; then
 	if [ -f "/cache/geoip.mmdb" ] ; then
 		echo "[*] Copying cached geoip.mmdb ..."
 		cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
