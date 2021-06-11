@@ -7,7 +7,7 @@
         <img src="https://img.shields.io/badge/nginx-1.20.1-blue" />
         <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
         <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
-        <img src="https://img.shields.io/docker/cloud/build/bunkerity/bunkerized-nginx" />
+        <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Build%20and%20push%20bunkerized-nginx?label=docker%20build" />
         <img src="https://img.shields.io/readthedocs/bunkerized-nginx" />
 </p>
 
