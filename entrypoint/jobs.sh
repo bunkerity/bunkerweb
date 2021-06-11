@@ -19,7 +19,7 @@ if [ "$files" != " " ] ; then
 		SELF_SIGNED_SSL_ORG="$(sed -nE 's/^SELF_SIGNED_SSL_ORG=(.*)$/\1/p' $file)"
 		SELF_SIGNED_SSL_OU="$(sed -nE 's/^SELF_SIGNED_SSL_OU=(.*)$/\1/p' $file)"
 		SELF_SIGNED_SSL_CN="$(sed -nE 's/^SELF_SIGNED_SSL_CN=(.*)$/\1/p' $file)"
-		openssl_output=$(openssl req -nodes -x509 -newkey rsa:4096 -keyout ${dest}self-key.pem -out ${dest}self-cert.pem -days $SELF_SIGNED_SSL_EXPIRY -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN" 2>&1)
+		openssl_output=$(openssl req -nodes -x509 -newkey rsa:4096 -keyout ${dest}self-key.pem -out ${dest}self-cert.pem -days "$SELF_SIGNED_SSL_EXPIRY" -subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN" 2>&1)
 		if [ $? -eq 0 ] ; then
 			echo "[*] Generated self-signed certificate ${dest}self-cert.pem with key ${dest}self-key.pem"
 		else
