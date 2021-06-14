@@ -28,7 +28,6 @@ function has_value() {
 	for file in $envs ; do
 		if [ "$(grep "^${1}=${2}$" $file)" != "" ] ; then
 			echo "$file"
-			return 0
 		fi
 	done
 }

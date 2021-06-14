@@ -5,7 +5,7 @@
 
 # self signed certs for sites
 files=$(has_value GENERATE_SELF_SIGNED_SSL yes)
-if [ "$files" != " " ] ; then
+if [ "$files" != "" ] ; then
 	for file in $files ; do
 		site=$(echo $file | cut -f 4 -d '/')
 		dest="/etc/nginx/"
@@ -47,7 +47,7 @@ fi
 
 # certbot
 files=$(has_value AUTO_LETS_ENCRYPT yes)
-if [ "$files" != " " ] ; then
+if [ "$files" != "" ] ; then
 	for file in $files ; do
 		if [ "$(echo "$file" | grep 'site.env$')" = "" ] ; then
 			continue
@@ -60,7 +60,7 @@ if [ "$files" != " " ] ; then
 		fi
 		certbot_outpout=$(/opt/scripts/certbot-new.sh "$(echo -n $SERVER_NAME | sed 's/ /,/g')" "$EMAIL_LETS_ENCRYPT" 2>&1)
 		if [ $? -eq 0 ] ; then
-			echo "[*] Certbot new successfully executed"
+			echo "[*] Certbot new successfully executed for domain(s) $(echo -n $SERVER_NAME | sed 's/ /,/g')"
 		else
 			echo "[*] Error while executing certbot new : $certbot_output"
 		fi
