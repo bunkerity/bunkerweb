@@ -1,5 +1,5 @@
-local M			= {}
-local dns		= require "dns"
+local M		= {}
+local dns	= require "dns"
 local logger	= require "logger"
 local iputils	= require "resty.iputils"
 
@@ -12,7 +12,7 @@ function M.cached ()
 end
 
 function M.check (dnsbls, resolvers)
-	local local_ips = iputils.parse_cidrs({"127.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"})
+	local local_ips = iputils.parse_cidrs({"127.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "10.0.0.0/8"})
 	if iputils.ip_in_cidrs(ngx.var.remote_addr, local_ips) then
 		ngx.shared.dnsbl_cache:set(ngx.var.remote_addr, "ok", 86400)
 		return false

@@ -102,6 +102,7 @@ class AutoConf :
 						del self.__instances[id]
 				else :
 					utils.log("[!] Initial config failed")
+			# TODO : wait while unhealthy if not swarm
 			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
 
 		elif event == "start" :

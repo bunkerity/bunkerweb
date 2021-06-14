@@ -35,4 +35,6 @@ EXPOSE 8080/tcp 8443/tcp
 
 USER nginx:nginx
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 CMD [ -f /tmp/nginx.pid ] || exit 1
+
 ENTRYPOINT ["/opt/entrypoint/entrypoint.sh"]
