@@ -3,7 +3,7 @@
 # load some functions
 . /opt/entrypoint/utils.sh
 
-if [ $(grep "^SWARM_MODE=yes$" /etc/nginx/global.env) != "" ] && [ -f /usr/sbin/nginx ] ; then
+if [ "$(grep "^SWARM_MODE=yes$" /etc/nginx/global.env)" != "" ] && [ -f /usr/sbin/nginx ] ; then
 	exit 0
 fi
 
