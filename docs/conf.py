@@ -83,7 +83,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_static_path = ['_static']
 
 # for sitemap
-sitemap_filename = "mysitemap.xml"
+sitemap_filename = "sm.xml"
 branch = get_git_branch()
 if branch == "master" :
 	html_baseurl = 'https://bunkerized-nginx.readthedocs.io/en/latest/'

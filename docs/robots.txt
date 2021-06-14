@@ -2,4 +2,4 @@ User-agent: *
 
 Disallow: /en/dev/
 
-Sitemap: https://bunkerized-nginx.readthedocs.io/mysitemap.xml
+Sitemap: https://bunkerized-nginx.readthedocs.io/en/latest/sm.xml
