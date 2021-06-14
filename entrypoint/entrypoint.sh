@@ -16,13 +16,14 @@ trap "trap_exit" TERM INT QUIT
 function trap_reload() {
 	echo "[*] Catched reload operation"
 	if [ "$SWARM_MODE" != "yes" ] ; then
-		/opt/entrypoint/jobs.sh
+		/opt/entrypoint/pre-jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
 		nginx -s reload
 		if [ $? -eq 0 ] ; then
 			echo "[*] Reload successfull"
+			/opt/entrypoint/post-jobs.sh
 		else
 			echo "[!] Reload failed"
 		fi
@@ -58,8 +59,8 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 		# call the generator
 		/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env
 
-		# external jobs
-		/opt/entrypoint/jobs.sh
+		# pre-jobs
+		/opt/entrypoint/pre-jobs.sh
 	fi
 else
 	echo "[*] Skipping configuration process"
@@ -96,6 +97,9 @@ if [ "$1" == "test" ] ; then
 	fi
 	exit 1
 fi
+
+# post jobs
+/opt/entrypoint/post-jobs.sh
 
 # wait for nginx
 wait "$pid"

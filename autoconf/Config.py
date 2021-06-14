@@ -9,12 +9,12 @@ class Config :
 		self.__swarm = swarm
 		self.__api = api
 
-	def __jobs(self) :
-		utils.log("[*] Starting jobs ...")
-		proc = subprocess.run(["/bin/su", "-c", "/opt/entrypoint/jobs.sh", "nginx"], capture_output=True)
+	def __jobs(self, type) :
+		utils.log("[*] Starting jobs (type = " + type + ") ...")
+		proc = subprocess.run(["/bin/su", "-c", "/opt/entrypoint/" + type + "-jobs.sh", "nginx"], capture_output=True)
 		stdout = proc.stdout.decode("ascii")
 		stderr = proc.stderr.decode("ascii")
-		if stdout != "" :
+		if len(stdout) > 1 :
 			utils.log("[*] Jobs stdout :")
 			utils.log(stdout)
 		if stderr != "" :
@@ -61,7 +61,7 @@ class Config :
 			# Print stdout/stderr
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
-			if stdout != "" :
+			if len(stdout) > 1 :
 				utils.log("[*] Generator output :")
 				utils.log(stdout)
 			if stderr != "" :
@@ -71,7 +71,7 @@ class Config :
 			# We're done
 			if proc.returncode == 0 :
 				if self.__swarm :
-					return self.__jobs()
+					return self.__jobs("pre")
 				return True
 			utils.log("[!] Error while generating site config for " + env["SERVER_NAME"] + " : return code = " + str(proc.returncode))
 
@@ -80,7 +80,11 @@ class Config :
 		return False
 
 	def reload(self, instances) :
-		return self.__api_call(instances, "/reload")
+		if self.__api_call(instances, "/reload") :
+			if self.__swarm :
+				return self.__jobs("post")
+			return True
+		return False
 
 	def __ping(self, instances) :
 		return self.__api_call(instances, "/ping")

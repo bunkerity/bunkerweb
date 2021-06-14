@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.7 - 2021/06/14
+
+- Add custom robots.txt and sitemap to RTD
+- Fix missing GeoIP DB bug when using BLACKLIST/WHITELIST_COUNTRY
+- Add underscore "_" to allowed chars for CUSTOM_HTTPS_CERT/KEY
+- Fix bug when using automatic self-signed certificate
+- Build and push images from GitHub actions instead of Docker Hub autobuild
+- Display the reason when generator is ignoring a variable
+- Various bug fixes related to certbot and jobs
+- Split jobs into pre and post jobs
+
 ## v1.2.6 - 2021/06/06
 
 - Move from "ghetto-style" shell scripts to generic jinja2 templating
