@@ -58,7 +58,7 @@ if [ "$files" != "" ] ; then
 		if [ "$EMAIL_LETS_ENCRYPT" = "" ] ; then
 			EMAIL_LETS_ENCRYPT="contact@${FIRST_SERVER}"
 		fi
-		certbot_outpout=$(/opt/scripts/certbot-new.sh "$(echo -n $SERVER_NAME | sed 's/ /,/g')" "$EMAIL_LETS_ENCRYPT" 2>&1)
+		certbot_output=$(/opt/scripts/certbot-new.sh "$(echo -n $SERVER_NAME | sed 's/ /,/g')" "$EMAIL_LETS_ENCRYPT" 2>&1)
 		if [ $? -eq 0 ] ; then
 			echo "[*] Certbot new successfully executed for domain(s) $(echo -n $SERVER_NAME | sed 's/ /,/g')"
 		else

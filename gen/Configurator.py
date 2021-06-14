@@ -21,10 +21,11 @@ class Configurator :
 
 	def load_variables(self, vars, multisite_only=False) :
 		for var, value in vars.items() :
-			if self.__check_var(var, value) :
+			check, reason = self.__check_var(var, value)
+			if check :
 				self.__variables[var] = value
 			else :
-				print("Ignoring " + var + "=" + value)
+				print("Ignoring " + var + "=" + value + " (" + reason + ")")
 
 	def get_config(self) :
 		config = {}
@@ -45,4 +46,10 @@ class Configurator :
 				real_var = "_".join(var.split("_")[:-1])
 			else :
 				real_var = "_".join(var.split("_")[:-1][1:])
-		return real_var != "" and re.search(self.__settings[real_var]["regex"], value) and (not multisite_only or self.__settings[real_var]["context"] == "multisite")
+		if real_var == "" :
+			return False, "doesn't exist"
+		elif not re.search(self.__settings[real_var]["regex"], value) :
+			return False, "doesn't match regex : " + self.__settings[real_var]["regex"]
+		elif multisite_only and self.__settings[real_var]["context"] != "multisite" :
+			return False, "not at multisite context"
+		return True, ""

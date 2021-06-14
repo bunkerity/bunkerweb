@@ -29,6 +29,10 @@ class AutoConf :
 				env = instance.attrs["Config"]["Env"]
 			for entry in env :
 				self.__env[entry.split("=")[0]] = entry.replace(entry.split("=")[0] + "=", "", 1)
+			blacklist = ["NGINX_VERSION", "NJS_VERSION", "PATH", "PKG_RELEASE"]
+			for entry in blacklist :
+				if entry in self.__env :
+					del self.__env[entry]
 		if not "SERVER_NAME" in self.__env or self.__env["SERVER_NAME"] == "" :
 			self.__env["SERVER_NAME"] = []
 		else :
