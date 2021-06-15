@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-        <img src="https://img.shields.io/badge/bunkerized--nginx-1.2.6-blue" />
+        <img src="https://img.shields.io/badge/bunkerized--nginx-1.2.7-blue" />
         <img src="https://img.shields.io/badge/nginx-1.20.1-blue" />
         <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
         <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
@@ -19,7 +19,7 @@
 		<span> | </span>
 		<a href="https://www.bunkerity.com/category/bunkerized-nginx/">Blog posts</a>
 		<span> | </span>
-		<a href="https://matrix.to/#/#bunkerized-nginx:matrix.org">Community chat</a>
+		<a href="https://coso.me/bunkerity-chat">Community chat</a>
 		<span> | </span>
 		<a href="https://coso.me/bunkerity">Follow us</a>
 	</strong>

@@ -8,6 +8,10 @@ We accept many types of contributions whether they are technical or not. Every c
 
 The first thing you can do is to talk about the project. You can share it on social media, make a blog post about it or simply tell your friends/colleagues that's an awesome project.
 
+## Join the community chat
+
+You can join [the community chat](https://coso.me/bunkerity-chat) to talk about the project and ask for help. Please note that you can choose the platform you want, thanks to [matterbridge](https://github.com/42wim/matterbridge) all messages coming from a platform are relayed to the others.
+
 ## Reporting bugs / ask for features
 
 The preferred way to report bugs and asking for features is using [issues](https://github.com/bunkerity/bunkerized-nginx/issues). Before opening a new one, please check if a related issue is already opened using the "filters" bar. When creating a new issue please select and fill the "Bug report" or "Feature request" template.
