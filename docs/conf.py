@@ -14,7 +14,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-import os
+import os, subprocess, re
 
 def get_git_branch():
     """Get the git branch this repository is currently on"""
@@ -26,7 +26,7 @@ def get_git_branch():
 
         # This will contain something like "* (HEAD detached at origin/MYBRANCH)"
         # or something like "* MYBRANCH"
-        branch_output = p.communicate()[0]
+        branch_output = p.communicate()[0].decode("ascii")
 
         # This is if git is in a normal branch state
         match = re.search(r'\* (?P<branch_name>[^\(\)\n ]+)', branch_output)
@@ -37,20 +37,20 @@ def get_git_branch():
         match = re.search(r'\(HEAD detached at origin/(?P<branch_name>[^\)]+)\)', branch_output)
         if match:
             return match.groupdict()['branch_name']
-    except Exception:
+    except Exception as e :
+        print(e)
         print(u'Could not get the branch')
 
     # Couldn't figure out the branch probably due to an error
     return None
 
 # -- Project information -----------------------------------------------------
-
 project = 'bunkerized-nginx'
 copyright = '2021, bunkerity'
 author = 'bunkerity'
 
 # The full version, including alpha/beta/rc tags
-release = 'v1.2.6'
+release = 'v1.2.7'
 
 
 # -- General configuration ---------------------------------------------------
