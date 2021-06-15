@@ -1,6 +1,9 @@
 from Config import Config
+
 import utils
-import os
+
+import os, time
+
 class AutoConf :
 
 	def __init__(self, swarm, api) :
@@ -20,7 +23,7 @@ class AutoConf :
 
 	def __gen_env(self) :
 		self.__env.clear()
-		# TODO : check actual state (e.g. : running ?)
+		# TODO : check actual state (e.g. : running, stopped ?)
 		for id, instance in self.__instances.items() :
 			env = []
 			if self.__swarm :
@@ -94,16 +97,29 @@ class AutoConf :
 		if event == "create" :
 			self.__instances[id] = instance
 			self.__gen_env()
+			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
 			if self.__swarm and len(self.__instances) == 1 :
 				if self.__config.generate(self.__env) :
 					utils.log("[*] Initial config succeeded")
 					if not self.__config.swarm_wait(self.__instances) :
-						utils.log("[!] Removing bunkerized-nginx instances from list")
+						utils.log("[!] Removing bunkerized-nginx instances from list (API not available)")
 						del self.__instances[id]
 				else :
 					utils.log("[!] Initial config failed")
-			# TODO : wait while unhealthy if not swarm
-			utils.log("[*] bunkerized-nginx instance created : " + name + " / " + id)
+			elif not self.__swarm and len(self.__instances) == 1 :
+				utils.log("[*] Wait until bunkerized-nginx is healthy (timeout = 120s) ...")
+				i = 0
+				healthy = False
+				while i < 120 :
+					self.__instances[id].reload()
+					if self.__instances[id].attrs["State"]["Health"]["Status"] == "healthy" :
+						healthy = True
+						break
+					time.sleep(1)
+					i = i + 1
+				if not healthy :
+					utils.log("[!] Removing bunkerized-nginx instances from list (unhealthy)")
+					del self.__instances[id]
 
 		elif event == "start" :
 			self.__instances[id].reload()

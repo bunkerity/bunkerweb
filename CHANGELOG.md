@@ -10,6 +10,9 @@
 - Display the reason when generator is ignoring a variable
 - Various bug fixes related to certbot and jobs
 - Split jobs into pre and post jobs
+- Fix race condition when using autoconf without Swarm by checking healthy state
+- Add HEALTHCHECK to image
+- Bump modsecurity-nginx to v1.0.2
 
 ## v1.2.6 - 2021/06/06
 
