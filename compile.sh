@@ -57,7 +57,7 @@ cp crs-setup.conf.example /opt/owasp/crs.conf
 # get nginx modules
 cd /tmp
 # ModSecurity connector for nginx
-git_secure_clone https://github.com/SpiderLabs/ModSecurity-nginx.git 22e53aba4e3ae8c7d59a3672d6727e49246afe96
+git_secure_clone https://github.com/SpiderLabs/ModSecurity-nginx.git 2497e6ac654d0b117b9534aa735b757c6b11c84f
 # headers more
 git_secure_clone https://github.com/openresty/headers-more-nginx-module.git d6d7ebab3c0c5b32ab421ba186783d3e5d2c6a17
 # geoip
