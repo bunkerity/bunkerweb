@@ -39,7 +39,7 @@ function do_and_check_cmd() {
 	if [ "$CHANGE_DIR" != "" ] ; then
 		cd "$CHANGE_DIR"
 	fi
-	output=$($* 2>&1)
+	output=$("$@" 2>&1)
 	ret="$?"
 	if [ $ret -ne 0 ] ; then
 		echo "[!] Error from command : $*"
@@ -50,6 +50,38 @@ function do_and_check_cmd() {
 	return 0
 }
 
+function get_nginx_signing_key() {
+	key="-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+mQENBE5OMmIBCAD+FPYKGriGGf7NqwKfWC83cBV01gabgVWQmZbMcFzeW+hMsgxH
+W6iimD0RsfZ9oEbfJCPG0CRSZ7ppq5pKamYs2+EJ8Q2ysOFHHwpGrA2C8zyNAs4I
+QxnZZIbETgcSwFtDun0XiqPwPZgyuXVm9PAbLZRbfBzm8wR/3SWygqZBBLdQk5TE
+fDR+Eny/M1RVR4xClECONF9UBB2ejFdI1LD45APbP2hsN/piFByU1t7yK2gpFyRt
+97WzGHn9MV5/TL7AmRPM4pcr3JacmtCnxXeCZ8nLqedoSuHFuhwyDnlAbu8I16O5
+XRrfzhrHRJFM1JnIiGmzZi6zBvH0ItfyX6ttABEBAAG0KW5naW54IHNpZ25pbmcg
+a2V5IDxzaWduaW5nLWtleUBuZ2lueC5jb20+iQE+BBMBAgAoAhsDBgsJCAcDAgYV
+CAIJCgsEFgIDAQIeAQIXgAUCV2K1+AUJGB4fQQAKCRCr9b2Ce9m/YloaB/9XGrol
+kocm7l/tsVjaBQCteXKuwsm4XhCuAQ6YAwA1L1UheGOG/aa2xJvrXE8X32tgcTjr
+KoYoXWcdxaFjlXGTt6jV85qRguUzvMOxxSEM2Dn115etN9piPl0Zz+4rkx8+2vJG
+F+eMlruPXg/zd88NvyLq5gGHEsFRBMVufYmHtNfcp4okC1klWiRIRSdp4QY1wdrN
+1O+/oCTl8Bzy6hcHjLIq3aoumcLxMjtBoclc/5OTioLDwSDfVx7rWyfRhcBzVbwD
+oe/PD08AoAA6fxXvWjSxy+dGhEaXoTHjkCbz/l6NxrK3JFyauDgU4K4MytsZ1HDi
+MgMW8hZXxszoICTTiQEcBBABAgAGBQJOTkelAAoJEKZP1bF62zmo79oH/1XDb29S
+YtWp+MTJTPFEwlWRiyRuDXy3wBd/BpwBRIWfWzMs1gnCjNjk0EVBVGa2grvy9Jtx
+JKMd6l/PWXVucSt+U/+GO8rBkw14SdhqxaS2l14v6gyMeUrSbY3XfToGfwHC4sa/
+Thn8X4jFaQ2XN5dAIzJGU1s5JA0tjEzUwCnmrKmyMlXZaoQVrmORGjCuH0I0aAFk
+RS0UtnB9HPpxhGVbs24xXZQnZDNbUQeulFxS4uP3OLDBAeCHl+v4t/uotIad8v6J
+SO93vc1evIje6lguE81HHmJn9noxPItvOvSMb2yPsE8mH4cJHRTFNSEhPW6ghmlf
+Wa9ZwiVX5igxcvaIRgQQEQIABgUCTk5b0gAKCRDs8OkLLBcgg1G+AKCnacLb/+W6
+cflirUIExgZdUJqoogCeNPVwXiHEIVqithAM1pdY/gcaQZmIRgQQEQIABgUCTk5f
+YQAKCRCpN2E5pSTFPnNWAJ9gUozyiS+9jf2rJvqmJSeWuCgVRwCcCUFhXRCpQO2Y
+Va3l3WuB+rgKjsQ=
+=EWWI
+-----END PGP PUBLIC KEY BLOCK-----"
+	echo "$key"
+}
+
 # Variables
 NTASK=$(nproc)
 
@@ -57,18 +89,6 @@ NTASK=$(nproc)
 if [ $(id -u) -ne 0 ] ; then
 	echo "[!] Run me as root"
 	exit 1
-fi
-
-# Check if nginx is present
-NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
-if [ "$NGINX_VERSION" = "" ] ; then
-	# TODO : install nginx from official repo
-	echo "[!] nginx is not installed"
-	exit 2
-fi
-echo "[*] Detected nginx version ${NGINX_VERSION}"
-if [ "$NGINX_VERSION" != "1.20.1" ] ; then
-	echo "/!\\ Warning : we recommend you to use nginx v1.20.1 /!\\"
 fi
 
 # Create /tmp/bunkerized-nginx
@@ -85,12 +105,37 @@ if [ -e "/opt/bunkerized-nginx" ] ; then
 fi
 do_and_check_cmd mkdir /opt/bunkerized-nginx
 
+# TODO : detect OS
+OS="debian"
+
+# Check nginx version
+NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
+# Add nginx official repo and install
+if [ "$NGINX_VERSION" = "" ] ; then
+	if [ "$OS" = "debian" ] ; then
+		echo "[*] Add nginx official repository"
+		do_and_check_cmd apt update
+		do_and_check_cmd apt install -y curl gnupg2 ca-certificates lsb-release software-properties-common
+		get_nginx_signing_key > /tmp/bunkerized-nginx/nginx_signing.key
+		do_and_check_cmd cp /tmp/bunkerized-nginx/nginx_signing.key /etc/apt/trusted.gpg.d/nginx_signing.asc
+		do_and_check_cmd add-apt-repository "deb http://nginx.org/packages/debian $(lsb_release -cs) nginx"
+		do_and_check_cmd apt update
+		echo "[*] Install nginx"
+		do_and_check_cmd apt install -y nginx
+	fi
+	NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
+fi
+echo "[*] Detected nginx version ${NGINX_VERSION}"
+if [ "$NGINX_VERSION" != "1.20.1" ] ; then
+	echo "/!\\ Warning : we recommend you to use nginx v1.20.1, you should uninstall your nginx version and run this script again ! /!\\"
+fi
+
 # Install dependencies
 # TODO : detect Linux flavor
 echo "[*] Update packet list"
 do_and_check_cmd apt update
 echo "[*] Install dependencies"
-DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget"
+DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget libmaxminddb-dev libbrotli-dev gnupg"
 do_and_check_cmd apt install -y $DEBIAN_DEPS
 # TODO : is it the same for other distro ?
 cp -r /usr/include/lua5.1/* /usr/include
@@ -239,8 +284,8 @@ if [ ! -d /usr/local/lib/lua/crowdsec ] ; then
 	do_and_check_cmd mkdir /usr/local/lib/lua/crowdsec
 fi
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-cs-bouncer/lib/* /usr/local/lib/lua/crowdsec
-sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
-sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
+do_and_check_cmd sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
+do_and_check_cmd sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
 
 # Download and install lua-resty-iputils
 echo "[*] Clone hamishforbes/lua-resty-iputils"
@@ -252,6 +297,14 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-iputils" do_and_check_cmd make LUA_L
 # TODO : check GPG signature
 echo "[*] Download nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
+do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz.asc"
+get_nginx_signing_key > /tmp/bunkerized-nginx/nginx_signing.key
+gpg --import /tmp/bunkerized-nginx/nginx_signing.key
+check=$(gpg --verify /tmp/nginx-${NGINX_VERSION}.tar.gz.asc /tmp/nginx-${NGINX_VERSION}.tar.gz 2>&1 | grep "^gpg: Good signature from ")
+if [ "$check" = "" ] ; then
+	echo "[!] Wrong signature from nginx source !!!"
+	exit 1
+fi
 CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERSION}.tar.gz
 
 # Compile dynamic modules
@@ -264,7 +317,7 @@ if [ $? -ne 0 ] ; then
 	echo "configure failed"
 	exit 1
 fi
-CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
+CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd make -j $NTASK modules
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib/nginx/modules
 
 # We're done
