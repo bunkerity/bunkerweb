@@ -279,9 +279,9 @@ do_and_check_cmd mkdir /opt/bunkerized-nginx
 NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
 # Add nginx official repo and install
 if [ "$NGINX_VERSION" = "" ] ; then
+	get_sign_repo_key > /tmp/bunkerized-nginx/nginx_signing.key
 	if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 		echo "[*] Add nginx official repository"
-		get_sign_repo_key > /tmp/bunkerized-nginx/nginx_signing.key
 		do_and_check_cmd cp /tmp/bunkerized-nginx/nginx_signing.key /etc/apt/trusted.gpg.d/nginx_signing.asc
 		do_and_check_cmd apt update
 		DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y gnupg2 ca-certificates lsb-release software-properties-common
@@ -289,6 +289,21 @@ if [ "$NGINX_VERSION" = "" ] ; then
 		do_and_check_cmd apt update
 		echo "[*] Install nginx"
 		DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y nginx
+	elif [ "$OS" = "centos" ] ; then
+		echo "[*] Add nginx official repository"
+		do_and_check_cmd yum install -y yum-utils
+		cp /tmp/bunkerized-nginx/nginx_signing.key /etc/pki/rpm-gpg/RPM-GPG-KEY-nginx
+		do_and_check_cmd rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-nginx
+		repo="[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-nginx
+enabled=1
+module_hotfixes=true"
+		echo "$repo" > /etc/yum.repos.d/nginx.repo
+		echo "[*] Install nginx"
+		do_and_check_cmd yum install -y nginx
 	fi
 	NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
 fi
@@ -298,14 +313,20 @@ if [ "$NGINX_VERSION" != "1.20.1" ] ; then
 fi
 
 # Install dependencies
-# TODO : detect Linux flavor
 echo "[*] Update packet list"
-do_and_check_cmd apt update
+if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
+	do_and_check_cmd apt update
+fi
 echo "[*] Install dependencies"
-DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget libmaxminddb-dev libbrotli-dev gnupg"
-DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
-# TODO : is it the same for other distro ?
-cp -r /usr/include/lua5.1/* /usr/include
+if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
+	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget libmaxminddb-dev libbrotli-dev gnupg"
+	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
+	do_and_check_cmd cp -r /usr/include/lua5.1/* /usr/include
+elif [ "$OS" = "centos" ] ; then
+	do_and_check_cmd yum install -y epel-release
+	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget libmaxminddb-devel brotli-devel gnupg"
+	do_and_check_cmd yum install -y $CENTOS_DEPS
+fi
 
 # Download, compile and install ModSecurity
 echo "[*] Clone SpiderLabs/ModSecurity"
@@ -411,7 +432,11 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make install-extra
 echo "[*] Clone ittner/lua-gd"
 git_secure_clone https://github.com/ittner/lua-gd.git 2ce8e478a8591afd71e607506bc8c64b161bbd30
 echo "[*] Compile lua-gd"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make -j $NTASK
+if [ "$OS" = "centos" ] ; then
+	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make LUAPKG=lua LUABIN=lua -j $NTASK
+else
+	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make -j $NTASK
+fi
 echo "[*] Install lua-gd"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make INSTALL_PATH=/usr/local/lib/lua/5.1 install
 
@@ -461,7 +486,6 @@ echo "[*] Install lua-resty-iputils"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-iputils" do_and_check_cmd make LUA_LIB_DIR=/usr/local/lib/lua install
 
 # Download nginx and decompress sources
-# TODO : check GPG signature
 echo "[*] Download nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz.asc"
@@ -481,7 +505,11 @@ CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure "$CONFARGS" --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
-CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib/nginx/modules
+if [ "$OS" = "centos" ] ; then
+	CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib64/nginx/modules
+else
+	CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib/nginx/modules
+fi
 
 # We're done
 cleanup
