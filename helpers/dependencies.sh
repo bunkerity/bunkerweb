@@ -91,6 +91,19 @@ Va3l3WuB+rgKjsQ=
 	echo "$key"
 }
 
+function get_sign_repo_key_rsa() {
+	key="-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA/hT2Chq4hhn+zasCn1gv
+N3AVdNYGm4FVkJmWzHBc3lvoTLIMR1uoopg9EbH2faBG3yQjxtAkUme6aauaSmpm
+LNvhCfENsrDhRx8KRqwNgvM8jQLOCEMZ2WSGxE4HEsBbQ7p9F4qj8D2YMrl1ZvTw
+Gy2UW3wc5vMEf90lsoKmQQS3UJOUxHw0fhJ8vzNUVUeMQpRAjjRfVAQdnoxXSNSw
++OQD2z9obDf6YhQclNbe8itoKRckbfe1sxh5/TFef0y+wJkTzOKXK9yWnJrQp8V3
+gmfJy6nnaErhxbocMg55QG7vCNejuV0a384ax0SRTNSZyIhps2Yuswbx9CLX8l+r
+bQIDAQAB
+-----END PUBLIC KEY-----"
+	echo "$key"
+}
+
 function get_sign_source_keys() {
 	keys="-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (FreeBSD)
@@ -255,6 +268,8 @@ elif [ "$(grep Ubuntu /etc/os-release)" != "" ] ; then
 	OS="ubuntu"
 elif [ "$(grep CentOS /etc/os-release)" != "" ] ; then
 	OS="centos"
+elif [ "$(grep Alpine /etc/os-release)" != "" ] ; then
+	OS="alpine"
 fi
 if [ "$OS" = "" ] ; then
 	echo "[!] Unsupported Operating System"
@@ -304,6 +319,12 @@ module_hotfixes=true"
 		echo "$repo" > /etc/yum.repos.d/nginx.repo
 		echo "[*] Install nginx"
 		do_and_check_cmd yum install -y nginx
+	elif [ "$OS" = "alpine" ] ; then
+		echo "[*] Add nginx official repository"
+		get_sign_repo_key_rsa > /etc/apk/keys/nginx_signing.rsa.pub
+		echo "@nginx http://nginx.org/packages/alpine/v$(egrep -o '^[0-9]+\.[0-9]+' /etc/alpine-release)/main" >> /etc/apk/repositories
+		echo "[*] Install nginx"
+		do_and_check_cmd apk add nginx@nginx
 	fi
 	NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
 fi
@@ -326,6 +347,9 @@ elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
 	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget libmaxminddb-devel brotli-devel gnupg"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
+elif [ "$OS" = "alpine" ] ; then
+	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev"
+	do_and_check_cmd apk add --no-cache --virtual build $ALPINE_DEPS
 fi
 
 # Download, compile and install ModSecurity
@@ -340,7 +364,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd git submodule up
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" git_secure_checkout bindings/python 47a6925df187f96e4593afab18dc92d5f22bd4d5
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" git_secure_checkout others/libinjection bf234eb2f385b969c4f803b35fda53cffdd93922
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" git_secure_checkout test/test-cases/secrules-language-tests d03f4c1e930440df46c1faa37d820a919704d9da
-CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd ./configure --enable-static=no --disable-doxygen-doc --disable-dependency-tracking --disable-examples
+CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd ./configure --disable-doxygen-doc --disable-dependency-tracking --disable-examples
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd make -j $NTASK
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd make install-strip
 
@@ -512,6 +536,9 @@ else
 fi
 
 # We're done
+if [ "$OS" = "alpine" ] ; then
+	apk del build > /dev/null 2>&1
+fi
 cleanup
 echo "[*] Dependencies for bunkerized-nginx successfully installed !"
 exit 0

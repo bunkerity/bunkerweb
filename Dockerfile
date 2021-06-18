@@ -1,10 +1,9 @@
 FROM nginx:1.20.1-alpine
 
-COPY nginx-keys/ /tmp/nginx-keys
-COPY compile.sh /tmp/compile.sh
-RUN chmod +x /tmp/compile.sh && \
-    /tmp/compile.sh && \
-    rm -rf /tmp/*
+COPY helpers/dependencies.sh /tmp/dependencies.sh && \
+     apk add --no-cache bash && \
+     /tmp/dependencies.sh && \
+     rm -f /tmp/dependencies.sh
 
 COPY dependencies.sh /tmp/dependencies.sh
 RUN chmod +x /tmp/dependencies.sh && \
