@@ -6,7 +6,7 @@ RUN apk add --no-cache bash && \
     /tmp/dependencies.sh && \
     rm -f /tmp/dependencies.sh
 
-RUN apk add --no-cache apk add certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip && \
+RUN apk add --no-cache certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip && \
     pip3 install jinja2
 
 COPY gen/ /opt/gen
