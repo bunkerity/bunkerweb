@@ -2,13 +2,12 @@ FROM nginx:1.20.1-alpine
 
 COPY helpers/dependencies.sh /tmp/dependencies.sh && \
      apk add --no-cache bash && \
+     chmod +x /tmp/dependencies.sh && \
      /tmp/dependencies.sh && \
      rm -f /tmp/dependencies.sh
 
-COPY dependencies.sh /tmp/dependencies.sh
-RUN chmod +x /tmp/dependencies.sh && \
-    /tmp/dependencies.sh && \
-    rm -rf /tmp/dependencies.sh
+RUN apk add --no-cache apk add certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip && \
+    pip3 install jinja2
 
 COPY gen/ /opt/gen
 COPY entrypoint/ /opt/entrypoint
