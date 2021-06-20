@@ -83,11 +83,11 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git cron"
+	DEBIAN_DEPS="git cron curl"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git crontabs"
+	CENTOS_DEPS="git crontabs curl"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 fi
 
@@ -136,6 +136,30 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd cp /tmp/bunkerized-nginx/misc/cron /var/spool/cron/nginx
 fi
+
+# Download abusers list
+echo "[*] Download abusers list"
+# TODO : call external script
+
+# Download TOR exit nodes list
+echo "[*] Download TOR exit nodes list"
+# TODO : call external script
+
+# Download proxies list
+echo "[*] Download proxies list"
+# TODO : call external script
+
+# Download referrers list
+echo "[*] Download referrers list"
+# TODO : call external script
+
+# Download user agents list
+echo "[*] Download user agents list"
+# TODO : call external script
+
+# Download geoip database
+echo "[*] Download proxies list"
+# TODO : call external script
 
 # We're done
 echo "[*] bunkerized-nginx successfully installed !"

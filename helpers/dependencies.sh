@@ -373,8 +373,8 @@ echo "[*] Clone coreruleset/coreruleset"
 git_secure_clone https://github.com/coreruleset/coreruleset.git 7776fe23f127fd2315bad0e400bdceb2cabb97dc
 echo "[*] Install coreruleset"
 do_and_check_cmd mkdir /opt/bunkerized-nginx/crs
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/coreruleset/rules /opt/bunkerized-nginx/crs/
-do_and_check_cmd cp /tmp/bunkerized-nginx/coreruleset/crs-setup.conf.example /opt/bunkerized-nginx/crs.conf
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/coreruleset/rules/* /opt/bunkerized-nginx/crs
+do_and_check_cmd cp /tmp/bunkerized-nginx/coreruleset/crs-setup.conf.example /opt/bunkerized-nginx/crs-setup.conf
 
 # Download ModSecurity-nginx module
 echo "[*] Clone SpiderLabs/ModSecurity-nginx"
@@ -527,7 +527,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERS
 echo "[*] Compile dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
-CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure "$CONFARGS" --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli
+CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
 if [ "$OS" = "centos" ] ; then
 	CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib64/nginx/modules
