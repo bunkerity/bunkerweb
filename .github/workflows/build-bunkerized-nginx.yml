@@ -38,13 +38,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build and push (dev)
+      - name: Build (dev)
         uses: docker/build-push-action@v2
         if: github.ref == 'refs/heads/dev'
         with:
           context: .
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
-          push: true
+          push: false
           tags: bunkerity/bunkerized-nginx:dev
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -55,7 +55,54 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      - name: Build and push (master)
+      - name: Build (master)
+        uses: docker/build-push-action@v2
+        if: github.ref == 'refs/heads/master'
+        with:
+          context: .
+          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          push: false
+          tags: bunkerity/bunkerized-nginx:latest,bunkerity/bunkerized-nginx:${{ env.VERSION }}
+
+      - name: Run autotest (dev)
+        if: github.ref == 'refs/heads/dev'
+        run: docker run bunkerity/bunkerized-nginx:dev test
+
+      - name: Run autotest (master)
+        if: github.ref == 'refs/heads/master'
+        run: docker run bunkerity/bunkerized-nginx test
+
+      - name: Run Trivy security scanner (dev)
+        if: github.ref == 'refs/heads/dev'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'bunkerity/bunkerized-nginx:dev'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Run Trivy security scanner (master)
+        if: github.ref == 'refs/heads/master'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'bunkerity/bunkerized-nginx'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Push (dev)
+        uses: docker/build-push-action@v2
+        if: github.ref == 'refs/heads/dev'
+        with:
+          context: .
+          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: bunkerity/bunkerized-nginx:dev
+          cache-from: type=local,src=/tmp/.buildx-cache
+
+      - name: Push (master)
         uses: docker/build-push-action@v2
         if: github.ref == 'refs/heads/master'
         with:
