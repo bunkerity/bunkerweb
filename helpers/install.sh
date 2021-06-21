@@ -93,11 +93,18 @@ fi
 
 # Clone the repo
 echo "[*] Clone bunkerity/bunkerized-nginx"
-CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 93543d3962473af42eb0295868f8ac4184d8eeca
+#CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 09a2a4f9e531b93684b0916a5146091a818501d3
+# TODO : do a secure clone
+CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
+CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev
 
 # Copy generator
 echo "[*] Copy generator"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/gen /opt/bunkerized-nginx
+
+# Copy entrypoint
+echo "[*] Copy entrypoint"
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/entrypoint /opt/bunkerized-nginx
 
 # Copy configs
 echo "[*] Copy configs"
@@ -191,6 +198,7 @@ do_and_check_cmd find /opt -type d -exec chmod 0750 {} \;
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/scripts/*
+do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 
 # Install cron
 echo "[*] Add jobs to crontab"

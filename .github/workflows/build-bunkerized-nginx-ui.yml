@@ -46,7 +46,7 @@ jobs:
           file: ui/Dockerfile
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
           push: false
-          tags: bunkerity/bunkerized-nginx-ui:dev
+          tags: bunkerized-nginx-ui
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -64,23 +64,13 @@ jobs:
           file: ui/Dockerfile
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
           push: false
-          tags: bunkerity/bunkerized-nginx-ui:latest,bunkerity/bunkerized-nginx-ui:${{ env.VERSION }}
+          tags: bunkerized-nginx-ui
+          cache-to: type=local,dest=/tmp/.buildx-cache-master
 
-      - name: Run Trivy security scanner (dev)
-        if: github.ref == 'refs/heads/dev'
+      - name: Run Trivy security scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'bunkerity/bunkerized-nginx-ui:dev'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-
-      - name: Run Trivy security scanner (master)
-        if: github.ref == 'refs/heads/master'
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'bunkerity/bunkerized-nginx-ui'
+          image-ref: 'bunkerized-nginx-ui'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -106,3 +96,4 @@ jobs:
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
           push: true
           tags: bunkerity/bunkerized-nginx-ui:latest,bunkerity/bunkerized-nginx-ui:${{ env.VERSION }}
+          cache-from: type=local,src=/tmp/.buildx-cache-master

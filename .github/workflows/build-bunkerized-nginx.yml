@@ -45,7 +45,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
           push: false
-          tags: bunkerity/bunkerized-nginx:dev
+          tags: bunkerized-nginx
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -62,31 +62,16 @@ jobs:
           context: .
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
           push: false
-          tags: bunkerity/bunkerized-nginx:latest,bunkerity/bunkerized-nginx:${{ env.VERSION }}
+          tags: bunkerized-nginx
+          cache-to: type=local,dest=/tmp/.buildx-cache-master
 
-      - name: Run autotest (dev)
-        if: github.ref == 'refs/heads/dev'
-        run: docker run bunkerity/bunkerized-nginx:dev test
+      - name: Run autotest
+        run: docker run bunkerized-nginx test
 
-      - name: Run autotest (master)
-        if: github.ref == 'refs/heads/master'
-        run: docker run bunkerity/bunkerized-nginx test
-
-      - name: Run Trivy security scanner (dev)
-        if: github.ref == 'refs/heads/dev'
+      - name: Run Trivy security scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'bunkerity/bunkerized-nginx:dev'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-
-      - name: Run Trivy security scanner (master)
-        if: github.ref == 'refs/heads/master'
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'bunkerity/bunkerized-nginx'
+          image-ref: 'bunkerized-nginx'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -110,3 +95,4 @@ jobs:
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
           push: true
           tags: bunkerity/bunkerized-nginx:latest,bunkerity/bunkerized-nginx:${{ env.VERSION }}
+          cache-from: type=local,src=/tmp/.buildx-cache-master

@@ -527,7 +527,10 @@ CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERS
 echo "[*] Compile dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
-CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli
+echo "\#/bin/sh" > "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
+echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli" >> "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
+do_and_check_cmd chmod +x "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
+CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure-fix.sh
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
 if [ "$OS" = "centos" ] ; then
 	CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib64/nginx/modules
