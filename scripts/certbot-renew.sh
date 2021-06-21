@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 if [ "$(grep "^SWARM_MODE=yes$" /etc/nginx/global.env)" != "" ] && [ -f /usr/sbin/nginx ] ; then
 	exit 0
@@ -12,7 +12,7 @@ if [ "$(has_value AUTO_LETS_ENCRYPT yes)" = "" ] ; then
 fi
 
 # ask new certificates if needed
-certbot renew --deploy-hook /opt/scripts/certbot-renew-hook.sh
+certbot renew --deploy-hook /opt/bunkerized-nginx/scripts/certbot-renew-hook.sh
 
 if [ "$?" -eq 0 ] ; then
 	job_log "[CERTBOT] renew operation done"

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 job_log "[CERTBOT] certificates have been renewed"
 

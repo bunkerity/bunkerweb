@@ -115,7 +115,7 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua/* /usr/local/lib/lua
 echo "[*] Copy antibot"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/antibot /opt/bunkerized-nginx
 
-# Copy antibot
+# Copy defaults
 echo "[*] Copy defaults"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/defaults /opt/bunkerized-nginx
 
@@ -129,6 +129,69 @@ if [ "$(grep "nginx:" /etc/passwd)" = "" ] ; then
 	do_and_check_cmd useradd -d /opt/bunkerized-nginx -s /usr/sbin/nologin nginx
 fi
 
+# Create www folder
+if [ ! -d "/opt/bunkerized-nginx/www" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/www folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/www
+fi
+
+# Create http-confs folder
+if [ ! -d "/opt/bunkerized-nginx/http-confs" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/http-confs folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/http-confs
+fi
+
+# Create server-confs folder
+if [ ! -d "/opt/bunkerized-nginx/server-confs" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/server-confs folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/server-confs
+fi
+
+# Create modsec-confs folder
+if [ ! -d "/opt/bunkerized-nginx/modsec-confs" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/modsec-confs folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/modsec-confs
+fi
+
+# Create modsec-crs-confs folder
+if [ ! -d "/opt/bunkerized-nginx/modsec-crs-confs" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/modsec-crs-confs folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/modsec-crs-confs
+fi
+
+# Create cache folder
+if [ ! -d "/opt/bunkerized-nginx/cache" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/cache folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/cache
+fi
+
+# Create pre-server-confs folder
+if [ ! -d "/opt/bunkerized-nginx/pre-server-confs" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/pre-server-confs folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/pre-server-confs
+fi
+
+# Create acme-challenge folder
+if [ ! -d "/opt/bunkerized-nginx/acme-challenge" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/acme-challenge folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/acme-challenge
+fi
+
+# Create plugins folder
+if [ ! -d "/opt/bunkerized-nginx/plugins" ] ; then
+	echo "[*] Create /opt/bunkerized-nginx/plugins folder"
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/plugins
+fi
+
+# Set permissions for /opt/bunkerized-nginx
+echo "[*] Set permissions for /opt/bunkerized-nginx files and folders"
+do_and_check_cmd chown -R root:nginx /opt/bunkerized-nginx
+do_and_check_cmd find /opt -type f -exec chmod 0740 {} \;
+do_and_check_cmd find /opt -type d -exec chmod 0750 {} \;
+do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
+do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
+do_and_check_cmd chmod 750 /opt/bunkerized-nginx/scripts/*
+
 # Install cron
 echo "[*] Add jobs to crontab"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
@@ -139,27 +202,27 @@ fi
 
 # Download abusers list
 echo "[*] Download abusers list"
-# TODO : call external script
+do_and_check_cmd /opt/bunkerized-nginx/scripts/abusers.sh
 
 # Download TOR exit nodes list
 echo "[*] Download TOR exit nodes list"
-# TODO : call external script
+do_and_check_cmd /opt/bunkerized-nginx/scripts/exit-nodes.sh
 
 # Download proxies list
 echo "[*] Download proxies list"
-# TODO : call external script
+do_and_check_cmd /opt/bunkerized-nginx/scripts/proxies.sh
 
 # Download referrers list
 echo "[*] Download referrers list"
-# TODO : call external script
+do_and_check_cmd /opt/bunkerized-nginx/scripts/referrers.sh
 
 # Download user agents list
 echo "[*] Download user agents list"
-# TODO : call external script
+do_and_check_cmd /opt/bunkerized-nginx/scripts/user-agents.sh
 
 # Download geoip database
 echo "[*] Download proxies list"
-# TODO : call external script
+do_and_check_cmd /opt/bunkerized-nginx/scripts/geoip.sh
 
 # We're done
 echo "[*] bunkerized-nginx successfully installed !"

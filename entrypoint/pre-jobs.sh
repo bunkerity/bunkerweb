@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 # self signed certs for sites
 files=$(has_value GENERATE_SELF_SIGNED_SSL yes)
@@ -58,7 +58,7 @@ if [ "$files" != "" ] ; then
 		if [ "$EMAIL_LETS_ENCRYPT" = "" ] ; then
 			EMAIL_LETS_ENCRYPT="contact@${FIRST_SERVER}"
 		fi
-		certbot_output=$(/opt/scripts/certbot-new.sh "$(echo -n $SERVER_NAME | sed 's/ /,/g')" "$EMAIL_LETS_ENCRYPT" 2>&1)
+		certbot_output=$(/opt/bunkerized-nginx/scripts/certbot-new.sh "$(echo -n $SERVER_NAME | sed 's/ /,/g')" "$EMAIL_LETS_ENCRYPT" 2>&1)
 		if [ $? -eq 0 ] ; then
 			echo "[*] Certbot new successfully executed for domain(s) $(echo -n $SERVER_NAME | sed 's/ /,/g')"
 		else
@@ -70,11 +70,11 @@ fi
 
 # GeoIP
 if [ "$(has_value BLACKLIST_COUNTRY ".\+")" != "" ] || [ "$(has_value WHITELIST_COUNTRY ".\+")" != "" ] ; then
-	if [ -f "/cache/geoip.mmdb" ] ; then
+	if [ -f "/opt/bunkerized-nginx/cache/geoip.mmdb" ] ; then
 		echo "[*] Copying cached geoip.mmdb ..."
-		cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
+		cp /opt/bunkerized-nginx/cache/geoip.mmdb /etc/nginx/geoip.mmdb
 	elif [ "$(ps aux | grep "geoip\.sh")" = "" ] ; then
 		echo "[*] Downloading GeoIP database ..."
-		/opt/scripts/geoip.sh > /dev/null 2>&1
+		/opt/bunkerized-nginx/scripts/geoip.sh > /dev/null 2>&1
 	fi
 fi

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 if [ "$MULTISITE" != "yes" ] && [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 	first_server_name=$(echo "$SERVER_NAME" | cut -d " " -f 1)
@@ -9,7 +9,7 @@ if [ "$MULTISITE" != "yes" ] && [ "$AUTO_LETS_ENCRYPT" = "yes" ] ; then
 	EMAIL_LETS_ENCRYPT="${EMAIL_LETS_ENCRYPT-contact@$first_server_name}"
 	if [ ! -f /etc/letsencrypt/live/${first_server_name}/fullchain.pem ] ; then
 		echo "[*] Performing Let's Encrypt challenge for $domains_lets_encrypt ..."
-		/opt/scripts/certbot-new.sh "$domains_lets_encrypt" "$EMAIL_LETS_ENCRYPT"
+		/opt/bunkerized-nginx/scripts/certbot-new.sh "$domains_lets_encrypt" "$EMAIL_LETS_ENCRYPT"
 	fi
 elif [ "$MULTISITE" = "yes" ] ; then
 	servers=$(find /etc/nginx -name "site.env" | cut -d '/' -f 4)
@@ -22,7 +22,7 @@ elif [ "$MULTISITE" = "yes" ] ; then
 			if [ "$EMAIL_LETS_ENCRYPT" = "" ] ; then
 				EMAIL_LETS_ENCRYPT="contact@${server}"
 			fi
-			/opt/scripts/certbot-new.sh "$domains" "EMAIL_LETS_ENCRYPT"
+			/opt/bunkerized-nginx/scripts/certbot-new.sh "$domains" "EMAIL_LETS_ENCRYPT"
 		fi
 	done
 fi

@@ -1190,7 +1190,7 @@
             },
             {
                 "context": "global",
-                "default": "/www",
+                "default": "/opt/bunkerized-nginx/www",
                 "env": "ROOT_FOLDER",
                 "id": "root-folder",
                 "label": "Root folder",

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 if [ "$(grep "^SWARM_MODE=yes$" /etc/nginx/global.env)" != "" ] && [ -f /usr/sbin/nginx ] ; then
 	exit 0
@@ -36,7 +36,7 @@ if [ "$lines" -gt 1 ] ; then
 		$RELOAD > /dev/null 2>&1
 		# new config is ok : save it in the cache
 		if [ "$?" -eq 0 ] ; then
-			cp /tmp/proxies.list /cache
+			cp /tmp/proxies.list /opt/bunkerized-nginx/cache
 			job_log "[NGINX] successfull nginx reload after proxies list update"
 		else
 			job_log "[NGINX] failed nginx reload after proxies list update fallback to old list"
@@ -44,7 +44,7 @@ if [ "$lines" -gt 1 ] ; then
 			$RELOAD > /dev/null 2>&1
 		fi
 	else
-		cp /tmp/proxies.list /cache
+		cp /tmp/proxies.list /opt/bunkerized-nginx/cache
 	fi
 else
 	job_log "[BLACKLIST] can't update proxies list"

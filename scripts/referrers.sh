@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 if [ "$(grep "^SWARM_MODE=yes$" /etc/nginx/global.env)" != "" ] && [ -f /usr/sbin/nginx ] ; then
 	exit 0
@@ -39,7 +39,7 @@ if [ "$lines" -gt 1 ] ; then
 	if [ "$RELOAD" != "" ] ; then
 		$RELOAD > /dev/null 2>&1
 		if [ "$?" -eq 0 ] ; then
-			cp /tmp/referrers.list /cache
+			cp /tmp/referrers.list /opt/bunkerized-nginx/cache
 			job_log "[NGINX] successfull nginx reload after referrers list update"
 		else
 			#cp /tmp/referrers.list.bak /etc/nginx
@@ -47,7 +47,7 @@ if [ "$lines" -gt 1 ] ; then
 			$RELOAD > /dev/null 2>&1
 		fi
 	else
-		cp /tmp/referrers.list /cache
+		cp /tmp/referrers.list /opt/bunkerized-nginx/cache
 	fi
 else
 	job_log "[BLACKLIST] can't update referrers list"

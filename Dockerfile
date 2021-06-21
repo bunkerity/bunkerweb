@@ -9,14 +9,14 @@ RUN apk add --no-cache bash && \
 RUN apk add --no-cache certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip && \
     pip3 install jinja2
 
-COPY gen/ /opt/gen
-COPY entrypoint/ /opt/entrypoint
-COPY confs/ /opt/confs
-COPY scripts/ /opt/scripts
+COPY gen/ /opt/bunkerized-nginx/gen
+COPY entrypoint/ /opt/bunkerized-nginx/entrypoint
+COPY confs/ /opt/bunkerized-nginx/confs
+COPY scripts/ /opt/bunkerized-nginx/scripts
 COPY lua/ /usr/local/lib/lua
-COPY antibot/ /antibot
-COPY defaults/ /defaults
-COPY settings.json /opt
+COPY antibot/ /opt/bunkerized-nginx/antibot
+COPY defaults/ /opt/bunkerized-nginx/defaults
+COPY settings.json /opt/bunkerized-nginx
 COPY misc/cron /etc/crontabs/nginx
 
 COPY prepare.sh /tmp/prepare.sh
@@ -35,4 +35,4 @@ USER nginx:nginx
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 CMD [ -f /tmp/nginx.pid ] || exit 1
 
-ENTRYPOINT ["/opt/entrypoint/entrypoint.sh"]
+ENTRYPOINT ["/opt/bunkerized-nginx/entrypoint/entrypoint.sh"]

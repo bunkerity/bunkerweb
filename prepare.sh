@@ -6,13 +6,13 @@ chown -R root:nginx /www
 chmod -R 770 /www
 
 # prepare /opt
-chown -R root:nginx /opt
+chown -R root:nginx /opt/bunkerized-nginx
 find /opt -type f -exec chmod 0740 {} \;
 find /opt -type d -exec chmod 0750 {} \;
-chmod ugo+x /opt/entrypoint/* /opt/scripts/*
-chmod ugo+x /opt/gen/main.py
-chmod 770 /opt
-chmod 440 /opt/settings.json
+chmod ugo+x /opt/bunkerized-nginx/entrypoint/* /opt/bunkerized-nginx/scripts/*
+chmod ugo+x /opt/bunkerized-nginx/gen/main.py
+chmod 770 /opt/bunkerized-nginx
+chmod 440 /opt/bunkerized-nginx/settings.json
 
 # prepare /etc/nginx
 for file in $(ls /etc/nginx) ; do
@@ -70,3 +70,14 @@ chmod 440 /etc/crontabs/nginx
 mkdir /plugins
 chown root:nginx /plugins
 chmod 770 /plugins
+
+# prepare symlinks
+ln -s /www /opt/bunkerized-nginx/www
+ln -s /http-confs /opt/bunkerized-nginx/http-confs
+ln -s /server-confs /opt/bunkerized-nginx/server-confs
+ln -s /modsec-confs /opt/bunkerized-nginx/modsec-confs
+ln -s /modsec-crs-confs /opt/bunkerized-nginx/modsec-crs-confs
+ln -s /cache /opt/bunkerized-nginx/cache
+ln -s /pre-server-confs /opt/bunkerized-nginx/pre-server-confs
+ln -s /acme-challenge /opt/bunkerized-nginx/acme-challenge
+ln -s /plugins /opt/bunkerized-nginx/plugins

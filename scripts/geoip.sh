@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load some functions
-. /opt/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 if [ "$(grep "^SWARM_MODE=yes$" /etc/nginx/global.env)" != "" ] && [ -f /usr/sbin/nginx ] ; then
 	exit 0
@@ -32,17 +32,17 @@ if [ "$?" -eq 0 ] && [ -f /tmp/geoip.mmdb.gz ] ; then
 	if [ "$RELOAD" != "" ] ; then
 		$RELOAD > /dev/null 2>&1
 		if [ "$?" -eq 0 ] ; then
-			cp /etc/nginx/geoip.mmdb /cache
+			cp /etc/nginx/geoip.mmdb /opt/bunkerized-nginx/cache
 			job_log "[NGINX] successfull nginx reload after GeoIP DB update"
 		else
 			job_log "[NGINX] failed nginx reload after GeoIP DB update"
-			if [ -f /cache/geoip.mmdb ] ; then
-				cp /cache/geoip.mmdb /etc/nginx/geoip.mmdb
+			if [ -f /opt/bunkerized-nginx/cache/geoip.mmdb ] ; then
+				cp /opt/bunkerized-nginx/cache/geoip.mmdb /etc/nginx/geoip.mmdb
 				$RELOAD > /dev/null 2>&1
 			fi
 		fi
 	else
-		cp /etc/nginx/geoip.mmdb /cache
+		cp /etc/nginx/geoip.mmdb /opt/bunkerized-nginx/cache
 	fi
 else
 	job_log "[GEOIP] can't download DB from $URL"

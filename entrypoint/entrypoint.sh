@@ -16,14 +16,14 @@ trap "trap_exit" TERM INT QUIT
 function trap_reload() {
 	echo "[*] Catched reload operation"
 	if [ "$SWARM_MODE" != "yes" ] ; then
-		/opt/entrypoint/pre-jobs.sh
+		/opt/bunkerized-nginx/entrypoint/pre-jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
 		nginx -s reload
 		if [ $? -eq 0 ] ; then
 			echo "[*] Reload successfull"
-			/opt/entrypoint/post-jobs.sh
+			/opt/bunkerized-nginx/entrypoint/post-jobs.sh
 		else
 			echo "[!] Reload failed"
 		fi
@@ -40,16 +40,16 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 
 	# check permissions
 	if [ "$SWARM_MODE" != "yes" ] ; then
-		/opt/entrypoint/permissions.sh
+		/opt/bunkerized-nginx/entrypoint/permissions.sh
 	else
-		/opt/entrypoint/permissions-swarm.sh
+		/opt/bunkerized-nginx/entrypoint/permissions-swarm.sh
 	fi
 	if [ "$?" -ne 0 ] ; then
 		exit 1
 	fi
 
 	# start temp nginx to solve Let's Encrypt challenges if needed
-	/opt/entrypoint/nginx-temp.sh
+	/opt/bunkerized-nginx/entrypoint/nginx-temp.sh
 
 	# only do config if we are not in swarm mode
 	if [ "$SWARM_MODE" != "yes" ] ; then
@@ -57,10 +57,10 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 		env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "/tmp/variables.env"
 
 		# call the generator
-		/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env
+		/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env
 
 		# pre-jobs
-		/opt/entrypoint/pre-jobs.sh
+		/opt/bunkerized-nginx/entrypoint/pre-jobs.sh
 	fi
 else
 	echo "[*] Skipping configuration process"
@@ -90,7 +90,7 @@ pid="$!"
 # autotest
 if [ "$1" == "test" ] ; then
 	sleep 10
-	echo -n "autotest" > /www/index.html
+	echo -n "autotest" > /opt/bunkerized-nginx/www/index.html
 	check=$(curl -H "User-Agent: legit" "http://localhost:8080")
 	if [ "$check" == "autotest" ] ; then
 		exit 0
@@ -99,7 +99,7 @@ if [ "$1" == "test" ] ; then
 fi
 
 # post jobs
-/opt/entrypoint/post-jobs.sh
+/opt/bunkerized-nginx/entrypoint/post-jobs.sh
 
 # wait for nginx
 wait "$pid"
