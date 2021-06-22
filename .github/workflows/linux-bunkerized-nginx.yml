@@ -17,4 +17,4 @@ jobs:
       - name: Ubuntu test
         run: ./tests/linux.sh ubuntu:focal
       - name: CentOS test
-        run: ./tests/linux.sh centos.sh
+        run: ./tests/linux.sh centos:7
