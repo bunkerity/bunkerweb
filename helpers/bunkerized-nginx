@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function do_and_check_cmd() {
+        if [ "$CHANGE_DIR" != "" ] ; then
+                cd "$CHANGE_DIR"
+        fi
+        output=$(su -s "/bin/bash" -c "$@" nginx 2>&1)
+        ret="$?"
+        if [ $ret -ne 0 ] ; then
+                echo "[!] Error from command : $*"
+                echo "$output"
+                exit $ret
+        fi
+        echo "$output"
+        return 0
+}
+
+# Check if we are root
+if [ $(id -u) -ne 0 ] ; then
+	echo "[!] Run me as root"
+	exit 1
+fi
+
+# Check if variables.env is present
+if [ ! -f "/opt/bunkerized-nginx/variables.env" ] ; then
+	echo "[!] Missing /opt/bunkerized-nginx/variables.env"
+	exit 1
+fi
+
+# Run generator
+echo "[*] Generate configuration files"
+do_and_check_cmd /opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /opt/bunkerized-nginx/variables.env
+
+# Run pre-jobs
+echo "[*] Run pre-jobs"
+do_and_check_cmd /opt/bunkerized-nginx/entrypoint/pre-jobs.sh
+
+# Reload nginx if it's running
+if [ -f "/tmp/nginx.pid" ] ; then
+	echo "[*] Reload nginx"
+	do_and_check_cmd nginx -s reload
+# Otherwise start it
+else
+	echo "[*] Start nginx"
+	do_and_check_cmd nginx -g 'daemon off;'
+fi
+
+# Run post-jobs
+echo "[*] Run post-jobs"
+do_and_check_cmd /opt/bunkerized-nginx/entrypoint/post-jobs.sh

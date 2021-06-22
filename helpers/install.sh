@@ -130,6 +130,10 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/defaults /opt/bunkerized-nginx
 echo "[*] Copy settings"
 do_and_check_cmd cp /tmp/bunkerized-nginx/settings.json /opt/bunkerized-nginx
 
+# Copy bunkerized-nginx
+echo "[*] Copy bunkerized-nginx"
+do_and_check_cmd cp /tmp/bunkerized-nginx/helpers/bunkerized-nginx /usr/local/bin
+
 # Create nginx user
 if [ "$(grep "nginx:" /etc/passwd)" = "" ] ; then
 	echo "[*] Add nginx user"
@@ -199,6 +203,10 @@ do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/scripts/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
+
+# Set permissions for /usr/local/bin/bunkerized-nginx
+do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
+do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx
 
 # Install cron
 echo "[*] Add jobs to crontab"
