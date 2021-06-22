@@ -55,7 +55,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 echo "[*] Copy variables.env"
-docker cp "tests/variables.env:$id" /opt/bunkerized-nginx/variables.env
+docker cp "tests/variables.env" "$id:/opt/bunkerized-nginx"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker cp failed"
 	cleanup "$id"
@@ -63,7 +63,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 echo "[*] Copy index.html"
-docker cp "tests/index.html:$id" /opt/bunkerized-nginx/www
+docker cp "tests/index.html" "$id:/opt/bunkerized-nginx/www"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker cp failed"
 	cleanup "$id"
@@ -79,7 +79,7 @@ if [ $? -ne 0 ] || [ "$res" != "ok" ] ; then
 fi
 
 echo "[*] Exec curl"
-res="$(curl -s http://localhost/")
+res="$(curl -s -H "User-Agent: LegitOne" http://localhost/")
 if [ $? -ne 0 ] || [ "$res" != "ok" ] ; then
 	echo "[!] curl failed"
 	cleanup "$id"
