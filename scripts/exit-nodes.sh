@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # load some functions
 . /opt/bunkerized-nginx/entrypoint/utils.sh

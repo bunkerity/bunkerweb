@@ -45,6 +45,7 @@ jobs:
           context: .
           file: ui/Dockerfile
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          load: true
           push: false
           tags: bunkerized-nginx-ui
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -63,6 +64,7 @@ jobs:
           context: .
           file: ui/Dockerfile
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          load: true
           push: false
           tags: bunkerized-nginx-ui
           cache-to: type=local,dest=/tmp/.buildx-cache-master

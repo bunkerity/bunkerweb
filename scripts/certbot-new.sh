@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # generate certificate
 certbot certonly --webroot -w /opt/bunkerized-nginx/acme-challenge -n -d "$1" --email "$2" --agree-tos
