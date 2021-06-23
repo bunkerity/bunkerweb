@@ -87,7 +87,7 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git crontabs curl python3 python3-pip procps luajit lua"
+	CENTOS_DEPS="git crontabs curl python3 python3-pip procps"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 fi
 do_and_check_cmd pip3 install jinja2
