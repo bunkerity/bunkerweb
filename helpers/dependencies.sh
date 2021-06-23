@@ -532,11 +532,13 @@ echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecuri
 do_and_check_cmd chmod +x "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib/" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure-fix.sh
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
-if [ "$OS" = "centos" ] ; then
-	CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib64/nginx/modules
-else
-	CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib/nginx/modules
+if [ ! -d "/usr/lib/nginx/modules" ] ; then
+	do_and_check_cmd mkdir -p /usr/lib/nginx/modules
 fi
+do_and_check_cmd chown -R root:root /usr/lib/nginx
+do_and_check_cmd chmod -R 755 /usr/lib/nginx
+CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/lib/nginx/modules
+do_and_check_cmd chmod 744 /usr/lib/nginx/modules/*
 
 # We're done
 if [ "$OS" = "alpine" ] ; then

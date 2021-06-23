@@ -72,16 +72,18 @@ fi
 
 echo "[*] Exec bunkerized-nginx"
 docker exec "$id" bunkerized-nginx
-if [ $? -ne 0 ] || [ "$res" != "ok" ] ; then
+if [ $? -ne 0 ] ; then
 	echo "[!] docker exec failed"
 	cleanup "$id"
 	exit 9
 fi
 
 echo "[*] Exec curl"
-res="$(curl -s -H "User-Agent: LegitOne" http://localhost/")
+res="$(curl -s -H "User-Agent: LegitOne" http://localhost/)"
 if [ $? -ne 0 ] || [ "$res" != "ok" ] ; then
 	echo "[!] curl failed"
 	cleanup "$id"
 	exit 10
 fi
+
+cleanup "$id"

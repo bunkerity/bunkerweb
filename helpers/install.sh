@@ -83,11 +83,11 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git cron curl python3 python3-pip"
+	DEBIAN_DEPS="git cron curl python3 python3-pip procps"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git crontabs curl python3 python3-pip"
+	CENTOS_DEPS="git crontabs curl python3 python3-pip procps luajit lua"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 fi
 do_and_check_cmd pip3 install jinja2
