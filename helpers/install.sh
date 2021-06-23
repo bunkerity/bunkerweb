@@ -83,13 +83,14 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git cron curl"
+	DEBIAN_DEPS="git cron curl python3 python3-pip"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git crontabs curl"
+	CENTOS_DEPS="git crontabs curl python3 python3-pip"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 fi
+do_and_check_cmd pip3 install jinja2
 
 # Clone the repo
 echo "[*] Clone bunkerity/bunkerized-nginx"
@@ -208,6 +209,9 @@ do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
 # Set permissions for /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx
+
+# Set permissions for /opt
+do_and_check_cmd chmod u+rx /opt
 
 # Install cron
 echo "[*] Add jobs to crontab"
