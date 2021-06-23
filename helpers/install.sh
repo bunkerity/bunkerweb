@@ -196,22 +196,24 @@ if [ ! -d "/opt/bunkerized-nginx/plugins" ] ; then
 fi
 
 # Set permissions for /opt/bunkerized-nginx
-echo "[*] Set permissions for /opt/bunkerized-nginx files and folders"
+echo "[*] Set permissions on files and folders"
 do_and_check_cmd chown -R root:nginx /opt/bunkerized-nginx
-do_and_check_cmd find /opt -type f -exec chmod 0740 {} \;
-do_and_check_cmd find /opt -type d -exec chmod 0750 {} \;
+do_and_check_cmd find /opt/bunkerized-nginx -type f -exec chmod 0740 {} \;
+do_and_check_cmd find /opt/bunkerized-nginx -type d -exec chmod 0750 {} \;
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/scripts/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
-
 # Set permissions for /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx
-
 # Set permissions for /opt
 do_and_check_cmd chmod u+rx /opt
+# Set permissions for /etc/nginx
+do_and_check_cmd chown -R nginx:nginx /etc/nginx
+do_and_check_cmd find /etc/nginx -type f -exec chmod 0774 {} \;
+do_and_check_cmd find /etc/nginx -type d -exec chmod 0775 {} \;
 
 # Install cron
 echo "[*] Add jobs to crontab"

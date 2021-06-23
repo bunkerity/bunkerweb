@@ -84,7 +84,7 @@ fi
 
 # run nginx
 echo "[*] Running nginx ..."
-nginx &
+nginx -g 'daemon off;' &
 pid="$!"
 
 # autotest
