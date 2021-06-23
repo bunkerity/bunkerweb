@@ -42,7 +42,7 @@ if [ -f "/tmp/nginx.pid" ] ; then
 # Otherwise start it
 else
 	echo "[*] Start nginx"
-	do_and_check_cmd "nginx -g 'daemon off;'"
+	do_and_check_cmd "nginx -g 'daemon on;'"
 fi
 
 # Run post-jobs

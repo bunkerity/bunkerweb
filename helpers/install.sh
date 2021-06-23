@@ -215,6 +215,22 @@ do_and_check_cmd chown -R nginx:nginx /etc/nginx
 do_and_check_cmd find /etc/nginx -type f -exec chmod 0774 {} \;
 do_and_check_cmd find /etc/nginx -type d -exec chmod 0775 {} \;
 
+# Prepare log files and folders
+echo "[*] Prepare log files and folders"
+do_and_check_cmd touch /var/log/access.log
+do_and_check_cmd touch /var/log/error.log
+if [ ! -e "/var/log/nginx" ] ; then
+	do_and_check_cmd mkdir /var/log/nginx
+fi
+do_and_check_cmd touch /var/log/nginx/modsec_audit.log
+do_and_check_cmd touch /var/log/nginx/error.log
+do_and_check_cmd chown -R root:nginx /var/log/nginx
+do_and_check_cmd chown root:nginx /var/log/access.log
+do_and_check_cmd chown root:nginx /var/log/error.log
+do_and_check_cmd chmod 770 /var/log/access.log
+do_and_check_cmd chmod 770 /var/log/error.log
+do_and_check_cmd chmod -R 770 /var/log/nginx
+
 # Install cron
 echo "[*] Add jobs to crontab"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
