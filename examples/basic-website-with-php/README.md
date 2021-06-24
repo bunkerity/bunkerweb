@@ -15,6 +15,11 @@ $ docker-compose up
 
 ## Linux
 
+You will need to configure your php-fpm service to listen on localhost with the following directive :
+```conf
+listen = 127.0.0.1:9000
+```
+
 ```shell
 $ cp variables.env /opt/bunkerized-nginx/variables.env
 $ cp web-files/* /opt/bunkerized-nginx/www
