@@ -90,7 +90,9 @@ elif [ "$OS" = "centos" ] ; then
 	CENTOS_DEPS="git crontabs curl python3 python3-pip procps"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 fi
-do_and_check_cmd pip3 install jinja2
+do_and_check_cmd pip3 install --upgrade pip
+do_and_check_cmd pip3 install jinja2 certbot
+do_and_check_cmd pip3 install cryptography --upgrade
 
 # Clone the repo
 echo "[*] Clone bunkerity/bunkerized-nginx"
@@ -230,6 +232,24 @@ do_and_check_cmd chown root:nginx /var/log/error.log
 do_and_check_cmd chmod 770 /var/log/access.log
 do_and_check_cmd chmod 770 /var/log/error.log
 do_and_check_cmd chmod -R 770 /var/log/nginx
+
+# Prepare Let's Encrypt files and folders
+echo "[*] Prepare Let's Encrypt files and folders"
+if [ ! -e "/var/log/letsencrypt" ] ; then
+	do_and_check_cmd mkdir /var/log/letsencrypt
+fi
+do_and_check_cmd chown root:nginx /var/log/letsencrypt
+do_and_check_cmd chmod 770 /var/log/letsencrypt
+if [ ! -e "/etc/letsencrypt" ] ; then
+	do_and_check_cmd mkdir /etc/letsencrypt
+fi
+do_and_check_cmd chown root:nginx /etc/letsencrypt
+do_and_check_cmd chmod 770 /etc/letsencrypt
+if [ ! -e "/var/lib/letsencrypt" ] ; then
+	do_and_check_cmd mkdir /var/lib/letsencrypt
+fi
+do_and_check_cmd chown root:nginx /var/lib/letsencrypt
+do_and_check_cmd chmod 770 /var/lib/letsencrypt
 
 # Install cron
 echo "[*] Add jobs to crontab"
