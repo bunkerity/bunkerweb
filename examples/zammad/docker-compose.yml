@@ -123,11 +123,11 @@ services:
       - FEATURE_POLICY=                                                         # Need to be allowed to work with Chrome, Brave, Edge
       - PERMISSIONS_POLICY=                                                     # Need to be allowed to work with Chrome, Brave, Edge
       - SERVER_NAME=www.website.com                                             # replace with your domain 
-      - www.website.com_REVERSE_PROXY_URL_1=/ws
-      - www.website.com_REVERSE_PROXY_HOST_1=http://zammad-websocket:6042
-      - www.website.com_REVERSE_PROXY_WS=yes                                    # used to allow websocket redirect
-      - www.website.com_REVERSE_PROXY_URL_2=/
-      - www.website.com_REVERSE_PROXY_HOST_2=http://zammad-railsserver:3000
+      - REVERSE_PROXY_URL_1=/ws
+      - REVERSE_PROXY_HOST_1=http://zammad-websocket:6042
+      - REVERSE_PROXY_WS=yes                                                    # used to allow websocket redirect
+      - REVERSE_PROXY_URL_2=/
+      - REVERSE_PROXY_HOST_2=http://zammad-railsserver:3000
       - ALLOWED_METHODS=GET|POST|HEAD|PUT|OPTIONS|DELETE|PATCH                  # All methods allowed by modSecurity used by default in zammad
     depends_on:
       - zammad-railsserver
