@@ -54,7 +54,7 @@ services:
       - app1.example.com_REMOTE_PHP=myapp1
       - app1.example.com_REMOTE_PHP_PATH=/app
       - app2.example.com_SERVE_FILES=no
-      - app2.example.com_USE_REVERSE_PROXY=myapp2
+      - app2.example.com_USE_REVERSE_PROXY=yes
       - app2.example.com_REVERSE_PROXY_URL=/
       - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
 
