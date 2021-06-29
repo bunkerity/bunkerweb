@@ -99,6 +99,12 @@ Default value : 2048
 Context : *global*  
 Sets the value of the [worker_rlimit_nofile](https://nginx.org/en/docs/ngx_core_module.html#worker_rlimit_nofile) directive.
 
+`INJECT_BODY`  
+Values : *\<any HTML code\>*
+Default value :  
+Context : *global*, *multisite*  
+Use this variable to inject any HTML code you want before the \</body\> tag (e.g. : `\<script src="https://..."\>`)
+
 ### Information leak
 
 `SERVER_TOKENS`  
@@ -860,22 +866,42 @@ Context : *global*, *multisite*
 List of HTTP status codes considered as "suspicious".   
 
 `BAD_BEHAVIOR_THRESHOLD`  
-Values : *<any positive integer>*  
+Values : *\<any positive integer\>*  
 Default value : *10*  
 Context : *global*, *multisite*  
 The number of "suspicious" HTTP status code before the corresponding IP is banned.
 
 `BAD_BEHAVIOR_BAN_TIME`  
-Values : *<any positive integer>*  
+Values : *\<any positive integer\>*  
 Default value : *86400*  
 Context : *global*, *multisite*  
 The duration time (in seconds) of a ban when the corresponding IP has reached the `BAD_BEHAVIOR_THRESHOLD`.
 
 `BAD_BEHAVIOR_COUNT_TIME`  
-Values : *<any positive integer>*  
+Values : *\<any positive integer\>*  
 Default value : *60*  
 Context : *global*, *multisite*  
 The duration time (in seconds) before the counter of "suspicious" HTTP is reset.
+
+## Authelia
+
+`USE_AUTHELIA`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*, *multisite*  
+Enable or disable [Authelia](https://www.authelia.com/) support. See the [authelia example](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/authelia) for more information on how to setup Authelia with bunkerized-nginx. 
+
+`AUTHELIA_BACKEND`  
+Values : *\<any valid http(s) address\>*  
+Default value :  
+Context : *global*, *multisite*  
+The public Authelia address that users will be redirect to when they will be asked to login (e.g. : `https://auth.example.com`).
+
+`AUTHELIA_UPSTREAM`  
+Values : *\<any valid http(s) address\>*  
+Default value :  
+Context : *global*, *multisite*  
+The private Authelia address when doing requests from nginx (e.g. : http://my-authelia.local:9091).
 
 ## misc
 

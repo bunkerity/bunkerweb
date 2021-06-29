@@ -935,6 +935,15 @@
                 "label": "Serve files",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "INJECT_BODY",
+                "id": "inject-body",
+                "label": "Custom code to inject into the page before closing the body",
+                "regex": ".*",
+                "type": "text"
             }
         ]
     },
