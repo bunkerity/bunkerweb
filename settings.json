@@ -87,6 +87,15 @@
                 "label": "Address of the authelia upstream",
                 "regex": ".*",
                 "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "portal",
+                "env": "AUTHELIA_MODE",
+                "id": "authelia-mode",
+                "label": "Show the portal or simply auth basic prompt",
+                "regex": "^(portal|auth\\-basic)$",
+                "type": "text"
             }
         ]
     },

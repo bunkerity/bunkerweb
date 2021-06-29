@@ -903,6 +903,12 @@ Default value :
 Context : *global*, *multisite*  
 The private Authelia address when doing requests from nginx (e.g. : http://my-authelia.local:9091).
 
+`AUTHELIA_MODE`  
+Values : *portal* | *auth-basic*  
+Default value : *portal*  
+Context : *global*, *multisite*  
+Choose authentication mode : show a web page (`portal`) or a simple auth basic prompt (`auth-basic`).
+
 ## misc
 
 `SWARM_MODE`  
