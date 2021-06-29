@@ -58,6 +58,38 @@
             }
         ]
     },
+    "Authelia": {
+        "id": "authelia",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_AUTHELIA",
+                "id": "use-authelia",
+                "label": "Use authelia",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "AUTHELIA_BACKEND",
+                "id": "authelia-backend",
+                "label": "Address of the authelia backend",
+                "regex": ".*",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "AUTHELIA_UPSTREAM",
+                "id": "authelia-upstream",
+                "label": "Address of the authelia upstream",
+                "regex": ".*",
+                "type": "text"
+            }
+        ]
+    },
     "Basic auth": {
         "id": "auth-basic",
         "params": [
