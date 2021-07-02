@@ -24,8 +24,8 @@ RUN chmod +x /tmp/prepare.sh && \
     /tmp/prepare.sh && \
     rm -f /tmp/prepare.sh
 
-# Fix CVE-2021-22901, CVE-2021-22898 and CVE-2021-22897
-RUN apk add "curl>=7.77.0-r0"
+# Fix CVE-2021-22901, CVE-2021-22898, CVE-2021-22897 and CVE-2021-33560
+RUN apk add "curl>=7.77.0-r0" "libgcrypt>=1.8.8-r0"
 
 VOLUME /www /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /pre-server-confs /acme-challenge /plugins
 
