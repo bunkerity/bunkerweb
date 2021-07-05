@@ -23,7 +23,9 @@ function trap_reload() {
 		nginx -s reload
 		if [ $? -eq 0 ] ; then
 			echo "[*] Reload successfull"
-			/opt/bunkerized-nginx/entrypoint/post-jobs.sh
+			if [ "$SWARM_MODE" != "yes" ] ; then
+				/opt/bunkerized-nginx/entrypoint/post-jobs.sh
+			fi
 		else
 			echo "[!] Reload failed"
 		fi
