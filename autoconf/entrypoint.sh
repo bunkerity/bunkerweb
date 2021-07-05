@@ -3,7 +3,7 @@
 echo "[*] Starting autoconf ..."
 
 # check permissions
-su -s "/opt/entrypoint/permissions.sh" nginx
+su -s "/opt/bunkerized-nginx/entrypoint/permissions.sh" nginx
 if [ "$?" -ne 0 ] ; then
 	exit 1
 fi
@@ -27,7 +27,7 @@ trap "trap_exit" TERM INT QUIT
 crond
 
 # run autoconf app
-/opt/entrypoint/app.py &
+/opt/bunkerized-nginx/entrypoint/app.py &
 pid="$!"
 
 # wait while app is up

@@ -5,13 +5,17 @@ addgroup -g 101 nginx
 adduser -h /var/cache/nginx -g nginx -s /bin/sh -G nginx -D -H -u 101 nginx
 
 # prepare /opt
-chown -R root:nginx /opt
-find /opt -type f -exec chmod 0740 {} \;
-find /opt -type d -exec chmod 0750 {} \;
-chmod ugo+x /opt/entrypoint/* /opt/scripts/*
-chmod ugo+x /opt/gen/main.py
-chmod 770 /opt
-chmod 440 /opt/settings.json
+chown root:nginx /opt
+chmod 750 /opt
+
+# prepare /opt/bunkerized-nginx
+chown -R root:nginx /opt/bunkerized-nginx
+find /opt/bunkerized-nginx -type f -exec chmod 0740 {} \;
+find /opt/bunkerized-nginx -type d -exec chmod 0750 {} \;
+chmod ugo+x /opt/bunkerized-nginx/entrypoint/* /opt/bunkerized-nginx/scripts/*
+chmod ugo+x /opt/bunkerized-nginx/gen/main.py
+chmod 770 /opt/bunkerized-nginx
+chmod 440 /opt/bunkerized-nginx/settings.json
 
 # prepare /var/log
 ln -s /proc/1/fd/1 /var/log/jobs.log
@@ -29,15 +33,29 @@ mkdir /var/lib/letsencrypt
 chown root:nginx /var/lib/letsencrypt
 chmod 770 /var/lib/letsencrypt
 
-# prepare /cache
+# prepare /opt/bunkerized-nginx/cache
+ln -s /cache /opt/bunkerized-nginx/cache
 mkdir /cache
 chown root:nginx /cache
 chmod 770 /cache
 
 # prepare /acme-challenge
+ln -s /acme-challenge /opt/bunkerized-nginx/acme-challenge
 mkdir /acme-challenge
 chown root:nginx /acme-challenge
 chmod 770 /acme-challenge
+
+# prepare /modsec-confs
+ln -s /modsec-confs /opt/bunkerized-nginx/modsec-confs
+mkdir /modsec-confs
+chown root:nginx /modsec-confs
+chmod 770 /modsec-confs
+
+# prepare /modsec-crs-confs
+ln -s /modsec-crs-confs /opt/bunkerized-nginx/modsec-crs-confs
+mkdir /modsec-crs-confs
+chown root:nginx /modsec-crs-confs
+chmod 770 /modsec-crs-confs
 
 # prepare /etc/crontabs/nginx
 chown root:nginx /etc/crontabs/nginx

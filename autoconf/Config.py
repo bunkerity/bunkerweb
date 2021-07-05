@@ -11,7 +11,7 @@ class Config :
 
 	def __jobs(self, type) :
 		utils.log("[*] Starting jobs (type = " + type + ") ...")
-		proc = subprocess.run(["/bin/su", "-c", "/opt/entrypoint/" + type + "-jobs.sh", "nginx"], capture_output=True)
+		proc = subprocess.run(["/bin/su", "-c", "/opt/bunkerized-nginx/entrypoint/" + type + "-jobs.sh", "nginx"], capture_output=True)
 		stdout = proc.stdout.decode("ascii")
 		stderr = proc.stderr.decode("ascii")
 		if len(stdout) > 1 :
@@ -56,7 +56,7 @@ class Config :
 					f.write(k + "=" + v + "\n")
 
 			# Call the generator
-			proc = subprocess.run(["/bin/su", "-c", "/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables /tmp/variables.env", "nginx"], capture_output=True)
+			proc = subprocess.run(["/bin/su", "-c", "/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env", "nginx"], capture_output=True)
 
 			# Print stdout/stderr
 			stdout = proc.stdout.decode("ascii")
