@@ -15,12 +15,6 @@ chmod 770 /opt/bunkerized-nginx
 chmod 440 /opt/bunkerized-nginx/settings.json
 
 # prepare /etc/nginx
-# TODO : remove commented code if not needed
-#for file in $(ls /etc/nginx) ; do
-#	if [ -f /etc/nginx/$file ] && [ ! -f /opt/bunkerized-nginx/confs/global/$file ] ; then
-#		cp /etc/nginx/$file /opt/bunkerized-nginx/confs/global
-#	fi
-#done
 chown -R root:nginx /etc/nginx
 chmod -R 770 /etc/nginx
 
@@ -30,9 +24,8 @@ chown root:nginx /var/log/nginx
 chmod -R 770 /var/log/nginx
 ln -s /proc/1/fd/2 /var/log/nginx/error.log
 ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log
-ln -s /proc/1/fd/1 /var/log/access.log
-ln -s /proc/1/fd/2 /var/log/error.log
-ln -s /proc/1/fd/1 /var/log/jobs.log
+ln -s /proc/1/fd/1 /var/log/nginx/access.log
+ln -s /proc/1/fd/1 /var/log/nginx/jobs.log
 mkdir /var/log/letsencrypt
 chown nginx:nginx /var/log/letsencrypt
 chmod 770 /var/log/letsencrypt

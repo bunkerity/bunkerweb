@@ -36,5 +36,5 @@ function has_value() {
 function job_log() {
 	when="$(date '+[%Y-%m-%d %H:%M:%S]')"
 	what="$1"
-	echo "$when $what" >> /var/log/jobs.log
+	echo "$when $what" >> /var/log/nginx/jobs.log
 }

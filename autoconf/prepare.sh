@@ -18,7 +18,10 @@ chmod 770 /opt/bunkerized-nginx
 chmod 440 /opt/bunkerized-nginx/settings.json
 
 # prepare /var/log
-ln -s /proc/1/fd/1 /var/log/jobs.log
+mkdir /var/log/nginx
+chown root:nginx /var/log/nginx
+chmod 770 /var/log/nginx
+ln -s /proc/1/fd/1 /var/log/nginx/jobs.log
 mkdir /var/log/letsencrypt
 chown nginx:nginx /var/log/letsencrypt
 chmod 770 /var/log/letsencrypt
