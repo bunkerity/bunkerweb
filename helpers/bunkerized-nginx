@@ -1,22 +1,22 @@
 #!/bin/bash
 
 function do_and_check_cmd() {
-        if [ "$CHANGE_DIR" != "" ] ; then
-                cd "$CHANGE_DIR"
-        fi
+	if [ "$CHANGE_DIR" != "" ] ; then
+		cd "$CHANGE_DIR"
+	fi
 	if [ "$AS_ROOT" != "" ] ; then
 		output=$("$@" 2>&1)
 	else
-        	output=$(su -s "/bin/bash" -c "$1" nginx 2>&1)
+		output=$(su -s "/bin/bash" -c "$1" nginx 2>&1)
 	fi
-        ret="$?"
-        if [ $ret -ne 0 ] ; then
-                echo "[!] Error from command : $*"
-                echo "$output"
-                exit $ret
-        fi
-        echo "$output"
-        return 0
+	ret="$?"
+	if [ $ret -ne 0 ] ; then
+		echo "[!] Error from command : $*"
+		echo "$output"
+		exit $ret
+	fi
+	echo "$output"
+	return 0
 }
 
 # Check if we are root
