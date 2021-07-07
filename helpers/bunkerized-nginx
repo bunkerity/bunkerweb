@@ -4,7 +4,11 @@ function do_and_check_cmd() {
         if [ "$CHANGE_DIR" != "" ] ; then
                 cd "$CHANGE_DIR"
         fi
-        output=$(su -s "/bin/bash" -c "$1" nginx 2>&1)
+	if [ "$AS_ROOT" != "" ] ; then
+		output=$("$@" 2>&1)
+	else
+        	output=$(su -s "/bin/bash" -c "$1" nginx 2>&1)
+	fi
         ret="$?"
         if [ $ret -ne 0 ] ; then
                 echo "[!] Error from command : $*"
@@ -42,7 +46,7 @@ if [ -f "/tmp/nginx.pid" ] ; then
 # Otherwise start it
 else
 	echo "[*] Start nginx"
-	do_and_check_cmd "nginx -g 'daemon on;'"
+	AS_ROOT="yes" do_and_check_cmd nginx -g 'daemon on; user nginx;'
 fi
 
 # Run post-jobs
