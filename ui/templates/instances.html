@@ -25,6 +25,7 @@
 
 	<div class="col col-12 col-lg-6">
 		<form id="form-instance-{{ instance["id"] }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 			<input type="hidden" name="INSTANCE_ID" value="{{ instance["id"] }}">
 		</form>
 		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">

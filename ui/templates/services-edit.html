@@ -17,6 +17,7 @@
 {% endfor %}
 				</ul>
 				<form id="form-edit-{{ id_server_name }}">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 					<input type="hidden" value="{{ service["SERVER_NAME"] }}" name="OLD_SERVER_NAME">
 					<div class="tab-content" id="edit-content-{{ id_server_name }}">
 {% set check = {"class": "show active"} %}

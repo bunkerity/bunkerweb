@@ -1,9 +1,8 @@
 FROM alpine
 
-COPY ui/dependencies.sh /tmp
-RUN chmod +x /tmp/dependencies.sh && \
-    /tmp/dependencies.sh && \
-    rm -f /tmp/dependencies.sh
+RUN apk add py3-pip bash
+COPY ui/requirements.txt /tmp
+RUN pip3 install -r /tmp/requirements.txt
 
 COPY gen/ /opt/bunkerized-nginx/gen
 COPY confs/site/ /opt/bunkerized-nginx/confs/site

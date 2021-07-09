@@ -4,3 +4,4 @@ docker
 flask-login
 bcrypt
 gunicorn
+Flask-WTF

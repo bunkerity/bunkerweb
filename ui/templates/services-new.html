@@ -17,6 +17,7 @@
 {% endfor %}
 				</ul>
 				<form id="form-new">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 					<div class="tab-content" id="new-content">
 {% set check = {"class": "show active"} %}
 {% for k, v in config["CONFIG"].get_settings().items() %}

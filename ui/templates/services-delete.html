@@ -8,6 +8,7 @@
 			<div class="modal-body">
 				Are you sure you want to delete the configuration of {{ service["SERVER_NAME"] }} ?
 				<form id="form-delete-{{ id_server_name }}">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 					<input type="hidden" value="{{ service["SERVER_NAME"] }}" name="SERVER_NAME">
 				</form>
 			</div>

@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, current_app, request, redirect
 from flask_login import LoginManager, login_required, login_user, logout_user
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 from src.Instances import Instances
 from src.User import User
@@ -33,10 +34,16 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWORD"])
 app.config["USER"] = user
-
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id, vars["ADMIN_PASSWORD"])
+
+# CSRF protection
+csrf = CSRFProtect()
+csrf.init_app(app)
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    return render_template("error.html", title="Error", error="Wrong CSRF token !"), 401
 
 @app.route('/login', methods=["GET", "POST"])
 def login() :
