@@ -299,4 +299,6 @@ echo "[*] Download proxies list"
 do_and_check_cmd /opt/bunkerized-nginx/scripts/geoip.sh
 
 # We're done
+echo "[*] Remove temp files"
+do_and_check_cmd rm -rf /tmp/bunkerized-nginx
 echo "[*] bunkerized-nginx successfully installed !"

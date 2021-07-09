@@ -1,4 +1,4 @@
-import docker, os, requests
+import docker, os, requests, subprocess
 
 class Instances :
 
@@ -16,6 +16,7 @@ class Instances :
 		instance["type"]	= type
 		instance["status"]	= status
 		instance["data"]	= data
+		return instance
 
 	def __api_request(self, instance, order) :
 		result = True
@@ -33,6 +34,13 @@ class Instances :
 					result = False
 			except :
 				result = False
+
+	def __instance_from_id(self, id) :
+		instances = self.get_instances()
+		for instance in instances :
+			if instance["id"] == id :
+				return instance
+		raise Exception("Can't find instance with id " + id)
 
 	def get_instances(self) :
 		instances = []
@@ -87,17 +95,20 @@ class Instances :
 
 		return all_reload
 
-	def reload_instance(self, instance) :
+	def reload_instance(self, id) :
+		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			instance["data"].kill(signal="SIGHUP")
+			proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/reload")
 		if result :
 			return "Instance " + instance["name"] + " has been reloaded."
 		return "Can't reload " + instance["name"]
 
-	def start_instance(self, instance) :
+	def start_instance(self, id) :
+		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
 			proc = subprocess.run(["/usr/sbin/nginx", "-g", "daemon on;"], capture_output=True)
@@ -108,7 +119,8 @@ class Instances :
 			return "Instance " + instance["name"] + " has been started."
 		return "Can't start " + instance["name"]
 
-	def stop_instance(self, instance) :
+	def stop_instance(self, id) :
+		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
 			proc = subprocess.run(["/usr/sbin/nginx", "-s", "quit"], capture_output=True)
@@ -119,7 +131,8 @@ class Instances :
 			return "Instance " + instance["name"] + " has been stopped."
 		return "Can't stop " + instance["name"]
 
-	def restart_instance(self, instance) :
+	def restart_instance(self, id) :
+		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
 			proc = subprocess.run(["/usr/sbin/nginx", "-s", "quit"], capture_output=True)
