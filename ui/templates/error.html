@@ -4,7 +4,9 @@
 
 	<div class="alert alert-danger text-center">
 		Something went wrong...<br /><br />
-		{{ error }}
+		{% autoescape false %}
+		{{ error | replace("\n", "<br/>") }}
+		{% endautoescape %}
 	</div>
 
 {% endblock %}

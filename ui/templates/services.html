@@ -2,24 +2,25 @@
 
 {% block content %}
 
-{% if operation != "" %}
-<div class="row justify-content-center">
-	<div class="col col-12 col-md-4 mb-3 text-center">
-		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
-			{{ operation }}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		</div>
-	</div>
-</div>
-{% endif %}
-
-
 <div class="row justify-content-center">
 
 	<div class="col col-12 mb-3 text-center">
 		<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-new"><i class="fas fa-plus"></i> New</button>
 	</div>
 
+	{% if operation != "" %}
+	<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+		{{ operation }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+	{% endif %}
+
+	{% if services|length == 0 %}
+	<div class="alert alert-primary text-center">
+		No service to show...
+	</div>
+	{% endif %}
+	
 	{% for service in services %}
 
 		{% set id_server_name = service["SERVER_NAME"].replace(".", "-") %}
@@ -58,11 +59,12 @@
 		</div>
 	</div>
 
-		{% include "services-new.html" %}
 		{% include "services-edit.html" %}
 		{% include "services-delete.html" %}
 
 	{% endfor %}
+
+	{% include "services-new.html" %}
 
 </div>
 

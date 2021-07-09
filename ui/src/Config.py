@@ -1,4 +1,4 @@
-import json, uuid, glob, copy, re, subprocess
+import json, uuid, glob, copy, re, subprocess, os
 
 class Config :
 
@@ -7,6 +7,8 @@ class Config :
             self.__settings = json.loads(f.read())
 
     def __env_to_dict(self, filename) :
+        if not os.path.isfile(filename) :
+            return {}
         with open(filename, "r") as f :
             env = f.read()
         data = {}
@@ -25,6 +27,8 @@ class Config :
 
     def __gen_conf(self, global_conf, services_conf) :
         conf = copy.deepcopy(global_conf)
+        if not "SERVER_NAME" in conf :
+            conf["SERVER_NAME"] = ""
         servers = conf["SERVER_NAME"].split(" ")
         if conf["SERVER_NAME"] == "" :
             servers = []
@@ -39,9 +43,9 @@ class Config :
         self.__dict_to_env(env_file, conf)
         proc = subprocess.run(["/opt/bunkerized-nginx/gen/main.py", "--settings", "/opt/bunkerized-nginx/settings.json", "--templates", "/opt/bunkerized-nginx/confs", "--output", "/etc/nginx", "--variables",  env_file], capture_output=True)
         stderr = proc.stderr.decode("ascii")
-        #stdout = proc.stdout.decode("ascii")
+        stdout = proc.stdout.decode("ascii")
         if stderr != "" or proc.returncode != 0 :
-            raise Exception("Error from generator (return code = " + str(proc.returncode) + ") : " + stderr)
+            raise Exception("Error from generator (return code = " + str(proc.returncode) + ") : " + stderr + "\n" + stdout)
 
     def get_settings(self) :
         return self.__settings
@@ -54,6 +58,7 @@ class Config :
         for filename in glob.iglob("/etc/nginx/**/site.env") :
             env = self.__env_to_dict(filename)
             services.append(env)
+        services.append(self.__env_to_dict("/etc/nginx/site.env"))
         return services
 
     def check_variables(self, variables) :

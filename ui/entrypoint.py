@@ -6,9 +6,8 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 
 from src.Instances import Instances
 from src.User import User
+from src.Config import Config
 
-from Docker import Docker
-from Config import Config
 import utils
 import os, json, re, copy, traceback
 
@@ -73,7 +72,7 @@ def home() :
 		services_number = len(app.config["CONFIG"].get_services())
 		return render_template("home.html", title="Home", instances_number=instances_number, services_number=services_number)
 	except Exception as e :
-		return render_template("error.html", title="Error", error=e)
+		return render_template("error.html", title="Error", error=str(e) + "<br />" + traceback.format_exc().replace("\n", "<br />"))
 
 @app.route('/instances', methods=["GET", "POST"])
 @login_required
@@ -106,7 +105,7 @@ def instances() :
 		return render_template("instances.html", title="Instances", instances=instances, operation=operation)
 
 	except Exception as e :
-		return render_template("error.html", title="Error", error=str(e))
+		return render_template("error.html", title="Error", error=str(e) + "\n" + traceback.format_exc())
 
 
 @app.route('/services', methods=["GET", "POST"])
@@ -123,6 +122,7 @@ def services():
 
 			# Check variables
 			variables = copy.deepcopy(request.form.to_dict())
+			del variables["csrf_token"]
 			if not "OLD_SERVER_NAME" in request.form and request.form["operation"] == "edit" :
 					raise Exception("Missing OLD_SERVER_NAME parameter.")
 			if request.form["operation"] in ["new", "edit"] :
@@ -145,13 +145,14 @@ def services():
 			elif request.form["operation"] == "delete" :
 				operation = app.config["CONFIG"].delete_service(request.form["SERVER_NAME"])
 			
-			# Reload containers
-			for instance in app.config["DOCKER"].get_instances() :
-				app.config["DOCKER"].reload_instance(instance.id)
+			# Reload instances
+			reload = app.config["INSTANCES"].reload_instances()
+			if not reload :
+				operation = "Reload failed for at least one instance..."
 
 		# Display services
 		services = app.config["CONFIG"].get_services()
 		return render_template("services.html", title="Services", services=services, operation=operation)
 
 	except Exception as e :
-		return render_template("error.html", title="Error", error=str(e) + traceback.format_exc())
+		return render_template("error.html", title="Error", error=str(e) + "\n" + traceback.format_exc())

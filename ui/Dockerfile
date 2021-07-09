@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add py3-pip bash
+RUN apk add py3-pip bash build-base python3-dev libffi-dev
 COPY ui/requirements.txt /tmp
 RUN pip3 install -r /tmp/requirements.txt
 

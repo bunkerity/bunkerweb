@@ -15,6 +15,12 @@
 
 <div class="row justify-content-center">
 
+	{% if instances|length == 0 %}
+	<div class="alert alert-primary text-center">
+		No instance to show...
+	</div>
+	{% endif %}
+
 	{% for instance in instances %}
 		{% set color = "dark" %}
 		{% if instance["status"] == "up" %}
