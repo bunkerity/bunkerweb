@@ -1,27 +1,64 @@
 #!/usr/bin/python3
 
-from flask import Flask, render_template, current_app, request
+from flask import Flask, render_template, current_app, request, redirect
+from flask_login import LoginManager, login_required, login_user, logout_user
 
 from src.Instances import Instances
+from src.User import User
 
 from Docker import Docker
 from Config import Config
 import utils
 import os, json, re, copy, traceback
 
+# Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 
+# Set variables and instantiate objects
 vars = utils.get_variables()
+app.secret_key = vars["FLASK_SECRET"]
 app.config["ABSOLUTE_URI"] = vars["ABSOLUTE_URI"]
 app.config["INSTANCES"] = Instances(vars["DOCKER_HOST"], vars["API_URI"])
 app.config["CONFIG"] = Config()
+
+# Declare functions for jinja2
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 app.jinja_env.globals.update(form_service_gen_multiple=utils.form_service_gen_multiple)
 app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service_gen_multiple_values)
 
+# Login management
+login_manager = LoginManager()
+login_manager.init_app(app)
+user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWRD"])
+app.config["USER"] = user
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
+@app.route('/login', methods=["GET", "POST"])
+def login() :
+	fail = False
+	if request.method == "POST" and "username" in request.form and "password" in request.form :
+		if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]) :
+			login_user(app.config["USER"])
+			return redirect("/")
+		else :
+			fail = True
+	if fail :
+		return render_template("login.html", title="Login", fail=True), 401
+	return render_template("login.html", title="Login", fail=False)
+
+@app.route("/logout")
+@login_required
+def logout() :
+    logout_user()
+    return redirect("/login")
+
 @app.route('/')
 @app.route('/home')
+@login_required
 def home() :
 	try :
 		instances_number = len(app.config["INSTANCES"].get_instances())
@@ -31,6 +68,7 @@ def home() :
 		return render_template("error.html", title="Error", error=e)
 
 @app.route('/instances', methods=["GET", "POST"])
+@login_required
 def instances() :
 	try :
 		# Manage instances
@@ -64,6 +102,7 @@ def instances() :
 
 
 @app.route('/services', methods=["GET", "POST"])
+@login_required
 def services():
 	try :
 		# Manage services

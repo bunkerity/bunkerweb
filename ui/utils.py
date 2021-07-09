@@ -7,6 +7,9 @@ def get_variables() :
 	vars["DOCKER_HOST"]		= "unix:///var/run/docker.sock"
 	vars["API_URI"]			= ""
 	vars["ABSOLUTE_URI"]	= ""
+	vars["FLASK_SECRET"]	= os.urandom(32)
+	vars["ADMIN_USERNAME"]	= "admin"
+	vars["ADMIN_PASSWORD"]	= "changeme"
 	for k in vars :
 		if k in os.environ :
 			vars[k] = os.environ[k]
