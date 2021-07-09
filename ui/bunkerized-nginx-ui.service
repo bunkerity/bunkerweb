@@ -6,7 +6,7 @@ After=network.target
 User=nginx
 Group=nginx
 WorkingDirectory=/opt/bunkerized-nginx/ui
-ExecStart=gunicorn --bind unix:bunkerized-nginx-ui.sock -m 007 wsgi:app
+ExecStart=gunicorn --bind 127.0.0.1:5000 -m 007 wsgi:app
 
 [Install]
 WantedBy=multi-user.target

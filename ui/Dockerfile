@@ -20,4 +20,4 @@ EXPOSE 5000
 
 WORKDIR /opt/bunkerized-nginx/ui
 USER nginx:nginx
-ENTRYPOINT ["/usr/bin/gunicorn", "--bind", "unix:bunkerized-nginx-ui.sock", "-m", "007", "wsgi:app"]
+ENTRYPOINT ["/usr/bin/gunicorn", "--bind", "0.0.0.0:5000", "-m", "007", "wsgi:app"]
