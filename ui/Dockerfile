@@ -5,11 +5,11 @@ RUN chmod +x /tmp/dependencies.sh && \
     /tmp/dependencies.sh && \
     rm -f /tmp/dependencies.sh
 
-COPY gen/ /opt/gen
-COPY confs/site/ /opt/confs/site
-COPY confs/global/ /opt/confs/global
-COPY ui/ /opt/entrypoint
-COPY settings.json /opt
+COPY gen/ /opt/bunkerized-nginx/gen
+COPY confs/site/ /opt/bunkerized-nginx/confs/site
+COPY confs/global/ /opt/bunkerized-nginx/confs/global
+COPY ui/ /opt/bunkerized-nginx/ui
+COPY settings.json /opt/bunkerized-nginx
 
 COPY ui/prepare.sh /tmp
 RUN chmod +x /tmp/prepare.sh && \
@@ -18,6 +18,6 @@ RUN chmod +x /tmp/prepare.sh && \
 
 EXPOSE 5000
 
-WORKDIR /opt/entrypoint
-ENV FLASK_APP entrypoint.py
-ENTRYPOINT ["/usr/bin/python3", "-m", "flask", "run", "--host=0.0.0.0"]
+WORKDIR /opt/bunkerized-nginx/ui
+USER nginx:nginx
+ENTRYPOINT ["/usr/bin/gunicorn", "--bind", "unix:bunkerized-nginx-ui.sock", "-m", "007", "wsgi:app"]

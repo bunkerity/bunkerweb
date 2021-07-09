@@ -91,7 +91,7 @@ elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 fi
 do_and_check_cmd pip3 install --upgrade pip
-do_and_check_cmd pip3 install jinja2 certbot
+do_and_check_cmd pip3 install jinja2 certbot docker requests flask gunicorn
 do_and_check_cmd pip3 install cryptography --upgrade
 
 # Clone the repo
@@ -132,6 +132,11 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/defaults /opt/bunkerized-nginx
 # Copy settings
 echo "[*] Copy settings"
 do_and_check_cmd cp /tmp/bunkerized-nginx/settings.json /opt/bunkerized-nginx
+
+# Copy UI
+echo "[*] Copy UI"
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/ui /opt/bunkerized-nginx
+do_and_check_cmd cp /tmp/bunkerized-nginx/ui/bunkerized-nginx-ui.service /etc/systemd/system
 
 # Copy bunkerized-nginx
 echo "[*] Copy bunkerized-nginx"
@@ -216,6 +221,9 @@ do_and_check_cmd chmod u+rx /opt
 do_and_check_cmd chown -R nginx:nginx /etc/nginx
 do_and_check_cmd find /etc/nginx -type f -exec chmod 0774 {} \;
 do_and_check_cmd find /etc/nginx -type d -exec chmod 0775 {} \;
+# Set permissions for /etc/systemd/system/bunkerized-nginx-ui.service
+do_and_check_cmd chown root:root /etc/systemd/system/bunkerized-nginx-ui.service
+do_and_check_cmd chmod 744 /etc/systemd/system/bunkerized-nginx-ui.service
 
 # Prepare log files and folders
 echo "[*] Prepare log files and folders"
@@ -228,19 +236,17 @@ fi
 if [ ! -e /var/log/nginx/error.log ] ; then
 	do_and_check_cmd touch /var/log/nginx/error.log
 fi
+if [ ! -e /var/log/nginx/modsec_audit.log ] ; then
+	do_and_check_cmd touch /var/log/nginx/modsec_audit.log
+fi
 if [ ! -e /var/log/nginx/jobs.log ] ; then
 	do_and_check_cmd touch /var/log/nginx/jobs.log
 fi
-do_and_check_cmd touch /var/log/nginx/modsec_audit.log
-do_and_check_cmd touch /var/log/nginx/error.log
+if [ ! -e /var/log/nginx/ui.log ] ; then
+	do_and_check_cmd touch /var/log/nginx/ui.log
+fi
 do_and_check_cmd chown -R root:nginx /var/log/nginx
-do_and_check_cmd chown root:nginx /var/log/nginx/access.log
-do_and_check_cmd chown root:nginx /var/log/nginx/error.log
-do_and_check_cmd chown root:nginx /var/log/nginx/jobs.log
-do_and_check_cmd chmod 770 /var/log/nginx/access.log
-do_and_check_cmd chmod 770 /var/log/nginx/error.log
-do_and_check_cmd chmod 770 /var/log/nginx/jobs.log
-do_and_check_cmd chmod -R 770 /var/log/nginx
+do_and_check_cmd chmod -R 770 /var/log/nginx/
 
 # Prepare Let's Encrypt files and folders
 echo "[*] Prepare Let's Encrypt files and folders"

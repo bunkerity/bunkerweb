@@ -17,11 +17,9 @@
 
 	{% for instance in instances %}
 		{% set color = "dark" %}
-		{% if instance["status"] == "running" %}
+		{% if instance["status"] == "up" %}
 			{% set color = "success" %}
-		{% elif instance["status"] == "created" or instance["status"] == "restarting" or instance["status"] == "paused" %}
-			{% set color = "warning" %}
-		{% elif instance["status"] == "exited" or instance["status"] == "dead" %}
+		{% elif instance["status"] == "down" %}
 			{% set color = "danger" %}
 		{% endif %}
 
@@ -34,27 +32,20 @@
 				{{ instance["name"] }}
 				<div class="btn-group mx-2 float-end" role="group">
 					<button id="btnGroupDrop1" class="btn btn-sm dropdown-toggle btn-light" data-bs-toggle="dropdown" aria-expanded="false">
-						<i class="fas fa-cogs"> manage container</i>
+						<i class="fas fa-cogs"> manage instance</i>
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-						<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>
+						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>{% endif %}
 						<li><a class="dropdown-item" href="#" onClick="return stopInstance('{{ instance["id"] }}');">Stop</a></li>
-						<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>
-						<li><a class="dropdown-item" href="#" onClick="return deleteInstance('{{ instance["id"] }}');">Delete</a></li>
+						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>{% endif %}
 					</ul>
 				</div>
-				<button class="btn btn-sm mx-2 float-end btn-light" onClick="reloadInstance('{{ instance["id"] }}');"><i class="fas fa-redo-alt"></i> reload nginx</button>
+				<button class="btn btn-sm mx-2 float-end btn-light" onClick="reloadInstance('{{ instance["id"] }}');"><i class="fas fa-redo-alt"></i> Reload configuration</button>
 			</div>
 			<div class="card-body text-dark">
 				<h5 class="card-title">Status : {{ instance["status"] }}</h5>
 				<span class="card-text">
-					Environment variables :<br />
-					{% set envfilter = ["PATH", "NGINX_VERSION", "NJS_VERSION", "PKG_RELEASE"] %}
-					{% for env in instance.attrs["Config"]["Env"] %}
-						{% if not env.startswith("PATH=") and not env.startswith("NGINX_VERSION=") and not env.startswith("NJS_VERSION=") and not env.startswith("PKG_RELEASE=") %}
-							{{ env }}<br />
-						{% endif %}
-					{% endfor %}
+					TODO
 				</span>
 			</div>
 		</div>

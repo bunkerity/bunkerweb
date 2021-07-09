@@ -1,0 +1,12 @@
+[Unit]
+Description=Web UI for bunkerized-nginx
+After=network.target
+
+[Service]
+User=nginx
+Group=nginx
+WorkingDirectory=/opt/bunkerized-nginx/ui
+ExecStart=gunicorn --bind unix:bunkerized-nginx-ui.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target

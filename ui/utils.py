@@ -1,9 +1,20 @@
 #!/usr/bin/python3
 
-import datetime, re, json
+import datetime, re, json, os
+
+def get_variables() :
+	vars = {}
+	vars["DOCKER_HOST"]		= "unix:///var/run/docker.sock"
+	vars["API_URI"]			= ""
+	vars["ABSOLUTE_URI"]	= ""
+	for k in vars :
+		if k in os.environ :
+			vars[k] = os.environ[k]
+	return vars
 
 def log(event) :
-	print("[" + str(datetime.datetime.now().replace(microsecond=0)) + "] " + event, flush=True)
+	with open("/var/log/nginx/ui.log", "a") as f :
+		f.write("[" + str(datetime.datetime.now().replace(microsecond=0)) + "] " + event + "\n")
 
 def env_to_summary_class(var, value) :
 	if type(var) is list and type(value) is list :

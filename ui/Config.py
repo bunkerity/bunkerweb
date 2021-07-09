@@ -3,7 +3,7 @@ import json, uuid, glob, copy, re, subprocess
 class Config :
 
     def __init__(self) :
-        with open("/opt/settings.json", "r") as f :
+        with open("/opt/bunkerized-nginx/settings.json", "r") as f :
             self.__settings = json.loads(f.read())
 
     def __env_to_dict(self, filename) :
@@ -37,7 +37,7 @@ class Config :
         conf["SERVER_NAME"] = " ".join(servers)
         env_file = "/tmp/" + str(uuid.uuid4()) + ".env"
         self.__dict_to_env(env_file, conf)
-        proc = subprocess.run(["/bin/su", "-c", "/opt/gen/main.py --settings /opt/settings.json --templates /opt/confs --output /etc/nginx --variables " + env_file, "nginx"], capture_output=True)
+        proc = subprocess.run(["/opt/bunkerized-nginx/gen/main.py", "--settings", "/opt/bunkerized-nginx/settings.json", "--templates", "/opt/bunkerized-nginx/confs", "--output", "/etc/nginx", "--variables",  env_file], capture_output=True)
         stderr = proc.stderr.decode("ascii")
         #stdout = proc.stdout.decode("ascii")
         if stderr != "" or proc.returncode != 0 :

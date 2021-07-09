@@ -2,19 +2,20 @@ import docker, os, requests
 
 class Instances :
 
-	def __init__(self, docker_host, api) :
+	def __init__(self, docker_host, api_uri) :
 		try :
 			self.__docker = docker.DockerClient(base_url=docker_host)
 		except :
 			self.__docker = None
-		self.__api = api
+		self.__api_uri = api_uri
 
-	def __instance(self, name, type, status, data=None) :
+	def __instance(self, id, name, type, status, data=None) :
 		instance = {}
-		instance["name"] = name
-		instance["type"] = type
-		instance["status"] = status
-		instance["data"] = data
+		instance["id"]		= id
+		instance["name"]	= name
+		instance["type"]	= type
+		instance["status"]	= status
+		instance["data"]	= data
 
 	def __api_request(self, instance, order) :
 		result = True
@@ -27,7 +28,7 @@ class Instances :
 				hosts.append(host)
 		for host in hosts :
 			try :
-				req = requests.post("http://" + host + ":8080" + self.__api + order)
+				req = requests.post("http://" + host + ":8080" + self.__api_uri + order)
 				if not req or req.status_code != 200 or req.text != "ok" :
 					result = False
 			except :
@@ -40,14 +41,16 @@ class Instances :
 		if self.__docker != None :
 			if self.__docker.swarm == None :
 				for instance in self.__docker.containers.list(all=True, filters={"label" : "bunkerized-nginx.UI"}) :
+					id = instance.id
 					name = instance.name
 					type = "container"
 					status = "down"
 					if instance.status == "running" :
 						status = "up"
-					instances.append(self.__instance(name, type, status, instance))
+					instances.append(self.__instance(id, name, type, status, instance))
 			else :
 				for instance in self.__docker.services.list(all=True, filters={"label" : "bunkerized-nginx.UI"}) :
+					id = instance.id
 					name = instance.name
 					type = "service"
 					status = "down"
@@ -55,16 +58,17 @@ class Instances :
 					running_tasks = instance.attrs["ServiceStatus"]["RunningTasks"]
 					if desired_tasks > 0 and (desired_tasks == running_tasks) :
 						status = "up"
-					instances.append(self.__instance(name, type, status, instance))
+					instances.append(self.__instance(id, name, type, status, instance))
 
 		# Local instance
 		if os.path.exists("/usr/sbin/nginx") :
+			id = "local"
 			name = "local"
 			type = "local"
 			status = "down"
 			if os.path.exists("/tmp/nginx.pid") :
 				status = "up"
-			instances.append(self.__instance(name, type, status))
+			instances.append(self.__instance(id, name, type, status))
 
 		return instances
 
@@ -99,7 +103,7 @@ class Instances :
 			proc = subprocess.run(["/usr/sbin/nginx", "-g", "daemon on;"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
-			result = self.__api_request(instance, "/start")
+			result = False #self.__api_request(instance, "/start")
 		if result :
 			return "Instance " + instance["name"] + " has been started."
 		return "Can't start " + instance["name"]
@@ -123,7 +127,7 @@ class Instances :
 				proc = subprocess.run(["/usr/sbin/nginx", "-g", "daemon on;"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
-			result = self.__api_request(instance, "/restart")
+			result = False #self.__api_request(instance, "/restart")
 		if result :
 			return "Instance " + instance["name"] + " has been restarted."
 		return "Can't restart " + instance["name"]

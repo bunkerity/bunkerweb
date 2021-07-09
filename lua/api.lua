@@ -1,4 +1,4 @@
-local M		= {}
+local M			= {}
 local api_list	= {}
 local iputils	= require "resty.iputils"
 
@@ -8,6 +8,10 @@ end
 
 api_list["^/reload$"] = function ()
 	return os.execute("/usr/sbin/nginx -s reload") == 0
+end
+
+api_list["^/stop$"] = function ()
+	return os.execute("/usr/sbin/nginx -s quit") == 0
 end
 
 function M.is_api_call (api_uri, api_whitelist_ip)
