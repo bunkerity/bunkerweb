@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+
+<div class="form-signin">
+	<div class="text-center">
+		<img src="img/logo.png" class="mb-4" style="max-width: 200px;">
+	</div>
+	<h1 class="h3 mb-3 fw-normal">Authentication required</h1>
+	<form action="login" method="POST">
+		<div class="form-floating">
+			<input type="text" id="username" class="form-control" name="username" placeholder="user">
+			<label for="username">Username</label>
+		</div>
+		<div class="form-floating">
+			<input type="password" id="password" class="form-control" name="password" placeholder="p@ssw0rd">
+			<label for="password">Password</label>
+		</div>
+		<button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+	</form>
+</div>
+
+
+{% endblock %}

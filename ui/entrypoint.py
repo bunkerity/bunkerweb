@@ -30,12 +30,13 @@ app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service
 # Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
-user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWRD"])
+login_manager.login_view = "login"
+user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWORD"])
 app.config["USER"] = user
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User(user_id, vars["ADMIN_PASSWORD"])
 
 @app.route('/login', methods=["GET", "POST"])
 def login() :

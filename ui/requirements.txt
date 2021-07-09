@@ -3,3 +3,4 @@ requests
 docker
 flask-login
 bcrypt
+gunicorn
