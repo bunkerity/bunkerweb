@@ -354,7 +354,7 @@ fi
 
 # Download, compile and install ModSecurity
 echo "[*] Clone SpiderLabs/ModSecurity"
-git_secure_clone https://github.com/SpiderLabs/ModSecurity.git 753145fbd1d6751a6b14fdd700921eb3cc3a1d35
+git_secure_clone https://github.com/SpiderLabs/ModSecurity.git bf881a4eda343d37629e39ede5e28b70dc4067c0
 echo "[*] Compile and install ModSecurity"
 # temp fix : Debian run it twice
 cd /tmp/bunkerized-nginx/ModSecurity && ./build.sh > /dev/null 2>&1
@@ -370,7 +370,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd make install-str
 
 # Download and install OWASP Core Rule Set
 echo "[*] Clone coreruleset/coreruleset"
-git_secure_clone https://github.com/coreruleset/coreruleset.git 7776fe23f127fd2315bad0e400bdceb2cabb97dc
+git_secure_clone https://github.com/coreruleset/coreruleset.git 18703f1bc47e9c4ec4096853d5fb4e2a204a07a2
 echo "[*] Install coreruleset"
 do_and_check_cmd mkdir /opt/bunkerized-nginx/crs
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/coreruleset/rules/* /opt/bunkerized-nginx/crs
