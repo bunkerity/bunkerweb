@@ -397,7 +397,7 @@ echo "[*] Clone google/ngx_brotli"
 git_secure_clone https://github.com/google/ngx_brotli.git 9aec15e2aa6feea2113119ba06460af70ab3ea62
 
 # Download lua-nginx module
-git_secure_clone https://github.com/openresty/lua-nginx-module.git 2d23bc4f0a29ed79aaaa754c11bffb1080aa44ba
+git_secure_clone https://github.com/openresty/lua-nginx-module.git 9007d673e28938f5dfa7720438991e22b794d225
 
 # Download, compile and install luajit2
 echo "[*] Clone openresty/luajit2"
