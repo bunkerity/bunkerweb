@@ -382,7 +382,7 @@ git_secure_clone https://github.com/SpiderLabs/ModSecurity-nginx.git 2497e6ac654
 
 # Download headers more module
 echo "[*] Clone openresty/headers-more-nginx-module"
-git_secure_clone https://github.com/openresty/headers-more-nginx-module.git d6d7ebab3c0c5b32ab421ba186783d3e5d2c6a17
+git_secure_clone https://github.com/openresty/headers-more-nginx-module.git f85af9649b858e21b400a2150a4c7b8ebd36e921
 
 # Download GeoIP moduke
 echo "[*] Clone leev/ngx_http_geoip2_module"
@@ -399,9 +399,9 @@ git_secure_clone https://github.com/google/ngx_brotli.git 9aec15e2aa6feea2113119
 # Download lua-nginx module
 git_secure_clone https://github.com/openresty/lua-nginx-module.git 9007d673e28938f5dfa7720438991e22b794d225
 
-# Download, compile and install luajit2
+# Download, compile and install 5ff674c5d9b75d6018994dfac3ce38aab3b8db12
 echo "[*] Clone openresty/luajit2"
-git_secure_clone https://github.com/openresty/luajit2.git fe32831adcb3f5fe9259a9ce404fc54e1399bba3
+git_secure_clone https://github.com/openresty/luajit2.git 5ff674c5d9b75d6018994dfac3ce38aab3b8db12
 echo "[*] Compile luajit2"
 CHANGE_DIR="/tmp/bunkerized-nginx/luajit2" do_and_check_cmd make -j $NTASK
 echo "[*] Install luajit2"
@@ -418,19 +418,19 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-core" do_and_check_cmd make install
 
 # Download and install lua-resty-lrucache
 echo "[*] Clone openresty/lua-resty-lrucache"
-git_secure_clone https://github.com/openresty/lua-resty-lrucache.git b2035269ac353444ac65af3969692bcae4fc1605
+git_secure_clone https://github.com/openresty/lua-resty-lrucache.git f20bb8ac9489ba87d90d78f929552c2eab153caa
 echo "[*] Install lua-resty-lrucache"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-lrucache" do_and_check_cmd make install
 
 # Download and install lua-resty-dns
 echo "[*] Clone openresty/lua-resty-dns"
-git_secure_clone https://github.com/openresty/lua-resty-dns.git 24c9a69808aedfaf029ae57707cdef75d83e2d19
+git_secure_clone https://github.com/openresty/lua-resty-dns.git 869d2fbb009b6ada93a5a10cb93acd1cc12bd53f
 echo "[*] Install lua-resty-dns"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-dns" do_and_check_cmd make install
 
 # Download and install lua-resty-session
 echo "[*] Clone bungle/lua-resty-session"
-git_secure_clone https://github.com/bungle/lua-resty-session.git f300870ce4eee3f4903e0565c589f1faf0c1c5aa
+git_secure_clone https://github.com/bungle/lua-resty-session.git 2cd1f8484fdd429505ac33abf7a44adda1f367bf
 echo "[*] Install lua-resty-session"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-resty-session/lib/resty/* /usr/local/lib/lua/resty
 
@@ -442,7 +442,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-random" do_and_check_cmd make instal
 
 # Download and install lua-resty-string
 echo "[*] Clone openresty/lua-resty-string"
-git_secure_clone https://github.com/openresty/lua-resty-string.git 9a543f8531241745f8814e8e02475351042774ec
+git_secure_clone https://github.com/openresty/lua-resty-string.git 3624678ca1c7c32e2fb16c18b7511863e074d542
 echo "[*] Install lua-resty-string"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-string" do_and_check_cmd make install
 
@@ -469,13 +469,13 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make INSTALL_PATH=/us
 
 # Download and install lua-resty-http
 echo "[*] Clone ledgetech/lua-resty-http"
-git_secure_clone https://github.com/ledgetech/lua-resty-http.git 984fdc26054376384e3df238fb0f7dfde01cacf1
+git_secure_clone https://github.com/ledgetech/lua-resty-http.git 9bf951dfe162dd9710a0e1f4525738d4902e9d20
 echo "[*] Install lua-resty-http"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-http" do_and_check_cmd make install
 
 # Download and install lualogging
 echo "[*] Clone Neopallium/lualogging"
-git_secure_clone https://github.com/Neopallium/lualogging.git cadc4e8fd652be07a65b121a3e024838db330c15
+git_secure_clone https://github.com/lunarmodules/lualogging.git 5973188a1f8fc31abd98aceed2a4853986d779e9
 echo "[*] Install lualogging"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/lualogging/src/* /usr/local/lib/lua
 
@@ -489,7 +489,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make CDIR_linux=li
 
 # Download, compile and install luasec
 echo "[*] Clone brunoos/luasec"
-git_secure_clone https://github.com/brunoos/luasec.git c6704919bdc85f3324340bdb35c2795a02f7d625
+git_secure_clone https://github.com/brunoos/luasec.git d5df31561751ec0d4098dfc09c92ece215a56a5a
 echo "[*] Compile luasec"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make linux -j $NTASK
 echo "[*] Install luasec"
