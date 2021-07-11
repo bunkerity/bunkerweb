@@ -308,7 +308,7 @@ echo "[*] Prepare /opt/bunkerized-nginx"
 if [ -e "/opt/bunkerized-nginx" ] ; then
 	do_and_check_cmd rm -rf /opt/bunkerized-nginx
 fi
-do_and_check_cmd mkdir /opt/bunkerized-nginx
+do_and_check_cmd mkdir -p /opt/bunkerized-nginx/deps
 
 # Check nginx version
 NGINX_VERSION="$(nginx -V 2>&1 | sed -rn 's~^nginx version: nginx/(.*)$~\1~p')"
@@ -377,12 +377,12 @@ echo "[*] Download maxmind/libmaxminddb"
 secure_download "https://github.com/maxmind/libmaxminddb/releases/download/1.6.0/libmaxminddb-1.6.0.tar.gz" "libmaxminddb-1.6.0.tar.gz" "9394e8dd959982d4ef5d15a928d32700722ed9d6c9988d9cc1bf2f4e67de0a53cc6987e90aaef3a6926c9ff36ac378f7a1fe47818fda4f5a3a22539210b2d004"
 CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xzf libmaxminddb-1.6.0.tar.gz
 echo "[*] Compile and install libmaxminddb"
-CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd ./configure
+CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd ./configure --prefix=/opt/bunkerized-nginx/deps
 CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make -j $NTASK
 CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make install
-if [ "$OS" = "centos" ] ; then
-	do_and_check_cmd cp -P /usr/local/lib/libmaxminddb* /lib64/
-fi
+#if [ "$OS" = "centos" ] ; then
+#	do_and_check_cmd cp -P /usr/local/lib/libmaxminddb* /lib64/
+#fi
 
 # Download, compile and install ModSecurity
 echo "[*] Clone SpiderLabs/ModSecurity"
@@ -396,7 +396,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd git submodule up
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" git_secure_checkout bindings/python 47a6925df187f96e4593afab18dc92d5f22bd4d5
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" git_secure_checkout others/libinjection bf234eb2f385b969c4f803b35fda53cffdd93922
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" git_secure_checkout test/test-cases/secrules-language-tests d03f4c1e930440df46c1faa37d820a919704d9da
-CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd ./configure --disable-doxygen-doc --disable-dependency-tracking --disable-examples
+CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd ./configure --disable-doxygen-doc --disable-dependency-tracking --disable-examples --prefix=/opt/bunkerized-nginx/deps --with-maxmind=/opt/bunkerized-nginx/deps
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd make -j $NTASK
 CHANGE_DIR="/tmp/bunkerized-nginx/ModSecurity" do_and_check_cmd make install-strip
 
@@ -419,6 +419,8 @@ git_secure_clone https://github.com/openresty/headers-more-nginx-module.git f85a
 # Download GeoIP moduke
 echo "[*] Clone leev/ngx_http_geoip2_module"
 git_secure_clone https://github.com/leev/ngx_http_geoip2_module.git 1cabd8a1f68ea3998f94e9f3504431970f848fbf
+do_and_check_cmd sed -i '1s:^:ngx_feature_path=/opt/bunkerized-nginx/deps/include\n:' /tmp/bunkerized-nginx/ngx_http_geoip2_module/config
+do_and_check_cmd sed -i 's:^ngx_feature_libs=.*$:ngx_feature_libs="-Wl,-rpath,/opt/bunkerized-nginx/deps/lib -L/opt/bunkerized-nginx/deps/lib -lmaxminddb":' /tmp/bunkerized-nginx/ngx_http_geoip2_module/config
 
 # Download cookie flag module
 echo "[*] Clone AirisX/nginx_cookie_flag_module"
@@ -437,46 +439,43 @@ git_secure_clone https://github.com/openresty/luajit2.git 5ff674c5d9b75d6018994d
 echo "[*] Compile luajit2"
 CHANGE_DIR="/tmp/bunkerized-nginx/luajit2" do_and_check_cmd make -j $NTASK
 echo "[*] Install luajit2"
-CHANGE_DIR="/tmp/bunkerized-nginx/luajit2" do_and_check_cmd make install
-if [ "$OS" = "centos" ] ; then
-	do_and_check_cmd cp -P /usr/local/lib/libluajit* /lib64/
-fi
+CHANGE_DIR="/tmp/bunkerized-nginx/luajit2" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download and install lua-resty-core
 echo "[*] Clone openresty/lua-resty-core"
 git_secure_clone https://github.com/openresty/lua-resty-core.git 12f26310a35e45c37157420f7e1f395a0e36e457
 echo "[*] Install lua-resty-core"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-core" do_and_check_cmd make install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-core" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download and install lua-resty-lrucache
 echo "[*] Clone openresty/lua-resty-lrucache"
 git_secure_clone https://github.com/openresty/lua-resty-lrucache.git f20bb8ac9489ba87d90d78f929552c2eab153caa
 echo "[*] Install lua-resty-lrucache"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-lrucache" do_and_check_cmd make install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-lrucache" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download and install lua-resty-dns
 echo "[*] Clone openresty/lua-resty-dns"
 git_secure_clone https://github.com/openresty/lua-resty-dns.git 869d2fbb009b6ada93a5a10cb93acd1cc12bd53f
 echo "[*] Install lua-resty-dns"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-dns" do_and_check_cmd make install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-dns" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download and install lua-resty-session
 echo "[*] Clone bungle/lua-resty-session"
 git_secure_clone https://github.com/bungle/lua-resty-session.git 2cd1f8484fdd429505ac33abf7a44adda1f367bf
 echo "[*] Install lua-resty-session"
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-resty-session/lib/resty/* /usr/local/lib/lua/resty
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-resty-session/lib/resty/* /opt/bunkerized-nginx/deps/lib/lua/resty
 
 # Download and install lua-resty-random
 echo "[*] Clone bungle/lua-resty-random"
 git_secure_clone https://github.com/bungle/lua-resty-random.git 17b604f7f7dd217557ca548fc1a9a0d373386480
 echo "[*] Install lua-resty-random"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-random" do_and_check_cmd make install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-random" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download and install lua-resty-string
 echo "[*] Clone openresty/lua-resty-string"
 git_secure_clone https://github.com/openresty/lua-resty-string.git 3624678ca1c7c32e2fb16c18b7511863e074d542
 echo "[*] Install lua-resty-string"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-string" do_and_check_cmd make install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-string" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download, compile and install lua-cjson
 echo "[*] Clone openresty/lua-cjson"
@@ -484,8 +483,8 @@ git_secure_clone https://github.com/openresty/lua-cjson.git 0df488874f52a881d14b
 echo "[*] Compile lua-cjson"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make -j $NTASK
 echo "[*] Install lua-cjson"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make install
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make install-extra
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install-extra
 
 # Download, compile and install lua-gd
 echo "[*] Clone ittner/lua-gd"
@@ -497,19 +496,19 @@ else
 	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make -j $NTASK
 fi
 echo "[*] Install lua-gd"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make INSTALL_PATH=/usr/local/lib/lua/5.1 install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make INSTALL_PATH=/opt/bunkerized-nginx/deps/lib/lua install
 
 # Download and install lua-resty-http
 echo "[*] Clone ledgetech/lua-resty-http"
 git_secure_clone https://github.com/ledgetech/lua-resty-http.git 9bf951dfe162dd9710a0e1f4525738d4902e9d20
 echo "[*] Install lua-resty-http"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-http" do_and_check_cmd make install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-http" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
 # Download and install lualogging
 echo "[*] Clone Neopallium/lualogging"
 git_secure_clone https://github.com/lunarmodules/lualogging.git 5973188a1f8fc31abd98aceed2a4853986d779e9
 echo "[*] Install lualogging"
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/lualogging/src/* /usr/local/lib/lua
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/lualogging/src/* /opt/bunkerized-nginx/deps/lib/lua
 
 # Download, compile and install luasocket
 echo "[*] Clone diegonehab/luasocket"
@@ -517,7 +516,7 @@ git_secure_clone https://github.com/diegonehab/luasocket.git 5b18e475f38fcf28429
 echo "[*] Compile luasocket"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make -j $NTASK
 echo "[*] Install luasocket"
-CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make CDIR_linux=lib/lua/5.1 LDIR_linux=lib/lua install
+CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make prefix=/opt/bunkerized-nginx/deps CDIR_linux=lib/lua LDIR_linux=lib/lua install
 
 # Download, compile and install luasec
 echo "[*] Clone brunoos/luasec"
@@ -525,24 +524,24 @@ git_secure_clone https://github.com/brunoos/luasec.git d5df31561751ec0d4098dfc09
 echo "[*] Compile luasec"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make linux -j $NTASK
 echo "[*] Install luasec"
-CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make LUACPATH=/usr/local/lib/lua/5.1 LUAPATH=/usr/local/lib/lua install
+CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make LUACPATH=/opt/bunkerized-nginx/deps/lib/lua LUAPATH=/opt/bunkerized-nginx/deps/lib/lua install
 
 # Download and install lua-cs-bouncer
 echo "[*] Clone crowdsecurity/lua-cs-bouncer"
 git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 3c235c813fc453dcf51a391bc9e9a36ca77958b0
 echo "[*] Install lua-cs-bouncer"
-if [ ! -d /usr/local/lib/lua/crowdsec ] ; then
-	do_and_check_cmd mkdir /usr/local/lib/lua/crowdsec
+if [ ! -d /opt/bunkerized-nginx/deps/lib/lua/crowdsec ] ; then
+	do_and_check_cmd mkdir /opt/bunkerized-nginx/deps/lib/lua/crowdsec
 fi
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-cs-bouncer/lib/* /usr/local/lib/lua/crowdsec
-do_and_check_cmd sed -i 's/require "lrucache"/require "resty.lrucache"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
-do_and_check_cmd sed -i 's/require "config"/require "crowdsec.config"/' /usr/local/lib/lua/crowdsec/CrowdSec.lua
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-cs-bouncer/lib/* /opt/bunkerized-nginx/deps/lib/lua/crowdsec
+do_and_check_cmd sed -i 's/require "lrucache"/require "resty.lrucache"/' /opt/bunkerized-nginx/deps/lib/lua/crowdsec/CrowdSec.lua
+do_and_check_cmd sed -i 's/require "config"/require "crowdsec.config"/' /opt/bunkerized-nginx/deps/lib/lua/crowdsec/CrowdSec.lua
 
 # Download and install lua-resty-iputils
 echo "[*] Clone hamishforbes/lua-resty-iputils"
 git_secure_clone https://github.com/hamishforbes/lua-resty-iputils.git 3151d6485e830421266eee5c0f386c32c835dba4
 echo "[*] Install lua-resty-iputils"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-iputils" do_and_check_cmd make LUA_LIB_DIR=/usr/local/lib/lua install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-iputils" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
 
 # Download nginx and decompress sources
 echo "[*] Download nginx-${NGINX_VERSION}.tar.gz"
@@ -562,10 +561,10 @@ CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERS
 echo "[*] Compile dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
-echo "\#/bin/sh" > "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
+echo "\#!/bin/bash" > "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
 echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli" >> "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
 do_and_check_cmd chmod +x "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
-CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/local/lib" LUAJIT_INC="/usr/local/include/luajit-2.1" do_and_check_cmd ./configure-fix.sh
+CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/opt/bunkerized-nginx/deps/lib -Wl,-rpath,/opt/bunkerized-nginx/deps/lib" LUAJIT_INC="/opt/bunkerized-nginx/deps/include/luajit-2.1" MODSECURITY_LIB="/opt/bunkerized-nginx/deps/lib" MODSECURITY_INC="/opt/bunkerized-nginx/deps/include" do_and_check_cmd ./configure-fix.sh
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
 if [ ! -d "/usr/lib/nginx/modules" ] ; then
 	do_and_check_cmd mkdir -p /usr/lib/nginx/modules
@@ -634,7 +633,7 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/scripts /opt/bunkerized-nginx
 
 # Copy LUA
 echo "[*] Copy LUA"
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua/* /usr/local/lib/lua
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua /opt/bunkerized-nginx
 
 # Copy antibot
 echo "[*] Copy antibot"
