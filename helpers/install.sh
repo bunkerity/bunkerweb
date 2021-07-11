@@ -483,8 +483,8 @@ git_secure_clone https://github.com/openresty/lua-cjson.git 0df488874f52a881d14b
 echo "[*] Compile lua-cjson"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make -j $NTASK
 echo "[*] Install lua-cjson"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install-extra
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua LUA_MODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua LUA_MODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install-extra
 
 # Download, compile and install lua-gd
 echo "[*] Clone ittner/lua-gd"
