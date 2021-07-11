@@ -596,7 +596,7 @@ elif [ "$OS" = "centos" ] ; then
 	CENTOS_DEPS="git crontabs curl python3 python3-pip procps"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "alpine" ] ; then
-	ALPINE_DEPS="certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip"
+	ALPINE_DEPS="certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip git"
 	do_and_check_cmd apk add --no-cache $ALPINE_DEPS
 fi
 

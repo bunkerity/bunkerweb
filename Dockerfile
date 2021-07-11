@@ -1,7 +1,8 @@
 FROM nginx:1.20.1-alpine
 
 COPY helpers/install.sh /tmp/install.sh
-RUN chmod +x /tmp/install.sh && \
+RUN apk --no-cache add bash && \
+    chmod +x /tmp/install.sh && \
     /tmp/install.sh && \
     rm -f /tmp/install.sh
 

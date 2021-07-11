@@ -14,13 +14,13 @@
 <p align="center">
 	<strong>
 		<a href="https://bunkerized-nginx.readthedocs.io">Documentation</a>
-		<span> | </span>
+		 &#124; 
 		<a href="https://github.com/bunkerity/bunkerized-nginx/tree/master/examples">Examples</a>
-		<span> | </span>
+		 &#124; 
 		<a href="https://www.bunkerity.com/category/bunkerized-nginx/">Blog posts</a>
-		<span> | </span>
+		 &#124; 
 		<a href="https://coso.me/bunkerity-chat">Community chat</a>
-		<span> | </span>
+		 &#124; 
 		<a href="https://coso.me/bunkerity">Follow us</a>
 	</strong>
 </p>
@@ -432,8 +432,8 @@ bunkerized-nginx comes with a set of predefined security settings that you can (
 
 # License
 
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/LICENSE.md).
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/blob/master/LICENSE.md).
 
 # Contributing
 
-If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/CONTRIBUTING.md) to get started.
+If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/blob/master/CONTRIBUTING.md) to get started.
