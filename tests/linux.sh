@@ -14,22 +14,6 @@ if [ $? -ne 0 ] ; then
 	exit 1
 fi
 
-echo "[*] Copy dependencies.sh"
-docker cp helpers/dependencies.sh "$id:/tmp"
-if [ $? -ne 0 ] ; then
-	echo "[!] docker cp failed"
-	cleanup "$id"
-	exit 2
-fi
-
-echo "[*] Exec dependencies.sh"
-docker exec "$id" /bin/bash -c 'chmod +x /tmp/dependencies.sh && /tmp/dependencies.sh'
-if [ $? -ne 0 ] ; then
-	echo "[!] docker exec failed"
-	cleanup "$id"
-	exit 3
-fi
-
 echo "[*] Copy install.sh"
 docker cp helpers/install.sh "$id:/tmp"
 if [ $? -ne 0 ] ; then
