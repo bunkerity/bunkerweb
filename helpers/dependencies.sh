@@ -38,6 +38,26 @@ function git_secure_clone() {
 	fi
 }
 
+function secure_download() {
+	cd /tmp/bunkerized-nginx
+	link="$1"
+	file="$2"
+	hash="$3"
+	output="$(wget -q -O "$file" "$link" 2>&1)"
+	if [ $? -ne 0 ] ; then
+		echo "[!] Error downloading $link"
+		echo "$output"
+		cleanup
+		exit 5
+	fi
+	check="$(sha512sum "$file" | cut -d ' ' -f 1)"
+	if [ "$check" != "$hash" ] ; then
+		echo "[!] Wrong hash from file $link (expected $hash got $check)"
+		cleanup
+		exit 6
+	fi
+}
+
 function do_and_check_cmd() {
 	if [ "$CHANGE_DIR" != "" ] ; then
 		cd "$CHANGE_DIR"
@@ -340,16 +360,28 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget libmaxminddb-dev libbrotli-dev gnupg"
+	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget libbrotli-dev gnupg"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 	do_and_check_cmd cp -r /usr/include/lua5.1/* /usr/include
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget libmaxminddb-devel brotli-devel gnupg"
+	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "alpine" ] ; then
-	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers libmaxminddb-dev musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev"
+	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev"
 	do_and_check_cmd apk add --no-cache --virtual build $ALPINE_DEPS
+fi
+
+# Download, compile and install libmaxminddb
+echo "[*] Download maxmind/libmaxminddb"
+secure_download "https://github.com/maxmind/libmaxminddb/releases/download/1.6.0/libmaxminddb-1.6.0.tar.gz" "libmaxminddb-1.6.0.tar.gz" "9394e8dd959982d4ef5d15a928d32700722ed9d6c9988d9cc1bf2f4e67de0a53cc6987e90aaef3a6926c9ff36ac378f7a1fe47818fda4f5a3a22539210b2d004"
+CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xzf libmaxminddb-1.6.0.tar.gz
+echo "[*] Compile and install libmaxminddb"
+CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd ./configure
+CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make -j $NTASK
+CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make install
+if [ "$OS" = "centos" ] ; then
+	do_and_check_cmd cp -P /usr/local/lib/libmaxminddb* /lib64/
 fi
 
 # Download, compile and install ModSecurity
@@ -399,7 +431,7 @@ git_secure_clone https://github.com/google/ngx_brotli.git 9aec15e2aa6feea2113119
 # Download lua-nginx module
 git_secure_clone https://github.com/openresty/lua-nginx-module.git 9007d673e28938f5dfa7720438991e22b794d225
 
-# Download, compile and install 5ff674c5d9b75d6018994dfac3ce38aab3b8db12
+# Download, compile and install luajit2
 echo "[*] Clone openresty/luajit2"
 git_secure_clone https://github.com/openresty/luajit2.git 5ff674c5d9b75d6018994dfac3ce38aab3b8db12
 echo "[*] Compile luajit2"
@@ -407,12 +439,12 @@ CHANGE_DIR="/tmp/bunkerized-nginx/luajit2" do_and_check_cmd make -j $NTASK
 echo "[*] Install luajit2"
 CHANGE_DIR="/tmp/bunkerized-nginx/luajit2" do_and_check_cmd make install
 if [ "$OS" = "centos" ] ; then
-	do_and_check_cmd cp /usr/local/lib/libluajit* /lib64/
+	do_and_check_cmd cp -P /usr/local/lib/libluajit* /lib64/
 fi
 
 # Download and install lua-resty-core
 echo "[*] Clone openresty/lua-resty-core"
-git_secure_clone https://github.com/openresty/lua-resty-core.git b7d0a681bb41e6e3f29e8ddc438ef26fd819bb19
+git_secure_clone https://github.com/openresty/lua-resty-core.git 12f26310a35e45c37157420f7e1f395a0e36e457
 echo "[*] Install lua-resty-core"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-core" do_and_check_cmd make install
 
