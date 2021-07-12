@@ -748,19 +748,19 @@ echo "[*] Prepare log files and folders"
 if [ ! -e "/var/log/nginx" ] ; then
 	do_and_check_cmd mkdir /var/log/nginx
 fi
-if [ ! -e /var/log/nginx/access.log ] ; then
+if [ ! -e "/var/log/nginx/access.log" ] ; then
 	do_and_check_cmd touch /var/log/nginx/access.log
 fi
-if [ ! -e /var/log/nginx/error.log ] ; then
+if [ ! -e "/var/log/nginx/error.log" ] ; then
 	do_and_check_cmd touch /var/log/nginx/error.log
 fi
-if [ ! -e /var/log/nginx/modsec_audit.log ] ; then
+if [ ! -e "/var/log/nginx/modsec_audit.log" ] ; then
 	do_and_check_cmd touch /var/log/nginx/modsec_audit.log
 fi
-if [ ! -e /var/log/nginx/jobs.log ] ; then
+if [ ! -e "/var/log/nginx/jobs.log" ] ; then
 	do_and_check_cmd touch /var/log/nginx/jobs.log
 fi
-if [ ! -e /var/log/nginx/ui.log ] ; then
+if [ ! -e "/var/log/nginx/ui.log" ] ; then
 	do_and_check_cmd touch /var/log/nginx/ui.log
 fi
 do_and_check_cmd chown -R root:nginx /var/log/nginx
