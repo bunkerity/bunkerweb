@@ -911,7 +911,7 @@
         "params": [
             {
                 "context": "multisite",
-                "default": "www.bunkerity.com",
+                "default": "www.example.com",
                 "env": "SERVER_NAME",
                 "id": "server-name",
                 "label": "Server name",

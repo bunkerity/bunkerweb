@@ -373,7 +373,7 @@ elif [ "$OS" = "centos" ] ; then
 	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
-	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg libxslt-devel"
+	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg libxslt-devel perl-ExtUtils-Embed gperftools-devel"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev"
@@ -574,6 +574,7 @@ echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecuri
 do_and_check_cmd chmod +x "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" LUAJIT_LIB="/opt/bunkerized-nginx/deps/lib -Wl,-rpath,/opt/bunkerized-nginx/deps/lib" LUAJIT_INC="/opt/bunkerized-nginx/deps/include/luajit-2.1" MODSECURITY_LIB="/opt/bunkerized-nginx/deps/lib" MODSECURITY_INC="/opt/bunkerized-nginx/deps/include" do_and_check_cmd ./configure-fix.sh
 CHANGE_DIR="/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
+# TODO : move modules to /opt/bunkerized-nginx/modules
 if [ ! -d "/usr/lib/nginx/modules" ] ; then
 	do_and_check_cmd mkdir -p /usr/lib/nginx/modules
 fi
@@ -603,8 +604,10 @@ elif [ "$OS" = "centos" ] ; then
 	CENTOS_DEPS="git crontabs curl python3 python3-pip procps"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
-	FEDORA_DEPS="git crontabs curl python3 python3-pip procps"
+	FEDORA_DEPS="git crontabs curl python3 python3-pip procps nginx-mod-stream"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
+	# Temp fix
+	do_and_check_cmd cp /usr/lib64/nginx/modules/ngx_stream_module.so /usr/lib/nginx/modules/ngx_stream_module.so
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip git"
 	do_and_check_cmd apk add --no-cache $ALPINE_DEPS
@@ -657,6 +660,10 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/defaults /opt/bunkerized-nginx
 # Copy settings
 echo "[*] Copy settings"
 do_and_check_cmd cp /tmp/bunkerized-nginx/settings.json /opt/bunkerized-nginx
+
+# Copy sample variables.env
+echo "[*] Copy sample variables.env"
+do_and_check_cmd cp /tmp/bunkerized-nginx/misc/variables.env /opt/bunkerized-nginx
 
 # Copy UI
 if [ "$OS" != "alpine" ] ; then
