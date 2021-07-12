@@ -288,6 +288,8 @@ elif [ "$(grep Ubuntu /etc/os-release)" != "" ] ; then
 	OS="ubuntu"
 elif [ "$(grep CentOS /etc/os-release)" != "" ] ; then
 	OS="centos"
+elif [ "$(grep Fedora /etc/os-release)" != "" ] ; then
+	OS="fedora"
 elif [ "$(grep Alpine /etc/os-release)" != "" ] ; then
 	OS="alpine"
 fi
@@ -339,6 +341,9 @@ module_hotfixes=true"
 		echo "$repo" > /etc/yum.repos.d/nginx.repo
 		echo "[*] Install nginx"
 		do_and_check_cmd yum install -y nginx
+	elif [ "$OS" = "fedora" ] ; then
+		echo "[*] Install nginx"
+		do_and_check_cmd dnf install -y nginx
 	elif [ "$OS" = "alpine" ] ; then
 		echo "[*] Add nginx official repository"
 		get_sign_repo_key_rsa > /etc/apk/keys/nginx_signing.rsa.pub
@@ -367,6 +372,9 @@ elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
 	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
+elif [ "$OS" = "fedora" ] ; then
+	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg libxslt-devel"
+	do_and_check_cmd dnf install -y $FEDORA_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev"
 	do_and_check_cmd apk add --no-cache --virtual build $ALPINE_DEPS
@@ -380,9 +388,6 @@ echo "[*] Compile and install libmaxminddb"
 CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd ./configure --prefix=/opt/bunkerized-nginx/deps
 CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make -j $NTASK
 CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make install
-#if [ "$OS" = "centos" ] ; then
-#	do_and_check_cmd cp -P /usr/local/lib/libmaxminddb* /lib64/
-#fi
 
 # Download, compile and install ModSecurity
 echo "[*] Clone SpiderLabs/ModSecurity"
@@ -490,7 +495,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/b
 echo "[*] Clone ittner/lua-gd"
 git_secure_clone https://github.com/ittner/lua-gd.git 2ce8e478a8591afd71e607506bc8c64b161bbd30
 echo "[*] Compile lua-gd"
-if [ "$OS" = "centos" ] ; then
+if [ "$OS" = "centos" ] || [ "$OS" = "fedora" ] ; then
 	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make LUAPKG=lua LUABIN=lua -j $NTASK
 else
 	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make -j $NTASK
@@ -561,6 +566,9 @@ CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERS
 echo "[*] Compile dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
+if [ "$OS" = "fedora" ] ; then
+	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'//" | sed "s/--with-cc-opt='.*'//")"
+fi
 echo "\#!/bin/bash" > "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
 echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerized-nginx/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerized-nginx/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_http_geoip2_module --add-dynamic-module=/tmp/bunkerized-nginx/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerized-nginx/lua-nginx-module --add-dynamic-module=/tmp/bunkerized-nginx/ngx_brotli" >> "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
 do_and_check_cmd chmod +x "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}/configure-fix.sh"
@@ -594,6 +602,9 @@ elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
 	CENTOS_DEPS="git crontabs curl python3 python3-pip procps"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
+elif [ "$OS" = "fedora" ] ; then
+	FEDORA_DEPS="git crontabs curl python3 python3-pip procps"
+	do_and_check_cmd dnf install -y $FEDORA_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip git"
 	do_and_check_cmd apk add --no-cache $ALPINE_DEPS
@@ -788,7 +799,7 @@ do_and_check_cmd chmod 770 /var/lib/letsencrypt
 echo "[*] Add jobs to crontab"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 	CRON_PATH="/var/spool/cron/crontabs/nginx"
-elif [ "$OS" = "centos" ] ; then
+elif [ "$OS" = "centos" ] || [ "$OS" = "fedora" ] ; then
 	CRON_PATH="/var/spool/cron/nginx"
 elif [ "$OS" = "alpine" ] ; then
 	CRON_PATH="/etc/crontabs/nginx"
