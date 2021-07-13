@@ -1008,6 +1008,24 @@
                 "label": "Remote php path",
                 "regex": "^/([A-Za-z0-9\\-]/?)*$",
                 "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "LOCAL_PHP",
+                "id": "local-php",
+                "label": "local php",
+                "regex": "^([a-zA-Z\\-0-9\\_\\./])*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "/app",
+                "env": "LOCAL_PHP_PATH",
+                "id": "local-php-path",
+                "label": "Local php path",
+                "regex": "^/([A-Za-z0-9\\-]/?)*$",
+                "type": "text"
             }
         ]
     },

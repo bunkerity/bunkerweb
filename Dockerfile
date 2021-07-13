@@ -1,5 +1,6 @@
 FROM nginx:1.20.1-alpine
 
+COPY . /tmp/bunkerized-nginx-docker
 COPY helpers/install.sh /tmp/install.sh
 RUN apk --no-cache add bash && \
     chmod +x /tmp/install.sh && \

@@ -297,6 +297,7 @@ if [ "$OS" = "" ] ; then
 	echo "[!] Unsupported Operating System"
 	exit 1
 fi
+old_dir="${PWD}"
 
 # Create /tmp/bunkerized-nginx
 echo "[*] Prepare /tmp/bunkerized-nginx"
@@ -307,8 +308,9 @@ do_and_check_cmd mkdir /tmp/bunkerized-nginx
 
 # Create /opt/bunkerized-nginx
 echo "[*] Prepare /opt/bunkerized-nginx"
-if [ -e "/opt/bunkerized-nginx" ] ; then
-	do_and_check_cmd rm -rf /opt/bunkerized-nginx
+if [ -d "/opt/bunkerized-nginx" ] ; then
+	echo "[!] Looks like bunkerized-nginx is already installed"
+	exit 1
 fi
 do_and_check_cmd mkdir -p /opt/bunkerized-nginx/deps
 
@@ -587,6 +589,7 @@ do_and_check_cmd chmod 744 /usr/lib/nginx/modules/*
 if [ "$OS" = "alpine" ] ; then
 	apk del build > /dev/null 2>&1
 fi
+cd "$old_dir"
 cleanup
 echo "[*] Dependencies for bunkerized-nginx successfully installed !"
 
@@ -614,11 +617,16 @@ elif [ "$OS" = "alpine" ] ; then
 fi
 
 # Clone the repo
-echo "[*] Clone bunkerity/bunkerized-nginx"
-#CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 09a2a4f9e531b93684b0916a5146091a818501d3
-# TODO : do a secure clone
-CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
-CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev
+if [ "$OS" != "alpine" ] ; then
+	echo "[*] Clone bunkerity/bunkerized-nginx"
+	#CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 09a2a4f9e531b93684b0916a5146091a818501d3
+	# TODO : do a secure clone
+	CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
+	CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev
+# Docker build case : simply rename the sources
+else
+	do_and_check_cmd mv /tmp/bunkerized-nginx-docker /tmp/bunkerized-nginx
+fi
 
 # Install Python dependencies
 echo "[*] Install python dependencies"
@@ -840,6 +848,6 @@ echo "[*] Download geoip DB"
 do_and_check_cmd /opt/bunkerized-nginx/scripts/geoip.sh
 
 # We're done
-echo "[*] Remove temp files"
-do_and_check_cmd rm -rf /tmp/bunkerized-nginx
+cd "$old_dir"
+cleanup
 echo "[*] bunkerized-nginx successfully installed !"
