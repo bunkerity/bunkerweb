@@ -367,20 +367,77 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install compilation dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make liblua5.1-0-dev libgd-dev lua5.1 libssl-dev wget libbrotli-dev gnupg"
+	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make libgd-dev libssl-dev wget libbrotli-dev gnupg patch libreadline-dev"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
-	do_and_check_cmd cp -r /usr/include/lua5.1/* /usr/include
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg"
+	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg patch libreadline-dev"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
-	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make lua-devel gd-devel lua openssl-devel wget brotli-devel gnupg libxslt-devel perl-ExtUtils-Embed gperftools-devel"
+	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg libxslt-devel perl-ExtUtils-Embed gperftools-devel patch readline-devel"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
 elif [ "$OS" = "alpine" ] ; then
-	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev lua-dev gd-dev gnupg brotli-dev openssl-dev"
+	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev"
 	do_and_check_cmd apk add --no-cache --virtual build $ALPINE_DEPS
 fi
+
+# Download, compile and install lua
+echo "[*] Download lua-5.1.5"
+secure_download "https://www.lua.org/ftp/lua-5.1.5.tar.gz" "lua-5.1.5.tar.gz" "0142fefcbd13afcd9b201403592aa60620011cc8e8559d4d2db2f92739d18186860989f48caa45830ff4f99bfc7483287fd3ff3a16d4dec928e2767ce4d542a9"
+CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xzf lua-5.1.5.tar.gz
+# Patch first Makefile
+patch1='@@ -43,7 +43,7 @@
+ # What to install.
+ TO_BIN= lua luac
+ TO_INC= lua.h luaconf.h lualib.h lauxlib.h ../etc/lua.hpp
+-TO_LIB= liblua.a
++TO_LIB= liblua.a liblua.so
+ TO_MAN= lua.1 luac.1
+
+ # Lua version and release.'
+echo "$patch1" > /tmp/bunkerized-nginx/lua-patch-1
+do_and_check_cmd patch /tmp/bunkerized-nginx/lua-5.1.5/Makefile /tmp/bunkerized-nginx/lua-patch-1
+# Patch second Makefile
+patch2='@@ -8,7 +8,7 @@
+ PLAT= none
+
+ CC= gcc
+-CFLAGS= -O2 -Wall $(MYCFLAGS)
++CFLAGS= -O2 -Wall $(MYCFLAGS) -fPIC
+ AR= ar rcu
+ RANLIB= ranlib
+ RM= rm -f
+@@ -23,6 +23,7 @@
+ PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
+
+ LUA_A=	liblua.a
++LUA_SO= liblua.so
+ CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
+        lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
+        lundump.o lvm.o lzio.o
+@@ -36,7 +37,7 @@
+ LUAC_O= luac.o print.o
+
+ ALL_O= $(CORE_O) $(LIB_O) $(LUA_O) $(LUAC_O)
+-ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T)
++ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(LUA_SO)
+ ALL_A= $(LUA_A)
+
+ default: $(PLAT)
+@@ -54,6 +55,9 @@
+ $(LUA_T): $(LUA_O) $(LUA_A)
+ 	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
+
++$(LUA_SO): $(CORE_O) $(LIB_O)
++	$(CC) -o $@ -shared -fPIC $? -ldl -lm
++
+ $(LUAC_T): $(LUAC_O) $(LUA_A)
+ 	$(CC) -o $@ $(MYLDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS)'
+echo "$patch2" > /tmp/bunkerized-nginx/lua-patch-2
+do_and_check_cmd patch /tmp/bunkerized-nginx/lua-5.1.5/src/Makefile /tmp/bunkerized-nginx/lua-patch-2
+echo "[*] Compile and install lua-5.1.5"
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-5.1.5" do_and_check_cmd make -j $NTASK linux
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-5.1.5" do_and_check_cmd make INSTALL_TOP=/opt/bunkerized-nginx/deps install
 
 # Download, compile and install libmaxminddb
 echo "[*] Download maxmind/libmaxminddb"
@@ -488,7 +545,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-string" do_and_check_cmd make PREFIX
 echo "[*] Clone openresty/lua-cjson"
 git_secure_clone https://github.com/openresty/lua-cjson.git 0df488874f52a881d14b5876babaa780bb6200ee
 echo "[*] Compile lua-cjson"
-CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make -j $NTASK
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make LUA_INCLUDE_DIR=/opt/bunkerized-nginx/deps/include -j $NTASK
 echo "[*] Install lua-cjson"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua LUA_MODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_CMODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua LUA_MODULE_DIR=/opt/bunkerized-nginx/deps/lib/lua install-extra
@@ -497,11 +554,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-cjson" do_and_check_cmd make PREFIX=/opt/b
 echo "[*] Clone ittner/lua-gd"
 git_secure_clone https://github.com/ittner/lua-gd.git 2ce8e478a8591afd71e607506bc8c64b161bbd30
 echo "[*] Compile lua-gd"
-if [ "$OS" = "centos" ] || [ "$OS" = "fedora" ] ; then
-	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make LUAPKG=lua LUABIN=lua -j $NTASK
-else
-	CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make -j $NTASK
-fi
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make "CFLAGS=-O3 -Wall -fPIC -fomit-frame-pointer -I/opt/bunkerized-nginx/deps/include -DVERSION=\\\"2.0.33r3\\\"" "LFLAGS=-shared -L/opt/bunkerized-nginx/deps/lib -llua -lgd -Wl,-rpath=/opt/bunkerized-nginx/deps/lib" LUABIN=/opt/bunkerized-nginx/deps/bin/lua -j $NTASK
 echo "[*] Install lua-gd"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-gd" do_and_check_cmd make INSTALL_PATH=/opt/bunkerized-nginx/deps/lib/lua install
 
@@ -521,7 +574,7 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/lualogging/src/* /opt/bunkerized-ng
 echo "[*] Clone diegonehab/luasocket"
 git_secure_clone https://github.com/diegonehab/luasocket.git 5b18e475f38fcf28429b1cc4b17baee3b9793a62
 echo "[*] Compile luasocket"
-CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make -j $NTASK
+CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make LUAINC_linux=/opt/bunkerized-nginx/deps/include -j $NTASK
 echo "[*] Install luasocket"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make prefix=/opt/bunkerized-nginx/deps CDIR_linux=lib/lua LDIR_linux=lib/lua install
 
@@ -529,7 +582,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make prefix=/opt/b
 echo "[*] Clone brunoos/luasec"
 git_secure_clone https://github.com/brunoos/luasec.git d5df31561751ec0d4098dfc09c92ece215a56a5a
 echo "[*] Compile luasec"
-CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make linux -j $NTASK
+CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make INC_PATH=-I/opt/bunkerized-nginx/deps/include linux -j $NTASK
 echo "[*] Install luasec"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make LUACPATH=/opt/bunkerized-nginx/deps/lib/lua LUAPATH=/opt/bunkerized-nginx/deps/lib/lua install
 
@@ -600,19 +653,19 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install runtime dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git cron curl python3 python3-pip procps"
+	DEBIAN_DEPS="certbot git cron curl python3 python3-pip procps"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git crontabs curl python3 python3-pip procps"
+	CENTOS_DEPS="certbot git crontabs curl python3 python3-pip procps"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
-	FEDORA_DEPS="git crontabs curl python3 python3-pip procps nginx-mod-stream"
+	FEDORA_DEPS="certbot git crontabs curl python3 python3-pip procps nginx-mod-stream"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
 	# Temp fix
 	do_and_check_cmd cp /usr/lib64/nginx/modules/ngx_stream_module.so /usr/lib/nginx/modules/ngx_stream_module.so
 elif [ "$OS" = "alpine" ] ; then
-	ALPINE_DEPS="certbot bash libmaxminddb libgcc lua yajl libstdc++ openssl py3-pip git"
+	ALPINE_DEPS="certbot bash libgcc yajl libstdc++ openssl py3-pip git"
 	do_and_check_cmd apk add --no-cache $ALPINE_DEPS
 fi
 

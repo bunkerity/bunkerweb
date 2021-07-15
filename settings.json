@@ -953,6 +953,15 @@
                 "label": "Custom code to inject into the page before closing the body",
                 "regex": ".*",
                 "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "REDIRECT_TO",
+                "id": "redirect-to",
+                "label": "Redirect every requests to another web service",
+                "regex": "^https?://.*$",
+                "type": "text"
             }
         ]
     },
