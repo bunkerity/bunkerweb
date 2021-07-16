@@ -23,6 +23,7 @@ services:
     volumes:
       - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
+      - ./bunkerized-nginx-crowdsec:/plugins/crowdsec # edit plugin.json
     environment:
       - SERVER_NAME=app1.example.com app2.example.com # replace with your domains
       - MULTISITE=yes
@@ -31,9 +32,6 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_CROWDSEC=yes
-      - CROWDSEC_HOST=http://mycrowdsec:8080
-      - CROWDSEC_KEY=                                # you need to generate it (see bouncer_key.sh)
       - app1.example.com_REMOTE_PHP=myapp1
       - app1.example.com_REMOTE_PHP_PATH=/app
       - app2.example.com_REMOTE_PHP=myapp2

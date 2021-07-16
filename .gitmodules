@@ -1,0 +1,3 @@
+[submodule "bunkerized-nginx-crowdsec"]
+	path = examples/crowdsec/bunkerized-nginx-crowdsec
+	url = https://github.com/bunkerity/bunkerized-nginx-crowdsec

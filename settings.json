@@ -493,38 +493,6 @@
             }
         ]
     },
-    "CrowdSec": {
-        "id": "use-crowdsec",
-        "params": [
-            {
-                "context": "multisite",
-                "default": "no",
-                "env": "USE_CROWDSEC",
-                "id": "use-crowdsec",
-                "label": "Use crowdsec",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "global",
-                "default": "",
-                "env": "CROWDSEC_HOST",
-                "id": "crowdsec-host",
-                "label": "CrowdSec host",
-                "regex": "^(https?://[\\S]+:?\\d*)?$",
-                "type": "text"
-            },
-            {
-                "context": "global",
-                "default": "",
-                "env": "CROWDSEC_KEY",
-                "id": "crowdsec-key",
-                "label": "CrowdSec key",
-                "regex": "^([\\S])*$",
-                "type": "text"
-            }
-        ]
-    },
     "DNSBL": {
         "id": "dnsbl",
         "params": [

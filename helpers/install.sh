@@ -586,17 +586,6 @@ CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make INC_PATH=-I/opt/
 echo "[*] Install luasec"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make LUACPATH=/opt/bunkerized-nginx/deps/lib/lua LUAPATH=/opt/bunkerized-nginx/deps/lib/lua install
 
-# Download and install lua-cs-bouncer
-echo "[*] Clone crowdsecurity/lua-cs-bouncer"
-git_secure_clone https://github.com/crowdsecurity/lua-cs-bouncer.git 3c235c813fc453dcf51a391bc9e9a36ca77958b0
-echo "[*] Install lua-cs-bouncer"
-if [ ! -d /opt/bunkerized-nginx/deps/lib/lua/crowdsec ] ; then
-	do_and_check_cmd mkdir /opt/bunkerized-nginx/deps/lib/lua/crowdsec
-fi
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-cs-bouncer/lib/* /opt/bunkerized-nginx/deps/lib/lua/crowdsec
-do_and_check_cmd sed -i 's/require "lrucache"/require "resty.lrucache"/' /opt/bunkerized-nginx/deps/lib/lua/crowdsec/CrowdSec.lua
-do_and_check_cmd sed -i 's/require "config"/require "crowdsec.config"/' /opt/bunkerized-nginx/deps/lib/lua/crowdsec/CrowdSec.lua
-
 # Download and install lua-resty-iputils
 echo "[*] Clone hamishforbes/lua-resty-iputils"
 git_secure_clone https://github.com/hamishforbes/lua-resty-iputils.git 3151d6485e830421266eee5c0f386c32c835dba4
