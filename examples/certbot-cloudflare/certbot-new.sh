@@ -3,8 +3,8 @@
 # you need to run it before starting bunkerized-nginx to get the first certificate
 
 # edit according to your values
-DOMAINS="website.com,*.website.com"
-EMAIL="contact@website.com"
+DOMAINS="example.com,*.example.com"
+EMAIL="contact@example.com"
 SERVICE="mywww"
 
 # ask for the certificate

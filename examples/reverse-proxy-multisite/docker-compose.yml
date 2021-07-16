@@ -17,7 +17,7 @@ services:
       - ./letsencrypt:/etc/letsencrypt
     environment:
       - MULTISITE=yes
-      - SERVER_NAME=app1.website.com app2.website.com # replace with your domain
+      - SERVER_NAME=app1.example.com app2.example.com # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
@@ -26,10 +26,10 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
-      - app1.website.com_REVERSE_PROXY_URL=/
-      - app1.website.com_REVERSE_PROXY_HOST=http://app1:3000
-      - app2.website.com_REVERSE_PROXY_URL=/
-      - app2.website.com_REVERSE_PROXY_HOST=http://app2
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1:3000
+      - app2.example.com_REVERSE_PROXY_URL=/
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2
 
   app1:
     image: node
@@ -46,4 +46,4 @@ services:
     restart: always
     environment:
       - PMA_ARBITRARY=1
-      - PMA_ABSOLUTE_URI=https://app2.website.com
+      - PMA_ABSOLUTE_URI=https://app2.example.com

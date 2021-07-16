@@ -24,7 +24,7 @@ services:
       - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
     environment:
-      - SERVER_NAME=app1.website.com app2.website.com # replace with your domains
+      - SERVER_NAME=app1.example.com app2.example.com # replace with your domains
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
@@ -34,10 +34,10 @@ services:
       - USE_CROWDSEC=yes
       - CROWDSEC_HOST=http://mycrowdsec:8080
       - CROWDSEC_KEY=                                # you need to generate it (see bouncer_key.sh)
-      - app1.website.com_REMOTE_PHP=myapp1
-      - app1.website.com_REMOTE_PHP_PATH=/app
-      - app2.website.com_REMOTE_PHP=myapp2
-      - app2.website.com_REMOTE_PHP_PATH=/app
+      - app1.example.com_REMOTE_PHP=myapp1
+      - app1.example.com_REMOTE_PHP_PATH=/app
+      - app2.example.com_REMOTE_PHP=myapp2
+      - app2.example.com_REMOTE_PHP_PATH=/app
     networks:
       net0:
       net1:
@@ -69,7 +69,7 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app1.website.com:/app
+      - ./web-files/app1.example.com:/app
     networks:
       - net1
 
@@ -77,7 +77,7 @@ services:
     image: php:fpm
     restart: always
     volumes:
-      - ./web-files/app2.website.com:/app
+      - ./web-files/app2.example.com:/app
     networks:
       - net2
 

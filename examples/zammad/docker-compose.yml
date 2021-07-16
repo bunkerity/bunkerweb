@@ -122,7 +122,7 @@ services:
       - LIMIT_REQ_RATE=20r/s                                                    # Number of request allowed per seconds, let him to 20 to don't get code 429
       - FEATURE_POLICY=                                                         # Need to be allowed to work with Chrome, Brave, Edge
       - PERMISSIONS_POLICY=                                                     # Need to be allowed to work with Chrome, Brave, Edge
-      - SERVER_NAME=www.website.com                                             # replace with your domain 
+      - SERVER_NAME=www.example.com                                             # replace with your domain 
       - REVERSE_PROXY_URL_1=/ws
       - REVERSE_PROXY_HOST_1=http://zammad-websocket:6042
       - REVERSE_PROXY_WS=yes                                                    # used to allow websocket redirect

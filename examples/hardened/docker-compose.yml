@@ -28,7 +28,7 @@ services:
       - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
     environment:
-      - SERVER_NAME=www.website.com # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes

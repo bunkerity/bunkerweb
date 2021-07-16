@@ -20,23 +20,23 @@ services:
       - ./modsec-confs:/modsec-confs:ro
       - ./modsec-crs-confs:/modsec-crs-confs:ro
     environment:
-      - SERVER_NAME=wp.website.com nc.website.com # replace with your domains
+      - SERVER_NAME=wp.example.com nc.example.com # replace with your domains
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - wp.website.com_REMOTE_PHP=mywp
-      - wp.website.com_REMOTE_PHP_PATH=/var/www/html
-      - nc.website.com_REMOTE_PHP=mync
-      - nc.website.com_REMOTE_PHP_PATH=/var/www/html
-      - nc.website.com_LIMIT_REQ_RATE=5r/s
-      - nc.website.com_LIMIT_REQ_BURST=10
-      - nc.website.com_ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
-      - nc.website.com_X_FRAME_OPTIONS=SAMEORIGIN
-      - nc.website.com_BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444
-      - nc.website.com_WHITELIST_USER_AGENT=WebDAV
+      - wp.example.com_REMOTE_PHP=mywp
+      - wp.example.com_REMOTE_PHP_PATH=/var/www/html
+      - nc.example.com_REMOTE_PHP=mync
+      - nc.example.com_REMOTE_PHP_PATH=/var/www/html
+      - nc.example.com_LIMIT_REQ_RATE=5r/s
+      - nc.example.com_LIMIT_REQ_BURST=10
+      - nc.example.com_ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
+      - nc.example.com_X_FRAME_OPTIONS=SAMEORIGIN
+      - nc.example.com_BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444
+      - nc.example.com_WHITELIST_USER_AGENT=WebDAV
     networks:
       - net1
       - net2
@@ -45,7 +45,7 @@ services:
     image: wordpress:fpm-alpine
     restart: always
     volumes:
-      - ./web-files/wp.website.com:/var/www/html
+      - ./web-files/wp.example.com:/var/www/html
     environment:
       - WORDPRESS_DB_HOST=mywpdb
       - WORDPRESS_DB_NAME=wp
@@ -72,7 +72,7 @@ services:
     image: nextcloud:stable-fpm
     restart: always
     volumes:
-      - ./web-files/nc.website.com:/var/www/html
+      - ./web-files/nc.example.com:/var/www/html
     environment:
       - MYSQL_HOST=myncdb
       - MYSQL_DATABASE=nc

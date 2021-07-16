@@ -4,7 +4,7 @@
 # since it's manual there is no auto renew, you need to run it again before it expires
 
 # replace with your values
-DOMAINS="website.com,*.website.com"
+DOMAINS="example.com,*.example.com"
 SERVICE="mywww"
 
 # ask for wildcard certificate

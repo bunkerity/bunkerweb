@@ -16,21 +16,21 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - autoconf:/etc/nginx
     environment:
-      - SERVER_NAME=admin.website.com                          # replace with your domain
+      - SERVER_NAME=admin.example.com                          # replace with your domain
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - admin.website.com_SERVE_FILES=no
-      - admin.website.com_USE_AUTH_BASIC=yes
-      - admin.website.com_AUTH_BASIC_USER=admin                # change it to something hard to guess
-      - admin.website.com_AUTH_BASIC_PASSWORD=admin            # change it to something hard to guess
-      - admin.website.com_USE_REVERSE_PROXY=yes
-      - admin.website.com_REVERSE_PROXY_URL=/admin/            # change it to something hard to guess
-      - admin.website.com_REVERSE_PROXY_HOST=http://myui:5000/  
-      - admin.website.com_USE_MODSECURITY=no
+      - admin.example.com_SERVE_FILES=no
+      - admin.example.com_USE_AUTH_BASIC=yes
+      - admin.example.com_AUTH_BASIC_USER=admin                # change it to something hard to guess
+      - admin.example.com_AUTH_BASIC_PASSWORD=admin            # change it to something hard to guess
+      - admin.example.com_USE_REVERSE_PROXY=yes
+      - admin.example.com_REVERSE_PROXY_URL=/admin/            # change it to something hard to guess
+      - admin.example.com_REVERSE_PROXY_HOST=http://myui:5000/  
+      - admin.example.com_USE_MODSECURITY=no
     labels:
       - "bunkerized-nginx.UI"
 
@@ -42,7 +42,7 @@ services:
     volumes:
       - autoconf:/etc/nginx
     environment:
-      - ABSOLUTE_URI=https://admin.website.com/admin/          # change it to your full URI
+      - ABSOLUTE_URI=https://admin.example.com/admin/          # change it to your full URI
       - DOCKER_HOST=tcp://myuiproxy:2375
 
   myuiproxy:

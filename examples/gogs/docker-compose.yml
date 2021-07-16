@@ -12,7 +12,7 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - ./modsec-crs-confs:/modsec-crs-confs:ro              # fix FP with CRS
     environment:
-      - SERVER_NAME=www.website.com                          # replace with your domain
+      - SERVER_NAME=www.example.com                          # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - REDIRECT_HTTP_TO_HTTPS=yes

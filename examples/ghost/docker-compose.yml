@@ -15,7 +15,7 @@ services:
     volumes:
       - ./letsencrypt:/etc/letsencrypt
     environment:
-      - SERVER_NAME=www.website.com                          # replace with your domain
+      - SERVER_NAME=www.example.com                          # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
@@ -31,4 +31,4 @@ services:
     volumes:
       - ./data-ghost:/var/lib/ghost/content
     environment:
-      - url=https://www.website.com                          # replace with your domain
+      - url=https://www.example.com                          # replace with your domain
