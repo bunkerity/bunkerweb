@@ -6,4 +6,4 @@ class CertbotRenew(Job) :
 		name = "certbot-renew"
 		data = ["certbot", "renew", "--deploy-hook", "/opt/bunkerized-nginx/jobs/reload.py"]
 		type = "exec"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, copy_cache=copy_cache)
+		super().__init__(name, data, filename=None, redis_host=redis_host, type=type, copy_cache=copy_cache)

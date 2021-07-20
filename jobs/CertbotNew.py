@@ -6,4 +6,4 @@ class CertbotRenew(Job) :
 		name = "certbot-new"
 		data = ["certbot", "certonly", "--webroot", "-w", "/opt/bunkerized-nginx/acme-challenge", "-n", "-d", domain, "--email", email, "--agree-tos"]
 		type = "exec"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, copy_cache=copy_cache)
+		super().__init__(name, data, filename=None, redis_host=redis_host, type=type, copy_cache=copy_cache)

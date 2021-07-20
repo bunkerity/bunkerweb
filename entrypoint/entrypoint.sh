@@ -61,8 +61,8 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 		# call the generator
 		/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env
 
-		# pre-jobs
-		/opt/bunkerized-nginx/entrypoint/pre-jobs.sh
+		# jobs
+		/opt/bunkerized-nginx/entrypoint/jobs.sh
 	fi
 else
 	echo "[*] Skipping configuration process"
@@ -99,9 +99,6 @@ if [ "$1" == "test" ] ; then
 	fi
 	exit 1
 fi
-
-# post jobs
-/opt/bunkerized-nginx/entrypoint/post-jobs.sh
 
 # wait for nginx
 wait "$pid"

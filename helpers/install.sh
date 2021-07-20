@@ -695,6 +695,10 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/confs /opt/bunkerized-nginx
 echo "[*] Copy scripts"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/scripts /opt/bunkerized-nginx
 
+# Copy scripts
+echo "[*] Copy jobs"
+do_and_check_cmd cp -r /tmp/bunkerized-nginx/jobs /opt/bunkerized-nginx
+
 # Copy LUA
 echo "[*] Copy LUA"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua /opt/bunkerized-nginx
@@ -796,6 +800,7 @@ do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/scripts/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
+do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/main.py
 # Set permissions for /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx
@@ -865,29 +870,37 @@ do_and_check_cmd cp /tmp/bunkerized-nginx/misc/cron "$CRON_PATH"
 do_and_check_cmd chown root:nginx "$CRON_PATH"
 do_and_check_cmd chmod 740 "$CRON_PATH"
 
+# Don't install external things on Docker image
+if [ "$OS" = "alpine" ] ; then
+	cd "$old_dir"
+	cleanup
+	echo "[*] bunkerized-nginx successfully installed !"
+	exit 0
+fi
+
 # Download abusers list
 echo "[*] Download abusers list"
-do_and_check_cmd /opt/bunkerized-nginx/scripts/abusers.sh
+do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name abusers
 
 # Download TOR exit nodes list
 echo "[*] Download TOR exit nodes list"
-do_and_check_cmd /opt/bunkerized-nginx/scripts/exit-nodes.sh
+do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name exit-nodes
 
 # Download proxies list
 echo "[*] Download proxies list"
-do_and_check_cmd /opt/bunkerized-nginx/scripts/proxies.sh
+do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name proxies
 
 # Download referrers list
 echo "[*] Download referrers list"
-do_and_check_cmd /opt/bunkerized-nginx/scripts/referrers.sh
+do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name referrers
 
 # Download user agents list
 echo "[*] Download user agents list"
-do_and_check_cmd /opt/bunkerized-nginx/scripts/user-agents.sh
+do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name user-agents
 
 # Download geoip database
 echo "[*] Download geoip DB"
-do_and_check_cmd /opt/bunkerized-nginx/scripts/geoip.sh
+do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name geoip
 
 # We're done
 cd "$old_dir"

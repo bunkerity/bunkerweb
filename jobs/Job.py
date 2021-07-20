@@ -2,7 +2,7 @@ import abc, requests, redis, os, datetime, traceback
 
 class Job(abc.ABC) :
 
-	def __init__(self, name, data, filename, redis_host=None, type="line", regex=r"^.+$", copy_cache=False) :
+	def __init__(self, name, data, filename=None, redis_host=None, type="line", regex=r"^.+$", copy_cache=False) :
 		self.__name = name
 		self.__data = data
 		self.__filename = filename
