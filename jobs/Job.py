@@ -2,9 +2,9 @@ import abc, requests, redis, os
 
 class Job(abc.ABC) :
 
-	def __init__(self, name, urls, filename, redis_host=None, type="line", regex=r"^.*$") :
+	def __init__(self, name, data, filename, redis_host=None, type="line", regex=r"^.+$") :
 		self.__name = name
-		self.__urls = urls
+		self.__data = data
 		self.__filename = filename
 		self.__redis = None
 		if redis_host != None :
@@ -13,6 +13,12 @@ class Job(abc.ABC) :
 		self.__regex = regex
 
 	def run(self) :
+		if self.__type == "line" or self.__type == "file" :
+			self.__external()
+		elif self.__type == "exec" :
+			self.__exec()
+
+	def __external(self) :
 		if self.__redis == None :
 			if os.path.isfile("/tmp/" + self.__filename) :
 				os.remove("/tmp/" + self.__filename)
@@ -22,7 +28,7 @@ class Job(abc.ABC) :
 			pipe = self.__redis.pipeline()
 
 		count = 0
-		for url in self.__urls :
+		for url in self.__data :
 			data = self.__download_data(url)
 			for chunk in data :
 				if self.__type == "line" and not re.match(self.__regex, chunk) :
@@ -52,3 +58,6 @@ class Job(abc.ABC) :
 		if self.__type == "line" :
 			return r.iter_lines()
 		return r.iter_content(chunk_size=8192)
+
+	def __exec(self) :
+		proc = subprocess.run(self.__data, capture_output=True)
