@@ -4,12 +4,12 @@ import datetime, gzip
 
 class GeoIP(Job) :
 
-	def __init__(self, redis_host=None) :
+	def __init__(self, redis_host=None, copy_cache=False) :
 		name = "geoip"
 		data = ["https://download.db-ip.com/free/dbip-country-lite-" + datetime.datetime.today().strftime("%Y-%m") + ".mmdb.gz"]
 		filename = "geoip.mmdb.gz"
 		type = "file"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex)
+		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)
 
 	def run(self) :
 		super().run()

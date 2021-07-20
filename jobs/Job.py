@@ -2,7 +2,7 @@ import abc, requests, redis, os, datetime, traceback
 
 class Job(abc.ABC) :
 
-	def __init__(self, name, data, filename, redis_host=None, type="line", regex=r"^.+$") :
+	def __init__(self, name, data, filename, redis_host=None, type="line", regex=r"^.+$", copy_cache=False) :
 		self.__name = name
 		self.__data = data
 		self.__filename = filename
@@ -15,6 +15,7 @@ class Job(abc.ABC) :
 				self.__log("can't connect to redis host " + redis_host)
 		self.__type = type
 		self.__regex = regex
+		self.__copy_cache = copy_cache
 
 	def __log(self, data) :
 		when = datetime.datetime.today().strftime("[%Y-%m-%d %H:%M:%S]")
@@ -25,7 +26,10 @@ class Job(abc.ABC) :
 	def run(self) :
 		try :
 			if self.__type == "line" or self.__type == "file" :
+				if self.__copy_cache and self.__from_cache() :
+					return True
 				self.__external()
+				self.__to_cache()
 			elif self.__type == "exec" :
 				self.__exec()
 		except Exception as e :
@@ -84,3 +88,31 @@ class Job(abc.ABC) :
 			self.__log("stderr = " + stderr)
 		if proc.returncode != 0 :
 			raise Exception("error code " + str(proc.returncode))
+
+	def __from_cache(self) :
+		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :
+			return False
+		if self.__redis == None or self.__type == "file" :
+			shutil.copyfile("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename)
+		elif self.__redis != None and self.__type == "line" :
+			self.__redis.del(self.__redis.keys(self.__name + "_*"))
+			with open("/opt/bunkerized-nginx/cache/" + self.__filename) as f :
+				pipe = self.__redis.pipeline()
+				while True :
+					line = f.readline()
+					if not line :
+						break
+					line = line.strip()
+					pipe.set(self.__name + "_" + line, "1")
+				pipe.execute()
+		return True
+
+	def __to_cache(self) :
+		if self.__redis == None or self.__type == "file" :
+			shutil.copyfile("/etc/nginx/" + self.__filename, "/opt/bunkerized-nginx/cache/" + self.__filename)
+		elif self.__redis != None and self.__type == "line" :
+			if os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :
+				os.remove("/opt/bunkerized-nginx/cache/" + self.__filename)
+			with open("/opt/bunkerized-nginx/cache/" + self.__filename, "a") as f :
+				for key in self.__redis.keys(self.__name + "_*") :
+					f.write(self.__redis.get(key) + "\n")
