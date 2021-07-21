@@ -50,15 +50,17 @@ class Job(abc.ABC) :
 		for url in self.__data :
 			data = self.__download_data(url)
 			for chunk in data :
-				if self.__type == "line" and not re.match(self.__regex, chunk.decode("utf-8")) :
-					continue
-				count += 1
+				if self.__type == "line" :
+					if not re.match(self.__regex, chunk.decode("utf-8")) :
+						continue
+					chunk = self.__edit(chunk)
 				if self.__redis == None :
 					if self.__type == "line" :
 						chunk += b"\n"
 					file.write(chunk)
 				else :
 					pipe.set(self.__name + "_" + chunk, "1")
+				count += 1
 
 		if self.__redis == None :
 			file.close()
@@ -88,6 +90,9 @@ class Job(abc.ABC) :
 			self.__log("stderr = " + stderr)
 		if proc.returncode != 0 :
 			raise Exception("error code " + str(proc.returncode))
+
+	def __edit(self, chunk) :
+		return chunk
 
 	def __from_cache(self) :
 		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :

@@ -59,10 +59,14 @@ if __name__ == "__main__" :
 	# TODO : only reload if needed
 	do_reload = True
 	if do_reload :
-		if not reload() :
+		ret = reload()
+		if ret == 0 :
+			print("[*] Reload operation successfully executed")
+		elif ret == 1 :
 			print("[!] Error while doing reload operation")
 			sys.exit(1)
-		print("[*] Reload operation successfully executed")
+		elif ret == 2 :
+			print("[*] Skipped reload operation because nginx is not running")
 
 	# Done
 	sys.exit(0)

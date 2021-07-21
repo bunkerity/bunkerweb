@@ -11,8 +11,8 @@ def reload() :
 				print(proc.stdout.decode("ascii"))
 			if len(proc.stderr.decode("ascii")) > 1 :
 				print(proc.stderr.decode("ascii"))
-			return False
-		return True
+			return 0
+		return 1
 
 	# Autoconf case (Docker, Swarm and Ingress)
 	if os.path.exists("/tmp/autoconf.sock") and stat.S_ISSOCK(os.stat("/tmp/autoconf.sock")) :
@@ -23,17 +23,21 @@ def reload() :
 		client.close()
 		if not data or data.decode("utf-8") != "ok" :
 			print("[!] Can't reload nginx (data not ok)")
-			return False
-		return True
+			return 0
+		return 1
 
-	return False
+	return 2
 
 if __name__ == "__main__" :
 	try :
 		print("[*] Starting reload operation ...")
-		if not reload() :
+		ret = reload()
+		if ret == 0 :
 			sys.exit(1)
-		print("[*] Reload operation successfully executed")
+		elif ret == 1 :
+			print("[*] Reload operation successfully executed")
+		elif ret == 2 :
+			print("[*] Skipped reload operation because nginx is not running")
 		sys.exit(0)
 	except :
 		print("[!] Can't reload nginx (exception)")

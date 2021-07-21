@@ -9,3 +9,6 @@ class UserAgents(Job) :
 		type = "line"
 		regex = r"^.+$"
 		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)
+
+	def __edit(self, chunk) :
+		return chunk.replace(b"\\ ", b" ").replace(b"\\.", b"%.").replace(b"\\\\", b"\\").replace(b"-", b"%-")
