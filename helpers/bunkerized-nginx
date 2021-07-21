@@ -36,8 +36,8 @@ echo "[*] Generate configuration files"
 do_and_check_cmd "/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /opt/bunkerized-nginx/variables.env"
 
 # Run pre-jobs
-echo "[*] Run pre-jobs"
-do_and_check_cmd "/opt/bunkerized-nginx/entrypoint/pre-jobs.sh"
+echo "[*] Run jobs"
+do_and_check_cmd "/opt/bunkerized-nginx/entrypoint/jobs.sh"
 
 # Reload nginx if it's running
 if [ -f "/tmp/nginx.pid" ] ; then
@@ -49,6 +49,5 @@ else
 	AS_ROOT="yes" do_and_check_cmd nginx -g 'daemon on; user nginx;'
 fi
 
-# Run post-jobs
-echo "[*] Run post-jobs"
-do_and_check_cmd /opt/bunkerized-nginx/entrypoint/post-jobs.sh
+# Done
+echo "[*] bunkerized-nginx successfully executed"

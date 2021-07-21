@@ -5,6 +5,7 @@ import argparse, sys
 sys.path.append("/opt/bunkerized-nginx/jobs")
 
 import Abusers, CertbotNew, CertbotRenew, ExitNodes, GeoIP, Proxies, Referrers, SelfSignedCert, UserAgents
+from Job import JobRet
 
 from reload import reload
 
@@ -50,15 +51,14 @@ if __name__ == "__main__" :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, dst_cert=args.dst_cert, dst_key=args.dst_key, expiry=args.expiry, subj=args.subj)
 	else :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache)
-	if not instance.run() :
+	ret = instance.run()
+	if ret == JobRet.KO :
 		print("[!] Error while running job " + job)
 		sys.exit(1)
 	print("[*] Job " + job + " successfully executed")
 
 	# Reload
-	# TODO : only reload if needed
-	do_reload = True
-	if do_reload :
+	if ret == JobRet.OK_RELOAD :
 		ret = reload()
 		if ret == 0 :
 			print("[*] Reload operation successfully executed")
@@ -67,6 +67,8 @@ if __name__ == "__main__" :
 			sys.exit(1)
 		elif ret == 2 :
 			print("[*] Skipped reload operation because nginx is not running")
+	else :
+		print("[*] Skipped reload operation because it's not needed")
 
 	# Done
 	sys.exit(0)

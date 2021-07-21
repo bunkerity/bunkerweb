@@ -1,6 +1,6 @@
 from Job import Job
 
-import datetime, gzip
+import datetime, gzip, shutil, os
 
 class GeoIP(Job) :
 
@@ -9,13 +9,13 @@ class GeoIP(Job) :
 		data = ["https://download.db-ip.com/free/dbip-country-lite-" + datetime.datetime.today().strftime("%Y-%m") + ".mmdb.gz"]
 		filename = "geoip.mmdb.gz"
 		type = "file"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)
+		super().__init__(name, data, filename, redis_host=redis_host, type=type, copy_cache=copy_cache)
 
 	def run(self) :
 		super().run()
 		count = 0
 		with gzip.open("/etc/nginx/geoip.mmdb.gz", "rb") as f :
-			with open("/tmp/geoip.mmdb", "w") as f2 :
+			with open("/tmp/geoip.mmdb", "wb") as f2 :
 				while True :
 					chunk = f.read(8192)
 					if not chunk :

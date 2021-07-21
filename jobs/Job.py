@@ -1,4 +1,9 @@
-import abc, requests, redis, os, datetime, traceback, re, shutil
+import abc, requests, redis, os, datetime, traceback, re, shutil, enum, filecmp
+
+class JobRet(enum.Enum) :
+	KO		= 0
+	OK_RELOAD	= 1
+	OK_NO_RELOAD	= 2
 
 class Job(abc.ABC) :
 
@@ -24,18 +29,21 @@ class Job(abc.ABC) :
 			f.write(when + " " + what)
 
 	def run(self) :
+		ret = JobRet.KO
 		try :
 			if self.__type == "line" or self.__type == "file" :
-				if self.__copy_cache and self.__from_cache() :
-					return True
-				self.__external()
+				if self.__copy_cache :
+					ret = self.__from_cache()
+					if ret != JobRet.KO :
+						return ret
+				ret = self.__external()
 				self.__to_cache()
 			elif self.__type == "exec" :
-				self.__exec()
+				return self.__exec()
 		except Exception as e :
 			self.__log("exception while running job : " + traceback.format_exc())
-			return False
-		return True
+			return JobRet.KO
+		return ret
 
 	def __external(self) :
 		if self.__redis == None :
@@ -67,10 +75,14 @@ class Job(abc.ABC) :
 			if count > 0 :
 				shutil.copyfile("/tmp/" + self.__filename, "/etc/nginx/" + self.__filename)
 			os.remove("/tmp/" + self.__filename)
+			return JobRet.OK_RELOAD
 
 		elif self.__redis != None and count > 0 :
 			self.__redis.delete(self.__redis.keys(self.__name + "_*"))
 			pipe.execute()
+			return JobRet.OK_RELOAD
+
+		return JobRet.KO
 
 	def __download_data(self, url) :
 		r = requests.get(url, stream=True)
@@ -89,17 +101,24 @@ class Job(abc.ABC) :
 		if len(stderr) > 1 :
 			self.__log("stderr = " + stderr)
 		if proc.returncode != 0 :
-			raise Exception("error code " + str(proc.returncode))
+			return JobRet.KO
+		# TODO : check if reload is needed ?
+		return JobRet.OK_RELOAD
 
 	def __edit(self, chunk) :
 		return chunk
 
 	def __from_cache(self) :
 		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :
-			return False
+			return JobRet.KO
+
 		if self.__redis == None or self.__type == "file" :
-			shutil.copyfile("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename)
-		elif self.__redis != None and self.__type == "line" :
+			if not os.path.isfile("/etc/nginx/" + self.__filename) or not filecmp.cmp("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename, shallow=False) :
+				shutil.copyfile("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename)
+				return JobRet.OK_RELOAD
+			return JobRet.OK_NO_RELOAD
+
+		if self.__redis != None and self.__type == "line" :
 			self.__redis.delete(self.__redis.keys(self.__name + "_*"))
 			with open("/opt/bunkerized-nginx/cache/" + self.__filename) as f :
 				pipe = self.__redis.pipeline()
@@ -110,7 +129,9 @@ class Job(abc.ABC) :
 					line = line.strip()
 					pipe.set(self.__name + "_" + line, "1")
 				pipe.execute()
-		return True
+				return JobRet.OK_NO_RELOAD
+
+		return JobRet.KO
 
 	def __to_cache(self) :
 		if self.__redis == None or self.__type == "file" :

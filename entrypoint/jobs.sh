@@ -70,30 +70,30 @@ fi
 
 # GeoIP
 if [ "$(has_value BLACKLIST_COUNTRY ".\+")" != "" ] || [ "$(has_value WHITELIST_COUNTRY ".\+")" != "" ] ; then
-	/opt/bunkerized-nginx/jobs/main.py --name geoip
+	/opt/bunkerized-nginx/jobs/main.py --name geoip --cache
 fi
 
 # User-Agents
 if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
-	/opt/bunkerized-nginx/jobs/main.py --name user-agents
+	/opt/bunkerized-nginx/jobs/main.py --name user-agents --cache
 fi
 
 # Referrers
 if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
-	/opt/bunkerized-nginx/jobs/main.py --name referrers
+	/opt/bunkerized-nginx/jobs/main.py --name referrers --cache
 fi
 
 # exit nodes
 if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
-	/opt/bunkerized-nginx/jobs/main.py --name exit-nodes
+	/opt/bunkerized-nginx/jobs/main.py --name exit-nodes --cache
 fi
 
 # proxies
 if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
-	/opt/bunkerized-nginx/jobs/main.py --name proxies
+	/opt/bunkerized-nginx/jobs/main.py --name proxies --cache
 fi
 
 # abusers
 if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
-	/opt/bunkerized-nginx/jobs/main.py --name abusers
+	/opt/bunkerized-nginx/jobs/main.py --name abusers --cache
 fi

@@ -886,27 +886,27 @@ fi
 
 # Download abusers list
 echo "[*] Download abusers list"
-do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name abusers
+do_and_check_cmd su -s "/bin/bash" -c "/opt/bunkerized-nginx/jobs/main.py --name abusers" nginx
 
 # Download TOR exit nodes list
 echo "[*] Download TOR exit nodes list"
-do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name exit-nodes
+do_and_check_cmd su -s "/bin/bash" -c "/opt/bunkerized-nginx/jobs/main.py --name exit-nodes" nginx
 
 # Download proxies list
 echo "[*] Download proxies list"
-do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name proxies
+do_and_check_cmd su -s "/bin/bash" -c "/opt/bunkerized-nginx/jobs/main.py --name proxies" nginx
 
 # Download referrers list
 echo "[*] Download referrers list"
-do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name referrers
+do_and_check_cmd su -s "/bin/bash" -c "/opt/bunkerized-nginx/jobs/main.py --name referrers" nginx
 
 # Download user agents list
 echo "[*] Download user agents list"
-do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name user-agents
+do_and_check_cmd su -s "/bin/bash" -c "/opt/bunkerized-nginx/jobs/main.py --name user-agents" nginx
 
 # Download geoip database
 echo "[*] Download geoip DB"
-do_and_check_cmd /opt/bunkerized-nginx/jobs/main.py --name geoip
+do_and_check_cmd su -s "/bin/bash" -c "/opt/bunkerized-nginx/jobs/main.py --name geoip" nginx
 
 # We're done
 cd "$old_dir"
