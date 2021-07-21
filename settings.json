@@ -1313,6 +1313,15 @@
                 "label": "worker_connections directive",
                 "regex": "^[0-9]+$",
                 "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "auto",
+                "env": "WORKER_PROCESSES",
+                "id": "worker-processes",
+                "label": "worker_processes directive",
+                "regex": "^(auto|[0-9]+)$",
+                "type": "text"
             }
         ]
     },
