@@ -16,16 +16,13 @@ trap "trap_exit" TERM INT QUIT
 function trap_reload() {
 	echo "[*] Catched reload operation"
 	if [ "$SWARM_MODE" != "yes" ] ; then
-		/opt/bunkerized-nginx/entrypoint/pre-jobs.sh
+		/opt/bunkerized-nginx/entrypoint/jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
 		echo "[*] Reloading nginx ..."
 		nginx -s reload
 		if [ $? -eq 0 ] ; then
 			echo "[*] Reload successfull"
-			if [ "$SWARM_MODE" != "yes" ] ; then
-				/opt/bunkerized-nginx/entrypoint/post-jobs.sh
-			fi
 		else
 			echo "[!] Reload failed"
 		fi
@@ -61,7 +58,7 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 		# call the generator
 		/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env
 
-		# jobs
+		# call jobs
 		/opt/bunkerized-nginx/entrypoint/jobs.sh
 	fi
 else

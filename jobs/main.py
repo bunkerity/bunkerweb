@@ -1,8 +1,12 @@
+#!/usr/bin/python3
+
 import argparse, sys
 
 sys.path.append("/opt/bunkerized-nginx/jobs")
 
 import Abusers, CertbotNew, CertbotRenew, ExitNodes, GeoIP, Proxies, Referrers, SelfSignedCert, UserAgents
+
+from reload import reload
 
 JOBS = {
 	"abusers": Abusers.Abusers,
@@ -33,10 +37,12 @@ if __name__ == "__main__" :
 
 	# Check job name
 	if not args.name in JOBS :
-		print("[!] unknown job " + args.job)
+		print("[!] unknown job " + args.name)
 		sys.exit(1)
+	job = args.name
 
 	# Run job
+	print("[*] Executing job " + job)
 	ret = 0
 	if job == "certbot-new" :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, domain=args.domain, email=args.email)
@@ -45,9 +51,18 @@ if __name__ == "__main__" :
 	else :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache)
 	if not instance.run() :
-		print("[!] error while running job " + job)
+		print("[!] Error while running job " + job)
 		sys.exit(1)
-	print("[*] job " + job + " successfully executed")
-	sys.exit(0)
+	print("[*] Job " + job + " successfully executed")
 
-	# TODO : reload
+	# Reload
+	# TODO : only reload if needed
+	do_reload = True
+	if do_reload :
+		if not reload() :
+			print("[!] Error while doing reload operation")
+			sys.exit(1)
+		print("[*] Reload operation successfully executed")
+
+	# Done
+	sys.exit(0)

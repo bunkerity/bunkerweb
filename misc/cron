@@ -1,7 +1,7 @@
-15 0 * * * /opt/bunkerized-nginx/scripts/certbot-renew.sh > /dev/null 2>&1
-30 0 * * * /opt/bunkerized-nginx/scripts/user-agents.sh > /dev/null 2>&1
-45 0 * * * /opt/bunkerized-nginx/scripts/referrers.sh > /dev/null 2>&1
-0 1 * * * /opt/bunkerized-nginx/scripts/abusers.sh > /dev/null 2>&1
-0 2 * * * /opt/bunkerized-nginx/scripts/proxies.sh > /dev/null 2>&1
-0 */1 * * * /opt/bunkerized-nginx/scripts/exit-nodes.sh > /dev/null 2>&1
-0 3 2 * * /opt/bunkerized-nginx/scripts/geoip.sh > /dev/null 2>&1
+15 0 * * * /opt/bunkerized-nginx/jobs/main.py --name certbot-renew >> /var/log/nginx/jobs.log 2>&1
+30 0 * * * /opt/bunkerized-nginx/jobs/main.py --name user-agents >> /var/log/nginx/jobs.log 2>&1
+45 0 * * * /opt/bunkerized-nginx/jobs/main.py --name referrers >> /var/log/nginx/jobs.log 2>&1
+0 1 * * * /opt/bunkerized-nginx/jobs/main.py --name abusers >> /var/log/nginx/jobs.log 2>&1
+0 2 * * * /opt/bunkerized-nginx/jobs/main.py --name proxies >> /var/log/nginx/jobs.log 2>&1
+0 */1 * * * /opt/bunkerized-nginx/jobs/main.py --name exit-nodes >> /var/log/nginx/jobs.log 2>&1
+0 3 2 * * /opt/bunkerized-nginx/jobs/main.py --name geoip >> /var/log/nginx/jobs.log 2>&1

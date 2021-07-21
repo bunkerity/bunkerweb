@@ -58,7 +58,7 @@ if [ "$files" != "" ] ; then
 		if [ "$EMAIL_LETS_ENCRYPT" = "" ] ; then
 			EMAIL_LETS_ENCRYPT="contact@${FIRST_SERVER}"
 		fi
-		certbot_output=$(/opt/bunkerized-nginx/scripts/certbot-new.sh "$(echo -n $SERVER_NAME | sed 's/ /,/g')" "$EMAIL_LETS_ENCRYPT" 2>&1)
+		/opt/bunkerized-nginx/jobs/main.py --name certbot-new --domain "$(echo -n $SERVER_NAME | sed 's/ /,/g')" --email "$EMAIL_LETS_ENCRYPT"
 		if [ $? -eq 0 ] ; then
 			echo "[*] Certbot new successfully executed for domain(s) $(echo -n $SERVER_NAME | sed 's/ /,/g')"
 		else
@@ -70,11 +70,30 @@ fi
 
 # GeoIP
 if [ "$(has_value BLACKLIST_COUNTRY ".\+")" != "" ] || [ "$(has_value WHITELIST_COUNTRY ".\+")" != "" ] ; then
-	if [ -f "/opt/bunkerized-nginx/cache/geoip.mmdb" ] ; then
-		echo "[*] Copying cached geoip.mmdb ..."
-		cp /opt/bunkerized-nginx/cache/geoip.mmdb /etc/nginx/geoip.mmdb
-	elif [ "$(ps aux | grep "geoip\.sh")" = "" ] ; then
-		echo "[*] Downloading GeoIP database ..."
-		/opt/bunkerized-nginx/scripts/geoip.sh > /dev/null 2>&1
-	fi
+	/opt/bunkerized-nginx/jobs/main.py --name geoip
+fi
+
+# User-Agents
+if [ "$(has_value BLOCK_USER_AGENT yes)" != "" ] ; then
+	/opt/bunkerized-nginx/jobs/main.py --name user-agents
+fi
+
+# Referrers
+if [ "$(has_value BLOCK_REFERRER yes)" != "" ] ; then
+	/opt/bunkerized-nginx/jobs/main.py --name referrers
+fi
+
+# exit nodes
+if [ "$(has_value BLOCK_TOR_EXIT_NODE yes)" != "" ] ; then
+	/opt/bunkerized-nginx/jobs/main.py --name exit-nodes
+fi
+
+# proxies
+if [ "$(has_value BLOCK_PROXIES yes)" != "" ] ; then
+	/opt/bunkerized-nginx/jobs/main.py --name proxies
+fi
+
+# abusers
+if [ "$(has_value BLOCK_ABUSERS yes)" != "" ] ; then
+	/opt/bunkerized-nginx/jobs/main.py --name abusers
 fi

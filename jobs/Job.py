@@ -1,4 +1,4 @@
-import abc, requests, redis, os, datetime, traceback
+import abc, requests, redis, os, datetime, traceback, re, shutil
 
 class Job(abc.ABC) :
 
@@ -41,7 +41,7 @@ class Job(abc.ABC) :
 		if self.__redis == None :
 			if os.path.isfile("/tmp/" + self.__filename) :
 				os.remove("/tmp/" + self.__filename)
-			file = open("/tmp/" + self.__filename, "a")
+			file = open("/tmp/" + self.__filename, "ab")
 
 		elif self.__redis != None :
 			pipe = self.__redis.pipeline()
@@ -50,7 +50,7 @@ class Job(abc.ABC) :
 		for url in self.__data :
 			data = self.__download_data(url)
 			for chunk in data :
-				if self.__type == "line" and not re.match(self.__regex, chunk) :
+				if self.__type == "line" and not re.match(self.__regex, chunk.decode("utf-8")) :
 					continue
 				count += 1
 				if self.__redis == None :
@@ -67,7 +67,7 @@ class Job(abc.ABC) :
 			os.remove("/tmp/" + self.__filename)
 
 		elif self.__redis != None and count > 0 :
-			self.__redis.del(self.__redis.keys(self.__name + "_*"))
+			self.__redis.delete(self.__redis.keys(self.__name + "_*"))
 			pipe.execute()
 
 	def __download_data(self, url) :
@@ -95,7 +95,7 @@ class Job(abc.ABC) :
 		if self.__redis == None or self.__type == "file" :
 			shutil.copyfile("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename)
 		elif self.__redis != None and self.__type == "line" :
-			self.__redis.del(self.__redis.keys(self.__name + "_*"))
+			self.__redis.delete(self.__redis.keys(self.__name + "_*"))
 			with open("/opt/bunkerized-nginx/cache/" + self.__filename) as f :
 				pipe = self.__redis.pipeline()
 				while True :

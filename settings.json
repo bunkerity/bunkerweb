@@ -1153,8 +1153,8 @@
             }
         ]
     },
-    "API": {
-        "id": "api",
+    "Internal": {
+        "id": "internal",
         "params": [
             {
                 "context": "global",
@@ -1191,6 +1191,24 @@
                 "label": "Swarm mode",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "no",
+                "env": "USE_REDIS",
+                "id": "use-redis",
+                "label": "Use external redis when coupled with autoconf",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "",
+                "env": "REDIS_HOST",
+                "id": "redis-host",
+                "label": "Hostname/IP of the Redis service",
+                "regex": "^[A-Za-z0-9\\-\\.\\_]+$",
+                "type": "text"
             }
         ]
     },

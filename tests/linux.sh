@@ -19,7 +19,15 @@ docker cp helpers/install.sh "$id:/tmp"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker cp failed"
 	cleanup "$id"
-	exit 4
+	exit 2
+fi
+
+echo "[*] Copy bunkerized-nginx"
+docker cp . "$id:/tmp/bunkerized-nginx-test"
+if [ $? -ne 0 ] ; then
+	echo "[!] docker cp failed"
+	cleanup "$id"
+	exit 3
 fi
 
 echo "[*] Exec install.sh"
@@ -27,7 +35,7 @@ docker exec "$id" /bin/bash -c 'chmod +x /tmp/install.sh && /tmp/install.sh'
 if [ $? -ne 0 ] ; then
 	echo "[!] docker exec failed"
 	cleanup "$id"
-	exit 5
+	exit 4
 fi
 
 echo "[*] Exec nginx -V"
@@ -35,7 +43,7 @@ docker exec "$id" nginx -V
 if [ $? -ne 0 ] ; then
 	echo "[!] docker exec failed"
 	cleanup "$id"
-	exit 6
+	exit 5
 fi
 
 echo "[*] Copy variables.env"
@@ -43,7 +51,7 @@ docker cp "tests/variables.env" "$id:/opt/bunkerized-nginx"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker cp failed"
 	cleanup "$id"
-	exit 7
+	exit 6
 fi
 
 echo "[*] Copy index.html"
@@ -51,7 +59,7 @@ docker cp "tests/index.html" "$id:/opt/bunkerized-nginx/www"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker cp failed"
 	cleanup "$id"
-	exit 8
+	exit 7
 fi
 
 echo "[*] Exec bunkerized-nginx"
@@ -59,7 +67,7 @@ docker exec "$id" bunkerized-nginx
 if [ $? -ne 0 ] ; then
 	echo "[!] docker exec failed"
 	cleanup "$id"
-	exit 9
+	exit 8
 fi
 
 echo "[*] Exec curl"
@@ -67,7 +75,7 @@ res="$(curl -s -H "User-Agent: LegitOne" http://localhost/)"
 if [ $? -ne 0 ] || [ "$res" != "ok" ] ; then
 	echo "[!] curl failed"
 	cleanup "$id"
-	exit 10
+	exit 9
 fi
 
 cleanup "$id"

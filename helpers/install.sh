@@ -592,6 +592,12 @@ git_secure_clone https://github.com/hamishforbes/lua-resty-iputils.git 3151d6485
 echo "[*] Install lua-resty-iputils"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-iputils" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
 
+# Download and install lua-resty-redis
+echo "[*] Clone openresty/lua-resty-redis"
+git_secure_clone https://github.com/openresty/lua-resty-redis.git 91585affcd9a8da65cb664a5b1e926dde428095a
+echo "[*] Install lua-resty-redis"
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-redis" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
+
 # Download nginx and decompress sources
 echo "[*] Download nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
@@ -659,21 +665,25 @@ elif [ "$OS" = "alpine" ] ; then
 fi
 
 # Clone the repo
-if [ "$OS" != "alpine" ] ; then
+if [ "$OS" != "alpine" ] && [ ! -d "/tmp/bunkerized-nginx-test" ] ; then
 	echo "[*] Clone bunkerity/bunkerized-nginx"
 	#CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 09a2a4f9e531b93684b0916a5146091a818501d3
 	# TODO : do a secure clone
 	CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
 	CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev
 # Docker build case : simply rename the sources
-else
+elif [ "$OS" == "alpine" ] ; then
 	do_and_check_cmd mv /tmp/bunkerized-nginx-docker /tmp/bunkerized-nginx
+# Tests case
+else
+	do_and_check_cmd mv /tmp/bunkerized-nginx-test /tmp/bunkerized-nginx
 fi
 
 # Install Python dependencies
 echo "[*] Install python dependencies"
 do_and_check_cmd pip3 install --upgrade pip
 do_and_check_cmd pip3 install -r /tmp/bunkerized-nginx/gen/requirements.txt
+do_and_check_cmd pip3 install -r /tmp/bunkerized-nginx/jobs/requirements.txt
 if [ "$OS" != "alpine" ] ; then
 	do_and_check_cmd pip3 install -r /tmp/bunkerized-nginx/ui/requirements.txt
 fi
@@ -691,11 +701,7 @@ do_and_check_cmd cp -r /tmp/bunkerized-nginx/entrypoint /opt/bunkerized-nginx
 echo "[*] Copy configs"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/confs /opt/bunkerized-nginx
 
-# Copy scripts
-echo "[*] Copy scripts"
-do_and_check_cmd cp -r /tmp/bunkerized-nginx/scripts /opt/bunkerized-nginx
-
-# Copy scripts
+# Copy jobs
 echo "[*] Copy jobs"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/jobs /opt/bunkerized-nginx
 
@@ -797,10 +803,10 @@ do_and_check_cmd find /opt/bunkerized-nginx -type f -exec chmod 0740 {} \;
 do_and_check_cmd find /opt/bunkerized-nginx -type d -exec chmod 0750 {} \;
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
-do_and_check_cmd chmod 750 /opt/bunkerized-nginx/scripts/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/main.py
+do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/reload.py
 # Set permissions for /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx

@@ -8,4 +8,4 @@ class Proxies(Job) :
 		filename = "proxies.list"
 		type = "line"
 		regex = r"^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?[0-9]*$"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex; copy_cache=copy_cache)
+		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)

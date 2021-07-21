@@ -15,7 +15,7 @@ class GeoIP(Job) :
 		super().run()
 		count = 0
 		with gzip.open("/etc/nginx/geoip.mmdb.gz", "rb") as f :
-			with open("/tmp/geoip.mmdb", "w") as f2
+			with open("/tmp/geoip.mmdb", "w") as f2 :
 				while True :
 					chunk = f.read(8192)
 					if not chunk :

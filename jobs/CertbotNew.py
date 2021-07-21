@@ -1,6 +1,6 @@
 from Job import Job
 
-class CertbotRenew(Job) :
+class CertbotNew(Job) :
 
 	def __init__(self, redis_host=None, copy_cache=False, domain="", email="") :
 		name = "certbot-new"
