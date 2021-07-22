@@ -61,13 +61,17 @@ class Job(abc.ABC) :
 				if self.__type == "line" :
 					if not re.match(self.__regex, chunk.decode("utf-8")) :
 						continue
-					chunk = self.__edit(chunk)
+					chunks = self.__edit(chunk)
 				if self.__redis == None :
 					if self.__type == "line" :
 						chunk += b"\n"
 					file.write(chunk)
 				else :
-					pipe.set(self.__name + "_" + chunk, "1")
+					if self.__type == "line" :
+						for chunk in chunks :
+							pipe.set(self.__name + "_" + chunk, "1")
+					else :
+						pipe.set(self.__name + "_" + chunk, "1")
 				count += 1
 
 		if self.__redis == None :
@@ -106,7 +110,7 @@ class Job(abc.ABC) :
 		return JobRet.OK_RELOAD
 
 	def __edit(self, chunk) :
-		return chunk
+		return [chunk]
 
 	def __from_cache(self) :
 		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :

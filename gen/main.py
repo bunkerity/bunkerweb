@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import argparse, os, sys, shutil
+import argparse, os, sys, shutil, glob
 
 import utils
 from Configurator import Configurator
