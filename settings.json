@@ -534,7 +534,7 @@
                 "env": "EMAIL_LETS_ENCRYPT",
                 "id": "email-lets-encrypt",
                 "label": "Email lets encrypt",
-                "regex": "^([a-z0-9\\-\\.]+@([a-z\\-0-9]+\\.?)|.{0})$",
+                "regex": "^([a-z0-9\-\.]+@[a-z\-0-9\.]+|.{0})$",
                 "type": "text"
             },
             {
