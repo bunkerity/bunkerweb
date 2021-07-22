@@ -173,7 +173,7 @@ class AutoConf :
 				self.__servers[id].reload()
 				utils.log("[*] Deactivating config for " + vars["SERVER_NAME"])
 				self.__gen_env()
-				if self.__config.reload() :
+				if self.__config.reload(self.__instances) :
 					utils.log("[*] Deactivated config for " + vars["SERVER_NAME"])
 				else :
 					utils.log("[!] Can't deactivate config for " + vars["SERVER_NAME"])
