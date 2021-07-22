@@ -974,7 +974,7 @@
                 "env": "REMOTE_PHP",
                 "id": "remote-php",
                 "label": "Remote php",
-                "regex": "^([a-z\\-0-9\\_]+\\.?)*$",
+                "regex": "^[a-z\-0-9_\.]*$",
                 "type": "text"
             },
             {
@@ -983,7 +983,7 @@
                 "env": "REMOTE_PHP_PATH",
                 "id": "remote-php-path",
                 "label": "Remote php path",
-                "regex": "^/([a-zA-Z\\-0-9\\_\\./])*$",
+                "regex": "^\/[a-zA-Z\-0-9_\.\/]*$",
                 "type": "text"
             },
             {
@@ -992,7 +992,7 @@
                 "env": "LOCAL_PHP",
                 "id": "local-php",
                 "label": "local php",
-                "regex": "^/([a-zA-Z\\-0-9\\_\\./])*$",
+                "regex": "^\/[a-zA-Z\-0-9_\.\/]*$",
                 "type": "text"
             },
             {
@@ -1001,7 +1001,7 @@
                 "env": "LOCAL_PHP_PATH",
                 "id": "local-php-path",
                 "label": "Local php path",
-                "regex": "^/([A-Za-z0-9\\-]/?)*$",
+                "regex": "^\/[a-zA-Z\-0-9_\.\/]*$",
                 "type": "text"
             }
         ]
