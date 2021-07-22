@@ -58,7 +58,9 @@ class Config :
         for filename in glob.iglob("/etc/nginx/**/site.env") :
             env = self.__env_to_dict(filename)
             services.append(env)
-        services.append(self.__env_to_dict("/etc/nginx/site.env"))
+	no_multisite = self.__env_to_dict("/etc/nginx/site.env")
+	if len(no_multisite) > 0 :
+		services.append(no_multisite)
         return services
 
     def check_variables(self, variables) :

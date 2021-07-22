@@ -534,7 +534,7 @@
                 "env": "EMAIL_LETS_ENCRYPT",
                 "id": "email-lets-encrypt",
                 "label": "Email lets encrypt",
-                "regex": "^([a-z0-9\-\.]+@[a-z\-0-9\.]+|.{0})$",
+                "regex": "^([a-z0-9\\-\\.]+@[a-z\\-0-9\\.]+|.{0})$",
                 "type": "text"
             },
             {
@@ -633,7 +633,7 @@
                 "env": "SELF_SIGNED_SSL_STATE",
                 "id": "self-signed-ssl-state",
                 "label": "State of the self-signed certificate",
-                "regex": "^[A-Za-z\\-]+$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -642,7 +642,7 @@
                 "env": "SELF_SIGNED_SSL_CITY",
                 "id": "self-signed-ssl-city",
                 "label": "City of the self-signed certificate",
-                "regex": "^[A-Za-z\\-]+$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -651,7 +651,7 @@
                 "env": "SELF_SIGNED_SSL_OU",
                 "id": "self-signed-ssl-ou",
                 "label": "Organizational Unit of the self-signed certificate",
-                "regex": "^[A-Za-z\\-]+$$",
+                "regex": "^[A-Za-z\\-]+$",
                 "type": "text"
             },
             {
@@ -660,7 +660,7 @@
                 "env": "SELF_SIGNED_SSL_ORG",
                 "id": "self-signed-ssl-org",
                 "label": "Organization name of the self-signed certificate",
-                "regex": "^[A-Za-z\\- ]+$$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -974,7 +974,7 @@
                 "env": "REMOTE_PHP",
                 "id": "remote-php",
                 "label": "Remote php",
-                "regex": "^[a-z\-0-9_\.]*$",
+                "regex": "^[a-z\\-0-9_\\.]*$",
                 "type": "text"
             },
             {
@@ -983,7 +983,7 @@
                 "env": "REMOTE_PHP_PATH",
                 "id": "remote-php-path",
                 "label": "Remote php path",
-                "regex": "^\/[a-zA-Z\-0-9_\.\/]*$",
+                "regex": "^\\/[a-zA-Z\\-0-9_\\.\\/]*$",
                 "type": "text"
             },
             {
@@ -992,7 +992,7 @@
                 "env": "LOCAL_PHP",
                 "id": "local-php",
                 "label": "local php",
-                "regex": "^\/[a-zA-Z\-0-9_\.\/]*$",
+                "regex": "^\\/[a-zA-Z\\-0-9_\\.\\/]*$",
                 "type": "text"
             },
             {
@@ -1001,7 +1001,7 @@
                 "env": "LOCAL_PHP_PATH",
                 "id": "local-php-path",
                 "label": "Local php path",
-                "regex": "^\/[a-zA-Z\-0-9_\.\/]*$",
+                "regex": "^\\/[a-zA-Z\\-0-9_\\.\\/]*$",
                 "type": "text"
             }
         ]
