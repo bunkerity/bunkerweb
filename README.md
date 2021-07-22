@@ -432,8 +432,8 @@ bunkerized-nginx comes with a set of predefined security settings that you can (
 
 # License
 
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/LICENSE.md).
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/blob/master/LICENSE.md).
 
 # Contributing
 
-If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/CONTRIBUTING.md) to get started.
+If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/blob/master/CONTRIBUTING.md) to get started.

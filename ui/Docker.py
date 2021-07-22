@@ -17,8 +17,10 @@ class Docker :
 		return self.__client.containers.get(id)
 
 	def reload_instance(self, id) :
-		self.get_instance(id).kill(signal="SIGHUP")
-		return "Instance " + id + " has been reloaded."
+		if self.get_instance(id).status == "running" :
+			self.get_instance(id).kill(signal="SIGHUP")
+			return "Instance " + id + " has been reloaded."
+		return "Instance " + id + " is not running, skipping reload."
 
 	def start_instance(self, id) :
 		self.get_instance(id).start()

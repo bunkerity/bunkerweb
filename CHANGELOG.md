@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.8 - 2021/07/22
+
+- Fix broken links in README
+- Fix regex for EMAIL_LETS_ENCRYPT
+- Fix regex for REMOTE_PHP and REMOTE_PHP_PATH
+- Fix regex for SELF_SIGNED_*
+- Fix various bugs related to web UI
+- Fix bug in autoconf (missing instances parameter to reload function)
+- Remove old .env files when generating a new configuration
+- 
+
 ## v1.2.7 - 2021/06/14
 
 - Add custom robots.txt and sitemap to RTD

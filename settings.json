@@ -525,7 +525,7 @@
                 "env": "EMAIL_LETS_ENCRYPT",
                 "id": "email-lets-encrypt",
                 "label": "Email lets encrypt",
-                "regex": "^([a-z0-9\\-\\.]+@([a-z\\-0-9]+\\.?)|.{0})$",
+                "regex": "^([a-z0-9\\-\\.]+@[a-z\\-0-9\\.]+|.{0})$",
                 "type": "text"
             },
             {
@@ -615,7 +615,7 @@
                 "env": "SELF_SIGNED_SSL_COUNTRY",
                 "id": "self-signed-ssl-country",
                 "label": "Country of the self-signed certificate",
-                "regex": "^[:print:]+$",
+                "regex": "^[A-Z]{2}$",
                 "type": "text"
             },
             {
@@ -624,7 +624,7 @@
                 "env": "SELF_SIGNED_SSL_STATE",
                 "id": "self-signed-ssl-state",
                 "label": "State of the self-signed certificate",
-                "regex": "^[:print:]+$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -633,7 +633,7 @@
                 "env": "SELF_SIGNED_SSL_CITY",
                 "id": "self-signed-ssl-city",
                 "label": "City of the self-signed certificate",
-                "regex": "^[:print:]+$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -642,7 +642,7 @@
                 "env": "SELF_SIGNED_SSL_OU",
                 "id": "self-signed-ssl-ou",
                 "label": "Organizational Unit of the self-signed certificate",
-                "regex": "^[:print:]+$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -651,7 +651,7 @@
                 "env": "SELF_SIGNED_SSL_ORG",
                 "id": "self-signed-ssl-org",
                 "label": "Organization name of the self-signed certificate",
-                "regex": "^[:print:]+$",
+                "regex": "^[A-Za-z\\- ]+$",
                 "type": "text"
             },
             {
@@ -660,7 +660,7 @@
                 "env": "SELF_SIGNED_SSL_CN",
                 "id": "self-signed-ssl-cn",
                 "label": "Common Name of the self-signed certificate",
-                "regex": "^[:print:]+$",
+                "regex": "^[A-Za-z\\-\\.0-9]+$",
                 "type": "text"
             }
         ]
@@ -947,7 +947,7 @@
                 "env": "REMOTE_PHP",
                 "id": "remote-php",
                 "label": "Remote php",
-                "regex": "^([a-z\\-0-9\\_]+\\.?)*$",
+                "regex": "^[a-z\\-0-9_\\.]*$",
                 "type": "text"
             },
             {
@@ -956,7 +956,7 @@
                 "env": "REMOTE_PHP_PATH",
                 "id": "remote-php-path",
                 "label": "Remote php path",
-                "regex": "^/([A-Za-z0-9\\-]/?)*$",
+                "regex": "^\\/[a-zA-Z\\-0-9_\\.\\/]*$",
                 "type": "text"
             }
         ]
