@@ -9,7 +9,6 @@
 - Fix various bugs related to web UI
 - Fix bug in autoconf (missing instances parameter to reload function)
 - Remove old .env files when generating a new configuration
-- 
 
 ## v1.2.7 - 2021/06/14
 
