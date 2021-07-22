@@ -10,5 +10,5 @@ class Referrers(Job) :
 		regex = r"^.+$"
 		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)
 
-	def _Job__edit(self, chunk) :
-		return chunk.replace(b".", b"%.").replace(b"-", b"%-")
+	def _edit(self, chunk) :
+		return [chunk.replace(b".", b"%.").replace(b"-", b"%-")]

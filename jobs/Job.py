@@ -8,37 +8,37 @@ class JobRet(enum.Enum) :
 class Job(abc.ABC) :
 
 	def __init__(self, name, data, filename=None, redis_host=None, type="line", regex=r"^.+$", copy_cache=False) :
-		self.__name = name
-		self.__data = data
-		self.__filename = filename
-		self.__redis = None
+		self._name = name
+		self._data = data
+		self._filename = filename
+		self._redis = None
 		if redis_host != None :
-			self.__redis = redis.Redis(host=redis_host, port=6379, db=0)
+			self._redis = redis.Redis(host=redis_host, port=6379, db=0)
 			try :
-				self.__redis.echo("test")
+				self._redis.echo("test")
 			except :
-				self.__log("can't connect to redis host " + redis_host)
-		self.__type = type
-		self.__regex = regex
-		self.__copy_cache = copy_cache
+				self._log("can't connect to redis host " + redis_host)
+		self._type = type
+		self._regex = regex
+		self._copy_cache = copy_cache
 
-	def __log(self, data) :
+	def _log(self, data) :
 		when = datetime.datetime.today().strftime("[%Y-%m-%d %H:%M:%S]")
-		what = self.__name + " - " + data + "\n"
+		what = self._name + " - " + data + "\n"
 		with open("/var/log/nginx/jobs.log", "a") as f :
 			f.write(when + " " + what)
 
 	def run(self) :
 		ret = JobRet.KO
 		try :
-			if self.__type == "line" or self.__type == "file" :
-				if self.__copy_cache :
+			if self._type == "line" or self._type == "file" :
+				if self._copy_cache :
 					ret = self.__from_cache()
 					if ret != JobRet.KO :
 						return ret
 				ret = self.__external()
 				self.__to_cache()
-			elif self.__type == "exec" :
+			elif self._type == "exec" :
 				return self.__exec()
 		except Exception as e :
 			self.__log("exception while running job : " + traceback.format_exc())
@@ -46,43 +46,45 @@ class Job(abc.ABC) :
 		return ret
 
 	def __external(self) :
-		if self.__redis == None :
-			if os.path.isfile("/tmp/" + self.__filename) :
-				os.remove("/tmp/" + self.__filename)
-			file = open("/tmp/" + self.__filename, "ab")
+		if self._redis == None :
+			if os.path.isfile("/tmp/" + self._filename) :
+				os.remove("/tmp/" + self._filename)
+			file = open("/tmp/" + self._filename, "ab")
 
-		elif self.__redis != None :
-			pipe = self.__redis.pipeline()
+		elif self._redis != None :
+			pipe = self._redis.pipeline()
 
 		count = 0
-		for url in self.__data :
+		for url in self._data :
 			data = self.__download_data(url)
 			for chunk in data :
-				if self.__type == "line" :
-					if not re.match(self.__regex, chunk.decode("utf-8")) :
+				if self._type == "line" :
+					if not re.match(self._regex, chunk.decode("utf-8")) :
 						continue
-					chunks = self.__edit(chunk)
-				if self.__redis == None :
-					if self.__type == "line" :
-						chunk += b"\n"
-					file.write(chunk)
-				else :
-					if self.__type == "line" :
+					chunks = self._edit(chunk)
+				if self._redis == None :
+					if self._type == "line" :
 						for chunk in chunks :
-							pipe.set(self.__name + "_" + chunk, "1")
+							file.write(chunk + b"\n")
 					else :
-						pipe.set(self.__name + "_" + chunk, "1")
+						file.write(chunk)
+				else :
+					if self._type == "line" :
+						for chunk in chunks :
+							pipe.set(self._name + "_" + chunk, "1")
+					else :
+						pipe.set(self._name + "_" + chunk, "1")
 				count += 1
 
-		if self.__redis == None :
+		if self._redis == None :
 			file.close()
 			if count > 0 :
-				shutil.copyfile("/tmp/" + self.__filename, "/etc/nginx/" + self.__filename)
-			os.remove("/tmp/" + self.__filename)
+				shutil.copyfile("/tmp/" + self._filename, "/etc/nginx/" + self._filename)
+			os.remove("/tmp/" + self._filename)
 			return JobRet.OK_RELOAD
 
-		elif self.__redis != None and count > 0 :
-			self.__redis.delete(self.__redis.keys(self.__name + "_*"))
+		elif self._redis != None and count > 0 :
+			self._redis.delete(self._redis.keys(self._name + "_*"))
 			pipe.execute()
 			return JobRet.OK_RELOAD
 
@@ -92,57 +94,57 @@ class Job(abc.ABC) :
 		r = requests.get(url, stream=True)
 		if not r or r.status_code != 200 :
 			raise Exception("can't download data at " + url)
-		if self.__type == "line" :
+		if self._type == "line" :
 			return r.iter_lines()
 		return r.iter_content(chunk_size=8192)
 
 	def __exec(self) :
-		proc = subprocess.run(self.__data, capture_output=True)
+		proc = subprocess.run(self._data, capture_output=True)
 		stdout = proc.stdout.decode("ascii")
 		stderr = proc.stderr.decode("err")
 		if len(stdout) > 1 :
-			self.__log("stdout = " + stdout)
+			self._log("stdout = " + stdout)
 		if len(stderr) > 1 :
-			self.__log("stderr = " + stderr)
+			self._log("stderr = " + stderr)
 		if proc.returncode != 0 :
 			return JobRet.KO
 		# TODO : check if reload is needed ?
 		return JobRet.OK_RELOAD
 
-	def __edit(self, chunk) :
+	def _edit(self, chunk) :
 		return [chunk]
 
 	def __from_cache(self) :
-		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :
+		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self._filename) :
 			return JobRet.KO
 
-		if self.__redis == None or self.__type == "file" :
-			if not os.path.isfile("/etc/nginx/" + self.__filename) or not filecmp.cmp("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename, shallow=False) :
-				shutil.copyfile("/opt/bunkerized-nginx/cache/" + self.__filename, "/etc/nginx/" + self.__filename)
+		if self._redis == None or self._type == "file" :
+			if not os.path.isfile("/etc/nginx/" + self._filename) or not filecmp.cmp("/opt/bunkerized-nginx/cache/" + self._filename, "/etc/nginx/" + self._filename, shallow=False) :
+				shutil.copyfile("/opt/bunkerized-nginx/cache/" + self._filename, "/etc/nginx/" + self._filename)
 				return JobRet.OK_RELOAD
 			return JobRet.OK_NO_RELOAD
 
-		if self.__redis != None and self.__type == "line" :
-			self.__redis.delete(self.__redis.keys(self.__name + "_*"))
-			with open("/opt/bunkerized-nginx/cache/" + self.__filename) as f :
-				pipe = self.__redis.pipeline()
+		if self._redis != None and self._type == "line" :
+			self._redis.delete(self._redis.keys(self._name + "_*"))
+			with open("/opt/bunkerized-nginx/cache/" + self._filename) as f :
+				pipe = self._redis.pipeline()
 				while True :
 					line = f.readline()
 					if not line :
 						break
 					line = line.strip()
-					pipe.set(self.__name + "_" + line, "1")
+					pipe.set(self._name + "_" + line, "1")
 				pipe.execute()
 				return JobRet.OK_NO_RELOAD
 
 		return JobRet.KO
 
 	def __to_cache(self) :
-		if self.__redis == None or self.__type == "file" :
-			shutil.copyfile("/etc/nginx/" + self.__filename, "/opt/bunkerized-nginx/cache/" + self.__filename)
-		elif self.__redis != None and self.__type == "line" :
-			if os.path.isfile("/opt/bunkerized-nginx/cache/" + self.__filename) :
-				os.remove("/opt/bunkerized-nginx/cache/" + self.__filename)
-			with open("/opt/bunkerized-nginx/cache/" + self.__filename, "a") as f :
-				for key in self.__redis.keys(self.__name + "_*") :
-					f.write(self.__redis.get(key) + "\n")
+		if self._redis == None or self._type == "file" :
+			shutil.copyfile("/etc/nginx/" + self._filename, "/opt/bunkerized-nginx/cache/" + self._filename)
+		elif self._redis != None and self._type == "line" :
+			if os.path.isfile("/opt/bunkerized-nginx/cache/" + self._filename) :
+				os.remove("/opt/bunkerized-nginx/cache/" + self._filename)
+			with open("/opt/bunkerized-nginx/cache/" + self._filename, "a") as f :
+				for key in self._redis.keys(self._name + "_*") :
+					f.write(self._redis.get(key) + "\n")
