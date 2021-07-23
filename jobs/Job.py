@@ -1,4 +1,4 @@
-import abc, requests, redis, os, datetime, traceback, re, shutil, enum, filecmp
+import abc, requests, redis, os, datetime, traceback, re, shutil, enum, filecmp, subprocess
 
 class JobRet(enum.Enum) :
 	KO		= 0
@@ -41,7 +41,7 @@ class Job(abc.ABC) :
 			elif self._type == "exec" :
 				return self.__exec()
 		except Exception as e :
-			self.__log("exception while running job : " + traceback.format_exc())
+			self._log("exception while running job : " + traceback.format_exc())
 			return JobRet.KO
 		return ret
 
@@ -101,7 +101,7 @@ class Job(abc.ABC) :
 	def __exec(self) :
 		proc = subprocess.run(self._data, capture_output=True)
 		stdout = proc.stdout.decode("ascii")
-		stderr = proc.stderr.decode("err")
+		stderr = proc.stderr.decode("ascii")
 		if len(stdout) > 1 :
 			self._log("stdout = " + stdout)
 		if len(stderr) > 1 :

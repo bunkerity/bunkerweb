@@ -30,6 +30,7 @@ if __name__ == "__main__" :
 	parser.add_argument("--cache", action="store_true", help="copy data from cache if available")
 	parser.add_argument("--domain", default="", type=str, help="domain(s) for certbot-new job (e.g. : www.example.com or app1.example.com,app2.example.com)")
 	parser.add_argument("--email", default="", type=str, help="email for certbot-new job (e.g. : contact@example.com)")
+	parser.add_argument("--staging", action="store_true", help="use staging server for let's encrypt instead of the production one")
 	parser.add_argument("--dst_cert", default="", type=str, help="certificate path for self-signed-cert job (e.g. : /etc/nginx/default-cert.pem)")
 	parser.add_argument("--dst_key", default="", type=str, help="key path for self-signed-cert job (e.g. : /etc/nginx/default-key.pem)")
 	parser.add_argument("--expiry", default="", type=str, help="number of validity days for self-signed-cert job (e.g. : 365)")
@@ -46,7 +47,7 @@ if __name__ == "__main__" :
 	print("[*] Executing job " + job)
 	ret = 0
 	if job == "certbot-new" :
-		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, domain=args.domain, email=args.email)
+		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, domain=args.domain, email=args.email, staging=args.staging)
 	elif job == "self-signed-cert" :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, dst_cert=args.dst_cert, dst_key=args.dst_key, expiry=args.expiry, subj=args.subj)
 	else :

@@ -540,6 +540,15 @@
             {
                 "context": "multisite",
                 "default": "no",
+                "env": "USE_LETS_ENCRYPT_STAGING",
+                "id": "use-lets-encrypt-staging",
+                "label": "Use staging server instead of production one",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
                 "env": "REDIRECT_HTTP_TO_HTTPS",
                 "id": "redirect-http-to-https",
                 "label": "Redirect http to https",

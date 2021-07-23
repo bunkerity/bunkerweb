@@ -19,7 +19,7 @@ if [ "$files" != "" ] ; then
 		SELF_SIGNED_SSL_ORG="$(sed -nE 's/^SELF_SIGNED_SSL_ORG=(.*)$/\1/p' $file)"
 		SELF_SIGNED_SSL_OU="$(sed -nE 's/^SELF_SIGNED_SSL_OU=(.*)$/\1/p' $file)"
 		SELF_SIGNED_SSL_CN="$(sed -nE 's/^SELF_SIGNED_SSL_CN=(.*)$/\1/p' $file)"
-		/opt/bunkerized-nginx/jobs/main.py --name self-signed-cert --dst_cert "${dest}self-cert.pem" --dst_key "${dest}self-key.pem" --days "$SELF_SIGNED_SSL_EXPIRY" --subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
+		/opt/bunkerized-nginx/jobs/main.py --name self-signed-cert --dst_cert "${dest}self-cert.pem" --dst_key "${dest}self-key.pem" --expiry "$SELF_SIGNED_SSL_EXPIRY" --subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
 		if [ $? -eq 0 ] ; then
 			echo "[*] Generated self-signed certificate ${dest}self-cert.pem with key ${dest}self-key.pem"
 		else
@@ -37,7 +37,7 @@ if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] || [ "$(has_value GENERATE_SEL
 	SELF_SIGNED_SSL_ORG="Your Company, Inc."
 	SELF_SIGNED_SSL_OU="IT"
 	SELF_SIGNED_SSL_CN="www.yourdomain.com"
-	/opt/bunkerized-nginx/jobs/main.py --name self-signed-cert --dst_cert "/etc/nginx/default-cert.pem" --dst_key "/etc/nginx/default-key.pem" --days "$SELF_SIGNED_SSL_EXPIRY" --subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
+	/opt/bunkerized-nginx/jobs/main.py --name self-signed-cert --dst_cert "/etc/nginx/default-cert.pem" --dst_key "/etc/nginx/default-key.pem" --expiry "$SELF_SIGNED_SSL_EXPIRY" --subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
 	if [ $? -eq 0 ] ; then
 		echo "[*] Generated self-signed certificate for default server"
 	else
@@ -55,10 +55,15 @@ if [ "$files" != "" ] ; then
 		SERVER_NAME="$(sed -nE 's/^SERVER_NAME=(.*)$/\1/p' $file)"
 		FIRST_SERVER="$(echo $SERVER_NAME | cut -d ' ' -f 1)"
 		EMAIL_LETS_ENCRYPT="$(sed -nE 's/^EMAIL_LETS_ENCRYPT=(.*)$/\1/p' $file)"
+		USE_STAGING="$(grep "^USE_LETS_ENCRYPT_STAGING=yes$" $file)"
 		if [ "$EMAIL_LETS_ENCRYPT" = "" ] ; then
 			EMAIL_LETS_ENCRYPT="contact@${FIRST_SERVER}"
 		fi
-		/opt/bunkerized-nginx/jobs/main.py --name certbot-new --domain "$(echo -n $SERVER_NAME | sed 's/ /,/g')" --email "$EMAIL_LETS_ENCRYPT"
+		if [ "$USE_STAGING" = "" ] ; then
+			/opt/bunkerized-nginx/jobs/main.py --name certbot-new --domain "$(echo -n $SERVER_NAME | sed 's/ /,/g')" --email "$EMAIL_LETS_ENCRYPT"
+		else
+			/opt/bunkerized-nginx/jobs/main.py --name certbot-new --domain "$(echo -n $SERVER_NAME | sed 's/ /,/g')" --email "$EMAIL_LETS_ENCRYPT" --staging
+		fi
 		if [ $? -eq 0 ] ; then
 			echo "[*] Certbot new successfully executed for domain(s) $(echo -n $SERVER_NAME | sed 's/ /,/g')"
 		else
