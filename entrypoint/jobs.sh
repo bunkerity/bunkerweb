@@ -20,11 +20,6 @@ if [ "$files" != "" ] ; then
 		SELF_SIGNED_SSL_OU="$(sed -nE 's/^SELF_SIGNED_SSL_OU=(.*)$/\1/p' $file)"
 		SELF_SIGNED_SSL_CN="$(sed -nE 's/^SELF_SIGNED_SSL_CN=(.*)$/\1/p' $file)"
 		/opt/bunkerized-nginx/jobs/main.py --name self-signed-cert --dst_cert "${dest}self-cert.pem" --dst_key "${dest}self-key.pem" --expiry "$SELF_SIGNED_SSL_EXPIRY" --subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
-		if [ $? -eq 0 ] ; then
-			echo "[*] Generated self-signed certificate ${dest}self-cert.pem with key ${dest}self-key.pem"
-		else
-			echo "[!] Error while generating self-signed certificate"
-		fi
 	done
 fi
 
@@ -38,11 +33,6 @@ if [ "$(has_value AUTO_LETS_ENCRYPT yes)" != "" ] || [ "$(has_value GENERATE_SEL
 	SELF_SIGNED_SSL_OU="IT"
 	SELF_SIGNED_SSL_CN="www.yourdomain.com"
 	/opt/bunkerized-nginx/jobs/main.py --name self-signed-cert --dst_cert "/etc/nginx/default-cert.pem" --dst_key "/etc/nginx/default-key.pem" --expiry "$SELF_SIGNED_SSL_EXPIRY" --subj "/C=$SELF_SIGNED_SSL_COUNTRY/ST=$SELF_SIGNED_SSL_STATE/L=$SELF_SIGNED_SSL_CITY/O=$SELF_SIGNED_SSL_ORG/OU=$SELF_SIGNED_SSL_OU/CN=$SELF_SIGNED_SSL_CN"
-	if [ $? -eq 0 ] ; then
-		echo "[*] Generated self-signed certificate for default server"
-	else
-		echo "[!] Error while generating self-signed certificate for default server"
-	fi
 fi
 
 # certbot
@@ -63,11 +53,6 @@ if [ "$files" != "" ] ; then
 			/opt/bunkerized-nginx/jobs/main.py --name certbot-new --domain "$(echo -n $SERVER_NAME | sed 's/ /,/g')" --email "$EMAIL_LETS_ENCRYPT"
 		else
 			/opt/bunkerized-nginx/jobs/main.py --name certbot-new --domain "$(echo -n $SERVER_NAME | sed 's/ /,/g')" --email "$EMAIL_LETS_ENCRYPT" --staging
-		fi
-		if [ $? -eq 0 ] ; then
-			echo "[*] Certbot new successfully executed for domain(s) $(echo -n $SERVER_NAME | sed 's/ /,/g')"
-		else
-			echo "[*] Error while executing certbot new : $certbot_output"
 		fi
 	done
 fi

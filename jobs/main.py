@@ -8,6 +8,7 @@ import Abusers, CertbotNew, CertbotRenew, ExitNodes, GeoIP, Proxies, Referrers, 
 from Job import JobRet
 
 from reload import reload
+from logger import log
 
 JOBS = {
 	"abusers": Abusers.Abusers,
@@ -28,6 +29,7 @@ if __name__ == "__main__" :
 	parser.add_argument("--name", default="", type=str, help="job to run (e.g : abusers or certbot-new or certbot-renew ...)")
 	parser.add_argument("--redis", default=None, type=str, help="hostname of the redis server if any")
 	parser.add_argument("--cache", action="store_true", help="copy data from cache if available")
+	parser.add_argument("--reload", action="store_true", help="reload nginx if necessary and the job is successful")
 	parser.add_argument("--domain", default="", type=str, help="domain(s) for certbot-new job (e.g. : www.example.com or app1.example.com,app2.example.com)")
 	parser.add_argument("--email", default="", type=str, help="email for certbot-new job (e.g. : contact@example.com)")
 	parser.add_argument("--staging", action="store_true", help="use staging server for let's encrypt instead of the production one")
@@ -39,12 +41,12 @@ if __name__ == "__main__" :
 
 	# Check job name
 	if not args.name in JOBS :
-		print("[!] unknown job " + args.name)
+		log("job", "ERROR", "unknown job " + args.name)
 		sys.exit(1)
 	job = args.name
 
 	# Run job
-	print("[*] Executing job " + job)
+	log("job", "INFO", "executing job " + job)
 	ret = 0
 	if job == "certbot-new" :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, domain=args.domain, email=args.email, staging=args.staging)
@@ -54,22 +56,22 @@ if __name__ == "__main__" :
 		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache)
 	ret = instance.run()
 	if ret == JobRet.KO :
-		print("[!] Error while running job " + job)
+		log("job", "ERROR", "error while running job " + job)
 		sys.exit(1)
-	print("[*] Job " + job + " successfully executed")
+	log("job", "INFO", "job " + job + " successfully executed")
 
 	# Reload
-	if ret == JobRet.OK_RELOAD :
+	if ret == JobRet.OK_RELOAD and args.reload :
 		ret = reload()
 		if ret == 0 :
-			print("[*] Reload operation successfully executed")
-		elif ret == 1 :
-			print("[!] Error while doing reload operation")
+			log("job", "ERROR", "error while doing reload operation (job = " + job + ")")
 			sys.exit(1)
+		elif ret == 1 :
+			log("job", "INFO", "reload operation successfully executed (job = " + job + ")")
 		elif ret == 2 :
-			print("[*] Skipped reload operation because nginx is not running")
+			log("job", "INFO", "skipped reload operation because nginx is not running (job = " + job + ")")
 	else :
-		print("[*] Skipped reload operation because it's not needed")
+		log("job", "INFO", "skipped reload operation because it's not needed (job = " + job + ")")
 
 	# Done
 	sys.exit(0)

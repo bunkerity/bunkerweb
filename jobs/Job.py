@@ -1,5 +1,7 @@
 import abc, requests, redis, os, datetime, traceback, re, shutil, enum, filecmp, subprocess
 
+from logger import log
+
 class JobRet(enum.Enum) :
 	KO		= 0
 	OK_RELOAD	= 1
@@ -17,16 +19,10 @@ class Job(abc.ABC) :
 			try :
 				self._redis.echo("test")
 			except :
-				self._log("can't connect to redis host " + redis_host)
+				log(self._name, "ERROR", "can't connect to redis host " + redis_host)
 		self._type = type
 		self._regex = regex
 		self._copy_cache = copy_cache
-
-	def _log(self, data) :
-		when = datetime.datetime.today().strftime("[%Y-%m-%d %H:%M:%S]")
-		what = self._name + " - " + data + "\n"
-		with open("/var/log/nginx/jobs.log", "a") as f :
-			f.write(when + " " + what)
 
 	def run(self) :
 		ret = JobRet.KO
@@ -41,7 +37,7 @@ class Job(abc.ABC) :
 			elif self._type == "exec" :
 				return self.__exec()
 		except Exception as e :
-			self._log("exception while running job : " + traceback.format_exc())
+			log(self._name, "ERROR", "exception while running job : " + traceback.format_exc())
 			return JobRet.KO
 		return ret
 
@@ -102,17 +98,22 @@ class Job(abc.ABC) :
 		proc = subprocess.run(self._data, capture_output=True)
 		stdout = proc.stdout.decode("ascii")
 		stderr = proc.stderr.decode("ascii")
-		if len(stdout) > 1 :
-			self._log("stdout = " + stdout)
-		if len(stderr) > 1 :
-			self._log("stderr = " + stderr)
 		if proc.returncode != 0 :
+			if len(stdout) > 1 :
+				log(self._name, "ERROR", "stdout = " + stdout)
+			if len(stderr) > 1 :
+				log(self._name, "ERROR", "stderr = " + stderr)
+			self._callback(False)
 			return JobRet.KO
 		# TODO : check if reload is needed ?
+		self._callback(True)
 		return JobRet.OK_RELOAD
 
 	def _edit(self, chunk) :
 		return [chunk]
+
+	def _callback(self, success) :
+		pass
 
 	def __from_cache(self) :
 		if not os.path.isfile("/opt/bunkerized-nginx/cache/" + self._filename) :
