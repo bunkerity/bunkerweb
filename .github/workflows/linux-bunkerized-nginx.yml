@@ -13,10 +13,10 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
       - name: Debian test
-        run: ./tests/linux.sh debian:buster-slim
+        run: ./tests/linux-run.sh debian:buster-slim test-debian
       - name: Ubuntu test
-        run: ./tests/linux.sh ubuntu:focal
+        run: ./tests/linux-run.sh ubuntu:focal test-ubuntu
       - name: CentOS test
-        run: ./tests/linux.sh centos:7
+        run: ./tests/linux-run.sh centos:7 test-centos
       - name: Fedora test
-        run: ./tests/linux.sh fedora:34
+        run: ./tests/linux-run.sh fedora:34 test-fedora
