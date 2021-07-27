@@ -1,0 +1,102 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bunkerized-nginx-ingress-controller
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bunkerized-nginx-ingress-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bunkerized-nginx-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: bunkerized-nginx-ingress-controller
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: bunkerized-nginx-ingress-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerized-nginx-ingress-controller
+  labels:
+    app: bunkerized-nginx-autoconf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bunkerized-nginx-autoconf
+  template:
+    metadata:
+      labels:
+        app: bunkerized-nginx-autoconf
+    spec:
+      serviceAccountName: bunkerized-nginx-ingress-controller
+      containers:
+      - name: bunkerized-nginx-autoconf
+        image: bunkerity/bunkerized-nginx-autoconf:1.3.0
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        - name: API_URI
+          value: "/ChangeMeToSomethingHardToGuess"
+        volumeMounts:
+        - name: config
+          mountPath: "/etc/nginx"
+        - name: certs
+          mountPath: "/etc/letsencrypt"
+        - name: challenges
+          mountPath: "/acme-challenge"
+        - name: cache
+          mountPath: "/cache"
+      volumes:
+      - name: config
+        hostPath:
+          path: /shared
+# TODO volumes : /etc/nginx, /etc/letsencrypt, /acme-challenge, /cache
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerized-nginx
+  labels:
+    app: bunkerized-nginx
+  annotations:
+    bunkerized-nginx.AUTOCONF: "yes"
+    bunkerized-nginx.MULTISITE: "yes"
+    bunkerized-nginx.SERVER_NAME: ""
+spec:
+  selector:
+    matchLabels:
+      name: bunkerized-nginx
+  template:
+    metadata:
+      labels:
+        name: bunkerized-nginx
+  spec:
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+    containers:
+    - name: bunkerized-nginx
+      image: bunkerity/bunkerized-nginx:1.3.0
+      env:
+      - name: KUBERNETES_MODE
+        value: "yes"
+      - name: USE_API
+        value: "yes"
+      - name: API_URI
+        value: "/ChangeMeToSomethingHardToGuess"
+# TODO volumes : /etc/nginx, /etc/letsencrypt, /acme-challenge
