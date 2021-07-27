@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bunkerized-nginx-ingress
+  annotations:
+    # mandatory, keep this annotation
+    bunkerized-nginx.AUTOCONF: "yes"
+    # add any global and default environment variables here as annotations with the "bunkerized-nginx." prefix
+    # if the scope is "multisite", they will be applied to all services unless overriden by the service
+    # examples :
+    #bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
+    #bunkerized-nginx.USE_ANTIBOT: "javascript"
+    #bunkerized-nginx.REDIRECT_HTTP_TO_HTTPS: "yes"
+    #bunkerized-nginx.app.example.com_REVERSE_PROXY_WS: "yes"
+    #bunkerized-nginx.app.example.com_USE_MODSECURITY: "no"
+
+# add "static" routes here (see https://kubernetes.io/docs/concepts/services-networking/ingress/)
+# and/or add annotations to your services (see https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/kubernetes)
+spec:
+  rules:
+  - host: "app.example.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app-service
+            port:
+              number: 80
+

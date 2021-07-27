@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: php:fpm
+        volumeMounts:
+          - name: www
+            mountPath: /var/www/html
+      volumes:
+        - name: www
+          hostPath:
+            path: /shared/www/myapp.example.com
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  annotations:
+    bunkerized-nginx.AUTOCONF: "yes"
+    bunkerized-nginx.SERVER_NAME: "myapp.example.com"
+    bunkerized-nginx.REMOTE_PHP: "myapp"
+    bunkerized-nginx.REMOTE_PHP_PATH: "/var/www/html"
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000

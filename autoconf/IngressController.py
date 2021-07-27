@@ -18,8 +18,20 @@ class IngressController :
 				raise Exception("Missing bunkerized-nginx.SERVER_NAME annotation in Service.")
 			prefix = annotations["bunkerized-nginx.SERVER_NAME"].split(" ")[0] + "_"
 		for annotation in annotations :
-			if annotation.startswith("bunkerized-nginx.") and annotation.split(".")[1] != "" and annotation.split(".")[1] != "AUTOCONF" :
-				env[prefix + annotation.split(".")[1]] = annotations[annotation]
+			if annotation.startswith("bunkerized-nginx.") and annotation.replace("bunkerized-nginx.", "", 1) != "" and annotation.replace("bunkerized-nginx.", "", 1) != "AUTOCONF" :
+				env[prefix + annotation.replace("bunkerized-nginx.", "", 1)] = annotations[annotation]
+		return env
+	
+	def __rules_to_env(self, rules) :
+		env = {}
+		for rule in rules :
+			prefix = ""
+			if "host" in rule :
+				prefix = rule["host"] + "_"
+			for path in rule["http"]["paths"] :
+				env[prefix + "USE_REVERSE_PROXY"] = "yes"
+				env[prefix + "REVERSE_PROXY_URL"] = path["path"]
+				env[prefix + "REVERSE_PROXY_HOST"] = "http://" + path["backend"]["serviceName"] + ":" + str(path["backend"]["servicePort"])
 		return env
 
 	def gen_conf(self) :
@@ -31,6 +43,7 @@ class IngressController :
 				continue
 			if "bunkerized-nginx.AUTOCONF" in ingress.metadata.annotations :
 				env.update(self.__annotations_to_env(ingress.metadata.annotations))
+				env.update(self.__rules_to_env(ingress.spec.rules))
 		for service in services :
 			if service.metadata.annotations == None :
 				continue

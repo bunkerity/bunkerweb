@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: containous/whoami
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  annotations:
+    bunkerized-nginx.AUTOCONF: "yes"
+    bunkerized-nginx.SERVER_NAME: "myapp.example.com"
+    bunkerized-nginx.USE_REVERSE_PROXY: "yes"
+    bunkerized-nginx.REVERSE_PROXY_URL: "/"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp"
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
