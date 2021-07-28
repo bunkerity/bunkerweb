@@ -15,6 +15,9 @@ RUN chmod +x /tmp/prepare.sh && \
     /tmp/prepare.sh && \
     rm -f /tmp/prepare.sh
 
+# Fix CVE-2021-36159
+RUN apk add "apk-tools>=2.12.6-r0"
+
 EXPOSE 5000
 
 WORKDIR /opt/bunkerized-nginx/ui

@@ -8,8 +8,9 @@ class ControllerType(Enum) :
 
 class Controller(ABC) :
 
-	def __init__(self, type) :
-		self.__config = Config.from_controller_type(type)
+	def __init__(self, type, api_uri=None, lock=None) :
+		self.__config = Config(type, api_uri)
+		self.lock = lock
 
 	@abstractmethod
 	def get_env(self) :
@@ -29,3 +30,6 @@ class Controller(ABC) :
 	@abstractmethod
 	def process_events(self) :
 		pass
+
+	def reload(self) :
+		return self.__config.reload()

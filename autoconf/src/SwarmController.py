@@ -4,8 +4,8 @@ import utils
 
 class SwarmController(Controller) :
 
-	def __init__(self) :
-		super().__init__(ControllerType.SWARM)
+	def __init__(self, api_uri) :
+		super().__init__(ControllerType.SWARM, api_uri=api_uri, lock=Lock())
 		# TODO : honor env vars like DOCKER_HOST
 		self.__client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
 
@@ -37,6 +37,8 @@ class SwarmController(Controller) :
 		for event in client.events(decode=True, filter={"type": "service", "label": ["bunkerized-nginx.AUTOCONF", "bunkerized-nginx.SERVER_NAME"]}) :
 			new_env = self.get_env()
 			if new_env != old_env :
-				if (self.gen_conf(new_env)) :
+				self.lock.acquire()
+				if self.gen_conf(new_env) :
 					old_env.copy(new_env)
 					utils.log("[*] Successfully generated new configuration")
+				self.lock.release()

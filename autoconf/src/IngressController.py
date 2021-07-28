@@ -1,16 +1,15 @@
 from kubernetes import client, config, watch
-from threading import Thread, Lock
+from threading import Thread
 
 from Controller import Controller, ControllerType
 
 class IngressController :
 
-	def __init__(self) :
-		super().__init__(ControllerType.KUBERNETES)
+	def __init__(self, api_uri) :
+		super().__init__(ControllerType.KUBERNETES, api_uri=api_uri, lock=Lock())
 		config.load_incluster_config()
 		self.__api = client.CoreV1Api()
 		self.__extensions_api = client.ExtensionsV1beta1Api()
-		self.__lock = Lock()
 		self.__old_env = {}
 
 	def __get_ingresses(self) :
@@ -71,25 +70,24 @@ class IngressController :
 		t_ingress.join()
 		t_service.join()
 
-
 	def __watch_ingress(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__extensions_api.list_ingress_for_all_namespaces) :
-			self.__lock.acquire()
+			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env() :
-				if self.gen_conf(new_env) :
+				if self.gen_conf(new_env, lock=False) :
 					self.__old_env.copy(new_env)
 					utils.log("[*] Successfully generated new configuration")
-			self.__lock.release()
+			self.lock.release()
 
 	def __watch_service(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__api.list_service_for_all_namespaces) :
-			self.__lock.acquire()
+			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env() :
-				if self.gen_conf(new_env) :
+				if self.gen_conf(new_env, lock=False) :
 					self.__old_env.copy(new_env)
 					utils.log("[*] Successfully generated new configuration")
-			self.__lock.release()
+			self.lock.release()

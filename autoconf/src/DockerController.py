@@ -37,6 +37,6 @@ class DockerController(Controller) :
 		for event in client.events(decode=True, filter={"type": "container", "label": ["bunkerized-nginx.AUTOCONF", "bunkerized-nginx.SERVER_NAME"]}) :
 			new_env = self.get_env()
 			if new_env != old_env :
-				if (self.gen_conf(new_env)) :
+				if self.gen_conf(new_env) :
 					old_env.copy(new_env)
 					utils.log("[*] Successfully generated new configuration")
