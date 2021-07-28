@@ -15,6 +15,14 @@ class Controller(ABC) :
 	def get_env(self) :
 		pass
 
+	def _fix_env(self, env) :
+		fixed_env = env.copy()
+		blacklist = ["NGINX_VERSION", "NJS_VERSION", "PATH", "PKG_RELEASE"]
+		for key in blacklist :
+			if key in fixed_env :
+				del fixed_env[key]
+		return fixed_env
+
 	def gen_conf(self, env) :
 		return self.__config.gen(env)
 

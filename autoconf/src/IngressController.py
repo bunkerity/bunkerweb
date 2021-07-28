@@ -1,16 +1,23 @@
 from kubernetes import client, config, watch
 from threading import Thread, Lock
 
-from Controller import Controller
+from Controller import Controller, ControllerType
 
 class IngressController :
 
 	def __init__(self) :
-		super().__init__()
+		super().__init__(ControllerType.KUBERNETES)
 		config.load_incluster_config()
 		self.__api = client.CoreV1Api()
 		self.__extensions_api = client.ExtensionsV1beta1Api()
 		self.__lock = Lock()
+		self.__old_env = {}
+
+	def __get_ingresses(self) :
+		return self.__extensions_api.list_ingress_for_all_namespaces(watch=False).items
+
+	def __get_services(self) :
+		return self.__api.list_service_for_all_namespaces(watch=False).items
 
 	def __annotations_to_env(self, annotations, service=False) :
 		env = {}
@@ -53,48 +60,36 @@ class IngressController :
 				continue
 			if "bunkerized-nginx.AUTOCONF" in service.metadata.annotations :
 				env.update(self.__annotations_to_env(service.metadata.annotations, service=True))
-		return env
+		return self._fix_env(env)
 
-	def __get_ingresses(self) :
-		return self.__extensions_api.list_ingress_for_all_namespaces(watch=False).items
+	def process_events(self, current_env) :
+		self.__old_env = current_env
+		t_ingress = Thread(target=self.__watch_ingress)
+		t_service = Thread(target=self.__watch_service)
+		t_ingress.start()
+		t_service.start()
+		t_ingress.join()
+		t_service.join()
 
-	def __get_services(self) :
-		return self.__api.list_service_for_all_namespaces(watch=False).items
 
-	def watch_ingress(self) :
+	def __watch_ingress(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__extensions_api.list_ingress_for_all_namespaces) :
 			self.__lock.acquire()
-#			print("*** NEW INGRESS EVENT ***", flush=True)
-#			for k, v in event.items() :
-#				print(k + " :", flush=True)
-#				print(v, flush=True)
-			self.gen_conf()
+			new_env = self.get_env()
+			if new_env != self.__old_env() :
+				if self.gen_conf(new_env) :
+					self.__old_env.copy(new_env)
+					utils.log("[*] Successfully generated new configuration")
 			self.__lock.release()
 
-	def watch_service(self) :
+	def __watch_service(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__api.list_service_for_all_namespaces) :
 			self.__lock.acquire()
-			self.gen_conf()
-#			print("*** NEW SERVICE EVENT ***", flush=True)
-#			for k, v in event.items() :
-#				print(k + " :", flush=True)
-#				print(v, flush=True)
+			new_env = self.get_env()
+			if new_env != self.__old_env() :
+				if self.gen_conf(new_env) :
+					self.__old_env.copy(new_env)
+					utils.log("[*] Successfully generated new configuration")
 			self.__lock.release()
-
-ic = IngressController()
-
-print("*** INGRESSES ***")
-print(ic.get_ingresses())
-
-print("*** SERVICES ***")
-print(ic.get_services())
-
-print("*** LISTENING FOR EVENTS ***")
-t_ingress = Thread(target=ic.watch_service)
-t_service = Thread(target=ic.watch_service)
-t_ingress.start()
-t_service.start()
-t_ingress.join()
-t_service.join()

@@ -7,7 +7,8 @@ COPY confs/site/ /opt/bunkerized-nginx/confs/site
 COPY jobs/ /opt/bunkerized-nginx/jobs
 COPY settings.json /opt/bunkerized-nginx/
 COPY misc/cron /etc/crontabs/nginx
-COPY autoconf/* /opt/bunkerized-nginx/entrypoint/
+COPY autoconf/entrypoint.sh /opt/bunkerized-nginx/entrypoint/
+COPY autoconf/src/* /opt/bunkerized-nginx/entrypoint/
 
 RUN apk add --no-cache py3-pip bash certbot curl openssl && \
     pip3 install -r /opt/bunkerized-nginx/gen/requirements.txt && \
