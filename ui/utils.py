@@ -4,8 +4,8 @@ import datetime, re, json, os
 
 def get_variables() :
 	vars = {}
-	vars["DOCKER_HOST"]		= "unix:///var/run/docker.sock"
-	vars["API_URI"]			= ""
+	vars["DOCKER_HOST"]	= "unix:///var/run/docker.sock"
+	vars["API_URI"]		= ""
 	vars["ABSOLUTE_URI"]	= ""
 	vars["FLASK_SECRET"]	= os.urandom(32)
 	vars["ADMIN_USERNAME"]	= "admin"

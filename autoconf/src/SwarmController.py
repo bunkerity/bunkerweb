@@ -38,7 +38,7 @@ class SwarmController(Controller) :
 			new_env = self.get_env()
 			if new_env != old_env :
 				self.lock.acquire()
-				if self.gen_conf(new_env) :
+				if self.gen_conf(new_env, lock=False) :
 					old_env.copy(new_env)
-					utils.log("[*] Successfully generated new configuration")
+					log("CONTROLLER", "INFO", "successfully generated new configuration")
 				self.lock.release()

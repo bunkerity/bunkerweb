@@ -3,6 +3,8 @@ from threading import Thread
 
 from Controller import Controller, ControllerType
 
+from logger import log
+
 class IngressController :
 
 	def __init__(self, api_uri) :
@@ -78,7 +80,7 @@ class IngressController :
 			if new_env != self.__old_env() :
 				if self.gen_conf(new_env, lock=False) :
 					self.__old_env.copy(new_env)
-					utils.log("[*] Successfully generated new configuration")
+					log("CONTROLLER", "INFO", "successfully generated new configuration")
 			self.lock.release()
 
 	def __watch_service(self) :
@@ -89,5 +91,5 @@ class IngressController :
 			if new_env != self.__old_env() :
 				if self.gen_conf(new_env, lock=False) :
 					self.__old_env.copy(new_env)
-					utils.log("[*] Successfully generated new configuration")
+					log("CONTROLLER", "INFO", "successfully generated new configuration")
 			self.lock.release()

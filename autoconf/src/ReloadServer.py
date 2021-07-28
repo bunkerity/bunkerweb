@@ -1,4 +1,6 @@
-import socketserver, threading, utils, os, stat
+import socketserver, threading, os, stat
+
+from logger import log
 
 class ReloadServerHandler(socketserver.StreamRequestHandler):
 
@@ -25,7 +27,7 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 					else :
 						self.request.sendall(b"ko")
 		except Exception as e :
-			utils.log("Exception ReloadServer : " + str(e))
+			log("RELOADSERVER", "ERROR", "exception : " + str(e))
 		if locked :
 			self.server.controller.lock.release()
 

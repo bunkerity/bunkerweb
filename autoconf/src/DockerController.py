@@ -39,4 +39,4 @@ class DockerController(Controller) :
 			if new_env != old_env :
 				if self.gen_conf(new_env) :
 					old_env.copy(new_env)
-					utils.log("[*] Successfully generated new configuration")
+					log("CONTROLLER", "INFO", "successfully generated new configuration")

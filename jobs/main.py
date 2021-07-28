@@ -60,10 +60,7 @@ if __name__ == "__main__" :
 	ret = instance.run()
 	if ret == JobRet.KO :
 		log("job", "ERROR", "error while running job " + job)
-		if reload_socket != None :
-			reload_socket.sendall(b"unlock")
-			reload_socket.recv(512)
-			reload_socket.close()
+		management.unlock()
 		sys.exit(1)
 	log("job", "INFO", "job " + job + " successfully executed")
 
