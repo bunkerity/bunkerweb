@@ -1,14 +1,16 @@
 from kubernetes import client, config, watch
 from threading import Thread, Lock
 
+from Controller import Controller
+
 class IngressController :
 
 	def __init__(self) :
-		config.load_kube_config()
+		super().__init__()
+		config.load_incluster_config()
 		self.__api = client.CoreV1Api()
 		self.__extensions_api = client.ExtensionsV1beta1Api()
 		self.__lock = Lock()
-		self.__last_conf = {}
 
 	def __annotations_to_env(self, annotations, service=False) :
 		env = {}
@@ -21,22 +23,24 @@ class IngressController :
 			if annotation.startswith("bunkerized-nginx.") and annotation.replace("bunkerized-nginx.", "", 1) != "" and annotation.replace("bunkerized-nginx.", "", 1) != "AUTOCONF" :
 				env[prefix + annotation.replace("bunkerized-nginx.", "", 1)] = annotations[annotation]
 		return env
-	
+
 	def __rules_to_env(self, rules) :
 		env = {}
 		for rule in rules :
 			prefix = ""
 			if "host" in rule :
 				prefix = rule["host"] + "_"
+			if not "http" in rule or not "paths" in rule["http"] :
+				continue
 			for path in rule["http"]["paths"] :
 				env[prefix + "USE_REVERSE_PROXY"] = "yes"
 				env[prefix + "REVERSE_PROXY_URL"] = path["path"]
 				env[prefix + "REVERSE_PROXY_HOST"] = "http://" + path["backend"]["serviceName"] + ":" + str(path["backend"]["servicePort"])
 		return env
 
-	def gen_conf(self) :
-		ingresses = self.get_ingresses()
-		services = self.get_services()
+	def get_env(self) :
+		ingresses = self.__get_ingresses()
+		services = self.__get_services()
 		env = {}
 		for ingress in ingresses :
 			if ingress.metadata.annotations == None :
@@ -49,16 +53,12 @@ class IngressController :
 				continue
 			if "bunkerized-nginx.AUTOCONF" in service.metadata.annotations :
 				env.update(self.__annotations_to_env(service.metadata.annotations, service=True))
-		if self.__last_conf != env :
-			self.__last_conf = env
-			print("*** NEW CONF ***")
-			for k, v in env.items() :
-				print(k + " = " + v)
+		return env
 
-	def get_ingresses(self) :
+	def __get_ingresses(self) :
 		return self.__extensions_api.list_ingress_for_all_namespaces(watch=False).items
 
-	def get_services(self) :
+	def __get_services(self) :
 		return self.__api.list_service_for_all_namespaces(watch=False).items
 
 	def watch_ingress(self) :

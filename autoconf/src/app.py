@@ -5,19 +5,19 @@ from ReloadServer import run_reload_server
 import utils
 import docker, os, stat, sys, select, threading
 
-# Connect to the endpoint
-endpoint = "/var/run/docker.sock"
-if not os.path.exists(endpoint) or not stat.S_ISSOCK(os.stat(endpoint).st_mode) :
-	utils.log("[!] /var/run/docker.sock not found (is it mounted ?)")
-	sys.exit(1)
-try :
-	client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
-except Exception as e :
-	utils.log("[!] Can't instantiate DockerClient : " + str(e))
-	sys.exit(2)
-
 # Check if we are in Swarm mode
 swarm = os.getenv("SWARM_MODE") == "yes"
+if swarm :
+	# Connect to the endpoint
+	endpoint = "/var/run/docker.sock"
+	if not os.path.exists(endpoint) or not stat.S_ISSOCK(os.stat(endpoint).st_mode) :
+		utils.log("[!] /var/run/docker.sock not found (is it mounted ?)")
+		sys.exit(1)
+	try :
+		client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
+	except Exception as e :
+		utils.log("[!] Can't instantiate DockerClient : " + str(e))
+		sys.exit(2)
 
 # Our object to process events
 api = ""
