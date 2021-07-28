@@ -5,9 +5,8 @@ import argparse, sys
 sys.path.append("/opt/bunkerized-nginx/jobs")
 
 import Abusers, CertbotNew, CertbotRenew, ExitNodes, GeoIP, Proxies, Referrers, SelfSignedCert, UserAgents
-from Job import JobRet
+from Job import JobRet, JobManagement, ReloadRet
 
-from reload import reload
 from logger import log
 
 JOBS = {
@@ -45,6 +44,10 @@ if __name__ == "__main__" :
 		sys.exit(1)
 	job = args.name
 
+	# Acquire the lock before
+	management = JobManagement()
+	management.lock()
+
 	# Run job
 	log("job", "INFO", "executing job " + job)
 	ret = 0
@@ -57,21 +60,29 @@ if __name__ == "__main__" :
 	ret = instance.run()
 	if ret == JobRet.KO :
 		log("job", "ERROR", "error while running job " + job)
+		if reload_socket != None :
+			reload_socket.sendall(b"unlock")
+			reload_socket.recv(512)
+			reload_socket.close()
 		sys.exit(1)
 	log("job", "INFO", "job " + job + " successfully executed")
 
 	# Reload
 	if ret == JobRet.OK_RELOAD and args.reload :
-		ret = reload()
-		if ret == 0 :
+		ret = management.reload()
+		if ret == ReloadRet.KO :
 			log("job", "ERROR", "error while doing reload operation (job = " + job + ")")
+			management.unlock()
 			sys.exit(1)
-		elif ret == 1 :
+		elif ret == ReloadRet.OK :
 			log("job", "INFO", "reload operation successfully executed (job = " + job + ")")
-		elif ret == 2 :
+		elif ret == ReloadRet.NO :
 			log("job", "INFO", "skipped reload operation because nginx is not running (job = " + job + ")")
 	else :
 		log("job", "INFO", "skipped reload operation because it's not needed (job = " + job + ")")
+
+	# Release the lock
+	management.unlock()
 
 	# Done
 	sys.exit(0)

@@ -7,6 +7,58 @@ class JobRet(enum.Enum) :
 	OK_RELOAD	= 1
 	OK_NO_RELOAD	= 2
 
+class ReloadRet(enum.Enum) :
+	KO		= 0
+	OK		= 1
+	NO		= 2
+
+class JobManagement() :
+
+	def __init__(self) :
+		self.__local_nginx = False
+		if os.path.isfile("/usr/sbin/nginx") and os.path.isfile("/tmp/nginx.pid") :
+			self.__local_nginx = True
+		self.__autoconf_socket = None
+		if os.path.exists("/tmp/autoconf.sock") and stat.S_ISSOCK(os.stat("/tmp/autoconf.sock")) :
+			self.__autoconf_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+			self.__autoconf_socket.connect()
+
+	def __autoconf_order(self, order) :
+		self.__autoconf_socket.sendall(order)
+		data = self.__autoconf_socket.recv(512)
+		if not data or data != b"ok" :
+			return False
+		return True
+
+	def lock(self) :
+		if self.__autoconf_socket != None :
+			return self.__autoconf_order(b"lock")
+		# TODO : local lock
+		return True
+
+	def unlock(self) :
+		if self.__autoconf_socket != None :
+			return self.__autoconf_order(b"unlock")
+		# TODO : local unlock
+		return True
+
+	def reload(self) :
+		if self.__autoconf_socket != None :
+			if self.__autoconf_order(b"reload") :
+				return ReloadRet.OK
+			return ReloadRet.KO
+		elif self.__local_nginx :
+			proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+			if proc.returncode != 0 :
+				log("reload", "ERROR", "can't reload nginx (status code = " + str(proc.returncode) + ")")
+				if len(proc.stdout.decode("ascii")) > 1 :
+					log("reload", "ERROR", proc.stdout.decode("ascii"))
+				if len(proc.stderr.decode("ascii")) > 1 :
+					log("reload", "ERROR", proc.stderr.decode("ascii"))
+				return ReloadRet.KO
+			return ReloadRet.OK
+		return ReloadRet.NO
+
 class Job(abc.ABC) :
 
 	def __init__(self, name, data, filename=None, redis_host=None, type="line", regex=r"^.+$", copy_cache=False) :
