@@ -32,9 +32,12 @@ function has_value() {
 	done
 }
 
-# log to jobs.log
-function job_log() {
+# log to stdout
+function log() {
 	when="$(date '+[%Y-%m-%d %H:%M:%S]')"
-	what="$1"
-	echo "$when $what" >> /var/log/nginx/jobs.log
+	category="$1"
+	severity="$2"
+	message="$3"
+	echo "$when $category - $severity - $message"
 }
+

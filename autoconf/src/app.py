@@ -6,7 +6,7 @@ import docker, os, stat, sys, select, threading
 
 from DockerController import DockerController
 from SwarmController import SwarmController
-from KubernetesController import KubernetesController
+from IngressController import IngressController
 
 from logger import log
 
@@ -21,7 +21,7 @@ if swarm :
 	controller = SwarmController(api_uri)
 elif kubernetes :
 	log("autoconf", "INFO", "kubernetes mode detected")
-	controller = KubernetesController(api_uri)
+	controller = IngressController(api_uri)
 else :
 	log("autoconf", "INFO", "docker mode detected")
 	controller = DockerController()
@@ -32,8 +32,8 @@ if swarm or kubernetes :
 
 # Apply the first config for existing services
 current_env = controller.get_env()
-if env != {} :
+if current_env != {} :
 	controller.gen_conf(current_env)
 
 # Process events
-controller.process_events()
+controller.process_events(current_env)

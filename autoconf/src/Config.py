@@ -1,19 +1,18 @@
 #!/usr/bin/python3
 
-import utils
 import subprocess, shutil, os, traceback, requests, time
 
-from Controller import ControllerType
+import Controller
 
 from logger import log
 
 class Config :
 
-	def __init__(type, api_uri) :
+	def __init__(self, type, api_uri) :
 		self.__type = type
 		self.__api_uri = api_uri
 
-	def gen(env) :
+	def gen(self, env) :
 		try :
 			# Write environment variables to a file
 			with open("/tmp/variables.env", "w") as f :
@@ -27,32 +26,32 @@ class Config :
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
 			if len(stdout) > 1 :
-				log("CONFIG", "INFO", "generator output : " + stdout)
+				log("config", "INFO", "generator output : " + stdout)
 			if stderr != "" :
-				log("CONFIG", "ERROR", "generator error : " + stderr)
+				log("config", "ERROR", "generator error : " + stderr)
 
 			# We're done
 			if proc.returncode == 0 :
-				if self.__type == ControllerType.SWARM or self.__type == ControllerType.KUBERNETES :
+				if self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
 					return self.__jobs()
 				return True
-			log("CONFIG", "ERROR", "error while generating config (return code = " + str(proc.returncode) + ")")
+			log("config", "ERROR", "error while generating config (return code = " + str(proc.returncode) + ")")
 
 		except Exception as e :
-			log("CONFIG", "ERROR", "exception while generating site config : " + traceback.format_exc())
+			log("config", "ERROR", "exception while generating site config : " + traceback.format_exc())
 		return False
 
 	def reload(self, instances) :
 		ret = True
-		if self.__type == ControllerType.DOCKER :
+		if self.__type == Controller.Type.DOCKER :
 			for instance in instances :
 				try :
 					instance.kill("SIGHUP")
 				except :
 					ret = False
-		elif self.__type == ControllerType.SWARM :
+		elif self.__type == Controller.Type.SWARM :
 			ret = self.__api_call(instances, "/reload")
-		elif self.__type == ControllerType.KUBERNETES :
+		elif self.__type == Controller.Type.KUBERNETES :
 			ret = self.__api_call(instances, "/reload")
 		return ret
 
@@ -61,9 +60,9 @@ class Config :
 
 	def wait(self, instances) :
 		ret = True
-		if self.__type == ControllerType.DOCKER :
+		if self.__type == Controller.Type.DOCKER :
 			ret = self.__wait_docker()
-		elif self.__type == ControllerType.SWARM or self.__type == ControllerType.KUBERNETES :
+		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
 			ret = self.__wait_api()
 		return ret
 
@@ -96,20 +95,20 @@ class Config :
 					started = True
 					break
 				i = i + 1
-				log("CONFIG", "INFO" "waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx instances")
+				log("config", "INFO" "waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx instances")
 			if started :
-				log("CONFIG", "INFO", "bunkerized-nginx instances started")
+				log("config", "INFO", "bunkerized-nginx instances started")
 				return True
 			else :
-				log("CONFIG", "ERROR", "bunkerized-nginx instances are not started")
+				log("config", "ERROR", "bunkerized-nginx instances are not started")
 		except Exception as e :
-			log("CONFIG", "ERROR", "exception while waiting for bunkerized-nginx instances : " + traceback.format_exc())
+			log("config", "ERROR", "exception while waiting for bunkerized-nginx instances : " + traceback.format_exc())
 		return False
 
 	def __api_call(self, instances, path) :
 		ret = True
 		urls = []
-		if self.__type == ControllerType.SWARM :
+		if self.__type == Controller.Type.SWARM :
 			for instance in instances :
 				name = instance.name
 				for task in instance.tasks() :
@@ -117,8 +116,8 @@ class Config :
 					taskID = task["ID"]
 					url = "http://" + name + "." + nodeID + "." + taskID + ":8080" + self.__api_uri + path
 					urls.append(url)
-		elif self.__type == ControllerType.KUBERNETES :
-			log("CONFIG", "ERROR", "TODO get urls for k8s")
+		elif self.__type == Controller.Type.KUBERNETES :
+			log("config", "ERROR", "TODO get urls for k8s")
 
 		for url in urls :
 			try :
@@ -126,8 +125,8 @@ class Config :
 			except :
 				pass
 			if req and req.status_code == 200 and req.text == "ok" :
-				log("CONFIG", "INFO", "successfully sent API order to " + url)
+				log("config", "INFO", "successfully sent API order to " + url)
 			else :
-				log("CONFIG", "INFO", "failed API order to " + url)
+				log("config", "INFO", "failed API order to " + url)
 				ret = False
 		return ret

@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
+from enum import Enum
+
 from Config import Config
 
-class ControllerType(Enum) :
+class Type(Enum) :
 	DOCKER = 1
 	SWARM = 2
 	KUBERNETES = 3
@@ -28,7 +30,7 @@ class Controller(ABC) :
 		return self.__config.gen(env)
 
 	@abstractmethod
-	def process_events(self) :
+	def process_events(self, current_env) :
 		pass
 
 	@abstractmethod

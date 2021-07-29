@@ -1,14 +1,14 @@
 from kubernetes import client, config, watch
 from threading import Thread
 
-from Controller import Controller, ControllerType
+import Controller
 
 from logger import log
 
-class IngressController :
+class IngressController(Controller.Controller) :
 
 	def __init__(self, api_uri) :
-		super().__init__(ControllerType.KUBERNETES, api_uri=api_uri, lock=Lock())
+		super().__init__(Controller.Type.KUBERNETES, api_uri=api_uri, lock=Lock())
 		config.load_incluster_config()
 		self.__api = client.CoreV1Api()
 		self.__extensions_api = client.ExtensionsV1beta1Api()
@@ -79,7 +79,7 @@ class IngressController :
 			new_env = self.get_env()
 			if new_env != self.__old_env() :
 				if self.gen_conf(new_env, lock=False) :
-					self.__old_env.copy(new_env)
+					self.__old_env = new_env.copy()
 					log("CONTROLLER", "INFO", "successfully generated new configuration")
 			self.lock.release()
 
@@ -90,6 +90,9 @@ class IngressController :
 			new_env = self.get_env()
 			if new_env != self.__old_env() :
 				if self.gen_conf(new_env, lock=False) :
-					self.__old_env.copy(new_env)
+					self.__old_env = new_env.copy()
 					log("CONTROLLER", "INFO", "successfully generated new configuration")
 			self.lock.release()
+
+	def reload(self) :
+		return self._reload(self.__get_ingresses())

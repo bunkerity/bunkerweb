@@ -21,7 +21,7 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 					locked = False
 					self.request.sendall(b"ok")
 				elif data == b"reload" :
-					ret = self.server.controller.reload() :
+					ret = self.server.controller.reload()
 					if ret :
 						self.request.sendall(b"ok")
 					else :

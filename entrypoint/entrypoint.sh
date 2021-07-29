@@ -1,33 +1,35 @@
 #!/bin/bash
 
-echo "[*] Starting bunkerized-nginx ..."
+. /opt/bunkerize-nginx/entrypoint/utils.sh
+
+log "entrypoint" "INFO" "starting bunkerized-nginx ..."
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
-	echo "[*] Catched stop operation"
-	echo "[*] Stopping crond ..."
+	log "stop" "INFO" "catched stop operation"
+	log "stop" "INFO" "stopping crond ..."
 	pkill -TERM crond
-	echo "[*] Stopping nginx ..."
+	log "stop" "INFO" "stopping nginx ..."
 	/usr/sbin/nginx -s stop
 }
 trap "trap_exit" TERM INT QUIT
 
 # trap SIGHUP
 function trap_reload() {
-	echo "[*] Catched reload operation"
+	log "reload" "INFO" "catched reload operation"
 	if [ "$SWARM_MODE" != "yes" ] ; then
 		/opt/bunkerized-nginx/entrypoint/jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
-		echo "[*] Reloading nginx ..."
+		log "reload" "INFO" "reloading nginx ..."
 		nginx -s reload
 		if [ $? -eq 0 ] ; then
-			echo "[*] Reload successfull"
+			log "reload" "INFO" "reloading successful"
 		else
-			echo "[!] Reload failed"
+			log "reload" "ERROR" "reloading failed"
 		fi
 	else
-		echo "[!] Ignored reload operation because nginx is not running"
+		log "reload" "INFO" "ignored reload operation because nginx is not running"
 	fi
 }
 trap "trap_reload" HUP
@@ -35,7 +37,7 @@ trap "trap_reload" HUP
 # do the configuration magic if needed
 if [ ! -f "/etc/nginx/global.env" ] ; then
 
-	echo "[*] Configuring bunkerized-nginx ..."
+	log "entrypoint" "INFO" "configuring bunkerized-nginx ..."
 
 	# check permissions
 	if [ "$SWARM_MODE" != "yes" ] ; then
@@ -50,27 +52,34 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 	# start temp nginx to solve Let's Encrypt challenges if needed
 	/opt/bunkerized-nginx/entrypoint/nginx-temp.sh
 
-	# only do config if we are not in swarm mode
-	if [ "$SWARM_MODE" != "yes" ] ; then
+	# only do config if we are not in swarm/kubernetes mode
+	if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] ; then
 		# export the variables
 		env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "/tmp/variables.env"
 
 		# call the generator
-		/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env
+		gen_ret="$(/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env 2>&1)"
+		if [ "$?" -ne 0 ] ; then
+			log "entrypoint" "ERROR" "generator failed : $gen_ret"
+			exit 1
+		fi
+		if [ "$gen_ret" != "" ] ; then
+			log "entrypoint" "INFO" "generator output : $gen_ret"
+		fi
 
 		# call jobs
 		/opt/bunkerized-nginx/entrypoint/jobs.sh
 	fi
 else
-	echo "[*] Skipping configuration process"
+	log "entrypoint" "INFO" "skipping configuration process"
 fi
 
 # start crond
 crond
 
 # wait until config has been generated if we are in swarm mode
-if [ "$SWARM_MODE" = "yes" ] ; then
-	echo "[*] Waiting until config has been generated ..."
+if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] ; then
+	log "entrypoint" "INFO" "waiting until config has been generated ..."
 	while [ ! -f "/etc/nginx/autoconf" ] ; do
 		sleep 1
 	done
@@ -82,7 +91,7 @@ if [ -f "/tmp/nginx-temp.pid" ] ; then
 fi
 
 # run nginx
-echo "[*] Running nginx ..."
+log "entrypoint" "INFO" "running nginx ..."
 nginx -g 'daemon off;' &
 pid="$!"
 
@@ -104,5 +113,5 @@ while [ -f "/tmp/nginx.pid" ] ; do
 done
 
 # sigterm trapped
-echo "[*] bunkerized-nginx stopped"
+log "entrypoint" "INFO" "bunkerized-nginx stopped"
 exit 0
