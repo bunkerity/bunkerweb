@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /opt/bunkerize-nginx/entrypoint/utils.sh
+. /opt/bunkerized-nginx/entrypoint/utils.sh
 
 log "entrypoint" "INFO" "starting bunkerized-nginx ..."
 

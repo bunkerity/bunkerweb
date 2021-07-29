@@ -63,7 +63,7 @@ services:
       labels:
         - "bunkerized-nginx.AUTOCONF"
 
- app1:
+  app1:
     image: php:fpm-alpine
     volumes:
       - /shared/www/app1.example.com:/www
