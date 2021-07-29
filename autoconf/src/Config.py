@@ -3,52 +3,17 @@
 import utils
 import subprocess, shutil, os, traceback, requests, time
 
+from Controller import ControllerType
+
+from logger import log
+
 class Config :
 
-	def __init__(self, swarm, api) :
-		self.__swarm = swarm
-		self.__api = api
+	def __init__(type, api_uri) :
+		self.__type = type
+		self.__api_uri = api_uri
 
-	def __jobs(self) :
-		utils.log("[*] Starting jobs")
-		proc = subprocess.run(["/bin/su", "-c", "/opt/bunkerized-nginx/entrypoint/jobs.sh", "nginx"], capture_output=True)
-		stdout = proc.stdout.decode("ascii")
-		stderr = proc.stderr.decode("ascii")
-		if len(stdout) > 1 :
-			utils.log("[*] Jobs stdout :")
-			utils.log(stdout)
-		if stderr != "" :
-			utils.log("[!] Jobs stderr :")
-			utils.log(stderr)
-		if proc.returncode != 0 :
-			utils.log("[!] Jobs error : return code != 0")
-			return False
-		return True
-
-	def swarm_wait(self, instances) :
-		try :
-			with open("/etc/nginx/autoconf", "w") as f :
-				f.write("ok")
-			utils.log("[*] Waiting for bunkerized-nginx tasks ...")
-			i = 1
-			started = False
-			while i <= 10 :
-				time.sleep(i)
-				if self.__ping(instances) :
-					started = True
-					break
-				i = i + 1
-				utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx tasks")
-			if started :
-				utils.log("[*] bunkerized-nginx tasks started")
-				return True
-			else :
-				utils.log("[!] bunkerized-nginx tasks are not started")
-		except Exception as e :
-			utils.log("[!] Error while waiting for Swarm tasks : " + str(e))
-		return False
-
-	def generate(self, env) :
+	def gen(env) :
 		try :
 			# Write environment variables to a file
 			with open("/tmp/variables.env", "w") as f :
@@ -62,60 +27,107 @@ class Config :
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
 			if len(stdout) > 1 :
-				utils.log("[*] Generator output :")
-				utils.log(stdout)
+				log("CONFIG", "INFO", "generator output : " + stdout)
 			if stderr != "" :
-				utils.log("[*] Generator error :")
-				utils.log(error)
+				log("CONFIG", "ERROR", "generator error : " + stderr)
 
 			# We're done
 			if proc.returncode == 0 :
-				if self.__swarm :
+				if self.__type == ControllerType.SWARM or self.__type == ControllerType.KUBERNETES :
 					return self.__jobs()
 				return True
-			utils.log("[!] Error while generating site config for " + env["SERVER_NAME"] + " : return code = " + str(proc.returncode))
+			log("CONFIG", "ERROR", "error while generating config (return code = " + str(proc.returncode) + ")")
 
 		except Exception as e :
-			utils.log("[!] Exception while generating site config : " + str(e))
+			log("CONFIG", "ERROR", "exception while generating site config : " + traceback.format_exc())
 		return False
 
 	def reload(self, instances) :
-		return self.__api_call(instances, "/reload")
+		ret = True
+		if self.__type == ControllerType.DOCKER :
+			for instance in instances :
+				try :
+					instance.kill("SIGHUP")
+				except :
+					ret = False
+		elif self.__type == ControllerType.SWARM :
+			ret = self.__api_call(instances, "/reload")
+		elif self.__type == ControllerType.KUBERNETES :
+			ret = self.__api_call(instances, "/reload")
+		return ret
 
 	def __ping(self, instances) :
 		return self.__api_call(instances, "/ping")
 
+	def wait(self, instances) :
+		ret = True
+		if self.__type == ControllerType.DOCKER :
+			ret = self.__wait_docker()
+		elif self.__type == ControllerType.SWARM or self.__type == ControllerType.KUBERNETES :
+			ret = self.__wait_api()
+		return ret
+
+	def __wait_docker(self, instances) :
+		all_healthy = False
+		i = 0
+		while i < 120 :
+			one_not_healthy = False
+			for instance in instances :
+				instance.reload()
+				if instance.attrs["State"]["Health"]["Status"] != "healthy" :
+					one_not_healthy = True
+					break
+			if not one_not_healthy :
+				all_healthy = True
+				break
+			time.sleep(1)
+			i += 1
+		return all_healthy
+
+	def __wait_api(self, instances) :
+		try :
+			with open("/etc/nginx/autoconf", "w") as f :
+				f.write("ok")
+			i = 1
+			started = False
+			while i <= 10 :
+				time.sleep(i)
+				if self.__ping(instances) :
+					started = True
+					break
+				i = i + 1
+				log("CONFIG", "INFO" "waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx instances")
+			if started :
+				log("CONFIG", "INFO", "bunkerized-nginx instances started")
+				return True
+			else :
+				log("CONFIG", "ERROR", "bunkerized-nginx instances are not started")
+		except Exception as e :
+			log("CONFIG", "ERROR", "exception while waiting for bunkerized-nginx instances : " + traceback.format_exc())
+		return False
+
 	def __api_call(self, instances, path) :
 		ret = True
-		for instance_id, instance in instances.items() :
-			# Reload the instance object just in case
-			instance.reload()
-			# Reload via API
-			if self.__swarm :
-				# Send POST request on http://serviceName.NodeID.TaskID:8000/action
+		urls = []
+		if self.__type == ControllerType.SWARM :
+			for instance in instances :
 				name = instance.name
 				for task in instance.tasks() :
-					if task["Status"]["State"] != "running" :
-						continue
 					nodeID = task["NodeID"]
 					taskID = task["ID"]
-					fqdn = name + "." + nodeID + "." + taskID
-					req = False
-					try :
-						req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
-					except :
-						pass
-					if req and req.status_code == 200 and req.text == "ok" :
-						utils.log("[*] Sent API order " + path + " to instance " + fqdn + " (service.node.task)")
-					else :
-						utils.log("[!] Can't send API order " + path + " to instance " + fqdn + " (service.node.task)")
-						ret = False
-			# Send SIGHUP to running instance
-			elif instance.status == "running" :
-				try :
-					instance.kill("SIGHUP")
-					utils.log("[*] Sent SIGHUP signal to bunkerized-nginx instance " + instance.name + " / " + instance.id)
-				except docker.errors.APIError as e :
-					utils.log("[!] Docker error while sending SIGHUP signal : " + str(e))
-					ret = False
+					url = "http://" + name + "." + nodeID + "." + taskID + ":8080" + self.__api_uri + path
+					urls.append(url)
+		elif self.__type == ControllerType.KUBERNETES :
+			log("CONFIG", "ERROR", "TODO get urls for k8s")
+
+		for url in urls :
+			try :
+				req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
+			except :
+				pass
+			if req and req.status_code == 200 and req.text == "ok" :
+				log("CONFIG", "INFO", "successfully sent API order to " + url)
+			else :
+				log("CONFIG", "INFO", "failed API order to " + url)
+				ret = False
 		return ret

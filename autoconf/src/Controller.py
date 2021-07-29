@@ -31,5 +31,9 @@ class Controller(ABC) :
 	def process_events(self) :
 		pass
 
+	@abstractmethod
 	def reload(self) :
-		return self.__config.reload()
+		pass
+
+	def _reload(self, instances) :
+		return self.__config.reload(instances)
