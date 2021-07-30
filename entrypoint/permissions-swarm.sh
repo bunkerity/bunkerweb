@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # /etc/letsencrypt
 if [ ! -r "/etc/letsencrypt" ] || [ ! -x "/etc/letsencrypt" ] ; then

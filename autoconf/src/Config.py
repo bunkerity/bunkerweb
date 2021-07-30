@@ -12,6 +12,21 @@ class Config :
 		self.__type = type
 		self.__api_uri = api_uri
 
+
+	def __jobs(self) :
+		log("config", "INFO", "starting jobs ...")
+		proc = subprocess.run(["/bin/su", "-c", "/opt/bunkerized-nginx/entrypoint/jobs.sh", "nginx"], capture_output=True)
+		stdout = proc.stdout.decode("ascii")
+		stderr = proc.stderr.decode("ascii")
+		if len(stdout) > 1 :
+			log("config", "INFO", "jobs stdout : " + stdout)
+		if stderr != "" :
+			log("config", "ERROR", "jobs stderr : " + stderr)
+		if proc.returncode != 0 :
+			log("config", "ERROR", "jobs error (return code = " + str(proc.returncode) + ")")
+			return False
+		return True
+
 	def gen(self, env) :
 		try :
 			# Write environment variables to a file

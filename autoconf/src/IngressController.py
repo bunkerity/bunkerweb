@@ -1,5 +1,5 @@
 from kubernetes import client, config, watch
-from threading import Thread
+from threading import Thread, Lock
 
 import Controller
 
@@ -96,3 +96,6 @@ class IngressController(Controller.Controller) :
 
 	def reload(self) :
 		return self._reload(self.__get_ingresses())
+
+	def wait(self) :
+		return self._config.wait(self.__get_ingresses())

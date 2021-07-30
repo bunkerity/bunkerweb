@@ -11,7 +11,7 @@ class Type(Enum) :
 class Controller(ABC) :
 
 	def __init__(self, type, api_uri=None, lock=None) :
-		self.__config = Config(type, api_uri)
+		self._config = Config(type, api_uri)
 		self.lock = lock
 
 	@abstractmethod
@@ -27,7 +27,11 @@ class Controller(ABC) :
 		return fixed_env
 
 	def gen_conf(self, env) :
-		return self.__config.gen(env)
+		return self._config.gen(env)
+
+	@abstractmethod
+	def wait(self) :
+		pass
 
 	@abstractmethod
 	def process_events(self, current_env) :
@@ -38,4 +42,4 @@ class Controller(ABC) :
 		pass
 
 	def _reload(self, instances) :
-		return self.__config.reload(instances)
+		return self._config.reload(instances)

@@ -57,3 +57,7 @@ class DockerController(Controller.Controller) :
 	def reload(self) :
 		return self._reload(self.__get_instances())
 
+
+	def wait(self) :
+		# TODO : healthcheck ?
+		return True

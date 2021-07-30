@@ -1,4 +1,4 @@
-import abc, requests, redis, os, datetime, traceback, re, shutil, enum, filecmp, subprocess
+import abc, requests, redis, os, datetime, traceback, re, shutil, enum, filecmp, subprocess, stat, socket
 
 from logger import log
 
@@ -19,9 +19,9 @@ class JobManagement() :
 		if os.path.isfile("/usr/sbin/nginx") and os.path.isfile("/tmp/nginx.pid") :
 			self.__local_nginx = True
 		self.__autoconf_socket = None
-		if os.path.exists("/tmp/autoconf.sock") and stat.S_ISSOCK(os.stat("/tmp/autoconf.sock")) :
+		if os.path.exists("/tmp/autoconf.sock") and stat.S_ISSOCK(os.stat("/tmp/autoconf.sock").st_mode) :
 			self.__autoconf_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			self.__autoconf_socket.connect()
+			self.__autoconf_socket.connect("/tmp/autoconf.sock")
 
 	def __autoconf_order(self, order) :
 		self.__autoconf_socket.sendall(order)

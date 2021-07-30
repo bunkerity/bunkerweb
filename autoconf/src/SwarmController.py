@@ -1,4 +1,5 @@
 import docker
+from threading import Lock
 
 from logger import log
 
@@ -59,3 +60,6 @@ class SwarmController(Controller.Controller) :
 
 	def reload(self) :
 		return self._reload(self.__get_instances())
+
+	def wait(self) :
+		return self._config.wait(self.__get_instances())

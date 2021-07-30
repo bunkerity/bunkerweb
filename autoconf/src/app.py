@@ -28,12 +28,18 @@ else :
 
 # Run the reload server in background if needed
 if swarm or kubernetes :
+	log("autoconf", "INFO", "start reload server in background")
 	(server, thread) = run_reload_server(controller)
 
 # Apply the first config for existing services
 current_env = controller.get_env()
 if current_env != {} :
-	controller.gen_conf(current_env)
+	log("autoconf", "INFO", "generating the initial configuration...")
+	if controller.gen_conf(current_env) :
+		log("autoconf", "INFO", "initial configuration successfully generated")
+	else :
+		log("autoconf", "ERROR", "error while generating initial configuration")
 
 # Process events
+log("autoconf", "INFO", "waiting for events ...")
 controller.process_events(current_env)
