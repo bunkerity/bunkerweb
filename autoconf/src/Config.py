@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import subprocess, shutil, os, traceback, requests, time
+import subprocess, shutil, os, traceback, requests, time, dns.resolver
 
 import Controller
 
@@ -76,9 +76,9 @@ class Config :
 	def wait(self, instances) :
 		ret = True
 		if self.__type == Controller.Type.DOCKER :
-			ret = self.__wait_docker()
+			ret = self.__wait_docker(instances)
 		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
-			ret = self.__wait_api()
+			ret = self.__wait_api(instances)
 		return ret
 
 	def __wait_docker(self, instances) :
@@ -110,7 +110,7 @@ class Config :
 					started = True
 					break
 				i = i + 1
-				log("config", "INFO" "waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx instances")
+				log("config", "INFO", "waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx instances")
 			if started :
 				log("config", "INFO", "bunkerized-nginx instances started")
 				return True
@@ -126,17 +126,19 @@ class Config :
 		if self.__type == Controller.Type.SWARM :
 			for instance in instances :
 				name = instance.name
-				for task in instance.tasks() :
-					nodeID = task["NodeID"]
-					taskID = task["ID"]
-					url = "http://" + name + "." + nodeID + "." + taskID + ":8080" + self.__api_uri + path
-					urls.append(url)
+				try :
+					dns_result = dns.resolver.query("tasks." + name)
+					for ip in dns_result :
+						urls.append("http://" + ip.to_text() + ":8080" + self.__api_uri + path)
+				except :
+					ret = False
 		elif self.__type == Controller.Type.KUBERNETES :
 			log("config", "ERROR", "TODO get urls for k8s")
 
 		for url in urls :
+			req = None
 			try :
-				req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
+				req = requests.post(url)
 			except :
 				pass
 			if req and req.status_code == 200 and req.text == "ok" :

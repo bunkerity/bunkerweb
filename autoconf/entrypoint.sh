@@ -8,10 +8,10 @@ if [ "$?" -ne 0 ] ; then
 	exit 1
 fi
 
-if [ "$SWARM_MODE" = "yes" ] ; then
-	chown -R root:nginx /etc/nginx
-	chmod -R 770 /etc/nginx
-fi
+#if [ "$SWARM_MODE" = "yes" ] ; then
+#	chown -R root:nginx /etc/nginx
+#	chmod -R 770 /etc/nginx
+#fi
 
 # trap SIGTERM and SIGINT
 function trap_exit() {

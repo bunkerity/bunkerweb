@@ -40,6 +40,12 @@ if current_env != {} :
 	else :
 		log("autoconf", "ERROR", "error while generating initial configuration")
 
+# Wait for instances
+if controller.wait() :
+	log("autoconf", "INFO", "bunkerized-nginx instances started")
+else :
+	log("autoconf", "ERROR", "bunkerized-nginx instances not started")
+
 # Process events
 log("autoconf", "INFO", "waiting for events ...")
 controller.process_events(current_env)
