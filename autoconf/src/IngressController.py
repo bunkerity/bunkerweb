@@ -75,24 +75,20 @@ class IngressController(Controller.Controller) :
 	def __watch_ingress(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__extensions_api.list_ingress_for_all_namespaces) :
-			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env() :
 				if self.gen_conf(new_env, lock=False) :
 					self.__old_env = new_env.copy()
 					log("CONTROLLER", "INFO", "successfully generated new configuration")
-			self.lock.release()
 
 	def __watch_service(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__api.list_service_for_all_namespaces) :
-			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env() :
 				if self.gen_conf(new_env, lock=False) :
 					self.__old_env = new_env.copy()
 					log("CONTROLLER", "INFO", "successfully generated new configuration")
-			self.lock.release()
 
 	def reload(self) :
 		return self._reload(self.__get_ingresses())

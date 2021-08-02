@@ -11,7 +11,7 @@ class Type(Enum) :
 class Controller(ABC) :
 
 	def __init__(self, type, api_uri=None, lock=None) :
-		self._config = Config(type, api_uri)
+		self._config = Config(type, api_uri, lock)
 		self.lock = lock
 
 	@abstractmethod

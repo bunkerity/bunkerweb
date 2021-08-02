@@ -8,10 +8,10 @@ from logger import log
 
 class Config :
 
-	def __init__(self, type, api_uri) :
+	def __init__(self, type, api_uri, lock=None) :
 		self.__type = type
 		self.__api_uri = api_uri
-
+		self.__lock = lock
 
 	def __jobs(self) :
 		log("config", "INFO", "starting jobs ...")
@@ -28,7 +28,13 @@ class Config :
 		return True
 
 	def gen(self, env) :
+		locked = False
 		try :
+			# Lock
+			if self.__lock :
+				self.__lock.acquire()
+				locked = True
+
 			# Write environment variables to a file
 			with open("/tmp/variables.env", "w") as f :
 				for k, v in env.items() :
@@ -36,6 +42,11 @@ class Config :
 
 			# Call the generator
 			proc = subprocess.run(["/bin/su", "-c", "/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /tmp/variables.env", "nginx"], capture_output=True)
+
+			# Unlock
+			if self.__lock :
+				self.__lock.release()
+				locked = False
 
 			# Print stdout/stderr
 			stdout = proc.stdout.decode("ascii")
@@ -54,6 +65,8 @@ class Config :
 
 		except Exception as e :
 			log("config", "ERROR", "exception while generating site config : " + traceback.format_exc())
+		if locked :
+			self.__lock.release()
 		return False
 
 	def reload(self, instances) :
@@ -121,6 +134,8 @@ class Config :
 		return False
 
 	def __api_call(self, instances, path) :
+		if self.__lock :
+			self.__lock.acquire()
 		ret = True
 		urls = []
 		if self.__type == Controller.Type.SWARM :
@@ -146,4 +161,6 @@ class Config :
 			else :
 				log("config", "INFO", "failed API order to " + url)
 				ret = False
+		if self.__lock :
+			self.__lock.release()
 		return ret

@@ -11,20 +11,21 @@ from IngressController import IngressController
 from logger import log
 
 # Get variables
-swarm = os.getenv("SWARM_MODE", "no") == "yes"
-kubernetes = os.getenv("KUBERNETES_MODE", "no") == "yes"
-api_uri = os.getenv("API_URI", "")
+swarm		= os.getenv("SWARM_MODE", "no") == "yes"
+kubernetes	= os.getenv("KUBERNETES_MODE", "no") == "yes"
+api_uri		= os.getenv("API_URI", "")
+docker_host	= os.getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 
 # Instantiate the controller
 if swarm :
 	log("autoconf", "INFO", "swarm mode detected")
-	controller = SwarmController(api_uri)
+	controller = SwarmController(docker_host, api_uri)
 elif kubernetes :
 	log("autoconf", "INFO", "kubernetes mode detected")
 	controller = IngressController(api_uri)
 else :
 	log("autoconf", "INFO", "docker mode detected")
-	controller = DockerController()
+	controller = DockerController(docker_host)
 
 # Run the reload server in background if needed
 if swarm or kubernetes :

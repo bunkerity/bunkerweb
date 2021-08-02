@@ -7,10 +7,9 @@ import Controller
 
 class SwarmController(Controller.Controller) :
 
-	def __init__(self, api_uri) :
+	def __init__(self, docker_host, api_uri) :
 		super().__init__(Controller.Type.SWARM, api_uri=api_uri, lock=Lock())
-		# TODO : honor env vars like DOCKER_HOST
-		self.__client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
+		self.__client = docker.DockerClient(base_url=docker_host)
 
 	def __get_instances(self) :
 		return self.__client.services.list(filters={"label" : "bunkerized-nginx.AUTOCONF"})
@@ -45,7 +44,6 @@ class SwarmController(Controller.Controller) :
 		for event in self.__client.events(decode=True, filters={"type": "service"}) :
 			new_env = self.get_env()
 			if new_env != old_env :
-				self.lock.acquire()
 				log("controller", "INFO", "generating new configuration")
 				if self.gen_conf(new_env) :
 					old_env = new_env.copy()
@@ -56,7 +54,6 @@ class SwarmController(Controller.Controller) :
 						log("controller", "ERROR", "failed reload")
 				else :
 					log("controller", "ERROR", "can't generate new configuration")
-				self.lock.release()
 
 	def reload(self) :
 		return self._reload(self.__get_instances())

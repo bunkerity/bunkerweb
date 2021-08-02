@@ -5,10 +5,9 @@ from logger import log
 
 class DockerController(Controller.Controller) :
 
-	def __init__(self) :
+	def __init__(self, docker_host) :
 		super().__init__(Controller.Type.DOCKER)
-		# TODO : honor env vars like DOCKER_HOST
-		self.__client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
+		self.__client = docker.DockerClient(base_url=docker_host)
 
 	def __get_instances(self) :
 		return self.__client.containers.list(filters={"label" : "bunkerized-nginx.AUTOCONF"})
