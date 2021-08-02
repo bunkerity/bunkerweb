@@ -32,21 +32,14 @@ if swarm or kubernetes :
 	log("autoconf", "INFO", "start reload server in background")
 	(server, thread) = run_reload_server(controller)
 
-# Apply the first config for existing services
-current_env = controller.get_env()
-if current_env != {} :
-	log("autoconf", "INFO", "generating the initial configuration...")
-	if controller.gen_conf(current_env) :
-		log("autoconf", "INFO", "initial configuration successfully generated")
-	else :
-		log("autoconf", "ERROR", "error while generating initial configuration")
-
 # Wait for instances
-if controller.wait() :
+log("autoconf", "INFO", "wait until a bunkerized-nginx instance is started ...")
+ret, env = controller.wait()
+if ret :
 	log("autoconf", "INFO", "bunkerized-nginx instances started")
 else :
 	log("autoconf", "ERROR", "bunkerized-nginx instances not started")
 
 # Process events
 log("autoconf", "INFO", "waiting for events ...")
-controller.process_events(current_env)
+controller.process_events(env)

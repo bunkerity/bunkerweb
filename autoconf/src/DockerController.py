@@ -1,4 +1,4 @@
-import docker
+import docker, time
 import Controller
 
 from logger import log
@@ -58,5 +58,14 @@ class DockerController(Controller.Controller) :
 
 
 	def wait(self) :
-		# TODO : healthcheck ?
-		return True
+		# Wait for a container
+		instances = self.__get_instances()
+		while len(instances) == 0 :
+			time.sleep(1)
+			instances = self.__get_instances()
+		# Generate first config
+		env = self.get_env()
+		if not self.gen_conf(env) :
+			return False, env
+		# Wait for nginx
+		return self._config.wait(instances), env

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import argparse, sys
+import argparse, sys, re
 
 sys.path.append("/opt/bunkerized-nginx/jobs")
 
@@ -26,7 +26,6 @@ if __name__ == "__main__" :
 	# Parse arguments
 	parser = argparse.ArgumentParser(description="job runner for bunkerized-nginx")
 	parser.add_argument("--name", default="", type=str, help="job to run (e.g : abusers or certbot-new or certbot-renew ...)")
-	parser.add_argument("--redis", default=None, type=str, help="hostname of the redis server if any")
 	parser.add_argument("--cache", action="store_true", help="copy data from cache if available")
 	parser.add_argument("--reload", action="store_true", help="reload nginx if necessary and the job is successful")
 	parser.add_argument("--domain", default="", type=str, help="domain(s) for certbot-new job (e.g. : www.example.com or app1.example.com,app2.example.com)")
@@ -48,15 +47,27 @@ if __name__ == "__main__" :
 	management = JobManagement()
 	management.lock()
 
+	# Check if we are using redis or not
+	redis_host = None
+	try :
+		with open("/etc/nginx/global.env", "r") as f :
+			data = f.read()
+		if re.search(r"^USE_REDIS=yes$", data, re.MULTILINE) :
+			re_match = re.search(r"^REDIS_HOST=(.+)$", data, re.MULTILINE)
+			if re_match :
+				redis_host = re_match.group(1)
+	except :
+		log("job", "ERROR", "can't check if redis is used")
+
 	# Run job
 	log("job", "INFO", "executing job " + job)
 	ret = 0
 	if job == "certbot-new" :
-		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, domain=args.domain, email=args.email, staging=args.staging)
+		instance = JOBS[job](redis_host=redis_host, copy_cache=args.cache, domain=args.domain, email=args.email, staging=args.staging)
 	elif job == "self-signed-cert" :
-		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache, dst_cert=args.dst_cert, dst_key=args.dst_key, expiry=args.expiry, subj=args.subj)
+		instance = JOBS[job](redis_host=redis_host, copy_cache=args.cache, dst_cert=args.dst_cert, dst_key=args.dst_key, expiry=args.expiry, subj=args.subj)
 	else :
-		instance = JOBS[job](redis_host=args.redis, copy_cache=args.cache)
+		instance = JOBS[job](redis_host=redis_host, copy_cache=args.cache)
 	ret = instance.run()
 	if ret == JobRet.KO :
 		log("job", "ERROR", "error while running job " + job)

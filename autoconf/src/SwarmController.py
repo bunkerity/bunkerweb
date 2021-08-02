@@ -1,4 +1,4 @@
-import docker
+import docker, time
 from threading import Lock
 
 from logger import log
@@ -59,4 +59,14 @@ class SwarmController(Controller.Controller) :
 		return self._reload(self.__get_instances())
 
 	def wait(self) :
-		return self._config.wait(self.__get_instances())
+		# Wait for a service
+		instances = self.__get_instances()
+		while len(instances) == 0 :
+			time.sleep(1)
+			instances = self.__get_instances()
+		# Generate first config
+		env = self.get_env()
+		if not self.gen_conf(env) :
+			return False, env
+		# Wait for nginx
+		return self._config.wait(instances), env

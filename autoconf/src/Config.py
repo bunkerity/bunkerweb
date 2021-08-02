@@ -137,6 +137,7 @@ class Config :
 		if self.__lock :
 			self.__lock.acquire()
 		ret = True
+		nb = 0
 		urls = []
 		if self.__type == Controller.Type.SWARM :
 			for instance in instances :
@@ -158,9 +159,10 @@ class Config :
 				pass
 			if req and req.status_code == 200 and req.text == "ok" :
 				log("config", "INFO", "successfully sent API order to " + url)
+				nb += 1
 			else :
 				log("config", "INFO", "failed API order to " + url)
 				ret = False
 		if self.__lock :
 			self.__lock.release()
-		return ret
+		return ret and nb > 0

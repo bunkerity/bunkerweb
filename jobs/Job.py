@@ -61,7 +61,7 @@ class JobManagement() :
 
 class Job(abc.ABC) :
 
-	def __init__(self, name, data, filename=None, redis_host=None, type="line", regex=r"^.+$", copy_cache=False) :
+	def __init__(self, name, data, filename=None, redis_host=None, redis_ex=86400, type="line", regex=r"^.+$", copy_cache=False) :
 		self._name = name
 		self._data = data
 		self._filename = filename
@@ -72,6 +72,7 @@ class Job(abc.ABC) :
 				self._redis.echo("test")
 			except :
 				log(self._name, "ERROR", "can't connect to redis host " + redis_host)
+		self._redis_ex = redis_ex
 		self._type = type
 		self._regex = regex
 		self._copy_cache = copy_cache
@@ -119,9 +120,9 @@ class Job(abc.ABC) :
 				else :
 					if self._type == "line" :
 						for chunk in chunks :
-							pipe.set(self._name + "_" + chunk, "1")
+							pipe.set(self._name + "_" + chunk, "1", ex=self._redis_ex)
 					else :
-						pipe.set(self._name + "_" + chunk, "1")
+						pipe.set(self._name + "_" + chunk, "1", ex=self._redis_ex)
 				count += 1
 
 		if self._redis == None :
@@ -132,7 +133,6 @@ class Job(abc.ABC) :
 			return JobRet.OK_RELOAD
 
 		elif self._redis != None and count > 0 :
-			self._redis.delete(self._redis.keys(self._name + "_*"))
 			pipe.execute()
 			return JobRet.OK_RELOAD
 
@@ -178,7 +178,6 @@ class Job(abc.ABC) :
 			return JobRet.OK_NO_RELOAD
 
 		if self._redis != None and self._type == "line" :
-			self._redis.delete(self._redis.keys(self._name + "_*"))
 			with open("/opt/bunkerized-nginx/cache/" + self._filename) as f :
 				pipe = self._redis.pipeline()
 				while True :
@@ -186,7 +185,7 @@ class Job(abc.ABC) :
 					if not line :
 						break
 					line = line.strip()
-					pipe.set(self._name + "_" + line, "1")
+					pipe.set(self._name + "_" + line, "1", ex=self._redis_ex)
 				pipe.execute()
 				return JobRet.OK_NO_RELOAD
 

@@ -8,7 +8,8 @@ class Referrers(Job) :
 		filename = "referrers.list"
 		type = "line"
 		regex = r"^.+$"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)
+		redis_ex = 86400
+		super().__init__(name, data, filename, redis_host=redis_host, redis_ex=redis_ex, type=type, regex=regex, copy_cache=copy_cache)
 
 	def _edit(self, chunk) :
 		return [chunk.replace(b".", b"%.").replace(b"-", b"%-")]
