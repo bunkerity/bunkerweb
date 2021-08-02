@@ -61,7 +61,3 @@ ln -s /modsec-crs-confs /opt/bunkerized-nginx/modsec-crs-confs
 mkdir /modsec-crs-confs
 chown root:nginx /modsec-crs-confs
 chmod 770 /modsec-crs-confs
-
-# prepare /etc/crontabs/nginx
-chown root:nginx /etc/crontabs/nginx
-chmod 440 /etc/crontabs/nginx

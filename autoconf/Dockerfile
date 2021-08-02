@@ -6,7 +6,7 @@ COPY confs/global/ /opt/bunkerized-nginx/confs/global
 COPY confs/site/ /opt/bunkerized-nginx/confs/site
 COPY jobs/ /opt/bunkerized-nginx/jobs
 COPY settings.json /opt/bunkerized-nginx/
-COPY misc/cron /etc/crontabs/nginx
+COPY misc/cron-autoconf /etc/crontabs/root
 COPY autoconf/entrypoint.sh /opt/bunkerized-nginx/entrypoint/
 COPY autoconf/requirements.txt /opt/bunkerized-nginx/entrypoint/
 COPY autoconf/src/* /opt/bunkerized-nginx/entrypoint/

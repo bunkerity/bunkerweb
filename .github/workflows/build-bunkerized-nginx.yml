@@ -16,6 +16,11 @@ jobs:
       # so we need to build the image the traditional way
       - name: Temp build to check security issues
         run: docker build -t bunkerized-nginx .
+   
+      # Temp ignore CVE-2021-36159
+      - name: Temp add .trivyignore
+        run: |
+          echo "CVE-2021-36159" > .trivyignore
 
       - name: Run Trivy security scanner
         uses: aquasecurity/trivy-action@master
@@ -25,6 +30,10 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Temp remove .trivyignore
+        run: |
+          rm -f .trivyignore
 
       - name: Run autotest
         run: docker run bunkerized-nginx test
