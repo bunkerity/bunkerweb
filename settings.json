@@ -1204,6 +1204,15 @@
             {
                 "context": "global",
                 "default": "no",
+                "env": "KUBERNETES_MODE",
+                "id": "kubernetes-mode",
+                "label": "Kubernetes mode",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "no",
                 "env": "USE_REDIS",
                 "id": "use-redis",
                 "label": "Use external redis when coupled with autoconf",

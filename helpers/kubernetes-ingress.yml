@@ -2,11 +2,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: bunkerized-nginx-ingress
+  labels:
+    bunkerized-nginx: "yes"
   annotations:
-    # mandatory, keep this annotation
-    bunkerized-nginx.AUTOCONF: "yes"
     # add any global and default environment variables here as annotations with the "bunkerized-nginx." prefix
-    # if the scope is "multisite", they will be applied to all services unless overriden by the service
     # examples :
     #bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     #bunkerized-nginx.USE_ANTIBOT: "javascript"
@@ -25,7 +24,39 @@ spec:
         path: "/"
         backend:
           service:
-            name: app-service
+            name: myapp
             port:
               number: 80
-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: containous/whoami
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

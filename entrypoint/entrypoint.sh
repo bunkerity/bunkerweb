@@ -17,7 +17,7 @@ trap "trap_exit" TERM INT QUIT
 # trap SIGHUP
 function trap_reload() {
 	log "reload" "INFO" "catched reload operation"
-	if [ "$SWARM_MODE" != "yes" ] ; then
+	if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] ; then
 		/opt/bunkerized-nginx/entrypoint/jobs.sh
 	fi
 	if [ -f /tmp/nginx.pid ] ; then
@@ -40,10 +40,10 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 	log "entrypoint" "INFO" "configuring bunkerized-nginx ..."
 
 	# check permissions
-	if [ "$SWARM_MODE" != "yes" ] ; then
+	if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] ; then
 		/opt/bunkerized-nginx/entrypoint/permissions.sh
 	else
-		/opt/bunkerized-nginx/entrypoint/permissions-swarm.sh
+		/opt/bunkerized-nginx/entrypoint/permissions-cluster.sh
 	fi
 	if [ "$?" -ne 0 ] ; then
 		exit 1

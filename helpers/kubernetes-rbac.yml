@@ -4,7 +4,7 @@ metadata:
   name: bunkerized-nginx-ingress-controller
 rules:
 - apiGroups: [""]
-  resources: ["services"]
+  resources: ["services", "pods"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["extensions"]
   resources: ["ingresses"]

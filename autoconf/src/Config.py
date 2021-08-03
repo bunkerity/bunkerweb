@@ -149,7 +149,14 @@ class Config :
 				except :
 					ret = False
 		elif self.__type == Controller.Type.KUBERNETES :
-			log("config", "ERROR", "TODO get urls for k8s")
+			for instance in instances :
+				name = instance.metadata.name
+				try :
+					dns_result = dns.resolver.query(name + ".default.svc.cluster.local")
+					for ip in dns_result :
+						urls.append("http://" + ip.to_text() + ":8080" + self.__api_uri + path)
+				except :
+					ret = False
 
 		for url in urls :
 			req = None

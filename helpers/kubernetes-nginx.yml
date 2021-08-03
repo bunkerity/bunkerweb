@@ -17,51 +17,56 @@ spec:
       serviceAccountName: bunkerized-nginx-ingress-controller
       containers:
       - name: bunkerized-nginx-autoconf
-        image: bunkerity/bunkerized-nginx-autoconf:1.3.0
+        image: bunkerity/bunkerized-nginx-autoconf:testing
+        imagePullPolicy: Always
         env:
         - name: KUBERNETES_MODE
           value: "yes"
         - name: API_URI
           value: "/ChangeMeToSomethingHardToGuess"
+        - name: SERVER_NAME
+          value: ""
+        - name: MULTISITE
+          value: "yes"
         volumeMounts:
-        - name: config
+        - name: confs
           mountPath: /etc/nginx
-        - name: certs
+        - name: letsencrypt
           mountPath: /etc/letsencrypt
-        - name: challenges
+        - name: acme-challenge
           mountPath: /acme-challenge
         - name: cache
           mountPath: /cache
-        - name: custom-modsec
+        - name: modsec-confs
           mountPath: /modsec-confs
           readOnly: true
-        - name: custom-modsec-crs
+        - name: modsec-crs-confs
           mountPath: /modsec-crs-confs
           readOnly: true
       volumes:
-      - name: config
+      - name: confs
         hostPath:
-          path: /shared/config
+          path: /shared/confs
           type: Directory
-      - name: certs
+      - name: letsencrypt
         hostPath:
-          path: /shared/certs
+          path: /shared/letsencrypt
           type: Directory
-      - name: challenges
+      - name: acme-challenge
         hostPath:
-          path: /shared/challenges
+          path: /shared/acme-challenge
           type: Directory
       - name: cache
         hostPath:
           path: /shared/cache
           type: Directory
-      - name: custom-modsec
+      - name: modsec-confs
         hostPath:
-          path: /shared/custom-modsec
+          path: /shared/modsec-confs
           type: Directory
-      - name: custom-modsec-crs
+      - name: modsec-crs-confs
         hostPath:
-          path: /shared/custom-modsec-crs
+          path: /shared/modsec-crs-confs
           type: Directory
 ---
 apiVersion: apps/v1
@@ -78,12 +83,14 @@ spec:
     metadata:
       labels:
         name: bunkerized-nginx
+        bunkerized-nginx: "yes"
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: bunkerized-nginx
-        image: bunkerity/bunkerized-nginx:1.3.0
+        image: bunkerity/bunkerized-nginx:testing
+        imagePullPolicy: Always
         env:
         - name: KUBERNETES_MODE
           value: "yes"
@@ -91,61 +98,78 @@ spec:
           value: "yes"
         - name: API_URI
           value: "/ChangeMeToSomethingHardToGuess"
+        - name: SERVER_NAME
+          value: ""
+        - name: MULTISITE
+          value: "yes"
         volumeMounts:
-        - name: config
+        - name: confs
           mountPath: /etc/nginx
           readOnly: true
-        - name: certs
+        - name: letsencrypt
           mountPath: /etc/letsencrypt
           readOnly: true
-        - name: challenges
+        - name: acme-challenge
           mountPath: /acme-challenge
           readOnly: true
         - name: www
           mountPath: /www
           readOnly: true
-        - name: custom-http
+        - name: http-confs
           mountPath: /http-confs
           readOnly: true
-        - name: custom-server
+        - name: server-confs
           mountPath: /server-confs
           readOnly: true
-        - name: custom-modsec
+        - name: modsec-confs
           mountPath: /modsec-confs
           readOnly: true
-        - name: custom-modsec-crs
+        - name: modsec-crs-confs
           mountPath: /modsec-crs-confs
           readOnly: true
       volumes:
-      - name: config
+      - name: confs
         hostPath:
-          path: /shared/config
+          path: /shared/confs
           type: Directory
-      - name: certs
+      - name: letsencrypt
         hostPath:
-          path: /shared/certs
+          path: /shared/letsencrypt
           type: Directory
-      - name: challenges
+      - name: acme-challenge
         hostPath:
-          path: /shared/challenges
+          path: /shared/acme-challenge
           type: Directory
       - name: www
         hostPath:
           path: /shared/www
           type: Directory
-      - name: custom-http
+      - name: http-confs
         hostPath:
-          path: /shared/custom-http
+          path: /shared/http-confs
           type: Directory
-      - name: custom-server
+      - name: server-confs
         hostPath:
-          path: /shared/custom-server
+          path: /shared/server-confs
           type: Directory
-      - name: custom-modsec
+      - name: modsec-confs
         hostPath:
-          path: /shared/custom-modsec
+          path: /shared/modsec-confs
           type: Directory
-      - name: custom-modsec-crs
+      - name: modsec-crs-confs
         hostPath:
-          path: /shared/custom-modsec-crs
+          path: /shared/modsec-crs-confs
           type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bunkerized-nginx-service
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    bunkerized-nginx.AUTOCONF: "yes"
+spec:
+  clusterIP: None
+  selector:
+    name: bunkerized-nginx
