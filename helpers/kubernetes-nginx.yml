@@ -17,17 +17,13 @@ spec:
       serviceAccountName: bunkerized-nginx-ingress-controller
       containers:
       - name: bunkerized-nginx-autoconf
-        image: bunkerity/bunkerized-nginx-autoconf:testing
-        imagePullPolicy: Always
+        image: bunkerity/bunkerized-nginx-autoconf
+        #imagePullPolicy: Always
         env:
         - name: KUBERNETES_MODE
           value: "yes"
         - name: API_URI
           value: "/ChangeMeToSomethingHardToGuess"
-        - name: SERVER_NAME
-          value: ""
-        - name: MULTISITE
-          value: "yes"
         volumeMounts:
         - name: confs
           mountPath: /etc/nginx
@@ -85,12 +81,15 @@ spec:
         name: bunkerized-nginx
         bunkerized-nginx: "yes"
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: bunkerized-nginx
-        image: bunkerity/bunkerized-nginx:testing
-        imagePullPolicy: Always
+        image: bunkerity/bunkerized-nginx
+        #imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          hostPort: 80
+        - containerPort: 8443
+          hostPort: 443
         env:
         - name: KUBERNETES_MODE
           value: "yes"

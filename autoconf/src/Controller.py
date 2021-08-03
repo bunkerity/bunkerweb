@@ -10,8 +10,8 @@ class Type(Enum) :
 
 class Controller(ABC) :
 
-	def __init__(self, type, api_uri=None, lock=None) :
-		self._config = Config(type, api_uri, lock)
+	def __init__(self, type, api_uri=None, lock=None, http_port="8080") :
+		self._config = Config(type, api_uri, lock=lock, http_port=http_port)
 		self.lock = lock
 
 	@abstractmethod

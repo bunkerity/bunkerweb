@@ -8,10 +8,11 @@ from logger import log
 
 class Config :
 
-	def __init__(self, type, api_uri, lock=None) :
+	def __init__(self, type, api_uri, lock=None, http_port="8080") :
 		self.__type = type
 		self.__api_uri = api_uri
 		self.__lock = lock
+		self.__http_port = http_port
 
 	def __jobs(self) :
 		log("config", "INFO", "starting jobs ...")
@@ -145,16 +146,16 @@ class Config :
 				try :
 					dns_result = dns.resolver.query("tasks." + name)
 					for ip in dns_result :
-						urls.append("http://" + ip.to_text() + ":8080" + self.__api_uri + path)
+						urls.append("http://" + ip.to_text() + ":" + self.__http_port + self.__api_uri + path)
 				except :
 					ret = False
 		elif self.__type == Controller.Type.KUBERNETES :
 			for instance in instances :
 				name = instance.metadata.name
 				try :
-					dns_result = dns.resolver.query(name + ".default.svc.cluster.local")
+					dns_result = dns.resolver.query(name + "." + instance.metadata.namespace + ".svc.cluster.local")
 					for ip in dns_result :
-						urls.append("http://" + ip.to_text() + ":8080" + self.__api_uri + path)
+						urls.append("http://" + ip.to_text() + ":" + self.__http_port + self.__api_uri + path)
 				except :
 					ret = False
 

@@ -16,6 +16,9 @@ metadata:
 # add "static" routes here (see https://kubernetes.io/docs/concepts/services-networking/ingress/)
 # and/or add annotations to your services (see https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/kubernetes)
 spec:
+  tls:
+  - hosts:
+    - app.example.com
   rules:
   - host: "app.example.com"
     http:

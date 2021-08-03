@@ -7,8 +7,8 @@ import Controller
 
 class SwarmController(Controller.Controller) :
 
-	def __init__(self, docker_host, api_uri) :
-		super().__init__(Controller.Type.SWARM, api_uri=api_uri, lock=Lock())
+	def __init__(self, docker_host, api_uri, http_port) :
+		super().__init__(Controller.Type.SWARM, api_uri=api_uri, lock=Lock(), http_port=http_port)
 		self.__client = docker.DockerClient(base_url=docker_host)
 
 	def __get_instances(self) :

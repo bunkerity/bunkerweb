@@ -8,8 +8,8 @@ from logger import log
 
 class IngressController(Controller.Controller) :
 
-	def __init__(self, api_uri) :
-		super().__init__(Controller.Type.KUBERNETES, api_uri=api_uri, lock=Lock())
+	def __init__(self, api_uri, http_port) :
+		super().__init__(Controller.Type.KUBERNETES, api_uri=api_uri, lock=Lock(), http_port=http_port)
 		config.load_incluster_config()
 		self.__api = client.CoreV1Api()
 		self.__extensions_api = client.ExtensionsV1beta1Api()
@@ -78,6 +78,10 @@ class IngressController(Controller.Controller) :
 				first_servers.extend(env["SERVER_NAME"].split(" "))
 		for ingress in ingresses :
 			env.update(self.__rules_to_env(ingress.spec.rules))
+			if ingress.spec.tls :
+				for tls_entry in ingress.spec.tls :
+					for host in tls_entry.hosts :
+						env[host + "_AUTO_LETS_ENCRYPT"] = "yes"
 			if "SERVER_NAME" in env and env["SERVER_NAME"] != "" :
 				first_servers.extend(env["SERVER_NAME"].split(" "))
 		for service in services :
