@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp
+  name: app2
   labels:
-    app: myapp
+    app: app2
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: app2
   template:
     metadata:
       labels:
-        app: myapp
+        app: app2
     spec:
       containers:
-      - name: myapp
+      - name: app2
         image: php:fpm
         volumeMounts:
           - name: www
@@ -23,22 +23,25 @@ spec:
       volumes:
         - name: www
           hostPath:
-            path: /shared/www/myapp.example.com
+            path: /shared/www/app2.example.com
             type: Directory
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: myapp
+  name: app2
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
   annotations:
-    bunkerized-nginx.AUTOCONF: "yes"
-    bunkerized-nginx.SERVER_NAME: "myapp.example.com"
-    bunkerized-nginx.REMOTE_PHP: "myapp"
+    bunkerized-nginx.SERVER_NAME: "app2.example.com"
+    bunkerized-nginx.REMOTE_PHP: "app2"
     bunkerized-nginx.REMOTE_PHP_PATH: "/var/www/html"
+    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
 spec:
   type: ClusterIP
   selector:
-    app: myapp
+    app: app2
   ports:
     - protocol: TCP
       port: 9000
