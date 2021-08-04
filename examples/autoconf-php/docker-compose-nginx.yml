@@ -24,6 +24,8 @@ services:
       - USE_GZIP=yes
     labels:
       - "bunkerized-nginx.AUTOCONF"
+    networks:
+      - myphpnet
 
   myautoconf:
     image: bunkerity/bunkerized-nginx-autoconf
@@ -33,39 +35,10 @@ services:
       - autoconf:/etc/nginx
     depends_on:
       - mywww
-      - myapp1
-      - myapp2
-      - myapp3
-
-  myapp1:
-    image: php:fpm
-    restart: always
-    volumes:
-      - ./web-files/app1.example.com:/app
-    labels:
-      - "bunkerized-nginx.SERVER_NAME=app1.example.com" # replace with your domain
-      - "bunkerized-nginx.REMOTE_PHP=myapp1"
-      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
-
-  myapp2:
-    image: php:fpm
-    restart: always
-    volumes:
-      - ./web-files/app2.example.com:/app
-    labels:
-      - "bunkerized-nginx.SERVER_NAME=app2.example.com" # replace with your domain
-      - "bunkerized-nginx.REMOTE_PHP=myapp2"
-      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
-
-  myapp3:
-    image: php:fpm
-    restart: always
-    volumes:
-      - ./web-files/app3.example.com:/app
-    labels:
-      - "bunkerized-nginx.SERVER_NAME=app3.example.com" # replace with your domain
-      - "bunkerized-nginx.REMOTE_PHP=myapp3"
-      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
 
 volumes:
   autoconf:
+
+networks:
+  myphpnet:
+    name: myphpnet

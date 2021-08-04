@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+
+  myapp1:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app1.example.com:/app
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app1.example.com" # replace with your domain
+      - "bunkerized-nginx.REMOTE_PHP=myapp1"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+    networks:
+      myphpnet:
+        aliases:
+          - myapp1
+
+  myapp2:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app2.example.com:/app
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app2.example.com" # replace with your domain
+      - "bunkerized-nginx.REMOTE_PHP=myapp2"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+    networks:
+      myphpnet:
+        aliases:
+          - myapp2
+
+  myapp3:
+    image: php:fpm
+    restart: always
+    volumes:
+      - ./web-files/app3.example.com:/app
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=app3.example.com" # replace with your domain
+      - "bunkerized-nginx.REMOTE_PHP=myapp3"
+      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+    networks:
+      myphpnet:
+        aliases:
+          - myapp3
+
+networks:
+  myphpnet:
+    external:
+      name: myphpnet
