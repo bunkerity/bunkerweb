@@ -25,6 +25,8 @@ services:
       - USE_REVERSE_PROXY=yes
     labels:
       - "bunkerized-nginx.AUTOCONF"
+    networks:
+      - myappnet
 
   myautoconf:
     image: bunkerity/bunkerized-nginx-autoconf
@@ -34,39 +36,10 @@ services:
       - autoconf:/etc/nginx
     depends_on:
       - mywww
-      - myapp1
-      - myapp2
-      - myapp3
-
-  myapp1:
-    build: js-app
-    restart: always
-    environment:
-      - NODE_ENV=production
-    labels:
-      - "bunkerized-nginx.SERVER_NAME=app1.example.com"            # replace with your domain
-      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
-
-  myapp2:
-    build: js-app
-    restart: always
-    environment:
-      - NODE_ENV=production
-    labels:
-      - "bunkerized-nginx.SERVER_NAME=app2.example.com"            # replace with your domain
-      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
-
-  myapp3:
-    build: js-app
-    restart: always
-    environment:
-      - NODE_ENV=production
-    labels:
-      - "bunkerized-nginx.SERVER_NAME=app3.example.com"            # replace with your domain
-      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp3:3000"
 
 volumes:
   autoconf:
+
+networks:
+  myappnet:
+    name: myappnet

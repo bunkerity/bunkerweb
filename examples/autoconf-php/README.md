@@ -6,7 +6,7 @@ Quickly deploy PHP app on Docker containers without restarting bunkerized-nginx.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/autoconf-php/architecture.png?raw=true" />
 
-## Docker
+## Autoconf
 
 First of all, you need to run bunkerized-nginx and bunkerized-nginx-autoconf : see [docker-compose-nginx.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/autoconf-php/docker-compose-nginx.yml).
 
