@@ -14,7 +14,7 @@ docker run --rm \
        certbot/dns-cloudflare \
        renew
 if [ $? -ne 0 ] ; then
-	echo "error while getting certificate for $DOMAINS"
+	echo "error while renewing certificate for $DOMAINS"
 	exit 1
 fi
 

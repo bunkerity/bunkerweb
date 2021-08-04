@@ -10,8 +10,8 @@ sleep 10
 # get the bouncer key
 docker-compose exec mycrowdsec cscli bouncers add MyBouncer
 
-# enter the key into the CROWDSEC_KEY environment variable
-read -p "edit CROWDSEC_KEY env var in docker-compose.yml file and press enter" edited
+# enter the key into the CROWDSEC_KEY setting
+read -p "edit CROWDSEC_KEY env var in plugin.json file and press enter" edited
 
 # start all services
 docker-compose up -d
