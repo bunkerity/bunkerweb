@@ -12,6 +12,8 @@ services:
       - /shared/letsencrypt:/etc/letsencrypt
       - /shared/acme-challenge:/acme-challenge
       - /shared/cache:/cache
+      - /shared/modsec-confs:/modsec-confs:ro
+      - /shared/modsec-crs-confs:/modsec-crs-confs:ro
     environment:
       - SWARM_MODE=yes
       - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
@@ -42,6 +44,8 @@ services:
       - /shared/acme-challenge:/acme-challenge:ro
       - /shared/www:/www:ro
       - /shared/cache:/cache:ro
+      - /shared/modsec-confs:/modsec-confs:ro
+      - /shared/modsec-crs-confs:/modsec-crs-confs:ro
     environment:
       - SWARM_MODE=yes
       - USE_API=yes
@@ -63,43 +67,8 @@ services:
       labels:
         - "bunkerized-nginx.AUTOCONF"
 
-  app1:
-    image: php:fpm-alpine
-    volumes:
-      - /shared/www/app1.example.com:/www
-    networks:
-      - net_services
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - "node.role==worker"
-      labels:
-        - "bunkerized-nginx.SERVER_NAME=app1.example.com"
-        - "bunkerized-nginx.REMOTE_PHP=app1"
-        - "bunkerized-nginx.REMOTE_PHP_PATH=/www"
-
-  app2:
-    image: phpmyadmin:apache
-    environment:
-      - PMA_ARBITRARY=1
-      - PMA_ABSOLUTE_URI=https://app2.example.com
-    networks:
-      - net_services
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - "node.role==worker"
-      labels:
-        - "bunkerized-nginx.SERVER_NAME=app2.example.com"
-        - "bunkerized-nginx.USE_PROXY_CACHE=yes"
-        - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
-        - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-        - "bunkerized-nginx.REVERSE_PROXY_HOST=http://app2"
-
 networks:
   net_config:
-    driver: overlay
+    external: true
   net_services:
-    driver: overlay  
+    external: true
