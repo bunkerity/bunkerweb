@@ -25,9 +25,11 @@
 	</strong>
 </p>
 
-nginx Docker image secure by default.  
+> Make security by default great again !
 
-Avoid the hassle of following security best practices "by hand" each time you need a web server or reverse proxy. Bunkerized-nginx provides generic security configs, settings and tools so you don't need to do it yourself.
+bunkerized-nginx is a web server based on the notorious nginx and focused on security. It integrates into existing environments (Linux, Docker, Swarm, Kubernetes, ...) to make your web services "secured by default" without any hassle. The security best practices are automatically applied for you while keeping control of every settings to meet your own use case.
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/overview.png?raw=true" />
 
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
@@ -36,12 +38,11 @@ Non-exhaustive list of features :
 - Automatic ban of strange behaviors
 - Antibot challenge through cookie, javascript, captcha or recaptcha v3
 - Block TOR, proxies, bad user-agents, countries, ...
-- Block known bad IP with DNSBL and CrowdSec
+- Block known bad IP with DNSBL
 - Prevent bruteforce attacks with rate limiting
-- Plugins system for external security checks (e.g. : ClamAV)
+- Plugins system for external security checks (ClamAV, CrowdSec, ...)
 - Easy to configure with environment variables or web UI
-- Automatic configuration with container labels
-- Docker Swarm support
+- Seamless integration into existing environments : Linux, Docker, Swarm, Kubernetes, ...
 
 Fooling automated tools/scanners :
 
@@ -52,22 +53,23 @@ You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do so
 # Table of contents
 <details>
 	<summary>Click to show</summary>
-
 - [Table of contents](#table-of-contents)
-- [Quickstart guide](#quickstart-guide)
-  * [Run HTTP server with default settings](#run-http-server-with-default-settings)
-  * [In combination with PHP](#in-combination-with-php)
-  * [Run HTTPS server with automated Let's Encrypt](#run-https-server-with-automated-lets-encrypt)
-  * [As a reverse proxy](#as-a-reverse-proxy)
-  * [Behind a reverse proxy](#behind-a-reverse-proxy)
-  * [Multisite](#multisite)
-  * [Automatic configuration](#automatic-configuration)
-  * [Swarm mode](#swarm-mode)
+- [Installation](#installation)
+  * [Linux](#linux)
+  * [Docker](#docker)
+  * [Swarm](#swarm)
+  * [Kubernetes](#kubernetes] 
+- [Configuration](#configuration)
+  * [Static pages](#static-pages)
+  * [PHP applications](#php-application)
+  * [Reverse proxy](#reverse-proxy)
+  * [Custom configurations)(#custom-configurations)
   * [Web UI](#web-ui)
 - [Security tuning](#security-tuning)
 - [Going further](#going-further)
 - [License](#license)
 - [Contributing](#contributing)
+- [Security policy](#security-policy)
 </details>
 
 # Quickstart guide
