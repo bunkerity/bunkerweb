@@ -54,23 +54,111 @@ You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do so
 <details>
 	<summary>Click to show</summary>
 - [Table of contents](#table-of-contents)
-- [Installation](#installation)
-  * [Linux](#linux)
+- [Integrations](#integrations)
   * [Docker](#docker)
   * [Swarm](#swarm)
   * [Kubernetes](#kubernetes] 
-- [Configuration](#configuration)
+  * [Linux](#linux)
+- [Use-cases](#use-cases)
   * [Static pages](#static-pages)
   * [PHP applications](#php-application)
   * [Reverse proxy](#reverse-proxy)
   * [Custom configurations)(#custom-configurations)
-  * [Web UI](#web-ui)
+- [Web UI](#web-ui)
 - [Security tuning](#security-tuning)
 - [Going further](#going-further)
 - [License](#license)
 - [Contributing](#contributing)
 - [Security policy](#security-policy)
 </details>
+
+# Integrations
+
+## Docker
+
+You can get official prebuilt Docker images of bunkerized-nginx for x86, x64, armv7 and aarch64/arm64 architectures on Docker Hub :
+```shell
+$ docker pull bunkerity/bunkerized-nginx
+```
+
+Or you can build it from source if you wish :
+```shell
+$ docker build -t bunkerized-nginx .
+```
+
+To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside (see [Use-cases](#use-cases) section for more information).
+
+The downside of using environment variables is that the container needs to be recreated each time there is an update which is not good. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest. Here is a diagram to illustrate how it works :
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/autoconf-docker.png?raw=true" />
+
+You will find more information about Docker integration and autoconf feature in the [documentation](#TODO).
+
+## Swarm
+
+Using bunkerized-nginx in Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send a reload order to all the bunkerized-nginx tasks so they can load the new configuration. Here is a diagram to illustrate how it works :
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/swarm.png?raw=true" />
+
+You will find more information about Docker Swarm integration in the [documentation](#TODO).
+
+## Kubernetes
+
+TODO
+
+You will find more information about Kubernetes integration in the [documentation](#TODO).
+
+## Linux
+
+TODO
+
+You will find more information about Linux integration in the [documentation](#TODO).
+
+# Use-cases
+
+## Static pages
+
+TODO
+
+## PHP applications
+
+TODO
+
+## Reverse proxy
+
+TODO
+
+## Custom configurations
+
+TODO
+
+# Web UI
+
+TODO
+
+# Security tuning
+
+bunkerized-nginx comes with a set of predefined security settings that you can (and you should) tune to meet your own use case. We recommend you to read the [security tuning](https://bunkerized-nginx.readthedocs.io/en/latest/security_tuning.html) section of the documentation.
+
+# Going further
+
+- [Official documentation](https://bunkerized-nginx.readthedocs.io/)
+- [Full concrete examples](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples)
+- [Tutorials in our blog](https://www.bunkerity.com/blog)
+
+# License
+
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/blob/master/LICENSE.md).
+
+# Contributing
+
+If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/blob/master/CONTRIBUTING.md) to get started.
+
+# Security policy
+
+We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerized-nginx/blob/master/SECURITY.md) for more information.
+
+# OLD README
 
 # Quickstart guide
 
@@ -422,20 +510,3 @@ The `AUTH_BASIC` environment variables let you define a login/password that must
 
 Web UI should now be accessible from https://admin.domain.com/webui/.
 
-# Security tuning
-
-bunkerized-nginx comes with a set of predefined security settings that you can (and you should) tune to meet your own use case. We recommend you to read the [security tuning](https://bunkerized-nginx.readthedocs.io/en/latest/security_tuning.html) section of the documentation.
-
-# Going further
-
-- [Official documentation](https://bunkerized-nginx.readthedocs.io/)
-- [Full concrete examples](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples)
-- [Tutorials in our blog](https://www.bunkerity.com/blog)
-
-# License
-
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/blob/master/LICENSE.md).
-
-# Contributing
-
-If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/blob/master/CONTRIBUTING.md) to get started.
