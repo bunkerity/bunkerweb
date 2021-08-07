@@ -2,18 +2,14 @@
 
 {% block content %}
 
-{% if operation != "" %}
 <div class="row justify-content-center">
-	<div class="col col-12 col-md-4 mb-3 text-center">
-		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
-			{{ operation }}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		</div>
-	</div>
-</div>
-{% endif %}
 
-<div class="row justify-content-center">
+	{% if operation != "" %}
+	<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+		{{ operation }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+	{% endif %}
 
 	{% if instances|length == 0 %}
 	<div class="alert alert-primary text-center">
@@ -29,7 +25,7 @@
 			{% set color = "danger" %}
 		{% endif %}
 
-	<div class="col col-12 col-lg-6">
+	<div class="col col-12">
 		<form id="form-instance-{{ instance["id"] }}">
 			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 			<input type="hidden" name="INSTANCE_ID" value="{{ instance["id"] }}">
@@ -39,20 +35,22 @@
 				{{ instance["name"] }}
 				<div class="btn-group mx-2 float-end" role="group">
 					<button id="btnGroupDrop1" class="btn btn-sm dropdown-toggle btn-light" data-bs-toggle="dropdown" aria-expanded="false">
-						<i class="fas fa-cogs"> manage instance</i>
+						<i class="fas fa-cogs"></i>
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+						<li><a class="dropdown-item" href="#" onClick="reloadInstance('{{ instance["id"] }}');">Reload</a></li>
 						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>{% endif %}
 						<li><a class="dropdown-item" href="#" onClick="return stopInstance('{{ instance["id"] }}');">Stop</a></li>
 						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>{% endif %}
 					</ul>
 				</div>
-				<button class="btn btn-sm mx-2 float-end btn-light" onClick="reloadInstance('{{ instance["id"] }}');"><i class="fas fa-redo-alt"></i> Reload configuration</button>
 			</div>
 			<div class="card-body text-dark">
-				<h5 class="card-title">Status : {{ instance["status"] }}</h5>
+				<h5 class="card-title">
+					Status : {{ instance["status"] }}<br>
+					Type : {{ instance["type"] }}
+				</h5>
 				<span class="card-text">
-					TODO
 				</span>
 			</div>
 		</div>
