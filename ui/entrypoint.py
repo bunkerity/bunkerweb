@@ -7,12 +7,14 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from src.Instances import Instances
 from src.User import User
 from src.Config import Config
+from src.ReverseProxied import ReverseProxied
 
 import utils
 import os, json, re, copy, traceback
 
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 # Set variables and instantiate objects
 vars = utils.get_variables()
@@ -50,7 +52,7 @@ def login() :
 	if request.method == "POST" and "username" in request.form and "password" in request.form :
 		if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]) :
 			login_user(app.config["USER"])
-			return redirect("/")
+			return redirect(app.config["ABSOLUTE_URI"])
 		else :
 			fail = True
 	if fail :
@@ -61,7 +63,7 @@ def login() :
 @login_required
 def logout() :
     logout_user()
-    return redirect("/login")
+    return redirect(app.config["ABSOLUTE_URI"] + "/login")
 
 @app.route('/')
 @app.route('/home')

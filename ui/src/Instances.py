@@ -47,17 +47,16 @@ class Instances :
 
 		# Docker instances (containers or services)
 		if self.__docker != None :
-			if self.__docker.swarm == None :
-				for instance in self.__docker.containers.list(all=True, filters={"label" : "bunkerized-nginx.UI"}) :
-					id = instance.id
-					name = instance.name
-					type = "container"
-					status = "down"
-					if instance.status == "running" :
-						status = "up"
-					instances.append(self.__instance(id, name, type, status, instance))
-			else :
-				for instance in self.__docker.services.list(all=True, filters={"label" : "bunkerized-nginx.UI"}) :
+			for instance in self.__docker.containers.list(all=True, filters={"label" : "bunkerized-nginx.UI"}) :
+				id = instance.id
+				name = instance.name
+				type = "container"
+				status = "down"
+				if instance.status == "running" :
+					status = "up"
+				instances.append(self.__instance(id, name, type, status, instance))
+			if self.__docker.swarm != None :
+				for instance in self.__docker.services.list(filters={"label" : "bunkerized-nginx.UI"}) :
 					id = instance.id
 					name = instance.name
 					type = "service"
