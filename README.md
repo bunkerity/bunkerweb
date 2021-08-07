@@ -46,7 +46,7 @@ Non-exhaustive list of features :
 
 Fooling automated tools/scanners :
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/demo.gif?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/demo.gif?raw=true" />
 
 You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do some security tests.
 
@@ -58,13 +58,13 @@ You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do so
 - [Integrations](#integrations)
   * [Docker](#docker)
   * [Swarm](#swarm)
-  * [Kubernetes](#kubernetes] 
+  * [Kubernetes][#kubernetes] 
   * [Linux](#linux)
 - [Use-cases](#use-cases)
   * [Static pages](#static-pages)
   * [PHP applications](#php-application)
   * [Reverse proxy](#reverse-proxy)
-  * [Custom configurations)(#custom-configurations)
+  * [Custom configurations](#custom-configurations)
 - [Web UI](#web-ui)
 - [Security tuning](#security-tuning)
 - [Going further](#going-further)
@@ -87,11 +87,11 @@ Or you can build it from source if you wish :
 $ docker build -t bunkerized-nginx .
 ```
 
-To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside (see [Use-cases](#use-cases) section for more information).
+To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/docker.png?raw=true" />
 
-The downside of using environment variables is that the container needs to be recreated each time there is an update which is not good. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
+The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/autoconf-docker.png?raw=true" />
 
@@ -99,7 +99,7 @@ You will find more information about Docker integration and Docker autoconf feat
 
 ## Swarm
 
-Using bunkerized-nginx in Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send a reload order to all the bunkerized-nginx tasks so they can load the new configuration.
+Using bunkerized-nginx in a Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send a reload order to all the bunkerized-nginx tasks so they can load the new configuration.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/swarm.png?raw=true" />
 
@@ -109,7 +109,7 @@ You will find more information about Docker Swarm integration in the [documentat
 
 **This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
 
-Using bunkerized-nginx in Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends a reload order to the bunkerized-nginx instances running in the cluster.
+Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessible from the nodes (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends a reload order to the bunkerized-nginx instances running in the cluster.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/kubernetes.png?raw=true" />
 
@@ -129,23 +129,63 @@ Unlike containers, Linux integration can be tedious because bunkerized-nginx has
 
 You will find more information about Linux integration in the [documentation](#TODO).
 
-# Use-cases
+# Configuration
 
-## Static pages
+The configuration is made through what we call "environment variables" as a form of key/value pairs. You will find the complete list in the [documentation](#TODO).
 
-TODO
+## Singlesite
 
-## PHP applications
+By default, bunkerized-nginx will only create one server block in the nginx configuration. This cover the simplest use-case where you want to protect one service easily and quickly.
 
-TODO
+Here is a dummy configuration as an example :
+```conf
+SERVER_NAME=example.com www.example.com
+AUTO_LETS_ENCRYPT=yes
+DISABLE_DEFAULT_SERVER=yes
+USE_REVERSE_PROXY=yes
+REVERSE_PROXY_URL=/
+REVERSE_PROXY_HOST=http://internal-service.example.local:8080
+# Uncomment the HTTP_PORT and HTTPS_PORTS variables when using Linux configuration
+#HTTP_PORT=80
+#HTTPS_PORT=443
+```
 
-## Reverse proxy
+## Multisite
 
-TODO
+If you have multiple services to protect, the easiest way to do it is by enabling the "multisite" mode. When using multisite, bunkerized-nginx will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
 
-## Custom configurations
+Here is a dummy configuration as an example :
+```conf
+SERVER_NAME=app1.example.com app2.example.com
+# Without prefix the variables are applied globally but can still be overriden
+AUTO_LETS_ENCRYPT=yes
+DISABLE_DEFAULT_SERVER=yes
+# Specific configurations for first service
+app1.example.com_USE_REVERSE_PROXY=yes
+app1.example.com_REVERSE_PROXY_URL=/
+app1.example.com_REVERSE_PROXY_HOST=http://internal-service.example.local:8080
+# Specific configuration for second service
+app2.example.com_REMOTE_PHP=my-fpm
+app2.example.com_REMOTE_PHP_PATH=/var/www/html
+# Uncomment the HTTP_PORT and HTTPS_PORTS variables when using Linux configuration
+#HTTP_PORT=80
+#HTTPS_PORT=443
+```
 
-TODO
+## Special folders
+
+|       Name       |                                     Location                                     |                                 Purpose                                 | Multisite |
+|:----------------:|:--------------------------------------------------------------------------------:|:-----------------------------------------------------------------------:|:---------:|
+| www              | /www (container)<br> /opt/bunkerized-nginx/www (Linux)                           | Static files that need to be delivered by bunkerized-nginx.             | Yes       |
+| http-confs       | /http-confs (container)<br> /opt/bunkerized-nginx/http-confs (Linux)             | Custom nginx configuration files loaded at http context.                | No        |
+| server-confs     | /server-confs (container)<br> /opt/bunkerized-nginx/server-confs (Linux)         | Custom nginx configuration files loaded at server context.              | Yes       |
+| modsec-confs     | /modsec-confs (container)<br> /opt/bunkerized-nginx/modsec-confs (Linux)         | Custom ModSecurity configuration files loaded before the Core Rule Set. | Yes       |
+| modsec-crs-confs | /modsec-crs-confs (container)<br> /opt/bunkerized-nginx/modsec-crs-confs (Linux) | Custom ModSecurity configuration files loaded after the Core Rule Set.  | Yes       |
+| plugins          | /plugins (container)<br> /opt/bunkerized-nginx/plugins (Linux)                   | Location of bunkerized-nginx plugins.                                   | No        |
+| cache            | /cache (container)<br> /opt/bunkerized-nginx/plugins (Linux)                     | Placeholder for caching data like external blacklists.                  | No        |
+| acme-challenge   | /acme-challenge (container)<br> /opt/bunkerized-nginx/acme-challenge (Linux)     | Placeholder for Let's Encrypt challenges.                               | No        |
+
+You will find more information about the special folders in the [documentation](#TODO).
 
 # Web UI
 
