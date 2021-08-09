@@ -34,6 +34,7 @@ class Instances :
 					result = False
 			except :
 				result = False
+		return result
 
 	def __instance_from_id(self, id) :
 		instances = self.get_instances()
@@ -91,7 +92,6 @@ class Instances :
 					all_reload = False
 			elif instance["type"] == "container" or instance["type"] == "service" :
 				all_reload = self.__api_request(instance, "/reload")
-
 		return all_reload
 
 	def reload_instance(self, id) :

@@ -50,10 +50,18 @@ class Templator :
 			real_config["ROOT_FOLDER"] += "/" + real_config["ROOT_SITE_SUBFOLDER"]
 		return real_config
 
+	def __filter_var(self, variable) :
+		filters = ["FIRST_SERVER", "NGINX_PREFIX"]
+		for filter in filters :
+			if variable == filter or variable.endswith("_" + filter) :
+				return True
+		return False
+
 	def __save_config(self, type, config) :
 		data = ""
 		for variable, value in config.items() :
-			data += variable + "=" + value + "\n"
+			if not self.__filter_var(variable) :
+				data += variable + "=" + value + "\n"
 		file = self.__output_path
 		if type == "global" :
 			file += "/global.env"

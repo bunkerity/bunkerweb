@@ -57,6 +57,7 @@ function deleteService(id) {
 
 function reloadInstance(id) {
 	post("reload", "instances", getData('form-instance-' + id));
+	return false;
 }
 
 function startInstance(id) {

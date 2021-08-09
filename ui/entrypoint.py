@@ -44,7 +44,7 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    return render_template("error.html", title="Error", error="Wrong CSRF token !"), 401
+	return render_template("error.html", title="Error", error="Wrong CSRF token !"), 401
 
 @app.route('/login', methods=["GET", "POST"])
 def login() :
@@ -146,7 +146,7 @@ def services():
 				operation = app.config["CONFIG"].edit_service(request.form["OLD_SERVER_NAME"], variables)
 			elif request.form["operation"] == "delete" :
 				operation = app.config["CONFIG"].delete_service(request.form["SERVER_NAME"])
-			
+
 			# Reload instances
 			reload = app.config["INSTANCES"].reload_instances()
 			if not reload :

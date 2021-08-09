@@ -13,6 +13,8 @@ class Config :
 			env = f.read()
 		data = {}
 		for line in env.split("\n") :
+			if not "=" in line :
+				continue
 			var = line.split("=")[0]
 			val = line.replace(var + "=", "", 1)
 			data[var] = val
@@ -37,7 +39,8 @@ class Config :
 			if not first_server in servers :
 				servers.append(first_server)
 			for k, v in service.items() :
-				conf[first_server + "_" + k] = v
+				if not k.startswith(first_server + "_") :
+					conf[first_server + "_" + k] = v
 		conf["SERVER_NAME"] = " ".join(servers)
 		env_file = "/tmp/" + str(uuid.uuid4()) + ".env"
 		self.__dict_to_env(env_file, conf)

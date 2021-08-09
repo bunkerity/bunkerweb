@@ -937,7 +937,7 @@
                 "env": "REDIRECT_TO",
                 "id": "redirect-to",
                 "label": "Redirect every requests to another web service",
-                "regex": "^https?://.*$",
+                "regex": "^(https?://.+|.{0})$",
                 "type": "text"
             }
         ]
@@ -1001,7 +1001,7 @@
                 "env": "LOCAL_PHP",
                 "id": "local-php",
                 "label": "local php",
-                "regex": "^\\/[a-zA-Z\\-0-9_\\.\\/]*$",
+                "regex": "^(\\/[a-zA-Z\\-0-9_\\.\\/]*|.{0})$",
                 "type": "text"
             },
             {
@@ -1010,7 +1010,7 @@
                 "env": "LOCAL_PHP_PATH",
                 "id": "local-php-path",
                 "label": "Local php path",
-                "regex": "^\\/[a-zA-Z\\-0-9_\\.\\/]*$",
+                "regex": "^(\\/[a-zA-Z\\-0-9_\\.\\/]*|.{0})$",
                 "type": "text"
             }
         ]
@@ -1225,7 +1225,7 @@
                 "env": "REDIS_HOST",
                 "id": "redis-host",
                 "label": "Hostname/IP of the Redis service",
-                "regex": "^[A-Za-z0-9\\-\\.\\_]+$",
+                "regex": "^([A-Za-z0-9\\-\\.\\_]+|.{0})$",
                 "type": "text"
             }
         ]

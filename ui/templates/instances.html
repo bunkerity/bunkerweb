@@ -5,9 +5,11 @@
 <div class="row justify-content-center">
 
 	{% if operation != "" %}
-	<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
-		{{ operation }}
-		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	<div class="col col-12 col-lg-4 mt-5 text-center">
+		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+			{{ operation }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
 	</div>
 	{% endif %}
 
@@ -38,7 +40,7 @@
 						<i class="fas fa-cogs"></i>
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-						<li><a class="dropdown-item" href="#" onClick="reloadInstance('{{ instance["id"] }}');">Reload</a></li>
+						<li><a class="dropdown-item" href="#" onClick="return reloadInstance('{{ instance["id"] }}');">Reload</a></li>
 						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>{% endif %}
 						<li><a class="dropdown-item" href="#" onClick="return stopInstance('{{ instance["id"] }}');">Stop</a></li>
 						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>{% endif %}
