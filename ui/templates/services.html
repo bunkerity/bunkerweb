@@ -5,20 +5,24 @@
 <div class="row justify-content-center">
 
 	{% if operation != "" %}
-	<div class="col col-12 col-lg-4 mt-5 text-center">
-		<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
-			{{ operation }}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	<div class="col col-12">
+		<div class="row justify-content-center">
+			<div class="col col-12 col-lg-4">
+				<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
+					{{ operation }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
 		</div>
 	</div>
 	{% endif %}
 
-	<div class="col col-12 mb-3 text-center">
+	<div class="col col-12 mb-3">
 		<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-new"><i class="fas fa-plus"></i> New</button>
 	</div>
 
 	{% if services|length == 0 %}
-	<div class="alert alert-primary text-center">
+	<div class="col col-12 alert alert-primary text-center">
 		No service to show...
 	</div>
 	{% endif %}
@@ -27,7 +31,7 @@
 
 		{% set id_server_name = service["SERVER_NAME"].replace(".", "-") %}
 
-	<div class="col col-12 col-lg-4">
+	<div class="col col-12 col-lg-6">
 		<div class="card border-primary mb-3" style="max-width: 80rem;">
 			<div class="card-header border-primary bg-primary text-white">
 				{{ service["SERVER_NAME"] }}
