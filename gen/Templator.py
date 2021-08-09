@@ -58,9 +58,18 @@ class Templator :
 		return False
 
 	def __save_config(self, type, config) :
+		first_servers = config["SERVER_NAME"].split(" ")
 		data = ""
 		for variable, value in config.items() :
-			if not self.__filter_var(variable) :
+			if self.__filter_var(variable) :
+				continue
+			add = True
+			if type == "global" :
+				for first_server in first_servers :
+					if variable.startswith(first_server + "_") :
+						add = False
+						break
+			if add :
 				data += variable + "=" + value + "\n"
 		file = self.__output_path
 		if type == "global" :

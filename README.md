@@ -188,7 +188,9 @@ You will find more information about the special folders in the [documentation](
 
 # Web UI
 
-TODO
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/web-ui.gif?raw=true" />
+
+You will find more information about the web UI in the [documentation](#TODO).
 
 # Security tuning
 
