@@ -738,4 +738,61 @@ spec:
 
 ### Introduction
 
+**This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
+
+List of supported Linux distributions :
+- Debian buster (10)
+- Ubuntu focal (20.04)
+- CentOS 7
+- Fedora 34
+
+Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a helper script to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the /opt/bunkerized-nginx/variables.env configuration file and run the bunkerized-nginx command to apply it.
+
 ### Usage
+
+First of all you will need to install bunkerized-nginx. The recommended way is to use the official installer script :
+```shell
+$ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh
+```
+
+Before executing it, you should also check the signature :
+$ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh.asc
+$ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.key
+$ gpg --import /tmp/bunkerized-nginx.key
+$ gpg --verify /tmp/bunkerized-nginx.sh.asc /tmp/bunkerized-nginx.sh
+```
+
+You can now install bunkerized-nginx (and take a coffee because it may take a while) :
+```shell
+$ chmod +x /tmp/bunkerized-nginx.sh
+$ /tmp/bunkerized-nginx.sh
+```
+
+To demonstrate the configuration on Linux, we will create a simple “Hello World” static file that will be served by bunkerized-nginx.
+
+Static files are stored inside the /opt/bunkerized-nginx/www folder and the unprivileged nginx user must have read access on it :
+```shell
+$ echo "Hello bunkerized World !" > /opt/bunkerized-nginx/www/index.html
+$ chown root:nginx /opt/bunkerized-nginx/www/index.html
+$ chmod 740 /opt/bunkerized-nginx/www/index.html
+```
+
+Here is the example configuration file that needs to be written at /opt/bunkerized-nginx/variables.env :
+```conf
+HTTP_PORT=80
+HTTPS_PORT=443
+SERVER_NAME=www.example.com
+AUTO_LETS_ENCRYPT=yes
+```
+
+Important things to note :
+- Replace www.example.com with your own domain (it must points to your server IP address if you want Let’s Encrypt to work)
+- Automatic Let’s Encrypt is enabled thanks to `AUTO_LETS_ENCRYPT=yes` (since the default is `AUTO_LETS_ENCRYPT=no` you can remove the environment variable to disable Let’s Encrypt)
+- The default values for `HTTP_PORT` and `HTTPS_PORT` are `8080` and `8443` hence the explicit declaration with standard ports values
+
+You can now apply the configuration by running the **bunkerized-nginx** command :
+```shell
+$ bunkerized-nginx
+```
+
+Visit http(s)://www.example.com to confirm that everything is working as expected.
