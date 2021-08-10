@@ -83,6 +83,8 @@ $ docker pull bunkerity/bunkerized-nginx
 
 Or you can build it from source if you wish :
 ```shell
+$ git clone https://github.com/bunkerity/bunkerized-nginx.git
+$ cd bunkerized-nginx
 $ docker build -t bunkerized-nginx .
 ```
 
