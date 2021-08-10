@@ -756,6 +756,7 @@ $ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh
 ```
 
 Before executing it, you should also check the signature :
+```shell
 $ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh.asc
 $ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.key
 $ gpg --import /tmp/bunkerized-nginx.key
