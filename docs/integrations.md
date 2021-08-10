@@ -458,6 +458,282 @@ Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessib
 
 **We also recommend you to first read the [Docker](#TODO) section before.**
 
+First of all, you will need to setup the shared folders :
+```shell
+$ cd /shared
+$ mkdir www confs letsencrypt acme-challenge
+$ chown root:nginx www confs letsencrypt acme-challenge
+$ chmod 770 www confs letsencrypt acme-challenge
+```
+
+The first step to do is to declare the RBAC authorization that will be used by the Ingress Controller to access the Kubernetes API. A ready-to-use declaration is available that you should audit before applying it :
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bunkerized-nginx-ingress-controller
+rules:
+- apiGroups: [""]
+  resources: ["services", "pods"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bunkerized-nginx-ingress-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bunkerized-nginx-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: bunkerized-nginx-ingress-controller
+  namespace: default
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: bunkerized-nginx-ingress-controller
+  apiGroup: rbac.authorization.k8s.io
+```
+
+Next, you can deploy bunkerized-nginx as a DaemonSet :
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerized-nginx
+  labels:
+    app: bunkerized-nginx
+spec:
+  selector:
+    matchLabels:
+      name: bunkerized-nginx
+  template:
+    metadata:
+      labels:
+        name: bunkerized-nginx
+        # this label is mandatory
+        bunkerized-nginx: "yes"
+    spec:
+      containers:
+      - name: bunkerized-nginx
+        image: bunkerity/bunkerized-nginx
+        ports:
+        - containerPort: 8080
+          hostPort: 80
+        - containerPort: 8443
+          hostPort: 443
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        - name: USE_API
+          value: "yes"
+        - name: API_URI
+          value: "/ChangeMeToSomethingHardToGuess"
+        - name: SERVER_NAME
+          value: ""
+        - name: MULTISITE
+          value: "yes"
+        volumeMounts:
+        - name: confs
+          mountPath: /etc/nginx
+          readOnly: true
+        - name: letsencrypt
+          mountPath: /etc/letsencrypt
+          readOnly: true
+        - name: acme-challenge
+          mountPath: /acme-challenge
+          readOnly: true
+        - name: www
+          mountPath: /www
+          readOnly: true
+      volumes:
+      - name: confs
+        hostPath:
+          path: /shared/confs
+          type: Directory
+      - name: letsencrypt
+        hostPath:
+          path: /shared/letsencrypt
+          type: Directory
+      - name: acme-challenge
+        hostPath:
+          path: /shared/acme-challenge
+          type: Directory
+      - name: www
+        hostPath:
+          path: /shared/www
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bunkerized-nginx-service
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  # this annotation is mandatory
+  annotations:
+    bunkerized-nginx.AUTOCONF: "yes"
+spec:
+  clusterIP: None
+  selector:
+    name: bunkerized-nginx
+```
+
+Important thing to note, labels and annotations defined are mandatory for autoconf to work.
+
+You can now deploy the autoconf which will act as the ingress controller :
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerized-nginx-ingress-controller
+  labels:
+    app: bunkerized-nginx-autoconf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bunkerized-nginx-autoconf
+  template:
+    metadata:
+      labels:
+        app: bunkerized-nginx-autoconf
+    spec:
+      serviceAccountName: bunkerized-nginx-ingress-controller
+      containers:
+      - name: bunkerized-nginx-autoconf
+        image: bunkerity/bunkerized-nginx-autoconf
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        - name: API_URI
+          value: "/ChangeMeToSomethingHardToGuess"
+        volumeMounts:
+        - name: confs
+          mountPath: /etc/nginx
+        - name: letsencrypt
+          mountPath: /etc/letsencrypt
+        - name: acme-challenge
+          mountPath: /acme-challenge
+      volumes:
+      - name: confs
+        hostPath:
+          path: /shared/confs
+          type: Directory
+      - name: letsencrypt
+        hostPath:
+          path: /shared/letsencrypt
+          type: Directory
+      - name: acme-challenge
+        hostPath:
+          path: /shared/acme-challenge
+          type: Directory
+```
+
+Check the logs of both bunkerized-nginx and autoconf deployments to see if everything is working as expected.
+
+You can now deploy your web service and make it accessible from within the cluster :
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: containous/whoami
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
+
+Last but not least, it's time to define your Ingress resource to make your web service publicly available :
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bunkerized-nginx-ingress
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    # add any global and default environment variables here as annotations with the "bunkerized-nginx." prefix
+    # examples :
+    #bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
+    #bunkerized-nginx.USE_ANTIBOT: "javascript"
+    #bunkerized-nginx.REDIRECT_HTTP_TO_HTTPS: "yes"
+    #bunkerized-nginx.www.example.com_REVERSE_PROXY_WS: "yes"
+    #bunkerized-nginx.www.example.com_USE_MODSECURITY: "no"
+spec:
+  tls:
+  - hosts:
+    - www.example.com
+  rules:
+  - host: "www.example.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: myapp
+            port:
+              number: 80
+```
+
+Check the logs to see if the configuration has been generated and bunkerized-nginx reloaded. You should be able to visit http(s)://www.example.com.
+
+Note that an alternative would be to add annotations directly to your services (a common use-case is for [PHP applications](#TODO) because the Ingress resource is only for reverse proxy) without editing the ingress resource :
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    bunkerized-nginx.SERVER_NAME: "www.example.com"
+    bunkerized-nginx.USE_REVERSE_PROXY: "yes"
+    bunkerized-nginx.REVERSE_PROXY_URL: "/"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp"
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
+
 ## Linux
 
 ### Introduction
