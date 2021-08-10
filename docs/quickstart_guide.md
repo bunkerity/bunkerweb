@@ -38,7 +38,6 @@ $ docker run -d \
          --network services-net
          -p 80:8080 \
          -p 443:8443 \
-         -v "${PWD}/www:/www:ro" \
          -v "${PWD}/certs:/etc/letsencrypt" \
          -e SERVER_NAME=www.example.com \
          -e AUTO_LETS_ENCRYPT=yes \
@@ -60,7 +59,6 @@ services:
       - 80:8080
       - 443:8443
     volumes:
-      - ./www:/www:ro
       - ./certs:/etc/letsencrypt
     environment:
       - SERVER_NAME=www.example.com
@@ -127,6 +125,7 @@ When the Docker Swarm stack is running, you simply need to start the Swarm servi
 $ docker service create \
          --name myservice \
          --network services-net \
+         --constraint node.role==worker \
          -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
          -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
          -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
@@ -290,19 +289,197 @@ LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
 
 ### Docker
 
-TODO
+When using Docker, the recommended way is to create a network so bunkerized-nginx can communicate with the PHP-FPM instance using its container name :
+```shell
+$ docker network create services-net
+$ docker run -d \
+         --name myservice \
+         --network services-net \
+         -v "${PWD}/www:/app" \
+         php:fpm
+$ docker run -d \
+         --network services-net \
+         -p 80:8080 \
+         -p 443:8443 \
+         -v "${PWD}/www:/www:ro" \
+         -v "${PWD}/certs:/etc/letsencrypt" \
+         -e SERVER_NAME=www.example.com \
+         -e AUTO_LETS_ENCRYPT=yes \
+         -e REMOTE_PHP=myservice \
+         -e REMOTE_PHP_PATH=/app \
+         bunkerity/bunkerized-nginx
+```
+
+
+docker-compose equivalent :
+```yaml
+version: '3'
+
+services:
+
+  mybunkerized:
+    image: bunkerity/bunkerized-nginx
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./www:/www:ro
+      - ./certs:/etc/letsencrypt
+    environment:
+      - SERVER_NAME=www.example.com
+      - AUTO_LETS_ENCRYPT=yes
+      - REMOTE_PHP=myservice
+      - REMOTE_PHP_PATH=/app
+    networks:
+      - services-net
+    depends_on:
+      - myservice
+
+  myservice:
+    image: php:fpm
+    networks:
+      - services-net
+    volumes:
+      - ./www:/app
+
+networks:
+  services-net:
+```
 
 ### Docker autoconf
 
-TODO
+When the Docker autoconf stack is running, you simply need to start the container hosting your PHP-FPM instance and add the environment variables as labels :
+
+```shell
+$ docker run -d \
+         --name myservice \
+         --network services-net \
+         -v "${PWD}/www/app.example.com:/app" \
+         -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
+         -l bunkerized-nginx.REMOTE_PHP=myservice \
+         -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+         php:fpm
+```
+
+```yaml
+version: '3'
+
+services:
+
+  myservice:
+    image: php:fpm
+    volumes:
+      - ./www/app.example.com:/app
+    networks:
+      myservice:
+        aliases:
+          - myservice
+    labels:
+      - bunkerized-nginx.SERVER_NAME=www.example.com
+      - bunkerized-nginx.REMOTE_PHP=myservice
+      - bunkerized-nginx.REMOTE_PHP_PATH=/app
+
+networks:
+  services-net:
+    external:
+      name: services-net
+```
 
 ### Docker Swarm
 
-TODO
+When the Docker Swarm stack is running, you simply need to start the Swarm service hosting your PHP-FPM instance and add the environment variables as labels :
+```shell
+$ docker service create \
+         --name myservice \
+         --constraint node.role==worker \
+         --network services-net \
+         --mount type=bind,source=/shared/www/app.example.com,destination=/app \
+         -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
+         -l bunkerized-nginx.REMOTE_PHP=myservice \
+         -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+         php:fpm
+```
+
+docker-compose equivalent :
+```yaml
+version: "3"
+
+services:
+
+  myservice:
+    image: php:fpm
+    networks:
+      - services-net
+    volumes:
+      - /shared/www/www.example.com:/app
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerized-nginx.SERVER_NAME=www.example.com"
+        - "bunkerized-nginx.REMOTE_PHP=myservice"
+        - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+
+networks:
+  services-net:
+    external:
+      name: services-net
+```
 
 ### Kubernetes
 
-TODO
+You need to use environment variables as annotations prefixed with "bunkerized-nginx." inside the Service resource of your PHP-FPM instance :
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myservice
+  labels:
+    app: myservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myservice
+  template:
+    metadata:
+      labels:
+        app: myservice
+    spec:
+      containers:
+      - name: myservice
+        image: php:fpm
+        volumeMounts:
+        - name: php-files
+          mountPath: /app
+      volumes:
+      - name: php-files
+        hostPath:
+          path: /shared/www/www.example.com
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    bunkerized-nginx.SERVER_NAME: "www.example.com"
+    bunkerized-nginx.REMOTE_PHP: "myservice"
+    bunkerized-nginx.REMOTE_PHP_PATH: "/app"
+spec:
+  type: ClusterIP
+  selector:
+    app: myservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
 
 ## Multisite
 

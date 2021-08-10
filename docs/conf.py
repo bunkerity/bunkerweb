@@ -92,3 +92,8 @@ else :
 
 # custom robots.txt
 html_extra_path = ['robots.txt']
+
+# toc depth
+html_theme_options = {
+	"navigation_depth": 1
+}
