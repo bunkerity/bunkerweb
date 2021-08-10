@@ -106,11 +106,15 @@ services:
 ...
 ```
 
-### Autoconf
+## Docker autoconf
+
+### Introduction
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/autoconf-docker.png?raw=true" />
+
+### Usage
 
 First of all, you will need a network so autoconf and bunkerized-nginx can communicate and another one to allow communication between bunkerized-nginx and your web services :
 ```shell
