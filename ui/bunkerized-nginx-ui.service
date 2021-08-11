@@ -6,6 +6,7 @@ After=network.target
 User=nginx
 Group=nginx
 WorkingDirectory=/opt/bunkerized-nginx/ui
+EnvironmentFile=/opt/bunkerized-nginx/ui/variables.env
 ExecStart=gunicorn --bind 127.0.0.1:5000 -m 007 wsgi:app
 
 [Install]
