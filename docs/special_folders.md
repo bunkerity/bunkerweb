@@ -1,10 +1,10 @@
 # Special folders
 
-Please note that bunkerized-nginx run as an unprivileged user (UID/GID 101 when using the Docker image) and you should set the rights on the host accordingly to the files and folders on your host.
+Please note that bunkerized-nginx runs as an unprivileged user (UID/GID 101 when using the Docker image) and you should set the rights on the host accordingly to the files and folders on your host.
 
 ## Multisite
 
-When the special folder "support" the multisite mode, you can create subfolders named as the server names used in the configuration. When doing it only the subfolder files will be "used" by the corresponding web service.
+When the special folder "supports" the multisite mode, you can create subfolders named as the server names used in the configuration. When doing it only the subfolder files will be "used" by the corresponding web service.
 
 ## Web files
 
@@ -16,8 +16,8 @@ Multisite : `yes`
 Read-only : `yes`  
 
 Examples :
-- [TODO basic single](#TODO)
-- [TODO advanced multi](#TODO)
+- [Basic website with PHP](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/basic-website-with-php)
+- [Multisite basic](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/multisite-basic)
 
 ## http configurations
 
@@ -29,7 +29,7 @@ Multisite : `no`
 Read-only : `yes`  
 
 Examples :
-- [TODO](#TODO)
+- [Load balancer](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/load-balancer)
 
 ## server configurations
 
@@ -41,8 +41,8 @@ Multisite : `yes`
 Read-only : `yes`  
 
 Examples :
-- [TODO basic single](#TODO)
-- [TODO advanced multi](#TODO)
+- [Wordpress](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/wordpress)
+- [Multisite custom confs](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/multisite-custom-confs)
 
 ## ModSecurity configurations
 
@@ -54,8 +54,8 @@ Multisite : `yes`
 Read-only : `yes`  
 
 Examples :
-- [TODO basic single](#TODO)
-- [TODO advanced multi](#TODO)
+- [Wordpress](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/wordpress)
+- [Multisite custom confs](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/multisite-custom-confs)
 
 ## CRS configurations
 
@@ -67,8 +67,8 @@ Multisite : `yes`
 Read-only : `yes`  
 
 Examples :
-- [TODO basic single](#TODO)
-- [TODO advanced multi](#TODO)
+- [Wordpress](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/wordpress)
+- [Multisite custom confs](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/multisite-custom-confs)
 
 ## Cache
 
@@ -81,7 +81,7 @@ Read-only : `no`
 
 ## Plugins
 
-This special folder is the placeholder for the plugins loaded by bunkerized-nginx. See the [plugin section](#TODO) for more information.
+This special folder is the placeholder for the plugins loaded by bunkerized-nginx. See the [plugins section](https://bunkerized-nginx.readthedocs.io/en/latest/plugins.html) for more information.
 
 Location (container) : `/plugins`  
 Location (Linux) : `/opt/bunkerized-nginx/plugins`  

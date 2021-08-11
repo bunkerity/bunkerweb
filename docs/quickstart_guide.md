@@ -15,7 +15,7 @@ REVERSE_PROXY_URL=/
 REVERSE_PROXY_HOST=http://my-service.example.local:8080
 ```
 
-If you have multiple web services you configure multiple reverse proxy rules by appending a number to the environment variables names :
+If you have multiple web services you can configure multiple reverse proxy rules by appending a number to the environment variables names :
 ```conf
 SERVER_NAME=www.example.com
 USE_REVERSE_PROXY=yes
@@ -27,7 +27,7 @@ REVERSE_PROXY_HOST_2=http://app2.example.local:8080
 
 ### Docker
 
-When using Docker, the recommended way is to create a network so bunkerized-nginx can communicate with the web service using its container name :
+When using Docker, the recommended way is to create a network so bunkerized-nginx can communicate with the web service using the container name :
 ```shell
 $ docker network create services-net
 $ docker run -d \
@@ -289,7 +289,7 @@ LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
 
 ### Docker
 
-When using Docker, the recommended way is to create a network so bunkerized-nginx can communicate with the PHP-FPM instance using its container name :
+When using Docker, the recommended way is to create a network so bunkerized-nginx can communicate with the PHP-FPM instance using the container name :
 ```shell
 $ docker network create services-net
 $ docker run -d \
@@ -429,7 +429,7 @@ networks:
 
 ### Kubernetes
 
-You need to use environment variables as annotations prefixed with "bunkerized-nginx." inside the Service resource of your PHP-FPM instance :
+You need to use environment variables as annotations prefixed with `bunkerized-nginx.` inside the Service resource of your PHP-FPM instance :
 
 ```yaml
 apiVersion: apps/v1
@@ -500,7 +500,7 @@ LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
 
 ## Multisite
 
-If you have multiple services to protect, the easiest way to do it is by enabling the "multisite" mode. When using multisite, bunkerized-nginx will create one server block per server defined in the SERVER_NAME environment variable. You can configure each servers independently by adding the server name as a prefix.
+If you have multiple services to protect, the easiest way to do it is by enabling the "multisite" mode. When using multisite, bunkerized-nginx will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
 
 Here is an example :
 ```conf
@@ -513,7 +513,7 @@ app2.example.com_REMOTE_PHP=app2.example.local
 app2.example.com_REMOTE_PHP_PATH=/var/www/html
 ```
 
-TODO : some words about special folders
+When using the multisite mode, some [special folders](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html) must have a specific structure with subfolders named the same as the servers defined in the `SERVER_NAME` environment variable. Let's take the **app2.example.com** as an example : if some static files need to be served by nginx, you need to place them under **www/app2.example.com**.
 
 ### Docker
 
@@ -593,7 +593,7 @@ networks:
 
 ### Docker autoconf
 
-**The multisite feature is implicitly activated when using the Docker autoconf integration.**
+**The multisite feature must be activated when using the Docker autoconf integration.**
 
 When the Docker autoconf stack is running, you simply need to start the containers hosting your web services and add the environment variables as labels :
 ```shell
@@ -654,7 +654,7 @@ networks:
 
 ### Docker Swarm
 
-**The multisite feature is implicitly activated when using the Docker Swarm integration.**
+**The multisite feature must be activated when using the Docker Swarm integration.**
 
 When the Docker Swarm stack is running, you simply need to start the Swarm service hosting your web services and add the environment variables as labels :
 ```shell
@@ -721,7 +721,7 @@ networks:
 
 ### Kubernetes
 
-**The multisite feature is implicitly activated when using the Kubernetes integration.**
+**The multisite feature must be activated when using the Kubernetes integration.**
 
 ```yaml
 apiVersion: apps/v1

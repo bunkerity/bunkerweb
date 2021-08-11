@@ -24,7 +24,7 @@ To use bunkerized-nginx as a Docker container you have to pass specific environm
 
 To demonstrate the use of the Docker image, we will create a simple "Hello World" static file that will be served by bunkerized-nginx.
 
-**One important thing to know is that the container runs as an unprivileged user with UID and GID 101. The reason behind this behavior is the security : in case a vulnerability is exploited the attacker won't have full privileges. But there is also a downside because bunkerized-nginx (heavily) make use of volumes, you will need to adjust the rights on the host.**
+**One important thing to know is that the container runs as an unprivileged user with UID and GID 101. The reason behind this behavior is the security : in case a vulnerability is exploited the attacker won't have full privileges inside the container. But there is also a downside because bunkerized-nginx (heavily) make use of volumes, you will need to adjust the rights on the host.**
 
 First create the environment on the host :
 ```shell
@@ -82,7 +82,7 @@ Important things to note :
 
 Inspect the container logs until bunkerized-nginx is started then visit http(s)://www.example.com to confirm that everything is working as expected.
 
-This example is really simple but, as you can see in the [list of environment variables](#TODO), you may get a lot of environment variables depending on your use case. To make things cleanier, you can write the environment variables to a file :
+This example is really simple but, as you can see in the [list of environment variables](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html), you may get a lot of environment variables depending on your use case. To make things cleanier, you can write the environment variables to a file :
 ```shell
 $ cat variables.env
 SERVER_NAME=www.example.com
@@ -116,23 +116,22 @@ The downside of using environment variables is that the container needs to be re
 
 ### Usage
 
-First of all, you will need a network so autoconf and bunkerized-nginx can communicate and another one to allow communication between bunkerized-nginx and your web services :
+First of all, you will need a network to allow communication between bunkerized-nginx and your web services :
 ```shell
-$ docker network create bunkerized-net
 $ docker network create services-net
 ```
 
-We will also make use of a named volume to share the configuration :
+We will also make use of a named volume to share the configuration between autoconf and bunkerized-nginx :
 ```shell
 $ docker volume create bunkerized-vol
 ```
 
-You can now create the bunkerized-nginx container, connect it to the web services network and start it :
+You can now create the bunkerized-nginx container :
 ```shell
 $ docker create \
          --name mybunkerized \
          -l bunkerized-nginx.AUTOCONF \
-         --network bunkerized-net \
+         --network services-net \
          -p 80:8080 \
          -p 443:8443 \
          -v "${PWD}/www:/www:ro" \
@@ -142,15 +141,12 @@ $ docker create \
          -e SERVER_NAME= \
          -e AUTO_LETS_ENCRYPT=yes \
          bunkerity/bunkerized-nginx
-$ docker network connect services-net mybunkerized
-$ docker start mybunkerized
 ```
 
 The autoconf one can now be started :
 ```shell
 $ docker run \
          --name myautoconf \
-         --network bunkerized-net \
          --volumes-from mybunkerized:rw \
          -v /var/run/docker.sock:/var/run/docker.sock:ro \
          bunkerity/bunkerized-nginx-autoconf
@@ -179,7 +175,6 @@ services:
     labels:
       - "bunkerized-nginx.AUTOCONF"
     networks:
-      - bunkerized-net
       - services-net
 
   myautoconf:
@@ -191,31 +186,26 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - mybunkerized
-    networks:
-      - bunkerized-net
 
 volumes:
   autoconf:
 
 networks:
-  bunkerized-net:
-    name: bunkerized-net
   services-net:
     name: services-net
 ```
 
 Important things to note :
-- autoconf needs to send reload orders to bunkerized-nginx, they need to be on the same network
-- autoconf is generating config files and other artefacts for the bunkerized-nginx, they need to share the volumes
-- autoconf must have access to the Docker socket in order to get events and access to labels
+- autoconf is generating config files and other artefacts for the bunkerized-nginx, they need to share the same volumes
+- autoconf must have access to the Docker socket in order to get events, access to labels and send SIGHUP signal (reload order) to bunkerized-nginx
 - bunkerized-nginx must have the bunkerized-nginx.AUTOCONF label
-- bunkerized-nginx must be started in [multisite mode](#) with the `MULTISITE=yes` environment variable
+- bunkerized-nginx must be started in [multisite mode](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html#multisite) with the `MULTISITE=yes` environment variable
 - When setting the `SERVER_NAME` environment variable to an empty value, bunkerized-nginx won't generate any web service configuration at startup
 - The `AUTO_LETS_ENCRYPT=yes` will be applied to all subsequent web service configuration, unless overriden by the web service labels
 
 Check the logs of both autoconf and bunkerized-nginx to see if everything is working as expected.
 
-You can now create a new web service and add environment variables as labels with the **"bunkerized-nginx." prefix** so the autoconf service will "automagically" do the configuration for you :
+You can now create a new web service and add environment variables as labels with the `bunkerized-nginx.` prefix to let the autoconf service "automagically" do the configuration for you :
 ```shell
 $ docker run \
          --name myservice \
@@ -255,7 +245,7 @@ Please note that if you want to override the `AUTO_LETS_ENCRYPT=yes` previously 
 
 Look at the logs of both autoconf and bunkerized-nginx to check if the configuration has been generated and loaded by bunkerized-nginx. You should now be able to visit http(s)://www.example.com.
 
-When your container is not needed anymore, you can delete it as usual. The autoconf should get the event and remove generate the configuration again.
+When your container is not needed anymore, you can delete it as usual. The autoconf should get the event and generate the configuration again.
 
 ## Docker Swarm
 
@@ -267,11 +257,9 @@ Using bunkerized-nginx in a Docker Swarm cluster requires a shared folder access
 
 ### Usage
 
-**We will assume that a shared directory is mounted at the /shared location on both your managers and workers. Don't forget that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolder in /shared accordingly.**
+**We will assume that a shared directory is mounted at the /shared location on both your managers and workers. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
 
-**We also recommend you to first read the [Docker](#TODO) section before.**
-
-In this setup we will deploy bunkerized-nginx in global mode on all workers and autoconf as a single replica.
+In this setup we will deploy bunkerized-nginx in global mode on all workers and autoconf as a single replica on a manager.
 
 First of all, you will need to setup the shared folders :
 ```shell
@@ -309,7 +297,7 @@ $ docker service create \
          -e AUTO_LETS_ENCRYPT=yes \
          bunkerity/bunkerized-nginx
 $ docker service update \
-         --network-add services-net
+         --network-add services-net \
          mybunkerized
 ```
 
@@ -366,6 +354,7 @@ services:
       placement:
         constraints:
           - "node.role==worker"
+      # mandatory label
       labels:
         - "bunkerized-nginx.AUTOCONF"
 
@@ -401,7 +390,7 @@ networks:
 
 Check the logs of both autoconf and bunkerized-nginx services to see if everything is working as expected.
 
-You can now create a new service and add environment variables as labels with the **"bunkerized-nginx." prefix** so the autoconf service will "automagically" do the configuration for you :
+You can now create a new service and add environment variables as labels with the `bunkerized-nginx.` prefix to let the autoconf service "automagically" do the configuration for you :
 ```shell
 $ docker service create \
          --name myservice \
@@ -440,11 +429,11 @@ networks:
       name: services-net
 ```
 
-Please note that if you want to override the AUTO_LETS_ENCRYPT=yes previously defined in the bunkerized-nginx service, you simply need to add the bunkerized-nginx.AUTO_LETS_ENCRYPT=no label.
+Please note that if you want to override the `AUTO_LETS_ENCRYPT=yes` previously defined in the bunkerized-nginx service, you simply need to add the `bunkerized-nginx.AUTO_LETS_ENCRYPT=no` label.
 
 Look at the logs of both autoconf and bunkerized-nginx to check if the configuration has been generated and loaded by bunkerized-nginx. You should now be able to visit http(s)://www.example.com.
 
-When your service is not needed anymore, you can delete it as usual. The autoconf should get the event and remove generate the configuration again.
+When your service is not needed anymore, you can delete it as usual. The autoconf should get the event and generate the configuration again.
 
 ## Kubernetes
 
@@ -458,9 +447,7 @@ Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessib
 
 ### Usage
 
-**We will assume that a shared directory is mounted at the /shared location on your nodes. Don't forget that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolder in /shared accordingly.**
-
-**We also recommend you to first read the [Docker](#TODO) section before.**
+**We will assume that a shared directory is mounted at the /shared location on your nodes. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
 
 First of all, you will need to setup the shared folders :
 ```shell
@@ -470,7 +457,7 @@ $ chown root:nginx www confs letsencrypt acme-challenge
 $ chmod 770 www confs letsencrypt acme-challenge
 ```
 
-The first step to do is to declare the RBAC authorization that will be used by the Ingress Controller to access the Kubernetes API. A ready-to-use declaration is available that you should audit before applying it :
+The first step to do is to declare the RBAC authorization that will be used by the Ingress Controller to access the Kubernetes API. A ready-to-use declaration is available here :
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -714,7 +701,7 @@ spec:
 
 Check the logs to see if the configuration has been generated and bunkerized-nginx reloaded. You should be able to visit http(s)://www.example.com.
 
-Note that an alternative would be to add annotations directly to your services (a common use-case is for [PHP applications](#TODO) because the Ingress resource is only for reverse proxy) without editing the ingress resource :
+Note that an alternative would be to add annotations directly to your services (a common use-case is for [PHP applications](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html#php-applications) because the Ingress resource is only for reverse proxy) without editing the Ingress resource :
 ```yaml
 apiVersion: v1
 kind: Service
@@ -750,7 +737,7 @@ List of supported Linux distributions :
 - CentOS 7
 - Fedora 34
 
-Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a helper script to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the /opt/bunkerized-nginx/variables.env configuration file and run the bunkerized-nginx command to apply it.
+Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a helper script to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
 
 ### Usage
 
@@ -775,14 +762,14 @@ $ /tmp/bunkerized-nginx.sh
 
 To demonstrate the configuration on Linux, we will create a simple “Hello World” static file that will be served by bunkerized-nginx.
 
-Static files are stored inside the /opt/bunkerized-nginx/www folder and the unprivileged nginx user must have read access on it :
+Static files are stored inside the `/opt/bunkerized-nginx/www` folder and the unprivileged nginx user must have read access on it :
 ```shell
 $ echo "Hello bunkerized World !" > /opt/bunkerized-nginx/www/index.html
 $ chown root:nginx /opt/bunkerized-nginx/www/index.html
 $ chmod 740 /opt/bunkerized-nginx/www/index.html
 ```
 
-Here is the example configuration file that needs to be written at /opt/bunkerized-nginx/variables.env :
+Here is the example configuration file that needs to be written at `/opt/bunkerized-nginx/variables.env` :
 ```conf
 HTTP_PORT=80
 HTTPS_PORT=443

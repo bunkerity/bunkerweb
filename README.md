@@ -48,7 +48,7 @@ Fooling automated tools/scanners :
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/demo.gif?raw=true" />
 
-You can find a live demo at https://demo-nginx.bunkerity.com, feel free to do some security tests.
+You can find a live demo at [https://demo-nginx.bunkerity.com](https://demo-nginx.bunkerity.com), feel free to do some security tests.
 
 # Table of contents
 <details>

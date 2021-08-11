@@ -604,12 +604,7 @@ do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz" "
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz.asc"
 get_sign_source_keys > /tmp/bunkerized-nginx/nginx.key
 do_and_check_cmd gpg --import /tmp/bunkerized-nginx/nginx.key
-check=$(gpg --verify /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz 2>&1 | grep "^gpg: Good signature from ")
-if [ "$check" = "" ] ; then
-	echo "[!] Wrong signature from nginx source !!!"
-	cleanup
-	exit 1
-fi
+do_and_check_cmd gpg --verify /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz
 CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERSION}.tar.gz
 
 # Compile dynamic modules

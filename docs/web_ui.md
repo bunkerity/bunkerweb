@@ -12,12 +12,11 @@ The web UI has its own set of environment variables to configure it :
 - `API_URI` : path of the bunkerized-nginx API (must match the corresponding `API_URI` of the bunkerized-nginx instance)
 - `DOCKER_HOST` : Docker API endpoint address (default = `unix:///var/run/docker.sock`)
 
-The deployment should be very easy because the web UI is web a service itself so we can use bunkerized-nginx as a reverse proxy in front of it.
+Since the web UI is ia service itself, we can use bunkerized-nginx as a reverse proxy in front of it.
 
-**
-Using the web UI in a Docker environment (containers, autoconf or Swarm) exposes a security risk because you need to mount the Docker API socket into the web UI container. It's highly recommended to use a middleware like [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy) to reduce the risk as much as possible.  
-Extra security steps still needs to be done like : complex admin password, hard to guess public URI, network isolation from others services, HTTPS only, ...
-**
+**Using the web UI in a Docker environment exposes a security risk because you need to mount the Docker API socket into the web UI container. It's highly recommended to use a middleware like [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy) to reduce the risk as much as possible.**
+
+**You need to apply the security best practices because the web UI contains code and that code might be vulnerable : complex admin password, hard to guess public URI, network isolation from others services, HTTPS only, ...**
 
 ### Docker
 
