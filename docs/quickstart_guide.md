@@ -481,6 +481,23 @@ spec:
       targetPort: 80
 ```
 
+### Linux
+
+Example of a basic configuration file :
+```conf
+HTTP_PORT=80
+HTTPS_PORT=443
+SERVER_NAME=www.example.com
+AUTO_LETS_ENCRYPT=yes
+# Case 1 : the PHP-FPM instance is on the same machine
+# you just need to adjust the socket path
+LOCAL_PHP=/run/php/php7.3-fpm.sock
+LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
+# Case 2 : the PHP-FPM instance is on another machine
+#REMOTE_PHP=myapp.example.local
+#REMOTE_PHP_PATH=/app
+```
+
 ## Multisite
 
 If you have multiple services to protect, the easiest way to do it is by enabling the "multisite" mode. When using multisite, bunkerized-nginx will create one server block per server defined in the SERVER_NAME environment variable. You can configure each servers independently by adding the server name as a prefix.
@@ -488,6 +505,7 @@ If you have multiple services to protect, the easiest way to do it is by enablin
 Here is an example :
 ```conf
 SERVER_NAME=app1.example.com app2.example.com
+MULTISITE=yes
 app1.example.com_USE_REVERSE_PROXY=yes
 app1.example.com_REVERSE_PROXY_URL=/
 app1.example.com_REVERSE_PROXY_HOST=http://app1.example.local:8080
@@ -495,18 +513,327 @@ app2.example.com_REMOTE_PHP=app2.example.local
 app2.example.com_REMOTE_PHP_PATH=/var/www/html
 ```
 
+TODO : some words about special folders
+
 ### Docker
 
-TODO
+When using Docker, the recommended way is to create a network so bunkerized-nginx can communicate with the web services using the container name :
+```shell
+$ docker network create services-net
+$ docker run -d \
+         --name myapp1 \
+         --network services-net \
+         tutum/hello-world
+$ docker run -d \
+         --name myapp2 \
+         --network services-net \
+         -v "${PWD}/www/app2.example.com:/app" \
+         php:fpm
+$ docker run -d \
+         --network services-net
+         -p 80:8080 \
+         -p 443:8443 \
+         -v "${PWD}/www:/www:ro" \
+         -v "${PWD}/certs:/etc/letsencrypt" \
+         -e "SERVER_NAME=app1.example.com app2.example.com" \
+         -e MULTISITE=yes \
+         -e AUTO_LETS_ENCRYPT=yes \
+         -e app1.example.com_USE_REVERSE_PROXY=yes \
+         -e app1.example.com_REVERSE_PROXY_URL=/ \
+         -e app1.example.com_REVERSE_PROXY_HOST=http://myservice \
+         -e app2.example.com_REMOTE_PHP=myapp2 \
+         -e app2.example.com_REMOTE_PHP_PATH=/app \
+         bunkerity/bunkerized-nginx
+```
+
+docker-compose equivalent :
+```yaml
+version: '3'
+
+services:
+
+  mybunkerized:
+    image: bunkerity/bunkerized-nginx
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./www:/www:ro
+      - ./certs:/etc/letsencrypt
+    environment:
+      - SERVER_NAME=app1.example.com app2.example.com
+      - MULTISITE=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - app1.example.com_USE_REVERSE_PROXY=yes
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
+      - app2.example.com_REMOTE_PHP=myapp2
+      - app2.example.com_REMOTE_PHP_PATH=/app
+    networks:
+      - services-net
+    depends_on:
+      - myapp1
+      - myapp2
+
+  myapp1:
+    image: tutum/hello-world
+    networks:
+      - services-net
+
+  myapp2:
+    image: php:fpm
+    volumes:
+      - ./www/app2.example.com:/app
+    networks:
+      - services-net
+
+networks:
+  services-net:
+```
 
 ### Docker autoconf
 
-TODO
+**The multisite feature is implicitly activated when using the Docker autoconf integration.**
+
+When the Docker autoconf stack is running, you simply need to start the containers hosting your web services and add the environment variables as labels :
+```shell
+$ docker run -d \
+         --name myapp1 \
+         --network services-net \
+         -l bunkerized-nginx.SERVER_NAME=app1.example.com \
+         -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
+         -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
+         -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1
+         tutum/hello-world
+$ docker run -d \
+         --name myapp2 \
+         --network services-net \
+         -v "${PWD}/www/app2.example.com:/app" \
+         -l bunkerized-nginx.SERVER_NAME=app2.example.com \
+         -l bunkerized-nginx.REMOTE_PHP=myapp2 \
+         -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+         php:fpm
+```
+
+docker-compose equivalent :
+```yaml
+version: '3'
+
+services:
+
+  myapp1:
+    image: tutum/hello-world
+    networks:
+      myapp1:
+        aliases:
+          - myapp1
+    labels:
+      - bunkerized-nginx.SERVER_NAME=app1.example.com
+      - bunkerized-nginx.USE_REVERSE_PROXY=yes
+      - bunkerized-nginx.REVERSE_PROXY_URL=/
+      - bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1
+
+  myapp2:
+    image: php:fpm
+    networks:
+      myapp2:
+        aliases:
+          - myapp2
+    volumes:
+      - ./www/app2.example.com:/www
+    labels:
+      - bunkerized-nginx.SERVER_NAME=app2.example.com
+      - bunkerized-nginx.REMOTE_PHP=myapp2
+      - bunkerized-nginx.REMOTE_PHP_PATH=/app
+
+networks:
+  services-net:
+    external:
+      name: services-net
+```
 
 ### Docker Swarm
 
-TODO
+**The multisite feature is implicitly activated when using the Docker Swarm integration.**
+
+When the Docker Swarm stack is running, you simply need to start the Swarm service hosting your web services and add the environment variables as labels :
+```shell
+$ docker service create \
+         --name myapp1 \
+         --network services-net \
+         --constraint node.role==worker \
+         -l bunkerized-nginx.SERVER_NAME=app1.example.com \ 
+         -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
+         -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
+         -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1 \
+         tutum/hello-world
+$ docker service create \
+         --name myapp2 \
+         --constraint node.role==worker \
+         --network services-net \
+         --mount type=bind,source=/shared/www/app2.example.com,destination=/app \
+         -l bunkerized-nginx.SERVER_NAME=app2.example.com \ 
+         -l bunkerized-nginx.REMOTE_PHP=myapp2 \
+         -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
+         php:fpm
+```
+
+docker-compose equivalent :
+```yaml
+version: "3"
+
+services:
+
+  myapp1:
+    image: tutum/hello-world
+    networks:
+      - services-net
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerized-nginx.SERVER_NAME=app1.example.com
+        - bunkerized-nginx.USE_REVERSE_PROXY=yes
+        - bunkerized-nginx.REVERSE_PROXY_URL=/
+        - bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1
+
+  myapp2:
+    image: php:fpm
+    networks:
+      - services-net
+    volumes:
+      - /shared/www/app2.example.com:/app
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerized-nginx.SERVER_NAME=app2.example.com"
+        - "bunkerized-nginx.REMOTE_PHP=myapp2"
+        - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+
+networks:
+  services-net:
+    external:
+      name: services-net
+```
 
 ### Kubernetes
 
-TODO
+**The multisite feature is implicitly activated when using the Kubernetes integration.**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp1
+  labels:
+    app: myapp1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp1
+  template:
+    metadata:
+      labels:
+        app: myapp1
+    spec:
+      containers:
+      - name: myapp1
+        image: tutum/hello-world
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp1
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    bunkerized-nginx.SERVER_NAME: "app1.example.com"
+    bunkerized-nginx.USE_REVERSE_PROXY: "yes"
+    bunkerized-nginx.REVERSE_PROXY_URL: "/"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp1"
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp2
+  labels:
+    app: myapp2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp2
+  template:
+    metadata:
+      labels:
+        app: myapp2
+    spec:
+      containers:
+      - name: myapp2
+        image: php:fpm
+        volumeMounts:
+        - name: php-files
+          mountPath: /app
+      volumes:
+      - name: php-files
+        hostPath:
+          path: /shared/www/app2.example.com
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp2
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    bunkerized-nginx.SERVER_NAME: "app2.example.com"
+    bunkerized-nginx.REMOTE_PHP: "myapp2"
+    bunkerized-nginx.REMOTE_PHP_PATH: "/app"
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
+
+### Linux
+
+Example of a basic configuration file :
+```conf
+HTTP_PORT=80
+HTTPS_PORT=443
+SERVER_NAME=app1.example.com app2.example.com
+MULTISITE=yes
+AUTO_LETS_ENCRYPT=yes
+app1.example.com_USE_REVERSE_PROXY=yes
+app1.example.com_REVERSE_PROXY_URL=/
+# Local proxied application
+app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8080
+# Remote proxied application
+#app1.example.com_REVERSE_PROXY_HOST=http://service.example.local:8080
+# If the PHP-FPM instance is on the same machine
+# you just need to adjust the socket path
+app2.example.com_LOCAL_PHP=/run/php/php7.3-fpm.sock
+app2.example.com_LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
+# Else if the PHP-FPM instance is on another machine
+#app2.example.com_REMOTE_PHP=myapp.example.local
+#app2.example.com_REMOTE_PHP_PATH=/app
+```
