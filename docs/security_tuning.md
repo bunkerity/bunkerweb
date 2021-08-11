@@ -199,6 +199,8 @@ You can quickly protect sensitive resources (e.g. : admin panels) by requiring H
 - `AUTH_BASIC_PASSWORD=changeme` : the password required
 - `AUTH_BASIC_TEXT=Restricted area` : the text that will be displayed to the user
 
+Please note that bunkerized-nginx also supports [Authelia](https://github.com/authelia/authelia) for authentication (see the corresponding [environment variables](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#authelia) and a [full example](https://github.com/bunkerity/bunkerized-nginx/tree/dev/examples/authelia)).
+
 ## Whitelisting
 
 Adding extra security can sometimes trigger false positives. Also, it might be not useful to do the security checks for specific clients because we decided to trust them. Bunkerized-nginx supports two types of whitelist : by IP address and by reverse DNS.

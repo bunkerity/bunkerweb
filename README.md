@@ -57,6 +57,7 @@ You can find a live demo at [https://demo-nginx.bunkerity.com](https://demo-ngin
 - [Table of contents](#table-of-contents)
 - [Integrations](#integrations)
   * [Docker](#docker)
+  * [Docker autoconf](#docker-autoconf)
   * [Swarm](#swarm)
   * [Kubernetes](#kubernetes)
   * [Linux](#linux)
@@ -92,11 +93,15 @@ To use bunkerized-nginx as a Docker container you have to pass specific environm
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/docker.png?raw=true" />
 
+You will find more information about Docker integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker).
+
+## Docker autoconf
+
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/autoconf-docker.png?raw=true" />
 
-You will find more information about Docker integration and Docker autoconf feature in the [documentation](#TODO).
+You will find more information about Docker autoconf feature in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-autoconf).
 
 ## Swarm
 
@@ -104,7 +109,7 @@ Using bunkerized-nginx in a Docker Swarm cluster requires a shared folder access
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/swarm.png?raw=true" />
 
-You will find more information about Docker Swarm integration in the [documentation](#TODO).
+You will find more information about Docker Swarm integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-swarm).
 
 ## Kubernetes
 
@@ -114,7 +119,7 @@ Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessib
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/kubernetes.png?raw=true" />
 
-You will find more information about Kubernetes integration in the [documentation](#TODO).
+You will find more information about Kubernetes integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#kubernetes).
 
 ## Linux
 
@@ -126,13 +131,13 @@ List of supported Linux distributions :
 - CentOS 7
 - Fedora 34
 
-Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a [helper script](#TODO) to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
+Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a [helper script](https://github.com/bunkerity/bunkerized-nginx/blob/master/helpers/install.sh) to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
 
-You will find more information about Linux integration in the [documentation](#TODO).
+You will find more information about Linux integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#linux).
 
 # Configuration
 
-The configuration is made through what we call "environment variables" as a form of key/value pairs. You will find the complete list in the [documentation](#TODO).
+The configuration is made through what we call "environment variables" as a form of key/value pairs. You will find the [quickstart guide](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html) and the complete [list of environment variables](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html) in the documentation.
 
 ## Singlesite
 
@@ -186,13 +191,13 @@ app2.example.com_REMOTE_PHP_PATH=/var/www/html
 | cache            | /cache (container)<br> /opt/bunkerized-nginx/plugins (Linux)                     | Placeholder for caching data like external blacklists.                  | No        |
 | acme-challenge   | /acme-challenge (container)<br> /opt/bunkerized-nginx/acme-challenge (Linux)     | Placeholder for Let's Encrypt challenges.                               | No        |
 
-You will find more information about the special folders in the [documentation](#TODO).
+You will find more information about the special folders in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html).
 
 # Web UI
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/web-ui.gif?raw=true" />
 
-You will find more information about the web UI in the [documentation](#TODO).
+You will find more information about the web UI in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/web_ui.html).
 
 # Security tuning
 
