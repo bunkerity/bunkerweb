@@ -33,6 +33,7 @@ class Config :
 		try :
 			# Lock
 			if self.__lock :
+				log("config", "ERROR", "lock")
 				self.__lock.acquire()
 				locked = True
 
@@ -46,6 +47,7 @@ class Config :
 
 			# Unlock
 			if self.__lock :
+				log("config", "ERROR", "release")
 				self.__lock.release()
 				locked = False
 
@@ -136,6 +138,7 @@ class Config :
 
 	def __api_call(self, instances, path) :
 		if self.__lock :
+			log("config", "ERROR", "lock")
 			self.__lock.acquire()
 		ret = True
 		nb = 0
@@ -172,5 +175,6 @@ class Config :
 				log("config", "INFO", "failed API order to " + url)
 				ret = False
 		if self.__lock :
+			log("config", "ERROR", "release")
 			self.__lock.release()
 		return ret and nb > 0

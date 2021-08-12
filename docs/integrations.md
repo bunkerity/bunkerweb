@@ -309,9 +309,9 @@ $ docker service create \
          --constraint node.role==manager \
          --network bunkerized-net \
          --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
-         --mount type=bind,source=/shared/confs,destination=/etc/nginx,rw \
-         --mount type=bind,source=/shared/letsencrypt,destination=/etc/letsencrypt,rw \
-         --mount type=bind,source=/shared/acme-challenge,destination=/acme-challenge,rw \
+         --mount type=bind,source=/shared/confs,destination=/etc/nginx \
+         --mount type=bind,source=/shared/letsencrypt,destination=/etc/letsencrypt \
+         --mount type=bind,source=/shared/acme-challenge,destination=/acme-challenge \
          -e SWARM_MODE=yes \
          -e API_URI=/ChangeMeToSomethingHardToGuess \
          bunkerity/bunkerized-nginx-autoconf
