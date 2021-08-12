@@ -128,15 +128,15 @@ $ docker volume create bunkerized-vol
 
 You can now create the bunkerized-nginx container :
 ```shell
-$ docker create \
+$ docker run \
          --name mybunkerized \
          -l bunkerized-nginx.AUTOCONF \
          --network services-net \
          -p 80:8080 \
          -p 443:8443 \
          -v "${PWD}/www:/www:ro" \
-         -v "${PWD}/certs:/etc/letsencrypt:ro" \
-         -v bunkerized-vol:/etc/nginx:ro \
+         -v "${PWD}/certs:/etc/letsencrypt" \
+         -v bunkerized-vol:/etc/nginx \
          -e MULTISITE=yes \
          -e SERVER_NAME= \
          -e AUTO_LETS_ENCRYPT=yes \
@@ -188,7 +188,7 @@ services:
       - mybunkerized
 
 volumes:
-  autoconf:
+  bunkerized-vol:
 
 networks:
   services-net:
@@ -226,7 +226,7 @@ services:
   myservice:
     image: tutum/hello-world
     networks:
-      myservice:
+      services-net:
         aliases:
           - myservice
     labels:
@@ -265,7 +265,7 @@ First of all, you will need to setup the shared folders :
 ```shell
 $ cd /shared
 $ mkdir www confs letsencrypt acme-challenge
-$ chown root:nginx www confs letsencrypt acme-challenge
+$ chown root:101 www confs letsencrypt acme-challenge
 $ chmod 770 www confs letsencrypt acme-challenge
 ```
 
