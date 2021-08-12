@@ -9,15 +9,3 @@ Use the web UI panel to configure your bunkerized-nginx instances.
 ## Docker
 
 See [docker-compose.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/web-ui/docker-compose.yml).
-
-## Linux
-
-TODO
-
-## Autoconf
-
-TODO
-
-## Swarm
-
-TODO

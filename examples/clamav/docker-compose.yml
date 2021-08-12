@@ -15,7 +15,7 @@ services:
     volumes:
       - ./web-files:/www:ro
       - ./letsencrypt:/etc/letsencrypt
-      - ./bunkerized-nginx-clamav:/plugins/clamav:ro # you will need to download the plugin see download-plugin.sh
+      - ./bunkerized-nginx-clamav:/plugins/clamav # you will need to download the plugin see download-plugin.sh
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes

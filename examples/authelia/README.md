@@ -17,3 +17,11 @@ First of all, you will need to edit the configuration files inside the authelia 
 ## Docker
 
 See [docker-compose.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/authelia/docker-compose.yml).
+
+## Docker autoconf
+
+See [docker-compose.autoconf.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/authelia/docker-compose.autoconf.yml).
+
+## Docker Swarm
+
+See [docker-compose.swarm.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/authelia/docker-compose.swarm.yml).

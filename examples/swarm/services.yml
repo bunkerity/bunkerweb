@@ -7,7 +7,7 @@ services:
     volumes:
       - /shared/www/app1.example.com:/www
     networks:
-      - net_services
+      - services-net
     deploy:
       replicas: 1
       placement:
@@ -24,7 +24,7 @@ services:
       - PMA_ARBITRARY=1
       - PMA_ABSOLUTE_URI=https://app2.example.com
     networks:
-      - net_services
+      - services-net
     deploy:
       replicas: 1
       placement:
@@ -38,5 +38,6 @@ services:
         - "bunkerized-nginx.REVERSE_PROXY_HOST=http://app2"
 
 networks:
-  net_services:
-    external: true
+  services-net:
+    external:
+      name: services-net

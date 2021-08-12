@@ -2,6 +2,6 @@
 	path = examples/crowdsec/bunkerized-nginx-crowdsec
 	url = https://github.com/bunkerity/bunkerized-nginx-crowdsec
 
-[submodule "bunkerized-nginx-clamav"]
+[submodule "examples/clamav/bunkerized-nginx-clamav"]
 	path = examples/clamav/bunkerized-nginx-clamav
-	url = https://github.com/bunkerity/bunkerized-nginx-clamav
+	url = https://github.com/bunkerity/bunkerized-nginx-clamav.git

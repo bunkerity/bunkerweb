@@ -4,47 +4,44 @@ services:
 
   myapp1:
     build: js-app
-    restart: always
+    networks:
+      services-net:
+        aliases:
+          - myapp1
     environment:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app1.example.com"            # replace with your domain
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
-    networks:
-      myappnet:
-        aliases:
-          - myapp1
 
   myapp2:
     build: js-app
-    restart: always
+    networks:
+      services-net:
+        aliases:
+          - myapp2
     environment:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app2.example.com"            # replace with your domain
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
-    networks:
-      myappnet:
-        aliases:
-          - myapp2
 
   myapp3:
     build: js-app
-    restart: always
+    networks:
+      services-net:
+        aliases:
+          - myapp3
     environment:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app3.example.com"            # replace with your domain
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp3:3000"
-    networks:
-      myappnet:
-        aliases:
-          - myapp3
 
 networks:
-  myphpnet:
+  services-net:
     external:
-      name: myphpnet
+      name: services-net

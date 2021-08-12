@@ -1,6 +1,6 @@
-# Swarm wit hredis
+# Swarm with redis
 
-Basic examples on how to deploy and use bunkerized-nginx within a Docker Swarm cluster and use redis to distribute the blacklists. See the [Docker Swarm](#TODO) section of the documentation for more information.
+Basic examples on how to deploy and use bunkerized-nginx within a Docker Swarm cluster and use redis to distribute the blacklists. See the [Docker Swarm integration section of the documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-swarm) for more information.
 
 ## Architecture
 
@@ -11,8 +11,8 @@ Basic examples on how to deploy and use bunkerized-nginx within a Docker Swarm c
 This example uses two overlay networks needed by the services :
 
 ```shell
-$ docker network create -d overlay --attachable net_config
-$ docker network create -d overlay --attachable net_services
+$ docker network create -d overlay --attachable config-net
+$ docker network create -d overlay --attachable services-net
 ```
 
 First you need to create the redis service : see [redis.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/swarm-redis/redis.yml).
