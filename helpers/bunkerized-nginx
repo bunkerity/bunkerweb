@@ -42,7 +42,7 @@ do_and_check_cmd "/opt/bunkerized-nginx/entrypoint/jobs.sh"
 # Reload nginx if it's running
 if [ -f "/tmp/nginx.pid" ] ; then
 	echo "[*] Reload nginx"
-	do_and_check_cmd "nginx -s reload"
+	AS_ROOT="yes" do_and_check_cmd nginx -s reload
 # Otherwise start it
 else
 	echo "[*] Start nginx"
