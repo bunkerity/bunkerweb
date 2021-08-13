@@ -44,29 +44,40 @@ class SwarmController(Controller.Controller) :
 		for event in self.__client.events(decode=True, filters={"type": "service"}) :
 			new_env = self.get_env()
 			if new_env != old_env :
-				log("controller", "INFO", "generating new configuration")
-				if self.gen_conf(new_env) :
-					old_env = new_env.copy()
-					log("controller", "INFO", "successfully generated new configuration")
-					if self.reload() :
-						log("controller", "INFO", "successful reload")
+				self.lock.acquire()
+				try :
+					log("controller", "INFO", "generating new configuration")
+					if self.gen_conf(new_env) :
+						old_env = new_env.copy()
+						log("controller", "INFO", "successfully generated new configuration")
+						if self.reload() :
+							log("controller", "INFO", "successful reload")
+						else :
+							log("controller", "ERROR", "failed reload")
 					else :
-						log("controller", "ERROR", "failed reload")
-				else :
-					log("controller", "ERROR", "can't generate new configuration")
+						log("controller", "ERROR", "can't generate new configuration")
+					except :
+						log("controller", "ERROR", "exception while receiving event")
+				self.lock.release()
 
 	def reload(self) :
 		return self._reload(self.__get_instances())
 
 	def wait(self) :
-		# Wait for a service
-		instances = self.__get_instances()
-		while len(instances) == 0 :
-			time.sleep(1)
+		self.lock.acquire()
+		try :
+			# Wait for a service
 			instances = self.__get_instances()
-		# Generate first config
-		env = self.get_env()
-		if not self.gen_conf(env) :
-			return False, env
-		# Wait for nginx
-		return self._config.wait(instances), env
+			while len(instances) == 0 :
+				time.sleep(1)
+				instances = self.__get_instances()
+			# Generate first config
+			env = self.get_env()
+			if not self.gen_conf(env) :
+				return False, env
+			# Wait for nginx
+			return self._config.wait(instances), env
+		except :
+			pass
+		self.lock.release()
+		return False, {}

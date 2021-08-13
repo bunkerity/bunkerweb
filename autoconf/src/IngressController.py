@@ -14,7 +14,6 @@ class IngressController(Controller.Controller) :
 		self.__api = client.CoreV1Api()
 		self.__extensions_api = client.ExtensionsV1beta1Api()
 		self.__old_env = {}
-		self.__internal_lock = Lock()
 
 	def __get_pods(self) :
 		return self.__api.list_pod_for_all_namespaces(watch=False, label_selector="bunkerized-nginx").items
@@ -110,68 +109,83 @@ class IngressController(Controller.Controller) :
 	def __watch_pod(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__api.list_pod_for_all_namespaces, label_selector="bunkerized-nginx") :
-			self.__internal_lock.acquire()
+			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env :
-				if self.gen_conf(new_env) :
-					self.__old_env = new_env.copy()
-					log("CONTROLLER", "INFO", "successfully generated new configuration")
-					if self.reload() :
-						log("controller", "INFO", "successful reload")
-					else :
-						log("controller", "ERROR", "failed reload")
-			self.__internal_lock.release()
+				try :
+					if self.gen_conf(new_env) :
+						self.__old_env = new_env.copy()
+						log("CONTROLLER", "INFO", "successfully generated new configuration")
+						if self.reload() :
+							log("controller", "INFO", "successful reload")
+						else :
+							log("controller", "ERROR", "failed reload")
+				except :
+					log("controller", "ERROR", "exception while receiving event")
+			self.lock.release()
 
 	def __watch_ingress(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__extensions_api.list_ingress_for_all_namespaces, label_selector="bunkerized-nginx") :
-			self.__internal_lock.acquire()
+			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env :
-				if self.gen_conf(new_env) :
-					self.__old_env = new_env.copy()
-					log("CONTROLLER", "INFO", "successfully generated new configuration")
-					if self.reload() :
-						log("controller", "INFO", "successful reload")
-					else :
-						log("controller", "ERROR", "failed reload")
-			self.__internal_lock.release()
+				try :
+					if self.gen_conf(new_env) :
+						self.__old_env = new_env.copy()
+						log("CONTROLLER", "INFO", "successfully generated new configuration")
+						if self.reload() :
+							log("controller", "INFO", "successful reload")
+						else :
+							log("controller", "ERROR", "failed reload")
+				except :
+					log("controller", "ERROR", "exception while receiving event")
+			self.lock.release()
 
 	def __watch_service(self) :
 		w = watch.Watch()
 		for event in w.stream(self.__api.list_service_for_all_namespaces, label_selector="bunkerized-nginx") :
-			self.__internal_lock.acquire()
+			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env :
-				if self.gen_conf(new_env) :
-					self.__old_env = new_env.copy()
-					log("CONTROLLER", "INFO", "successfully generated new configuration")
-					if self.reload() :
-						log("controller", "INFO", "successful reload")
-					else :
-						log("controller", "ERROR", "failed reload")
-			self.__internal_lock.release()
+				try :
+					if self.gen_conf(new_env) :
+						self.__old_env = new_env.copy()
+						log("CONTROLLER", "INFO", "successfully generated new configuration")
+						if self.reload() :
+							log("controller", "INFO", "successful reload")
+						else :
+							log("controller", "ERROR", "failed reload")
+				except :
+					log("controller", "ERROR", "exception while receiving event")
+			self.lock.release()
 
 	def reload(self) :
 		return self._reload(self.__get_services(autoconf=True))
 
 	def wait(self) :
-		# Wait for at least one bunkerized-nginx pod
-		pods = self.__get_pods()
-		while len(pods) == 0 :
-			time.sleep(1)
+		self.lock.acquire()
+		try :
+			# Wait for at least one bunkerized-nginx pod
 			pods = self.__get_pods()
+			while len(pods) == 0 :
+				time.sleep(1)
+				pods = self.__get_pods()
 
-		# Wait for at least one bunkerized-nginx service
-		services = self.__get_services(autoconf=True)
-		while len(services) == 0 :
-			time.sleep(1)
+			# Wait for at least one bunkerized-nginx service
 			services = self.__get_services(autoconf=True)
+			while len(services) == 0 :
+				time.sleep(1)
+				services = self.__get_services(autoconf=True)
 
-		# Generate first config
-		env = self.get_env()
-		if not self.gen_conf(env) :
-			return False, env
+			# Generate first config
+			env = self.get_env()
+			if not self.gen_conf(env) :
+				return False, env
 
-		# Wait for bunkerized-nginx
-		return self._config.wait(services), env
+			# Wait for bunkerized-nginx
+			return self._config.wait(services), env
+		except :
+			pass
+		self.lock.release()
+		return False, {}

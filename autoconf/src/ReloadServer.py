@@ -13,12 +13,10 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 				if not data or not data in [b"lock", b"reload", b"unlock"] :
 					break
 				if data == b"lock" :
-					log("RELOADSERVER", "ERROR", "lock")
 					self.server.controller.lock.acquire()
 					locked = True
 					self.request.sendall(b"ok")
 				elif data == b"unlock" :
-					log("RELOADSERVER", "ERROR", "unlock")
 					self.server.controller.lock.release()
 					locked = False
 					self.request.sendall(b"ok")

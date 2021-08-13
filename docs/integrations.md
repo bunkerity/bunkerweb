@@ -319,7 +319,7 @@ $ docker service create \
 
 Or do the same with docker-compose if you wish :
 ```yaml
-version: '3'
+version: '3.8'
 
 services:
 

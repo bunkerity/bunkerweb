@@ -11,7 +11,7 @@ class Type(Enum) :
 class Controller(ABC) :
 
 	def __init__(self, type, api_uri=None, lock=None, http_port="8080") :
-		self._config = Config(type, api_uri, lock=lock, http_port=http_port)
+		self._config = Config(type, api_uri, http_port=http_port)
 		self.lock = lock
 
 	@abstractmethod
@@ -27,7 +27,11 @@ class Controller(ABC) :
 		return fixed_env
 
 	def gen_conf(self, env) :
-		return self._config.gen(env)
+		try :
+			ret = self._config.gen(env)
+		except :
+			ret = False
+		return ret
 
 	@abstractmethod
 	def wait(self) :
@@ -42,4 +46,8 @@ class Controller(ABC) :
 		pass
 
 	def _reload(self, instances) :
-		return self._config.reload(instances)
+		try :
+			ret = self._config.reload(instances)
+		except :
+			ret = False
+		return ret
