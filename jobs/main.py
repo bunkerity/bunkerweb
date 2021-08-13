@@ -27,6 +27,7 @@ if __name__ == "__main__" :
 	parser = argparse.ArgumentParser(description="job runner for bunkerized-nginx")
 	parser.add_argument("--name", default="", type=str, help="job to run (e.g : abusers or certbot-new or certbot-renew ...)")
 	parser.add_argument("--cache", action="store_true", help="copy data from cache if available")
+	parser.add_argument("--lock", action="store_true", help="lock access to the configuration")
 	parser.add_argument("--reload", action="store_true", help="reload nginx if necessary and the job is successful")
 	parser.add_argument("--domain", default="", type=str, help="domain(s) for certbot-new job (e.g. : www.example.com or app1.example.com,app2.example.com)")
 	parser.add_argument("--email", default="", type=str, help="email for certbot-new job (e.g. : contact@example.com)")
@@ -45,7 +46,8 @@ if __name__ == "__main__" :
 
 	# Acquire the lock before
 	management = JobManagement()
-	management.lock()
+	if args.lock :
+		management.lock()
 
 	# Check if we are using redis or not
 	redis_host = None
@@ -71,7 +73,8 @@ if __name__ == "__main__" :
 	ret = instance.run()
 	if ret == JobRet.KO :
 		log("job", "ERROR", "error while running job " + job)
-		management.unlock()
+		if args.lock :
+			management.unlock()
 		sys.exit(1)
 	log("job", "INFO", "job " + job + " successfully executed")
 
@@ -80,7 +83,8 @@ if __name__ == "__main__" :
 		ret = management.reload()
 		if ret == ReloadRet.KO :
 			log("job", "ERROR", "error while doing reload operation (job = " + job + ")")
-			management.unlock()
+			if args.lock :
+				management.unlock()
 			sys.exit(1)
 		elif ret == ReloadRet.OK :
 			log("job", "INFO", "reload operation successfully executed (job = " + job + ")")
@@ -90,7 +94,8 @@ if __name__ == "__main__" :
 		log("job", "INFO", "skipped reload operation because it's not needed (job = " + job + ")")
 
 	# Release the lock
-	management.unlock()
+	if args.lock :
+		management.unlock()
 
 	# Done
 	sys.exit(0)

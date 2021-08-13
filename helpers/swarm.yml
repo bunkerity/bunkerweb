@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    image: bunkerity/bunkerized-nginx
+    ports:
+      - published: 80
+        target: 8080
+        mode: host
+        protocol: tcp
+      - published: 443
+        target: 8443
+        mode: host
+        protocol: tcp
+    volumes:
+      - /shared/confs:/etc/nginx:ro
+      - /shared/www:/www:ro
+      - /shared/letsencrypt:/etc/letsencrypt:ro
+      - /shared/acme-challenge:/acme-challenge:ro
+    environment:
+      - SWARM_MODE=yes
+      - USE_API=yes
+      - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from autoconf
+      - MULTISITE=yes
+      - SERVER_NAME=
+      - AUTO_LETS_ENCRYPT=yes
+    networks:
+      - bunkerized-net
+      - services-net
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.role==worker"
+      # mandatory label
+      labels:
+        - "bunkerized-nginx.AUTOCONF"
+
+  autoconf:
+    image: bunkerity/bunkerized-nginx-autoconf
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /shared/confs:/etc/nginx
+      - /shared/letsencrypt:/etc/letsencrypt
+      - /shared/acme-challenge:/acme-challenge
+    environment:
+      - SWARM_MODE=yes
+      - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
+    networks:
+      - bunkerized-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.role==manager"
+
+# This will create the networks for you
+networks:
+  bunkerized-net:
+    driver: overlay
+    attachable: true
+    name: bunkerized-net
+  services-net:
+    driver: overlay
+    attachable: true
+    name: services-net

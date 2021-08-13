@@ -1,71 +1,4 @@
 apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bunkerized-nginx-ingress-controller
-  labels:
-    app: bunkerized-nginx-autoconf
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: bunkerized-nginx-autoconf
-  template:
-    metadata:
-      labels:
-        app: bunkerized-nginx-autoconf
-    spec:
-      serviceAccountName: bunkerized-nginx-ingress-controller
-      containers:
-      - name: bunkerized-nginx-autoconf
-        image: bunkerity/bunkerized-nginx-autoconf
-        #imagePullPolicy: Always
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        - name: API_URI
-          value: "/ChangeMeToSomethingHardToGuess"
-        volumeMounts:
-        - name: confs
-          mountPath: /etc/nginx
-        - name: letsencrypt
-          mountPath: /etc/letsencrypt
-        - name: acme-challenge
-          mountPath: /acme-challenge
-        - name: cache
-          mountPath: /cache
-        - name: modsec-confs
-          mountPath: /modsec-confs
-          readOnly: true
-        - name: modsec-crs-confs
-          mountPath: /modsec-crs-confs
-          readOnly: true
-      volumes:
-      - name: confs
-        hostPath:
-          path: /shared/confs
-          type: Directory
-      - name: letsencrypt
-        hostPath:
-          path: /shared/letsencrypt
-          type: Directory
-      - name: acme-challenge
-        hostPath:
-          path: /shared/acme-challenge
-          type: Directory
-      - name: cache
-        hostPath:
-          path: /shared/cache
-          type: Directory
-      - name: modsec-confs
-        hostPath:
-          path: /shared/modsec-confs
-          type: Directory
-      - name: modsec-crs-confs
-        hostPath:
-          path: /shared/modsec-crs-confs
-          type: Directory
----
-apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: bunkerized-nginx
@@ -79,12 +12,12 @@ spec:
     metadata:
       labels:
         name: bunkerized-nginx
+        # this label is mandatory
         bunkerized-nginx: "yes"
     spec:
       containers:
       - name: bunkerized-nginx
         image: bunkerity/bunkerized-nginx
-        #imagePullPolicy: Always
         ports:
         - containerPort: 8080
           hostPort: 80
@@ -114,18 +47,6 @@ spec:
         - name: www
           mountPath: /www
           readOnly: true
-        - name: http-confs
-          mountPath: /http-confs
-          readOnly: true
-        - name: server-confs
-          mountPath: /server-confs
-          readOnly: true
-        - name: modsec-confs
-          mountPath: /modsec-confs
-          readOnly: true
-        - name: modsec-crs-confs
-          mountPath: /modsec-crs-confs
-          readOnly: true
       volumes:
       - name: confs
         hostPath:
@@ -143,32 +64,64 @@ spec:
         hostPath:
           path: /shared/www
           type: Directory
-      - name: http-confs
-        hostPath:
-          path: /shared/http-confs
-          type: Directory
-      - name: server-confs
-        hostPath:
-          path: /shared/server-confs
-          type: Directory
-      - name: modsec-confs
-        hostPath:
-          path: /shared/modsec-confs
-          type: Directory
-      - name: modsec-crs-confs
-        hostPath:
-          path: /shared/modsec-crs-confs
-          type: Directory
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: bunkerized-nginx-service
+  # this label is mandatory
   labels:
     bunkerized-nginx: "yes"
+  # this annotation is mandatory
   annotations:
     bunkerized-nginx.AUTOCONF: "yes"
 spec:
   clusterIP: None
   selector:
     name: bunkerized-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerized-nginx-ingress-controller
+  labels:
+    app: bunkerized-nginx-autoconf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bunkerized-nginx-autoconf
+  template:
+    metadata:
+      labels:
+        app: bunkerized-nginx-autoconf
+    spec:
+      serviceAccountName: bunkerized-nginx-ingress-controller
+      containers:
+      - name: bunkerized-nginx-autoconf
+        image: bunkerity/bunkerized-nginx-autoconf
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        - name: API_URI
+          value: "/ChangeMeToSomethingHardToGuess"
+        volumeMounts:
+        - name: confs
+          mountPath: /etc/nginx
+        - name: letsencrypt
+          mountPath: /etc/letsencrypt
+        - name: acme-challenge
+          mountPath: /acme-challenge
+      volumes:
+      - name: confs
+        hostPath:
+          path: /shared/confs
+          type: Directory
+      - name: letsencrypt
+        hostPath:
+          path: /shared/letsencrypt
+          type: Directory
+      - name: acme-challenge
+        hostPath:
+          path: /shared/acme-challenge
+          type: Directory

@@ -712,6 +712,7 @@ metadata:
     bunkerized-nginx: "yes"
   annotations:
     bunkerized-nginx.SERVER_NAME: "www.example.com"
+    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     bunkerized-nginx.USE_REVERSE_PROXY: "yes"
     bunkerized-nginx.REVERSE_PROXY_URL: "/"
     bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp"
@@ -749,8 +750,7 @@ $ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh
 Before executing it, you should also check the signature :
 ```shell
 $ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh.asc
-$ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.key
-$ gpg --import /tmp/bunkerized-nginx.key
+$ gpg --auto-key-locate hkps://keys.openpgp.org --locate-keys contact@bunkerity.com
 $ gpg --verify /tmp/bunkerized-nginx.sh.asc /tmp/bunkerized-nginx.sh
 ```
 

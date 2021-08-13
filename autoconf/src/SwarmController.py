@@ -56,8 +56,8 @@ class SwarmController(Controller.Controller) :
 							log("controller", "ERROR", "failed reload")
 					else :
 						log("controller", "ERROR", "can't generate new configuration")
-					except :
-						log("controller", "ERROR", "exception while receiving event")
+				except :
+					log("controller", "ERROR", "exception while receiving event")
 				self.lock.release()
 
 	def reload(self) :
@@ -74,8 +74,10 @@ class SwarmController(Controller.Controller) :
 			# Generate first config
 			env = self.get_env()
 			if not self.gen_conf(env) :
+				self.lock.release()
 				return False, env
 			# Wait for nginx
+			self.lock.release()
 			return self._config.wait(instances), env
 		except :
 			pass

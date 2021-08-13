@@ -86,7 +86,7 @@ class IngressController(Controller.Controller) :
 		for service in services :
 			if service.metadata.annotations != None and "bunkerized-nginx.SERVER_NAME" in service.metadata.annotations :
 				env.update(self.__annotations_to_env(service.metadata.annotations))
-				first_servers.append(service.metadata.annotations["SERVER_NAME"])
+				first_servers.append(service.metadata.annotations["bunkerized-nginx.SERVER_NAME"])
 		first_servers = list(dict.fromkeys(first_servers))
 		if len(first_servers) == 0 :
 			env["SERVER_NAME"] = ""
@@ -181,9 +181,11 @@ class IngressController(Controller.Controller) :
 			# Generate first config
 			env = self.get_env()
 			if not self.gen_conf(env) :
+				self.lock.release()
 				return False, env
 
 			# Wait for bunkerized-nginx
+			self.lock.release()
 			return self._config.wait(services), env
 		except :
 			pass

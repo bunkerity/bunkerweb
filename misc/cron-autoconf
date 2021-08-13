@@ -1,7 +1,7 @@
-15 0 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name certbot-renew" nginx >> /var/log/nginx/jobs.log 2>&1
-30 0 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name user-agents" nginx >> /var/log/nginx/jobs.log 2>&1
-45 0 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name referrers" nginx >> /var/log/nginx/jobs.log 2>&1
-0 1 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name abusers" nginx >> /var/log/nginx/jobs.log 2>&1
-0 2 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name proxies" nginx >> /var/log/nginx/jobs.log 2>&1
-0 */1 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name exit-nodes" nginx >> /var/log/nginx/jobs.log 2>&1
-0 3 2 * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --name geoip" nginx >> /var/log/nginx/jobs.log 2>&1
+15 0 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name certbot-renew" nginx >> /var/log/nginx/jobs.log 2>&1
+30 0 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name user-agents" nginx >> /var/log/nginx/jobs.log 2>&1
+45 0 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name referrers" nginx >> /var/log/nginx/jobs.log 2>&1
+0 1 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name abusers" nginx >> /var/log/nginx/jobs.log 2>&1
+0 2 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name proxies" nginx >> /var/log/nginx/jobs.log 2>&1
+0 */1 * * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name exit-nodes" nginx >> /var/log/nginx/jobs.log 2>&1
+0 3 2 * * /bin/su -c "/opt/bunkerized-nginx/jobs/main.py --reload --lock --name geoip" nginx >> /var/log/nginx/jobs.log 2>&1
