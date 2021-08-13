@@ -70,10 +70,8 @@ class DockerController(Controller.Controller) :
 			# Generate first config
 			env = self.get_env()
 			if not self.gen_conf(env) :
-				self.lock.release()
 				return False, env
 			# Wait for nginx
-			self.lock.release()
 			return self._config.wait(instances), env
 		except :
 			pass

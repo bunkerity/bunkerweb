@@ -35,7 +35,7 @@ $ docker run -d \
          --network services-net \
          tutum/hello-world
 $ docker run -d \
-         --network services-net
+         --network services-net \
          -p 80:8080 \
          -p 443:8443 \
          -v "${PWD}/certs:/etc/letsencrypt" \
@@ -87,7 +87,7 @@ When the Docker autoconf stack is running, you simply need to start the containe
 $ docker run -d \
          --name myservice \
          --network services-net \
-         -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
+         -l bunkerized-nginx.SERVER_NAME=www.example.com \
          -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
          -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
          -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myservice \
@@ -103,7 +103,7 @@ services:
   myservice:
     image: tutum/hello-world
     networks:
-      myservice:
+      services-net:
         aliases:
           - myservice
     labels:
@@ -354,8 +354,8 @@ When the Docker autoconf stack is running, you simply need to start the containe
 $ docker run -d \
          --name myservice \
          --network services-net \
-         -v "${PWD}/www/app.example.com:/app" \
-         -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
+         -v "${PWD}/www/www.example.com:/app" \
+         -l bunkerized-nginx.SERVER_NAME=www.example.com \
          -l bunkerized-nginx.REMOTE_PHP=myservice \
          -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
          php:fpm
@@ -369,9 +369,9 @@ services:
   myservice:
     image: php:fpm
     volumes:
-      - ./www/app.example.com:/app
+      - ./www/www.example.com:/app
     networks:
-      myservice:
+      services-net:
         aliases:
           - myservice
     labels:
@@ -393,8 +393,8 @@ $ docker service create \
          --name myservice \
          --constraint node.role==worker \
          --network services-net \
-         --mount type=bind,source=/shared/www/app.example.com,destination=/app \
-         -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
+         --mount type=bind,source=/shared/www/www.example.com,destination=/app \
+         -l bunkerized-nginx.SERVER_NAME=www.example.com \
          -l bunkerized-nginx.REMOTE_PHP=myservice \
          -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
          php:fpm
@@ -530,7 +530,7 @@ $ docker run -d \
          -v "${PWD}/www/app2.example.com:/app" \
          php:fpm
 $ docker run -d \
-         --network services-net
+         --network services-net \
          -p 80:8080 \
          -p 443:8443 \
          -v "${PWD}/www:/www:ro" \
@@ -540,7 +540,7 @@ $ docker run -d \
          -e AUTO_LETS_ENCRYPT=yes \
          -e app1.example.com_USE_REVERSE_PROXY=yes \
          -e app1.example.com_REVERSE_PROXY_URL=/ \
-         -e app1.example.com_REVERSE_PROXY_HOST=http://myservice \
+         -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
          -e app2.example.com_REMOTE_PHP=myapp2 \
          -e app2.example.com_REMOTE_PHP_PATH=/app \
          bunkerity/bunkerized-nginx
@@ -603,7 +603,7 @@ $ docker run -d \
          -l bunkerized-nginx.SERVER_NAME=app1.example.com \
          -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
          -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
-         -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1
+         -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1 \
          tutum/hello-world
 $ docker run -d \
          --name myapp2 \
@@ -624,7 +624,7 @@ services:
   myapp1:
     image: tutum/hello-world
     networks:
-      myapp1:
+      services-net:
         aliases:
           - myapp1
     labels:
@@ -636,11 +636,11 @@ services:
   myapp2:
     image: php:fpm
     networks:
-      myapp2:
+      services-net:
         aliases:
           - myapp2
     volumes:
-      - ./www/app2.example.com:/www
+      - ./www/app2.example.com:/app
     labels:
       - bunkerized-nginx.SERVER_NAME=app2.example.com
       - bunkerized-nginx.REMOTE_PHP=myapp2
