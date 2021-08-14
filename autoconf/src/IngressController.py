@@ -47,7 +47,7 @@ class IngressController(Controller.Controller) :
 				env[prefix + annotation.replace("bunkerized-nginx.", "", 1)] = annotations[annotation]
 		return env
 
-	def __rules_to_env(self, rules) :
+	def __rules_to_env(self, rules, namespace="default") :
 		env = {}
 		first_servers = []
 		for rule in rules :
@@ -61,7 +61,7 @@ class IngressController(Controller.Controller) :
 			for path in rule["http"]["paths"] :
 				env[prefix + "USE_REVERSE_PROXY"] = "yes"
 				env[prefix + "REVERSE_PROXY_URL"] = path["path"]
-				env[prefix + "REVERSE_PROXY_HOST"] = "http://" + path["backend"]["service_name"] + ":" + str(path["backend"]["service_port"])
+				env[prefix + "REVERSE_PROXY_HOST"] = "http://" + path["backend"]["service_name"] + "." + namespace + ".svc.cluster.local:" + str(path["backend"]["service_port"])
 		env["SERVER_NAME"] = " ".join(first_servers)
 		return env
 
@@ -76,7 +76,7 @@ class IngressController(Controller.Controller) :
 			if "SERVER_NAME" in env and env["SERVER_NAME"] != "" :
 				first_servers.extend(env["SERVER_NAME"].split(" "))
 		for ingress in ingresses :
-			env.update(self.__rules_to_env(ingress.spec.rules))
+			env.update(self.__rules_to_env(ingress.spec.rules, namespace=ingress.metadata.namespace))
 			if ingress.spec.tls :
 				for tls_entry in ingress.spec.tls :
 					for host in tls_entry.hosts :

@@ -1248,7 +1248,7 @@
                 "env": "DNS_RESOLVERS",
                 "id": "dns-resolvers",
                 "label": "DNS Resolvers",
-                "regex": "^(\\d+.\\d+.\\d+.\\d+ ?)*$",
+                "regex": "^([a-z\\-0-9]+\\.? ?)*$",
                 "type": "text"
             },
             {
