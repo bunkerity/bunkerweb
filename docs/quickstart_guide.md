@@ -126,7 +126,7 @@ $ docker service create \
          --name myservice \
          --network services-net \
          --constraint node.role==worker \
-         -l bunkerized-nginx.SERVER_NAME=www.example.com \ 
+         -l bunkerized-nginx.SERVER_NAME=www.example.com \
          -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
          -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
          -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myservice \
@@ -142,7 +142,7 @@ services:
   myservice:
     image: tutum/hello-world
     networks:
-      myservice:
+      services-net:
         aliases:
           - myservice
     deploy:
@@ -409,7 +409,9 @@ services:
   myservice:
     image: php:fpm
     networks:
-      - services-net
+      services-net:
+        aliases:
+          - myservice
     volumes:
       - /shared/www/www.example.com:/app
     deploy:
@@ -662,7 +664,7 @@ $ docker service create \
          --name myapp1 \
          --network services-net \
          --constraint node.role==worker \
-         -l bunkerized-nginx.SERVER_NAME=app1.example.com \ 
+         -l bunkerized-nginx.SERVER_NAME=app1.example.com \
          -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
          -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
          -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1 \
@@ -672,7 +674,7 @@ $ docker service create \
          --constraint node.role==worker \
          --network services-net \
          --mount type=bind,source=/shared/www/app2.example.com,destination=/app \
-         -l bunkerized-nginx.SERVER_NAME=app2.example.com \ 
+         -l bunkerized-nginx.SERVER_NAME=app2.example.com \
          -l bunkerized-nginx.REMOTE_PHP=myapp2 \
          -l bunkerized-nginx.REMOTE_PHP_PATH=/app \
          php:fpm
@@ -687,7 +689,9 @@ services:
   myapp1:
     image: tutum/hello-world
     networks:
-      - services-net
+      services-net:
+        aliases:
+          - myapp1
     deploy:
       placement:
         constraints:
@@ -701,7 +705,9 @@ services:
   myapp2:
     image: php:fpm
     networks:
-      - services-net
+      services-net:
+        aliases:
+          - myapp2
     volumes:
       - /shared/www/app2.example.com:/app
     deploy:
