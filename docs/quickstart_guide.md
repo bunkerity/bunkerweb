@@ -236,9 +236,10 @@ metadata:
     bunkerized-nginx: "yes"
   annotations:
     bunkerized-nginx.SERVER_NAME: "www.example.com"
+    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     bunkerized-nginx.USE_REVERSE_PROXY: "yes"
     bunkerized-nginx.REVERSE_PROXY_URL: "/"
-    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myservice"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myservice.default.svc.cluster.local"
 spec:
   type: ClusterIP
   selector:
@@ -471,7 +472,8 @@ metadata:
     bunkerized-nginx: "yes"
   annotations:
     bunkerized-nginx.SERVER_NAME: "www.example.com"
-    bunkerized-nginx.REMOTE_PHP: "myservice"
+    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
+    bunkerized-nginx.REMOTE_PHP: "myservice.default.svc.cluster.local"
     bunkerized-nginx.REMOTE_PHP_PATH: "/app"
 spec:
   type: ClusterIP
@@ -759,6 +761,7 @@ metadata:
     bunkerized-nginx: "yes"
   annotations:
     bunkerized-nginx.SERVER_NAME: "app1.example.com"
+    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     bunkerized-nginx.USE_REVERSE_PROXY: "yes"
     bunkerized-nginx.REVERSE_PROXY_URL: "/"
     bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp1"
@@ -808,6 +811,7 @@ metadata:
     bunkerized-nginx: "yes"
   annotations:
     bunkerized-nginx.SERVER_NAME: "app2.example.com"
+    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     bunkerized-nginx.REMOTE_PHP: "myapp2"
     bunkerized-nginx.REMOTE_PHP_PATH: "/app"
 spec:

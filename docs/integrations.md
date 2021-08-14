@@ -521,6 +521,8 @@ spec:
         env:
         - name: KUBERNETES_MODE
           value: "yes"
+        - name: DNS_RESOLVERS
+          value: "kube-dns.kube-system.svc.cluster.local"
         - name: USE_API
           value: "yes"
         - name: API_URI
@@ -715,7 +717,7 @@ metadata:
     bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     bunkerized-nginx.USE_REVERSE_PROXY: "yes"
     bunkerized-nginx.REVERSE_PROXY_URL: "/"
-    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp.default.svc.cluster.local"
 spec:
   type: ClusterIP
   selector:

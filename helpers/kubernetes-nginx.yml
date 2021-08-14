@@ -26,6 +26,8 @@ spec:
         env:
         - name: KUBERNETES_MODE
           value: "yes"
+        - name: DNS_RESOLVERS
+          value: "kube-dns.kube-system.svc.cluster.local"
         - name: USE_API
           value: "yes"
         - name: API_URI
