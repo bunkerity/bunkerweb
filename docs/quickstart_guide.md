@@ -481,8 +481,8 @@ spec:
     app: myservice
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
+      port: 9000
+      targetPort: 9000
 ```
 
 ### Linux
@@ -764,7 +764,7 @@ metadata:
     bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
     bunkerized-nginx.USE_REVERSE_PROXY: "yes"
     bunkerized-nginx.REVERSE_PROXY_URL: "/"
-    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp1"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp1.default.svc.cluster.local"
 spec:
   type: ClusterIP
   selector:
@@ -812,7 +812,7 @@ metadata:
   annotations:
     bunkerized-nginx.SERVER_NAME: "app2.example.com"
     bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
-    bunkerized-nginx.REMOTE_PHP: "myapp2"
+    bunkerized-nginx.REMOTE_PHP: "myapp2.default.svc.cluster.local"
     bunkerized-nginx.REMOTE_PHP_PATH: "/app"
 spec:
   type: ClusterIP
@@ -820,8 +820,8 @@ spec:
     app: myapp2
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
+      port: 9000
+      targetPort: 9000
 ```
 
 ### Linux
