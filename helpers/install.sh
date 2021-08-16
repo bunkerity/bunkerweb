@@ -360,6 +360,15 @@ if [ "$NGINX_VERSION" != "1.20.1" ] ; then
 	echo "/!\\ Warning : we recommend you to use nginx v1.20.1, you should uninstall your nginx version and run this script again ! /!\\"
 fi
 
+# Stop nginx on Linux
+if [ "$OS" != "alpine" ] ; then
+	echo "[*] Stop nginx service"
+	systemctl status nginx > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		do_and_check_cmd systemctl stop nginx
+	fi
+fi
+
 # Install dependencies
 echo "[*] Update packet list"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
@@ -724,12 +733,18 @@ do_and_check_cmd cp /tmp/bunkerized-nginx/misc/variables.env /opt/bunkerized-ngi
 if [ "$OS" != "alpine" ] ; then
 	echo "[*] Copy UI"
 	do_and_check_cmd cp -r /tmp/bunkerized-nginx/ui /opt/bunkerized-nginx
-	do_and_check_cmd cp /tmp/bunkerized-nginx/ui/bunkerized-nginx-ui.service /etc/systemd/system
+	do_and_check_cmd cp /tmp/bunkerized-nginx/ui/bunkerized-nginx-ui.service /lib/systemd/system
 fi
 
 # Copy bunkerized-nginx
 echo "[*] Copy bunkerized-nginx"
 do_and_check_cmd cp /tmp/bunkerized-nginx/helpers/bunkerized-nginx /usr/local/bin
+
+# Replace old nginx.service file
+if [ "$OS" != "alpine" ] ; then
+	do_and_check_cmd mv /lib/systemd/system/nginx.service /lib/systemd/system/nginx.service.bak
+	do_and_check_cmd cp /tmp/bunkerized-nginx/misc/nginx.service /lib/systemd/system/
+fi
 
 # Create nginx user
 if [ "$(grep "nginx:" /etc/passwd)" = "" ] ; then
@@ -811,10 +826,13 @@ do_and_check_cmd chmod u+rx /opt
 do_and_check_cmd chown -R nginx:nginx /etc/nginx
 do_and_check_cmd find /etc/nginx -type f -exec chmod 0774 {} \;
 do_and_check_cmd find /etc/nginx -type d -exec chmod 0775 {} \;
-# Set permissions for /etc/systemd/system/bunkerized-nginx-ui.service
+# Set permissions for systemd files and reload config
 if [ "$OS" != "alpine" ] ; then
-	do_and_check_cmd chown root:root /etc/systemd/system/bunkerized-nginx-ui.service
-	do_and_check_cmd chmod 744 /etc/systemd/system/bunkerized-nginx-ui.service
+	do_and_check_cmd chown root:root /lib/systemd/system/bunkerized-nginx-ui.service
+	do_and_check_cmd chmod 744 /lib/systemd/system/bunkerized-nginx-ui.service
+	do_and_check_cmd chown root:root /lib/systemd/system/nginx.service
+	do_and_check_cmd chmod 744 /lib/systemd/system/nginx.service
+	do_and_check_cmd systemctl daemon-reload
 fi
 
 # Prepare log files and folders

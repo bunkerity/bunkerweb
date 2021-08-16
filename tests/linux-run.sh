@@ -12,7 +12,7 @@ if [ "$3" == "no" ] ; then
 fi
 
 echo "[*] Run $image"
-id="$(docker run --rm -d -it -p 80:80 -p 443:443 --name "$name" "$image")"
+id="$(docker run --rm -d -p 80:80 -p 443:443 --privileged=true --name "$name" "$image" /sbin/init)"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker run failed"
 	cleanup "$name"

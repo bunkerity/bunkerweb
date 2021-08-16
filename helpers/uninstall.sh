@@ -30,13 +30,22 @@ elif [ "$(grep Ubuntu /etc/os-release)" != "" ] ; then
 	OS="ubuntu"
 elif [ "$(grep CentOS /etc/os-release)" != "" ] ; then
 	OS="centos"
-elif [ "$(grep Alpine /etc/os-release)" != "" ] ; then
-	OS="alpine"
 fi
 if [ "$OS" = "" ] ; then
 	echo "[!] Unsupported Operating System"
 	exit 1
 fi
+
+# Stop nginx
+systemctl status nginx > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	echo "[*] Stop nginx service"
+	do_and_check_cmd systemctl stop nginx
+fi
+
+# Reload old nginx.service file
+do_and_check_cmd mv /lib/systemd/system/nginx.service.bak /lib/systemd/system/nginx.service
+do_and_check_cmd systemctl daemon-reload
 
 # Remove /opt/bunkerized-nginx
 if [ -e "/opt/bunkerized-nginx" ] ; then
@@ -45,14 +54,16 @@ if [ -e "/opt/bunkerized-nginx" ] ; then
 fi
 
 # Remove UI service
-if [ -e "/etc/systemd/system/bunkerized-nginx-ui.service" ] ; then
-	echo "[*] Remove bunkerized-nginx-ui service"
+systemctl status bunkerized-nginx-ui > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	echo "[*] Stop bunkerized-nginx-ui service"
+	systemctl status nginx > /dev/null 2>&1
 	do_and_check_cmd systemctl stop bunkerized-nginx-ui
-	do_and_check_cmd systemctl disable bunkerized-nginx-ui
-	do_and_check_cmd rm -f /etc/systemd/system/bunkerized-nginx-ui.service
-	do_and_check_cmd systemctl daemon-reload
-	do_and_check_cmd systemctl reset-failed
 fi
+do_and_check_cmd systemctl disable bunkerized-nginx-ui
+do_and_check_cmd rm -f /lib/systemd/system/bunkerized-nginx-ui.service
+do_and_check_cmd systemctl daemon-reload
+do_and_check_cmd systemctl reset-failed
 
 # Remove cron
 echo "[*] Remove cron"

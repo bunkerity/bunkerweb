@@ -40,13 +40,14 @@ echo "[*] Run jobs"
 do_and_check_cmd "/opt/bunkerized-nginx/entrypoint/jobs.sh"
 
 # Reload nginx if it's running
-if [ -f "/tmp/nginx.pid" ] ; then
+status="$(systemctl status nginx 2>&1)"
+if [ $? -eq 0 ] ; then
 	echo "[*] Reload nginx"
-	AS_ROOT="yes" do_and_check_cmd nginx -s reload
+	AS_ROOT="yes" do_and_check_cmd systemctl reload nginx
 # Otherwise start it
 else
 	echo "[*] Start nginx"
-	AS_ROOT="yes" do_and_check_cmd nginx -g 'daemon on; user nginx;'
+	AS_ROOT="yes" do_and_check_cmd systemctl start nginx
 fi
 
 # Done
