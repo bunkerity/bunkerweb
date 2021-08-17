@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# load some functions
+. /opt/bunkerized-nginx/entrypoint/utils.sh
+
 function do_and_check_cmd() {
 	if [ "$CHANGE_DIR" != "" ] ; then
 		cd "$CHANGE_DIR"
@@ -35,9 +38,25 @@ fi
 echo "[*] Generate configuration files"
 do_and_check_cmd "/opt/bunkerized-nginx/gen/main.py --settings /opt/bunkerized-nginx/settings.json --templates /opt/bunkerized-nginx/confs --output /etc/nginx --variables /opt/bunkerized-nginx/variables.env"
 
+# Run temporary nginx if needed
+status="$(systemctl status nginx 2>&1)"
+if [ $? -ne 0 ] && [ "$(grep "^.*AUTO_LETS_ENCRYPT=yes$" /opt/bunkerized-nginx/variables.env)" != "" ] ; then
+	echo "[*] Run temp nginx"
+	do_and_check_cmd "cp /opt/bunkerized-nginx/confs/global/nginx-temp.conf /tmp/nginx-temp.conf"
+	replace_in_file "/tmp/nginx-temp.conf" "%USE_API%" ""
+	replace_in_file "/tmp/nginx-temp.conf" "%HTTP_PORT%" "80"
+	AS_ROOT="yes" do_and_check_cmd nginx -c /tmp/nginx-temp.conf -g 'user nginx;'
+fi
+
 # Run pre-jobs
 echo "[*] Run jobs"
-do_and_check_cmd "/opt/bunkerized-nginx/entrypoint/jobs.sh"
+CHANGE_DIR=/tmp do_and_check_cmd "/opt/bunkerized-nginx/entrypoint/jobs.sh"
+
+# Stop temp nginx
+status="$(systemctl status nginx 2>&1)"
+if [ $? -ne 0 ] && [ -f "/tmp/nginx-temp.pid" ] ; then
+	AS_ROOT="yes" do_and_check_cmd nginx -c /tmp/nginx-temp.conf -s quit
+fi
 
 # Reload nginx if it's running
 status="$(systemctl status nginx 2>&1)"
