@@ -256,6 +256,7 @@ Example of a basic configuration file :
 ```conf
 HTTP_PORT=80
 HTTPS_PORT=443
+DNS_RESOLVERS=8.8.8.8 8.8.4.4
 SERVER_NAME=www.example.com
 AUTO_LETS_ENCRYPT=yes
 USE_REVERSE_PROXY=yes
@@ -491,6 +492,7 @@ Example of a basic configuration file :
 ```conf
 HTTP_PORT=80
 HTTPS_PORT=443
+DNS_RESOLVERS=8.8.8.8 8.8.4.4
 SERVER_NAME=www.example.com
 AUTO_LETS_ENCRYPT=yes
 # Case 1 : the PHP-FPM instance is on the same machine
@@ -500,6 +502,38 @@ LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
 # Case 2 : the PHP-FPM instance is on another machine
 #REMOTE_PHP=myapp.example.local
 #REMOTE_PHP_PATH=/app
+```
+
+Don't forget that bunkerized-nginx runs as an unprivileged user/group both named `nginx`. When using a local PHP-FPM instance, you will need to take care of the rights and permissions of the socket and web files.
+
+For example, if your PHP-FPM is running as the `www-data` user, you can create a new group called `web-users` and add `nginx` and `www-data` into it :
+```shell
+$ groupadd web-users
+$ usermod -a -G web-users nginx
+$ usermod -a -G web-users www-data
+```
+
+Once it's done, you will need to tweak your PHP-FPM configuration file (e.g., `/etc/php/7.3/fpm/pool.d/www.conf`) to edit the default group of the processes and the permissions of the socket file :
+```conf
+[www]
+...
+user = www-data
+group = web-users
+...
+listen = /run/php/php7.3-fpm.sock
+listen.owner = www-data
+listen.group = web-users
+listen.mode = 0660
+...
+```
+
+Last but not least, you will need to edit the permissions of `/opt/bunkerized-nginx/www` to make sure that nginx can read and PHP-FPM can write (in case your PHP app needs it) :
+```shell
+$ chown root:web-users /opt/bunkerized-nginx/www
+$ chmod 750 /opt/bunkerized-nginx/www
+$ find /opt/bunkerized-nginx/www/* -exec chown www-data:nginx {} \;
+$ find /opt/bunkerized-nginx/www/* -type f -exec chmod 740 {} \;
+$ find /opt/bunkerized-nginx/www/* -type d -exec chmod 750 {} \;
 ```
 
 ## Multisite
@@ -830,6 +864,7 @@ Example of a basic configuration file :
 ```conf
 HTTP_PORT=80
 HTTPS_PORT=443
+DNS_RESOLVERS=8.8.8.8 8.8.4.4
 SERVER_NAME=app1.example.com app2.example.com
 MULTISITE=yes
 AUTO_LETS_ENCRYPT=yes
@@ -847,3 +882,7 @@ app2.example.com_LOCAL_PHP_PATH=/opt/bunkerized-nginx/www/app2.example.com
 #app2.example.com_REMOTE_PHP=myapp.example.local
 #app2.example.com_REMOTE_PHP_PATH=/app
 ```
+
+Don't forget that bunkerized-nginx runs as an unprivileged user/group both named `nginx`. When using a local PHP-FPM instance, you will need to take care of the rights and permissions of the socket and web files.
+
+See the [Linux section of PHP application](#id5) for more information.
