@@ -16,6 +16,8 @@ jobs:
         run: docker build -t debian-systemd -f tests/Dockerfile-debian .
       - name: Build Ubuntu with systemd
         run: docker build -t ubuntu-systemd -f tests/Dockerfile-ubuntu .
+      - name: Build CentOS with systemd
+        run: docker build -t centos-systemd -f tests/Dockerfile-centos .
       - name: Build Fedora with systemd
         run: docker build -t fedora-systemd -f tests/Dockerfile-fedora .
       - name: Debian test
@@ -23,6 +25,6 @@ jobs:
       - name: Ubuntu test
         run: ./tests/linux-run.sh ubuntu-systemd test-ubuntu
       - name: CentOS test
-        run: ./tests/linux-run.sh centos:7 test-centos
+        run: ./tests/linux-run.sh centos-systemd test-centos
       - name: Fedora test
         run: ./tests/linux-run.sh fedora-systemd test-fedora
