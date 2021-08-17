@@ -842,7 +842,7 @@ app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8080
 # If the PHP-FPM instance is on the same machine
 # you just need to adjust the socket path
 app2.example.com_LOCAL_PHP=/run/php/php7.3-fpm.sock
-app2.example.com_LOCAL_PHP_PATH=/opt/bunkerized-nginx/www
+app2.example.com_LOCAL_PHP_PATH=/opt/bunkerized-nginx/www/app2.example.com
 # Else if the PHP-FPM instance is on another machine
 #app2.example.com_REMOTE_PHP=myapp.example.local
 #app2.example.com_REMOTE_PHP_PATH=/app

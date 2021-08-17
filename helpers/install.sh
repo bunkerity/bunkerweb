@@ -834,6 +834,8 @@ if [ "$OS" != "alpine" ] ; then
 	do_and_check_cmd chmod 744 /lib/systemd/system/nginx.service
 	do_and_check_cmd systemctl daemon-reload
 fi
+# Allow RX access to others on /opt/bunkerized-nginx
+do_and_check_cmd chmod 755 /opt/bunkerized-nginx
 
 # Prepare log files and folders
 echo "[*] Prepare log files and folders"
