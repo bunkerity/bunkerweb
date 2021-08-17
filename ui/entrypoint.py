@@ -22,12 +22,19 @@ app.secret_key = vars["FLASK_SECRET"]
 app.config["ABSOLUTE_URI"] = vars["ABSOLUTE_URI"]
 app.config["INSTANCES"] = Instances(vars["DOCKER_HOST"], vars["API_URI"])
 app.config["CONFIG"] = Config()
+app.config["SESSION_COOKIE_DOMAIN"] = vars["ABSOLUTE_URI"].replace("http://", "").replace("https://", "").split("/")[0]
+app.config["WTF_CSRF_SSL_STRICT"] = False
 
 # Declare functions for jinja2
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 app.jinja_env.globals.update(form_service_gen_multiple=utils.form_service_gen_multiple)
 app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service_gen_multiple_values)
+
+@app.before_request
+def log_request():
+    app.logger.debug("Request Headers %s", request.headers)
+    return None
 
 # Login management
 login_manager = LoginManager()

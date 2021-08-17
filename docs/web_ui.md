@@ -12,7 +12,7 @@ The web UI has its own set of environment variables to configure it :
 - `API_URI` : path of the bunkerized-nginx API (must match the corresponding `API_URI` of the bunkerized-nginx instance)
 - `DOCKER_HOST` : Docker API endpoint address (default = `unix:///var/run/docker.sock`)
 
-Since the web UI is ia service itself, we can use bunkerized-nginx as a reverse proxy in front of it.
+Since the web UI is a web service itself, we can use bunkerized-nginx as a reverse proxy in front of it.
 
 **Using the web UI in a Docker environment exposes a security risk because you need to mount the Docker API socket into the web UI container. It's highly recommended to use a middleware like [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy) to reduce the risk as much as possible.**
 
@@ -59,7 +59,7 @@ $ docker run -d \
 
 Last but not least, you need to start the bunkerized-nginx and configure it as a reverse proxy for the web UI web service :
 ```shell
-$ docker create -d \
+$ docker create \
          --name my-bunkerized \
          --network ui-net \
          -p 80:8080 \
@@ -74,8 +74,8 @@ $ docker create -d \
          -e REDIRECT_HTTP_TO_HTTPS=yes \
          -e admin.example.com_USE_REVERSE_PROXY=yes \
          -e admin.example.com_REVERSE_PROXY_URL=/admin-changeme/ \
-         -e admin.example.com_REVERSE_PROXY_HOST=http://my-bunkerized-ui:5000/ \
-         -e admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin-changeme \
+         -e admin.example.com_REVERSE_PROXY_HOST=http://my-bunkerized-ui:5000 \
+         -e "admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin-changeme" \
          -e admin.example.com_USE_MODSECURITY=no \
          -l bunkerized-nginx.UI \
          bunkerity/bunkerized-nginx
@@ -111,7 +111,7 @@ services:
       - REDIRECT_HTTP_TO_HTTPS=yes
       - admin.example.com_USE_REVERSE_PROXY=yes
       - admin.example.com_REVERSE_PROXY_URL=/admin-changeme/         # change it to something hard to guess
-      - admin.example.com_REVERSE_PROXY_HOST=http://my-bunkerized-ui:5000/
+      - admin.example.com_REVERSE_PROXY_HOST=http://my-bunkerized-ui:5000
       - admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin # must match REVERSE_PROXY_URL
       - admin.example.com_USE_MODSECURITY=no
     labels:
@@ -177,6 +177,7 @@ Edit the bunkerized-nginx configurations located at `/opt/bunkerized-nginx/varia
 ```conf
 HTTP_PORT=80
 HTTPS_PORT=443
+DNS_RESOLVERS=8.8.8.8 8.8.4.4
 SERVER_NAME=admin.example.com
 MULTISITE=yes
 AUTO_LETS_ENCRYPT=yes
@@ -184,7 +185,7 @@ REDIRECT_HTTP_TO_HTTPS=yes
 admin.example.com_USE_REVERSE_PROXY=yes
 admin.example.com_REVERSE_PROXY_URL=/admin-changeme/
 # Local bunkerized-nginx-ui
-admin.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:5000/
+admin.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:5000
 # Remote bunkerized-nginx-ui
 #REVERSE_PROXY_HOST=http://service.example.local:5000
 admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin-changeme
