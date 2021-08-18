@@ -44,6 +44,7 @@ if [ $? -eq 0 ] ; then
 fi
 
 # Reload old nginx.service file
+echo "[*] Restore old nginx service"
 do_and_check_cmd mv /lib/systemd/system/nginx.service.bak /lib/systemd/system/nginx.service
 do_and_check_cmd systemctl daemon-reload
 
@@ -54,10 +55,12 @@ if [ $? -eq 0 ] ; then
 	systemctl status nginx > /dev/null 2>&1
 	do_and_check_cmd systemctl stop bunkerized-nginx-ui
 fi
+echo "[*] Remove bunkerized-nginx-ui service"
 do_and_check_cmd systemctl disable bunkerized-nginx-ui
 do_and_check_cmd rm -f /lib/systemd/system/bunkerized-nginx-ui.service
 do_and_check_cmd systemctl daemon-reload
 do_and_check_cmd systemctl reset-failed
+sed -i "s@nginx ALL=(root:root) NOPASSWD: /opt/bunkerized-nginx/ui/linux.sh@@" /etc/sudoers
 
 # Remove cron
 echo "[*] Remove cron"

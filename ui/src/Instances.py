@@ -96,7 +96,7 @@ class Instances :
 				if proc.returncode != 0 :
 					all_reload = False
 				else :
-					proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
+					proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
 					if proc.returncode != 0 :
 						all_reload = False
 			elif instance["type"] == "container" or instance["type"] == "service" :
@@ -111,7 +111,7 @@ class Instances :
 			if proc.returncode != 0 :
 				result = False
 			else :
-				proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
+				proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
 				result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/reload")
@@ -123,7 +123,7 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "start"], capture_output=True)
+			proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "start"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = False #self.__api_request(instance, "/start")
@@ -135,7 +135,7 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "stop"], capture_output=True)
+			proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "stop"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/stop")
@@ -147,7 +147,7 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "restart"], capture_output=True)
+			proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "restart"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = False #self.__api_request(instance, "/restart")

@@ -652,14 +652,14 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install runtime dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="certbot git cron curl python3 python3-pip procps"
+	DEBIAN_DEPS="certbot git cron curl python3 python3-pip procps sudo"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="certbot git crontabs curl python3 python3-pip procps"
+	CENTOS_DEPS="certbot git crontabs curl python3 python3-pip procps sudo"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
-	FEDORA_DEPS="certbot git crontabs curl python3 python3-pip procps nginx-mod-stream"
+	FEDORA_DEPS="certbot git crontabs curl python3 python3-pip procps nginx-mod-stream sudo"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
 	# Temp fix
 	do_and_check_cmd cp /usr/lib64/nginx/modules/ngx_stream_module.so /usr/lib/nginx/modules/ngx_stream_module.so
@@ -840,7 +840,7 @@ do_and_check_cmd chmod 755 /opt/bunkerized-nginx
 if [ "$OS" != "alpine" ] ; then
 	do_and_check_cmd chown root:nginx /opt/bunkerized-nginx/ui/linux.sh
 	do_and_check_cmd chmod 750 /opt/bunkerized-nginx/ui/linux.sh
-	do_and_check_cmd chmod u+s /opt/bunkerized-nginx/ui/linux.sh
+	echo "nginx ALL=(root:root) NOPASSWD: /opt/bunkerized-nginx/ui/linux.sh" >> /etc/sudoers
 fi
 
 # Prepare log files and folders
