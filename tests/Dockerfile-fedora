@@ -13,4 +13,4 @@ rm -f /lib/systemd/system/anaconda.target.wants/*;\
 rm -f /lib/systemd/system/*tmpfiles*;\
 rm -f /lib/systemd/user/*tmpfiles*;\
 find /lib/systemd/ -type f -iname "*.service" -exec rm -f {} \;;\
-find /etc/systemd/ -type f -inaùe "*.service" -exec rm -f {} \;
+find /etc/systemd/ -type f -iname "*.service" -exec rm -f {} \;

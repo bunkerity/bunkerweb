@@ -92,9 +92,13 @@ class Instances :
 				all_reload = False
 				continue
 			if instance["type"] == "local" :
-				proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+				proc = subprocess.run(["/opt/bunkerized-nginx/entrypoint/jobs.sh"], capture_output=True)
 				if proc.returncode != 0 :
 					all_reload = False
+				else :
+					proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
+					if proc.returncode != 0 :
+						all_reload = False
 			elif instance["type"] == "container" or instance["type"] == "service" :
 				all_reload = self.__api_request(instance, "/reload")
 		return all_reload
@@ -107,7 +111,7 @@ class Instances :
 			if proc.returncode != 0 :
 				result = False
 			else :
-				proc = subprocess.run(["/opt/bunkerized-nginx/ui/nginx-reload.sh"], capture_output=True)
+				proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
 				result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/reload")
@@ -119,7 +123,7 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/usr/sbin/nginx", "-g", "daemon on;"], capture_output=True)
+			proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "start"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = False #self.__api_request(instance, "/start")
@@ -131,7 +135,7 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/usr/sbin/nginx", "-s", "quit"], capture_output=True)
+			proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "stop"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/stop")
@@ -143,9 +147,7 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/usr/sbin/nginx", "-s", "quit"], capture_output=True)
-			if proc.returncode == 0 :
-				proc = subprocess.run(["/usr/sbin/nginx", "-g", "daemon on;"], capture_output=True)
+			proc = subprocess.run(["/opt/bunkerized-nginx/ui/linux.sh", "restart"], capture_output=True)
 			result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = False #self.__api_request(instance, "/restart")
