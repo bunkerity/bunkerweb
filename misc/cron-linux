@@ -1,0 +1,7 @@
+15 0 * * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name certbot-renew >> /var/log/nginx/jobs.log 2>&1
+30 0 * * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name user-agents >> /var/log/nginx/jobs.log 2>&1
+45 0 * * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name referrers >> /var/log/nginx/jobs.log 2>&1
+0 1 * * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name abusers >> /var/log/nginx/jobs.log 2>&1
+0 2 * * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name proxies >> /var/log/nginx/jobs.log 2>&1
+0 */1 * * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name exit-nodes >> /var/log/nginx/jobs.log 2>&1
+0 3 2 * * nginx /opt/bunkerized-nginx/jobs/main.py --reload --name geoip >> /var/log/nginx/jobs.log 2>&1

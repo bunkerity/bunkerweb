@@ -886,14 +886,14 @@ do_and_check_cmd chmod 770 /var/lib/letsencrypt
 
 # Install cron
 echo "[*] Add jobs to crontab"
-if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	CRON_PATH="/var/spool/cron/crontabs/nginx"
-elif [ "$OS" = "centos" ] || [ "$OS" = "fedora" ] ; then
-	CRON_PATH="/var/spool/cron/nginx"
-elif [ "$OS" = "alpine" ] ; then
+if [ "$OS" = "alpine" ] ; then
+	CRON_SRC="/tmp/bunkerized-nginx/misc/cron"
 	CRON_PATH="/etc/crontabs/nginx"
+else
+	CRON_SRC="/tmp/bunkerized-nginx/misc/cron-linux"
+	CRON_PATH="/etc/cron.d/nginx"
 fi
-do_and_check_cmd cp /tmp/bunkerized-nginx/misc/cron "$CRON_PATH"
+do_and_check_cmd cp "$CRON_SRC" "$CRON_PATH"
 do_and_check_cmd chown root:nginx "$CRON_PATH"
 do_and_check_cmd chmod 740 "$CRON_PATH"
 

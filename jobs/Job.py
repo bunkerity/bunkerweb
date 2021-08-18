@@ -48,7 +48,7 @@ class JobManagement() :
 				return ReloadRet.OK
 			return ReloadRet.KO
 		elif self.__local_nginx :
-			proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+			proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
 			if proc.returncode != 0 :
 				log("reload", "ERROR", "can't reload nginx (status code = " + str(proc.returncode) + ")")
 				if len(proc.stdout.decode("ascii")) > 1 :
