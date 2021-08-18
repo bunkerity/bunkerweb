@@ -891,7 +891,7 @@ if [ "$OS" = "alpine" ] ; then
 	CRON_PATH="/etc/crontabs/nginx"
 else
 	CRON_SRC="/tmp/bunkerized-nginx/misc/cron-linux"
-	CRON_PATH="/etc/cron.d/nginx"
+	CRON_PATH="/etc/cron.d/bunkerized-nginx"
 fi
 do_and_check_cmd cp "$CRON_SRC" "$CRON_PATH"
 do_and_check_cmd chown root:nginx "$CRON_PATH"

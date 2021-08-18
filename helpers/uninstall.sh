@@ -64,16 +64,7 @@ sed -i "s@nginx ALL=(root:root) NOPASSWD: /opt/bunkerized-nginx/ui/linux.sh@@" /
 
 # Remove cron
 echo "[*] Remove cron"
-if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	CRON_PATH="/var/spool/cron/crontabs/nginx"
-elif [ "$OS" = "centos" ] ; then
-	CRON_PATH="/var/spool/cron/nginx"
-elif [ "$OS" = "alpine" ] ; then
-	CRON_PATH="/etc/crontabs/nginx"
-fi
-if [ -e "$CRON_PATH" ] ; then
-	do_and_check_cmd rm -f "$CRON_PATH"
-fi
+do_and_check_cmd rm -f /etc/crond.d/bunkerized-nginx
 
 # Remove /opt/bunkerized-nginx
 if [ -e "/opt/bunkerized-nginx" ] ; then
