@@ -96,6 +96,9 @@ services:
     restart: always
     depends_on:
       - my-bunkerized-ui
+    networks:
+      - services-net
+      - ui-net
     ports:
       - 80:8080
       - 443:8443
@@ -103,16 +106,16 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - bunkerized-vol:/etc/nginx
     environment:
-      - SERVER_NAME=admin.example.com                                # replace with your domain
+      - SERVER_NAME=admin.example.com                                         # replace with your domain
       - MULTISITE=yes
       - USE_API=yes
-      - API_URI=/ChangeMeToSomethingHardToGuess                      # change it to something hard to guess + must match API_URI from myui service
+      - API_URI=/ChangeMeToSomethingHardToGuess                               # change it to something hard to guess + must match API_URI from myui service
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - admin.example.com_USE_REVERSE_PROXY=yes
-      - admin.example.com_REVERSE_PROXY_URL=/admin-changeme/         # change it to something hard to guess
+      - admin.example.com_REVERSE_PROXY_URL=/admin-changeme/                  # change it to something hard to guess
       - admin.example.com_REVERSE_PROXY_HOST=http://my-bunkerized-ui:5000
-      - admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin # must match REVERSE_PROXY_URL
+      - admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin-changeme # must match REVERSE_PROXY_URL
       - admin.example.com_USE_MODSECURITY=no
     labels:
       - "bunkerized-nginx.UI"
@@ -125,13 +128,13 @@ services:
     networks:
       - ui-net
     volumes:
-      - autoconf:/etc/nginx
+      - bunkerized-vol:/etc/nginx
     environment:
-      - ABSOLUTE_URI=https://admin.example.com/admin/ # change it to your full URI
+      - ABSOLUTE_URI=https://admin.example.com/admin-changeme/ # change it to your full URI
       - DOCKER_HOST=tcp://my-docker-proxy:2375
-      - API_URI=/ChangeMeToSomethingHardToGuess       # must match API_URI from bunkerized-nginx
-      - ADMIN_USERNAME=admin                          # change it to something hard to guess
-      - ADMIN_PASSWORD=changeme                       # change it to a good password
+      - API_URI=/ChangeMeToSomethingHardToGuess                # must match API_URI from bunkerized-nginx
+      - ADMIN_USERNAME=admin                                   # change it to something hard to guess
+      - ADMIN_PASSWORD=changeme                                # change it to a good password
 
   my-docker-proxy:
     image: tecnativa/docker-socket-proxy
@@ -148,6 +151,7 @@ services:
 networks:
   ui-net:
   services-net:
+    name: services-net
 
 volumes:
   bunkerized-vol:

@@ -31,10 +31,10 @@ app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 app.jinja_env.globals.update(form_service_gen_multiple=utils.form_service_gen_multiple)
 app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service_gen_multiple_values)
 
-@app.before_request
-def log_request():
-    app.logger.debug("Request Headers %s", request.headers)
-    return None
+#@app.before_request
+#def log_request():
+#    app.logger.debug("Request Headers %s", request.headers)
+#    return None
 
 # Login management
 login_manager = LoginManager()

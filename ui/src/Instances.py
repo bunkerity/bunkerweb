@@ -56,7 +56,12 @@ class Instances :
 				if instance.status == "running" :
 					status = "up"
 				instances.append(self.__instance(id, name, type, status, instance))
-			if self.__docker.swarm != None :
+			is_swarm = True
+			try :
+				version = self.__docker.swarm.version
+			except :
+				is_swarm = False
+			if is_swarm :
 				for instance in self.__docker.services.list(filters={"label" : "bunkerized-nginx.UI"}) :
 					id = instance.id
 					name = instance.name

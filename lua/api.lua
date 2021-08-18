@@ -1,4 +1,4 @@
-local M			= {}
+local M		= {}
 local api_list	= {}
 local iputils	= require "resty.iputils"
 
@@ -7,6 +7,18 @@ api_list["^/ping$"] = function ()
 end
 
 api_list["^/reload$"] = function ()
+	local jobs = true
+	local file = io.open("/etc/nginx/global.env", "r")
+	for line in file:lines() do
+		if line == "KUBERNETES_MODE=yes" or line == "SWARM_MODE=yes" then
+			jobs = false
+			break
+		end
+	end
+	file:close()
+	if jobs then
+		os.execute("/opt/bunkerized-nginx/entrypoint/jobs.sh")
+	end
 	return os.execute("/usr/sbin/nginx -s reload") == 0
 end
 
