@@ -836,6 +836,12 @@ if [ "$OS" != "alpine" ] ; then
 fi
 # Allow RX access to others on /opt/bunkerized-nginx
 do_and_check_cmd chmod 755 /opt/bunkerized-nginx
+# Allow nginx group to do nginx reload as root
+if [ "$OS" != "alpine" ] ; then
+	do_and_check_cmd chown root:nginx /opt/bunkerized-nginx/ui/nginx-reload.sh
+	do_and_check_cmd chmod 750 /opt/bunkerized-nginx/ui/nginx-reload.sh
+	do_and_check_cmd chmod u+s /opt/bunkerized-nginx/ui/nginx-reload.sh
+fi
 
 # Prepare log files and folders
 echo "[*] Prepare log files and folders"

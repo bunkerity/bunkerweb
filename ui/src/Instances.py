@@ -107,7 +107,7 @@ class Instances :
 			if proc.returncode != 0 :
 				result = False
 			else :
-				proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+				proc = subprocess.run(["/opt/bunkerized-nginx/ui/nginx-reload.sh"], capture_output=True)
 				result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/reload")
