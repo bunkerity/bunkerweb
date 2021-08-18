@@ -53,7 +53,7 @@ if __name__ == "__main__" :
 	# Remove old files
 	files = glob.glob(args.output + "/*")
 	for file in files :
-		if file.endswith(".conf") and os.path.isfile(file) and not os.path.islink(file) :
+		if (file.endswith(".conf") or file.endswith(".env")) and os.path.isfile(file) and not os.path.islink(file) :
 			os.remove(file)
 		elif os.path.isdir(file) and not os.path.islink(file) :
 			shutil.rmtree(file, ignore_errors=False)

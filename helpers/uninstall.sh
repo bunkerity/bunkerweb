@@ -47,12 +47,6 @@ fi
 do_and_check_cmd mv /lib/systemd/system/nginx.service.bak /lib/systemd/system/nginx.service
 do_and_check_cmd systemctl daemon-reload
 
-# Remove /opt/bunkerized-nginx
-if [ -e "/opt/bunkerized-nginx" ] ; then
-	echo "[*] Remove /opt/bunkerized-nginx"
-	do_and_check_cmd rm -rf /opt/bunkerized-nginx
-fi
-
 # Remove UI service
 systemctl status bunkerized-nginx-ui > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
@@ -76,6 +70,12 @@ elif [ "$OS" = "alpine" ] ; then
 fi
 if [ -e "$CRON_PATH" ] ; then
 	do_and_check_cmd rm -f "$CRON_PATH"
+fi
+
+# Remove /opt/bunkerized-nginx
+if [ -e "/opt/bunkerized-nginx" ] ; then
+	echo "[*] Remove /opt/bunkerized-nginx"
+	do_and_check_cmd rm -rf /opt/bunkerized-nginx
 fi
 
 # We're done

@@ -103,8 +103,12 @@ class Instances :
 		instance = self.__instance_from_id(id)
 		result = True
 		if instance["type"] == "local" :
-			proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
-			result = proc.returncode == 0
+			proc = subprocess.run(["/opt/bunkerized-nginx/entrypoint/jobs.sh"], capture_output=True)
+			if proc.returncode != 0 :
+				result = False
+			else :
+				proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+				result = proc.returncode == 0
 		elif instance["type"] == "container" or instance["type"] == "service" :
 			result = self.__api_request(instance, "/reload")
 		if result :
