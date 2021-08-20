@@ -35,7 +35,7 @@ metadata:
     bunkerized-nginx: "yes"
   annotations:
     bunkerized-nginx.SERVER_NAME: "app2.example.com"
-    bunkerized-nginx.REMOTE_PHP: "app2"
+    bunkerized-nginx.REMOTE_PHP: "app2.default.svc.cluster.local"
     bunkerized-nginx.REMOTE_PHP_PATH: "/var/www/html"
     bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
 spec:

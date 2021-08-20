@@ -29,7 +29,7 @@ metadata:
     bunkerized-nginx.SERVER_NAME: "app3.example.com"
     bunkerized-nginx.USE_REVERSE_PROXY: "yes"
     bunkerized-nginx.REVERSE_PROXY_URL: "/"
-    bunkerized-nginx.REVERSE_PROXY_HOST: "http://app3"
+    bunkerized-nginx.REVERSE_PROXY_HOST: "http://app3.default.svc.cluster.local"
     bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
 spec:
   type: ClusterIP

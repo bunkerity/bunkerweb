@@ -27,7 +27,7 @@
 
 > Make security by default great again !
 
-bunkerized-nginx is a web server based on the notorious nginx and focused on security. It integrates into existing environments (Linux, Docker, Swarm, Kubernetes, ...) to make your web services "secured by default" without any hassle. The security best practices are automatically applied for you while keeping control of every settings to meet your own use case.
+bunkerized-nginx is a web server based on the notorious nginx and focused on security. It integrates into existing environments (Linux, Docker, Swarm, Kubernetes, ...) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every settings to meet your own use case.
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/overview.png?raw=true" />
 

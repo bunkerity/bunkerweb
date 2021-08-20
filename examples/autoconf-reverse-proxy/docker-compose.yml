@@ -12,6 +12,7 @@ services:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app1.example.com"            # replace with your domain
+      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp1:3000"
 
@@ -25,6 +26,7 @@ services:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app2.example.com"            # replace with your domain
+      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp2:3000"
 
@@ -38,6 +40,7 @@ services:
       - NODE_ENV=production
     labels:
       - "bunkerized-nginx.SERVER_NAME=app3.example.com"            # replace with your domain
+      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
       - "bunkerized-nginx.REVERSE_PROXY_URL=/"
       - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myapp3:3000"
 
