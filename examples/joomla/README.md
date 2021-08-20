@@ -4,7 +4,7 @@ Joomla is a free and open-source content management system (CMS) for publishing 
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/joomla/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/joomla/architecture.png?raw=true" />
 
 ## Docker
 

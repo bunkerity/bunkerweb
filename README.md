@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/logo.png?raw=true" width="425" />
+	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/logo.png?raw=true" width="425" />
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 bunkerized-nginx is a web server based on the notorious nginx and focused on security. It integrates into existing environments (Linux, Docker, Swarm, Kubernetes, ...) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every settings to meet your own use case.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/overview.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/overview.png?raw=true" />
 
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
@@ -46,7 +46,7 @@ Non-exhaustive list of features :
 
 Fooling automated tools/scanners :
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/demo.gif?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/demo.gif?raw=true" />
 
 You can find a live demo at [https://demo-nginx.bunkerity.com](https://demo-nginx.bunkerity.com), feel free to do some security tests.
 
@@ -91,7 +91,7 @@ $ docker build -t bunkerized-nginx .
 
 To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/docker.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/docker.png?raw=true" />
 
 You will find more information about Docker integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker).
 
@@ -99,7 +99,7 @@ You will find more information about Docker integration in the [documentation](h
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/autoconf-docker.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/autoconf-docker.png?raw=true" />
 
 You will find more information about Docker autoconf feature in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-autoconf).
 
@@ -107,7 +107,7 @@ You will find more information about Docker autoconf feature in the [documentati
 
 Using bunkerized-nginx in a Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send a reload order to all the bunkerized-nginx tasks so they can load the new configuration.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/swarm.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/swarm.png?raw=true" />
 
 You will find more information about Docker Swarm integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-swarm).
 
@@ -117,7 +117,7 @@ You will find more information about Docker Swarm integration in the [documentat
 
 Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessible from the nodes (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends a reload order to the bunkerized-nginx instances running in the cluster.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/kubernetes.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/kubernetes.png?raw=true" />
 
 You will find more information about Kubernetes integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#kubernetes).
 
@@ -195,7 +195,7 @@ You will find more information about the special folders in the [documentation](
 
 # Web UI
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/web-ui.gif?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/web-ui.gif?raw=true" />
 
 You will find more information about the web UI in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/web_ui.html).
 

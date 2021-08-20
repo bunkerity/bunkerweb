@@ -4,7 +4,7 @@ WordPress is a free and open-source content management system (CMS) written in P
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/wordpress/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/wordpress/architecture.png?raw=true" />
 
 ## Docker
 

@@ -4,7 +4,7 @@ PrestaShop is a freemium, open source e-commerce platform. See the official [web
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/prestashop/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/prestashop/architecture.png?raw=true" />
 
 ## Docker
 

@@ -95,7 +95,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 
 We strongly recommend to keep both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed easily and the CRS team maintains a list of exclusions for common application (e.g., wordpress, nextcloud, drupal, cpanel, ...).
 
-Tuning the CRS with bunkerized-nginx is pretty simple : you can add configuration before and after the rules are loaded. You just need to mount your .conf files into the `/modsec-crs-confs` (before CRS is loaded) and `/modsec-confs` (after CRS is loaded) volumes. If you are using Linux integration the [special folders](https://bunkerized-nginx.readthedocs.io/en/dev/special_folders.html) are `/opt/bunkerized-nginx/modsec-confs` and `/opt/bunkerized-nginx/modsec-crs-confs`.
+Tuning the CRS with bunkerized-nginx is pretty simple : you can add configuration before and after the rules are loaded. You just need to mount your .conf files into the `/modsec-crs-confs` (before CRS is loaded) and `/modsec-confs` (after CRS is loaded) volumes. If you are using Linux integration the [special folders](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html) are `/opt/bunkerized-nginx/modsec-confs` and `/opt/bunkerized-nginx/modsec-crs-confs`.
 
 Here is a Docker example to illustrate it :
 

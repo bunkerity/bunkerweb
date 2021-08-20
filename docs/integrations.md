@@ -16,7 +16,7 @@ $ docker build -t bunkerized-nginx .
 
 To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/docker.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/docker.png?raw=true" />
 
 To demonstrate the use of the Docker image, we will create a simple "Hello World" static file that will be served by bunkerized-nginx.
 
@@ -106,7 +106,7 @@ services:
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/autoconf-docker.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/autoconf-docker.png?raw=true" />
 
 First of all, you will need a network to allow communication between bunkerized-nginx and your web services :
 ```shell
@@ -243,7 +243,7 @@ When your container is not needed anymore, you can delete it as usual. The autoc
 
 Using bunkerized-nginx in a Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send a reload order to all the bunkerized-nginx tasks so they can load the new configuration.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/swarm.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/swarm.png?raw=true" />
 
 **We will assume that a shared directory is mounted at the /shared location on both your managers and workers. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
 
@@ -429,7 +429,7 @@ When your service is not needed anymore, you can delete it as usual. The autocon
 
 Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessible from the nodes (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends a reload order to the bunkerized-nginx instances running in the cluster.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/kubernetes.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/kubernetes.png?raw=true" />
 
 **We will assume that a shared directory is mounted at the /shared location on your nodes. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
 
@@ -726,12 +726,12 @@ Unlike containers, Linux integration can be tedious because bunkerized-nginx has
 
 First of all you will need to install bunkerized-nginx. The recommended way is to use the official installer script :
 ```shell
-$ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh
+$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.0/linux-install.sh -o /tmp/bunkerized-nginx.sh
 ```
 
 Before executing it, you should also check the signature :
 ```shell
-$ curl -fsSL https://TODO -o /tmp/bunkerized-nginx.sh.asc
+$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.0/linux-install.sh.asc -o /tmp/bunkerized-nginx.sh.asc
 $ gpg --auto-key-locate hkps://keys.openpgp.org --locate-keys contact@bunkerity.com
 $ gpg --verify /tmp/bunkerized-nginx.sh.asc /tmp/bunkerized-nginx.sh
 ```

@@ -2,7 +2,7 @@
 
 ## Overview
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/docs/img/web-ui.gif?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/web-ui.gif?raw=true" />
 
 ## Usage
 

@@ -4,7 +4,7 @@ Passbolt is a free open source password manager for teams. See the official [web
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/passbolt/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/passbolt/architecture.png?raw=true" />
 
 ## Docker
 

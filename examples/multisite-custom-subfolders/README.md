@@ -4,7 +4,7 @@ This is a basic example for hosting multiple web services with custom subfolders
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/multisite-custom-subfolders/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/multisite-custom-subfolders/architecture.png?raw=true" />
 
 ## Docker
 

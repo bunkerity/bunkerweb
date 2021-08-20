@@ -4,7 +4,7 @@ Zammad is a web-based, open source user support/ticketing solution. See the offi
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/zammad/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/zammad/architecture.png?raw=true" />
 
 ## Docker
 

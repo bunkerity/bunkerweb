@@ -8,7 +8,7 @@ We will assume that you already have some basic knowledges about Cloudflare. If 
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/certbot-cloudflare/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/certbot-cloudflare/architecture.png?raw=true" />
 
 ## Configuration
 

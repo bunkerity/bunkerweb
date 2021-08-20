@@ -4,7 +4,7 @@ Redmine is a free and open source, web-based project management and issue tracki
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/redmine/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/redmine/architecture.png?raw=true" />
 
 ## Docker
 

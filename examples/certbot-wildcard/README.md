@@ -8,7 +8,7 @@ We will assume that you already have some basic knowledges about Let's Encrypt D
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/certbot-wildcard/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/certbot-wildcard/architecture.png?raw=true" />
 
 ## Configuration
 

@@ -4,7 +4,7 @@ Ghost is a free and open source blogging platform written in JavaScript and dist
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/ghost/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/ghost/architecture.png?raw=true" />
 
 ## Docker
 

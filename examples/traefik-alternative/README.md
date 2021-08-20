@@ -6,7 +6,7 @@ You can easily switch from Traefik to bunkerized-nginx if you are more concerned
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/traefik-alternative/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/traefik-alternative/architecture.png?raw=true" />
 
 ## Autoconf
 

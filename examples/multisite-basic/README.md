@@ -4,7 +4,7 @@ This is a basic example for hosting multiple web services.
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/multisite-basic/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/multisite-basic/architecture.png?raw=true" />
 
 ## Docker
 

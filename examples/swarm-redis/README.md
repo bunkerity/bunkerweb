@@ -4,7 +4,7 @@ Basic examples on how to deploy and use bunkerized-nginx within a Docker Swarm c
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/swarm-redis/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/swarm-redis/architecture.png?raw=true" />
 
 ## Swarm
 

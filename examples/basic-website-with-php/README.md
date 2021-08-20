@@ -4,7 +4,7 @@ This is a basic example for a typical PHP website/app.
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/basic-website-with-php/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/basic-website-with-php/architecture.png?raw=true" />
 
 ## Docker
 

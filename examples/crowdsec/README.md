@@ -8,7 +8,7 @@ This example uses a bunkerized-nginx plugin, you can have a look at the [documen
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/crowdsec/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/crowdsec/architecture.png?raw=true" />
 
 ## Configuration
 

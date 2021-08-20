@@ -4,7 +4,7 @@ Quickly deploy web app on Docker containers without restarting bunkerized-nginx.
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/autoconf-reverse-proxy/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/autoconf-reverse-proxy/architecture.png?raw=true" />
 
 ## Autoconf
 

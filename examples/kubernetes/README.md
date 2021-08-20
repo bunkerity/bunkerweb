@@ -4,7 +4,7 @@ Basic examples on how to use bunkerized-nginx within a Kubernetes cluster. See t
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/kubernetes/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/kubernetes/architecture.png?raw=true" />
 
 ## Kubernetes
 

@@ -8,7 +8,7 @@ We will assume that you already have some basic knownledges about Authelia. If t
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/authelia/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/authelia/architecture.png?raw=true" />
 
 ## Configuration
 

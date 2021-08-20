@@ -4,7 +4,7 @@ Simple example on how to load balance requests to multiple backends.
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/load-balancer/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/load-balancer/architecture.png?raw=true" />
 
 ## Configuration
 

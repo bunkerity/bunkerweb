@@ -4,7 +4,7 @@ This is a basic example for hosting multiple web services with custom configurat
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/multisite-custom-confs/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/multisite-custom-confs/architecture.png?raw=true" />
 
 ## Docker
 

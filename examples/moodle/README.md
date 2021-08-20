@@ -4,7 +4,7 @@ Moodle is a free and open-source learning management system (LMS) written in PHP
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/moodle/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/moodle/architecture.png?raw=true" />
 
 ## Docker
 

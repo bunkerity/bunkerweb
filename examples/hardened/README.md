@@ -4,7 +4,7 @@ Example on how you can harden the container executing bunkerized-nginx. See the 
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/hardened/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/hardened/architecture.png?raw=true" />
 
 ## Docker
 

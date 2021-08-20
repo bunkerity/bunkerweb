@@ -4,7 +4,7 @@ Simple example to show how to setup bunkerized-nginx in front of some existing W
 
 ## Architecture
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/dev/examples/reverse-proxy-websocket/architecture.png?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/reverse-proxy-websocket/architecture.png?raw=true" />
 
 ## Docker
 
