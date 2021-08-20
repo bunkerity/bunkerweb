@@ -87,6 +87,8 @@ Some important HTTP headers related to client security are sent with a default v
 
 You can also remove headers (e.g., too verbose ones) by using the `REMOVE_HEADERS` environment variable which takes a list of header name separated with space (default value = `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
 
+If you want to keep your application headers and tell bunkerized-nginx to not override it, just set the corresponding environment variable to an empty value (e.g., `CONTENT_SECURITY_POLICY=`, `PERMISSIONS_POLICY=`, ...).
+
 ## ModSecurity
 
 ModSecurity is integrated and enabled by default alongside the OWASP Core Rule Set within bunkerized-nginx. To change this behaviour you can use the `USE_MODSECURITY=no` or `USE_MODSECURITY_CRS=no` environment variables.

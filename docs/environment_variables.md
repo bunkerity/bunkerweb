@@ -87,23 +87,41 @@ Default value : *8443*
 Context : *global*  
 The HTTPS port number used by nginx inside the container.
 
-`WORKER_CONNECTIONS`
+`WORKER_CONNECTIONS`  
 Values : *\<any positive integer\>*  
 Default value : 1024  
 Context : *global*  
 Sets the value of the [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) directive.
 
-`WORKER_RLIMIT_NOFILE`
+`WORKER_RLIMIT_NOFILE`  
 Values : *\<any positive integer\>*  
 Default value : 2048  
 Context : *global*  
 Sets the value of the [worker_rlimit_nofile](https://nginx.org/en/docs/ngx_core_module.html#worker_rlimit_nofile) directive.
 
+`WORKER_PROCESSES`  
+Values : *\<any positive integer or auto\>*  
+Default value : auto  
+Context : *global*  
+Sets the value of the [worker_processes](https://nginx.org/en/docs/ngx_core_module.html#worker_processes) directive.
+
 `INJECT_BODY`  
-Values : *\<any HTML code\>*
+Values : *\<any HTML code\>*  
 Default value :  
 Context : *global*, *multisite*  
 Use this variable to inject any HTML code you want before the \</body\> tag (e.g. : `\<script src="https://..."\>`)
+
+`REDIRECT_TO`  
+Values : *\<any valid absolute URI\>*  
+Default value :  
+Context : *global*, *multisite*  
+Use this variable if you want to redirect one server to another (e.g., redirect apex to www : `REDIRECT_TO=https://www.example.com`).
+
+`REDIRECT_TO_REQUEST_URI`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*, *multisite*  
+When set to yes and `REDIRECT_TO` is set it will append the requested path to the redirection (e.g., https://example.com/something redirects to https://www.example.com/something).
 
 ### Information leak
 
@@ -397,6 +415,12 @@ Default value : *contact@first-domain-in-server-name*
 Context : *global*, *multisite*  
 Define the contact email address declare in the certificate.
 
+`USE_LETS_ENCRYPT_STAGING`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*, *multisite*  
+When set to yes, it tells certbot to use the [staging environment](https://letsencrypt.org/docs/staging-environment/) for Let's Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.
+
 ### HTTP
 
 `LISTEN_HTTP`  
@@ -526,6 +550,8 @@ Context : *global*, *multisite*
 Sets the value of the [SecAuditEngine directive](https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual-%28v2.x%29#SecAuditEngine) of ModSecurity.
 
 ## Security headers
+
+If you want to keep your application headers and tell bunkerized-nginx to not override it, just set the corresponding environment variable to an empty value (e.g., `CONTENT_SECURITY_POLICY=`, `PERMISSIONS_POLICY=`, ...).
 
 `X_FRAME_OPTIONS`  
 Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net*
@@ -851,6 +877,18 @@ Default value : */app*
 Context : *global*, *multisite*  
 The path where the PHP files are located inside the server specified in `REMOTE_PHP`.
 
+`LOCAL_PHP`  
+Values : *\<any valid absolute path\>*  
+Default value :  
+Context : *global*, *multisite*  
+Set the absolute path of the unix socket file of a local PHP-FPM instance to execute .php files.
+
+`LOCAL_PHP_PATH`  
+Values : *\<any valid absolute path\>*  
+Default value : */app*  
+Context : *global*, *multisite*  
+The path where the PHP files are located inside the server specified in `LOCAL_PHP`.
+
 ## Bad behavior
 
 `USE_BAD_BEHAVIOR`  
@@ -915,22 +953,34 @@ Choose authentication mode : show a web page (`portal`) or a simple auth basic p
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*  
-Only set to *yes* when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+Only set to *yes* when you use *bunkerized-nginx* with Docker Swarm integration.
+
+`KUBERNETES_MODE`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*  
+Only set to *yes* when you use bunkerized-nginx with Kubernetes integration.
 
 `USE_API`  
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*  
-Only set to *yes* when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+Only set to *yes* when you use bunkerized-nginx with Swarm/Kubernetes integration or with the web UI.
 
 `API_URI`  
 Values : *random* | *\<any valid URI path\>*  
 Default value : *random*  
 Context : *global*  
-Set it to a random path when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+Only set to *yes* when you use bunkerized-nginx with Swarm/Kubernetes integration or with the web UI.
 
 `API_WHITELIST_IP`  
 Values : *\<list of IP/CIDR separated with space\>*  
 Default value : *192.168.0.0/16 172.16.0.0/12 10.0.0.0/8*  
 Context : *global*  
 List of IP/CIDR block allowed to send API order using the `API_URI` uri.
+
+`USE_REDIS`  
+Undocumented. Reserved for future use.
+
+`REDIS_HOST`  
+Undocumented. Reserved for future use.

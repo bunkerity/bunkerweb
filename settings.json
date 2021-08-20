@@ -534,7 +534,7 @@
                 "env": "EMAIL_LETS_ENCRYPT",
                 "id": "email-lets-encrypt",
                 "label": "Email lets encrypt",
-                "regex": "^([a-z0-9\\-\\.]+@[a-z\\-0-9\\.]+|.{0})$",
+                "regex": "^([a-z0-9\\-\\._]+@[a-z\\-0-9\\.]+|.{0})$",
                 "type": "text"
             },
             {
@@ -939,6 +939,15 @@
                 "label": "Redirect every requests to another web service",
                 "regex": "^(https?://.+|.{0})$",
                 "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "REDIRECT_TO_REQUEST_URI",
+                "id": "redirect-to-request-uri",
+                "label": "Append the requested path when redirecting",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
             }
         ]
     },
@@ -1375,7 +1384,7 @@
             },
             {
                 "context": "multisite",
-                "default": ".googlebot.com .google.com .search.msn.com .crawl.yahoot.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net",
+                "default": ".googlebot.com .google.com .search.msn.com .crawl.yahoo.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net",
                 "env": "WHITELIST_REVERSE_LIST",
                 "id": "whitelist-reverse-list",
                 "label": "Whitelist reverse list",

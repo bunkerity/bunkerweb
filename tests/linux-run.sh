@@ -2,6 +2,7 @@
 
 function cleanup() {
 	docker kill "$1"
+	docker volume rm "linux-tmp"
 }
 
 image="$1"
@@ -11,8 +12,15 @@ if [ "$3" == "no" ] ; then
 	do_cleanup="no"
 fi
 
+echo "[*] Create volume"
+docker volume create linux-tmp
+if [ $? -ne 0 ] ; then
+	echo "[!] docker volume failed"
+	exit 1
+fi
+
 echo "[*] Run $image"
-id="$(docker run --rm -d -p 80:80 -p 443:443 --privileged=true --name "$name" "$image" /sbin/init)"
+id="$(docker run --rm -d -p 80:80 -p 443:443 --privileged=true --name "$name" -v linux-tmp:/tmp "$image" /sbin/init)"
 if [ $? -ne 0 ] ; then
 	echo "[!] docker run failed"
 	cleanup "$name"
