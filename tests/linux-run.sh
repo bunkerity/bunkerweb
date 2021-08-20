@@ -2,6 +2,7 @@
 
 function cleanup() {
 	docker kill "$1"
+	sleep 30
 	docker volume rm "linux-tmp"
 }
 
@@ -94,3 +95,5 @@ fi
 if [ "$do_cleanup" == "yes" ] ; then
 	cleanup "$name"
 fi
+
+exit 0
