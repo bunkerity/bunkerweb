@@ -459,7 +459,10 @@ CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make inst
 
 # Download, compile and install ModSecurity
 echo "[*] Clone SpiderLabs/ModSecurity"
-git_secure_clone https://github.com/SpiderLabs/ModSecurity.git bf881a4eda343d37629e39ede5e28b70dc4067c0
+# TODO : looks like memory leak is happening with ModSecurity 3.0.5
+# so we keep 3.0.4 until a fixed version is available
+#git_secure_clone https://github.com/SpiderLabs/ModSecurity.git bf881a4eda343d37629e39ede5e28b70dc4067c0
+git_secure_clone https://github.com/SpiderLabs/ModSecurity.git 753145fbd1d6751a6b14fdd700921eb3cc3a1d35
 echo "[*] Compile and install ModSecurity"
 # temp fix : Debian run it twice
 cd /tmp/bunkerized-nginx/ModSecurity && ./build.sh > /dev/null 2>&1
