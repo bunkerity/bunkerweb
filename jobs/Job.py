@@ -15,10 +15,13 @@ class ReloadRet(enum.Enum) :
 class JobManagement() :
 
 	def __init__(self) :
+		self.__docker_nginx = False
 		self.__local_nginx = False
-		if os.path.isfile("/usr/sbin/nginx") and os.path.isfile("/tmp/nginx.pid") :
-			self.__local_nginx = True
 		self.__autoconf_socket = None
+		if os.path.isfile("/usr/sbin/nginx") and os.path.isfile("/tmp/nginx.pid") and not os.path.isfile("/opt/bunkerized-nginx/ui/linux.sh") :
+			self.__docker_nginx = True
+		if os.path.isfile("/usr/sbin/nginx") and os.path.isfile("/tmp/nginx.pid") and os.path.isfile("/opt/bunkerized-nginx/ui/linux.sh") :
+			self.__local_nginx = True
 		if os.path.exists("/tmp/autoconf.sock") and stat.S_ISSOCK(os.stat("/tmp/autoconf.sock").st_mode) :
 			self.__autoconf_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			self.__autoconf_socket.connect("/tmp/autoconf.sock")
@@ -43,10 +46,22 @@ class JobManagement() :
 		return True
 
 	def reload(self) :
-		if self.__autoconf_socket != None :
+		if self.__docker_nginx :
+			proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], capture_output=True)
+			if proc.returncode != 0 :
+				log("reload", "ERROR", "can't reload nginx (status code = " + str(proc.returncode) + ")")
+				if len(proc.stdout.decode("ascii")) > 1 :
+					log("reload", "ERROR", proc.stdout.decode("ascii"))
+				if len(proc.stderr.decode("ascii")) > 1 :
+					log("reload", "ERROR", proc.stderr.decode("ascii"))
+				return ReloadRet.KO
+			return ReloadRet.OK
+
+		elif self.__autoconf_socket != None :
 			if self.__autoconf_order(b"reload") :
 				return ReloadRet.OK
 			return ReloadRet.KO
+
 		elif self.__local_nginx :
 			proc = subprocess.run(["sudo", "/opt/bunkerized-nginx/ui/linux.sh", "reload"], capture_output=True)
 			if proc.returncode != 0 :
@@ -57,6 +72,7 @@ class JobManagement() :
 					log("reload", "ERROR", proc.stderr.decode("ascii"))
 				return ReloadRet.KO
 			return ReloadRet.OK
+
 		return ReloadRet.NO
 
 class Job(abc.ABC) :
