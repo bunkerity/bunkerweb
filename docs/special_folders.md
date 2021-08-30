@@ -46,7 +46,7 @@ Examples :
 
 ## ModSecurity configurations
 
-This special folder contains .conf files that will be loaded by ModSecurity before the OWASP Core Rule Set is loaded. The typical use case is when you want to specify exclusions for the CRS.
+This special folder contains .conf files that will be loaded by ModSecurity after the OWASP Core Rule Set is loaded. The typical use case is to edit loaded CRS rules to avoid false positives.
 
 Location (container) : `/modsec-confs`  
 Location (Linux) : `/opt/bunkerized-nginx/modsec-confs`  
@@ -59,7 +59,7 @@ Examples :
 
 ## CRS configurations
 
-This special folder contains .conf file that will be loaded by ModSecurity after the OWASP Core Rule Set is loaded. The typical use case is to edit loaded CRS rules to avoid false positives.
+This special folder contains .conf file that will be loaded by ModSecurity before the OWASP Core Rule Set is loaded. The typical use case is when you want to specify exclusions for the CRS.
 
 Location (container) : `/modsec-crs-confs`  
 Location (Linux) : `/opt/bunkerized-nginx/modsec-crs-confs`  
