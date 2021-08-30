@@ -60,6 +60,7 @@ Examples :
 ## CRS configurations
 
 This special folder contains .conf file that will be loaded by ModSecurity before the OWASP Core Rule Set is loaded. The typical use case is when you want to specify exclusions for the CRS.
+
 Location (container) : `/modsec-crs-confs`  
 Location (Linux) : `/opt/bunkerized-nginx/modsec-crs-confs`  
 Multisite : `yes`  
