@@ -1099,6 +1099,16 @@
                     },
                     {
                         "context": "multisite",
+                        "default": "yes",
+                        "env": "REVERSE_PROXY_KEEPALIVE",
+                        "id": "reverse-proxy-keepalive",
+                        "label": "Reverse proxy keepalive",
+                        "multiple": "Reverse proxy",
+                        "regex": "^(yes|no)$",
+                        "type": "checkbox"
+                    },
+                    {
+                        "context": "multisite",
                         "default": "",
                         "env": "REVERSE_PROXY_HEADERS",
                         "id": "reverse-proxy-headers",

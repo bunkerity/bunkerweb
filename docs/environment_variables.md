@@ -220,6 +220,13 @@ Context : *global*, *multisite*
 Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* then the [proxy_buffering](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering) directive will be set to `on` or `off` otherwise.  
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_BUFFERING_1`, `REVERSE_PROXY_BUFFERING_2`, `REVERSE_PROXY_BUFFERING_3`, ...
 
+`REVERSE_PROXY_KEEPALIVE`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* to enable keepalive connections with the backend (needs a HTTP 1.1 backend) or *no* otherwise.  
+You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_KEEPALIVE_1`, `REVERSE_PROXY_KEEPALIVE_2`, `REVERSE_PROXY_KEEPALIVE_3`, ...
+
 `REVERSE_PROXY_HEADERS`  
 Values : *\<list of custom headers separated with a semicolon like this : header1 value1;header2 value2...\>* 
 Default value :  
