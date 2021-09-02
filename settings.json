@@ -775,6 +775,23 @@
                 "label": "Content security policy",
                 "regex": "^([\\S ]*)$",
                 "type": "text"
+            },
+            {
+                "id": "custom-headers",
+                "label": "Custom headers",
+                "params" : [
+                    {
+                        "context": "multisite",
+                        "default": "",
+                        "env": "CUSTOM_HEADER",
+                        "id": "custom-headers",
+                        "label": "Custom header",
+                        "multiple": "Custom headers",
+                        "regex": "^([\\S ]*)$",
+                        "type": "text"
+                    }
+                ],
+                "type": "multiple"
             }
         ]
     },

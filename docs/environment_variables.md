@@ -123,6 +123,12 @@ Default value : *no*
 Context : *global*, *multisite*  
 When set to yes and `REDIRECT_TO` is set it will append the requested path to the redirection (e.g., https://example.com/something redirects to https://www.example.com/something).
 
+`CUSTOM_HEADER`  
+Values : *\<HeaderName: HeaderValue\>*  
+Default value :  
+Context : *global*, *multisite*  
+Add custom HTTP header of your choice to clients. You can add multiple headers by appending a number as a suffix of the environment variable : `CUSTOM_HEADER_1`, `CUSTOM_HEADER_2`, `CUSTOM_HEADER_3`, ...
+
 ### Information leak
 
 `SERVER_TOKENS`  
