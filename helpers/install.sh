@@ -674,7 +674,7 @@ fi
 # Clone the repo
 if [ "$OS" != "alpine" ] && [ ! -d "/tmp/bunkerized-nginx-test" ] ; then
 	echo "[*] Clone bunkerity/bunkerized-nginx"
-	CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 8808f161c5f92911ae485623d96f6ef24fe42ffe
+	CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 3d2f5e2389e5f75131ae22f822a673b92cb12cca
 	# TODO : dev only
 	#CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
 	#CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev

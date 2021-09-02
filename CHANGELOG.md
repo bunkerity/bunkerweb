@@ -1,6 +1,15 @@
 # Changelog
 
-## v1.3.0
+## v1.3.1 - 2021/09/02
+
+- Use ModSecurity v3.0.4 instead of v3.0.5 to fix memory leak
+- Fix ignored variables to control jobs
+- Fix bug when LISTEN_HTTP=no and MULTISITE=yes
+- Add CUSTOM_HEADER variable
+- Add REVERSE_PROXY_BUFFERING variable
+- Fix documentation for modsec and modsec-crs special folders
+
+## v1.3.0 - 2021/08/23
 
 - Kubernetes integration in beta
 - Linux integration in beta
