@@ -1,6 +1,7 @@
 local M		= {}
 local api_list	= {}
 local iputils	= require "resty.iputils"
+local upload	= require "resty.upload"
 
 api_list["^/ping$"] = function ()
 	return true
@@ -24,6 +25,76 @@ end
 
 api_list["^/stop$"] = function ()
 	return os.execute("/usr/sbin/nginx -s quit") == 0
+end
+
+api_list["^/conf$"] = function ()
+	if not M.save_file("/tmp/conf.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/conf.tar.gz", "/etc/nginx/")
+end
+
+api_list["^/letsencrypt$"] = function ()
+	if not M.save_file("/tmp/letsencrypt.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/letsencrypt.tar.gz", "/etc/letsencrypt/")
+end
+
+api_list["^/http$"] = function ()
+	if not M.save_file("/tmp/http.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/http.tar.gz", "/http-confs/")
+end
+
+api_list["^/server$"] = function ()
+	if not M.save_file("/tmp/server.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/server.tar.gz", "/server-confs/")
+end
+
+api_list["^/modsec$"] = function ()
+	if not M.save_file("/tmp/modsec.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/modsec.tar.gz", "/modsec-confs/")
+end
+
+api_list["^/modsec-crs$"] = function ()
+	if not M.save_file("/tmp/modsec-crs.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/modsec-crs.tar.gz", "/modsec-crs-confs/")
+end
+
+function M.save_file (name)
+	local form, err = upload:new(4096)
+	if not form then
+		return false
+	end
+	form:set_timeout(1000)
+	file = io.open(name, "a")
+	while true do
+		local typ, res, err = form:read()
+		if not typ then
+			file:close()
+			return false
+		end
+		if typ == "eof" then
+			break
+		end
+		if typ == "body" then
+			file:write(res)
+		end
+	end
+	file:close()
+	return true
+end
+
+function M.extract_file(archive, destination)
+	return os.execute("tar xzf " .. archive .. " -C " .. destination)
 end
 
 function M.is_api_call (api_uri, api_whitelist_ip)

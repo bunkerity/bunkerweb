@@ -7,6 +7,7 @@
 - Fix bug when LISTEN_HTTP=no and MULTISITE=yes
 - Add CUSTOM_HEADER variable
 - Add REVERSE_PROXY_BUFFERING variable
+- Add REVERSE_PROXY_KEEPALIVE variable
 - Fix documentation for modsec and modsec-crs special folders
 
 ## v1.3.0 - 2021/08/23
