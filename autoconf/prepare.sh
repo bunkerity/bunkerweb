@@ -16,6 +16,7 @@ chmod ugo+x /opt/bunkerized-nginx/entrypoint/* /opt/bunkerized-nginx/scripts/*
 chmod ugo+x /opt/bunkerized-nginx/gen/main.py
 chmod ugo+x /opt/bunkerized-nginx/jobs/main.py
 chmod ugo+x /opt/bunkerized-nginx/jobs/reload.py
+chmod ugo+x /opt/bunkerized-nginx/jobs/certbot-*.sh
 chmod 770 /opt/bunkerized-nginx
 chmod 440 /opt/bunkerized-nginx/settings.json
 

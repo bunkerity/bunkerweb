@@ -96,9 +96,9 @@ class IngressController(Controller.Controller) :
 
 	def process_events(self, current_env) :
 		self.__old_env = current_env
-		t_pod = Thread(target=self.__watch_pod)
-		t_ingress = Thread(target=self.__watch_ingress)
-		t_service = Thread(target=self.__watch_service)
+		t_pod = Thread(target=self.__watch, args=("pod",))
+		t_ingress = Thread(target=self.__watch, args=("ingress",))
+		t_service = Thread(target=self.__watch, args=("service",))
 		t_pod.start()
 		t_ingress.start()
 		t_service.start()
@@ -106,62 +106,37 @@ class IngressController(Controller.Controller) :
 		t_ingress.join()
 		t_service.join()
 
-	def __watch_pod(self) :
+	def __watch(self, type) :
 		w = watch.Watch()
-		for event in w.stream(self.__api.list_pod_for_all_namespaces, label_selector="bunkerized-nginx") :
+		what = None
+		if type == "pod" :
+			what = self.__api.list_pod_for_all_namespaces
+		elif type == "ingress" :
+			what = self.__extensions_api.list_ingress_for_all_namespaces
+		elif type == "service" :
+			what = self.__api.list_service_for_all_namespaces
+		for event in w.stream(what, label_selector="bunkerized-nginx") :
 			self.lock.acquire()
 			new_env = self.get_env()
 			if new_env != self.__old_env :
 				try :
-					if self.gen_conf(new_env) :
-						self.__old_env = new_env.copy()
-						log("CONTROLLER", "INFO", "successfully generated new configuration")
-						if self.reload() :
-							log("controller", "INFO", "successful reload")
-						else :
-							log("controller", "ERROR", "failed reload")
-				except :
-					log("controller", "ERROR", "exception while receiving event")
-			self.lock.release()
-
-	def __watch_ingress(self) :
-		w = watch.Watch()
-		for event in w.stream(self.__extensions_api.list_ingress_for_all_namespaces, label_selector="bunkerized-nginx") :
-			self.lock.acquire()
-			new_env = self.get_env()
-			if new_env != self.__old_env :
-				try :
-					if self.gen_conf(new_env) :
-						self.__old_env = new_env.copy()
-						log("CONTROLLER", "INFO", "successfully generated new configuration")
-						if self.reload() :
-							log("controller", "INFO", "successful reload")
-						else :
-							log("controller", "ERROR", "failed reload")
-				except :
-					log("controller", "ERROR", "exception while receiving event")
-			self.lock.release()
-
-	def __watch_service(self) :
-		w = watch.Watch()
-		for event in w.stream(self.__api.list_service_for_all_namespaces, label_selector="bunkerized-nginx") :
-			self.lock.acquire()
-			new_env = self.get_env()
-			if new_env != self.__old_env :
-				try :
-					if self.gen_conf(new_env) :
-						self.__old_env = new_env.copy()
-						log("CONTROLLER", "INFO", "successfully generated new configuration")
-						if self.reload() :
-							log("controller", "INFO", "successful reload")
-						else :
-							log("controller", "ERROR", "failed reload")
-				except :
-					log("controller", "ERROR", "exception while receiving event")
+					if not self.gen_conf(new_env) :
+						raise Exception("can't generate configuration")
+					if not self.send() :
+						raise Exception("can't send configuration")
+					if not self.reload() :
+						raise Exception("can't reload configuration")
+					self.__old_env = new_env.copy()
+					log("CONTROLLER", "INFO", "successfully loaded new configuration")
+				except Exception as e :
+					log("controller", "ERROR", "error while computing new event : " + str(e))
 			self.lock.release()
 
 	def reload(self) :
 		return self._reload(self.__get_services(autoconf=True))
+
+	def send(self) :
+		return self._send(self.__get_services(autoconf=True))
 
 	def wait(self) :
 		self.lock.acquire()

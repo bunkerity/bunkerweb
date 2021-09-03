@@ -41,6 +41,13 @@ api_list["^/letsencrypt$"] = function ()
 	return M.extract_file("/tmp/letsencrypt.tar.gz", "/etc/letsencrypt/")
 end
 
+api_list["^/acme$"] = function ()
+	if not M.save_file("/tmp/acme.tar.gz") then
+		return false
+	end
+	return M.extract_file("/tmp/acme.tar.gz", "/acme-challenge")
+end
+
 api_list["^/http$"] = function ()
 	if not M.save_file("/tmp/http.tar.gz") then
 		return false
@@ -75,7 +82,7 @@ function M.save_file (name)
 		return false
 	end
 	form:set_timeout(1000)
-	file = io.open(name, "a")
+	file = io.open(name, "w")
 	while true do
 		local typ, res, err = form:read()
 		if not typ then
@@ -89,6 +96,7 @@ function M.save_file (name)
 			file:write(res)
 		end
 	end
+	file:flush()
 	file:close()
 	return true
 end

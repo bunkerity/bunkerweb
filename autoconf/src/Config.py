@@ -6,6 +6,15 @@ import Controller
 
 from logger import log
 
+CONFIGS = {
+	"conf": "/etc/nginx",
+	"letsencrypt": "/etc/letsencrypt",
+	"http": "/http-confs",
+	"server": "/server-confs",
+	"modsec": "/modsec-confs",
+	"modsec-crs": "/modsec-crs-confs"
+}
+
 class Config :
 
 	def __init__(self, type, api_uri, http_port="8080") :
@@ -64,11 +73,31 @@ class Config :
 					instance.kill("SIGHUP")
 				except :
 					ret = False
-		elif self.__type == Controller.Type.SWARM :
-			ret = self.__api_call(instances, "/reload")
-		elif self.__type == Controller.Type.KUBERNETES :
+		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
 			ret = self.__api_call(instances, "/reload")
 		return ret
+
+	def send(self, instances) :
+		ret = True
+		if self.__type == Controller.Type.DOCKER :
+			return ret
+		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNERTES :
+			fail = False
+			for name, path in CONFIGS.items() :
+				file = self.__tarball(path)
+				if not self.__api_call(instances, "/" + name, file=file) :
+					log("config", "ERROR", "can't send config " + name + " to instance(s)")
+					fail = True
+				file.close()
+			if fail :
+				ret = False
+		return ret
+
+	def __tarball(path) :
+		file = io.BytesIO()
+		with tarfile.open(mode="w:gz", fileobj=file) as tar :
+			tar.add(path, arcname=".")
+		return file
 
 	def __ping(self, instances) :
 		return self.__api_call(instances, "/ping")
@@ -120,7 +149,7 @@ class Config :
 			log("config", "ERROR", "exception while waiting for bunkerized-nginx instances : " + traceback.format_exc())
 		return False
 
-	def __api_call(self, instances, path) :
+	def __api_call(self, instances, path, file=None) :
 		ret = True
 		nb = 0
 		urls = []
@@ -146,7 +175,10 @@ class Config :
 		for url in urls :
 			req = None
 			try :
-				req = requests.post(url)
+				if file == None :
+					req = requests.post(url)
+				else :
+					req = requests.post(url, {'file': file})
 			except :
 				pass
 			if req and req.status_code == 200 and req.text == "ok" :

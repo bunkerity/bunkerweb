@@ -37,31 +37,10 @@ spec:
         - name: MULTISITE
           value: "yes"
         volumeMounts:
-        - name: confs
-          mountPath: /etc/nginx
-          readOnly: true
-        - name: letsencrypt
-          mountPath: /etc/letsencrypt
-          readOnly: true
-        - name: acme-challenge
-          mountPath: /acme-challenge
-          readOnly: true
         - name: www
           mountPath: /www
           readOnly: true
       volumes:
-      - name: confs
-        hostPath:
-          path: /shared/confs
-          type: Directory
-      - name: letsencrypt
-        hostPath:
-          path: /shared/letsencrypt
-          type: Directory
-      - name: acme-challenge
-        hostPath:
-          path: /shared/acme-challenge
-          type: Directory
       - name: www
         hostPath:
           path: /shared/www
@@ -108,22 +87,10 @@ spec:
         - name: API_URI
           value: "/ChangeMeToSomethingHardToGuess"
         volumeMounts:
-        - name: confs
-          mountPath: /etc/nginx
         - name: letsencrypt
           mountPath: /etc/letsencrypt
-        - name: acme-challenge
-          mountPath: /acme-challenge
       volumes:
-      - name: confs
-        hostPath:
-          path: /shared/confs
-          type: Directory
       - name: letsencrypt
         hostPath:
           path: /shared/letsencrypt
-          type: Directory
-      - name: acme-challenge
-        hostPath:
-          path: /shared/acme-challenge
           type: Directory

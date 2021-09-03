@@ -51,3 +51,10 @@ class Controller(ABC) :
 		except :
 			ret = False
 		return ret
+
+	def _send(self, instances) :
+		try :
+			ret = self._config.send(instances)
+		except :
+			ret = False
+		return ret
