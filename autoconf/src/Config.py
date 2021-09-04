@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import subprocess, shutil, os, traceback, requests, time, dns.resolver
+import subprocess, shutil, os, traceback, requests, time, dns.resolver, io, tarfile
 
 import Controller
 
@@ -79,24 +79,25 @@ class Config :
 
 	def send(self, instances) :
 		ret = True
-		if self.__type == Controller.Type.DOCKER :
-			return ret
-		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNERTES :
-			fail = False
-			for name, path in CONFIGS.items() :
-				file = self.__tarball(path)
-				if not self.__api_call(instances, "/" + name, file=file) :
-					log("config", "ERROR", "can't send config " + name + " to instance(s)")
-					fail = True
-				file.close()
-			if fail :
-				ret = False
+		fail = False
+		for name, path in CONFIGS.items() :
+			file = self.__tarball(path)
+			if not self.__api_call(instances, "/" + name, file=file) :
+				log("config", "ERROR", "can't send config " + name + " to instance(s)")
+				fail = True
+			file.close()
+		if fail :
+			ret = False
 		return ret
 
-	def __tarball(path) :
+	def stop_temp(self, instances) :
+		return self.__api_call(instances, "/stop-temp")
+
+	def __tarball(self, path) :
 		file = io.BytesIO()
 		with tarfile.open(mode="w:gz", fileobj=file) as tar :
 			tar.add(path, arcname=".")
+		file.seek(0, 0)
 		return file
 
 	def __ping(self, instances) :
@@ -178,7 +179,8 @@ class Config :
 				if file == None :
 					req = requests.post(url)
 				else :
-					req = requests.post(url, {'file': file})
+					file.seek(0, 0)
+					req = requests.post(url, files={'file': file})
 			except :
 				pass
 			if req and req.status_code == 200 and req.text == "ok" :

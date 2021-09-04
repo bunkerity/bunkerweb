@@ -11,7 +11,7 @@ COPY autoconf/entrypoint.sh /opt/bunkerized-nginx/entrypoint/
 COPY autoconf/requirements.txt /opt/bunkerized-nginx/entrypoint/
 COPY autoconf/src/* /opt/bunkerized-nginx/entrypoint/
 
-RUN apk add --no-cache py3-pip bash certbot curl openssl && \
+RUN apk add --no-cache py3-pip bash certbot curl openssl socat && \
     pip3 install -r /opt/bunkerized-nginx/gen/requirements.txt && \
     pip3 install -r /opt/bunkerized-nginx/entrypoint/requirements.txt && \
     pip3 install -r /opt/bunkerized-nginx/jobs/requirements.txt
@@ -23,5 +23,7 @@ RUN chmod +x /tmp/prepare.sh && \
 
 # Fix CVE-2021-36159
 RUN apk add "apk-tools>=2.12.6-r0"
+
+#VOLUME /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /etc/letsencrypt /acme-challenge
 
 ENTRYPOINT ["/opt/bunkerized-nginx/entrypoint/entrypoint.sh"]

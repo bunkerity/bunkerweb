@@ -610,6 +610,12 @@ git_secure_clone https://github.com/openresty/lua-resty-redis.git 91585affcd9a8d
 echo "[*] Install lua-resty-redis"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-redis" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
 
+# Download and install lua-resty-upload
+echo "[*] Clone openresty/lua-resty-upload"
+git_secure_clone https://github.com/openresty/lua-resty-upload.git 7baca92c7e741979ae5857989bbf6cc0402d6126
+echo "[*] Install lua-resty-upload"
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-upload" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
+
 # Download nginx and decompress sources
 echo "[*] Download nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"

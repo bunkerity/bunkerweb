@@ -1,3 +1,4 @@
+import traceback
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -55,6 +56,13 @@ class Controller(ABC) :
 	def _send(self, instances) :
 		try :
 			ret = self._config.send(instances)
-		except :
+		except Exception as e :
+			ret = False
+		return ret
+
+	def _stop_temp(self, instances) :
+		try :
+			ret = self._config.stop_temp(instances)
+		except Exception as e :
 			ret = False
 		return ret

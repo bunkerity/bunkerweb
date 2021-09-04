@@ -29,6 +29,11 @@ mkdir /var/log/letsencrypt
 chown nginx:nginx /var/log/letsencrypt
 chmod 770 /var/log/letsencrypt
 
+# prepare /etc/nginx
+mkdir /etc/nginx
+chown root:nginx /etc/nginx
+chmod 770 /etc/nginx
+
 # prepare /etc/letsencrypt
 mkdir /etc/letsencrypt
 chown root:nginx /etc/letsencrypt
@@ -50,6 +55,18 @@ ln -s /acme-challenge /opt/bunkerized-nginx/acme-challenge
 mkdir /acme-challenge
 chown root:nginx /acme-challenge
 chmod 770 /acme-challenge
+
+# prepare /http-confs
+ln -s /http-confs /opt/bunkerized-nginx/http-confs
+mkdir /http-confs
+chown root:nginx /http-confs
+chmod 770 /http-confs
+
+# prepare /server-confs
+ln -s /server-confs /opt/bunkerized-nginx/server-confs
+mkdir /server-confs
+chown root:nginx /server-confs
+chmod 770 /server-confs
 
 # prepare /modsec-confs
 ln -s /modsec-confs /opt/bunkerized-nginx/modsec-confs

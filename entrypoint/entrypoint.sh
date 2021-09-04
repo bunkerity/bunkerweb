@@ -49,7 +49,7 @@ if [ ! -f "/etc/nginx/global.env" ] ; then
 		exit 1
 	fi
 
-	# start temp nginx to solve Let's Encrypt challenges if needed
+	# start temp nginx to solve Let's Encrypt challenges if needed and serve API
 	/opt/bunkerized-nginx/entrypoint/nginx-temp.sh
 
 	# only do config if we are not in swarm/kubernetes mode
@@ -75,15 +75,16 @@ else
 fi
 
 # start crond
-crond
-
-# wait until config has been generated if we are in swarm mode
-if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] ; then
-	log "entrypoint" "INFO" "waiting until config has been generated ..."
-	while [ ! -f "/etc/nginx/autoconf" ] ; do
-		sleep 1
-	done
+if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] ; then
+	crond
 fi
+# wait until config has been generated if we are in swarm mode
+#if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] ; then
+#	log "entrypoint" "INFO" "waiting until config has been generated ..."
+#	while [ ! -f "/etc/nginx/autoconf" ] ; do
+#		sleep 1
+#	done
+#fi
 
 # stop temp config if needed
 if [ -f "/tmp/nginx-temp.pid" ] ; then

@@ -2,6 +2,7 @@ local M		= {}
 local api_list	= {}
 local iputils	= require "resty.iputils"
 local upload	= require "resty.upload"
+local logger	= require "logger"
 
 api_list["^/ping$"] = function ()
 	return true
@@ -25,6 +26,10 @@ end
 
 api_list["^/stop$"] = function ()
 	return os.execute("/usr/sbin/nginx -s quit") == 0
+end
+
+api_list["^/stop%-temp$"] = function ()
+	return os.execute("/usr/sbin/nginx -c /tmp/nginx-temp.conf -s stop") == 0
 end
 
 api_list["^/conf$"] = function ()
@@ -69,7 +74,7 @@ api_list["^/modsec$"] = function ()
 	return M.extract_file("/tmp/modsec.tar.gz", "/modsec-confs/")
 end
 
-api_list["^/modsec-crs$"] = function ()
+api_list["^/modsec%-crs$"] = function ()
 	if not M.save_file("/tmp/modsec-crs.tar.gz") then
 		return false
 	end
@@ -79,6 +84,7 @@ end
 function M.save_file (name)
 	local form, err = upload:new(4096)
 	if not form then
+		logger.log(ngx.ERR, "API", err)
 		return false
 	end
 	form:set_timeout(1000)
@@ -87,6 +93,7 @@ function M.save_file (name)
 		local typ, res, err = form:read()
 		if not typ then
 			file:close()
+			logger.log(ngx.ERR, "API", "not typ")
 			return false
 		end
 		if typ == "eof" then
@@ -102,7 +109,7 @@ function M.save_file (name)
 end
 
 function M.extract_file(archive, destination)
-	return os.execute("tar xzf " .. archive .. " -C " .. destination)
+	return os.execute("tar xzf " .. archive .. " -C " .. destination) == 0
 end
 
 function M.is_api_call (api_uri, api_whitelist_ip)

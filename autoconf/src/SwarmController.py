@@ -64,6 +64,9 @@ class SwarmController(Controller.Controller) :
 	def send(self) :
 		return self._send(self.__get_instances())
 
+	def stop_temp(self) :
+		return self._stop_temp(self.__get_instances())
+
 	def wait(self) :
 		self.lock.acquire()
 		try :
@@ -72,14 +75,29 @@ class SwarmController(Controller.Controller) :
 			while len(instances) == 0 :
 				time.sleep(1)
 				instances = self.__get_instances()
+			# Wait for temporary bunkerized-nginx
+			if not self._config.wait(instances) :
+				self.lock.release()
+				return False, env
 			# Generate first config
 			env = self.get_env()
 			if not self.gen_conf(env) :
 				self.lock.release()
 				return False, env
-			# Wait for nginx
+			# Send the config
+			if not self.send() :
+				self.lock.release()
+				return False, env
+			# Stop the temporary server
+			if not self.stop_temp() :
+				self.lock.release()
+				return False, env
+			# Wait for bunkerized-nginx
+			if not self._config.wait(instances) :
+				self.lock.release()
+				return False, env
 			self.lock.release()
-			return self._config.wait(instances), env
+			return True, env
 		except :
 			pass
 		self.lock.release()

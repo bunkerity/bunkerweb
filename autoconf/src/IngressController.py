@@ -138,6 +138,9 @@ class IngressController(Controller.Controller) :
 	def send(self) :
 		return self._send(self.__get_services(autoconf=True))
 
+	def stop_temp(self) :
+		return self._stop_temp(self.__get_services(autoconf=True))
+
 	def wait(self) :
 		self.lock.acquire()
 		try :
@@ -146,20 +149,28 @@ class IngressController(Controller.Controller) :
 			while len(pods) == 0 :
 				time.sleep(1)
 				pods = self.__get_pods()
-
 			# Wait for at least one bunkerized-nginx service
 			services = self.__get_services(autoconf=True)
 			while len(services) == 0 :
 				time.sleep(1)
 				services = self.__get_services(autoconf=True)
-
 			# Generate first config
 			env = self.get_env()
 			if not self.gen_conf(env) :
 				self.lock.release()
 				return False, env
-
+			# Send the config
+			if not self.send() :
+				self.lock.release()
+				return False, env
+			# Stop the temporary server
+			if not self.stop_temp() :
+				self.lock.release()
+				return False, env
 			# Wait for bunkerized-nginx
+			if not self._config.wait(instances) :
+				self.lock.release()
+				return False, env
 			self.lock.release()
 			return self._config.wait(services), env
 		except :
