@@ -241,9 +241,11 @@ When your container is not needed anymore, you can delete it as usual. The autoc
 
 ## Docker Swarm
 
-Using bunkerized-nginx in a Docker Swarm cluster requires a shared folder accessible from both managers and workers (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send a reload order to all the bunkerized-nginx tasks so they can load the new configuration.
+The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send the configuration files and a reload order to all the bunkerized-nginx tasks so they can apply the new configuration. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Docker volume plugin](https://docs.docker.com/engine/extend/)).
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/swarm.png?raw=true" />
+
+TODO : without shared folder first then with shared folder (www, cache and letsencrypt)
 
 **We will assume that a shared directory is mounted at the /shared location on both your managers and workers. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
 
@@ -427,9 +429,11 @@ When your service is not needed anymore, you can delete it as usual. The autocon
 
 **This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
 
-Using bunkerized-nginx in a Kubernetes cluster requires a shared folder accessible from the nodes (anything like NFS, GlusterFS, CephFS or even SSHFS will work). The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends a reload order to the bunkerized-nginx instances running in the cluster.
+The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends the configuration files and a reload order to the bunkerized-nginx instances running in the cluster. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Kubernetes Volume that supports ReadOnlyMany access](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/kubernetes.png?raw=true" />
+
+TODO : without shared folder first then with shared folder (www, cache and letsencrypt)
 
 **We will assume that a shared directory is mounted at the /shared location on your nodes. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.2 -
+
+- Use API instead of a shared folder for Swarm and Kubernetes integrations
+- Various bug fixes related to antibot feature
+- Fix Moodle example
+
 ## v1.3.1 - 2021/09/02
 
 - Use ModSecurity v3.0.4 instead of v3.0.5 to fix memory leak
