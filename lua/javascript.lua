@@ -15,12 +15,12 @@ end
 
 function M.get_code (challenge, antibot_uri, original_uri)
 	-- get template
-	local f = io.open("/antibot/javascript.html", "r")
+	local f = io.open("/opt/bunkerized-nginx/antibot/javascript.html", "r")
 	local template = f:read("*all")
 	f:close()
 
 	-- get JS code
-	f = io.open("/antibot/javascript.data", "r")
+	f = io.open("/opt/bunkerized-nginx/antibot/javascript.data", "r")
 	local javascript = f:read("*all")
 	f:close()
 
@@ -32,14 +32,11 @@ function M.get_code (challenge, antibot_uri, original_uri)
 end
 
 function M.check (challenge, user)
-	ngx.log(ngx.ERR, "debug challenge = " .. challenge)
-	ngx.log(ngx.ERR, "debug user = " .. user)
 	local resty_sha256 = require "resty.sha256"
 	local str = require "resty.string"
 	local sha256 = resty_sha256:new()
 	sha256:update(challenge .. user)
 	local digest = sha256:final()
-	ngx.log(ngx.ERR, "debug digest = " .. str.to_hex(digest))
 	return str.to_hex(digest):find("^0000") ~= nil
 end
 

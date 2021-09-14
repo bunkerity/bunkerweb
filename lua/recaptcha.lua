@@ -4,15 +4,15 @@ local cjson	= require "cjson"
 
 function M.get_code (antibot_uri, recaptcha_sitekey)
 	-- get template
-	local f = io.open("/antibot/recaptcha.html", "r")
+	local f = io.open("/opt/bunkerized-nginx/antibot/recaptcha.html", "r")
 	local template = f:read("*all")
 	f:close()
 
 	-- get recaptcha code
-	f = io.open("/antibot/recaptcha-head.data", "r")
+	f = io.open("/opt/bunkerized-nginx/antibot/recaptcha-head.data", "r")
 	local recaptcha_head = f:read("*all")
 	f:close()
-	f = io.open("/antibot/recaptcha-body.data", "r")
+	f = io.open("/opt/bunkerized-nginx/antibot/recaptcha-body.data", "r")
 	local recaptcha_body = f:read("*all")
 	f:close()
 
