@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+
+  mybunkerized:
+    image: bunkerity/bunkerized-nginx
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - certs:/etc/letsencrypt
+    environment:
+      - SERVER_NAME=api.example.com nc.example.com
+      - MULTISITE=yes
+      - BAD_BEHAVIOR_BAN_TIME=600
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - USE_REVERSE_PROXY=yes
+      - USE_BROTLI=yes
+      - USE_CLIENT_CACHE=yes
+      #app1.example.com
+      - api.example.com_REVERSE_PROXY_URL=/
+      - api.example.com_REVERSE_PROXY_HOST=http://192.168.2.10:32768
+      #nc.example.com
+      - nc.example.com_MAX_CLIENT_SIZE=100m
+      - nc.example.com_ALLOWED_METHODS=GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH|PROPFIND
+      - nc.example.com_USE_MODSECURITY_CRS=no
+      - nc.example.com_USE_LIMIT_REQ=no
+      - nc.example.com_USE_BLACKLIST_IP=yes
+      - nc.example.com_BLACKLIST_IP_LIST=0.0.0.0/0
+      - nc.example.com_USE_WHITELIST_IP=yes
+      - nc.example.com_WHITELIST_IP_LIST=192.168.0.0/16
+      - nc.example.com_REVERSE_PROXY_URL=/
+      - nc.example.com_REVERSE_PROXY_HOST=http://192.168.2.135
+      
+volumes:
+  certs:
