@@ -749,6 +749,10 @@ fi
 echo "[*] Copy bunkerized-nginx"
 do_and_check_cmd cp /tmp/bunkerized-nginx/helpers/bunkerized-nginx /usr/local/bin
 
+# Copy VERSION
+echo "[*] Copy VERSION"
+do_and_check_cmd cp /tmp/bunkerized-nginx/VERSION /opt/bunkerized-nginx
+
 # Replace old nginx.service file
 if [ "$OS" != "alpine" ] ; then
 	do_and_check_cmd mv /lib/systemd/system/nginx.service /lib/systemd/system/nginx.service.bak

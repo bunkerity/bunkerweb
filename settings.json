@@ -1274,6 +1274,24 @@
                 "regex": "^([A-Za-z0-9\\-\\.\\_]+|.{0})$",
                 "type": "text"
             }
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_REMOTE_API",
+                "id": "use-remote-api",
+                "label": "Use a remote service for enhanced security",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "",
+                "env": "REMOTE_API_SERVER",
+                "id": "remote-api-server",
+                "label": "The URL of the remote service",
+                "regex": "^.*$",
+                "type": "text"
+            }
         ]
     },
     "nginx": {
