@@ -380,6 +380,8 @@ fi
 echo "[*] Update packet list"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 	do_and_check_cmd apt update
+elif [ "$OS" = "archlinux" ] ; then
+	do_and_check_cmd pacman -Sy
 fi
 echo "[*] Install compilation dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
@@ -387,7 +389,7 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg patch readline-devel"
+	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg patch readline-devel ca-certificates"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
 	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg libxslt-devel perl-ExtUtils-Embed gperftools-devel patch readline-devel"
