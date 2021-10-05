@@ -20,6 +20,8 @@ jobs:
         run: docker build -t centos-systemd -f tests/Dockerfile-centos .
       - name: Build Fedora with systemd
         run: docker build -t fedora-systemd -f tests/Dockerfile-fedora .
+      - name: Build Arch Linux with systemd
+        run: docker build -t archlinux-systemd -f tests/Dockerfile-archlinux .
       - name: Debian test
         run: ./tests/linux-run.sh debian-systemd test-debian
       - name: Ubuntu test
@@ -28,3 +30,5 @@ jobs:
         run: ./tests/linux-run.sh centos-systemd test-centos
       - name: Fedora test
         run: ./tests/linux-run.sh fedora-systemd test-fedora
+      - name: Arch Linux test
+        run: ./tests/linux-run.sh archlinux-systemd test-archlinux

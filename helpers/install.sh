@@ -290,6 +290,8 @@ elif [ "$(grep CentOS /etc/os-release)" != "" ] ; then
 	OS="centos"
 elif [ "$(grep Fedora /etc/os-release)" != "" ] ; then
 	OS="fedora"
+elif [ "$(grep Arch /etc/os-release)" != "" ] ; then
+	OS="archlinux"
 elif [ "$(grep Alpine /etc/os-release)" != "" ] ; then
 	OS="alpine"
 fi
@@ -346,6 +348,11 @@ module_hotfixes=true"
 	elif [ "$OS" = "fedora" ] ; then
 		echo "[*] Install nginx"
 		do_and_check_cmd dnf install -y nginx
+	elif [ "$OS" = "archlinux" ; then
+		echo "[*] Update pacman DB"
+		do_and_check_cmd pacman -Sy
+		echo "[*] Install nginx"
+		do_and_check_cmd pacman -S --noconfirm nginx
 	elif [ "$OS" = "alpine" ] ; then
 		echo "[*] Add nginx official repository"
 		get_sign_repo_key_rsa > /etc/apk/keys/nginx_signing.rsa.pub
@@ -385,6 +392,9 @@ elif [ "$OS" = "centos" ] ; then
 elif [ "$OS" = "fedora" ] ; then
 	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg libxslt-devel perl-ExtUtils-Embed gperftools-devel patch readline-devel"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
+elif [ "$OS" = "archlinux" ] ; then
+	ARCHLINUX_DEPS="git autoconf pkgconf pcre2 automake libtool gcc make gd openssl wget brotli gnupg libxslt patch readline"
+	do_and_check_cmd pacman -S --noconfirm $ARCHLINUX_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev"
 	do_and_check_cmd apk add --no-cache --virtual build $ALPINE_DEPS
@@ -672,6 +682,9 @@ elif [ "$OS" = "fedora" ] ; then
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
 	# Temp fix
 	do_and_check_cmd cp /usr/lib64/nginx/modules/ngx_stream_module.so /usr/lib/nginx/modules/ngx_stream_module.so
+elif [ "$OS" = "archlinux" ] ; then
+	ARCHLINUX_DEPS="certbot git cronie curl python python-pip procps sudo"
+	do_and_check_cmd pacman -S --noconfirm $ARCHLINUX_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="certbot bash libgcc yajl libstdc++ openssl py3-pip git"
 	do_and_check_cmd apk add --no-cache $ALPINE_DEPS

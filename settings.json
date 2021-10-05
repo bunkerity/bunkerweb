@@ -1273,7 +1273,7 @@
                 "label": "Hostname/IP of the Redis service",
                 "regex": "^([A-Za-z0-9\\-\\.\\_]+|.{0})$",
                 "type": "text"
-            }
+            },
             {
                 "context": "multisite",
                 "default": "no",
