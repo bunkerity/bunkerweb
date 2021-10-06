@@ -17,8 +17,11 @@ JOBS = {
 	"geoip": GeoIP.GeoIP,
 	"proxies": Proxies.Proxies,
 	"referrers": Referrers.Referrers,
+	"remote-api-database": RemoteApiDatabase.RemoteApiDatabase,
+	"remote-api-register": RemoteApiRegister.RemoteApiRegister,
 	"self-signed-cert": SelfSignedCert.SelfSignedCert,
 	"user-agents": UserAgents.UserAgents
+
 }
 
 if __name__ == "__main__" :
@@ -36,6 +39,9 @@ if __name__ == "__main__" :
 	parser.add_argument("--dst_key", default="", type=str, help="key path for self-signed-cert job (e.g. : /etc/nginx/default-key.pem)")
 	parser.add_argument("--expiry", default="", type=str, help="number of validity days for self-signed-cert job (e.g. : 365)")
 	parser.add_argument("--subj", default="", type=str, help="certificate subject for self-signed-cert job (e.g. : OU=X/CN=Y...)")
+	parser.add_argument("--server", default="", type=str, help="address of the server for remote-api jobs")
+	parser.add_argument("--id", default="", type=str, help="machine id for remote-api jobs")
+	parser.add_argument("--version", default="", type=str, help="bunkerized-nginx version for remote-api jobs")
 	args = parser.parse_args()
 
 	# Check job name
@@ -68,6 +74,10 @@ if __name__ == "__main__" :
 		instance = JOBS[job](redis_host=redis_host, copy_cache=args.cache, domain=args.domain, email=args.email, staging=args.staging)
 	elif job == "self-signed-cert" :
 		instance = JOBS[job](redis_host=redis_host, copy_cache=args.cache, dst_cert=args.dst_cert, dst_key=args.dst_key, expiry=args.expiry, subj=args.subj)
+	elif job == "remote-api-database" :
+		instance = JOBS[job](server=args.server, version=args.version, id=args.id, redis_host=redis_host, copy_cache=args.cache)
+	elif job == "remote-api-register" :
+		instance = JOBS[job](server=args.server, version=args.version)
 	else :
 		instance = JOBS[job](redis_host=redis_host, copy_cache=args.cache)
 	ret = instance.run()

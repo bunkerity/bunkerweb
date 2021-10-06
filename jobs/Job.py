@@ -77,7 +77,7 @@ class JobManagement() :
 
 class Job(abc.ABC) :
 
-	def __init__(self, name, data, filename=None, redis_host=None, redis_ex=86400, type="line", regex=r"^.+$", copy_cache=False) :
+	def __init__(self, name, data, filename=None, redis_host=None, redis_ex=86400, type="line", regex=r"^.+$", copy_cache=False, json_data=None, method="GET") :
 		self._name = name
 		self._data = data
 		self._filename = filename
@@ -92,11 +92,13 @@ class Job(abc.ABC) :
 		self._type = type
 		self._regex = regex
 		self._copy_cache = copy_cache
+		self._json_data = json_data
+		self._method = method
 
 	def run(self) :
 		ret = JobRet.KO
 		try :
-			if self._type == "line" or self._type == "file" :
+			if self._type in ["line", "file", "json"] :
 				if self._copy_cache :
 					ret = self.__from_cache()
 					if ret != JobRet.KO :
@@ -123,18 +125,18 @@ class Job(abc.ABC) :
 		for url in self._data :
 			data = self.__download_data(url)
 			for chunk in data :
-				if self._type == "line" :
+				if self._type == ["line", "json"] :
 					if not re.match(self._regex, chunk.decode("utf-8")) :
 						continue
 					chunks = self._edit(chunk)
 				if self._redis == None :
-					if self._type == "line" :
+					if self._type in ["line", "json"] :
 						for chunk in chunks :
 							file.write(chunk + b"\n")
 					else :
 						file.write(chunk)
 				else :
-					if self._type == "line" :
+					if self._type in ["line", "json"] :
 						for chunk in chunks :
 							pipe.set(self._name + "_" + chunk, "1", ex=self._redis_ex)
 					else :
@@ -155,11 +157,16 @@ class Job(abc.ABC) :
 		return JobRet.KO
 
 	def __download_data(self, url) :
-		r = requests.get(url, stream=True)
+		r = requests.request(self._method, url, stream=True, json=self._json_data)
 		if not r or r.status_code != 200 :
 			raise Exception("can't download data at " + url)
 		if self._type == "line" :
 			return r.iter_lines()
+		if self._type == "json" :
+			try :
+				return self._json(r.json())
+			except :
+				raise Exception("can't decode json from " + url)
 		return r.iter_content(chunk_size=8192)
 
 	def __exec(self) :
@@ -176,6 +183,9 @@ class Job(abc.ABC) :
 		# TODO : check if reload is needed ?
 		self._callback(True)
 		return JobRet.OK_RELOAD
+
+	def _json(self, data) :
+		return data
 
 	def _edit(self, chunk) :
 		return [chunk]
