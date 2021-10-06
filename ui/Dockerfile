@@ -9,14 +9,12 @@ COPY confs/site/ /opt/bunkerized-nginx/confs/site
 COPY confs/global/ /opt/bunkerized-nginx/confs/global
 COPY ui/ /opt/bunkerized-nginx/ui
 COPY settings.json /opt/bunkerized-nginx
+COPY VERSION /opt/bunkerized-nginx
 
 COPY ui/prepare.sh /tmp
 RUN chmod +x /tmp/prepare.sh && \
     /tmp/prepare.sh && \
     rm -f /tmp/prepare.sh
-
-# Fix CVE-2021-36159
-RUN apk add "apk-tools>=2.12.6-r0"
 
 EXPOSE 5000
 

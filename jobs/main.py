@@ -4,7 +4,7 @@ import argparse, sys, re
 
 sys.path.append("/opt/bunkerized-nginx/jobs")
 
-import Abusers, CertbotNew, CertbotRenew, ExitNodes, GeoIP, Proxies, Referrers, SelfSignedCert, UserAgents
+import Abusers, CertbotNew, CertbotRenew, ExitNodes, GeoIP, Proxies, Referrers, SelfSignedCert, UserAgents, RemoteApiDatabase, RemoteApiRegister
 from Job import JobRet, JobManagement, ReloadRet
 
 from logger import log

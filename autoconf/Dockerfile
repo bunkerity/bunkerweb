@@ -10,6 +10,7 @@ COPY misc/cron-autoconf /etc/crontabs/root
 COPY autoconf/entrypoint.sh /opt/bunkerized-nginx/entrypoint/
 COPY autoconf/requirements.txt /opt/bunkerized-nginx/entrypoint/
 COPY autoconf/src/* /opt/bunkerized-nginx/entrypoint/
+COPY VERSION /opt/bunkerized-nginx
 
 RUN apk add --no-cache py3-pip bash certbot curl openssl socat && \
     pip3 install -r /opt/bunkerized-nginx/gen/requirements.txt && \
@@ -20,9 +21,6 @@ COPY autoconf/prepare.sh /tmp
 RUN chmod +x /tmp/prepare.sh && \
     /tmp/prepare.sh && \
     rm -f /tmp/prepare.sh
-
-# Fix CVE-2021-36159
-RUN apk add "apk-tools>=2.12.6-r0"
 
 #VOLUME /http-confs /server-confs /modsec-confs /modsec-crs-confs /cache /etc/letsencrypt /acme-challenge
 

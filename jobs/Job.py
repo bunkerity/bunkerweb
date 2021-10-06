@@ -116,7 +116,10 @@ class Job(abc.ABC) :
 		if self._redis == None :
 			if os.path.isfile("/tmp/" + self._filename) :
 				os.remove("/tmp/" + self._filename)
-			file = open("/tmp/" + self._filename, "ab")
+			mode = "a"
+			if self._type == "file" :
+				mode = "ab"
+			file = open("/tmp/" + self._filename, mode)
 
 		elif self._redis != None :
 			pipe = self._redis.pipeline()
@@ -126,19 +129,20 @@ class Job(abc.ABC) :
 			data = self.__download_data(url)
 			for chunk in data :
 				if self._type == ["line", "json"] :
-					if not re.match(self._regex, chunk.decode("utf-8")) :
+					if not re.match(self._regex, chunk) :
 						continue
-					chunks = self._edit(chunk)
 				if self._redis == None :
 					if self._type in ["line", "json"] :
-						for chunk in chunks :
-							file.write(chunk + b"\n")
+						chunks = self._edit(chunk)
+						for more_chunk in chunks :
+							file.write(more_chunk + "\n")
 					else :
 						file.write(chunk)
 				else :
 					if self._type in ["line", "json"] :
-						for chunk in chunks :
-							pipe.set(self._name + "_" + chunk, "1", ex=self._redis_ex)
+						chunks = self._edit(chunk)
+						for more_chunk in chunks :
+							pipe.set(self._name + "_" + more_chunk, "1", ex=self._redis_ex)
 					else :
 						pipe.set(self._name + "_" + chunk, "1", ex=self._redis_ex)
 				count += 1
@@ -161,7 +165,7 @@ class Job(abc.ABC) :
 		if not r or r.status_code != 200 :
 			raise Exception("can't download data at " + url)
 		if self._type == "line" :
-			return r.iter_lines()
+			return r.iter_lines(decode_unicode=True)
 		if self._type == "json" :
 			try :
 				return self._json(r.json())
