@@ -128,7 +128,9 @@ class Job(abc.ABC) :
 		for url in self._data :
 			data = self.__download_data(url)
 			for chunk in data :
-				if self._type == ["line", "json"] :
+				if isinstance(chunk, bytes) :
+					chunk = chunk.decode("utf-8")
+				if self._type in ["line", "json"] :
 					if not re.match(self._regex, chunk) :
 						continue
 				if self._redis == None :
@@ -207,7 +209,7 @@ class Job(abc.ABC) :
 				return JobRet.OK_RELOAD
 			return JobRet.OK_NO_RELOAD
 
-		if self._redis != None and self._type == "line" :
+		if self._redis != None and self._type in ["line", "json"] :
 			with open("/opt/bunkerized-nginx/cache/" + self._filename) as f :
 				pipe = self._redis.pipeline()
 				while True :
@@ -224,7 +226,7 @@ class Job(abc.ABC) :
 	def __to_cache(self) :
 		if self._redis == None or self._type == "file" :
 			shutil.copyfile("/etc/nginx/" + self._filename, "/opt/bunkerized-nginx/cache/" + self._filename)
-		elif self._redis != None and self._type == "line" :
+		elif self._redis != None and self._type in ["line", "json"] :
 			if os.path.isfile("/opt/bunkerized-nginx/cache/" + self._filename) :
 				os.remove("/opt/bunkerized-nginx/cache/" + self._filename)
 			with open("/opt/bunkerized-nginx/cache/" + self._filename, "a") as f :

@@ -12,4 +12,4 @@ class UserAgents(Job) :
 		super().__init__(name, data, filename, redis_host=redis_host, redis_ex=redis_ex, type=type, regex=regex, copy_cache=copy_cache)
 
 	def _edit(self, chunk) :
-		return [chunk.replace(b"\\ ", b" ").replace(b"\\.", b"%.").replace(b"\\\\", b"\\").replace(b"-", b"%-")]
+		return [chunk.replace("\\ ", " ").replace("\\.", "%.").replace("\\\\", "\\").replace("-", "%-")]
