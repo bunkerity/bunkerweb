@@ -39,6 +39,28 @@ function M.gen_data(use_id, data)
 	return all_data
 end
 
+function M.ping2()
+	local https = require "ssl.https"
+	local ltn12 = require "ltn12"
+	local request_body = cjson.encode(M.gen_data(true, {}))
+	local response_body = {}
+	local res, code, headers, status = https.request {
+		url = ngx.shared.remote_api:get("server") .. "/ping",
+		method = "GET",
+		headers = {
+			["Content-Type"] = "application/json",
+			["User-Agent"] = "bunkerized-nginx/" .. ngx.shared.remote_api:get("version"),
+			["Content-Length"] = request_body:len()
+		},
+		source = ltn12.source.string(request_body),
+		sink = ltn12.sink.table(response_body)
+	}
+	if res and status == 200 and response_body["data"] == "pong" then
+		return true
+	end
+	return false
+end
+
 function M.register()
 	local request = {}
 	local res, status, data = M.send("POST", "/register", M.gen_data(false, request))
@@ -58,7 +80,6 @@ function M.ping()
 end
 
 function M.ip(ip, reason)
-	-- TODO : check if IP is global
 	local request = {
 		["ip"] = ip,
 		["reason"] = reason

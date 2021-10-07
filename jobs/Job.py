@@ -132,7 +132,7 @@ class Job(abc.ABC) :
 					chunk = chunk.decode("utf-8")
 				if self._type in ["line", "json"] :
 					if not re.match(self._regex, chunk) :
-						log(self._name, "WARN", chunk + " doesn't match regex " + self._regex)
+						#log(self._name, "WARN", chunk + " doesn't match regex " + self._regex)
 						continue
 				if self._redis == None :
 					if self._type in ["line", "json"] :

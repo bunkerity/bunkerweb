@@ -3,6 +3,7 @@
 ## v1.3.2 -
 
 - Use API instead of a shared folder for Swarm and Kubernetes integrations
+- Beta integration of distributed bad IPs database through a remote API
 - Various bug fixes related to antibot feature
 - Fix Moodle example
 
