@@ -128,10 +128,11 @@ class Job(abc.ABC) :
 		for url in self._data :
 			data = self.__download_data(url)
 			for chunk in data :
-				if isinstance(chunk, bytes) :
+				if isinstance(chunk, bytes) and self._type in ["line", "json"] :
 					chunk = chunk.decode("utf-8")
 				if self._type in ["line", "json"] :
 					if not re.match(self._regex, chunk) :
+						log(self._name, "WARN", chunk + " doesn't match regex " + self._regex)
 						continue
 				if self._redis == None :
 					if self._type in ["line", "json"] :

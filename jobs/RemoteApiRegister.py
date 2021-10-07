@@ -13,4 +13,4 @@ class RemoteApiRegister(Job) :
 		super().__init__(name, data, filename, type=type, regex=regex, copy_cache=True, json_data=json_data, method=method)
 
 	def _json(self, data) :
-		return data["data"]
+		return [data["data"]]

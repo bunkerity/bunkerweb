@@ -58,6 +58,7 @@ function M.ping()
 end
 
 function M.ip(ip, reason)
+	-- TODO : check if IP is global
 	local request = {
 		["ip"] = ip,
 		["reason"] = reason

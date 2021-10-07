@@ -92,6 +92,6 @@ fi
 if [ "$(has_value USE_REMOTE_API yes)" != "" ] ; then
 	/opt/bunkerized-nginx/jobs/main.py --name remote-api-register --server "$(grep '^REMOTE_API_SERVER=' /etc/nginx/global.env | cut -d '=' -f 2)" --version "$(cat /opt/bunkerized-nginx/VERSION)"
 	if [ $? -eq 0 ] ; then
-		/opt/bunkerized-nginx/jobs/main.py --name remote-api-database --server "$(grep '^REMOTE_API_SERVER=' /etc/nginx/global.env | cut -d '=' -f 2)" --version "$(cat /opt/bunkerized-nginx/VERSION)" --id "$(cat /opt/bunkerized-nginx/machine.id)"
+		/opt/bunkerized-nginx/jobs/main.py --name remote-api-database --server "$(grep '^REMOTE_API_SERVER=' /etc/nginx/global.env | cut -d '=' -f 2)" --version "$(cat /opt/bunkerized-nginx/VERSION)" --id "$(cat /opt/bunkerized-nginx/cache/machine.id)"
 	fi
 fi
