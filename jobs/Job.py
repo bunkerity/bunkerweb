@@ -116,10 +116,11 @@ class Job(abc.ABC) :
 		if self._redis == None :
 			if os.path.isfile("/tmp/" + self._filename) :
 				os.remove("/tmp/" + self._filename)
-			mode = "a"
-			if self._type == "file" :
-				mode = "ab"
-			file = open("/tmp/" + self._filename, mode)
+#			mode = "a"
+#			if self._type == "file" :
+#				mode = "ab"
+#			file = open("/tmp/" + self._filename, mode)
+			file = open("/tmp/" + self._filename, "ab")
 
 		elif self._redis != None :
 			pipe = self._redis.pipeline()
@@ -138,7 +139,7 @@ class Job(abc.ABC) :
 					if self._type in ["line", "json"] :
 						chunks = self._edit(chunk)
 						for more_chunk in chunks :
-							file.write(more_chunk + "\n")
+							file.write(more_chunk.encode("utf-8") + b"\n")
 					else :
 						file.write(chunk)
 				else :
