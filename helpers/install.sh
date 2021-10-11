@@ -845,7 +845,7 @@ do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/main.py
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/reload.py
-do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/certbot-*.sh
+do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/certbot-*.py
 # Set permissions for /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx
