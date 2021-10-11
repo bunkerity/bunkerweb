@@ -348,7 +348,7 @@ module_hotfixes=true"
 	elif [ "$OS" = "fedora" ] ; then
 		echo "[*] Install nginx"
 		do_and_check_cmd dnf install -y nginx
-	elif [ "$OS" = "archlinux" ; then
+	elif [ "$OS" = "archlinux" ] ; then
 		echo "[*] Update pacman DB"
 		do_and_check_cmd pacman -Sy
 		echo "[*] Install nginx"
@@ -825,7 +825,7 @@ fi
 # Create acme-challenge folder
 if [ ! -d "/opt/bunkerized-nginx/acme-challenge" ] ; then
 	echo "[*] Create /opt/bunkerized-nginx/acme-challenge folder"
-	do_and_check_cmd mkdir /opt/bunkerized-nginx/acme-challenge
+	do_and_check_cmd mkdir -p /opt/bunkerized-nginx/acme-challenge/.well-known/acme-challenge
 fi
 
 # Create plugins folder
@@ -840,7 +840,7 @@ do_and_check_cmd chown -R root:nginx /opt/bunkerized-nginx
 do_and_check_cmd find /opt/bunkerized-nginx -type f -exec chmod 0740 {} \;
 do_and_check_cmd find /opt/bunkerized-nginx -type d -exec chmod 0750 {} \;
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
-do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
+do_and_check_cmd chmod -R 770 /opt/bunkerized-nginx/acme-challenge
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/main.py

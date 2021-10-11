@@ -52,9 +52,9 @@ chmod 770 /cache
 
 # prepare /acme-challenge
 ln -s /acme-challenge /opt/bunkerized-nginx/acme-challenge
-mkdir /acme-challenge
-chown root:nginx /acme-challenge
-chmod 770 /acme-challenge
+mkdir -p /acme-challenge/.well-known/acme-challenge
+chown -R root:nginx /acme-challenge
+chmod -R 770 /acme-challenge
 
 # prepare /http-confs
 ln -s /http-confs /opt/bunkerized-nginx/http-confs

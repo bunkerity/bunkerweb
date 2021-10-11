@@ -12,7 +12,8 @@ CONFIGS = {
 	"http": "/http-confs",
 	"server": "/server-confs",
 	"modsec": "/modsec-confs",
-	"modsec-crs": "/modsec-crs-confs"
+	"modsec-crs": "/modsec-crs-confs",
+	"acme": "/acme-challenge"
 }
 
 class Config :

@@ -2,7 +2,7 @@ import socketserver, threading, os, stat
 
 from logger import log
 
-class ReloadServerHandler(socketserver.StreamRequestHandler):
+class ReloadServerHandler(socketserver.BaseRequestHandler):
 
 	def handle(self) :
 		locked = False
@@ -10,7 +10,8 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 
 			while True :
 				data = self.request.recv(512)
-				if not data or not data in [b"lock", b"reload", b"unlock"] :
+				print(data, flush=True)
+				if not data or not data in [b"lock", b"reload", b"unlock", b"acme"] :
 					break
 				if data == b"lock" :
 					self.server.controller.lock.acquire()

@@ -1,33 +1,19 @@
 #!/bin/sh
 
-# prepare /www
-mkdir /www
-chown -R root:nginx /www
-chmod -R 770 /www
-
-# prepare /acme-challenge
-mkdir /acme-challenge
-chown root:nginx /acme-challenge
-chmod 770 /acme-challenge
-
-# prepare /cache
-mkdir /cache
-chown root:nginx /cache
-chmod 770 /cache
-
-# prepare /plugins
-mkdir /plugins
-chown root:nginx /plugins
-chmod 770 /plugins
-
-# prepare symlinks
+# prepare folders
 folders="www http-confs server-confs modsec-confs modsec-crs-confs cache pre-server-confs acme-challenge plugins"
 for folder in $folders ; do
-	if [ -e "/opt/bunkerized-nginx/$folder" ] ; then
-		rm -rf "/opt/bunkerized-nginx/$folder"
+	if [ -e "/opt/bunkerized-nginx/${folder}" ] ; then
+		rm -rf "/opt/bunkerized-nginx/${folder}"
 	fi
+	mkdir "/${folder}"
+	chown root:nginx "/${folder}"
+	chmod 770 "/${folder}"
 	ln -s "/$folder" "/opt/bunkerized-nginx/$folder"
 done
+mkdir -p /acme-challenge/.well-known/acme-challenge
+chown -R root:nginx /acme-challenge
+chmod 770 /acme-challenge
 
 # prepare /var/log
 rm -f /var/log/nginx/*
