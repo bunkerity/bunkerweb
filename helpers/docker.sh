@@ -13,7 +13,7 @@ for folder in $folders ; do
 done
 mkdir -p /acme-challenge/.well-known/acme-challenge
 chown -R root:nginx /acme-challenge
-chmod 770 /acme-challenge
+chmod -R 770 /acme-challenge
 
 # prepare /var/log
 rm -f /var/log/nginx/*

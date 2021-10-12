@@ -50,18 +50,26 @@ class IngressController(Controller.Controller) :
 	def __rules_to_env(self, rules, namespace="default") :
 		env = {}
 		first_servers = []
+		numbers = {}
 		for rule in rules :
 			rule = rule.to_dict()
 			prefix = ""
+			number = 1
 			if "host" in rule :
 				prefix = rule["host"] + "_"
 				first_servers.append(rule["host"])
+				if not rule["host"] in numbers :
+					numbers[rule["host"]] = 1
+				number = numbers[rule["host"]]
 			if not "http" in rule or not "paths" in rule["http"] :
 				continue
+			env[prefix + "USE_REVERSE_PROXY"] = "yes"
 			for path in rule["http"]["paths"] :
-				env[prefix + "USE_REVERSE_PROXY"] = "yes"
-				env[prefix + "REVERSE_PROXY_URL"] = path["path"]
-				env[prefix + "REVERSE_PROXY_HOST"] = "http://" + path["backend"]["service_name"] + "." + namespace + ".svc.cluster.local:" + str(path["backend"]["service_port"])
+				suffix = "_" + str(number)
+				env[prefix + "REVERSE_PROXY_URL" + suffix] = path["path"]
+				env[prefix + "REVERSE_PROXY_HOST" + suffix] = "http://" + path["backend"]["service_name"] + "." + namespace + ".svc.cluster.local:" + str(path["backend"]["service_port"])
+				number += 1
+			numbers[rule["host"]] = number
 		env["SERVER_NAME"] = " ".join(first_servers)
 		return env
 
@@ -135,8 +143,8 @@ class IngressController(Controller.Controller) :
 	def reload(self) :
 		return self._reload(self.__get_services(autoconf=True))
 
-	def send(self) :
-		return self._send(self.__get_services(autoconf=True))
+	def send(self, files="all") :
+		return self._send(self.__get_services(autoconf=True), files=files)
 
 	def stop_temp(self) :
 		return self._stop_temp(self.__get_services(autoconf=True))

@@ -10,7 +10,6 @@ class ReloadServerHandler(socketserver.BaseRequestHandler):
 
 			while True :
 				data = self.request.recv(512)
-				print(data, flush=True)
 				if not data or not data in [b"lock", b"reload", b"unlock", b"acme"] :
 					break
 				if data == b"lock" :
@@ -22,7 +21,7 @@ class ReloadServerHandler(socketserver.BaseRequestHandler):
 					locked = False
 					self.request.sendall(b"ok")
 				elif data == b"acme" :
-					ret = self.server.controller.send()
+					ret = self.server.controller.send(files="acme")
 					if ret :
 						self.request.sendall(b"ok")
 					else :
@@ -38,8 +37,11 @@ class ReloadServerHandler(socketserver.BaseRequestHandler):
 		if locked :
 			self.server.controller.lock.release()
 
+class ThreadingUnixServer(socketserver.ThreadingMixIn, socketserver.UnixStreamServer) :
+	pass
+
 def run_reload_server(controller) :
-	server = socketserver.UnixStreamServer("/tmp/autoconf.sock", ReloadServerHandler)
+	server = ThreadingUnixServer("/tmp/autoconf.sock", ReloadServerHandler)
 	os.chown("/tmp/autoconf.sock", 0, 101)
 	os.chmod("/tmp/autoconf.sock", 0o770)
 	server.controller = controller

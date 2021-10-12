@@ -61,8 +61,8 @@ class SwarmController(Controller.Controller) :
 	def reload(self) :
 		return self._reload(self.__get_instances())
 
-	def send(self) :
-		return self._send(self.__get_instances())
+	def send(self, files="all") :
+		return self._send(self.__get_instances(), files=files)
 
 	def stop_temp(self) :
 		return self._stop_temp(self.__get_instances())

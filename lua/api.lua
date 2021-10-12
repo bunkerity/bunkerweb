@@ -88,7 +88,7 @@ function M.save_file (name)
 		return false
 	end
 	form:set_timeout(1000)
-	file = io.open(name, "w")
+	local file = io.open(name, "w")
 	while true do
 		local typ, res, err = form:read()
 		if not typ then

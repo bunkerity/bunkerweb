@@ -29,9 +29,9 @@ class Config :
 		stdout = proc.stdout.decode("ascii")
 		stderr = proc.stderr.decode("ascii")
 		if len(stdout) > 1 :
-			log("config", "INFO", "jobs stdout : " + stdout)
+			log("config", "INFO", "jobs stdout :\n" + stdout)
 		if stderr != "" :
-			log("config", "ERROR", "jobs stderr : " + stderr)
+			log("config", "ERROR", "jobs stderr :\n" + stderr)
 		if proc.returncode != 0 :
 			log("config", "ERROR", "jobs error (return code = " + str(proc.returncode) + ")")
 			return False
@@ -78,10 +78,12 @@ class Config :
 			ret = self.__api_call(instances, "/reload")
 		return ret
 
-	def send(self, instances) :
+	def send(self, instances, files="all") :
 		ret = True
 		fail = False
 		for name, path in CONFIGS.items() :
+			if files != "all" and name != files :
+				continue
 			file = self.__tarball(path)
 			if not self.__api_call(instances, "/" + name, file=file) :
 				log("config", "ERROR", "can't send config " + name + " to instance(s)")

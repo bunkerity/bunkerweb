@@ -53,9 +53,9 @@ class Controller(ABC) :
 			ret = False
 		return ret
 
-	def _send(self, instances) :
+	def _send(self, instances, files="all") :
 		try :
-			ret = self._config.send(instances)
+			ret = self._config.send(instances, files=files)
 		except Exception as e :
 			ret = False
 		return ret
