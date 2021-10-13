@@ -41,7 +41,9 @@ class IngressController(Controller.Controller) :
 
 	def __annotations_to_env(self, annotations) :
 		env = {}
-		prefix = annotations["bunkerized-nginx.SERVER_NAME"].split(" ")[0] + "_"
+		prefix = ""
+		if "bunkerized-nginx.SERVER_NAME" in annotations :
+			prefix = annotations["bunkerized-nginx.SERVER_NAME"].split(" ")[0] + "_"
 		for annotation in annotations :
 			if annotation.startswith("bunkerized-nginx.") and annotation.replace("bunkerized-nginx.", "", 1) != "" and annotation.replace("bunkerized-nginx.", "", 1) != "AUTOCONF" :
 				env[prefix + annotation.replace("bunkerized-nginx.", "", 1)] = annotations[annotation]
@@ -85,6 +87,8 @@ class IngressController(Controller.Controller) :
 				first_servers.extend(env["SERVER_NAME"].split(" "))
 		for ingress in ingresses :
 			env.update(self.__rules_to_env(ingress.spec.rules, namespace=ingress.metadata.namespace))
+			if ingress.metadata.annotations != None :
+				env.update(self.__annotations_to_env(ingress.metadata.annotations))
 			if ingress.spec.tls :
 				for tls_entry in ingress.spec.tls :
 					for host in tls_entry.hosts :

@@ -120,7 +120,7 @@ class Job(abc.ABC) :
 #			if self._type == "file" :
 #				mode = "ab"
 #			file = open("/tmp/" + self._filename, mode)
-			file = open("/tmp/" + self._filename, "ab")
+			file = open("/tmp/" + self._filename, "wb")
 
 		elif self._redis != None :
 			pipe = self._redis.pipeline()
@@ -153,8 +153,8 @@ class Job(abc.ABC) :
 
 		if self._redis == None :
 			file.close()
-			if count > 0 :
-				shutil.copyfile("/tmp/" + self._filename, "/etc/nginx/" + self._filename)
+			#if count > 0 :
+			shutil.copyfile("/tmp/" + self._filename, "/etc/nginx/" + self._filename)
 			os.remove("/tmp/" + self._filename)
 			return JobRet.OK_RELOAD
 

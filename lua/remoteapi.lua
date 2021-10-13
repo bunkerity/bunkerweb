@@ -55,8 +55,9 @@ function M.ping2()
 		source = ltn12.source.string(request_body),
 		sink = ltn12.sink.table(response_body)
 	}
-	if res and status == 200 and response_body["data"] == "pong" then
-		return true
+	if res and status:match("^.*% 200% .*$") then
+		response_body = cjson.decode(response_body[1])
+		return response_body["data"] == "pong"
 	end
 	return false
 end
