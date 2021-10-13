@@ -33,32 +33,34 @@ function M.incr (key)
 	return true
 end
 
-function M.check (url, rate)
-	if url == "/" or url == ngx.var.request_uri then
-		local key = ngx.var.remote_addr .. url
-		local rate_split = rate:gmatch("([^/]+)")
-		local max = rate_split[1]
-		local unit = rate_split[2]
-		local delay = 0
-		if unit == "s" then
-			delay = 1
-		elseif unit == "m" then
-			delay = 60
-		elseif unit == "h" then
-			delay = 3600
-		elseif unit == "d" then
-			delay = 86400
-		end
-		if M.incr(key) then
-			local current, flags = ngx.shared.limit_req:get(key)
-			if M.decr(key, delay) then
-				if current > max then
-					logger.log(ngx.WARN, "REQ LIMIT", "ip " .. ngx.var.remote_addr .. " has reached the limit : " .. current .. "/" .. unit .. " (max = " .. rate .. ")")
-					return true
+function M.check (rate, burst, sleep)
+	local key = ngx.var.remote_addr .. ngx.var.uri
+	local rate_split = rate:gmatch("([^r/]+)")
+	local max = rate_split[1]
+	local unit = rate_split[2]
+	local delay = 0
+	if unit == "s" then
+		delay = 1
+	elseif unit == "m" then
+		delay = 60
+	elseif unit == "h" then
+		delay = 3600
+	elseif unit == "d" then
+		delay = 86400
+	end
+	if M.incr(key) then
+		local current, flags = ngx.shared.limit_req:get(key)
+		if M.decr(key, delay) then
+			if current > max + burst then
+				logger.log(ngx.WARN, "REQ LIMIT", "ip " .. ngx.var.remote_addr .. " has reached the limit for uri " .. ngx.var.uri .. " : " .. current .. "r/" .. unit .. " (max = " .. rate .. ")")
+				return true
+			elseif current > max then
+				if sleep > 0 then
+					ngx.sleep(sleep)
 				end
-			else
-				ngx.shared.limit_req:set(key, current-1, 0)
 			end
+		else
+			ngx.shared.limit_req:set(key, current-1, 0)
 		end
 	end
 	return false	

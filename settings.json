@@ -877,16 +877,25 @@
                 "env": "LIMIT_REQ_RATE",
                 "id": "limit-req-rate",
                 "label": "Limit req rate",
-                "regex": "^\\d+r/(ms|s|m|h|d)$",
+                "regex": "^\\d+r/(s|m|h|d)$",
                 "type": "text"
             },
             {
                 "context": "multisite",
-                "default": "2",
+                "default": "5",
                 "env": "LIMIT_REQ_BURST",
                 "id": "limit-req-burst",
                 "label": "Limit req burst",
                 "regex": "^\\d+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "1",
+                "env": "LIMIT_REQ_DELAY",
+                "id": "limit-req-delay",
+                "label": "Limit req delay",
+                "regex": "^\\d+(\\.\\d+)?$",
                 "type": "text"
             },
             {
