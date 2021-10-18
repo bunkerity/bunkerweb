@@ -99,6 +99,56 @@
             }
         ]
     },
+    "Bad behavior": {
+        "id": "bad-behavior",
+        "params": [
+            {
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_BAD_BEHAVIOR",
+                "id": "use-bad-behavior",
+                "label": "Use bad behavior",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
+                "default": "86400",
+                "env": "BAD_BEHAVIOR_BAN_TIME",
+                "id": "bad-behavior-ban-time",
+                "label": "Ban duration time",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "60",
+                "env": "BAD_BEHAVIOR_COUNT_TIME",
+                "id": "bad-behavior-count-time",
+                "label": "Count time",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "400 401 403 404 405 429 444",
+                "env": "BAD_BEHAVIOR_STATUS_CODES",
+                "id": "bad-behavior-status-codes",
+                "label": "Status codes",
+                "regex": "^([0-9]{3} ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "10",
+                "env": "BAD_BEHAVIOR_THRESHOLD",
+                "id": "bad-behavior-threshold",
+                "label": "Threshold",
+                "regex": "^[0-9]+$",
+                "type": "text"
+            }
+        ]
+    },
     "Basic auth": {
         "id": "auth-basic",
         "params": [
@@ -779,7 +829,7 @@
             {
                 "id": "custom-headers",
                 "label": "Custom headers",
-                "params" : [
+                "params": [
                     {
                         "context": "multisite",
                         "default": "",
@@ -823,6 +873,92 @@
                 "id": "errors",
                 "label": "Custom error pages (code1=/page1 code2=/page2 ...)",
                 "regex": ".*",
+                "type": "text"
+            }
+        ]
+    },
+    "Internal": {
+        "id": "internal",
+        "params": [
+            {
+                "context": "global",
+                "default": "no",
+                "env": "USE_API",
+                "id": "use-api",
+                "label": "Enable API",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
+                "env": "API_WHITELIST_IP",
+                "id": "api-whitelist-ip",
+                "label": "API whitelist IP",
+                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "random",
+                "env": "API_URI",
+                "id": "api-uri",
+                "label": "API URI",
+                "regex": "^(random|\\/[A-Za-z0-9\\-\\/]+)$",
+                "type": "text"
+            },
+            {
+                "context": "global",
+                "default": "no",
+                "env": "SWARM_MODE",
+                "id": "swarm-mode",
+                "label": "Swarm mode",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "no",
+                "env": "KUBERNETES_MODE",
+                "id": "kubernetes-mode",
+                "label": "Kubernetes mode",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "no",
+                "env": "USE_REDIS",
+                "id": "use-redis",
+                "label": "Use external redis when coupled with autoconf",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "",
+                "env": "REDIS_HOST",
+                "id": "redis-host",
+                "label": "Hostname/IP of the Redis service",
+                "regex": "^([A-Za-z0-9\\-\\.\\_]+|.{0})$",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "no",
+                "env": "USE_REMOTE_API",
+                "id": "use-remote-api",
+                "label": "Use a remote service for enhanced security",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "global",
+                "default": "",
+                "env": "REMOTE_API_SERVER",
+                "id": "remote-api-server",
+                "label": "The URL of the remote service",
+                "regex": "^.*$",
                 "type": "text"
             }
         ]
@@ -872,31 +1008,51 @@
                 "type": "checkbox"
             },
             {
-                "context": "multisite",
-                "default": "1r/s",
-                "env": "LIMIT_REQ_RATE",
-                "id": "limit-req-rate",
-                "label": "Limit req rate",
-                "regex": "^\\d+r/(s|m|h|d)$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "5",
-                "env": "LIMIT_REQ_BURST",
-                "id": "limit-req-burst",
-                "label": "Limit req burst",
-                "regex": "^\\d+$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "1",
-                "env": "LIMIT_REQ_DELAY",
-                "id": "limit-req-delay",
-                "label": "Limit req delay",
-                "regex": "^\\d+(\\.\\d+)?$",
-                "type": "text"
+                "id": "limit-req-params",
+                "label": "Limit request",
+                "params": [
+                    {
+                        "context": "multisite",
+                        "default": "",
+                        "env": "LIMIT_REQ_URL",
+                        "id": "limit-req-url",
+                        "label": "Limit req url",
+                        "multiple": "Limit request",
+                        "regex": "^.*$",
+                        "type": "text"
+                    },
+                    {
+                        "context": "multisite",
+                        "default": "1r/s",
+                        "env": "LIMIT_REQ_RATE",
+                        "id": "limit-req-rate",
+                        "label": "Limit req rate",
+                        "multiple": "Limit request",
+                        "regex": "^\\d+r/(s|m|h|d)$",
+                        "type": "text"
+                    },
+                    {
+                        "context": "multisite",
+                        "default": "5",
+                        "env": "LIMIT_REQ_BURST",
+                        "id": "limit-req-burst",
+                        "label": "Limit req burst",
+                        "multiple": "Limit request",
+                        "regex": "^\\d+$",
+                        "type": "text"
+                    },
+                    {
+                        "context": "multisite",
+                        "default": "1",
+                        "env": "LIMIT_REQ_DELAY",
+                        "id": "limit-req-delay",
+                        "label": "Limit req delay",
+                        "multiple": "Limit request",
+                        "regex": "^\\d+(\\.\\d+)?$",
+                        "type": "text"
+                    }
+                ],
+                "type": "multiple"
             },
             {
                 "context": "global",
@@ -1167,138 +1323,70 @@
             }
         ]
     },
-    "Bad behavior": {
-        "id": "bad-behavior",
+    "Whitelist": {
+        "id": "whitelist",
         "params": [
             {
                 "context": "multisite",
                 "default": "yes",
-                "env": "USE_BAD_BEHAVIOR",
-                "id": "use-bad-behavior",
-                "label": "Use bad behavior",
+                "env": "USE_WHITELIST_IP",
+                "id": "use-whitelist-ip",
+                "label": "Use whitelist ip",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
             },
             {
                 "context": "multisite",
-                "default": "86400",
-                "env": "BAD_BEHAVIOR_BAN_TIME",
-                "id": "bad-behavior-ban-time",
-                "label": "Ban duration time",
-                "regex": "^[0-9]+$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "60",
-                "env": "BAD_BEHAVIOR_COUNT_TIME",
-                "id": "bad-behavior-count-time",
-                "label": "Count time",
-                "regex": "^[0-9]+$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "400 401 403 404 405 429 444",
-                "env": "BAD_BEHAVIOR_STATUS_CODES",
-                "id": "bad-behavior-status-codes",
-                "label": "Status codes",
-                "regex": "^([0-9]{3} ?)*$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "10",
-                "env": "BAD_BEHAVIOR_THRESHOLD",
-                "id": "bad-behavior-threshold",
-                "label": "Threshold",
-                "regex": "^[0-9]+$",
-                "type": "text"
-            }
-        ]
-    },
-    "Internal": {
-        "id": "internal",
-        "params": [
-            {
-                "context": "global",
-                "default": "no",
-                "env": "USE_API",
-                "id": "use-api",
-                "label": "Enable API",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "global",
-                "default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
-                "env": "API_WHITELIST_IP",
-                "id": "api-whitelist-ip",
-                "label": "API whitelist IP",
+                "default": "23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8",
+                "env": "WHITELIST_IP_LIST",
+                "id": "whitelist-ip-list",
+                "label": "Whitelist ip list",
                 "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
                 "type": "text"
             },
             {
-                "context": "global",
-                "default": "random",
-                "env": "API_URI",
-                "id": "api-uri",
-                "label": "API URI",
-                "regex": "^(random|\\/[A-Za-z0-9\\-\\/]+)$",
-                "type": "text"
-            },
-            {
-                "context": "global",
-                "default": "no",
-                "env": "SWARM_MODE",
-                "id": "swarm-mode",
-                "label": "Swarm mode",
+                "context": "multisite",
+                "default": "yes",
+                "env": "USE_WHITELIST_REVERSE",
+                "id": "use-whitelist-reverse",
+                "label": "Use whitelist reverse",
                 "regex": "^(yes|no)$",
                 "type": "checkbox"
             },
             {
-                "context": "global",
-                "default": "no",
-                "env": "KUBERNETES_MODE",
-                "id": "kubernetes-mode",
-                "label": "Kubernetes mode",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "global",
-                "default": "no",
-                "env": "USE_REDIS",
-                "id": "use-redis",
-                "label": "Use external redis when coupled with autoconf",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "global",
-                "default": "",
-                "env": "REDIS_HOST",
-                "id": "redis-host",
-                "label": "Hostname/IP of the Redis service",
-                "regex": "^([A-Za-z0-9\\-\\.\\_]+|.{0})$",
+                "context": "multisite",
+                "default": ".googlebot.com .google.com .search.msn.com .crawl.yahoo.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net",
+                "env": "WHITELIST_REVERSE_LIST",
+                "id": "whitelist-reverse-list",
+                "label": "Whitelist reverse list",
+                "regex": "^([a-z\\-0-9\\.]+ ?)*$",
                 "type": "text"
             },
             {
                 "context": "multisite",
-                "default": "no",
-                "env": "USE_REMOTE_API",
-                "id": "use-remote-api",
-                "label": "Use a remote service for enhanced security",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
+                "default": "",
+                "env": "WHITELIST_COUNTRY",
+                "id": "whitelist-country",
+                "label": "Whitelist country",
+                "regex": "^([A-Z]{2} ?)*$",
+                "type": "text"
             },
             {
-                "context": "global",
+                "context": "multisite",
                 "default": "",
-                "env": "REMOTE_API_SERVER",
-                "id": "remote-api-server",
-                "label": "The URL of the remote service",
-                "regex": "^.*$",
+                "env": "WHITELIST_USER_AGENT",
+                "id": "whitelist-user-agent",
+                "label": "Whitelist user agent",
+                "regex": ".*",
+                "type": "text"
+            },
+            {
+                "context": "multisite",
+                "default": "",
+                "env": "WHITELIST_URI",
+                "id": "whitelist-uri",
+                "label": "Whitelist URI",
+                "regex": "^(\\S ?)*$",
                 "type": "text"
             }
         ]
@@ -1372,6 +1460,7 @@
             {
                 "context": "global",
                 "default": "8080",
+
                 "env": "HTTP_PORT",
                 "id": "http-port",
                 "label": "HTTP port",
@@ -1412,74 +1501,6 @@
                 "id": "worker-processes",
                 "label": "worker_processes directive",
                 "regex": "^(auto|[0-9]+)$",
-                "type": "text"
-            }
-        ]
-    },
-    "Whitelist": {
-        "id": "whitelist",
-        "params": [
-            {
-                "context": "multisite",
-                "default": "yes",
-                "env": "USE_WHITELIST_IP",
-                "id": "use-whitelist-ip",
-                "label": "Use whitelist ip",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "multisite",
-                "default": "23.21.227.69 40.88.21.235 50.16.241.113 50.16.241.114 50.16.241.117 50.16.247.234 52.204.97.54 52.5.190.19 54.197.234.188 54.208.100.253 54.208.102.37 107.21.1.8",
-                "env": "WHITELIST_IP_LIST",
-                "id": "whitelist-ip-list",
-                "label": "Whitelist ip list",
-                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "yes",
-                "env": "USE_WHITELIST_REVERSE",
-                "id": "use-whitelist-reverse",
-                "label": "Use whitelist reverse",
-                "regex": "^(yes|no)$",
-                "type": "checkbox"
-            },
-            {
-                "context": "multisite",
-                "default": ".googlebot.com .google.com .search.msn.com .crawl.yahoo.net .crawl.baidu.jp .crawl.baidu.com .yandex.com .yandex.ru .yandex.net",
-                "env": "WHITELIST_REVERSE_LIST",
-                "id": "whitelist-reverse-list",
-                "label": "Whitelist reverse list",
-                "regex": "^([a-z\\-0-9\\.]+ ?)*$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "",
-                "env": "WHITELIST_COUNTRY",
-                "id": "whitelist-country",
-                "label": "Whitelist country",
-                "regex": "^([A-Z]{2} ?)*$",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "",
-                "env": "WHITELIST_USER_AGENT",
-                "id": "whitelist-user-agent",
-                "label": "Whitelist user agent",
-                "regex": ".*",
-                "type": "text"
-            },
-            {
-                "context": "multisite",
-                "default": "",
-                "env": "WHITELIST_URI",
-                "id": "whitelist-uri",
-                "label": "Whitelist URI",
-                "regex": "^(\\S ?)*$",
                 "type": "text"
             }
         ]

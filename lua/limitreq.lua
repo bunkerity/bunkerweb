@@ -35,7 +35,10 @@ end
 
 function M.check (rate, burst, sleep)
 	local key = ngx.var.remote_addr .. ngx.var.uri
-	local rate_split = rate:gmatch("([^r/]+)")
+	local rate_split = {}
+	for str in rate:gmatch("([^r/]+)") do
+		table.insert(rate_split, str)
+	end
 	local max = rate_split[1]
 	local unit = rate_split[2]
 	local delay = 0
