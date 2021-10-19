@@ -16,7 +16,7 @@ function M.decr (key, delay)
 			ngx.shared.limit_req:set(key, value-1, 0)
 		end
 	end
-	local hdl, err = ngx.timer.at(delay, callback, key)
+	local ok, err = ngx.timer.at(delay, callback, key)
 	if not ok then
 		logger.log(ngx.ERR, "REQ LIMIT", "can't setup decrement timer : " .. err)
 		return false
@@ -39,7 +39,7 @@ function M.check (rate, burst, sleep)
 	for str in rate:gmatch("([^r/]+)") do
 		table.insert(rate_split, str)
 	end
-	local max = rate_split[1]
+	local max = tonumber(rate_split[1])
 	local unit = rate_split[2]
 	local delay = 0
 	if unit == "s" then
