@@ -9,6 +9,8 @@
 - Init support of Arch Linux
 - Fix Moodle example
 - Fix ROOT_FOLDER bug in serve-files.conf when using the UI
+- Update default values for PERMISSIONS_POLICY and FEATURE_POLICY
+- Disable COUNTRY ban if IP is local
 
 ## v1.3.1 - 2021/09/02
 
