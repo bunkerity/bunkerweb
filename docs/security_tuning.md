@@ -62,7 +62,7 @@ docker kill --signal=SIGHUP my-container
 
 Swarm and Kubernetes reload (repeat for each node) :
 ```shell
-$ curl http://node-local-ip:80/reload
+$ curl http://node-local-ip:80/api-uri/reload
 ```
 
 Linux reload :
@@ -141,6 +141,18 @@ You can use the `USE_ANTIBOT` environment variable to add that kind of checks wh
 
 ## External blacklists
 
+### Distributed
+
+**This feature is in beta and will be improved regularly.**
+
+You can benefit from a distributed blacklist shared among all of the bunkerized-nginx users.
+
+Each time a bunkerized-nginx instance detect a bad request, the offending IP is sent to a remote API and will enrich a database. An extract of the top malicious IP is downloaded on a periodic basis and integrated into bunkerized-nginx as a blacklist.
+
+This feature is controlled with the `USE_REMOTE_API=yes` environment variable.
+
+**To avoid poisoning, in addition to the various security checks made by the API we only mark IP as bad in the database if it has been seen by one of our honeypots under our control.**
+
 ### DNSBL
 
 Automatic checks on external DNS BlackLists are enabled by default with the `USE_DNSBL=yes` environment variable. The list of DNSBL zones is also configurable, you just need to edit the `DNSBL_LIST` environment variable which contains the following value by default `bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org`.
@@ -173,12 +185,16 @@ This list contains bad referrers domains known for spamming (downloaded from [he
 
 ### Requests
 
-To limit bruteforce attacks we decided to use the [rate limiting feature in nginx](https://www.nginx.com/blog/rate-limiting-nginx/) so attackers will be limited to X request(s)/s for the same resource. That kind of protection might be useful against other attacks too (e.g., blind SQL injection).
+To limit bruteforce attacks or rate limit access to your API you can use the "request limit" feature so attackers will be limited to X request(s) within a period of time for the same resource. That kind of protection might be useful against other attacks too (e.g., blind SQL injection).
 
 Here is the list of related environment variables and their default value :
 - `USE_LIMIT_REQ=yes` : enable/disable request limiting
-- `LIMIT_REQ_RATE=1r/s` : the rate to apply for the same resource
-- `LIMIT_REQ_BURST=2` : the number of request tu put in a queue before effectively rejecting requests
+- `LIMIT_REQ_URL=` : the URL you want to protect, use `/` to apply the limit for all URL
+- `LIMIT_REQ_RATE=1r/s` : the rate to apply for the resource, valid period are : `s` (second), `m` (minute), `h` (hour) and `d` (day)
+- `LIMIT_REQ_BURST=5 : the number of request tu put in a queue before effectively rejecting requests
+- `LIMIT_REQ_DELAY=1` : the number of seconds to wait before we proceed requests in queue
+
+Please note that you can apply different rate to different URL by appending number as a suffix (more info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#requests-limiting)).
 
 ### Connections
 
