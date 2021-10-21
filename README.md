@@ -130,6 +130,7 @@ List of supported Linux distributions :
 - Ubuntu focal (20.04)
 - CentOS 7
 - Fedora 34
+- Arch Linux
 
 Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a [helper script](https://github.com/bunkerity/bunkerized-nginx/blob/master/helpers/install.sh) to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
 

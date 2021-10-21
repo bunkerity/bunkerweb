@@ -27,7 +27,7 @@ spec:
         - name: KUBERNETES_MODE
           value: "yes"
         - name: DNS_RESOLVERS
-          value: "kube-dns.kube-system.svc.cluster.local"
+          value: "coredns.kube-system.svc.cluster.local"
         - name: USE_API
           value: "yes"
         - name: API_URI
@@ -36,15 +36,6 @@ spec:
           value: ""
         - name: MULTISITE
           value: "yes"
-        volumeMounts:
-        - name: www
-          mountPath: /www
-          readOnly: true
-      volumes:
-      - name: www
-        hostPath:
-          path: /shared/www
-          type: Directory
 ---
 apiVersion: v1
 kind: Service
@@ -60,6 +51,17 @@ spec:
   clusterIP: None
   selector:
     name: bunkerized-nginx
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nginx
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -78,6 +80,30 @@ spec:
         app: bunkerized-nginx-autoconf
     spec:
       serviceAccountName: bunkerized-nginx-ingress-controller
+      volumes:
+      - name: vol-nginx
+        persistentVolumeClaim:
+          claimName: pvc-nginx
+      initContainers:
+      - name: change-data-dir-permissions
+        command:
+        - chown
+        - -R
+        - 101:101
+        - /etc/letsencrypt
+        - /cache
+        image: busybox
+        volumeMounts:
+        - name: vol-nginx
+          mountPath: /etc/letsencrypt
+          subPath: letsencrypt
+        - name: vol-nginx
+          mountPath: /cache
+          subPath: cache
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+          runAsGroup: 0
       containers:
       - name: bunkerized-nginx-autoconf
         image: bunkerity/bunkerized-nginx-autoconf
@@ -87,10 +113,9 @@ spec:
         - name: API_URI
           value: "/ChangeMeToSomethingHardToGuess"
         volumeMounts:
-        - name: letsencrypt
+        - name: vol-nginx
           mountPath: /etc/letsencrypt
-      volumes:
-      - name: letsencrypt
-        hostPath:
-          path: /shared/letsencrypt
-          type: Directory
+          subPath: letsencrypt
+        - name: vol-nginx
+          mountPath: /cache
+          subPath: cache

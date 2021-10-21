@@ -245,21 +245,9 @@ The deployment and configuration is very similar to the "Docker autoconf" one bu
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/swarm.png?raw=true" />
 
-TODO : without shared folder first then with shared folder (www, cache and letsencrypt)
-
-**We will assume that a shared directory is mounted at the /shared location on both your managers and workers. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
-
 In this setup we will deploy bunkerized-nginx in global mode on all workers and autoconf as a single replica on a manager.
 
-First of all, you will need to setup the shared folders :
-```shell
-$ cd /shared
-$ mkdir www confs letsencrypt acme-challenge
-$ chown root:101 www confs letsencrypt acme-challenge
-$ chmod 770 www confs letsencrypt acme-challenge
-```
-
-Then you will need to create 2 networks, one for the communication between bunkerized-nginx and autoconf and the other one for the communication between bunkerized-nginx and the web services :
+First of all, you will need to create 2 networks, one for the communication between bunkerized-nginx and autoconf and the other one for the communication between bunkerized-nginx and the web services :
 ```shell
 $ docker network create -d overlay --attachable bunkerized-net
 $ docker network create -d overlay --attachable services-net
@@ -275,10 +263,6 @@ $ docker service create \
          --network bunkerized-net \
          -p published=80,target=8080,mode=host \
          -p published=443,target=8443,mode=host \
-         --mount type=bind,source=/shared/confs,destination=/etc/nginx,ro \
-         --mount type=bind,source=/shared/www,destination=/www,ro \
-         --mount type=bind,source=/shared/letsencrypt,destination=/etc/letsencrypt,ro \
-         --mount type=bind,source=/shared/acme-challenge,destination=/acme-challenge,ro \
          -e SWARM_MODE=yes \
          -e USE_API=yes \
          -e API_URI=/ChangeMeToSomethingHardToGuess \
@@ -299,9 +283,8 @@ $ docker service create \
          --constraint node.role==manager \
          --network bunkerized-net \
          --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
-         --mount type=bind,source=/shared/confs,destination=/etc/nginx \
-         --mount type=bind,source=/shared/letsencrypt,destination=/etc/letsencrypt \
-         --mount type=bind,source=/shared/acme-challenge,destination=/acme-challenge \
+         --mount type=volume,source=cache-vol,destination=/cache \
+         --mount type=volume,source=certs-vol,destination=/etc/letsencrypt \
          -e SWARM_MODE=yes \
          -e API_URI=/ChangeMeToSomethingHardToGuess \
          bunkerity/bunkerized-nginx-autoconf
@@ -324,11 +307,6 @@ services:
         target: 8443
         mode: host
         protocol: tcp
-    volumes:
-      - /shared/confs:/etc/nginx:ro
-      - /shared/www:/www:ro
-      - /shared/letsencrypt:/etc/letsencrypt:ro
-      - /shared/acme-challenge:/acme-challenge:ro
     environment:
       - SWARM_MODE=yes
       - USE_API=yes
@@ -352,9 +330,8 @@ services:
     image: bunkerity/bunkerized-nginx-autoconf
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /shared/confs:/etc/nginx
-      - /shared/letsencrypt:/etc/letsencrypt
-      - /shared/acme-challenge:/acme-challenge
+      - cache-vol:/cache
+      - certs-vol:/etc/letsencrypt
     environment:
       - SWARM_MODE=yes
       - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
@@ -376,6 +353,10 @@ networks:
     driver: overlay
     attachable: true
     name: services-net
+# And the volumes too
+volumes:
+  cache-vol:
+  certs-vol:
 ```
 
 Check the logs of both autoconf and bunkerized-nginx services to see if everything is working as expected.
@@ -432,18 +413,6 @@ When your service is not needed anymore, you can delete it as usual. The autocon
 The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends the configuration files and a reload order to the bunkerized-nginx instances running in the cluster. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Kubernetes Volume that supports ReadOnlyMany access](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
 
 <img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/kubernetes.png?raw=true" />
-
-TODO : without shared folder first then with shared folder (www, cache and letsencrypt)
-
-**We will assume that a shared directory is mounted at the /shared location on your nodes. Keep in mind that bunkerized-nginx and autoconf are running as unprivileged users with UID and GID 101. You must set the rights and permissions of the subfolders in /shared accordingly.**
-
-First of all, you will need to setup the shared folders :
-```shell
-$ cd /shared
-$ mkdir www confs letsencrypt acme-challenge
-$ chown root:nginx www confs letsencrypt acme-challenge
-$ chmod 770 www confs letsencrypt acme-challenge
-```
 
 The first step to do is to declare the RBAC authorization that will be used by the Ingress Controller to access the Kubernetes API. A ready-to-use declaration is available here :
 ```yaml
@@ -510,7 +479,7 @@ spec:
         - name: KUBERNETES_MODE
           value: "yes"
         - name: DNS_RESOLVERS
-          value: "kube-dns.kube-system.svc.cluster.local"
+          value: "coredns.kube-system.svc.cluster.local"
         - name: USE_API
           value: "yes"
         - name: API_URI
@@ -519,36 +488,6 @@ spec:
           value: ""
         - name: MULTISITE
           value: "yes"
-        volumeMounts:
-        - name: confs
-          mountPath: /etc/nginx
-          readOnly: true
-        - name: letsencrypt
-          mountPath: /etc/letsencrypt
-          readOnly: true
-        - name: acme-challenge
-          mountPath: /acme-challenge
-          readOnly: true
-        - name: www
-          mountPath: /www
-          readOnly: true
-      volumes:
-      - name: confs
-        hostPath:
-          path: /shared/confs
-          type: Directory
-      - name: letsencrypt
-        hostPath:
-          path: /shared/letsencrypt
-          type: Directory
-      - name: acme-challenge
-        hostPath:
-          path: /shared/acme-challenge
-          type: Directory
-      - name: www
-        hostPath:
-          path: /shared/www
-          type: Directory
 ---
 apiVersion: v1
 kind: Service
@@ -566,10 +505,19 @@ spec:
     name: bunkerized-nginx
 ```
 
-Important thing to note, labels and annotations defined are mandatory for autoconf to work.
-
 You can now deploy the autoconf which will act as the ingress controller :
 ```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nginx
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -587,6 +535,30 @@ spec:
         app: bunkerized-nginx-autoconf
     spec:
       serviceAccountName: bunkerized-nginx-ingress-controller
+      volumes:
+      - name: vol-nginx
+        persistentVolumeClaim:
+          claimName: pvc-nginx
+      initContainers:
+      - name: change-data-dir-permissions
+        command:
+        - chown
+        - -R
+        - 101:101
+        - /etc/letsencrypt
+        - /cache
+        image: busybox
+        volumeMounts:
+        - name: vol-nginx
+          mountPath: /etc/letsencrypt
+          subPath: letsencrypt
+        - name: vol-nginx
+          mountPath: /cache
+          subPath: cache
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+          runAsGroup: 0
       containers:
       - name: bunkerized-nginx-autoconf
         image: bunkerity/bunkerized-nginx-autoconf
@@ -596,25 +568,12 @@ spec:
         - name: API_URI
           value: "/ChangeMeToSomethingHardToGuess"
         volumeMounts:
-        - name: confs
-          mountPath: /etc/nginx
-        - name: letsencrypt
+        - name: vol-nginx
           mountPath: /etc/letsencrypt
-        - name: acme-challenge
-          mountPath: /acme-challenge
-      volumes:
-      - name: confs
-        hostPath:
-          path: /shared/confs
-          type: Directory
-      - name: letsencrypt
-        hostPath:
-          path: /shared/letsencrypt
-          type: Directory
-      - name: acme-challenge
-        hostPath:
-          path: /shared/acme-challenge
-          type: Directory
+          subPath: letsencrypt
+        - name: vol-nginx
+          mountPath: /cache
+          subPath: cache
 ```
 
 Check the logs of both bunkerized-nginx and autoconf deployments to see if everything is working as expected.
@@ -725,6 +684,7 @@ List of supported Linux distributions :
 - Ubuntu focal (20.04)
 - CentOS 7
 - Fedora 34
+- Arch Linux
 
 Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a helper script to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
 

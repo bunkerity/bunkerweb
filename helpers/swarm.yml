@@ -13,8 +13,6 @@ services:
         target: 8443
         mode: host
         protocol: tcp
-    volumes:
-      - /shared/www:/www:ro
     environment:
       - SWARM_MODE=yes
       - USE_API=yes
@@ -38,7 +36,8 @@ services:
     image: bunkerity/bunkerized-nginx-autoconf
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /shared/letsencrypt:/etc/letsencrypt
+      - cache-vol:/cache
+      - certs-vol:/etc/letsencrypt
     environment:
       - SWARM_MODE=yes
       - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
@@ -60,3 +59,7 @@ networks:
     driver: overlay
     attachable: true
     name: services-net
+# And the volumes too
+volumes:
+  cache-vol:
+  certs-vol:
