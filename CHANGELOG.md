@@ -4,8 +4,11 @@
 
 - Use API instead of a shared folder for Swarm and Kubernetes integrations
 - Beta integration of distributed bad IPs database through a remote API
+- Improvement of the request limiting feature : hour/day rate and multiple URL support
 - Various bug fixes related to antibot feature
+- Init support of Arch Linux
 - Fix Moodle example
+- Fix ROOT_FOLDER bug in serve-files.conf when using the UI
 
 ## v1.3.1 - 2021/09/02
 

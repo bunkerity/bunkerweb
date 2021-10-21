@@ -45,7 +45,8 @@ class Templator :
 		real_config["NGINX_PREFIX"] = self.__target_path
 		if self.__config_global["MULTISITE"] == "yes" and type == "site" :
 			real_config["NGINX_PREFIX"] += first_server + "/"
-			real_config["ROOT_FOLDER"] += "/" + first_server
+			if not real_config["ROOT_FOLDER"].endswith("/" + first_server) :
+				real_config["ROOT_FOLDER"] += "/" + first_server
 		if real_config["ROOT_SITE_SUBFOLDER"] != "" :
 			real_config["ROOT_FOLDER"] += "/" + real_config["ROOT_SITE_SUBFOLDER"]
 		return real_config

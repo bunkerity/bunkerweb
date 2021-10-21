@@ -28,7 +28,7 @@ services:
       - admin.example.com_SERVE_FILES=no
       - admin.example.com_USE_REVERSE_PROXY=yes
       - admin.example.com_REVERSE_PROXY_URL=/admin/                  # change it to something hard to guess
-      - admin.example.com_REVERSE_PROXY_HOST=http://myui:5000/
+      - admin.example.com_REVERSE_PROXY_HOST=http://myui:5000
       - admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin # must match REVERSE_PROXY_URL
       - admin.example.com_USE_MODSECURITY=no
     labels:
