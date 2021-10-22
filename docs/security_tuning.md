@@ -194,7 +194,7 @@ Here is the list of related environment variables and their default value :
 - `LIMIT_REQ_BURST=5 : the number of request tu put in a queue before effectively rejecting requests
 - `LIMIT_REQ_DELAY=1` : the number of seconds to wait before we proceed requests in queue
 
-Please note that you can apply different rate to different URL by appending number as a suffix (more info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#requests-limiting)).
+Please note that you can apply different rate to different URL by appending a number as suffix (more info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#requests-limiting)).
 
 ### Connections
 

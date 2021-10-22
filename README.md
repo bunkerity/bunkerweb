@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-        <img src="https://img.shields.io/badge/bunkerized--nginx-1.3.1-blue" />
+        <img src="https://img.shields.io/badge/bunkerized--nginx-1.3.2-blue" />
         <img src="https://img.shields.io/badge/nginx-1.20.1-blue" />
         <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
         <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
@@ -38,8 +38,8 @@ Non-exhaustive list of features :
 - Automatic ban of strange behaviors
 - Antibot challenge through cookie, javascript, captcha or recaptcha v3
 - Block TOR, proxies, bad user-agents, countries, ...
-- Block known bad IP with DNSBL
-- Prevent bruteforce attacks with rate limiting
+- Block known bad IP with DNSBL and distributed blacklist
+- Prevent bruteforce attacks and protect API resources with rate limiting
 - Plugins system for external security checks (ClamAV, CrowdSec, ...)
 - Easy to configure with environment variables or web UI
 - Seamless integration into existing environments : Linux, Docker, Swarm, Kubernetes, ...

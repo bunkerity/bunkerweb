@@ -603,14 +603,14 @@ More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Refer
 
 `FEATURE_POLICY`  
 Values : *&lt;directive&gt; &lt;allow list&gt;*  
-Default value : *accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vibrate 'none'; vr 'none'*  
+Default value : *accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; sync-xhr 'none'; usb 'none'; wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none"*  
 Context : *global*, *multisite*  
 Tells the browser which features can be used on the website.  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy).
 
 `PERMISSIONS_POLICY`  
 Values : *feature=(allow list)*  
-Default value : accelerometer=(), ambient-light-sensor=(), autoplay=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker=(), sync-xhr=(), usb=(), vibrate=(), vr=()  
+Default value : *accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), interest-cohort=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()*  
 Context : *global*, *multisite*  
 Tells the browser which features can be used on the website.  
 More info [here](https://www.w3.org/TR/permissions-policy-1/).
@@ -685,6 +685,20 @@ Values : *\<private key given by Google\>*
 Default value :  
 Context : *global*, *multisite*  
 The secret given by Google when `USE_ANTIBOT` is set to *recaptcha*.
+
+### Distributed blacklist
+
+`USE_REMOTE_API`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+If set to yes, the instance will participate into the distributed blacklist shared among all other instances. The blacklist will be automaticaly downloaded on a periodic basis.
+
+`REMOTE_API_SERVER`  
+Values : *\<any valid full URL\>*  
+Default value :  
+Context : *global*  
+Full URL of the remote API used for the distributed blacklist.
 
 ### External blacklists
 
@@ -828,19 +842,34 @@ Values : *yes* | *no*
 Default value : *yes*  
 Context : *global*, *multisite*  
 If set to yes, the amount of HTTP requests made by a user for a given resource will be limited during a period of time.  
-More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/) (the key used is $binary_remote_addr$uri).
+
+`LIMIT_REQ_URL`  
+Values : *\<any valid url\>*  
+Default value :  
+Context : *global*, *multisite*  
+The URL where you want to apply the request limiting. Use special value of `/` to apply it globally for all URL.  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_URL_1`, `LIMIT_REQ_URL_2`, `LIMIT_REQ_URL_3`, ...
 
 `LIMIT_REQ_RATE`  
-Values : *Xr/s* | *Xr/m*  
+Values : *Xr/s* | *Xr/m* | *Xr/h* | *Xr/d*  
 Default value : *1r/s*  
 Context : *global*, *multisite*  
-The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 1 request to the same URI and from the same IP per second.
+The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 1 request to the same URI and from the same IP per second. Possible value are : `s` (second), `m` (minute), `h` (hour) and `d` (day)).  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_RATE_1`, `LIMIT_REQ_RATE_2`, `LIMIT_REQ_RATE_3`, ...
 
 `LIMIT_REQ_BURST`  
-Values : *<any valid integer\>*  
-Default value : *2*  
+Values : *\<any valid integer\>*  
+Default value : *5*  
 Context : *global*, *multisite*  
-The number of requests to put in queue before rejecting requests.
+The number of requests to put in queue before rejecting requests.  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_BURST_1`, `LIMIT_REQ_BURST_2`, `LIMIT_REQ_BURST_3`, ...
+
+`LIMIT_REQ_DELAY`  
+Values : *\<any valid float\>*  
+Default value : *1*  
+Context : *global*, *multisite*  
+The number of seconds to wait before requests in queue are processed. Values like `0.1`, `0.01` or `0.001` are also accepted.  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_DELAY_1`, `LIMIT_REQ_DELAY_2`, `LIMIT_REQ_DELAY_3`, ...
 
 `LIMIT_REQ_CACHE`  
 Values : *Xm* | *Xk*    
