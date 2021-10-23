@@ -945,7 +945,7 @@
             },
             {
                 "context": "multisite",
-                "default": "no",
+                "default": "yes",
                 "env": "USE_REMOTE_API",
                 "id": "use-remote-api",
                 "label": "Use a remote service for enhanced security",
@@ -954,7 +954,7 @@
             },
             {
                 "context": "global",
-                "default": "",
+                "default": "https://api.bunkerity.com/bunkerized",
                 "env": "REMOTE_API_SERVER",
                 "id": "remote-api-server",
                 "label": "The URL of the remote service",

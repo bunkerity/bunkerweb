@@ -690,12 +690,12 @@ Unlike containers, Linux integration can be tedious because bunkerized-nginx has
 
 First of all you will need to install bunkerized-nginx. The recommended way is to use the official installer script :
 ```shell
-$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.1/linux-install.sh -o /tmp/bunkerized-nginx.sh
+$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.2/linux-install.sh -o /tmp/bunkerized-nginx.sh
 ```
 
 Before executing it, you should also check the signature :
 ```shell
-$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.1/linux-install.sh.asc -o /tmp/bunkerized-nginx.sh.asc
+$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.2/linux-install.sh.asc -o /tmp/bunkerized-nginx.sh.asc
 $ gpg --auto-key-locate hkps://keys.openpgp.org --locate-keys contact@bunkerity.com
 $ gpg --verify /tmp/bunkerized-nginx.sh.asc /tmp/bunkerized-nginx.sh
 ```
