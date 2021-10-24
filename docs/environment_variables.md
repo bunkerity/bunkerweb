@@ -238,7 +238,7 @@ You can set multiple url/host by adding a suffix number to the variable name lik
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*, *multisite*  
-Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Ssecurity tools will also then work correctly.
+Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Security tools will also then work correctly.
 
 `PROXY_REAL_IP_FROM`  
 Values : *\<list of trusted IP addresses and/or networks separated with spaces\>*  
