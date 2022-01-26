@@ -1296,6 +1296,15 @@
             },
             {
                 "context": "multisite",
+                "default": "no",
+                "env": "PROXY_PROTOCOL",
+                "id": "proxy-protocol",
+                "label": "Enable proxy protocol",
+                "regex": "^(yes|no)$",
+                "type": "checkbox"
+            },
+            {
+                "context": "multisite",
                 "default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                 "env": "PROXY_REAL_IP_FROM",
                 "id": "proxy-real-ip-from",
