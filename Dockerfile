@@ -1,4 +1,4 @@
-FROM nginx:1.20.1-alpine
+FROM nginx:1.20.2-alpine
 
 COPY . /tmp/bunkerized-nginx-docker
 COPY helpers/install.sh /tmp/install.sh
