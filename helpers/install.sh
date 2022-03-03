@@ -549,7 +549,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-dns" do_and_check_cmd make PREFIX=/o
 
 # Download and install lua-resty-session
 echo "[*] Clone bungle/lua-resty-session"
-git_secure_clone https://github.com/bungle/lua-resty-session.git 2cd1f8484fdd429505ac33abf7a44adda1f367bf
+git_secure_clone https://github.com/bungle/lua-resty-session.git e6bf2630c90df7b3db35e859f0aa7e096af3e918
 echo "[*] Install lua-resty-session"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/lua-resty-session/lib/resty/* /opt/bunkerized-nginx/deps/lib/lua/resty
 
@@ -561,7 +561,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-random" do_and_check_cmd make PREFIX
 
 # Download and install lua-resty-string
 echo "[*] Clone openresty/lua-resty-string"
-git_secure_clone https://github.com/openresty/lua-resty-string.git 3624678ca1c7c32e2fb16c18b7511863e074d542
+git_secure_clone https://github.com/openresty/lua-resty-string.git b192878f6ed31b0af237935bbc5a8110a3c2256c
 echo "[*] Install lua-resty-string"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-string" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps install
 
@@ -590,7 +590,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-http" do_and_check_cmd make PREFIX=/
 
 # Download and install lualogging
 echo "[*] Clone Neopallium/lualogging"
-git_secure_clone https://github.com/lunarmodules/lualogging.git 5973188a1f8fc31abd98aceed2a4853986d779e9
+git_secure_clone https://github.com/lunarmodules/lualogging.git 0bc4415de03ff1a99c92c02a5bed14a45b078079
 echo "[*] Install lualogging"
 do_and_check_cmd cp -r /tmp/bunkerized-nginx/lualogging/src/* /opt/bunkerized-nginx/deps/lib/lua
 
@@ -604,7 +604,7 @@ CHANGE_DIR="/tmp/bunkerized-nginx/luasocket" do_and_check_cmd make prefix=/opt/b
 
 # Download, compile and install luasec
 echo "[*] Clone brunoos/luasec"
-git_secure_clone https://github.com/brunoos/luasec.git d5df31561751ec0d4098dfc09c92ece215a56a5a
+git_secure_clone https://github.com/brunoos/luasec.git d7161ca0267c0d7a8581a4493f26927c119116de
 echo "[*] Compile luasec"
 CHANGE_DIR="/tmp/bunkerized-nginx/luasec" do_and_check_cmd make INC_PATH=-I/opt/bunkerized-nginx/deps/include linux -j $NTASK
 echo "[*] Install luasec"
