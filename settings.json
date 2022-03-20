@@ -217,7 +217,7 @@
                 "env": "BLACKLIST_IP_LIST",
                 "id": "blacklist-ip-list",
                 "label": "Blacklist ip list",
-                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "regex": "^((((\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}(/\\d+)?)|(([0-9A-Ea-z]{0,4})::?){1,7}([0-9a-z]{0,4})(/\\d+)?) ?))*$",
                 "type": "text"
             },
             {
@@ -895,7 +895,7 @@
                 "env": "API_WHITELIST_IP",
                 "id": "api-whitelist-ip",
                 "label": "API whitelist IP",
-                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "regex": "^((((\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}(/\\d+)?)|(([0-9A-Ea-z]{0,4})::?){1,7}([0-9a-z]{0,4})(/\\d+)?) ?))*$",
                 "type": "text"
             },
             {
@@ -1300,7 +1300,7 @@
                 "env": "PROXY_REAL_IP_FROM",
                 "id": "proxy-real-ip-from",
                 "label": "Proxy real ip from",
-                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "regex": "^((((\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}(/\\d+)?)|(([0-9A-Ea-z]{0,4})::?){1,7}([0-9a-z]{0,4})(/\\d+)?) ?))*$",
                 "type": "text"
             },
             {
@@ -1341,7 +1341,7 @@
                 "env": "WHITELIST_IP_LIST",
                 "id": "whitelist-ip-list",
                 "label": "Whitelist ip list",
-                "regex": "^(\\d+.\\d+.\\d+.\\d+(/\\d+)? ?)*$",
+                "regex": "^((((\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}(/\\d+)?)|(([0-9A-Ea-z]{0,4})::?){1,7}([0-9a-z]{0,4})(/\\d+)?) ?))*$",
                 "type": "text"
             },
             {

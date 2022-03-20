@@ -46,6 +46,9 @@ class Configurator :
 				real_var = "_".join(var.split("_")[:-1])
 			else :
 				real_var = "_".join(var.split("_")[:-1][1:])
+		if "#" in value:
+			print("Warning ! Avoid using yaml comments at the end of variable '#'"+
+				  " this could have a huge speed impact in some cases. VAR: "+ var+"="+value)
 		if real_var == "" :
 			return False, "doesn't exist"
 		elif not re.search(self.__settings[real_var]["regex"], value) :
