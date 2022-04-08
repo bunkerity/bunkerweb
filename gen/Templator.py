@@ -103,7 +103,7 @@ class Templator :
 				f.write(output)
 		self.__save_config(type, real_config)
 
-	@jinja2.contextfunction
+	@jinja2.pass_context
 	def has_value(context, name, value) :
 		for k, v in context.items() :
 			if (k == name or k.endswith("_" + name)) and v == value :
