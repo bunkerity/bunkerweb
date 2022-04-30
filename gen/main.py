@@ -50,10 +50,13 @@ if __name__ == "__main__" :
 	configurator.load_variables(variables)
 	config = configurator.get_config()
 
-	# TODO : find a proper way to remove old sites
-	env_list = glob.glob(args.output + "/**/*.env", recursive=True)
-	for env in env_list :
-		os.remove(env)
+	# Remove old files
+	files = glob.glob(args.output + "/*")
+	for file in files :
+		if (file.endswith(".conf") or file.endswith(".env")) and os.path.isfile(file) and not os.path.islink(file) :
+			os.remove(file)
+		elif os.path.isdir(file) and not os.path.islink(file) :
+			shutil.rmtree(file, ignore_errors=False)
 
 	# Generate the files from templates and config
 	templator = Templator(config, args.templates, args.output, args.target)

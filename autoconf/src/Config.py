@@ -1,54 +1,43 @@
 #!/usr/bin/python3
 
-import utils
-import subprocess, shutil, os, traceback, requests, time
+import subprocess, shutil, os, traceback, requests, time, dns.resolver, io, tarfile
+
+import Controller
+
+from logger import log
+
+CONFIGS = {
+	"conf": "/etc/nginx",
+	"letsencrypt": "/etc/letsencrypt",
+	"http": "/http-confs",
+	"server": "/server-confs",
+	"modsec": "/modsec-confs",
+	"modsec-crs": "/modsec-crs-confs",
+	"acme": "/acme-challenge"
+}
 
 class Config :
 
-	def __init__(self, swarm, api) :
-		self.__swarm = swarm
-		self.__api = api
+	def __init__(self, type, api_uri, http_port="8080") :
+		self.__type = type
+		self.__api_uri = api_uri
+		self.__http_port = http_port
 
 	def __jobs(self) :
-		utils.log("[*] Starting jobs")
+		log("config", "INFO", "starting jobs ...")
 		proc = subprocess.run(["/bin/su", "-c", "/opt/bunkerized-nginx/entrypoint/jobs.sh", "nginx"], capture_output=True)
 		stdout = proc.stdout.decode("ascii")
 		stderr = proc.stderr.decode("ascii")
 		if len(stdout) > 1 :
-			utils.log("[*] Jobs stdout :")
-			utils.log(stdout)
+			log("config", "INFO", "jobs stdout :\n" + stdout)
 		if stderr != "" :
-			utils.log("[!] Jobs stderr :")
-			utils.log(stderr)
+			log("config", "ERROR", "jobs stderr :\n" + stderr)
 		if proc.returncode != 0 :
-			utils.log("[!] Jobs error : return code != 0")
+			log("config", "ERROR", "jobs error (return code = " + str(proc.returncode) + ")")
 			return False
 		return True
 
-	def swarm_wait(self, instances) :
-		try :
-			with open("/etc/nginx/autoconf", "w") as f :
-				f.write("ok")
-			utils.log("[*] Waiting for bunkerized-nginx tasks ...")
-			i = 1
-			started = False
-			while i <= 10 :
-				time.sleep(i)
-				if self.__ping(instances) :
-					started = True
-					break
-				i = i + 1
-				utils.log("[!] Waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx tasks")
-			if started :
-				utils.log("[*] bunkerized-nginx tasks started")
-				return True
-			else :
-				utils.log("[!] bunkerized-nginx tasks are not started")
-		except Exception as e :
-			utils.log("[!] Error while waiting for Swarm tasks : " + str(e))
-		return False
-
-	def generate(self, env) :
+	def gen(self, env) :
 		try :
 			# Write environment variables to a file
 			with open("/tmp/variables.env", "w") as f :
@@ -62,60 +51,145 @@ class Config :
 			stdout = proc.stdout.decode("ascii")
 			stderr = proc.stderr.decode("ascii")
 			if len(stdout) > 1 :
-				utils.log("[*] Generator output :")
-				utils.log(stdout)
+				log("config", "INFO", "generator output : " + stdout)
 			if stderr != "" :
-				utils.log("[*] Generator error :")
-				utils.log(error)
+				log("config", "ERROR", "generator error : " + stderr)
 
 			# We're done
 			if proc.returncode == 0 :
-				if self.__swarm :
+				if self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
 					return self.__jobs()
 				return True
-			utils.log("[!] Error while generating site config for " + env["SERVER_NAME"] + " : return code = " + str(proc.returncode))
+			log("config", "ERROR", "error while generating config (return code = " + str(proc.returncode) + ")")
 
 		except Exception as e :
-			utils.log("[!] Exception while generating site config : " + str(e))
+			log("config", "ERROR", "exception while generating site config : " + traceback.format_exc())
 		return False
 
 	def reload(self, instances) :
-		return self.__api_call(instances, "/reload")
+		ret = True
+		if self.__type == Controller.Type.DOCKER :
+			for instance in instances :
+				try :
+					instance.kill("SIGHUP")
+				except :
+					ret = False
+		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
+			ret = self.__api_call(instances, "/reload")
+		return ret
+
+	def send(self, instances, files="all") :
+		ret = True
+		fail = False
+		for name, path in CONFIGS.items() :
+			if files != "all" and name != files :
+				continue
+			file = self.__tarball(path)
+			if not self.__api_call(instances, "/" + name, file=file) :
+				log("config", "ERROR", "can't send config " + name + " to instance(s)")
+				fail = True
+			file.close()
+		if fail :
+			ret = False
+		return ret
+
+	def stop_temp(self, instances) :
+		return self.__api_call(instances, "/stop-temp")
+
+	def __tarball(self, path) :
+		file = io.BytesIO()
+		with tarfile.open(mode="w:gz", fileobj=file) as tar :
+			tar.add(path, arcname=".")
+		file.seek(0, 0)
+		return file
 
 	def __ping(self, instances) :
 		return self.__api_call(instances, "/ping")
 
-	def __api_call(self, instances, path) :
+	def wait(self, instances) :
 		ret = True
-		for instance_id, instance in instances.items() :
-			# Reload the instance object just in case
-			instance.reload()
-			# Reload via API
-			if self.__swarm :
-				# Send POST request on http://serviceName.NodeID.TaskID:8000/action
-				name = instance.name
-				for task in instance.tasks() :
-					if task["Status"]["State"] != "running" :
-						continue
-					nodeID = task["NodeID"]
-					taskID = task["ID"]
-					fqdn = name + "." + nodeID + "." + taskID
-					req = False
-					try :
-						req = requests.post("http://" + fqdn + ":8080" + self.__api + path)
-					except :
-						pass
-					if req and req.status_code == 200 and req.text == "ok" :
-						utils.log("[*] Sent API order " + path + " to instance " + fqdn + " (service.node.task)")
-					else :
-						utils.log("[!] Can't send API order " + path + " to instance " + fqdn + " (service.node.task)")
-						ret = False
-			# Send SIGHUP to running instance
-			elif instance.status == "running" :
-				try :
-					instance.kill("SIGHUP")
-					utils.log("[*] Sent SIGHUP signal to bunkerized-nginx instance " + instance.name + " / " + instance.id)
-				except docker.errors.APIError as e :
-					utils.log("[!] Docker error while sending SIGHUP signal : " + str(e))
-					ret = False
+		if self.__type == Controller.Type.DOCKER :
+			ret = self.__wait_docker(instances)
+		elif self.__type == Controller.Type.SWARM or self.__type == Controller.Type.KUBERNETES :
+			ret = self.__wait_api(instances)
 		return ret
+
+	def __wait_docker(self, instances) :
+		all_healthy = False
+		i = 0
+		while i < 120 :
+			one_not_healthy = False
+			for instance in instances :
+				instance.reload()
+				if instance.attrs["State"]["Health"]["Status"] != "healthy" :
+					one_not_healthy = True
+					break
+			if not one_not_healthy :
+				all_healthy = True
+				break
+			time.sleep(1)
+			i += 1
+		return all_healthy
+
+	def __wait_api(self, instances) :
+		try :
+			with open("/etc/nginx/autoconf", "w") as f :
+				f.write("ok")
+			i = 1
+			started = False
+			while i <= 10 :
+				time.sleep(i)
+				if self.__ping(instances) :
+					started = True
+					break
+				i = i + 1
+				log("config", "INFO", "waiting " + str(i) + " seconds before retrying to contact bunkerized-nginx instances")
+			if started :
+				log("config", "INFO", "bunkerized-nginx instances started")
+				return True
+			else :
+				log("config", "ERROR", "bunkerized-nginx instances are not started")
+		except Exception as e :
+			log("config", "ERROR", "exception while waiting for bunkerized-nginx instances : " + traceback.format_exc())
+		return False
+
+	def __api_call(self, instances, path, file=None) :
+		ret = True
+		nb = 0
+		urls = []
+		if self.__type == Controller.Type.SWARM :
+			for instance in instances :
+				name = instance.name
+				try :
+					dns_result = dns.resolver.query("tasks." + name)
+					for ip in dns_result :
+						urls.append("http://" + ip.to_text() + ":" + self.__http_port + self.__api_uri + path)
+				except :
+					ret = False
+		elif self.__type == Controller.Type.KUBERNETES :
+			for instance in instances :
+				name = instance.metadata.name
+				try :
+					dns_result = dns.resolver.query(name + "." + instance.metadata.namespace + ".svc.cluster.local")
+					for ip in dns_result :
+						urls.append("http://" + ip.to_text() + ":" + self.__http_port + self.__api_uri + path)
+				except :
+					ret = False
+
+		for url in urls :
+			req = None
+			try :
+				if file == None :
+					req = requests.post(url)
+				else :
+					file.seek(0, 0)
+					req = requests.post(url, files={'file': file})
+			except :
+				pass
+			if req and req.status_code == 200 and req.text == "ok" :
+				log("config", "INFO", "successfully sent API order to " + url)
+				nb += 1
+			else :
+				log("config", "INFO", "failed API order to " + url)
+				ret = False
+		return ret and nb > 0

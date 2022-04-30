@@ -6,7 +6,7 @@ bunkerized-nginx comes with a set of predefined security settings that you can (
 
 Here is a list of miscellaneous environment variables related more or less to security :
 - `MAX_CLIENT_SIZE=10m` : maximum size of client body
-- `ALLOWED_METHODS=GET|POST|HEAD` : list of HTTP methos that clients are allowed to use
+- `ALLOWED_METHODS=GET|POST|HEAD` : list of HTTP methods that clients are allowed to use
 - `DISABLE_DEFAULT_SERVER=no` : enable/disable the default server (i.e. : should your server respond to unknown Host header ?)
 - `SERVER_TOKENS=off` : enable/disable sending the version number of nginx
 
@@ -26,11 +26,11 @@ Here is a list of environment variables and the corresponding default value rela
 
 Using Let's Encrypt with the `AUTO_LETS_ENCRYPT=yes` environment variable is the easiest way to add HTTPS supports to your web services if they are connected to internet and you have public DNS A record(s).
 
-You can also set the `EMAIL_LETS_ENCRYPT` environment variable if you want to receive notifications from Let's Encrypt (e.g. : expiration).
+You can also set the `EMAIL_LETS_ENCRYPT` environment variable if you want to receive notifications from Let's Encrypt like expiration alerts.
 
 ### Custom certificate(s)
 
-If you have security constraints (e.g : local network, custom PKI, ...) you can use custom certificates of your choice and tell bunkerized-nginx to use them with the following environment variables :
+If you have security constraints (e.g., local network, custom PKI, ...) you can use custom certificates of your choice and tell bunkerized-nginx to use them with the following environment variables :
 - `USE_CUSTOM_HTTPS=yes`
 - `CUSTOM_HTTPS_CERT=/path/inside/container/to/cert.pem`
 - `CUSTOM_HTTPS_KEY=/path/inside/container/to/key.pem`
@@ -53,10 +53,21 @@ $ docker run -p 80:8080 \
 
 Please note that if you have one or more intermediate certificate(s) in your chain of trust, you will need to provide the bundle to `CUSTOM_HTTPS_CERT` (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)).
 
-You can reload the certificate(s) (e.g. : in case of a renewal) by sending the SIGHUP/HUP signal to the container bunkerized-nginx will catch the signal and send a reload order to nginx :
+You can reload the certificate(s) (i.e., in case of a renewal) by sending a reload order to bunkerized-nginx.
 
+Docker reload :
 ```shell
 docker kill --signal=SIGHUP my-container
+```
+
+Swarm and Kubernetes reload (repeat for each node) :
+```shell
+$ curl http://node-local-ip:80/api-uri/reload
+```
+
+Linux reload :
+```shell
+$ /usr/sbin/nginx -s reload
 ```
 
 ### Self-signed certificate
@@ -74,17 +85,19 @@ $ docker run -p 80:8080 \
 
 Some important HTTP headers related to client security are sent with a default value. Sometimes it can break a web application or can be tuned to provide even more security. The complete list is available [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#security-headers).
 
-You can also remove headers (e.g. : too verbose ones) by using the `REMOVE_HEADERS` environment variable which takes a list of header name separated with space (default value = `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
+You can also remove headers (e.g., too verbose ones) by using the `REMOVE_HEADERS` environment variable which takes a list of header name separated with space (default value = `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
+
+If you want to keep your application headers and tell bunkerized-nginx to not override it, just set the corresponding environment variable to an empty value (e.g., `CONTENT_SECURITY_POLICY=`, `PERMISSIONS_POLICY=`, ...).
 
 ## ModSecurity
 
 ModSecurity is integrated and enabled by default alongside the OWASP Core Rule Set within bunkerized-nginx. To change this behaviour you can use the `USE_MODSECURITY=no` or `USE_MODSECURITY_CRS=no` environment variables.
 
-We strongly recommend to keep both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed easily and the CRS team maintains a list of exclusions for common application (e.g : wordpress, nextcloud, drupal, cpanel, ...).
+We strongly recommend to keep both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed easily and the CRS team maintains a list of exclusions for common application (e.g., wordpress, nextcloud, drupal, cpanel, ...).
 
-Tuning the CRS with bunkerized-nginx is pretty simple : you can add configuration before (i.e. : exclusions) and after (i.e. : exceptions/tuning) the rules are loaded. You just need to mount your .conf files into the /modsec-crs-confs (before CRS is loaded) and /modsec-confs (after CRS is loaded).
+Tuning the CRS with bunkerized-nginx is pretty simple : you can add configuration before and after the rules are loaded. You just need to mount your .conf files into the `/modsec-crs-confs` (before CRS is loaded) and `/modsec-confs` (after CRS is loaded) volumes. If you are using Linux integration the [special folders](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html) are `/opt/bunkerized-nginx/modsec-confs` and `/opt/bunkerized-nginx/modsec-crs-confs`.
 
-Here is an example to illustrate it :
+Here is a Docker example to illustrate it :
 
 ```shell
 $ cat /data/exclusions-crs/wordpress.conf
@@ -122,24 +135,27 @@ That kind of security measure is implemented and enabled by default in bunkerize
 
 ## Antibot challenge
 
-Attackers will certainly use automated tools to exploit/find some vulnerabilities on your web service. One countermeasure is to challenge the users to detect if it looks like a bot. It might be effective against script kiddies or "lazy" attackers.
+Attackers will certainly use automated tools to exploit/find some vulnerabilities on your web services. One countermeasure is to challenge the users to detect if they look like a bot. It might be effective against script kiddies or "lazy" attackers.
 
 You can use the `USE_ANTIBOT` environment variable to add that kind of checks whenever a new client is connecting. The available challenges are : `cookie`, `javascript`, `captcha` and `recaptcha`. More info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#antibot).
 
 ## External blacklists
 
+### Distributed
+
+**This feature is in beta and will be improved regularly.**
+
+You can benefit from a distributed blacklist shared among all of the bunkerized-nginx users.
+
+Each time a bunkerized-nginx instance detect a bad request, the offending IP is sent to a remote API and will enrich a database. An extract of the top malicious IP is downloaded on a periodic basis and integrated into bunkerized-nginx as a blacklist.
+
+This feature is controlled with the `USE_REMOTE_API=yes` environment variable.
+
+**To avoid poisoning, in addition to the various security checks made by the API we only mark IP as bad in the database if it has been seen by one of our honeypots under our control.**
+
 ### DNSBL
 
 Automatic checks on external DNS BlackLists are enabled by default with the `USE_DNSBL=yes` environment variable. The list of DNSBL zones is also configurable, you just need to edit the `DNSBL_LIST` environment variable which contains the following value by default `bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org`.
-
-### CrowdSec
-
-CrowdSec is not enabled by default because it's more than an external blacklists and needs some extra work to get it working. But bunkerized-nginx is fully working with CrowdSec, here are the related environment variables :
-- `USE_CROWDSEC=no` : enable/disable CrowdSec checks before we authorize a client
-- `CROWDSEC_HOST=` : full URL to your CrowdSec instance API
-- `CROWDSEC_KEY=` : bouncer key given from **cscli bouncer add MyBouncer**
-
-You will also need to share the logs generated by bunkerized-nginx with your CrowdSec instance. One approach is to send the logs to a syslog server which is writing the logs to the file system and then CrowdSec can easily read the logs. If you want to give it a try, you have a concrete example on how to use CrowdSec with bunkerized-nginx [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/crowdsec).
 
 ### User-Agents
 
@@ -169,12 +185,16 @@ This list contains bad referrers domains known for spamming (downloaded from [he
 
 ### Requests
 
-To limit bruteforce attacks we decided to use the [rate limiting feature in nginx](https://www.nginx.com/blog/rate-limiting-nginx/) so attackers will be limited to X request(s)/s for the same resource. That kind of protection might be useful against other attacks too (e.g. : blind SQL injection).
+To limit bruteforce attacks or rate limit access to your API you can use the "request limit" feature so attackers will be limited to X request(s) within a period of time for the same resource. That kind of protection might be useful against other attacks too (e.g., blind SQL injection).
 
 Here is the list of related environment variables and their default value :
 - `USE_LIMIT_REQ=yes` : enable/disable request limiting
-- `LIMIT_REQ_RATE=1r/s` : the rate to apply for the same resource
-- `LIMIT_REQ_BURST=2` : the number of request tu put in a queue before effectively rejecting requests
+- `LIMIT_REQ_URL=` : the URL you want to protect, use `/` to apply the limit for all URL
+- `LIMIT_REQ_RATE=1r/s` : the rate to apply for the resource, valid period are : `s` (second), `m` (minute), `h` (hour) and `d` (day)
+- `LIMIT_REQ_BURST=5 : the number of request tu put in a queue before effectively rejecting requests
+- `LIMIT_REQ_DELAY=1` : the number of seconds to wait before we proceed requests in queue
+
+Please note that you can apply different rate to different URL by appending a number as suffix (more info [here](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#requests-limiting)).
 
 ### Connections
 
@@ -197,6 +217,8 @@ You can quickly protect sensitive resources (e.g. : admin panels) by requiring H
 - `AUTH_BASIC_PASSWORD=changeme` : the password required
 - `AUTH_BASIC_TEXT=Restricted area` : the text that will be displayed to the user
 
+Please note that bunkerized-nginx also supports [Authelia](https://github.com/authelia/authelia) for authentication (see the corresponding [environment variables](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html#authelia) and a [full example](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/authelia)).
+
 ## Whitelisting
 
 Adding extra security can sometimes trigger false positives. Also, it might be not useful to do the security checks for specific clients because we decided to trust them. Bunkerized-nginx supports two types of whitelist : by IP address and by reverse DNS.
@@ -217,47 +239,16 @@ Here is the list of related environment variables and their default value :
 - `USE_BLACKLIST_REVERSE=yes` : enable/disable blacklisting by reverse DNS
 - `BLACKLIST_REVERSE_LIST=.shodan.io` : the list of reverse DNS suffixes to never trust
 
-## Web UI
-
-Mounting the docker socket in a container which is facing the network, like we do with the [web UI](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html#web-ui), is not a good security practice. In case of a vulnerability inside the application, attackers can freely use the Docker socket and the whole host can be compromised.
-
-A possible workaround is to use the [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy) image which acts as a reverse proxy between the application and the Docker socket. It can allow/deny the requests made to the Docker API.
-
-Before starting the web UI, you need to fire up the docker-socket-proxy (we also need a network because of inter-container communication) :
-
-```shell
-docker network create mynet
-```
-
-```shell
-docker run --name mysocketproxy \
-           --network mynet \
-           -v /var/run/docker.sock:/var/run/docker.sock:ro \
-           -e POST=1 \
-           -e CONTAINERS=1 \
-           tecnativa/docker-socket-proxy
-```
-
-You can now start the web UI container and use the `DOCKER_HOST` environment variable to define the Docker API endpoint :
-
-```shell
-docker run --network mynet \
-           -v autoconf:/etc/nginx \
-           -e ABSOLUTE_URI=https://my.webapp.com/admin/ \
-           -e DOCKER_HOST=tcp://mysocketproxy:2375 \
-           bunkerity/bunkerized-nginx-ui
-```
-
 ## Plugins
 
-Some security features can be added through the plugins system (e.g. : ClamAV). You will find more info in the [plugins section](https://bunkerized-nginx.readthedocs.io/en/latest/plugins.html).
+Some security features can be added through the plugins system (e.g., ClamAV, CrowdSec, ...). You will find more info in the [plugins section](https://bunkerized-nginx.readthedocs.io/en/latest/plugins.html).
 
 ## Container hardening
 
 You will find a ready to use docker-compose.yml file focused on container hardening [here](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/hardened).
 
 ### Drop capabilities
-By default, *bunkerized-nginx* runs as non-root user inside the container and should not use any of the default [capabilities](https://docs.docker.com/engine/security/#linux-kernel-capabilities) allowed by Docker. You can safely remove all capabilities to harden the container :
+By default, bunkerized-nginx runs as non-root user inside the container and should not use any of the default [capabilities](https://docs.docker.com/engine/security/#linux-kernel-capabilities) allowed by Docker. You can safely remove all capabilities to harden the container :
 
 ```shell
 docker run ... --drop-cap=all ... bunkerity/bunkerized-nginx

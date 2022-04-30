@@ -16,20 +16,20 @@ services:
       - ./letsencrypt:/etc/letsencrypt
       - autoconf:/etc/nginx
     environment:
-      - SERVER_NAME=admin.example.com                          # replace with your domain
+      - SERVER_NAME=admin.example.com                                # replace with your domain
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
       - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
+      - USE_API=yes
+      - API_URI=/ChangeMeToSomethingHardToGuess                      # change it to something hard to guess + must match API_URI from myui service
       - admin.example.com_SERVE_FILES=no
-      - admin.example.com_USE_AUTH_BASIC=yes
-      - admin.example.com_AUTH_BASIC_USER=admin                # change it to something hard to guess
-      - admin.example.com_AUTH_BASIC_PASSWORD=admin            # change it to something hard to guess
       - admin.example.com_USE_REVERSE_PROXY=yes
-      - admin.example.com_REVERSE_PROXY_URL=/admin/            # change it to something hard to guess
-      - admin.example.com_REVERSE_PROXY_HOST=http://myui:5000/  
+      - admin.example.com_REVERSE_PROXY_URL=/admin/                  # change it to something hard to guess
+      - admin.example.com_REVERSE_PROXY_HOST=http://myui:5000
+      - admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin # must match REVERSE_PROXY_URL
       - admin.example.com_USE_MODSECURITY=no
     labels:
       - "bunkerized-nginx.UI"
@@ -42,8 +42,11 @@ services:
     volumes:
       - autoconf:/etc/nginx
     environment:
-      - ABSOLUTE_URI=https://admin.example.com/admin/          # change it to your full URI
+      - ABSOLUTE_URI=https://admin.example.com/admin/ # change it to your full URI
       - DOCKER_HOST=tcp://myuiproxy:2375
+      - API_URI=/ChangeMeToSomethingHardToGuess       # must match API_URI from bunkerized-nginx
+      - ADMIN_USERNAME=admin                          # change it to something hard to guess
+      - ADMIN_PASSWORD=changeme                       # change it to a good password
 
   myuiproxy:
     image: tecnativa/docker-socket-proxy
@@ -51,8 +54,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - POST=1
       - CONTAINERS=1
+      - SWARM=1
+      - SERVICES=1
 
 volumes:
   autoconf:

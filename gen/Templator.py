@@ -45,15 +45,33 @@ class Templator :
 		real_config["NGINX_PREFIX"] = self.__target_path
 		if self.__config_global["MULTISITE"] == "yes" and type == "site" :
 			real_config["NGINX_PREFIX"] += first_server + "/"
-			real_config["ROOT_FOLDER"] += "/" + first_server
+			if not real_config["ROOT_FOLDER"].endswith("/" + first_server) :
+				real_config["ROOT_FOLDER"] += "/" + first_server
 		if real_config["ROOT_SITE_SUBFOLDER"] != "" :
 			real_config["ROOT_FOLDER"] += "/" + real_config["ROOT_SITE_SUBFOLDER"]
 		return real_config
 
+	def __filter_var(self, variable) :
+		filters = ["FIRST_SERVER", "NGINX_PREFIX"]
+		for filter in filters :
+			if variable == filter or variable.endswith("_" + filter) :
+				return True
+		return False
+
 	def __save_config(self, type, config) :
+		first_servers = config["SERVER_NAME"].split(" ")
 		data = ""
 		for variable, value in config.items() :
-			data += variable + "=" + value + "\n"
+			if self.__filter_var(variable) :
+				continue
+			add = True
+			if type == "global" :
+				for first_server in first_servers :
+					if variable.startswith(first_server + "_") :
+						add = False
+						break
+			if add :
+				data += variable + "=" + value + "\n"
 		file = self.__output_path
 		if type == "global" :
 			file += "/global.env"

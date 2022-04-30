@@ -50,7 +50,7 @@ copyright = '2021, bunkerity'
 author = 'bunkerity'
 
 # The full version, including alpha/beta/rc tags
-release = 'v1.2.7'
+release = 'v1.3.2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -92,3 +92,8 @@ else :
 
 # custom robots.txt
 html_extra_path = ['robots.txt']
+
+# toc depth
+html_theme_options = {
+	"navigation_depth": 2
+}

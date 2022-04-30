@@ -2,21 +2,17 @@
 
 {% block content %}
 
-<div class="d-flex text-center justify-content-center">
+<div class="row justify-content-center">
 
-	<div class="card border-0" style="width: 30rem;">
+	<div class="col col-12">
+		<img src="img/logo.png" style="width: 300px;" />
+	</div>
 
-		<img src="img/logo.png" class="card-img-top" />
-
-		<div class="row row-cols-1 row-cols-md-2">
-			<div class="col pt-3">
-				<span class="badge bg-primary">{{ instances_number }}</span> bunkerized-nginx instances
-			</div>
-			<div class="col pt-3">
-				<span class="badge bg-primary">{{ services_number }}</span> web services
-			</div>
-		</div>
-
+	<div class="col col-12 mt-20">
+		<span class="badge bg-primary">{{ instances_number }}</span> bunkerized-nginx instances
+	</div>
+	<div class="col col-12 mt-20">
+		<span class="badge bg-primary">{{ services_number }}</span> web services
 	</div>
 
 </div>

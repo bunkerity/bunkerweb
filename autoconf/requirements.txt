@@ -2,3 +2,4 @@ docker
 requests
 jinja2
 kubernetes
+dnspython

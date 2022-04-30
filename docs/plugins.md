@@ -1,10 +1,11 @@
 # Plugins
 
-Bunkerized-nginx comes with a plugin system that lets you extend the core with extra security features. To add a plugin you will need to download it, edit its settings and mount it to the `/plugins` volume.
+Bunkerized-nginx comes with a plugin system that lets you extend the core with extra security features.
 
 ## Official plugins
 
 - [ClamAV](https://github.com/bunkerity/bunkerized-nginx-clamav) : automatically scan uploaded files and deny access if a virus is detected
+- [CrowdSec](https://github.com/bunkerity/bunkerized-nginx-crowdsec) : CrowdSec bouncer integration within bunkerized-nginx
 
 ## Community plugins
 
@@ -13,9 +14,10 @@ If you have made a plugin and want it to be listed here, feel free to [create a 
 ## Use a plugin
 
 The generic way of using a plugin consists of :
-- Download it to a folder (e.g. : myplugin/)
-- Edit the settings inside the plugin.json files (e.g. : myplugin/plugin.json)
-- Mount the plugin folder to the /plugins/plugin-id inside the container (e.g. : /where/is/myplugin:/plugins/myplugin)
+- Download the plugin into your local drive (e.g., git clone)
+- Edit the settings inside the plugin.json files (e.g., myplugin/plugin.json)
+- If you are using a container based integration, you need to mount it to the [plugins special folder](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html#plugins) inside the container (e.g., /where/is/myplugin:/plugins/myplugin)
+- If you are using Linux integration, copy the downloaded plugin folder to the [plugins special folder](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html#plugins) (e.g., cp -r myplugin /plugins)
 
 To check if the plugin is loaded you should see log entries like that :
 
@@ -52,6 +54,20 @@ Settings names and default values can be choosen freely. There will be no confli
 local M		= {}
 local logger	= require "logger"
 
+-- this function will be called at startup
+-- the name MUST be init without any argument
+function M.init ()
+	-- the logger.log function lets you write into the logs
+	-- only ERROR level is available in init()
+	logger.log(ngx.ERR, "MyPlugin", "*NOT AN ERROR* init called")
+
+	-- here is how to retrieve a setting
+	local my_setting = ngx.shared.plugins_data:get("pluginid_MY_SETTING")
+	logger.log(ngx.ERR, "MyPlugin", "*NOT AN ERROR* my_setting = " .. my_setting)
+	
+	return true
+end
+
 -- this function will be called for each request
 -- the name MUST be check without any argument
 function M.check ()
@@ -66,7 +82,6 @@ function M.check ()
 	if my_setting == "block" then
 		ngx.exit(ngx.HTTP_FORBIDDEN)
 	end
-
 end
 
 return M

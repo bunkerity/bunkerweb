@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  mybunkerized:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./www:/www:ro
+      - bunkerized-vol:/etc/nginx
+    environment:
+      - SERVER_NAME=
+      - MULTISITE=yes
+      - AUTO_LETS_ENCRYPT=yes
+    labels:
+      - "bunkerized-nginx.AUTOCONF"
+    networks:
+      - services-net
+
+  myautoconf:
+    image: bunkerity/bunkerized-nginx-autoconf
+    restart: always
+    volumes_from:
+      - mybunkerized
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - mybunkerized
+
+volumes:
+  bunkerized-vol:
+
+networks:
+  services-net:
+    name: services-net

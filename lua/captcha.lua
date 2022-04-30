@@ -4,19 +4,19 @@ local base64	= require "misc.base64"
 
 function M.get_challenge ()
 	local cap = captcha.new()
-	cap:font("/usr/local/lib/lua/misc/Vera.ttf")
+	cap:font("/opt/bunkerized-nginx/lua/misc/Vera.ttf")
 	cap:generate()
 	return cap:jpegStr(70), cap:getStr()
 end
 
 function M.get_code (img, antibot_uri)
 	-- get template
-	local f = io.open("/antibot/captcha.html", "r")
+	local f = io.open("/opt/bunkerized-nginx/antibot/captcha.html", "r")
 	local template = f:read("*all")
 	f:close()
 
 	-- get captcha code
-	f = io.open("/antibot/captcha.data", "r")
+	f = io.open("/opt/bunkerized-nginx/antibot/captcha.data", "r")
 	local captcha_data = f:read("*all")
 	f:close()
 

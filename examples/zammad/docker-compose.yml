@@ -125,7 +125,7 @@ services:
       - SERVER_NAME=www.example.com                                             # replace with your domain 
       - REVERSE_PROXY_URL_1=/ws
       - REVERSE_PROXY_HOST_1=http://zammad-websocket:6042
-      - REVERSE_PROXY_WS=yes                                                    # used to allow websocket redirect
+      - REVERSE_PROXY_WS_1=yes                                                    # used to allow websocket redirect
       - REVERSE_PROXY_URL_2=/
       - REVERSE_PROXY_HOST_2=http://zammad-railsserver:3000
       - ALLOWED_METHODS=GET|POST|HEAD|PUT|OPTIONS|DELETE|PATCH                  # All methods allowed by modSecurity used by default in zammad

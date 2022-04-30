@@ -16,7 +16,7 @@ jobs:
       # so we need to build the image the traditional way
       - name: Temp build to check security issues
         run: docker build -t bunkerized-nginx .
-
+   
       - name: Run Trivy security scanner
         uses: aquasecurity/trivy-action@master
         with:

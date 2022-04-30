@@ -87,23 +87,47 @@ Default value : *8443*
 Context : *global*  
 The HTTPS port number used by nginx inside the container.
 
-`WORKER_CONNECTIONS`
+`WORKER_CONNECTIONS`  
 Values : *\<any positive integer\>*  
 Default value : 1024  
 Context : *global*  
 Sets the value of the [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) directive.
 
-`WORKER_RLIMIT_NOFILE`
+`WORKER_RLIMIT_NOFILE`  
 Values : *\<any positive integer\>*  
 Default value : 2048  
 Context : *global*  
 Sets the value of the [worker_rlimit_nofile](https://nginx.org/en/docs/ngx_core_module.html#worker_rlimit_nofile) directive.
 
+`WORKER_PROCESSES`  
+Values : *\<any positive integer or auto\>*  
+Default value : auto  
+Context : *global*  
+Sets the value of the [worker_processes](https://nginx.org/en/docs/ngx_core_module.html#worker_processes) directive.
+
 `INJECT_BODY`  
-Values : *\<any HTML code\>*
+Values : *\<any HTML code\>*  
 Default value :  
 Context : *global*, *multisite*  
 Use this variable to inject any HTML code you want before the \</body\> tag (e.g. : `\<script src="https://..."\>`)
+
+`REDIRECT_TO`  
+Values : *\<any valid absolute URI\>*  
+Default value :  
+Context : *global*, *multisite*  
+Use this variable if you want to redirect one server to another (e.g., redirect apex to www : `REDIRECT_TO=https://www.example.com`).
+
+`REDIRECT_TO_REQUEST_URI`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*, *multisite*  
+When set to yes and `REDIRECT_TO` is set it will append the requested path to the redirection (e.g., https://example.com/something redirects to https://www.example.com/something).
+
+`CUSTOM_HEADER`  
+Values : *\<HeaderName: HeaderValue\>*  
+Default value :  
+Context : *global*, *multisite*  
+Add custom HTTP header of your choice to clients. You can add multiple headers by appending a number as a suffix of the environment variable : `CUSTOM_HEADER_1`, `CUSTOM_HEADER_2`, `CUSTOM_HEADER_3`, ...
 
 ### Information leak
 
@@ -189,6 +213,20 @@ Context : *global*, *multisite*
 Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* when the corresponding `REVERSE_PROXY_HOST` is a WebSocket server.  
 You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_WS_1`, `REVERSE_PROXY_WS_2`, `REVERSE_PROXY_WS_3`, ...
 
+`REVERSE_PROXY_BUFFERING`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* then the [proxy_buffering](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering) directive will be set to `on` or `off` otherwise.  
+You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_BUFFERING_1`, `REVERSE_PROXY_BUFFERING_2`, `REVERSE_PROXY_BUFFERING_3`, ...
+
+`REVERSE_PROXY_KEEPALIVE`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+Only valid when `USE_REVERSE_PROXY` is set to *yes*. Set it to *yes* to enable keepalive connections with the backend (needs a HTTP 1.1 backend) or *no* otherwise.  
+You can set multiple url/host by adding a suffix number to the variable name like this : `REVERSE_PROXY_KEEPALIVE_1`, `REVERSE_PROXY_KEEPALIVE_2`, `REVERSE_PROXY_KEEPALIVE_3`, ...
+
 `REVERSE_PROXY_HEADERS`  
 Values : *\<list of custom headers separated with a semicolon like this : header1 value1;header2 value2...\>* 
 Default value :  
@@ -200,7 +238,7 @@ You can set multiple url/host by adding a suffix number to the variable name lik
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*, *multisite*  
-Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Ssecurity tools will also then work correctly.
+Set this environment variable to *yes* if you're using bunkerized-nginx behind a reverse proxy. This means you will see the real client address instead of the proxy one inside your logs. Security tools will also then work correctly.
 
 `PROXY_REAL_IP_FROM`  
 Values : *\<list of trusted IP addresses and/or networks separated with spaces\>*  
@@ -397,6 +435,12 @@ Default value : *contact@first-domain-in-server-name*
 Context : *global*, *multisite*  
 Define the contact email address declare in the certificate.
 
+`USE_LETS_ENCRYPT_STAGING`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*, *multisite*  
+When set to yes, it tells certbot to use the [staging environment](https://letsencrypt.org/docs/staging-environment/) for Let's Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.
+
 ### HTTP
 
 `LISTEN_HTTP`  
@@ -527,6 +571,8 @@ Sets the value of the [SecAuditEngine directive](https://github.com/SpiderLabs/M
 
 ## Security headers
 
+If you want to keep your application headers and tell bunkerized-nginx to not override it, just set the corresponding environment variable to an empty value (e.g., `CONTENT_SECURITY_POLICY=`, `PERMISSIONS_POLICY=`, ...).
+
 `X_FRAME_OPTIONS`  
 Values : *DENY* | *SAMEORIGIN* | *ALLOW-FROM https://www.website.net*
 Default value : *DENY*  
@@ -557,14 +603,14 @@ More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Refer
 
 `FEATURE_POLICY`  
 Values : *&lt;directive&gt; &lt;allow list&gt;*  
-Default value : *accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vibrate 'none'; vr 'none'*  
+Default value : *accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; sync-xhr 'none'; usb 'none'; wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none"*  
 Context : *global*, *multisite*  
 Tells the browser which features can be used on the website.  
 More info [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy).
 
 `PERMISSIONS_POLICY`  
 Values : *feature=(allow list)*  
-Default value : accelerometer=(), ambient-light-sensor=(), autoplay=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker=(), sync-xhr=(), usb=(), vibrate=(), vr=()  
+Default value : *accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), interest-cohort=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()*  
 Context : *global*, *multisite*  
 Tells the browser which features can be used on the website.  
 More info [here](https://www.w3.org/TR/permissions-policy-1/).
@@ -639,6 +685,20 @@ Values : *\<private key given by Google\>*
 Default value :  
 Context : *global*, *multisite*  
 The secret given by Google when `USE_ANTIBOT` is set to *recaptcha*.
+
+### Distributed blacklist
+
+`USE_REMOTE_API`  
+Values : *yes* | *no*  
+Default value : *yes*  
+Context : *global*, *multisite*  
+If set to yes, the instance will participate into the distributed blacklist shared among all other instances. The blacklist will be automaticaly downloaded on a periodic basis.
+
+`REMOTE_API_SERVER`  
+Values : *\<any valid full URL\>*  
+Default value :  
+Context : *global*  
+Full URL of the remote API used for the distributed blacklist.
 
 ### External blacklists
 
@@ -782,19 +842,34 @@ Values : *yes* | *no*
 Default value : *yes*  
 Context : *global*, *multisite*  
 If set to yes, the amount of HTTP requests made by a user for a given resource will be limited during a period of time.  
-More info rate limiting [here](https://www.nginx.com/blog/rate-limiting-nginx/) (the key used is $binary_remote_addr$uri).
+
+`LIMIT_REQ_URL`  
+Values : *\<any valid url\>*  
+Default value :  
+Context : *global*, *multisite*  
+The URL where you want to apply the request limiting. Use special value of `/` to apply it globally for all URL.  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_URL_1`, `LIMIT_REQ_URL_2`, `LIMIT_REQ_URL_3`, ...
 
 `LIMIT_REQ_RATE`  
-Values : *Xr/s* | *Xr/m*  
+Values : *Xr/s* | *Xr/m* | *Xr/h* | *Xr/d*  
 Default value : *1r/s*  
 Context : *global*, *multisite*  
-The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 1 request to the same URI and from the same IP per second.
+The rate limit to apply when `USE_LIMIT_REQ` is set to *yes*. Default is 1 request to the same URI and from the same IP per second. Possible value are : `s` (second), `m` (minute), `h` (hour) and `d` (day)).  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_RATE_1`, `LIMIT_REQ_RATE_2`, `LIMIT_REQ_RATE_3`, ...
 
 `LIMIT_REQ_BURST`  
-Values : *<any valid integer\>*  
-Default value : *2*  
+Values : *\<any valid integer\>*  
+Default value : *5*  
 Context : *global*, *multisite*  
-The number of requests to put in queue before rejecting requests.
+The number of requests to put in queue before rejecting requests.  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_BURST_1`, `LIMIT_REQ_BURST_2`, `LIMIT_REQ_BURST_3`, ...
+
+`LIMIT_REQ_DELAY`  
+Values : *\<any valid float\>*  
+Default value : *1*  
+Context : *global*, *multisite*  
+The number of seconds to wait before requests in queue are processed. Values like `0.1`, `0.01` or `0.001` are also accepted.  
+You can set multiple rules by adding a suffix number to the variable name like this : `LIMIT_REQ_DELAY_1`, `LIMIT_REQ_DELAY_2`, `LIMIT_REQ_DELAY_3`, ...
 
 `LIMIT_REQ_CACHE`  
 Values : *Xm* | *Xk*    
@@ -850,6 +925,18 @@ Values : *\<any valid absolute path\>*
 Default value : */app*  
 Context : *global*, *multisite*  
 The path where the PHP files are located inside the server specified in `REMOTE_PHP`.
+
+`LOCAL_PHP`  
+Values : *\<any valid absolute path\>*  
+Default value :  
+Context : *global*, *multisite*  
+Set the absolute path of the unix socket file of a local PHP-FPM instance to execute .php files.
+
+`LOCAL_PHP_PATH`  
+Values : *\<any valid absolute path\>*  
+Default value : */app*  
+Context : *global*, *multisite*  
+The path where the PHP files are located inside the server specified in `LOCAL_PHP`.
 
 ## Bad behavior
 
@@ -915,22 +1002,34 @@ Choose authentication mode : show a web page (`portal`) or a simple auth basic p
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*  
-Only set to *yes* when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+Only set to *yes* when you use *bunkerized-nginx* with Docker Swarm integration.
+
+`KUBERNETES_MODE`  
+Values : *yes* | *no*  
+Default value : *no*  
+Context : *global*  
+Only set to *yes* when you use bunkerized-nginx with Kubernetes integration.
 
 `USE_API`  
 Values : *yes* | *no*  
 Default value : *no*  
 Context : *global*  
-Only set to *yes* when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+Only set to *yes* when you use bunkerized-nginx with Swarm/Kubernetes integration or with the web UI.
 
 `API_URI`  
 Values : *random* | *\<any valid URI path\>*  
 Default value : *random*  
 Context : *global*  
-Set it to a random path when you use *bunkerized-nginx* with *autoconf* feature in swarm mode. More info [here](#swarm-mode).
+Only set to *yes* when you use bunkerized-nginx with Swarm/Kubernetes integration or with the web UI.
 
 `API_WHITELIST_IP`  
 Values : *\<list of IP/CIDR separated with space\>*  
 Default value : *192.168.0.0/16 172.16.0.0/12 10.0.0.0/8*  
 Context : *global*  
 List of IP/CIDR block allowed to send API order using the `API_URI` uri.
+
+`USE_REDIS`  
+Undocumented. Reserved for future use.
+
+`REDIS_HOST`  
+Undocumented. Reserved for future use.

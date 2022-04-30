@@ -290,6 +290,8 @@ elif [ "$(grep CentOS /etc/os-release)" != "" ] ; then
 	OS="centos"
 elif [ "$(grep Fedora /etc/os-release)" != "" ] ; then
 	OS="fedora"
+elif [ "$(grep Arch /etc/os-release)" != "" ] ; then
+	OS="archlinux"
 elif [ "$(grep Alpine /etc/os-release)" != "" ] ; then
 	OS="alpine"
 fi
@@ -346,6 +348,11 @@ module_hotfixes=true"
 	elif [ "$OS" = "fedora" ] ; then
 		echo "[*] Install nginx"
 		do_and_check_cmd dnf install -y nginx
+	elif [ "$OS" = "archlinux" ] ; then
+		echo "[*] Update pacman DB"
+		do_and_check_cmd pacman -Sy
+		echo "[*] Install nginx"
+		do_and_check_cmd pacman -S --noconfirm nginx
 	elif [ "$OS" = "alpine" ] ; then
 		echo "[*] Add nginx official repository"
 		get_sign_repo_key_rsa > /etc/apk/keys/nginx_signing.rsa.pub
@@ -360,10 +367,21 @@ if [ "$NGINX_VERSION" != "1.20.1" ] ; then
 	echo "/!\\ Warning : we recommend you to use nginx v1.20.1, you should uninstall your nginx version and run this script again ! /!\\"
 fi
 
+# Stop nginx on Linux
+if [ "$OS" != "alpine" ] ; then
+	echo "[*] Stop nginx service"
+	systemctl status nginx > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		do_and_check_cmd systemctl stop nginx
+	fi
+fi
+
 # Install dependencies
 echo "[*] Update packet list"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 	do_and_check_cmd apt update
+elif [ "$OS" = "archlinux" ] ; then
+	do_and_check_cmd pacman -Sy
 fi
 echo "[*] Install compilation dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
@@ -371,11 +389,14 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg patch readline-devel"
+	CENTOS_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg patch readline-devel ca-certificates"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
 	FEDORA_DEPS="git autoconf pkg-config pcre-devel automake libtool gcc-c++ make gd-devel openssl-devel wget brotli-devel gnupg libxslt-devel perl-ExtUtils-Embed gperftools-devel patch readline-devel"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
+elif [ "$OS" = "archlinux" ] ; then
+	ARCHLINUX_DEPS="git autoconf pkgconf pcre2 automake libtool gcc make gd openssl wget brotli gnupg libxslt patch readline"
+	do_and_check_cmd pacman -S --noconfirm $ARCHLINUX_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="git build autoconf libtool automake git geoip-dev yajl-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev"
 	do_and_check_cmd apk add --no-cache --virtual build $ALPINE_DEPS
@@ -450,7 +471,10 @@ CHANGE_DIR="/tmp/bunkerized-nginx/libmaxminddb-1.6.0" do_and_check_cmd make inst
 
 # Download, compile and install ModSecurity
 echo "[*] Clone SpiderLabs/ModSecurity"
-git_secure_clone https://github.com/SpiderLabs/ModSecurity.git bf881a4eda343d37629e39ede5e28b70dc4067c0
+# TODO : looks like memory leak is happening with ModSecurity 3.0.5
+# so we keep 3.0.4 until a fixed version is available
+#git_secure_clone https://github.com/SpiderLabs/ModSecurity.git bf881a4eda343d37629e39ede5e28b70dc4067c0
+git_secure_clone https://github.com/SpiderLabs/ModSecurity.git 753145fbd1d6751a6b14fdd700921eb3cc3a1d35
 echo "[*] Compile and install ModSecurity"
 # temp fix : Debian run it twice
 cd /tmp/bunkerized-nginx/ModSecurity && ./build.sh > /dev/null 2>&1
@@ -598,18 +622,19 @@ git_secure_clone https://github.com/openresty/lua-resty-redis.git 91585affcd9a8d
 echo "[*] Install lua-resty-redis"
 CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-redis" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
 
+# Download and install lua-resty-upload
+echo "[*] Clone openresty/lua-resty-upload"
+git_secure_clone https://github.com/openresty/lua-resty-upload.git 7baca92c7e741979ae5857989bbf6cc0402d6126
+echo "[*] Install lua-resty-upload"
+CHANGE_DIR="/tmp/bunkerized-nginx/lua-resty-upload" do_and_check_cmd make PREFIX=/opt/bunkerized-nginx/deps LUA_LIB_DIR=/opt/bunkerized-nginx/deps/lib/lua install
+
 # Download nginx and decompress sources
 echo "[*] Download nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
 do_and_check_cmd wget -O "/tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc" "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz.asc"
 get_sign_source_keys > /tmp/bunkerized-nginx/nginx.key
 do_and_check_cmd gpg --import /tmp/bunkerized-nginx/nginx.key
-check=$(gpg --verify /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz 2>&1 | grep "^gpg: Good signature from ")
-if [ "$check" = "" ] ; then
-	echo "[!] Wrong signature from nginx source !!!"
-	cleanup
-	exit 1
-fi
+do_and_check_cmd gpg --verify /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz.asc /tmp/bunkerized-nginx/nginx-${NGINX_VERSION}.tar.gz
 CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd tar -xvzf nginx-${NGINX_VERSION}.tar.gz
 
 # Compile dynamic modules
@@ -648,17 +673,20 @@ if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
 fi
 echo "[*] Install runtime dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="certbot git cron curl python3 python3-pip procps"
+	DEBIAN_DEPS="certbot git cron curl python3 python3-pip procps sudo"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
-	CENTOS_DEPS="certbot git crontabs curl python3 python3-pip procps"
+	CENTOS_DEPS="certbot git crontabs curl python3 python3-pip procps sudo"
 	do_and_check_cmd yum install -y $CENTOS_DEPS
 elif [ "$OS" = "fedora" ] ; then
-	FEDORA_DEPS="certbot git crontabs curl python3 python3-pip procps nginx-mod-stream"
+	FEDORA_DEPS="certbot git crontabs curl python3 python3-pip procps nginx-mod-stream sudo"
 	do_and_check_cmd dnf install -y $FEDORA_DEPS
 	# Temp fix
 	do_and_check_cmd cp /usr/lib64/nginx/modules/ngx_stream_module.so /usr/lib/nginx/modules/ngx_stream_module.so
+elif [ "$OS" = "archlinux" ] ; then
+	ARCHLINUX_DEPS="certbot git cronie curl python python-pip procps sudo"
+	do_and_check_cmd pacman -S --noconfirm $ARCHLINUX_DEPS
 elif [ "$OS" = "alpine" ] ; then
 	ALPINE_DEPS="certbot bash libgcc yajl libstdc++ openssl py3-pip git"
 	do_and_check_cmd apk add --no-cache $ALPINE_DEPS
@@ -667,10 +695,10 @@ fi
 # Clone the repo
 if [ "$OS" != "alpine" ] && [ ! -d "/tmp/bunkerized-nginx-test" ] ; then
 	echo "[*] Clone bunkerity/bunkerized-nginx"
-	#CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 09a2a4f9e531b93684b0916a5146091a818501d3
-	# TODO : do a secure clone
-	CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
-	CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev
+	CHANGE_DIR="/tmp" do_and_check_cmd git_secure_clone https://github.com/bunkerity/bunkerized-nginx.git 3d2f5e2389e5f75131ae22f822a673b92cb12cca
+	# TODO : dev only
+	#CHANGE_DIR="/tmp" do_and_check_cmd git clone https://github.com/bunkerity/bunkerized-nginx.git
+	#CHANGE_DIR="/tmp/bunkerized-nginx" do_and_check_cmd git checkout dev
 # Docker build case : simply rename the sources
 elif [ "$OS" == "alpine" ] ; then
 	do_and_check_cmd mv /tmp/bunkerized-nginx-docker /tmp/bunkerized-nginx
@@ -729,12 +757,22 @@ do_and_check_cmd cp /tmp/bunkerized-nginx/misc/variables.env /opt/bunkerized-ngi
 if [ "$OS" != "alpine" ] ; then
 	echo "[*] Copy UI"
 	do_and_check_cmd cp -r /tmp/bunkerized-nginx/ui /opt/bunkerized-nginx
-	do_and_check_cmd cp /tmp/bunkerized-nginx/ui/bunkerized-nginx-ui.service /etc/systemd/system
+	do_and_check_cmd cp /tmp/bunkerized-nginx/ui/bunkerized-nginx-ui.service /lib/systemd/system
 fi
 
 # Copy bunkerized-nginx
 echo "[*] Copy bunkerized-nginx"
 do_and_check_cmd cp /tmp/bunkerized-nginx/helpers/bunkerized-nginx /usr/local/bin
+
+# Copy VERSION
+echo "[*] Copy VERSION"
+do_and_check_cmd cp /tmp/bunkerized-nginx/VERSION /opt/bunkerized-nginx
+
+# Replace old nginx.service file
+if [ "$OS" != "alpine" ] ; then
+	do_and_check_cmd mv /lib/systemd/system/nginx.service /lib/systemd/system/nginx.service.bak
+	do_and_check_cmd cp /tmp/bunkerized-nginx/misc/nginx.service /lib/systemd/system/
+fi
 
 # Create nginx user
 if [ "$(grep "nginx:" /etc/passwd)" = "" ] ; then
@@ -787,7 +825,7 @@ fi
 # Create acme-challenge folder
 if [ ! -d "/opt/bunkerized-nginx/acme-challenge" ] ; then
 	echo "[*] Create /opt/bunkerized-nginx/acme-challenge folder"
-	do_and_check_cmd mkdir /opt/bunkerized-nginx/acme-challenge
+	do_and_check_cmd mkdir -p /opt/bunkerized-nginx/acme-challenge/.well-known/acme-challenge
 fi
 
 # Create plugins folder
@@ -802,11 +840,12 @@ do_and_check_cmd chown -R root:nginx /opt/bunkerized-nginx
 do_and_check_cmd find /opt/bunkerized-nginx -type f -exec chmod 0740 {} \;
 do_and_check_cmd find /opt/bunkerized-nginx -type d -exec chmod 0750 {} \;
 do_and_check_cmd chmod 770 /opt/bunkerized-nginx/cache
-do_and_check_cmd chmod 770 /opt/bunkerized-nginx/acme-challenge
+do_and_check_cmd chmod -R 770 /opt/bunkerized-nginx/acme-challenge
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/entrypoint/*
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/gen/main.py
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/main.py
 do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/reload.py
+do_and_check_cmd chmod 750 /opt/bunkerized-nginx/jobs/certbot-*.py
 # Set permissions for /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chown root:root /usr/local/bin/bunkerized-nginx
 do_and_check_cmd chmod 750 /usr/local/bin/bunkerized-nginx
@@ -816,10 +855,21 @@ do_and_check_cmd chmod u+rx /opt
 do_and_check_cmd chown -R nginx:nginx /etc/nginx
 do_and_check_cmd find /etc/nginx -type f -exec chmod 0774 {} \;
 do_and_check_cmd find /etc/nginx -type d -exec chmod 0775 {} \;
-# Set permissions for /etc/systemd/system/bunkerized-nginx-ui.service
+# Set permissions for systemd files and reload config
 if [ "$OS" != "alpine" ] ; then
-	do_and_check_cmd chown root:root /etc/systemd/system/bunkerized-nginx-ui.service
-	do_and_check_cmd chmod 744 /etc/systemd/system/bunkerized-nginx-ui.service
+	do_and_check_cmd chown root:root /lib/systemd/system/bunkerized-nginx-ui.service
+	do_and_check_cmd chmod 744 /lib/systemd/system/bunkerized-nginx-ui.service
+	do_and_check_cmd chown root:root /lib/systemd/system/nginx.service
+	do_and_check_cmd chmod 744 /lib/systemd/system/nginx.service
+	do_and_check_cmd systemctl daemon-reload
+fi
+# Allow RX access to others on /opt/bunkerized-nginx
+do_and_check_cmd chmod 755 /opt/bunkerized-nginx
+# Allow nginx group to do nginx reload as root
+if [ "$OS" != "alpine" ] ; then
+	do_and_check_cmd chown root:nginx /opt/bunkerized-nginx/ui/linux.sh
+	do_and_check_cmd chmod 750 /opt/bunkerized-nginx/ui/linux.sh
+	echo "nginx ALL=(root:root) NOPASSWD: /opt/bunkerized-nginx/ui/linux.sh" >> /etc/sudoers
 fi
 
 # Prepare log files and folders
@@ -865,14 +915,14 @@ do_and_check_cmd chmod 770 /var/lib/letsencrypt
 
 # Install cron
 echo "[*] Add jobs to crontab"
-if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	CRON_PATH="/var/spool/cron/crontabs/nginx"
-elif [ "$OS" = "centos" ] || [ "$OS" = "fedora" ] ; then
-	CRON_PATH="/var/spool/cron/nginx"
-elif [ "$OS" = "alpine" ] ; then
+if [ "$OS" = "alpine" ] ; then
+	CRON_SRC="/tmp/bunkerized-nginx/misc/cron"
 	CRON_PATH="/etc/crontabs/nginx"
+else
+	CRON_SRC="/tmp/bunkerized-nginx/misc/cron-linux"
+	CRON_PATH="/etc/cron.d/bunkerized-nginx"
 fi
-do_and_check_cmd cp /tmp/bunkerized-nginx/misc/cron "$CRON_PATH"
+do_and_check_cmd cp "$CRON_SRC" "$CRON_PATH"
 do_and_check_cmd chown root:nginx "$CRON_PATH"
 do_and_check_cmd chmod 740 "$CRON_PATH"
 

@@ -1,0 +1,66 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bunkerized-nginx-ingress
+  # this label is mandatory
+  labels:
+    bunkerized-nginx: "yes"
+  annotations:
+    # add any global and default environment variables here as annotations with the "bunkerized-nginx." prefix
+    # examples :
+    #bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
+    #bunkerized-nginx.USE_ANTIBOT: "javascript"
+    #bunkerized-nginx.REDIRECT_HTTP_TO_HTTPS: "yes"
+    #bunkerized-nginx.app.example.com_REVERSE_PROXY_WS: "yes"
+    #bunkerized-nginx.app.example.com_USE_MODSECURITY: "no"
+# add "static" routes here (see https://kubernetes.io/docs/concepts/services-networking/ingress/)
+# and/or add annotations to your services (see https://github.com/bunkerity/bunkerized-nginx/tree/master/examples/kubernetes)
+spec:
+  tls:
+  - hosts:
+    - app1.example.com
+  rules:
+  - host: "app1.example.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app1
+            port:
+              number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: containous/whoami
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1
+spec:
+  type: ClusterIP
+  selector:
+    app: app1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+

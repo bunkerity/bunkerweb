@@ -2,7 +2,7 @@ import socketserver, threading, os, stat
 
 from logger import log
 
-class ReloadServerHandler(socketserver.StreamRequestHandler):
+class ReloadServerHandler(socketserver.BaseRequestHandler):
 
 	def handle(self) :
 		locked = False
@@ -10,7 +10,7 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 
 			while True :
 				data = self.request.recv(512)
-				if not data or not data in [b"lock", b"reload", b"unlock"] :
+				if not data or not data in [b"lock", b"reload", b"unlock", b"acme"] :
 					break
 				if data == b"lock" :
 					self.server.controller.lock.acquire()
@@ -20,8 +20,14 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 					self.server.controller.lock.release()
 					locked = False
 					self.request.sendall(b"ok")
+				elif data == b"acme" :
+					ret = self.server.controller.send(files="acme")
+					if ret :
+						self.request.sendall(b"ok")
+					else :
+						self.request.sendall(b"ko")
 				elif data == b"reload" :
-					ret = self.server.controller.reload() :
+					ret = self.server.controller.reload()
 					if ret :
 						self.request.sendall(b"ok")
 					else :
@@ -31,8 +37,11 @@ class ReloadServerHandler(socketserver.StreamRequestHandler):
 		if locked :
 			self.server.controller.lock.release()
 
+class ThreadingUnixServer(socketserver.ThreadingMixIn, socketserver.UnixStreamServer) :
+	pass
+
 def run_reload_server(controller) :
-	server = socketserver.UnixStreamServer("/tmp/autoconf.sock", ReloadServerHandler)
+	server = ThreadingUnixServer("/tmp/autoconf.sock", ReloadServerHandler)
 	os.chown("/tmp/autoconf.sock", 0, 101)
 	os.chmod("/tmp/autoconf.sock", 0o770)
 	server.controller = controller

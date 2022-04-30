@@ -2,13 +2,15 @@
 
 ## Logs
 
-When troubleshooting, the logs are your best friends. We try our best to provide user-friendly logs to help you understand what happened. Please note that we don't store the logs inside the container, they are all displayed on stdout/stderr so Docker can capture them. They can be displayed using the [docker logs](https://docs.docker.com/engine/reference/commandline/logs/) command.
+When troubleshooting, the logs are your best friends. We try our best to provide user-friendly logs to help you understand what happened.
+
+If you are using container based integrations, you can get the logs using your manager/orchestrator (e.g., docker logs, docker service logs, kubectl logs, ...). For Linux integration, everything is stored inside the `/var/log` folder.
 
 You can edit the `LOG_LEVEL` environment variable to increase or decrease the verbosity of logs with the following values : `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert` or `emerg` (with `debug` being the most verbose level).
 
 ## Permissions
 
-Don't forget that bunkerized-nginx runs as an unprivileged user with UID/GID 101. Double check the permissions of files and folders for each volumes (see the [volumes list](https://bunkerized-nginx.readthedocs.io/en/latest/volumes.html)).
+Don't forget that bunkerized-nginx runs as an unprivileged user with UID/GID 101 when using container based integrations or simply the `nginx` user on Linux. Double check the permissions of files and folders for each special folders (see the [volumes list](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html)).
 
 ## ModSecurity
 

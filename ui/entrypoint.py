@@ -7,12 +7,14 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from src.Instances import Instances
 from src.User import User
 from src.Config import Config
+from src.ReverseProxied import ReverseProxied
 
 import utils
 import os, json, re, copy, traceback
 
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 # Set variables and instantiate objects
 vars = utils.get_variables()
@@ -20,12 +22,19 @@ app.secret_key = vars["FLASK_SECRET"]
 app.config["ABSOLUTE_URI"] = vars["ABSOLUTE_URI"]
 app.config["INSTANCES"] = Instances(vars["DOCKER_HOST"], vars["API_URI"])
 app.config["CONFIG"] = Config()
+app.config["SESSION_COOKIE_DOMAIN"] = vars["ABSOLUTE_URI"].replace("http://", "").replace("https://", "").split("/")[0]
+app.config["WTF_CSRF_SSL_STRICT"] = False
 
 # Declare functions for jinja2
 app.jinja_env.globals.update(env_to_summary_class=utils.env_to_summary_class)
 app.jinja_env.globals.update(form_service_gen=utils.form_service_gen)
 app.jinja_env.globals.update(form_service_gen_multiple=utils.form_service_gen_multiple)
 app.jinja_env.globals.update(form_service_gen_multiple_values=utils.form_service_gen_multiple_values)
+
+#@app.before_request
+#def log_request():
+#    app.logger.debug("Request Headers %s", request.headers)
+#    return None
 
 # Login management
 login_manager = LoginManager()
@@ -42,7 +51,7 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    return render_template("error.html", title="Error", error="Wrong CSRF token !"), 401
+	return render_template("error.html", title="Error", error="Wrong CSRF token !"), 401
 
 @app.route('/login', methods=["GET", "POST"])
 def login() :
@@ -50,7 +59,7 @@ def login() :
 	if request.method == "POST" and "username" in request.form and "password" in request.form :
 		if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]) :
 			login_user(app.config["USER"])
-			return redirect("/")
+			return redirect(app.config["ABSOLUTE_URI"])
 		else :
 			fail = True
 	if fail :
@@ -61,7 +70,7 @@ def login() :
 @login_required
 def logout() :
     logout_user()
-    return redirect("/login")
+    return redirect(app.config["ABSOLUTE_URI"] + "/login")
 
 @app.route('/')
 @app.route('/home')
@@ -144,7 +153,7 @@ def services():
 				operation = app.config["CONFIG"].edit_service(request.form["OLD_SERVER_NAME"], variables)
 			elif request.form["operation"] == "delete" :
 				operation = app.config["CONFIG"].delete_service(request.form["SERVER_NAME"])
-			
+
 			# Reload instances
 			reload = app.config["INSTANCES"].reload_instances()
 			if not reload :

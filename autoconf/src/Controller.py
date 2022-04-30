@@ -1,15 +1,18 @@
+import traceback
 from abc import ABC, abstractmethod
+from enum import Enum
+
 from Config import Config
 
-class ControllerType(Enum) :
+class Type(Enum) :
 	DOCKER = 1
 	SWARM = 2
 	KUBERNETES = 3
 
 class Controller(ABC) :
 
-	def __init__(self, type, api_uri=None, lock=None) :
-		self.__config = Config(type, api_uri)
+	def __init__(self, type, api_uri=None, lock=None, http_port="8080") :
+		self._config = Config(type, api_uri, http_port=http_port)
 		self.lock = lock
 
 	@abstractmethod
@@ -25,11 +28,41 @@ class Controller(ABC) :
 		return fixed_env
 
 	def gen_conf(self, env) :
-		return self.__config.gen(env)
+		try :
+			ret = self._config.gen(env)
+		except :
+			ret = False
+		return ret
 
 	@abstractmethod
-	def process_events(self) :
+	def wait(self) :
 		pass
 
+	@abstractmethod
+	def process_events(self, current_env) :
+		pass
+
+	@abstractmethod
 	def reload(self) :
-		return self.__config.reload()
+		pass
+
+	def _reload(self, instances) :
+		try :
+			ret = self._config.reload(instances)
+		except :
+			ret = False
+		return ret
+
+	def _send(self, instances, files="all") :
+		try :
+			ret = self._config.send(instances, files=files)
+		except Exception as e :
+			ret = False
+		return ret
+
+	def _stop_temp(self, instances) :
+		try :
+			ret = self._config.stop_temp(instances)
+		except Exception as e :
+			ret = False
+		return ret

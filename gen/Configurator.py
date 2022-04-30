@@ -1,4 +1,4 @@
-import json, re
+import json, re, sys
 
 class Configurator :
 
@@ -25,7 +25,7 @@ class Configurator :
 			if check :
 				self.__variables[var] = value
 			else :
-				print("Ignoring " + var + "=" + value + " (" + reason + ")")
+				print("ignoring " + var + "=" + value + " (" + reason + ")", file=sys.stderr)
 
 	def get_config(self) :
 		config = {}

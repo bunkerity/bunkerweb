@@ -2,44 +2,12 @@ version: '3'
 
 services:
 
-  mywww:
-    image: bunkerity/bunkerized-nginx
-    restart: always
-    ports:
-      - 80:8080
-      - 443:8443
-    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
-    # don't forget to edit the permissions of the files and folders accordingly
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./web-files:/www:ro
-      - autoconf:/etc/nginx
-    environment:
-      - SERVER_NAME=                                   # must be left blank if you don't want to setup "static" conf
-      - MULTISITE=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-    labels:
-      - "bunkerized-nginx.AUTOCONF"
-
-  myautoconf:
-    image: bunkerity/bunkerized-nginx-autoconf
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - autoconf:/etc/nginx
-    depends_on:
-      - mywww
-      - myapp1
-      - myapp2
-      - myapp3
-
   myapp1:
     image: php:fpm
-    restart: always
+    networks:
+      services-net:
+        aliases:
+          - myapp1
     volumes:
       - ./web-files/app1.example.com:/app
     labels:
@@ -49,7 +17,10 @@ services:
 
   myapp2:
     image: php:fpm
-    restart: always
+    networks:
+      services-net:
+        aliases:
+          - myapp2
     volumes:
       - ./web-files/app2.example.com:/app
     labels:
@@ -59,7 +30,10 @@ services:
 
   myapp3:
     image: php:fpm
-    restart: always
+    networks:
+      services-net:
+        aliases:
+          - myapp3
     volumes:
       - ./web-files/app3.example.com:/app
     labels:
@@ -67,5 +41,7 @@ services:
       - "bunkerized-nginx.REMOTE_PHP=myapp3"
       - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
 
-volumes:
-  autoconf:
+networks:
+  services-net:
+    external:
+      name: services-net

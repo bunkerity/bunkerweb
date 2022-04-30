@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+
+  autoconf:
+    image: bunkerity/bunkerized-nginx-autoconf
+    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /shared/confs:/etc/nginx
+      - /shared/letsencrypt:/etc/letsencrypt
+      - /shared/acme-challenge:/acme-challenge
+      - /shared/cache:/cache
+      - /shared/modsec-confs:/modsec-confs:ro
+      - /shared/modsec-crs-confs:/modsec-crs-confs:ro
+    environment:
+      - SWARM_MODE=yes
+      - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
+    networks:
+      - config-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.role==manager"
+
+  nginx:
+    image: bunkerity/bunkerized-nginx
+    ports:
+      - published: 80
+        target: 8080
+        mode: host
+        protocol: tcp
+      - published: 443
+        target: 8443
+        mode: host
+        protocol: tcp
+    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    volumes:
+      - /shared/confs:/etc/nginx:ro
+      - /shared/letsencrypt:/etc/letsencrypt:ro
+      - /shared/acme-challenge:/acme-challenge:ro
+      - /shared/www:/www:ro
+      - /shared/cache:/cache:ro
+      - /shared/modsec-confs:/modsec-confs:ro
+      - /shared/modsec-crs-confs:/modsec-crs-confs:ro
+    environment:
+      - SWARM_MODE=yes
+      - USE_REDIS=yes
+      - REDIS_HOST=redis
+      - USE_API=yes
+      - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from autoconf
+      - MULTISITE=yes
+      - SERVER_NAME=
+      - AUTO_LETS_ENCRYPT=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+    networks:
+      - config-net
+      - services-net
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerized-nginx.AUTOCONF"
+
+networks:
+  config-net:
+    external:
+      name: config-net
+  services-net:
+    external:
+      name: services-net

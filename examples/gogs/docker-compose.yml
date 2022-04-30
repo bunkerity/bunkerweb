@@ -22,7 +22,7 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://mygogs:3000/
+      - REVERSE_PROXY_HOST=http://mygogs:3000
 
   mygogs:
     image: gogs/gogs

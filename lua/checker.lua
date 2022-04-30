@@ -14,7 +14,7 @@ end
 
 function M.check(self, data)
 	-- without redis
-	if self.__data_dict ~= nil and self.__redis_client == nil then
+	if self.__redis_client == nil then
 		if self.__type == "simple" then
 			local value, flags = self.__data_dict:get(data)
 			return value ~= nil
@@ -28,7 +28,7 @@ function M.check(self, data)
 		end
 
 	-- with redis
-	elseif self.__data_dict == nil and self.__redis_client ~= nil then
+	else
 		if self.__type == "simple" then
 			local res, err = self.__redis_client:get(self.__name .. "_" .. data)
 			return res and res ~= ngx.null
@@ -36,7 +36,8 @@ function M.check(self, data)
 			local patterns = self.__redis_client:keys(self.__name .. "_*")
 			if patterns then
 				for i, pattern in ipairs(patterns) do
-					if string.match(data, pattern) then
+					local real_pattern = string.gsub(pattern, self.__name:gsub("%-", "%%-") .. "_", "", 1)
+					if string.match(data, real_pattern) then
 						return true
 					end
 				end

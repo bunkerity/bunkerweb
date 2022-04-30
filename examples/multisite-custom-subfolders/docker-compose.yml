@@ -41,17 +41,6 @@ services:
     volumes:
       - ./apps/app1.example.com/web-files:/var/www/html    # app1 project web root
 
-  app1_db:
-    image: mariadb
-    restart: always
-    volumes:
-      - ./apps/app1.example.com/db-data:/var/lib/mysql    # app1 project data
-    environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd         # replace with a stronger password
-      - MYSQL_DATABASE=app
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd              # replace with a stronger password
-
   app2:
     image: php:fpm
     restart: always

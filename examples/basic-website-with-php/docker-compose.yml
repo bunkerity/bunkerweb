@@ -4,7 +4,6 @@ services:
 
   mywww:
     image: bunkerity/bunkerized-nginx
-    restart: always
     depends_on:
       - myphp
     ports:

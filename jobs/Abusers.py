@@ -10,7 +10,8 @@ class Abusers(Job) :
 		filename = "abusers.list"
 		type = "line"
 		regex = r"^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?[0-9]*$"
-		super().__init__(name, data, filename, redis_host=redis_host, type=type, regex=regex, copy_cache=copy_cache)
+		redis_ex = 86400
+		super().__init__(name, data, filename, redis_host=redis_host, redis_ex=redis_ex, type=type, regex=regex, copy_cache=copy_cache)
 
 	def _edit(self, chunk) :
 		if self._redis != None :

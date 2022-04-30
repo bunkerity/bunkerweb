@@ -1,12 +1,14 @@
 # Introduction
 
 <p align="center">
-	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/logo.png?raw=true" width="425" />
+	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/logo.png?raw=true" width="425" />
 </p>
 
-nginx Docker image secure by default.  
+> Make security by default great again !
 
-Avoid the hassle of following security best practices "by hand" each time you need a web server or reverse proxy. Bunkerized-nginx provides generic security configs, settings and tools so you don't need to do it yourself.
+bunkerized-nginx is a web server based on the notorious nginx and focused on security. It integrates into existing environments (Linux, Docker, Swarm, Kubernetes, ...) to make your web services "secured by default" without any hassle. The security best practices are automatically applied for you while keeping control of every settings to meet your own use case.
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/overview.png?raw=true" />
 
 Non-exhaustive list of features :
 - HTTPS support with transparent Let's Encrypt automation
@@ -15,15 +17,14 @@ Non-exhaustive list of features :
 - Automatic ban of strange behaviors
 - Antibot challenge through cookie, javascript, captcha or recaptcha v3
 - Block TOR, proxies, bad user-agents, countries, ...
-- Block known bad IP with DNSBL and CrowdSec
+- Block known bad IP with DNSBL
 - Prevent bruteforce attacks with rate limiting
-- Plugins system for external security checks (e.g. : ClamAV)
+- Plugins system for external security checks (ClamAV, CrowdSec, ...)
 - Easy to configure with environment variables or web UI
-- Automatic configuration with container labels
-- Docker Swarm support
+- Seamless integration into existing environments : Linux, Docker, Swarm, Kubernetes, ...
 
 Fooling automated tools/scanners :
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/demo.gif?raw=true" />
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/demo.gif?raw=true" />
 
-You can find a live demo at <a href="https://demo-nginx.bunkerity.com" target="_blank">https://demo-nginx.bunkerity.com</a>, feel free to do some security tests.
+You can find a live demo at [https://demo-nginx.bunkerity.com](https://demo-nginx.bunkerity.com), feel free to do some security tests.

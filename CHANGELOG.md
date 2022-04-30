@@ -1,5 +1,55 @@
 # Changelog
 
+## v1.3.2 -
+
+- Use API instead of a shared folder for Swarm and Kubernetes integrations
+- Beta integration of distributed bad IPs database through a remote API
+- Improvement of the request limiting feature : hour/day rate and multiple URL support
+- Various bug fixes related to antibot feature
+- Init support of Arch Linux
+- Fix Moodle example
+- Fix ROOT_FOLDER bug in serve-files.conf when using the UI
+- Update default values for PERMISSIONS_POLICY and FEATURE_POLICY
+- Disable COUNTRY ban if IP is local
+
+## v1.3.1 - 2021/09/02
+
+- Use ModSecurity v3.0.4 instead of v3.0.5 to fix memory leak
+- Fix ignored variables to control jobs
+- Fix bug when LISTEN_HTTP=no and MULTISITE=yes
+- Add CUSTOM_HEADER variable
+- Add REVERSE_PROXY_BUFFERING variable
+- Add REVERSE_PROXY_KEEPALIVE variable
+- Fix documentation for modsec and modsec-crs special folders
+
+## v1.3.0 - 2021/08/23
+
+- Kubernetes integration in beta
+- Linux integration in beta
+- autoconf refactoring
+- jobs refactoring
+- UI refactoring
+- UI security : login/password authentication and CRSF protection
+- various dependencies updates
+- move CrowdSec as an external plugin
+- Authelia support
+- improve various regexes
+- add INJECT_BODY variable
+- add WORKER_PROCESSES variable
+- add USE_LETS_ENCRYPT_STAGING variable
+- add LOCAL_PHP and LOCAL_PHP_PATH variables
+- add REDIRECT_TO variable
+
+## v1.2.8 - 2021/07/22
+
+- Fix broken links in README
+- Fix regex for EMAIL_LETS_ENCRYPT
+- Fix regex for REMOTE_PHP and REMOTE_PHP_PATH
+- Fix regex for SELF_SIGNED_*
+- Fix various bugs related to web UI
+- Fix bug in autoconf (missing instances parameter to reload function)
+- Remove old .env files when generating a new configuration
+
 ## v1.2.7 - 2021/06/14
 
 - Add custom robots.txt and sitemap to RTD

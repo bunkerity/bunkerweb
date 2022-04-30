@@ -6,7 +6,7 @@ class CertbotNew(Job) :
 
 	def __init__(self, redis_host=None, copy_cache=False, domain="", email="", staging=False) :
 		name = "certbot-new"
-		data = ["certbot", "certonly", "--webroot", "-w", "/opt/bunkerized-nginx/acme-challenge", "-n", "-d", domain, "--email", email, "--agree-tos"]
+		data = ["certbot", "certonly", "--manual", "--preferred-challenges=http", "--manual-auth-hook", "/opt/bunkerized-nginx/jobs/certbot-auth.py", "--manual-cleanup-hook", "/opt/bunkerized-nginx/jobs/certbot-cleanup.py", "-n", "-d", domain, "--email", email, "--agree-tos"]
 		if staging :
 			data.append("--staging")
 		type = "exec"

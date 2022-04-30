@@ -2,28 +2,16 @@
 
 This is a basic example for a typical PHP website/app.
 
+## Architecture
+
+<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/basic-website-with-php/architecture.png?raw=true" />
+
 ## Docker
 
-```shell
-$ mkdir letsencrypt
-$ chown root:101 letsencrypt
-$ chmod 770 letsencrypt
-$ chmod 755 web-files
-$ chmod -R 744 web-files/*
-$ docker-compose up
-```
+See [docker-compose.yml](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/basic-website-with-php/docker-compose.yml).
 
 ## Linux
 
-You will need to configure your php-fpm service to listen on localhost with the following directive :
-```conf
-listen = 127.0.0.1:9000
-```
+Please note that you need to install and configure a php-fpm instance on your server.
 
-```shell
-$ cp variables.env /opt/bunkerized-nginx/variables.env
-$ cp web-files/* /opt/bunkerized-nginx/www
-$ chown -R www-data:www-data /opt/bunkerized-nginx/www/*
-$ chmod -R 774 /opt/bunkerized-nginx/www/*
-$ bunkerized-nginx
-```
+See [variables.env](https://github.com/bunkerity/bunkerized-nginx/blob/master/examples/basic-website-with-php/variables.env).

@@ -1,13 +1,14 @@
 # bunkerized-nginx official documentation
 
 ```{toctree}
-:maxdepth: 2
 :caption: Contents
 introduction
+integrations
 quickstart_guide
+special_folders
 security_tuning
-troubleshooting
-volumes
+web_ui
 environment_variables
+troubleshooting
 plugins
 ```
