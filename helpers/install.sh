@@ -385,7 +385,7 @@ elif [ "$OS" = "archlinux" ] ; then
 fi
 echo "[*] Install compilation dependencies"
 if [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ] ; then
-	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make libgd-dev libssl-dev wget libbrotli-dev gnupg patch libreadline-dev"
+	DEBIAN_DEPS="git autoconf pkg-config libpcre++-dev automake libtool g++ make libgd-dev libssl-dev wget libbrotli-dev gnupg patch libreadline-dev libncurses5-dev"
 	DEBIAN_FRONTEND=noninteractive do_and_check_cmd apt install -y $DEBIAN_DEPS
 elif [ "$OS" = "centos" ] ; then
 	do_and_check_cmd yum install -y epel-release
