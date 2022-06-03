@@ -31,6 +31,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`API_HTTP_PORT`        |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                   |
 |`API_SERVER_NAME`      |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.           |
 |`API_WHITELIST_IP`     |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.    |
+|`AUTOCONF_MODE`        |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.               |
 |`SWARM_MODE`           |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                  |
 |`KUBERNETES_MODE`      |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                    |
 
