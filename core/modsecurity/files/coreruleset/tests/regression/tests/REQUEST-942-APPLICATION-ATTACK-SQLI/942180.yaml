@@ -1,0 +1,41 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942180.yaml
+  tests:
+  -
+    test_title: 942180-1
+    desc: "basic SQL authentication bypass"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          # something simple like 3' ' 1
+          uri: "/?var=3%27%20%27%201"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942180"
+  -
+    test_title: 942180-2
+    desc: "XSS test based on portswigger XSS cheatsheet"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          version: HTTP/1.0
+          data: "javascript:\"/*'/*`/*--></noscript></title></textarea></style></template></noembed></script><html \""
+        output:
+          log_contains: id "942180"

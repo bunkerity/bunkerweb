@@ -1,0 +1,60 @@
+dist: trusty
+sudo: true
+
+addons:
+  apt:
+    packages:
+    - libfuzzy-dev
+    - libyajl-dev
+    - libgeoip-dev
+    - liblua5.2-dev
+    - liblmdb-dev
+    - cppcheck
+
+language: cpp
+
+compiler:
+  - clang
+  - gcc
+
+os:
+  - linux
+  - osx
+
+env:
+  - OPTS="--enable-parser-generation $OPTS"
+  - OPTS="--without-curl $OPTS"
+  - OPTS="--without-yajl $OPTS"
+  - OPTS="--without-geoip $OPTS"
+  - OPTS="--with-lmdb $OPTS"
+  - OPTS="--without-ssdeep $OPTS"
+  - OPTS="--without-lua $OPTS"
+  - OPTS="--without-maxmind $OPTS"
+
+before_script:
+  - echo $TRAVIS_OS_NAME
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew update'
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew install cppcheck'
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew install libmaxminddb'
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew install lmdb'
+  - '[ "$TRAVIS_OS_NAME" != linux ] || sudo add-apt-repository --yes ppa:maxmind/ppa'
+  - '[ "$TRAVIS_OS_NAME" != linux ] || sudo apt-get update'
+  - '[ "$TRAVIS_OS_NAME" != linux ] || sudo apt-cache search maxmind'
+  - '[ "$TRAVIS_OS_NAME" != linux ] || sudo apt-get install -y libmaxminddb-dev'
+
+script:
+  - ./build.sh
+  - ./configure $OPTS
+  - make parser
+  - make
+#
+# Temporarily disabled.
+# - make -j$(getconf _NPROCESSORS_ONLN)
+# Leading build to crash with parser enabled.
+# Not sure why.
+#
+  - make check
+  - make check-static
+
+
+

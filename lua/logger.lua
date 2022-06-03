@@ -1,4 +1,4 @@
-local M		= {}
+local M			= {}
 local errlog	= require "ngx.errlog"
 
 function M.log (level, prefix, msg)
@@ -6,3 +6,4 @@ function M.log (level, prefix, msg)
 end
 
 return M
+

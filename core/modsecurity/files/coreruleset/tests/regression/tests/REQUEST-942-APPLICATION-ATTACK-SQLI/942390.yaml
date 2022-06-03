@@ -1,0 +1,23 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942390.yaml
+  tests:
+  -
+    test_title: 942390-1
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          uri: "/?var=sdfsd%27or%201%20%3e%201"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942390"

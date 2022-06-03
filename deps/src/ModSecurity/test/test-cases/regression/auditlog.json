@@ -1,0 +1,224 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "auditlog : basic parser test - Parallel",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "www.modsecurity.org",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=   test   &param2=test2",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "plain\/text\n\r"
+      },
+      "body": [
+        "test"
+      ]
+    },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "\\[9\\]  T \\(0\\) t:trim: \"test",
+      "error_log": "",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@contains test\" \"id:1,t:trim,deny,auditlog\"",
+      "SecAuditEngine RelevantOnly",
+      "SecAuditLogParts ABCFHZ",
+      "SecAuditLogStorageDir /tmp/test",
+      "SecAuditLogDirMode 0766",
+      "SecAuditLogFileMode 0600",
+      "SecAuditLogType Parallel",
+      "SecAuditLogRelevantStatus \"^(?:5|4(?!04))\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "auditlog : basic parser test - Serial",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "www.modsecurity.org",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=   test   &param2=test2",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "plain\/text\n\r"
+      },
+      "body": [
+        "test"
+      ]
+    },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "\\[9\\]  T \\(0\\) t:trim: \"test",
+      "error_log": "",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@contains test\" \"id:1,t:trim,deny,auditlog\"",
+      "SecAuditEngine RelevantOnly",
+      "SecAuditLogParts ABCFHZ",
+      "SecAuditLogStorageDir /tmp/test",
+      "SecAuditLog /tmp/audit_test.log",
+      "SecAuditLogDirMode 0766",
+      "SecAuditLogFileMode 0600",
+      "SecAuditLogType Serial",
+      "SecAuditLogRelevantStatus \"^(?:5|4(?!04))\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "auditlog : basic parser test - Parallel",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "www.modsecurity.org",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=   test   &param2=test2",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "plain\/text\n\r"
+      },
+      "body": [
+        "test"
+      ]
+    },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "\\[9\\]  T \\(0\\) t:trim: \"test",
+      "error_log": "",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@contains test\" \"id:1,t:trim,deny,auditlog\"",
+      "SecAuditEngine RelevantOnly",
+      "SecAuditLogParts ABCFHZ",
+      "SecAuditLogStorageDir /tmp/test",
+      "SecAuditLog /tmp/audit_test_parallel.log",
+      "SecAuditLogDirMode 0766",
+      "SecAuditLogFileMode 0600",
+      "SecAuditLogType Parallel",
+      "SecAuditLogRelevantStatus \"^(?:5|4(?!04))\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "auditlog : messages verification - nolog,auditlog",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "www.modsecurity.org",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=test&param2=test2",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "expected": {
+      "audit_log": "id \"1556",
+      "error_log": "",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecDefaultAction \"phase:1,nolog,auditlog,deny,status:403\"",
+      "SecRule ARGS \"@contains test\" \"id:1556,phase:1,block,nolog,auditlog\"",
+      "SecAuditEngine RelevantOnly",
+      "SecAuditLogParts ABCFHZ",
+      "SecAuditLog /tmp/test/modsec_audit_auditlog_1.log",
+      "SecAuditLogDirMode 0766",
+      "SecAuditLogFileMode 0666",
+      "SecAuditLogType Serial",
+      "SecAuditLogRelevantStatus \"^(?:5|4(?!04))\""
+    ]
+  }
+]

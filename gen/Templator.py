@@ -1,122 +1,135 @@
-import jinja2, glob, os, pathlib, copy, crypt, random, string
+import jinja2, glob, importlib, os, pathlib, copy, string, random
 
 class Templator :
 
-	def __init__(self, config, input_path, output_path, target_path) :
-		self.__config_global = copy.deepcopy(config)
-		if config["MULTISITE"] == "yes" and config["SERVER_NAME"] != "" :
-			self.__config_sites = {}
-			for server_name in config["SERVER_NAME"].split(" ") :
-				self.__config_sites[server_name] = {}
-				for k, v in config.items() :
-					if k.startswith(server_name + "_") :
-						self.__config_sites[server_name][k.replace(server_name + "_", "", 1)] = v
-						del self.__config_global[k]
-		self.__input_path = input_path
-		self.__output_path = output_path
-		self.__target_path = target_path
-		if not self.__target_path.endswith("/") :
-			self.__target_path += "/"
-		self.__template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=self.__input_path), lstrip_blocks=True, trim_blocks=True)
+    def __init__(self, templates, core, plugins, output, target, config) :
+        self.__templates = templates
+        self.__core = core
+        self.__plugins = plugins
+        self.__output = output
+        if not self.__output.endswith("/") :
+            self.__output += "/"
+        self.__target = target
+        if not self.__target.endswith("/") :
+            self.__target += "/"
+        self.__config = config
+        self.__jinja_env = self.__load_jinja_env()
 
-	def render_global(self) :
-		return self.__render("global")
+    def render(self) :
+        self.__render_global()
+        servers = [self.__config["SERVER_NAME"]]
+        if self.__config["MULTISITE"] == "yes" :
+            servers = self.__config["SERVER_NAME"].split(" ")
+        for server in servers :
+            self.__render_server(server)
 
-	def render_site(self, server_name=None, first_server=None) :
-		if server_name is None :
-			server_name = self.__config_global["SERVER_NAME"]
-		if first_server is None :
-			first_server = self.__config_global["SERVER_NAME"].split(" ")[0]
-		return self.__render("site", server_name, first_server)
+    def __load_jinja_env(self) :
+        searchpath = [self.__templates]
+        for subpath in glob.glob(self.__core + "/*") + glob.glob(self.__plugins + "/*") :
+            if os.path.isdir(subpath) :
+                searchpath.append(subpath + "/confs")
+        return jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=searchpath), lstrip_blocks=True, trim_blocks=True)
 
-	def __prepare_config(self, type, server_name=None, first_server=None) :
-		real_config = copy.deepcopy(self.__config_global)
-		if type == "site" and self.__config_global["MULTISITE"] == "yes" :
-			site_config = copy.deepcopy(self.__config_sites[first_server])
-			real_config.update(site_config)
-		elif type == "global" and self.__config_global["MULTISITE"] == "yes" and self.__config_global["SERVER_NAME"] != "" :
-			for k, v in self.__config_sites.items() :
-				for k2, v2 in v.items() :
-					real_config[k + "_" + k2] = v2
-		if not server_name is None :
-			real_config["SERVER_NAME"] = server_name
-		if not first_server is None :
-			real_config["FIRST_SERVER"] = first_server
-		real_config["NGINX_PREFIX"] = self.__target_path
-		if self.__config_global["MULTISITE"] == "yes" and type == "site" :
-			real_config["NGINX_PREFIX"] += first_server + "/"
-			if not real_config["ROOT_FOLDER"].endswith("/" + first_server) :
-				real_config["ROOT_FOLDER"] += "/" + first_server
-		if real_config["ROOT_SITE_SUBFOLDER"] != "" :
-			real_config["ROOT_FOLDER"] += "/" + real_config["ROOT_SITE_SUBFOLDER"]
-		return real_config
+    def __find_templates(self, contexts) :
+        templates = []
+        for template in self.__jinja_env.list_templates() :
+            if "global" in contexts and "/" not in template :
+                templates.append(template)
+                continue
+            for context in contexts :
+                if template.startswith(context + "/") :
+                    templates.append(template)
+        return templates
 
-	def __filter_var(self, variable) :
-		filters = ["FIRST_SERVER", "NGINX_PREFIX"]
-		for filter in filters :
-			if variable == filter or variable.endswith("_" + filter) :
-				return True
-		return False
+    def __write_config(self, subpath=None, config=None) :
+        real_path = self.__output
+        if subpath != None :
+            real_path += subpath + "/"
+        real_path += "variables.env"
+        real_config = self.__config
+        if config != None :
+            real_config = config
+        pathlib.Path(os.path.dirname(real_path)).mkdir(parents=True, exist_ok=True)
+        with open(real_path, "w") as f :
+            for k, v in real_config.items() :
+                f.write(k + "=" + v + "\n")
 
-	def __save_config(self, type, config) :
-		first_servers = config["SERVER_NAME"].split(" ")
-		data = ""
-		for variable, value in config.items() :
-			if self.__filter_var(variable) :
-				continue
-			add = True
-			if type == "global" :
-				for first_server in first_servers :
-					if variable.startswith(first_server + "_") :
-						add = False
-						break
-			if add :
-				data += variable + "=" + value + "\n"
-		file = self.__output_path
-		if type == "global" :
-			file += "/global.env"
-		elif config["MULTISITE"] == "yes" :
-			file += "/" + config["FIRST_SERVER"] + "/site.env"
-		else :
-			file += "/site.env"
-		with open(file, "w") as f :
-			f.write(data)
+    def __render_global(self) :
+        self.__write_config()
+        templates = self.__find_templates(["global", "http", "stream", "default-server-http"])
+        for template in templates :
+            self.__render_template(template)
 
-	def __render(self, type, server_name=None, first_server=None) :
-		real_config = self.__prepare_config(type, server_name, first_server)
-		for filename in glob.iglob(self.__input_path + "/" + type + "**/**", recursive=True) :
-			if not os.path.isfile(filename) :
-				continue
-			relative_filename = filename.replace(self.__input_path, "").replace(type + "/", "")
-			template = self.__template_env.get_template(type + "/" + relative_filename)
-			template.globals["has_value"] = Templator.has_value
-			template.globals["sha512_crypt"] = Templator.sha512_crypt
-			template.globals["is_custom_conf"] = Templator.is_custom_conf
-			template.globals["random"] = Templator.random
-			output = template.render(real_config, all=real_config)
-			if real_config["MULTISITE"] == "yes" and type == "site" :
-				relative_filename = real_config["FIRST_SERVER"] + "/" + relative_filename
-			if "/" in relative_filename :
-				directory = relative_filename.replace(relative_filename.split("/")[-1], "")
-				pathlib.Path(self.__output_path + "/" + directory).mkdir(parents=True, exist_ok=True)
-			with open(self.__output_path + "/" + relative_filename, "w") as f :
-				f.write(output)
-		self.__save_config(type, real_config)
+    def __render_server(self, server) :
+        templates = self.__find_templates(["modsec", "modsec-crs", "server-http", "server-stream"])
+        if self.__config["MULTISITE"] == "yes" :
+            config = copy.deepcopy(self.__config)
+            for variable, value in self.__config.items() :
+                if variable.startswith(server + "_") :
+                    config[variable.replace(server + "_", "", 1)] = value
+            self.__write_config(subpath=server, config=config)
+        for template in templates :
+            subpath = None
+            config = None
+            name = None
+            if self.__config["MULTISITE"] == "yes" :
+                subpath = server
+                config = copy.deepcopy(self.__config)
+                for variable, value in self.__config.items() :
+                    if variable.startswith(server + "_") :
+                        config[variable.replace(server + "_", "", 1)] = value
+                config["NGINX_PREFIX"] = self.__target + server + "/"
+                server_key = server + "_SERVER_NAME"
+                if server_key not in self.__config :
+                    config["SERVER_NAME"] = server
+            root_confs = ["server.conf", "access-lua.conf", "init-lua.conf", "log-lua.conf"]
+            for root_conf in root_confs :
+                if template.endswith("/" + root_conf) :
+                    name = os.path.basename(template)
+                    break
+            self.__render_template(template, subpath=subpath, config=config, name=name)
 
-	@jinja2.contextfunction
-	def has_value(context, name, value) :
-		for k, v in context.items() :
-			if (k == name or k.endswith("_" + name)) and v == value :
-				return True
-		return False
+    def __render_template(self, template, subpath=None, config=None, name=None) :
+        # Get real config and output folder in case it's a server config and we are in multisite mode
+        real_config = copy.deepcopy(self.__config)
+        if config :
+            real_config = copy.deepcopy(config)
+        real_config["all"] = copy.deepcopy(real_config)
+        real_config["import"] = importlib.import_module
+        real_config["is_custom_conf"] = Templator.is_custom_conf
+        real_config["has_variable"] = Templator.has_variable
+        real_config["random"] = Templator.random
+        real_config["read_lines"] = Templator.read_lines
+        real_output = self.__output
+        if subpath :
+            real_output += "/" + subpath + "/"
+        real_name = template
+        if name :
+            real_name = name
+        jinja_template = self.__jinja_env.get_template(template)
+        pathlib.Path(os.path.dirname(real_output + real_name)).mkdir(parents=True, exist_ok=True)
+        with open(real_output + real_name, "w") as f :
+            f.write(jinja_template.render(real_config))
 
-	def sha512_crypt(password) :
-		return crypt.crypt(password, crypt.mksalt(crypt.METHOD_SHA512))
-
-	def is_custom_conf(folder) :
-		for filename in glob.iglob(folder + "/*.conf") :
-			return True
-		return False
-
-	def random(number) :
-		return "".join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=number))
+    def is_custom_conf(path) :
+        return glob.glob(path + "/*.conf")
+    
+    def has_variable(all_vars, variable, value) :
+        if variable in all_vars and all_vars[variable] == value :
+            return True
+        if all_vars["MULTISITE"] == "yes" :
+            for server_name in all_vars["SERVER_NAME"].split(" ") :
+                if server_name + "_" + variable in all_vars and all_vars[server_name + "_" + variable] == value :
+                    return True
+        return False
+    
+    def random(nb) :
+        characters = string.ascii_letters + string.digits
+        return "".join(random.choice(characters) for i in range(nb))
+    
+    def read_lines(file) :
+        try :
+            with open(file, "r") as f :
+                return f.readlines()
+        except :
+            return []

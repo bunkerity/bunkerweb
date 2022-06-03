@@ -1,0 +1,105 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-3 mb-3">
+  <form id="form-edit-global-conf" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <div class="pb-3 flex-grow-1 d-flex flex-column flex-md-row">
+      <div class="row flex-grow-md-1 flex-grow-1">
+        <aside
+          class="col-md-3 flex-grow-md-1 flex-shrink-1 flex-grow-0 sticky-top pb-md-0 pb-3"
+        >
+          <div class="bg-light border rounded-3 p-1 h-100 sticky-top">
+            <ul
+              class="nav nav-pills flex-md-column flex-row mb-auto justify-content-start text-truncate"
+              id="pills-tab"
+              role="tablist"
+            >
+              <li class="nav-item">
+                <a
+                  class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate active"
+                  id="edit-global-conf-general-tab"
+                  data-bs-toggle="pill"
+                  href="#edit-global-conf-general"
+                  role="tab"
+                  aria-controls="edit-global-conf-general"
+                  aria-selected="selected"
+                >
+                  <span class="d-md-inline">General</span>
+                  <div
+                    class="d-none px-2 d-md-inline"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="General settings of BunkerWeb"
+                  >
+                    <i class="fa-solid fa-circle-info"></i>
+                  </div>
+                </a>
+              </li>
+              {% for plugin in config["CONFIG"].get_plugins() %} {% if
+              plugin["settings"] and check_settings(plugin["settings"],
+              "global") %}
+              <li class="nav-item">
+                <a
+                  class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate"
+                  id="edit-global-conf-{{ plugin['id'] }}-tab"
+                  data-bs-toggle="pill"
+                  href="#edit-global-conf-{{ plugin['id'] }}"
+                  role="tab"
+                  aria-controls="edit-global-conf-{{ plugin['id'] }}"
+                  aria-selected=""
+                >
+                  <span class="d-md-inline">{{ plugin["name"] }}</span>
+                  <div
+                    class="d-none px-2 d-md-inline"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="{{ plugin['description'] }}"
+                  >
+                    <i class="fa-solid fa-circle-info"></i>
+                  </div>
+                </a>
+              </li>
+              {% endif %} {% endfor %}
+            </ul>
+          </div>
+        </aside>
+        <main class="col overflow-auto h-100">
+          <div class="bg-light border rounded-3 p-3">
+            <div class="tab-content" id="edit-global-conf-content">
+              <div
+                class="tab-pane fade show active"
+                id="edit-global-conf-general"
+                role="tabpanel"
+                aria-labelledby="edit-global-conf-general-tab"
+              >
+                {% set global_config = config["CONFIG"].get_config() %} {% for
+                setting, value in config["CONFIG"].get_settings().items() %} {%
+                if value["context"] == "global" and "label" in value %}
+                <div
+                  class="d-flex flex-row justify-content-between align-items-center mb-3"
+                  id="form-edit-global-conf-{{ setting['id'] }}"
+                >
+                  {{ form_service_gen("form-edit-global-conf-" + value["id"],
+                  value["help"], value["label"], value["type"],
+                  global_config[setting], setting, value["default"],
+                  value["select"], value["regex"])|safe }}
+                </div>
+                {% endif %} {% endfor %}
+              </div>
+              {% for plugin in config["CONFIG"].get_plugins() %} {% if
+              plugin["settings"] and check_settings(plugin["settings"],
+              "global") %} {{ form_plugin_gen(global_config, plugin,
+              "edit-global-conf", context="global")|safe }} {% endif %} {%
+              endfor %}
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <div class="col col-12 mb-3 align-items-center text-center">
+      <button type="submit" class="p-2 btn btn-outline-success">
+        Save <i class="fa-solid fa-floppy-disk"></i>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

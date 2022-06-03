@@ -1,0 +1,56 @@
+sudo: required
+dist: trusty
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+addons:
+  apt:
+    packages:
+    - cppcheck
+    - valgrind
+    - cpanminus
+    - libipc-run3-perl
+    - lua5.1
+    - lua5.1-dev
+
+cache:
+  apt: true
+
+env:
+  global:
+    - JOBS=3
+    - LUAROCKS_VER=2.4.2
+  matrix:
+      #- LUA=1 LUA_DIR=/usr LUA_INCLUDE_DIR=$LUA_DIR/include/lua5.1
+      - LUAJIT=1 LUA_DIR=/usr/local LUA_INCLUDE_DIR=$LUA_DIR/include/luajit-2.1 LUA_SUFFIX=--lua-suffix=jit
+
+install:
+    - if [ -n "$LUAJIT" ]; then git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git; fi
+    - if [ -n "$LUAJIT" ]; then cd ./luajit2; fi
+    - if [ -n "$LUAJIT" ]; then make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS='-DLUA_USE_APICHECK -DLUA_USE_ASSERT' > build.log 2>&1 || (cat build.log && exit 1); fi
+    - if [ -n "$LUAJIT" ]; then sudo make install > build.log 2>&1 || (cat build.log && exit 1); fi
+    - if [ -n "$LUAJIT" ]; then cd ..; fi
+    - if [ -n "$LUAJIT" ]; then sudo ln -s $LUA_DIR/bin/luajit $LUA_DIR/bin/lua; fi
+    - sudo cpanm --notest Test::Base Test::LongString > build.log 2>&1 || (cat build.log && exit 1)
+    - wget https://luarocks.github.io/luarocks/releases/luarocks-$LUAROCKS_VER.tar.gz
+    - tar -zxf luarocks-$LUAROCKS_VER.tar.gz
+    - cd luarocks-$LUAROCKS_VER
+    - ./configure --with-lua=$LUA_DIR --with-lua-include=$LUA_INCLUDE_DIR $LUA_SUFFIX
+    - make build
+    - sudo make install
+    - cd ..
+
+script:
+  - cppcheck -i ./luajit2 -i --force --error-exitcode=1 --enable=warning . > build.log 2>&1 || (cat build.log && exit 1)
+  - sh runtests.sh
+  - make
+  - prove -Itests tests
+  - TEST_LUA_USE_VALGRIND=1 prove -Itests tests > build.log 2>&1; export e=$?
+  - cat build.log
+  - grep -E '^==[0-9]+==' build.log; if [ "$?" == 0 ]; then exit 1; else exit $e; fi

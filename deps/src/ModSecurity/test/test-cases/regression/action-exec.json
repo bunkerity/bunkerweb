@@ -1,0 +1,148 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "resource":"lua",
+    "title":"Testing action :: exec (1/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{
+      "headers":{
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      }
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Saving msg: This is a test, text\/html,application",
+      "error_log":"",
+      "parser_error":"exec: Expecting a Lua script: /bin/ech"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:1,t:lowercase,t:none,exec:/bin/echo\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "resource":"lua",
+    "title":"Testing action :: exec (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{
+      "headers":{
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      }
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Running script... test-cases/data/test.lua",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Cookie \"@contains PHPSESSID\" \"id:1,exec:test-cases/data/test.lua\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "resource":"lua",
+    "title":"Testing action :: exec (3/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{
+      "headers":{
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      }
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Running script... test-cases/data/match.lua",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Cookie \"@contains PHPSESSID\" \"id:1,exec:test-cases/data/match.lua\""
+    ]
+  }
+]
+

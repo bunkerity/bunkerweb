@@ -2,58 +2,63 @@ version: '3'
 
 services:
 
-  mywww:
-    image: bunkerity/bunkerized-nginx
-    restart: always
-    depends_on:
-      - mync
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
       - 443:8443
-    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
     volumes:
-      - ./nc-files:/www:ro
-      - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs:ro         # custom nginx confs at server context to make Nextcloud working
-      - ./modsec-crs-confs:/modsec-crs-confs:ro # custom Core Rule Set confs to add Nextcloud exclusions
-      - ./modsec-confs:/modsec-confs:ro         # disable some false positive
+      - ./bw-data:/data # contains custom Core Rule Set confs to add Nextcloud exclusions
     environment:
-      - SERVER_NAME=www.example.com          # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - MAX_CLIENT_SIZE=10G
       - USE_CLIENT_CACHE=yes
-      - REMOTE_PHP=mync
-      - REMOTE_PHP_PATH=/var/www/html
-      - LIMIT_REQ_RATE=5r/s
-      - LIMIT_REQ_BURST=10
+      - SERVE_FILES=no
       - ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
       - X_FRAME_OPTIONS=SAMEORIGIN
       - USE_GZIP=yes
       - BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444
       - WHITELIST_USER_AGENT=WebDAV
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://mync
+      - LIMIT_REQ_URL_1=/apps
+      - LIMIT_REQ_RATE_1=5r/s
+      - LIMIT_REQ_URL_2=/apps/text/session/sync
+      - LIMIT_REQ_RATE_2=8r/s
+      - LIMIT_REQ_URL_3=/core/preview
+      - LIMIT_REQ_RATE_3=5r/s
 
   mync:
-    image: nextcloud:21-fpm
-    restart: always
+    image: nextcloud:stable-apache
     volumes:
       - ./nc-files:/var/www/html
     environment:
       - MYSQL_HOST=mydb
       - MYSQL_DATABASE=nc
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd                # replace with a stronger password (must match MYSQL_PASSWORD)
+      - NEXTCLOUD_ADMIN_USER=admin                # replace with the admin username
+      - NEXTCLOUD_ADMIN_PASSWORD=changeme         # replace with a stronger password
+      - NEXTCLOUD_TRUSTED_DOMAINS=www.example.com # replace with your domain(s)
+      - TRUSTED_PROXIES=192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
+      - APACHE_DISABLE_REWRITE_IP=1
 
   mydb:
     image: mariadb
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
-    restart: always
     volumes:
       - ./db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=nc
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MYSQL_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MYSQL_PASSWORD)

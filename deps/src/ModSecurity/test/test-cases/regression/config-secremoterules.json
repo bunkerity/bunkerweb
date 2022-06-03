@@ -1,0 +1,99 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource": "curl",
+    "title":"Include remote rules",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Executing operator \"PmFromFile\" with param \".*\" against REQUEST_FILENAME"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRemoteRules key https://gist.githubusercontent.com/zimmerle/a4c1ec028999f7df71d0cc80f4f271ca/raw/4c74363bf4eae974180f1a82007196e58729dd16/modsecurity-regression-test-secremoterules.txt",
+      "SecRule ARGS \"@contains somethingelse\" \"id:9,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "resource": "curl",
+    "version_min":300000,
+    "title":"Include remote rules - failed download (Abort)",
+    "expected":{
+      "parser_error": "Failed to download: HTTP response code said error"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRemoteRulesFailAction Abort",
+      "SecRemoteRules key https://gist.githubusercontent.com/zimmerle/a4c1ec028999f7df71d0cc80f4f271ca/raw/4c74363bf4eae974180f1a82007196e58729dd16/modsecurity-regression-test-secremoterules-bonga.txt"
+    ]
+  },
+  {
+    "enabled":1,
+    "resource": "curl",
+    "version_min":300000,
+    "title":"Include remote rules - failed download (Warn)",
+   "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Executing operator \"Contains\" with param \"somethingelse\" against ARGS."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRemoteRulesFailAction Warn",
+      "SecRemoteRules key https://gist.githubusercontent.com/zimmerle/a4c1ec028999f7df71d0cc80f4f271ca/raw/4c74363bf4eae974180f1a82007196e58729dd16/modsecurity-regression-test-secremoterules-bonga.txt",
+      "SecRule ARGS \"@contains somethingelse\" \"id:9,pass,t:trim\""
+    ]
+  }
+]

@@ -1,0 +1,52 @@
+---
+  meta:
+    author: csanders-git
+    description: None
+    enabled: true
+    name: 920400.yaml
+  tests:
+  -
+    test_title: 920400-1
+    desc: Uploaded file size too large (920400)  from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+            Accept-Encoding: gzip,deflate
+            Accept-Language: en-us,en;q=0.5
+            Content-Length: '10485760'
+            Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            Referer: http
+            User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+          method: POST
+          port: 80
+          uri: /
+          version: HTTP/1.1
+          data:
+          - '-----------------------------265001916915724'
+          - 'Content-Disposition: form-data; name="file"; filename="test"'
+          - 'Content-Type: application/octet-stream'
+          - ''
+          - Rotem & Ayala
+          - ''
+          - '-----------------------------265001916915724'
+          - 'Content-Disposition: form-data; name="name"'
+          - ''
+          - tt2
+          - '-----------------------------265001916915724'
+          - 'Content-Disposition: form-data; name="B1"'
+          - ''
+          - Submit
+          - '-----------------------------265001916915724--'
+        output:
+                # Most web servers simply won't respond to invalid requests like
+                # like this they'll just time out when we get OR type checks
+                # we'll be able to check for both an error or the rule firing
+                expect_error: true

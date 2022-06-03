@@ -1,0 +1,139 @@
+#--------------------------------------------------------------------------
+# Distribution makefile
+#--------------------------------------------------------------------------
+DIST = luasocket-3.0-rc1
+
+TEST = \
+	test/README \
+	test/hello.lua \
+	test/testclnt.lua \
+	test/testsrvr.lua \
+	test/testsupport.lua
+
+SAMPLES = \
+	samples/README \
+	samples/cddb.lua \
+	samples/daytimeclnt.lua \
+	samples/echoclnt.lua \
+	samples/echosrvr.lua \
+	samples/mclisten.lua \
+	samples/mcsend.lua \
+	samples/listener.lua \
+	samples/lpr.lua \
+	samples/talker.lua \
+	samples/tinyirc.lua
+
+ETC = \
+	etc/README \
+	etc/b64.lua \
+	etc/check-links.lua \
+	etc/check-memory.lua \
+	etc/dict.lua \
+	etc/dispatch.lua \
+	etc/eol.lua \
+	etc/forward.lua \
+	etc/get.lua \
+	etc/lp.lua \
+	etc/qp.lua \
+	etc/tftp.lua
+
+SRC = \
+	src/makefile \
+	src/auxiliar.c \
+	src/auxiliar.h \
+	src/buffer.c \
+	src/buffer.h \
+	src/except.c \
+	src/except.h \
+	src/inet.c \
+	src/inet.h \
+	src/io.c \
+	src/io.h \
+	src/luasocket.c \
+	src/luasocket.h \
+	src/mime.c \
+	src/mime.h \
+	src/options.c \
+	src/options.h \
+	src/select.c \
+	src/select.h \
+	src/socket.h \
+	src/tcp.c \
+	src/tcp.h \
+	src/timeout.c \
+	src/timeout.h \
+	src/udp.c \
+	src/udp.h \
+	src/unix.c \
+	src/serial.c \
+	src/unix.h \
+	src/usocket.c \
+	src/usocket.h \
+	src/wsocket.c \
+	src/wsocket.h \
+	src/ftp.lua \
+	src/http.lua \
+	src/ltn12.lua \
+	src/mime.lua \
+	src/smtp.lua \
+	src/socket.lua \
+	src/headers.lua \
+	src/tp.lua \
+	src/url.lua
+
+MAKE = \
+	makefile \
+	luasocket.sln \
+	luasocket-scm-0.rockspec \
+	Lua51.props \
+	Lua52.props \
+	socket.vcxproj.filters \
+	mime.vcxproj.filters \
+	socket.vcxproj \
+	mime.vcxproj
+
+DOC = \
+	doc/dns.html \
+	doc/ftp.html \
+	doc/index.html \
+	doc/http.html \
+	doc/installation.html \
+	doc/introduction.html \
+	doc/ltn12.html \
+	doc/luasocket.png \
+	doc/mime.html \
+	doc/reference.css \
+	doc/reference.html \
+	doc/smtp.html \
+	doc/socket.html \
+	doc/tcp.html \
+	doc/udp.html \
+	doc/url.html
+
+dist:
+	mkdir -p $(DIST)
+	cp -vf NEW $(DIST)
+	cp -vf LICENSE $(DIST)
+	cp -vf README $(DIST)
+	cp -vf $(MAKE) $(DIST)
+
+	mkdir -p $(DIST)/etc
+	cp -vf $(ETC) $(DIST)/etc
+
+	mkdir -p $(DIST)/src
+	cp -vf $(SRC) $(DIST)/src
+
+	mkdir -p $(DIST)/doc
+	cp -vf $(DOC) $(DIST)/doc
+
+	mkdir -p $(DIST)/samples
+	cp -vf $(SAMPLES) $(DIST)/samples
+
+	mkdir -p $(DIST)/test
+	cp -vf $(TEST) $(DIST)/test
+
+	tar -zcvf $(DIST).tar.gz $(DIST)
+	zip -r $(DIST).zip $(DIST)
+
+clean:
+	\rm -rf $(DIST) $(DIST).tar.gz $(DIST).zip

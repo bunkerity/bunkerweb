@@ -1,0 +1,67 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing USERID variable (1/2)",
+    "expected":{
+      "debug_log": "Target value: \"zimmerle2\""
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "USER=zimmerle"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:User-Agent \"^(.*)$\" \"id:'900018',phase:1,t:none,t:sha1,t:hexEncode,setuid:%{REQUEST_COOKIES:USER}%,nolog,pass\"",
+      "SecRule REQUEST_HEADERS:User-Agent \"^(.*)$\" \"id:'900068',phase:1,t:none,t:sha1,t:hexEncode,setuid:%{REQUEST_COOKIES:USER}2,nolog,pass\"",
+      "SecRule USERID \".*\" \"id:1239,phase:1,log,pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing USERID variable (2/2)",
+    "expected":{
+      "debug_log": "Target value: \"whee\""
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "USER=whee"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:User-Agent \"^(.*)$\" \"id:'900018',phase:1,t:none,t:sha1,t:hexEncode,setuid:%{REQUEST_COOKIES:USER}%,nolog,pass\"",
+      "SecRule USERID \".*\" \"id:1239,phase:1,log,pass\""
+    ]
+  }
+]

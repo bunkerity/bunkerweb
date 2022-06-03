@@ -1,0 +1,7 @@
+--TEST--
+sqli test, nc type that is sqli
+--INPUT--
+foo/* yes this is sqli */
+--EXPECTED--
+nc
+

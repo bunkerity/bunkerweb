@@ -1,0 +1,19 @@
+[Unit]
+Description=Bunkerweb ui service
+Documentation=Coming soon
+After=network.target
+
+[Service]
+Restart=always
+StartLimitBurst=1
+User=nginx
+ExecStart=/opt/bunkerweb/scripts/bunkerweb-ui.sh start
+ExecStop=/opt/bunkerweb/scripts/bunkerweb-ui.sh stop
+ExecReload=/opt/bunkerweb/scripts/bunkerweb-ui.sh reload
+Type=simple
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
+Alias=bunkerweb-ui.service

@@ -1,0 +1,7 @@
+--TEST--
+sqli nested pgsql style comments
+--INPUT--
+1 /* /* */ */ 2
+--EXPECTED--
+X
+

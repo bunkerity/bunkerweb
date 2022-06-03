@@ -1,0 +1,40 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 941300.yaml
+  tests:
+  -
+    test_title: 941300-1
+    desc: "IE XSS Filters"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          uri: "/?%3cOBJECT%20data%20%3d=sdffdsa"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941300"
+  -
+    test_title: 941300-2
+    desc: "IE XSS Filters"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          version: HTTP/1.0
+          data: "payload=<object data=\"javascript:alert(1)\"></a>"
+        output:
+          log_contains: id "941300"

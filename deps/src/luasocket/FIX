@@ -1,0 +1,28 @@
+
+
+
+
+
+
+http was preserving old host header during redirects
+fix smtp.send hang on source error
+add create field to FTP and SMTP and fix HTTP ugliness
+clean timeout argument to open functions in SMTP, HTTP and FTP
+eliminate globals from namespaces created by module().
+url.absolute was not working when base_url was already parsed
+http.request was redirecting even when the location header was empty
+tcp{client}:shutdown() was checking for group instead of class.
+tcp{client}:send() now returns i+sent-1...
+get rid of a = socket.try() in the manual, except for protected cases. replace it with assert.
+get rid of "base." kludge in package.loaded
+check all "require("http")" etc in the manual.
+make sure sock_gethostname.*  only return success if the hp is not null!
+change 'l' prefix in C libraries to 'c' to avoid clash with LHF libraries
+    don't forget the declarations in luasocket.h and mime.h!!!
+setpeername was using udp{unconnected}
+fixed a bug in http.lua that caused some requests to fail (Florian Berger)
+fixed a bug in select.c that prevented sockets with descriptor 0 from working (Renato Maia)
+fixed a "bug" that caused dns.toip to crash under uLinux
+fixed a "bug" that caused a crash in gethostbyname under VMS
+DEBUG and VERSION became _DEBUG and _VERSION
+send returns the right value if input is "". Alexander Marinov

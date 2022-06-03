@@ -1,0 +1,23 @@
+---
+  meta:
+    author: "4v3r9"
+    enabled: true
+    name: "941101.yaml"
+    description: "Test to trigger 941101"
+  tests:
+    -
+      test_title: 941101-1
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: /
+            headers:
+              User-Agent: ModSecurity CRS 3 Tests
+              Host: localhost
+              Referer: www.github.com<script><img><iframe>
+          output:
+            log_contains: id "941101"

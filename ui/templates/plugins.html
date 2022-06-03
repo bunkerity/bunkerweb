@@ -1,0 +1,73 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 mb-3">
+  <div class="uploader">
+    <div class="wrapper">
+      <header>Upload a new plugin</header>
+      <form action="#" class="drop-zone">
+        <input
+          type="hidden"
+          id="csrf_token"
+          name="csrf_token"
+          value="{{ csrf_token() }}"
+        />
+        <input
+          class="file-input drop-zone__input"
+          type="file"
+          name="file"
+          multiple="multiple"
+          hidden
+        />
+        <i class="fa-solid fa-cloud-upload-alt"></i>
+        <p>Browse File to Upload</p>
+      </form>
+      <section class="progress-area"></section>
+      <section class="uploaded-area"></section>
+      <header>
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-outline-primary btn-block mt-2">
+            Reload plugins
+          </button>
+        </form>
+      </header>
+    </div>
+  </div>
+  <div class="p-3 pt-4">
+    <div class="widget">
+      <div id="folders">{{ gen_folders_tree_html(folders)|safe }}</div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="modal-delete"
+  tabindex="-1"
+  aria-labelledby="modal-delete-label"
+  aria-hidden="true"
+>
+  <form id="form-delete" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" value="delete" name="operation" />
+    <input type="hidden" id="delete-path" value="" name="path" />
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-delete-label"></h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-delete-body"></div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

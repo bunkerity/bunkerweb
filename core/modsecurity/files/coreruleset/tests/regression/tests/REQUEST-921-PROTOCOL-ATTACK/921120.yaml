@@ -1,0 +1,70 @@
+---
+  meta:
+    author: csanders-git, Franziska Bühler
+    description: None
+    enabled: true
+    name: 921120.yaml
+  tests:
+  -
+    test_title: 921120-1
+    desc: HTTP response splitting (921120) from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel,
+              application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash,
+              */*
+            Accept-Encoding: gzip, deflate
+            Accept-Language: zh-sg
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            Referer: http
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /?lang=foobar%0d%0aContent-Length:%200%0d%0a%0d%0aHTTP/1.1%20200%20OK%0d%0aContent-Type:%20text/html%0d%0aContent-Length:%2019%0d%0a%0d%0a<html>Shazam</html>
+          version: HTTP/1.1
+        output:
+          log_contains: id "921120"
+  -
+    test_title: 921120-2
+    desc: "HTTP Response splitting attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Proxy-Connection: keep-alive
+            Referer: http
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: "/file.jsp?somevar=foobar%0d%0aContent-Length:%2002343432423<html>ftw</html>"
+          version: HTTP/1.1
+        output:
+          log_contains: id "921120"
+  -
+    test_title: 921120-3
+    desc: "Fix FP issue 1615. Header followed by word chars."
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Proxy-Connection: keep-alive
+            Referer: http
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: "/file.jsp?somevar=%0A%0Dlocation:%0A%0D"
+          version: HTTP/1.1
+        output:
+          no_log_contains: id "921120"

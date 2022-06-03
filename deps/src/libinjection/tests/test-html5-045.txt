@@ -1,0 +1,9 @@
+--TEST--
+Basic doctype
+--INPUT--
+<!DOCTYPE>
+--EXPECTED--
+DOCTYPE,7,DOCTYPE
+
+
+

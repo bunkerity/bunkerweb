@@ -1,0 +1,41 @@
+---
+  meta:
+    author: "Christian S.J. Peron, Franziska Bühler"
+    description: None
+    enabled: true
+    name: 942350.yaml
+  tests:
+  -
+    test_title: 942350-1
+    desc: "MySQL UDF injection and other data/structure manipulation"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          # ; insert INTO table (word) VALUES('dfsd')
+          uri: "/?var=%3bINSERT%20INTO%20table%20%28col%29%20VALUES"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942350"
+  -
+    test_title: 942350-2
+    desc: "Fix for FP reported in GitHub issue 1587"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          # ;insertion_424242
+          uri: "/?var=%3Binsertion_424242"
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "942350"

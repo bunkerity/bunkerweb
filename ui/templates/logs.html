@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 mb-3">
+  <div class="p-md-2 pt-1 pt-sm-4">
+    <div class="search-area d-sm-flex">
+      <div class="search-bar flex-grow-1">
+        <form>
+          <input type="search" id="filter-input" placeholder="Filter..." required />
+          <i class="fa-solid fa-search"></i>
+        </form>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="input-group">
+          <input
+            type="text"
+            id="date-input"
+            class="form-control"
+            placeholder="Pick a date"
+            aria-label="Date filter"
+            aria-describedby="date-picker"
+            value=""
+            disabled
+          />
+          <button
+            type="button"
+            id="date-picker"
+            class="btn btn-outline-primary"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="Filter from date"
+            {% if first_instance and first_instance.get_id() == 'linux' %} disabled {% endif %}
+          >
+            <i class="fa-solid fa-calendar-alt"></i>
+          </button>
+        </div>
+        <div class="badge px-1">
+          <button
+            type="button"
+            id="date-clear"
+            class="btn btn-outline-danger"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="Clear filters"
+          >
+            <i class="fa-solid fa-eraser"></i>
+          </button>
+        </div>
+        <div class="badge px-1">
+          <button
+            type="button"
+            id="refresh-logs"
+            class="btn btn-outline-secondary"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="Enable/Disable auto refresh"
+          >
+            <i id="rotate-icon" class="fa-solid fa-arrows-rotate rotate"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="pt-4">
+      <div class="widget">
+        <ul class="nav nav-tabs">
+          {% for instance in instances %}
+          <li class="nav-item">
+            <a class="nav-link container-selector {% if instance.get_id() == first_instance.get_id() %}active{% endif %}" href="javascript:void(0)" {% if instance.get_id() == first_instance.get_id() %}aria-current="page"{% endif %} id="active-nav" data-container-id="{{ instance.get_id() }}">{{ instance.name }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+        <ul class="list-group pt-1" id="logs-list"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

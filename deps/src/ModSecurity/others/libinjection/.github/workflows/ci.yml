@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cppcheck:
+    runs-on: ubuntu-20.04
+    name: cppcheck
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout repo
+      - name: Setup Dependencies
+        run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install cppcheck
+      - name: cppcheck
+        run: |
+          cppcheck --std=c89 \
+            --enable=all \
+            --inconclusive \
+            --suppress=variableScope \
+            --suppress=missingIncludeSystem \
+            --quiet \
+            --error-exitcode=1 \
+            --template='{file}:{line} {id} {severity} {message}' \
+            .
+
+  clang-static:
+    runs-on: ubuntu-20.04
+    name: clang static check
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout repo
+      - name: make analyze
+        run: make analyze
+        working-directory: src
+        env:
+          CFLAGS: '-g -ansi -fpic -O3 -Weverything -Wno-unused-macros -Wno-padded -Wno-covered-switch-default -Wno-disabled-macro-expansion -Werror'
+
+  build-linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
+        platform: [x32, x64]
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Dependencies
+        run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install valgrind
+      - name: build
+        run: make all
+      - name: test
+        run: make -e check
+      - name: clean
+        run: make clean
+      - name: build pedantic
+        run: make all
+        env:
+          CFLAGS: '-Wall -Wextra -Werror -pedantic -ansi -g -O1'
+      - name: test valgrind
+        run: make -e check
+        env:        
+          VALGRIND: 'valgrind --gen-suppressions=no --leak-check=full --show-leak-kinds=all --read-var-info=yes --error-exitcode=1 --track-origins=yes --suppressions=/home/runner/work/libinjection/libinjection/src/alpine.supp'
+
+  build-macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-10.15]
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: make all
+      - name: test
+        run: make -e check
+      - name: clean
+        run: make clean
+      - name: build pedantic
+        run: make all
+        env:
+          CFLAGS: '-Wall -Wextra -Werror -pedantic -ansi -g -O1'

@@ -1,0 +1,64 @@
+Directories: 
+------------
+* alpn
+ Test ALPN (Application-Layer Protocol Negotiation) support.
+
+* certs
+ Contains scripts to generate the certificates used by the examples.
+ Generate Root CA 'A' and 'B' first, then the servers and clients.
+
+* chain
+ Example of certificate chain in handshake.
+
+* curve-negotiation
+ Elliptic curve negotiation.
+
+* dhparam
+ DH parameters for handshake.
+
+* digest
+ Certificate digest.
+
+* ecdh
+ Elliptic curve cipher.
+
+* info
+ Information about the connection.
+
+* key
+ Test encrypted private key.
+
+* loop
+ Test successive connections between the server and the client 
+ (to check memory leak).
+
+* loop-gc
+ Same of above,  but the connection is not  explicit closed, the gabage
+ collector is encharge of that.
+
+* luaossl
+ Integration with luaossl.
+
+* multicert
+ Support to multiple certificate for dual RSA/ECDSA.
+
+* oneshot
+ A simple connection example.
+
+* sni
+ Support to SNI (Server Name Indication).
+
+* verification
+ Retrieve the certificate verification errors from the handshake.
+
+* verify
+ Ignore handshake errors and proceed.
+
+* want
+ Test want() method.
+
+* wantread
+ Test timeout in handshake() and receive().
+
+* wantwrite
+ Test timeout in send().

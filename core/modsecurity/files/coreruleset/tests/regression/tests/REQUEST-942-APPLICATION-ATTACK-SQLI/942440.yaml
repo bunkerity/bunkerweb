@@ -1,0 +1,23 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942440.yaml
+  tests:
+  -
+    test_title: 942440-1
+    desc: "SQL Comment Sequence"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          uri: "/?var=DROP%20sampletable%3b--"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942440"

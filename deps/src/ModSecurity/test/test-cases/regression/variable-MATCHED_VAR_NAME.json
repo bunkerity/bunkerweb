@@ -1,0 +1,86 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MATCHED_VAR_NAME (1/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?keyI=value&keyII=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"ARGS:keyII\" \\(Variable: MATCHED_VAR_NAME\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:keyI \"@contains value\" \"chain,id:28,pass\"",
+      "SecRule ARGS:keyII \"@contains other_value\" \"chain\"",
+      "SecRule MATCHED_VAR_NAME \"@contains asdf\" \"\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MATCHED_VAR_NAME (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?keyI=value&keyII=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":" Target value: \"ARGS:keyII\" \\(Variable: MATCHED_VAR_NAME\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:keyI \"@contains value\" \"chain,id:28,pass\"",
+      "SecRule ARGS:keyII \"@contains other_value\" \"chain\"",
+      "SecRule MATCHED_VAR_NAME \"@contains asdf\" \"\"",
+      "SecRule MATCHED_VAR_NAME \"@contains value\" \"id:29\""
+    ]
+  }
+]
+

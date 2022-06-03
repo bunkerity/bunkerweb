@@ -1,0 +1,7 @@
+--TEST--
+sqli test for code coverage, plain, mysql-style non-comment
+--INPUT--
+1" UNION ALL SELECT --1 FROM FOO
+--EXPECTED--
+sUE1k
+

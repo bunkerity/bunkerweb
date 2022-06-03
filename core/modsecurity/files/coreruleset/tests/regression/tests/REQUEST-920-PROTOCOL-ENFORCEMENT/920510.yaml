@@ -1,0 +1,97 @@
+---
+  meta:
+    author: "Andrea Menin"
+    enabled: true
+    name: "920510.yaml"
+    description: "Cache-Control directives whitelist"
+  tests:
+    - test_title: 920510-1
+      desc: "block request with a response cache-control directive in request"
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              uri: "/"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cache-Control: "private"
+            output:
+              log_contains: "id \"920510\""
+    - test_title: 920510-2
+      desc: "block request with an invalid cache-control directive in request"
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              uri: "/"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cache-Control: "foo=bar"
+            output:
+              log_contains: "id \"920510\""
+    - test_title: 920510-3
+      desc: "block request with an invalid cache-control directive in request with multiple directives"
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              uri: "/"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cache-Control: "max-age=1, foo=bar"
+            output:
+              log_contains: "id \"920510\""
+    - test_title: 920510-4
+      desc: "block request with an invalid cache-control syntax in request with multiple directives"
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              uri: "/"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cache-Control: "max-age=1,,,max-stale=2"
+            output:
+              log_contains: "id \"920510\""
+    - test_title: 920510-5
+      desc: "allow request with valid cache-control single directive"
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              uri: "/"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cache-Control: "no-cache"
+            output:
+              no_log_contains: "id \"920510\""
+    - test_title: 920510-6
+      desc: "allow request with valid cache-control multiple directive"
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              uri: "/"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cache-Control: "max-age=123, max-stale, no-cache"
+            output:
+              no_log_contains: "id \"920510\""

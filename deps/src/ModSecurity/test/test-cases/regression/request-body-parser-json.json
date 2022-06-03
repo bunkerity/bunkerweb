@@ -1,0 +1,155 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing JSON request body parser 1/2",
+    "expected":{
+      "debug_log": "Target value: \"bar\" \\(Variable: ARGS:json.foo\\)"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "{",
+        "       \"foo\":\"bar\",",
+        "       \"mod\":\"sec\"",
+        "}"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule ARGS:json.foo \"bar\" \"id:'200441',phase:3,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing JSON request body parser 2/2",
+    "expected":{
+      "debug_log": "Target value: \"bar\" \\(Variable: ARGS:json.first_level.first_key\\)"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "{",
+        "\"first_level\":",
+        "{",
+        "       \"first_key\":\"bar\",",
+        "       \"second_key\":\"sec\"",
+        "}",
+        "}"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule ARGS \"bar\" \"id:'200441',phase:3,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing JSON request body parser - issue #1822 (1/2)",
+    "expected":{
+      "debug_log": "Target value: \"0\" .Variable: REQBODY_ERROR."
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing JSON request body parser - issue #1822 (2/2)",
+    "expected":{
+      "debug_log": "Target value: \"1\" .Variable: REQBODY_ERROR."
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "a"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
+    ]
+  }
+]
+

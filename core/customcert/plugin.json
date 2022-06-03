@@ -1,0 +1,44 @@
+{
+	"id": "customcert",
+	"order": 999,
+	"name": "Custom HTTPS certificate",
+	"description": "Choose custom certificate for HTTPS.",
+	"version": "0.1",
+	"settings": {
+		"USE_CUSTOM_HTTPS": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Use custom HTTPS certificate.",
+			"id": "use-custom-https",
+			"label": "Use custom certificate",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"CUSTOM_HTTPS_CERT": {
+			"context": "multisite",
+			"default": "",
+			"help": "Full path of the certificate or bundle file.",
+			"id": "custom-https-cert",
+			"label": "Certificate path",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"CUSTOM_HTTPS_KEY": {
+			"context": "multisite",
+			"default": "",
+			"help": "Full path of the key file.",
+			"id": "custom-https-key",
+			"label": "Key path",
+			"regex": "^.*$",
+			"type": "text"
+		}
+	},
+	"jobs": [
+		{
+			"name": "custom-cert",
+			"file": "custom-cert.py",
+			"every": "day",
+			"reload": true
+		}
+	]
+}

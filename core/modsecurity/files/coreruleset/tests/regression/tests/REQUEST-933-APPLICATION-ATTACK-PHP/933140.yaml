@@ -1,0 +1,24 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 933140.yaml
+  tests:
+  -
+    test_title: 933140-1
+    desc: "PHP Injection Attack: I/O Stream"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: POST
+          port: 80
+          data: "var=php://stdout"
+          version: HTTP/1.0
+        output:
+          log_contains: id "933140"

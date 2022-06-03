@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
+    volumes:
+      - ./bw-data:/data # contains custom Core Rule Set confs to add Drupal exclusions
+    environment:
+      - SERVER_NAME=www.example.com # replace with your domain
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://mydrupal
+      # Remove the following lines after finishing the installation of PrestaShop
+      - LIMIT_REQ_URL_1=/core/install.php
+      - LIMIT_REQ_RATE_1=5r/s
+
+  mydrupal:
+    image: drupal:9-apache
+    volumes:
+      - ./drupal-modules:/var/www/html/modules
+      - ./drupal-profiles:/var/www/html/profiles
+      - ./drupal-themes:/var/www/html/themes
+      - ./drupal-sites:/var/www/html/sites
+
+  mydb:
+    image: mariadb
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=drupaldb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password

@@ -1,0 +1,75 @@
+---
+  meta:
+    author: Christian S.J. Peron, Federico G. Schwindt
+    description: US-ASCII Malformed Encoding XSS Filter
+    enabled: true
+    name: 941310.yaml
+  tests:
+  -
+    test_title: 941310-1
+    desc: Positive test using single byte
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Content-type: us-ascii
+          method: POST
+          port: 80
+          uri: /
+          data: var=\xbcscript\xbealert(\xa2XSS\xa2)\xbc/script\xbe
+        output:
+          log_contains: id "941310"
+  -
+    test_title: 941310-2
+    desc: Positive test using utf-8
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Content-type: us-ascii
+          method: POST
+          port: 80
+          uri: /
+          data: var=\xc2\xbcscript\xc2\xbealert(\xc2\xa2XSS\xc2\xa2)\xc2\xbc/script\xc2\xbe
+        output:
+          log_contains: id "941310"
+  -
+    test_title: 941310-3
+    desc: Negative test for opening tag
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Content-type: us-ascii
+          method: POST
+          port: 80
+          uri: /
+          data: var=\xbc\xbc
+        output:
+          no_log_contains: id "941310"
+  -
+    test_title: 941310-4
+    desc: Negative test for closing tag
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Content-type: us-ascii
+          method: POST
+          port: 80
+          uri: /
+          data: var=\xbe\xbe
+        output:
+          no_log_contains: id "941310"

@@ -1,0 +1,363 @@
+---
+  meta:
+    author: "Christian S.J. Peron, Christoph Hansen"
+    description: None
+    enabled: true
+    name: 942120.yaml
+  tests:
+  -
+    test_title: 942120-1
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          uri: "/?var=blahblah&var2=LIKE%20NULL"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-2
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=RegExp"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-3
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ">>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-4
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=%26%26"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-5
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "<<"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-6
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "%21%3D"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-7
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "||"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-8
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "XOR"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-9
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=%3C%3D"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-10
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "IS NULL"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-11
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "in (0,1)"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-12
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "in (2147483647,-1)"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-13
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=%3C%3D%3E"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-14
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "regexp"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-15
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "RLIKE"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-16
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "<>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-17
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "+in+%28++select+anfrage_id+from+erkenntnisse+where+id+is++not++null++%29%0A"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-18
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "+IN+%28815914%2C+815913%29%0A"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-19
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "+IN+%28815919%2C+815920%2C+815921%2C+815922%2C+815923%2C+815924%2C+815925%2C+815926%2C+815927%2C+815928%2C+815929%2C+815930%2C+815932%2C+815933%2C+815934%2C+815935%2C+815936%2C+815937%2C+815917%2C+815918%29%0A"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-20
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay= in ( Aa,- Ab-, and Ac)"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"
+  -
+    test_title: 942120-21
+    desc: "SQL Injection Attack: SQL Operator Detected"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "%3E%3D"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942120"

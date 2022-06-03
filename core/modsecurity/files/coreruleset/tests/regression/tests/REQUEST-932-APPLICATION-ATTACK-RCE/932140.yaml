@@ -1,0 +1,2833 @@
+---
+  meta:
+    author: fgsch
+    description: Tests for Windows for command
+    enabled: true
+    name: 932140.yaml
+  tests:
+  -
+    test_title: 932140-1
+    desc: for %
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%25variable%20in%20%28set%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-2
+    desc: for %%
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%25%25variable%20in%20%28set%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-3
+    desc: for /d
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2fd%20%variable%20in%20%28set%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-4
+    desc: for /r
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2fr%20c%3a%5c%20%25variable%20in%20%28set%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-5
+    desc: for /l
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2fl%20%25variable%20in%20%281%2c1%2c2%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-6
+    desc: for /f .. fileset
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2ff%20%25variable%20in%20%28fileset%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-7
+    desc: for /f .. "string"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2ff%20%25variable%20in%20%28%22string%22%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-8
+    desc: for /f .. 'command'
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2ff%20%25variable%20in%20%28%27command%27%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-9
+    desc: for /f .. `command`
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for%20%2ff%20%22usebackq%22%20%25variable%20in%20%28%60command%60%29%20do%20command
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-10
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%7Cfor+%2Ff+%22delims%3D%22+%25i+in+%28%27cmd+%2Fc+%22powershell.exe+-InputFormat+none+write+%27FJQPVY%27.length%22%27%29+do+if+%25i%3D%3D6+%28cmd+%2Fc+%22powershell.exe+-InputFormat+none+Start-Sleep+-s+2%22%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-11
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR++++++++++++++%25a+IN+%28set%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-12
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FD+++++++++++%25a+IN+%28dirs%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-13
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FD+%2FD++++++++%25a+IN+%28dirs%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-14
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22options%22+%25a+IN+%28text%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-15
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22options%22+%25a+IN+%28%22text%22%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-16
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FL+++++++++++%25a+IN+%28start%2Cstep%2Cend%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-17
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FL+%2FL+%2FL+++++%25a+IN+%28start%2Cstep%2Cend%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-18
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FR+C%3A%5Cbla++++%25A+IN+%28set%29+DO+abc
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-19
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+for+%25a+in+%28a%2Cb%2Cc%29+do+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-20
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25%25a+IN+%28a%2Cb%2Cc%29+DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-21
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25_+IN+%28a%2Cb%2Cc%29+DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-22
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%252+IN+%28a%2Cb%2Cc%29+DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-23
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25-+IN+%28a%2Cb%2Cc%29+DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-24
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25%2F+IN+%28a%2Cb%2Cc%29+DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-25
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25%40+IN+%28a%2Cb%2Cc%29DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-26
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25%5B+IN+%28a%2Cb%2Cc%29DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-27
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25%5D+IN+%28a%2Cb%2Cc%29DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-28
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%25%7E+IN+%28a%2Cb%2Cc%29DO+cmd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-29
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%2FF+%22tokens%3D1-3%22+%25A+IN+%28%22jejeje+brbr%22%29+DO+%40echo+pwnd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-30
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%2FF+%22tokens%3D1-3%22+%25%25A+IN+++%28%22jejeje+brbr%22%29+DO+%40echo+pwnd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-31
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%2FF+%22delims%3D%22+%25G+IN+%28%27SET%27%29+DO+%40Echo+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-32
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%2FF+%22delims%3D%22+%25G+IN+++%28%27ECHO+foo%27%29DO+%40Echo+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-33
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+FOR+%2FF+%22delims%3D%22+%25%7E+IN+++%28%27ECHO+foo%27%29DO+%40Echo+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-34
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=For+%2FR+C%3A%5Ctemp%5C+%25G+IN+%28%2A.bak%29+do+Echo+del+%22%25G%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-35
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=For+%2FR+C%3A%5Ctemp%5C+%25%25G+IN+%28%2A.bak%29+do+Echo+del+%22%25%25G%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-36
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2Ff+%22tokens%3D%2A%22+%25G+IN+%28%27dir+%2Fb%27%29+DO+%28call+%3Asubroutine+%22%25G%22%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-37
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2Ff+%22tokens%3D%2A%22+%25%25G+IN+%28%27dir+%2Fb%27%29+DO+%28call+%3Asubroutine+%22%25%25G%22%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-38
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22tokens%3D1-5%22+%25A+IN+%28%22This+is+a+short+sentence%22%29+DO+%40echo+%25A+%25B+%25D
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-39
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22tokens%3D1-5%22+%25%25A+IN+%28%22This+is+a+short+sentence%22%29+DO+%40echo+%25%25A+%25%25B+%25%25D
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-40
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%25G+IN+%28a%2Cb%2Cc%2Cd%2Ce%2Cf%2Cg%2Ch%2Ci%2Cj%2Ck%2Cl%2Cm%2Cn%2Co%2Cp%2Cq%2Cr%2Cs%2Ct%2Cu%2Cv%2Cw%2Cx%2Cy%2Cz%29+DO+%28md+C%3A%5Cdemo%5C%25G%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-41
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%25%25G+IN+%28a%2Cb%2Cc%2Cd%2Ce%2Cf%2Cg%2Ch%2Ci%2Cj%2Ck%2Cl%2Cm%2Cn%2Co%2Cp%2Cq%2Cr%2Cs%2Ct%2Cu%2Cv%2Cw%2Cx%2Cy%2Cz%29+DO+%28md+C%3A%5Cdemo%5C%25%25G%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-42
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FL+%25G+IN+%281%2C1%2C5%29+DO+echo+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-43
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FL+%25%25G+IN+%281%2C1%2C5%29+DO+echo+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-44
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%25G+IN+%28Sun+Mon+Tue+Wed+Thur+Fri+Sat%29+DO+echo+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-45
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%25%25G+IN+%28Sun+Mon+Tue+Wed+Thur+Fri+Sat%29+DO+echo+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-46
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%2Ff+%22tokens%3D%2A%22+%25G+in+%28%27dir+%2Fb+%2Fs+%2Fa%3Ad+%22C%3A%5CWork%5Creports%2A%22%27%29+do+echo+Found+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-47
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%2Ff+%22tokens%3D%2A%22+%25%25G+in+%28%27dir+%2Fb+%2Fs+%2Fa%3Ad+%22C%3A%5CWork%5Creports%2A%22%27%29+do+echo+Found+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-48
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FD+%2Fr+%25G+in+%28%22User%2A%22%29+DO+Echo+We+found+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-49
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22tokens%3D1%2C3+delims%3D%2C%22+%25%25G+IN+%28weather.txt%29+DO+%40echo+%25%25G+%25%25H
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-50
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22tokens%3D4+delims%3D%2C%22+%25%25G+IN+%28%22deposit%2C%244500%2C123.4%2C12-AUG-09%22%29+DO+%40echo+Date+paid+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-51
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%25G+IN+%28%27%22C%3A%5Cprogram+Files%5Ccommand.exe%22%27%29+DO+ECHO+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-52
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%25%25G+IN+%28%27%22C%3A%5Cprogram+Files%5Ccommand.exe%22%27%29+DO+ECHO+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-53
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22tokens%3D1%2C2%2A+delims%3D%2C%22+%25%25+IN+%28C%3A%5CMyDocu%7E1%5Cmytex%7E1.txt%29+DO+ECHO+%25%25
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-54
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22tokens%3D1%2C2%2A+delims%3D%2C%22+%25%25G+IN+%28C%3A%5CMyDocu%7E1%5Cmytex%7E1.txt%29+DO+ECHO+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-55
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22usebackq+tokens%3D1%2C2%2A+delims%3D%2C%22+%25G+IN+%28%22C%3A%5CMy+Documents%5Cmy+textfile.txt%22%29+DO+ECHO+%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-56
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=FOR+%2FF+%22usebackq+tokens%3D1%2C2%2A+delims%3D%2C%22+%25%25G+IN+%28%22C%3A%5CMy+Documents%5Cmy+textfile.txt%22%29+DO+ECHO+%25%25G
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-57
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%26+for+%2Ff+%5C%22delims%3D%5C%22+%25i+in+%28%27cmd+%2Fc+%5C%22set+%2Fa+%2863%2B21%29%5C%22%27%29+do+%40set+%2Fp+%3D+PDVQIS%25iPDVQISPDVQIS%3C+nul
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-58
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=%3Bfor+%2Ff+%5C%22delims%3D%5C%22+%25i+in+%28%27cmd+%2Fc+%5C%22set+%2Fa+%2835%2B66%29%5C%22%27%29+do+%40set+%2Fp+%3D+LZEUZE%25iLZEUZELZEUZE%3C+nul%27
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-59
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%2Ff+%22tokens%3D%2A+delims%3D0%22+%25%25A+in+%28%22%25n1%25%22%29+do+set+%22n1%3D%25%25A%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-60
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%25i+in+%28%2A%29+do+set+LIST%3D+%25i
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-61
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%25i+in+%28%2A%29+do+set+LIST%3D%21LIST%21+%25i
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-62
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%2Fl+%25%25I+in+%280%2C1%2C5%29+do+call+echo+%25%25RANDOM%25%25
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-63
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%25%25d+in+%28A%2CC%2CD%29+do+DIR+%25%25d+%2A.%2A
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-64
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%25%25f+in+%28%2A.TXT+%2A.BAT+%2A.DOC%29+do+TYPE+%25%25f
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-65
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=for+%25%25P+in+%28%25PATH%25%29+do+if+exist+%25%25P%5C%2A.BAT+COPY+%25%25P%5C%2A.BAT+C%3A%5CBAT
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-66
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+filename.txt+++++%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-67
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+filename+++++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-68
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+filename+++++++++%28CMD%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-69
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+data.xls+++++++++Echo+The+file+was+found.
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-70
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+MyFile.txt+++++++%28ECHO+Some%5Bmore%5DPotatoes%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-71
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+C%3A%5Cpagefile.sys++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-72
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++EXIST+C%3A%5Cpagefile.sys++%28CMD%29+ELSE+%28CMD%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-73
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++NOT+EXIST+C%3A%5Cnonexistent+++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-74
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+NOT+EXIST+C%3A%5Cnonexistent+++echo+hey
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-75
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+++%2FI+++NOT+++EXIST+++C%3A%5Cnonexistent+++echo+hey
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-76
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++NOT+EXIST+C%3A%5Cnonexistent+++%28CMD%29+ELSE+%28CMD%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-77
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++NOT+EXIST+%28C%3A%5Cnonexistent%29+ECHO+pwnt
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-78
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++DEFINED+variable+++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-79
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++NOT+DEFINED+_example+++++++ECHO+Value+Missing
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-80
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++ERRORLEVEL+0+++++++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-81
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++NOT+ERRORLEVEL+0+++++++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-82
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++CMDEXTVERSION+1++++++++GOTO+start_process
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-83
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++2++++++++++++GEQ+15++++echo+%22bigger%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-84
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%222%22++++++++++GEQ+%2215%22++echo+%22bigger%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-85
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25ERRORLEVEL%25+EQU+2+++++goto+sub_problem2
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-86
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25ERRORLEVEL%25+NEQ+0+++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-87
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25ERRORLEVEL%25+LEQ+2+++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-88
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25ERRORLEVEL%25+GTR+2+++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-89
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25ERRORLEVEL%25+GEQ+2+++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-90
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25VARIABLE%25+++GTR+0+++++Echo+An+error+was+found
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-91
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25VARIABLE%25+++LSS+0+++++Echo+An+error+was+found
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-92
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25VARIABLE%25+++EQU+0+++++Echo+An+error+was+found
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-93
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+++++item1%3D%3Ditem2+++++++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-94
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+NOT+item1%3D%3Ditem2+++++++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-95
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+NOT+1%3D%3D2+++++++++++++++++++CMD
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-96
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%25_prefix%25%3D%3DSS6+++++++++GOTO+they_matched
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-97
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%5B%251%5D%3D%3D%5B%5D+++++++++++++++ECHO+Value+Missing
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-98
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%5B%251%5D+EQU+%5B%5D++++++++++++ECHO+Value+Missing
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-99
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++%282+GEQ+15%29+++++++++++++echo+%22bigger%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-100
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++++++red%3D%3Dred+++++++++++++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-101
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF++++NOT+red%3D%3D%3Dred++++++++++++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-102
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+++++Red%3D%3Dred+++++++++++++++echo+test
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-103
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%281%29+equ+%281%29+echo+hey
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-104
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+%282+equ+2%29+echo+hey
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-105
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%25VAR%25%22%3D%3D%25%25A+do+echo+true
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-106
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%22%25%7E1%22+%3D%3D+%22%25%7E2%22+%28EXIT+%2FB+0%29+ELSE+%28EXIT+%2FB+1%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-107
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%25n1%25+gtr+%25n2%25+echo+%25n1%25+is+greater+than+%25n2%25
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-108
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%25n1%25+lss+%25n2%25+echo+%25n1%25+is+less+than+%25n2%25
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-109
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%25n1%25+equ+%25n2%25+echo+%25n1%25+is+equal+to+%25n2%25
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-110
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%25n1%25%22+gtr+%22%25n2%25%22+echo+%22%25n1%25%22+is+greater+than+%22%25n2%25%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-111
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%25n1%25%22+lss+%22%25n2%25%22+echo+%22%25n1%25%22+is+less+than+%22%25n2%25%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-112
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%25n1%25%22+equ+%22%25n2%25%22+echo+%22%25n1%25%22+is+equal+to+%22%25n2%25%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-113
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+defined+n1+set+%22n1%3D0%22
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-114
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+X%251%3D%3DX%2F%3F+GOTO+Helpscreen
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-115
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%22%251%22%3D%3D%22%2F%3F%22+...
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-116
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%5B%251%5D%3D%3D%5B%2F%3F%5D+...
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-117
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%22%25%7E1%22%3D%3D%22%2F%3F%22+...
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-118
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+ERRORLEVEL+3+IF+NOT+ERRORLEVEL+4+...
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-119
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+NOT+DEFINED+BAR+%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-120
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%25VAR%25%22+%3D%3D+%22before%22+%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-121
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%25VAR%25%22+%3D%3D+%22after%22+%40echo+ok
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-122
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%21VAR%21%22+%3D%3D+%22after%22+%40echo+ok
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-123
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+defined+BAR+set+FOO%3D1%26+echo+FOO%3A+%25FOO%25
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-124
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%28%251%29%3D%3D%28LTRS%29+CD+C%3A%5CWORD%5CLTRS
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-125
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22%251%22%3D%3D%22%22+goto+ERROR
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-126
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%28AA%29+%3D%3D+%28AA%29+echo+same
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-127
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%5BAA%5D+%3D%3D+%5BAA%5D+echo+same
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-128
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%22A+A%22+%3D%3D+%22A+A%22+echo+same
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-129
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%25_prog%3A%7E-1%25+NEQ+%5C+%28Set+_prog%3D%25_prog%25%5C%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-130
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+EXIST+%22temp.txt%22+ECHO+found
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-131
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+NOT+EXIST+%22temp.txt%22+ECHO+not+found
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-132
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%22%25var%25%22%3D%3D%22%22+%28SET+var%3Ddefault+value%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-133
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+NOT+DEFINED+var+%28SET+var%3Ddefault+value%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-134
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%22%25var%25%22%3D%3D%22Hello%2C+World%21%22+%28ECHO+found%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-135
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+%22%25var%25%22%3D%3D%22hello%2C+world%21%22+%28+ECHO+found+%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-136
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+%22%25var%25%22+EQU+%221%22+ECHO+equality+with+1
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-137
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+%22%25var%25%22+NEQ+%220%22+ECHO+inequality+with+0
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-138
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+%22%25var%25%22+GEQ+%221%22+ECHO+greater+than+or+equal+to+1
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-139
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+%22%25var%25%22+LEQ+%221%22+ECHO+less+than+or+equal+to+1
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-140
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+%2FI+%22%25ERRORLEVEL%25%22+NEQ+%220%22+%28ECHO+execution+failed%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-141
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+%251+%3D%3D+%22%22+%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-142
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+%22%251%22+%3D%3D+%22%22+%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-143
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+%7B%251%7D+%3D%3D+%7B%7D
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-144
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+not+%22A%251%22+%3D%3D+%22A%22+%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-145
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=IF+DEFINED+ARG+%28echo+%22It+is+defined%3A+%251%22%29+ELSE+%28echo+%22%25%251+is+not+defined%22%29
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-146
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if3q+hfy6e8egfxsjtewc838gsfbhwvw9qzfty3gjs86syg7y6mrpwgw4ekureakjpk6%2Flyghe9pnfekpw2yt8svzseinhs1rbkuu%2Fzq15u5wh8nj8dd+fn86qcdwzv3s9hw35e14pxgcv34dhmt1mwbxnicwudjawfqz+fphmr5vlnufdihoffpuvqwkcmom61i3lisyxg65fx+rgbnrs6e4pmbvy2xl+vwb8oct23cyypregi638dkychllvvw5kq7rolfbhk3hojxz9tthunqky9dodqbb6u8roh+firwx8kuf1dfgewcto9eljhuaoqgdk4qwxlziktaf1mw2atcmw7jvzsh1s0kngiepps54lj4wtcbfzfvbqb7y3caffhnvfrm3tbjxlywqakfqxoprh7yooguat5flg2ozx5%2Fafn7w%3D%3D
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "932140"
+  -
+    test_title: 932140-147
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-148
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if%2Fi+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-149
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%2Fi+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-150
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%2Fi+%22a%22%3D%3D%22b%22++foo
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-151
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%2Fi+not++%22a%22%3D%3D%22b%22++foo
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-152
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+++exist+StorageServer.port+echo+yay
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-153
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if+%2Fi+exist+StorageServer.port+echo+yay
+          version: HTTP/1.0
+        output:
+          log_contains: id "932140"
+  -
+    test_title: 932140-154
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=ifq+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "932140"
+  -
+    test_title: 932140-155
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=iffoo+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "932140"
+  -
+    test_title: 932140-156
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if3+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "932140"
+  -
+    test_title: 932140-157
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=if3q+a%3D%3Db+foo
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "932140"

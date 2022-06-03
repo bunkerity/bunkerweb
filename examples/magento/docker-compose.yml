@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
+    volumes:
+      - ./bw-data:/data # contains custom server configuration for proxy buffers size
+    environment:
+      - SERVER_NAME=www.example.com # replace with your domain
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://mymagento:8080
+
+  mymagento:
+    image: bitnami/magento:2
+    volumes:
+      - ./magento-data:/bitnami/magento
+    environment:
+      - MAGENTO_USERNAME=admin                # replace with admin username
+      - MAGENTO_PASSWORD=changeme42           # replace with a stronger password
+      - MAGENTO_EMAIL=contact@example.com     # replace with admin email
+      - MAGENTO_HOST=www.example.com          # replace with your domain
+      - MAGENTO_ENABLE_HTTPS=yes
+      - MAGENTO_ENABLE_ADMIN_HTTPS=yes
+      - MAGENTO_DATABASE_HOST=mydb
+      - MAGENTO_DATABASE_NAME=magentodb
+      - MAGENTO_DATABASE_USER=user
+      - MAGENTO_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - ELASTICSEARCH_HOST=myelasticsearch
+
+  myelasticsearch:
+    image: bitnami/elasticsearch:7
+    # ⚠️ you need to create the directory and fix permissions ⚠️
+    # see setup.sh
+    volumes:
+      - ./elasticsearch-data:/bitnami/elasticsearch/data
+
+  mydb:
+    image: mariadb:10.2
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=magentodb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)

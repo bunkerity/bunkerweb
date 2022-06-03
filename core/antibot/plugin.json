@@ -1,0 +1,98 @@
+{
+	"id": "antibot",
+	"order": 4,
+	"name": "Antibot",
+	"description": "Bot detection by using a challenge.",
+	"version": "0.1",
+	"settings": {
+		"USE_ANTIBOT": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Activate antibot feature.",
+			"id": "use-antibot",
+			"label": "Antibot challenge",
+			"regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha)$",
+			"type": "select",
+			"select": [
+				"no",
+				"cookie",
+				"javascript",
+				"captcha",
+				"recaptcha",
+				"hcaptcha"
+			]
+		},
+		"ANTIBOT_URI": {
+			"context": "multisite",
+			"default": "/challenge",
+			"help": "Unused URI that clients will be redirected to solve the challenge.",
+			"id": "antibot-uri",
+			"label": "Antibot URL",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_SESSION_SECRET": {
+			"context": "global",
+			"default": "random",
+			"help": "Secret used to encrypt sessions variables for storing data related to challenges.",
+			"id": "antibot-session-secret",
+			"label": "Session secret",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_SESSION_NAME": {
+			"context": "global",
+			"default": "random",
+			"help": "Name of the cookie used by the antibot feature.",
+			"id": "antibot-session-name",
+			"label": "Session name",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_RECAPTCHA_SCORE": {
+			"context": "multisite",
+			"default": "0.7",
+			"help": "Minimum score required for reCAPTCHA challenge.",
+			"id": "antibot-recaptcha-score",
+			"label": "reCAPTCHA score",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_RECAPTCHA_SITEKEY": {
+			"context": "multisite",
+			"default": "",
+			"help": "Sitekey for reCAPTCHA challenge.",
+			"id": "antibot-recaptcha-sitekey",
+			"label": "reCAPTCHA sitekey",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_RECAPTCHA_SECRET": {
+			"context": "multisite",
+			"default": "",
+			"help": "Secret for reCAPTCHA challenge.",
+			"id": "antibot-recaptcha-secret",
+			"label": "reCAPTCHA secret",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_HCAPTCHA_SITEKEY": {
+			"context": "multisite",
+			"default": "",
+			"help": "Sitekey for hCaptcha challenge.",
+			"id": "antibot-hcaptcha-sitekey",
+			"label": "hCaptcha sitekey",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"ANTIBOT_HCAPTCHA_SECRET": {
+			"context": "multisite",
+			"default": "",
+			"help": "Secret for hCaptcha challenge.",
+			"id": "antibot-hcaptcha-secret",
+			"label": "hCaptcha secret",
+			"regex": "^.*$",
+			"type": "text"
+		}
+	}
+}

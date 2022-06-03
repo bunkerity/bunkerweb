@@ -1,0 +1,116 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920160.yaml"
+    description: "Tests to trigger rule 920160"
+  tests:
+    -
+      # Non digit Content-Length without content-type
+      test_title: 920160-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Length: "NotDigits"
+              protocol: "http"
+              uri: "/"
+            output:
+              status: 400
+    -
+      # Non digit content-length with content-type
+      test_title: 920160-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "POST"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+                  Content-Length: "NotDigits"
+              protocol: "http"
+              uri: "/"
+            output:
+              status: 400
+    -
+      # Mixed digit and non digit content length
+      test_title: 920160-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "POST"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+                  Content-Length: "123x"
+              protocol: "http"
+              uri: "/"
+            output:
+              status: 400
+    -
+      # Apache auto corrects for this error now so the log should not contain anything
+      test_title: 920160-4
+      desc: Content-Length HTTP header is not numeric (920160)  from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Language: en-us,en;q=0.5
+              Content-Length: '3'
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+            data: abc
+          output:
+            status: 200
+            no_log_contains: id "920160"
+    -
+      test_title: 920160-5
+      desc: Content-Length HTTP header is not numeric (920160)  from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Language: en-us,en;q=0.5
+              Content-Length: "3;"
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+            data: abc
+          output:
+            status: [200, 403, 400]
+            # log_contains: id "920160"

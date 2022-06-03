@@ -5,43 +5,55 @@ services:
   myapp1:
     image: php:fpm
     networks:
-      services-net:
+      bw-services:
         aliases:
           - myapp1
+    # ⚠️ UID and GID of mywww (101:101) and php:fpm (33:33) are not the same ⚠️
+    # but both needs access to the files and folders of web-files
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example : chown -R 33:101 ./bw-data/www && find ./bw-data/www -type f -exec chmod 0640 {} \; && find ./bw-data/www -type d -exec chmod 0750 {} \;
     volumes:
-      - ./web-files/app1.example.com:/app
+      - ./bw-data/www/app1.example.com:/app # folder containing PHP app1 (don't forget to rename it)
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app1.example.com" # replace with your domain
-      - "bunkerized-nginx.REMOTE_PHP=myapp1"
-      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+      - "bunkerweb.SERVER_NAME=app1.example.com" # replace with your domain
+      - "bunkerweb.REMOTE_PHP=myapp1"
+      - "bunkerweb.REMOTE_PHP_PATH=/app"
 
   myapp2:
     image: php:fpm
     networks:
-      services-net:
+      bw-services:
         aliases:
           - myapp2
+    # ⚠️ UID and GID of mywww (101:101) and php:fpm (33:33) are not the same ⚠️
+    # but both needs access to the files and folders of web-files
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example : chown -R 33:101 ./bw-data/www && find ./bw-data/www -type f -exec chmod 0640 {} \; && find ./bw-data/www -type d -exec chmod 0750 {} \;
     volumes:
-      - ./web-files/app2.example.com:/app
+      - ./bw-data/www/app2.example.com:/app # folder containing PHP app2 (don't forget to rename it)
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app2.example.com" # replace with your domain
-      - "bunkerized-nginx.REMOTE_PHP=myapp2"
-      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+      - "bunkerweb.SERVER_NAME=app2.example.com" # replace with your domain
+      - "bunkerweb.REMOTE_PHP=myapp2"
+      - "bunkerweb.REMOTE_PHP_PATH=/app"
 
   myapp3:
     image: php:fpm
     networks:
-      services-net:
+      bw-services:
         aliases:
           - myapp3
+    # ⚠️ UID and GID of mywww (101:101) and php:fpm (33:33) are not the same ⚠️
+    # but both needs access to the files and folders of web-files
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example : chown -R 33:101 ./bw-data/www && find ./bw-data/www -type f -exec chmod 0640 {} \; && find ./bw-data/www -type d -exec chmod 0750 {} \;
     volumes:
-      - ./web-files/app3.example.com:/app
+      - ./bw-data/www/app3.example.com:/app # folder containing PHP app3 (don't forget to rename it)
     labels:
-      - "bunkerized-nginx.SERVER_NAME=app3.example.com" # replace with your domain
-      - "bunkerized-nginx.REMOTE_PHP=myapp3"
-      - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+      - "bunkerweb.SERVER_NAME=app3.example.com" # replace with your domain
+      - "bunkerweb.REMOTE_PHP=myapp3"
+      - "bunkerweb.REMOTE_PHP_PATH=/app"
 
 networks:
-  services-net:
+  bw-services:
     external:
-      name: services-net
+      name: bw-services

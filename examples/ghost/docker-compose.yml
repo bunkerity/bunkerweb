@@ -2,33 +2,36 @@ version: '3'
 
 services:
 
-  myreverse:
-    image: bunkerity/bunkerized-nginx
-    restart: always
-    depends_on:
-      - myghost
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
       - 443:8443
-    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
     volumes:
-      - ./letsencrypt:/etc/letsencrypt
+      - bw_data:/data
     environment:
-      - SERVER_NAME=www.example.com                          # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
       - AUTO_LETS_ENCRYPT=yes
-      - USE_PROXY_CACHE=yes
+      - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myghost:2368/
+      - REVERSE_PROXY_HOST=http://myghost:2368
 
   myghost:
     image: ghost:alpine
     volumes:
-      - ./data-ghost:/var/lib/ghost/content
+      - ./ghost-data:/var/lib/ghost/content
     environment:
-      - url=https://www.example.com                          # replace with your domain
+      - url=http://www.example.com # replace with your domain
+
+volumes:
+  bw_data:

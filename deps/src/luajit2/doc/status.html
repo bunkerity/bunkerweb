@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Status</title>
+<meta charset="utf-8">
+<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Language" content="en">
+<link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+<link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+<style type="text/css">
+ul li { padding-bottom: 0.3em; }
+</style>
+</head>
+<body>
+<div id="site">
+<a href="https://luajit.org"><span>Lua<span id="logo">JIT</span></span></a>
+</div>
+<div id="head">
+<h1>Status</h1>
+</div>
+<div id="nav">
+<ul><li>
+<a href="luajit.html">LuaJIT</a>
+<ul><li>
+<a href="https://luajit.org/download.html">Download <span class="ext">&raquo;</span></a>
+</li><li>
+<a href="install.html">Installation</a>
+</li><li>
+<a href="running.html">Running</a>
+</li></ul>
+</li><li>
+<a href="extensions.html">Extensions</a>
+<ul><li>
+<a href="ext_ffi.html">FFI Library</a>
+<ul><li>
+<a href="ext_ffi_tutorial.html">FFI Tutorial</a>
+</li><li>
+<a href="ext_ffi_api.html">ffi.* API</a>
+</li><li>
+<a href="ext_ffi_semantics.html">FFI Semantics</a>
+</li></ul>
+</li><li>
+<a href="ext_buffer.html">String Buffers</a>
+</li><li>
+<a href="ext_jit.html">jit.* Library</a>
+</li><li>
+<a href="ext_c_api.html">Lua/C API</a>
+</li><li>
+<a href="ext_profiler.html">Profiler</a>
+</li></ul>
+</li><li>
+<a class="current" href="status.html">Status</a>
+</li><li>
+<a href="faq.html">FAQ</a>
+</li><li>
+<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
+</li><li>
+<a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
+</li></ul>
+</div>
+<div id="main">
+<p>
+This documentation is for LuaJIT 2.1.0-beta3. Please check the <tt>doc</tt>
+directory in each git branch for the version-specific documentation.
+</p>
+<p>
+The currently developed branches are LuaJIT&nbsp;2.1 and LuaJIT&nbsp;2.0.
+</p>
+<p>
+LuaJIT&nbsp;2.0 is in feature-freeze &mdash; new features will only
+be added to LuaJIT&nbsp;2.1.
+</p>
+
+<h2>Current Status</h2>
+<p>
+LuaJIT ought to run all Lua&nbsp;5.1-compatible source code just fine.
+It's considered a serious bug if the VM crashes or produces unexpected
+results &mdash; please report this.
+</p>
+<p>
+Known incompatibilities and issues in LuaJIT&nbsp;2.0:
+</p>
+<ul>
+<li>
+There are some differences in <b>implementation-defined</b> behavior.
+These either have a good reason, are arbitrary design choices
+or are due to quirks in the VM. The latter cases may get fixed if a
+demonstrable need is shown.
+</li>
+<li>
+The Lua <b>debug API</b> is missing a couple of features (return
+hooks for non-Lua functions) and shows slightly different behavior
+in LuaJIT (no per-coroutine hooks, no tail call counting).
+</li>
+</ul>
+<br class="flush">
+</div>
+<div id="foot">
+<hr class="hide">
+Copyright &copy; 2005-2021
+<span class="noprint">
+&middot;
+<a href="contact.html">Contact</a>
+</span>
+</div>
+</body>
+</html>

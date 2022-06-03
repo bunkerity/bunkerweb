@@ -1,0 +1,84 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: TX:0 (1/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.11",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"27",
+        "Content-Type":"application/x-www-form-urlencoded"
+      },
+      "uri":"/one/two/three?key1=value1&key2=v%20a%20l%20u%20e%202",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "whee test 123"
+      ]
+    },
+    "expected":{
+      "debug_log":"(.*) Target value: \"123\" \\(Variable\\: TX\\:0(.*)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecResponseBodyAccess On",
+      "SecRequestBodyAccess On",
+      "SecRule RESPONSE_BODY \"@rx ([0-9]+)\" \"id:1,phase:4,capture,id:105\"",
+      "SecRule TX \"@rx ([A-z]+)\" \"phase:4,id:106\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: TX:0 (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"USER_TOKEN\" \\(Variable: TX:0(.*)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@rx ([A-z]+)\" \"id:1,log,pass,capture,id:14\"",
+      "SecRule TX:0 \"@rx ([A-z]+)\" \"id:15\""
+    ]
+  }
+]

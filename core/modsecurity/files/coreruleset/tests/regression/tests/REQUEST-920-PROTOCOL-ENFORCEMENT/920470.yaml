@@ -1,0 +1,199 @@
+---
+  meta:
+    author: "lifeforms, Franziska Bühler"
+    enabled: true
+    name: "920470.yaml"
+    description: "Content-Type header format checks"
+  tests:
+    - test_title: 920470-1
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "%{(#nike='multipart/form-data').(#dm=@ognl"
+                  Content-Length: 0
+            output:
+              log_contains: "id \"920470\""
+    - test_title: 920470-2
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'text/plain; charset="UTF-8"; garbage'
+                  Content-Length: 0
+            output:
+              log_contains: "id \"920470\""
+    - test_title: 920470-3
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'text/plain; charset=/gar/bage'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-4
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "text/plain"
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-5
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'text/plain; charset=UTF-8'
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-6
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'text/plain; charset="UTF-8"'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-7
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'multipart/form-data; boundary=----WebKitFormBoundary12345'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-8
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'application/json'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-9
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'multipart/form-data; boundary=----formdata-polyfill-0.40616634299_704013'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-10
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'multipart/mixed; boundary=-----boundary_data:55780(123,45:667)+part'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-11
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'multipart/mixed; boundary= gc0p4Jq0M2Yt,08/jU534c0p?==:test'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-12
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'multipart/form-data; boundary=  test_data_123456'
+                  Content-Length: 0
+            output:
+              log_contains: "id \"920470\""
+    - test_title: 920470-13
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'multipart/related; type="application/xop+xml"; boundary="uuid:a111aaa1-aa11-1a11-a11a-11a1111aa11a"; start="<root.message@cxf.apache.org>"; start-info="application/soap+xml'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""
+    - test_title: 920470-14
+      stages:
+        - stage:
+            input:
+              dest_addr: 127.0.0.1
+              port: 80
+              method: POST
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: 'application/soap+xml; action="urn:hl7-org:v3:PRPA_IN201305UV02"; charset=UTF-8'
+                  Content-Length: 0
+            output:
+              no_log_contains: "id \"920470\""

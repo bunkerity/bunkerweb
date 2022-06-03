@@ -1,68 +1,153 @@
-{% extends "base.html" %}
-
-{% block content %}
-
-<div class="row justify-content-center">
-
-	{% if operation != "" %}
-	<div class="col col-12">
-		<div class="row justify-content-center">
-			<div class="col col-12 col-lg-4">
-				<div class="alert alert-primary alert-dismissible fade show text-break" role="alert">
-					{{ operation }}
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-				</div>
-			</div>
-		</div>
-	</div>
-	{% endif %}
-
-	{% if instances|length == 0 %}
-	<div class="col col-12 alert alert-primary">
-		No instance to show...
-	</div>
-	{% endif %}
-
-	{% for instance in instances %}
-		{% set color = "dark" %}
-		{% if instance["status"] == "up" %}
-			{% set color = "success" %}
-		{% elif instance["status"] == "down" %}
-			{% set color = "danger" %}
-		{% endif %}
-
-	<div class="col col-12 col-lg-6">
-		<form id="form-instance-{{ instance["id"] }}">
-			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-			<input type="hidden" name="INSTANCE_ID" value="{{ instance["id"] }}">
-		</form>
-		<div class="card border-{{ color }} mb-3" style="max-width: 80rem;">
-			<div class="card-header border-{{ color }} bg-{{ color }} text-white">
-				{{ instance["name"] }}
-				<div class="btn-group mx-2 float-end" role="group">
-					<button id="btnGroupDrop1" class="btn btn-sm dropdown-toggle btn-light" data-bs-toggle="dropdown" aria-expanded="false">
-						<i class="fas fa-cogs"></i>
-					</button>
-					<ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-						<li><a class="dropdown-item" href="#" onClick="return reloadInstance('{{ instance["id"] }}');">Reload</a></li>
-						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return startInstance('{{ instance["id"] }}');">Start</a></li>{% endif %}
-						<li><a class="dropdown-item" href="#" onClick="return stopInstance('{{ instance["id"] }}');">Stop</a></li>
-						{% if instance["type"] == "local" %}<li><a class="dropdown-item" href="#" onClick="return restartInstance('{{ instance["id"] }}');">Restart</a></li>{% endif %}
-					</ul>
-				</div>
-			</div>
-			<div class="card-body text-dark text-center">
-				<h5 class="card-title">
-					Status : {{ instance["status"] }}<br>
-					Type : {{ instance["type"] }}
-				</h5>
-				<span class="card-text">
-				</span>
-			</div>
-		</div>
-	</div>
-	{% endfor %}
-
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 mb-3">
+  {% if instances|length == 0 %}
+  <div class="row justify-content-center">
+    <div class="col col-12 alert alert-primary text-center">
+      No instance to show...
+    </div>
+  </div>
+  {% else %} {% for instances_batched in instances|batch(2) %}
+  <div class="row">
+    {% for instance in instances_batched %}
+    <div class="col-lg-6">
+      <form id="form-instance-{{ instance._id }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="INSTANCE_ID" value="{{ instance._id }}" />
+        <div class="card p-3 mb-2">
+          <div class="d-flex justify-content-between">
+            <div class="d-flex flex-row align-items-center">
+              {% if instance._type == "local" %} {% if instance.health %}
+              <button
+                class="state-button icon {{ instance.health }}"
+                type="submit"
+                name="operation"
+                value="stop"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                title="Stop"
+              >
+                <i class="fa-solid fa-power-off"></i>
+              </button>
+              {% else %}
+              <button
+                class="state-button icon {{ instance.health }}"
+                type="submit"
+                name="operation"
+                value="start"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                title="Start"
+              >
+                <i class="fa-solid fa-power-off"></i>
+              </button>
+              {% endif %} {% else %}
+              <button
+                class="state-button icon {{ instance.health }}"
+                type="submit"
+                name="operation"
+                value="reload"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                title="Reload"
+              >
+                <i class="fa-solid fa-power-off"></i>
+              </button>
+              {% endif %}
+              <div class="ms-2 c-details">
+                <h6 class="mb-0">{{ instance.name }}</h6>
+              </div>
+            </div>
+            <div class="d-flex flex-row align-items-center">
+              <div class="badge dropdown">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  id="dropdownInfoButton"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="fa-solid fa-circle-info"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownInfoButton">
+                  <li>
+                    <a class="dropdown-item"
+                      ><b>Hostname</b>: <i>{{ instance.hostname }}</i></a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item"
+                      ><b>Type</b>: <i>{{ instance._type }}</i></a
+                    >
+                  </li>
+                </ul>
+              </div>
+              <div class="badge dropdown">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  id="dropdownSettingsButton"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="fa-solid fa-sliders fa-rotate-90"></i>
+                </button>
+                <ul
+                  class="dropdown-menu"
+                  aria-labelledby="dropdownSettingsButton"
+                >
+                  <li>
+                    <button
+                      class="dropdown-item"
+                      type="submit"
+                      name="operation"
+                      value="reload"
+                    >
+                      Reload
+                    </button>
+                  </li>
+                  {% if instance._type == "local" and not instance.health %}
+                  <li>
+                    <button
+                      class="dropdown-item"
+                      type="submit"
+                      name="operation"
+                      value="start"
+                    >
+                      Start
+                    </button>
+                  </li>
+                  {% endif %} {% if instance.health %}
+                  <li>
+                    <button
+                      class="dropdown-item"
+                      type="submit"
+                      name="operation"
+                      value="stop"
+                    >
+                      Stop
+                    </button>
+                  </li>
+                  {% endif %} {% if instance._type == "local" %}
+                  <li>
+                    <button
+                      class="dropdown-item"
+                      type="submit"
+                      name="operation"
+                      value="restart"
+                    >
+                      Restart
+                    </button>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %} {% endif %}
 </div>
-
 {% endblock %}

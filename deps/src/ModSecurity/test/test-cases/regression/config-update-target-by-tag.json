@@ -1,0 +1,242 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateTargetByTag (1/6)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRuleUpdateTargetByTag test !ARGS",
+      "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateTargetByTag (2/6)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRuleUpdateTargetByTag test !ARGS:'/.*y$/'",
+      "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateTargetByTag (3/6)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRuleUpdateTargetByTag test !ARGS:'/k.*/'",
+      "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateTargetByTag (4/6)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRuleUpdateTargetByTag test !ARGS:/ke/",
+      "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
+    ]
+  },
+  {
+       "enabled":1,
+       "version_min":300000,
+       "title":"SecRuleUpdateTargetByTag Test (5/6) Regex with match anchored at beginning of Subject",
+       "client":{
+         "ip":"200.249.12.31",
+         "port":123
+       },
+       "server":{
+         "ip":"200.249.12.31",
+         "port":80
+       },
+       "request":{
+         "headers":{
+              "Host":"localhost",
+              "User-Agent":"curl/7.38.0",
+              "Accept":"*/*"
+         },
+         "uri":"/?key=value&ref=something",
+         "method":"GET"
+       },
+       "response":{
+         "headers":{
+              "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+              "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+              "Content-Type":"text/html"
+         },
+         "body":[
+              "no need."
+         ]
+       },
+       "expected":{
+         "http_code": 200
+       },
+       "rules":[
+         "SecRuleEngine On",
+         "SecRuleUpdateTargetByTag test !ARGS:'/(?!ref)/'",
+         "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
+       ]
+  },
+  {
+       "enabled":1,
+       "version_min":300000,
+       "title":"SecRuleUpdateTargetByTag Test (6/6) Regex with match anchored at beginning of Subject",
+       "client":{
+         "ip":"200.249.12.31",
+         "port":123
+       },
+       "server":{
+         "ip":"200.249.12.31",
+         "port":80
+       },
+       "request":{
+         "headers":{
+              "Host":"localhost",
+              "User-Agent":"curl/7.38.0",
+              "Accept":"*/*"
+         },
+         "uri":"/?key=value&ref=something",
+         "method":"GET"
+       },
+       "response":{
+         "headers":{
+              "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+              "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+              "Content-Type":"text/html"
+         },
+         "body":[
+              "no need."
+         ]
+       },
+       "expected":{
+         "http_code": 200
+       },
+       "rules":[
+         "SecRuleEngine On",
+         "SecRuleUpdateTargetByTag test !ARGS:'/^ref/'",
+         "SecRule ARGS \"@contains something\" \"id:1,pass,t:trim,tag:'test',deny\""
+       ]
+  }
+]

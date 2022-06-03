@@ -1,0 +1,71 @@
+{
+	"id": "realip",
+	"order": 999,
+	"name": "Real IP",
+	"description": "Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.",
+	"version": "0.1",
+	"settings": {
+		"USE_REAL_IP": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Retrieve the real IP of client.",
+			"id": "use-real-ip",
+			"label": "Use real ip",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"USE_PROXY_PROTOCOL": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Enable PROXY protocol communication.",
+			"id": "use-proxy-protocol",
+			"label": "Use PROXY protocol",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"REAL_IP_FROM": {
+			"context": "multisite",
+			"default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
+			"help": "List of trusted IPs / networks where proxied requests come from.",
+			"id": "real-ip-from",
+			"label": "Real IP from",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"REAL_IP_FROM_URLS": {
+			"context": "global",
+			"default": "",
+			"help": "List of URLs containing trusted IPs / networks where proxied requests come from.",
+			"id": "real-ip-from-urls",
+			"label": "Real IP from URLs",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"REAL_IP_HEADER": {
+			"context": "multisite",
+			"default": "X-Forwarded-For",
+			"help": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
+			"id": "real-ip-header",
+			"label": "Real IP header",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"REAL_IP_RECURSIVE": {
+			"context": "multisite",
+			"default": "yes",
+			"help": "Perform a recursive search in the header container IP address.",
+			"id": "real-ip-header",
+			"label": "Real IP recursive",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		}
+	},
+	"jobs": [
+		{
+			"name": "realip-download",
+			"file": "realip-download.py",
+			"every": "hour",
+			"reload": true
+		}
+	]
+}

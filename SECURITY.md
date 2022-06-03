@@ -7,7 +7,7 @@ Even though this project is focused on security, it is still prone to possible v
 If you have found a security bug, please send us an email at security \[@\] bunkerity.com with technical details so we can resolve it as soon as possible.
 
 Here is a non-exhaustive list of issues we consider as high risk :
-- Vulnerability in the core
+- Vulnerability in the code
 - Bypass of a security feature
 - Vulnerability in a third-party dependency
 - Risk in the supply chain

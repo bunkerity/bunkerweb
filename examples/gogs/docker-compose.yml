@@ -2,29 +2,34 @@ version: '3'
 
 services:
 
-  myreverse:
-    image: bunkerity/bunkerized-nginx
-    restart: always
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
       - 443:8443
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
     volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./modsec-crs-confs:/modsec-crs-confs:ro              # fix FP with CRS
+      - ./bw-data:/data # contains some Core Rule Set configuration to fix FP
     environment:
-      - SERVER_NAME=www.example.com                          # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
       - AUTO_LETS_ENCRYPT=yes
-      - USE_PROXY_CACHE=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mygogs:3000
+      - WHITELIST_USER_AGENT=^git
+      - REVERSE_PROXY_HEADERS_1=Authorization $http_authorization
+      - MAX_CLIENT_SIZE=1G
 
   mygogs:
     image: gogs/gogs
     volumes:
-      - ./data-gogs:/data
+      - ./gogs-data:/data

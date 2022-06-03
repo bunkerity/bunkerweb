@@ -1,0 +1,198 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_GET (1/5)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"other_value\""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_GET \"@contains test \" \"id:1,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_GET (2/5)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"value\""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_GET \"@contains test \" \"id:1,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_GET (3/5)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value%26withsomestuff=tootherstuff",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"other_value&withsomestuff=tootherstuff\""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_GET \"@contains test \" \"id:1,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_GET (4/5)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&secondkey=&key3=val3",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"0\""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_GET:secondkey \"0\" \"id:1,phase:2,pass,t:none,t:length\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_GET (5/5)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&secondkey=othervalue&",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"othervalue\""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_GET \"@rx ^othervalue$ \" \"id:1,pass,t:none\""
+    ]
+  }
+]
+

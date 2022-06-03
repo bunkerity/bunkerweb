@@ -1,0 +1,20 @@
+[Unit]
+Description=Bunkerweb jobs services
+Documentation=Coming soon
+After=network.target
+
+[Service]
+Restart=always
+StartLimitBurst=1
+User=root
+PIDFile=/opt/bunkerweb/tmp/scheduler.pid
+ExecStart=/opt/bunkerweb/scripts/start.sh start
+ExecStop=/opt/bunkerweb/scripts/start.sh stop
+ExecReload=/opt/bunkerweb/scripts/start.sh reload
+Type=simple
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
+Alias=bunkerweb.service

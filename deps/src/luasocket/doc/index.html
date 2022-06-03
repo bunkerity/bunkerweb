@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" 
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<meta name="description" content="The LuaSocket Homepage">
+<meta name="keywords" content="Lua, LuaSocket, Network, Library, Support, Internet">
+<title>LuaSocket: Network support for the Lua language </title>
+<link rel="stylesheet" href="reference.css" type="text/css">
+</head>
+
+<body>
+
+<!-- header +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=header>
+<hr>
+<center>
+<table summary="LuaSocket logo">
+<tr><td align=center><a href="http://www.lua.org">
+<img width=128 height=128 border=0 alt="LuaSocket" src="luasocket.png">
+</a></td></tr>
+<tr><td align=center valign=top>Network support for the Lua language
+</td></tr>
+</table>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a> 
+</p>
+</center>
+<hr>
+</div>
+
+<!-- whatis +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id=whatis>What is LuaSocket?</h2>
+
+<p>
+LuaSocket  is a  <a href="http://www.lua.org">Lua</a>  extension library
+that is composed by two parts: a C core that provides  support for the TCP
+and UDP transport layers, and a set of Lua modules that add support for
+functionality commonly needed by applications that deal with the Internet. 
+</p>
+
+<p>
+The core support has been  implemented so that it  is both efficient and
+simple to use.  It is available to any Lua application once it has been
+properly initialized by the interpreter in use. The code has been tested
+and runs well on several Windows and UNIX platforms. </p>
+
+<p>
+Among the support modules, the most commonly used implement the 
+<a href=smtp.html>SMTP</a>
+(sending  e-mails),  
+<a href=http.html>HTTP</a>
+(WWW access)  and  
+<a href=ftp.html>FTP</a>  
+(uploading  and downloading files) client
+protocols. These provide a very natural and generic interface to the
+functionality defined by each protocol. 
+In addition, you will find that the 
+<a href=mime.html>MIME</a> (common encodings), 
+<a href=url.html>URL</a> 
+(anything you could possible want to do with one) and 
+<a href=ltn12.html>LTN12</a> 
+(filters, sinks, sources and pumps) modules can be very handy. 
+</p>
+
+<p>
+The library is available under the same  
+<a href="http://www.lua.org/copyright.html">
+terms and conditions</a> as the Lua language, the MIT license. The idea is
+that if you can use Lua in a project, you should also be able to use 
+LuaSocket.
+</p>
+
+<p>
+Copyright &copy; 1999-2013 Diego Nehab. All rights reserved. <br>
+Author: <A href="http://www.impa.br/~diego">Diego Nehab</a>
+</p>
+
+<!-- download +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id=download>Download</h2>
+
+<p>
+LuaSocket version 3.0-rc1 is now available for download! 
+It is compatible with  Lua&nbsp;5.1 and 5.2, and has    
+been tested on Windows&nbsp;XP, Linux, and Mac OS X. Chances
+are it works well on most UNIX distributions and Windows flavors.
+</p>
+
+<p>
+The current version of the library can be found at
+the <a href="https://github.com/diegonehab/luasocket">LuaSocket
+project page</a> on GitHub. Besides the full C and Lua source code 
+for the library, the distribution contains several examples, 
+this user's manual and basic test procedures.
+</p>
+
+<p> Take a look at the <a
+href=installation.html>installation</a> section of the
+manual to find out how to properly install the library.
+</p>
+
+<!-- thanks +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id=thanks>Special thanks</h2>
+
+<p>
+This marks the first release of LuaSocket that
+wholeheartedly embraces the open-source development
+philosophy. After a long hiatus, Matthew Wild finally
+convinced me it was time for a release including IPv6 and
+Lua 5.2 support. It was more work than we anticipated.
+Special thanks to Sam Roberts, Florian Zeitz, and Paul
+Aurich, Liam Devine, Alexey Melnichuk, and everybody else
+that has helped bring this library back to life. 
+</p>
+
+<!-- whatsnew +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id=new>What's New</h2>
+
+<p>
+Main changes for LuaSocket&nbsp;3.0-rc1 are IPv6 support
+and Lua&nbsp;5.2 compatibility. 
+</p>
+
+<ul>
+<li> Added: Compatible with Lua&nbsp;5.2 
+<ul>
+<li> Note that unless you define <tt>LUA_COMPAT_MODULE</tt>,
+package tables will <em>not</em> be exported as globals!
+</ul>
+<li> Added: IPv6 support;
+<ul>
+<li> <tt>Socket.connect</tt> and <tt>socket.bind</tt> support IPv6 addresses;
+<li> <tt>Getpeername</tt> and <tt>getsockname</tt> support
+IPv6 addresses, and return the socket family as a third value;
+<li> URL module updated to support IPv6 host names;
+<li> New <tt>socket.tcp6</tt> and <tt>socket.udp6</tt> functions;
+<li> New <tt>socket.dns.getaddrinfo</tt> and 
+    <tt>socket.dns.getnameinfo</tt> functions;
+</ul>
+<li> Added: <tt>getoption</tt> method;
+<li> Fixed: <tt>url.unescape</tt> was returning additional values;
+<li> Fixed: <tt>mime.qp</tt>, <tt>mime.unqp</tt>, 
+    <tt>mime.b64</tt>, and <tt>mime.unb64</tt> could
+    mistaking their own stack slots for functions arguments;
+<li> Fixed: Receiving zero-length datagram is now possible;
+<li> Improved: Hidden all internal library symbols;
+<li> Improved: Better error messages;
+<li> Improved: Better documentation of socket options.
+<li> Fixed: manual sample of HTTP authentication now uses correct
+     "authorization" header (Alexandre Ittner);
+<li> Fixed: failure on bind() was destroying the socket (Sam Roberts);
+<li> Fixed: receive() returns immediatelly if prefix can satisfy
+     bytes requested (M Joonas Pihlaja);
+<li> Fixed: multicast didn't work on Windows, or anywhere
+     else for that matter (Herbert Leuwer, Adrian Sietsma);
+<li> Fixed: select() now reports an error when called with more
+     sockets than FD_SETSIZE (Lorenzo Leonini);
+<li> Fixed: manual links to home.html changed to index.html
+(Robert Hahn);
+<li> Fixed: mime.unb64() would return an empty string on results that started
+     with a null character (Robert Raschke);
+<li> Fixed: HTTP now automatically redirects on 303 and 307 (Jonathan Gray);
+<li> Fixed: calling sleep() with negative numbers could
+     block forever, wasting CPU. Now it returns immediately (MPB);
+<li> Improved: FTP commands are now sent in upper case to
+     help buggy servers (Anders Eurenius);
+<li> Improved: known headers now sent in canonic
+     capitalization to help buggy servers (Joseph Stewart);
+<li> Improved: Clarified tcp:receive() in the manual (MPB);
+<li> Improved: Decent makefiles (LHF).
+<li> Fixed: RFC links in documentation now point to IETF (Cosmin Apreutesei).
+</ul>
+
+<!-- old ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id=old>Old Versions</h2>
+
+<p>
+All  previous versions  of the  LuaSocket library  can be  downloaded <a
+href="http://www.impa.br/~diego/software/luasocket/old">
+here</a>. Although these  versions are  no longer  supported, they  are
+still available for those that have compatibility issues. 
+</p>
+
+<!-- footer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=footer>
+<hr>
+<center>
+<p class=bar>
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+<p>
+<small>
+Last modified by Diego Nehab on <br>
+Tue Jun 11 18:50:23 HKT 2013
+</small>
+</p>
+</center>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+extends: default
+
+rules:
+  # Test lines can be big
+  line-length:
+    max: 1024
+    level: warning
+    # These files below have very large lines, needed for the test.
+    # So they will raise warnings every time.
+    ignore: |
+      tests/regression/tests/REQUEST-920-PROTOCOL-ENFORCEMENT/920380.yaml
+      tests/regression/tests/REQUEST-920-PROTOCOL-ENFORCEMENT/920390.yaml
+      tests/regression/tests/REQUEST-941-APPLICATION-ATTACK-XSS/941360.yaml
+
+  # don't bother me with this rule
+  indentation: disable
+
+  comments: {require-starting-space: false}

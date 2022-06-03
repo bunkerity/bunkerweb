@@ -1,0 +1,62 @@
+version: '3.5'
+
+services:
+
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - published: 80
+        target: 8080
+        mode: host
+        protocol: tcp
+      - published: 443
+        target: 8443
+        mode: host
+        protocol: tcp
+    environment:
+      - SWARM_MODE=yes
+      - SERVER_NAME=
+      - MULTISITE=yes
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - AUTO_LETS_ENCRYPT=yes # will be applied to all the services
+    networks:
+      - bw-autoconf
+      - bw-services
+    deploy:
+      mode: global
+      # placement:
+        # constraints:
+          # - "node.role==worker"
+      labels:
+        - "bunkerweb.AUTOCONF"
+
+  myautoconf:
+    image: bunkerity/bunkerweb-autoconf:1.4.0
+    environment:
+      - SWARM_MODE=yes
+    volumes:
+      - bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bw-autoconf
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.role==manager"
+
+networks:
+  bw-autoconf:
+    driver: overlay
+    attachable: true
+    name: bw-autoconf
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    driver: overlay
+    attachable: true
+    name: bw-services
+
+volumes:
+  bw-data:

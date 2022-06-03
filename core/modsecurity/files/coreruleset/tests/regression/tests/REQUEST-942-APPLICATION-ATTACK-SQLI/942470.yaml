@@ -1,0 +1,177 @@
+---
+  meta:
+    author: "Christoph Hansen"
+    description: None
+    enabled: true
+    name: 942470.yaml
+  tests:
+  -
+    test_title: 942470-1
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=nvarchar"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-2
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=xp_cmdshell"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-3
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=varchar"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-4
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=xp_dirtree"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-5
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=xp_regread"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-6
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=sp_password"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-7
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=UTL_HTTP"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-8
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=OPENROWSET"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-9
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=sp_executesql"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"
+  -
+    test_title: 942470-10
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "sp_executesql"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942470"

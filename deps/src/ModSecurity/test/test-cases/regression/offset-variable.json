@@ -1,0 +1,1955 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,3v23,6t:trim"
+    },
+    "rules":[
+      "SecRule ARGS \"@rx val\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_GET",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value2",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o3,3v37,6t:trim"
+    },
+    "rules":[
+      "SecRule ARGS_GET \"@rx ue2\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_POST 1",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value1"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o3,3v142,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_POST \"@rx ue1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_POST 2",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o3,3v156,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_POST \"@rx ue2\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_GET_NAMES 1",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,6v17,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_GET_NAMES \"@rx param1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_GET_NAMES 2",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,6v31,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_GET_NAMES \"@rx param2\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_GET_NAMES 3",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      // should not match
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_GET_NAMES \"@rx am1 par\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_GET_NAMES 4",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      // should not match
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_GET_NAMES \"@rx am1 param2 par\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_POST_NAMES",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log": "0,6v149,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_POST_NAMES \"@rx param1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_NAMES",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"POST",
+      "body":[
+        "param1=value1&param2=value2&param3=value3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,6v17,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_NAMES \"@rx param1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_COMBINED_SIZE 1",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"v16,6v23,6v30,6v37,6v44,6v51,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_COMBINED_SIZE 2",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"v16,6v23,6v30,6v37,6v44,6v51,6t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_LINE",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o23,6v0,63t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_LINE \"value1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_METHOD",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,3v0,3t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_METHOD \"GET\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_PROTOCOL",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o5,3v58,8t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_PROTOCOL \"1.1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - PATH_INFO",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o1,5v4,11t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule PATH_INFO \"index\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - QUERY_STRING",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o7,6v16,41t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule QUERY_STRING \"value1\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_BASENAME",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o6,4v5,10t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_BASENAME \"html\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_URI",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html%20%20?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o7,4v4,59t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_URI \"html\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_URI_RAW",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html%20%20?param1=value1&param2=value1&param3=value1",
+      "method":"GET",
+      "http_version": 1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o7,4v4,59t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_URI_RAW \"html\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_HEADERS",
+    "request":{
+      "headers":{
+        "Content-Length": "27",
+        "Host":"localhost",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,9v89,9t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS \"localhost\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_HEADERS:content-type",
+    "request":{
+      "headers":{
+        "Content-Length": "27",
+        "Host":"localhost",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o14,3v163,33t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS \"www\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+  },
+      {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - AUTH_TYPE 1",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,5v162,5t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule AUTH_TYPE \"Basic\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - AUTH_TYPE 2",
+    "request":{
+      "headers":{
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,5v79,5t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule AUTH_TYPE \"Basic\" \"id:1,phase:2,pass,t:trim,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_HEADERS_NAMES",
+    "request":{
+      "headers":{
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,4v64,13t:lowercase"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS_NAMES \"auth\" \"id:1,phase:2,pass,t:lowercase,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_COOKIES 1",
+    "request":{
+      "headers":{
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o1,2v216,3t:lowercase"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_COOKIES \"es\" \"id:1,phase:2,pass,t:lowercase,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_COOKIES 2",
+    "request":{
+      "headers":{
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,1v223,1t:lowercase"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_COOKIES \"z\" \"id:1,phase:2,pass,t:lowercase,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_COOKIES 3",
+    "request":{
+      "headers":{
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,1v228,1t:lowercase"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_COOKIES \"b\" \"id:1,phase:2,pass,t:lowercase,msg:'ops'\""
+    ]
+    },
+    {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - REQUEST_COOKIES_NAMES",
+    "request":{
+      "headers":{
+        "AuThOrIzAtIoN": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/index.html?param1=value1&param2=value1&param3=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,1v226,1"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_COOKIES_NAMES \"t\" \"id:1,phase:2,pass,msg:'ops'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REMOTE_USER",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"27",
+        "Content-Type":"application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpPcGVuU2VzYW1l"
+      },
+      "uri":"/one/two/three?key1=value1&key2=v%20a%20l%20u%20e%202",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"o0,7v198,30t:trim"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REMOTE_USER \"Aladdin\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_BODY",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o45,30v193,516t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_BODY \"Content-Disposition: form-data\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_BODY",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o45,30v193,516t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_BODY \"Content-Disposition: form-data\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_BODY_LENGTH",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"v193,516t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_BODY_LENGTH \"@gt 5\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_FILENAME 1",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/file?something else",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o6,5v5,11t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_FILENAME \"/file\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_FILENAME 2",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20?something else",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o6,8v5,23t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_FILENAME \"/f i l e\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_FILENAME 3",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o6,8v5,23t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_FILENAME \"/f i l e\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS/Multipart 1",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file2.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,4v306,4t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS \"test\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS/Multipart 2",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file2.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,5v402,5t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule ARGS \"test2\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,16v680,20t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule FILES \"small_text_file2\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,16v512,20t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule FILES \"small_text_file1\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES_NAMES",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,8o0,8v491,8t:trimo0,16o0,16v709,16t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule FILES_NAMES \"(fiasdfasdfledata|filedata)\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES_SIZES 1",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"v560,32t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule FILES_SIZES:filedata \"@gt 0\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES_SIZES 2",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"v754,38t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule FILES_SIZES:fiasdfasdfledata \"@gt 0\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES_COMBINED_SIZE",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"v560,32v754,38t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecRule FILES_COMBINED_SIZE \"@gt 0\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES_TMP_CONTENT 1",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o8,7v754,38t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecUploadKeepFiles On",
+      "SecUploadDir /tmp",
+      "SecRule FILES_TMP_CONTENT \"another\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - FILES_TMP_CONTENT 2",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o15,5v560,32t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecUploadKeepFiles On",
+      "SecUploadDir /tmp",
+      "SecRule FILES_TMP_CONTENT:small_text_file1.txt \"small\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - PATH_INFO",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o6,4v5,23t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecUploadKeepFiles On",
+      "SecUploadDir /tmp",
+      "SecRule PATH_INFO \"/f i\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - MULTIPART_FILENAME",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,20v680,20t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecUploadKeepFiles On",
+      "SecUploadDir /tmp",
+      "SecRule MULTIPART_FILENAME \"small_text_file2.txt\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - MULTIPART_NAME",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/wheee/f%20i%20l%20e%20",
+      "method":"POST",
+      "body":[  
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name2\"",
+        "",
+        "test2",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file1.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; filename=\"small_text_file2.txt\"; name=\"fiasdfasdfledata\" ",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "----------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "expected":{
+      "error_log":"o0,16v709,16t:trim"
+    },
+    "rules":[
+      "SecRequestBodyAccess On",
+      "SecUploadKeepFiles On",
+      "SecUploadDir /tmp",
+      "SecRule MULTIPART_NAME \"fiasdfasdfledata\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  }
+]

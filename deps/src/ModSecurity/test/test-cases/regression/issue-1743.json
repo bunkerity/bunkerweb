@@ -1,0 +1,74 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Regex match does not work when arg ends with unescaped equal char (1/2)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1743",
+  "gihub_issue": 1743,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "uri":"/?x=foo%3d",
+    "headers": "",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 1",
+    "error_log": "Value: `foo='",
+    "http_code": 403
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule ARGS \"foo?=\" \"phase:2,id:1,capture,t:none,t:lowercase,deny,msg:'XSS Attack Detected',logdata:'Matched Data: %{TX.0} found within %{MATCHED_VAR_NAME}: %{MATCHED_VAR}'\""
+  ]
+},
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Regex match does not work when arg ends with unescaped equal char (2/2)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1743",
+  "gihub_issue": 1743,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "uri":"/?x=foo=",
+    "headers": "",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 1",
+    "error_log": "Value: `foo='",
+    "http_code": 403
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule ARGS \"foo?=\" \"phase:2,id:1,capture,t:none,t:lowercase,deny,msg:'XSS Attack Detected',logdata:'Matched Data: %{TX.0} found within %{MATCHED_VAR_NAME}: %{MATCHED_VAR}'\""
+  ]
+}
+]

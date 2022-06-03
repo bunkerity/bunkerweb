@@ -1,0 +1,24 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 941120.yaml
+  tests:
+  -
+    test_title: 941120-1
+    desc: "XSS Filter - Category 2: Event Handler Vector"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/?%20%20onload%3d%20=vardata"
+          #data: "%20%20onload%3d%20=vardata"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941120"

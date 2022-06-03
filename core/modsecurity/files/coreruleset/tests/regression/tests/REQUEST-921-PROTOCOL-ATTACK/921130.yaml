@@ -1,0 +1,83 @@
+---
+  meta:
+    author: "csanders-git, Franziska Bühler"
+    description: None
+    enabled: true
+    name: 921130.yaml
+  tests:
+  -
+    test_title: 921130-1
+    desc: HTTP response splitting (921130) from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel,
+              application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash,
+              */*
+            Accept-Encoding: gzip, deflate
+            Accept-Language: zh-sg
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            Referer: http
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /?lang=foobar%3Cmeta%20http-equiv%3D%22Refresh%22%20content%3D%220%3B%20url%3Dhttp%3A%2F%2Fwww.hacker.com%2F%22%3E
+          version: HTTP/1.1
+        output:
+          log_contains: id "921130"
+  -
+    test_title: 921130-2
+    desc: "HTTP Response splitting attack: cookie data"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cookie: "oreo=munchmuch%0d%0a%0d%0a<HTML><title></title></HTML>"
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: "/"
+        output:
+          log_contains: id "921130"
+  -
+    test_title: 921130-3
+    desc: HTTP Request Smuggling with not supported HTTP versions such as HTTP/1.2
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Accept: "*/*"
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /?arg1=GET%20http%3A%2F%2Fwww.foo.bar%20HTTP%2F1.2
+        output:
+          log_contains: id "921130"
+  -
+    test_title: 921130-4
+    desc: HTTP Request Smuggling with not supported HTTP versions such as HTTP/3
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Accept: "*/*"
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /?arg1=GET%20http%3A%2F%2Fwww.foo.bar%20HTTP%2F3.2
+        output:
+          log_contains: id "921130"

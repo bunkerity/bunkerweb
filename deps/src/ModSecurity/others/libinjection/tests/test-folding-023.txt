@@ -1,0 +1,8 @@
+--TEST--
+three words, no folding
+--INPUT--
+foo zap bar
+--EXPECTED--
+n foo
+n zap
+n bar

@@ -1,0 +1,61 @@
+sudo: required
+dist: bionic
+
+branches:
+  only:
+    - "v2.1-agentzh"
+
+os: linux
+arch:
+  - amd64
+  - arm64
+  - s390x
+
+language: c
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+    - axel
+    - cpanminus
+    - libtest-base-perl
+    - libtext-diff-perl
+    - libtest-longstring-perl
+    - liblist-moreutils-perl
+    - libparallel-forkmanager-perl
+    - libgd-dev
+    - libmpc-dev
+    - build-essential
+    - libgtk2.0-dev
+    - valgrind
+
+env:
+  global:
+  - JOBS=3
+  - LUAJIT_PREFIX=/opt/luajit21
+  - LUAJIT_SYSM_PREFIX=/opt/luajit21-sysm
+  - LUAJIT_COMMON_XCFLAGS="-DLUA_USE_APICHECK -DLUA_USE_ASSERT -DLUAJIT_NUMMODE=2 -O1"
+  - LUAJIT_COMMON_XCFLAGS=$( [ ${TRAVIS_CPU_ARCH} == "amd64" ] && echo "$LUAJIT_COMMON_XCFLAGS -msse4.2" || echo "$LUAJIT_COMMON_XCFLAGS" )
+
+  matrix:
+  - LUAJIT_XCFLAGS="$LUAJIT_COMMON_XCFLAGS"
+  - LUAJIT_XCFLAGS="-DLUAJIT_ENABLE_LUA52COMPAT $LUAJIT_COMMON_XCFLAGS" LUA52=1
+  - LUAJIT_XCFLAGS="-DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC -DLUAJIT_ENABLE_LUA52COMPAT $LUAJIT_COMMON_XCFLAGS" LUA52=1 FLAGS=$( [ ${TRAVIS_CPU_ARCH} != "s390x" ] && echo '-v' )
+  - LUAJIT_XCFLAGS="-DLUAJIT_DISABLE_GC64 -DLUAJIT_ENABLE_LUA52COMPAT $LUAJIT_COMMON_XCFLAGS" LUA52=1
+
+install:
+  - git clone https://github.com/openresty/luajit2-test-suite.git ../luajit2-test-suite
+
+script:
+  - echo ${LUAJIT_COMMON_XCFLAGS}
+  - valgrind --version
+  - sudo cpanm IPC::Run3
+  - cd ../luajit2
+  - make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS="$LUAJIT_XCFLAGS" > build.log 2>&1 || (cat build.log && exit 1)
+  - sudo make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
+  - if [ ${TRAVIS_CPU_ARCH} == "amd64" ]; then PATH=/opt/luajit21/bin:$PATH prove -I. t; fi
+  - cd ../luajit2-test-suite
+  - ./run-tests -j $JOBS $FLAGS $LUAJIT_PREFIX

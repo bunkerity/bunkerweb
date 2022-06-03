@@ -1,0 +1,53 @@
+#form-edit-global-conf .row .col-form-label,
+#form-edit-global-conf .row .col-8 {
+  background-color: transparent;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .nav-link:hover {
+  background-color: rgba(64, 187, 107, 0.5) !important;
+  background-clip: border-box !important;
+}
+
+#form-edit-global-conf .fa-circle-info,
+#form-edit-global-conf .fa-question-circle,
+#form-edit-global-conf .fa-circle-question {
+  color: #085577 !important;
+}
+
+#form-edit-global-conf .nav-link span {
+  color: #000 !important;
+}
+
+#form-edit-global-conf aside {
+  background: none !important;
+}
+
+#form-edit-global-conf .btn-primary {
+  background-color: #085577;
+  border-color: #085577;
+}
+
+#form-edit-global-conf .btn-primary:hover {
+  background-color: #247496;
+  border-color: #247496;
+}
+
+[data-theme="dark"] #form-edit-global-conf,
+[data-theme="dark"] .wrapper {
+  background-color: #222 !important;
+}
+
+[data-theme="dark"] #form-edit-global-conf .bg-light {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  border-color: #111 !important;
+  border: 1px solid #343636 !important;
+}
+
+[data-theme="dark"] #form-edit-global-conf .nav-link span {
+  color: #fff !important;
+}
+
+[data-theme="dark"] .nav-pills .nav-link.active {
+  background-color: #535353 !important;
+}

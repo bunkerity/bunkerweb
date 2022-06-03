@@ -1,223 +1,287 @@
 <p align="center">
-	<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/logo.png?raw=true" width="425" />
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/master/logo.png" />
 </p>
 
 <p align="center">
-        <img src="https://img.shields.io/badge/bunkerized--nginx-1.3.2-blue" />
-        <img src="https://img.shields.io/badge/nginx-1.20.1-blue" />
-        <img src="https://img.shields.io/github/last-commit/bunkerity/bunkerized-nginx" />
-        <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Automatic%20test?label=automatic%20test" />
-        <img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerized-nginx/Build%20and%20push%20bunkerized-nginx?label=docker%20build" />
-        <img src="https://img.shields.io/readthedocs/bunkerized-nginx" />
+	<img src="https://img.shields.io/badge/bunkerweb-1.4.0-blue" />
+	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
+	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28DEV%29?label=CI%2FCD%20dev" />
+	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28PROD%29?label=CI%2FCD%20prod" />
+	<img src="https://img.shields.io/github/issues/bunkerity/bunkerweb">
+	<img src="https://img.shields.io/github/issues-pr/bunkerity/bunkerweb">
 </p>
 
 <p align="center">
-	<strong>
-		<a href="https://bunkerized-nginx.readthedocs.io">Documentation</a>
-		 &#124; 
-		<a href="https://github.com/bunkerity/bunkerized-nginx/tree/master/examples">Examples</a>
-		 &#124; 
-		<a href="https://www.bunkerity.com/category/bunkerized-nginx/">Blog posts</a>
-		 &#124; 
-		<a href="https://coso.me/bunkerity-chat">Community chat</a>
-		 &#124; 
-		<a href="https://coso.me/bunkerity">Follow us</a>
-	</strong>
+	📓 <a href="https://docs.bunkerweb.io">Documentation</a>
+	 &#124; 
+	👨‍💻 <a href="https://demo.bunkerweb.io">Demo</a>
+	 &#124; 
+	🛡️ <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">Examples</a>
+	 &#124; 
+	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>
+	 &#124; 
+	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
+	 &#124;
+	⚙️ <a href="https://config.bunkerweb.io">Configurator</a>
 </p>
 
 > Make security by default great again !
 
-bunkerized-nginx is a web server based on the notorious nginx and focused on security. It integrates into existing environments (Linux, Docker, Swarm, Kubernetes, ...) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every settings to meet your own use case.
+# Bunkerweb
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/overview.png?raw=true" />
+<p align="center">
+	<img alt="overview" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/intro-overview.svg" />
+</p>
 
-Non-exhaustive list of features :
-- HTTPS support with transparent Let's Encrypt automation
-- State-of-the-art web security : HTTP security headers, prevent leaks, TLS hardening, ...
-- Integrated ModSecurity WAF with the OWASP Core Rule Set
-- Automatic ban of strange behaviors
-- Antibot challenge through cookie, javascript, captcha or recaptcha v3
-- Block TOR, proxies, bad user-agents, countries, ...
-- Block known bad IP with DNSBL and distributed blacklist
-- Prevent bruteforce attacks and protect API resources with rate limiting
-- Plugins system for external security checks (ClamAV, CrowdSec, ...)
-- Easy to configure with environment variables or web UI
-- Seamless integration into existing environments : Linux, Docker, Swarm, Kubernetes, ...
+BunkerWeb is a web server based on the notorious [NGINX](https://nginx.org/) and focused on security.
 
-Fooling automated tools/scanners :
+It integrates into existing environments ([Linux](#linux), [Docker](#docker), [Swarm](#swarm), [Kubernetes](#Kubernetes), …) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every setting to meet your use case.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/demo.gif?raw=true" />
+BunkerWeb contains primary [security features](#security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](#plugins).
 
-You can find a live demo at [https://demo-nginx.bunkerity.com](https://demo-nginx.bunkerity.com), feel free to do some security tests.
+## Why BunkerWeb ?
 
-# Table of contents
-<details>
-	<summary>Click to show</summary>
+- **Easy integration into existing environments** : support for Linux, Docker, Swarm and Kubernetes
+- **Highly customizable** : enable, disable and configure features easily to meet your use case
+- **Secure by default** : offers out-of-the-box and hassle-free minimal security for your web services
+- **Free as in "freedom"** : licensed under the free [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
-- [Table of contents](#table-of-contents)
-- [Integrations](#integrations)
-  * [Docker](#docker)
-  * [Docker autoconf](#docker-autoconf)
-  * [Swarm](#swarm)
-  * [Kubernetes](#kubernetes)
-  * [Linux](#linux)
-- [Configuration](#configuration)
-  * [Singlesite](#singlesite)
-  * [Multisite](#multisite)
-  * [Special folders](#special-folders)
-- [Web UI](#web-ui)
-- [Security tuning](#security-tuning)
-- [Going further](#going-further)
-- [License](#license)
-- [Contributing](#contributing)
-- [Security policy](#security-policy)
-</details>
+## Security features
 
-# Integrations
+A non-exhaustive list of security features :
+
+- **HTTPS** support with transparent **Let's Encrypt** automation
+- **State-of-the-art web security** : HTTP security headers, prevent leaks, TLS hardening, ...
+- Integrated **ModSecurity WAF** with the **OWASP Core Rule Set**
+- **Automatic ban** of strange behaviors based on HTTP status code
+- Apply **connections and requests limit** for clients
+- **Block bots** by asking them to solve a **challenge** (e.g. : cookie, javascript, captcha, hCaptcha or reCAPTCHA)
+- **Block known bad IPs** with external blacklists and DNSBL
+- And much more ...
+
+Learn more about the core security features in the [security tuning](https://docs.bunkerweb.io/security-tuning) section of the documentation.
+
+## Demo
+
+<p align="center">
+	<img alt="Demo GIF" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/demo.gif" />
+</p>
+
+A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.
+
+# Concepts
+
+<p align="center">
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/concepts.svg" />
+</p>
+
+You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/concepts).
+
+## Integrations
+
+The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of the goals of BunkerWeb is to integrate seamlessly into existing environments.
+
+The following integrations are officially supported :
+
+- [Docker](https://docs.bunkerweb.io/integrations/#docker)
+- [Docker autoconf](https://docs.bunkerweb.io/integrations/#docker-autoconf)
+- [Swarm](https://docs.bunkerweb.io/integrations/#swarm)
+- [Kubernetes](https://docs.bunkerweb.io/integrations/#kubernetes)
+- [Linux](https://docs.bunkerweb.io/integrations/#linux)
+
+## Settings
+
+Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
+
+Configuration of BunkerWeb is done using what we called the "settings" or "variables". Each setting is identified by a name like `AUTO_LETS_ENCRYPT` or `USE_ANTIBOT` for example. You can assign values to the settings to configure BunkerWeb.
+
+Here is a dummy example of a BunkerWeb configuration :
+
+```conf
+SERVER_NAME=www.example.com
+AUTO_LETS_ENCRYPT=yes
+USE_ANTIBOT=captcha
+REFERRER_POLICY=no-referrer
+USE_MODSECURITY=no
+USE_GZIP=yes
+USE_BROTLI=no
+```
+
+You will find an easy to use settings generator at [config.bunkerweb.io](https://config.bunkerweb.io).
+
+## Multisite mode
+
+The multisite mode is a crucial concept to understand when using BunkerWeb. Because the goal is to protect web applications, we intrinsically inherit the concept of "virtual host" or "vhost" (more info [here](https://en.wikipedia.org/wiki/Virtual_hosting)) which makes it possible to serve multiple web applications from a single (or a cluster of) instance.
+
+By default, the multisite mode of BunkerWeb is disabled which means that only one web application will be served and all the settings will be applied to it. The typical use case is when you have a single application to protect : you don't have to worry about the multisite and the default behavior should be the right one for you.
+
+When multisite mode is enabled, BunkerWeb will serve and protect multiple web applications. Each web application is identified by a unique server name and have its own set of settings. The typical use case is when you have multiple applications to protect and you want to use a single (or a cluster depending of the integration) instance of BunkerWeb.
+
+## Custom configurations
+
+Because meeting all the use cases only using the settings is not an option (even with [external plugins](https://docs.bunkerweb.io/plugins)), you can use custom configurations to solve your specific challenges.
+
+Under the hood, BunkerWeb uses the notorious NGINX web server, that's why you can leverage its configuration system for your specific needs. Custom NGINX configurations can be included in different [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) like HTTP or server (all servers and/or specific server block).
+
+Another core component of BunkerWeb is the ModSecurity Web Application Firewall : you can also use custom configurations to fix some false positives or add custom rules for example.
+
+# Setup
 
 ## Docker
 
-You can get official prebuilt Docker images of bunkerized-nginx for x86, x64, armv7 and aarch64/arm64 architectures on Docker Hub :
-```shell
-$ docker pull bunkerity/bunkerized-nginx
-```
+<p align="center">
+	<img alt="Docker" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-docker.svg" />
+</p>
 
-Or you can build it from source if you wish :
-```shell
-$ git clone https://github.com/bunkerity/bunkerized-nginx.git
-$ cd bunkerized-nginx
-$ docker build -t bunkerized-nginx .
-```
+We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) using the `bunkerity/bunkerweb` tag.
 
-To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside.
+Usage and configuration of the BunkerWeb container are based on :
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/docker.png?raw=true" />
+- **Environment variables** to configure BunkerWeb and meet your use cases
+- **Volume** to cache important data and mount custom configuration files
+- **Networks** to expose ports for clients and connect to upstream web services
 
-You will find more information about Docker integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker).
+You will find more information in the [Docker integration section](https://docs.bunkerweb.io/integrations/#docker) of the documentation.
 
 ## Docker autoconf
 
-The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
+<p align="center">
+	<img alt="Docker autoconf" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-autoconf.svg" />
+</p>
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/autoconf-docker.png?raw=true" />
+The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
 
-You will find more information about Docker autoconf feature in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-autoconf).
+Instead of defining environment variables for the BunkerWeb container, you simply add **labels** to your web applications containers and the **autoconf** will "automagically" take care of the rest.
+
+You will find more information in the [Docker autoconf section](https://docs.bunkerweb.io/integrations/#docker-autoconf) of the documentation.
 
 ## Swarm
 
-The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send the configuration files and a reload order to all the bunkerized-nginx tasks so they can apply the new configuration. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Docker volume plugin](https://docs.docker.com/engine/extend/)).
+<p align="center">
+	<img alt="Swarm" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-swarm.svg" />
+</p>
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/swarm.png?raw=true" />
+To automatically configure BunkerWeb instances, a special service, called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
 
-You will find more information about Docker Swarm integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#docker-swarm).
+Like the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels starting with the special **bunkerweb.** prefix.
+
+The recommended setup is to schedule the **BunkerWeb service** as a **global service** on all worker nodes and the **autoconf service** as a **single replicated service** on a manager node.
+
+You will find more information in the [Swarm section](https://docs.bunkerweb.io/integrations/#swarm) of the documentation.
 
 ## Kubernetes
 
-**This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
+<p align="center">
+	<img alt="Kubernetes" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-kubernetes.svg" />
+</p>
 
-The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends the configuration files and a reload order to the bunkerized-nginx instances running in the cluster. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Kubernetes Volume that supports ReadOnlyMany access](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
+The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/kubernetes.png?raw=true" />
-
-You will find more information about Kubernetes integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#kubernetes).
+You will find more information in the [Kubernetes section](https://docs.bunkerweb.io/integrations/#kubernetes) of the documentation.
 
 ## Linux
 
-**This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
+<p align="center">
+	<img alt="Linux" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-linux.svg" />
+</p>
 
-List of supported Linux distributions :
-- Debian buster (10)
-- Ubuntu focal (20.04)
-- CentOS 7
-- Fedora 34
-- Arch Linux
+List of supported Linux distros :
 
-Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a [helper script](https://github.com/bunkerity/bunkerized-nginx/blob/master/helpers/install.sh) to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
+- Debian 11 "Bullseye"
+- Ubuntu 22.04 "Jammy"
+- Fedora 36
+- CentOS Stream 8
 
-You will find more information about Linux integration in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/integrations.html#linux).
+Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
-# Configuration
+You will find more information in the [Linux section](https://docs.bunkerweb.io/integrations/#linux) of the documentation.
 
-The configuration is made through what we call "environment variables" as a form of key/value pairs. You will find the [quickstart guide](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html) and the complete [list of environment variables](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html) in the documentation.
+# Quickstart guide
 
-## Singlesite
-
-By default, bunkerized-nginx will only create one server block in the nginx configuration. This cover the simplest use-case where you want to protect one service easily and quickly.
-
-Here is a dummy configuration as an example :
-```conf
-SERVER_NAME=example.com www.example.com
-AUTO_LETS_ENCRYPT=yes
-DISABLE_DEFAULT_SERVER=yes
-USE_REVERSE_PROXY=yes
-REVERSE_PROXY_URL=/
-REVERSE_PROXY_HOST=http://internal-service.example.local:8080
-# Uncomment the HTTP_PORT and HTTPS_PORTS variables when using Linux configuration
-#HTTP_PORT=80
-#HTTPS_PORT=443
-```
-
-## Multisite
-
-If you have multiple services to protect, the easiest way to do it is by enabling the "multisite" mode. When using multisite, bunkerized-nginx will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
-
-Here is a dummy configuration as an example :
-```conf
-SERVER_NAME=app1.example.com app2.example.com
-# Without prefix the variables are applied globally but can still be overriden
-AUTO_LETS_ENCRYPT=yes
-DISABLE_DEFAULT_SERVER=yes
-# Specific configurations for first service
-app1.example.com_USE_REVERSE_PROXY=yes
-app1.example.com_REVERSE_PROXY_URL=/
-app1.example.com_REVERSE_PROXY_HOST=http://internal-service.example.local:8080
-# Specific configuration for second service
-app2.example.com_REMOTE_PHP=my-fpm
-app2.example.com_REMOTE_PHP_PATH=/var/www/html
-# Uncomment the HTTP_PORT and HTTPS_PORTS variables when using Linux configuration
-#HTTP_PORT=80
-#HTTPS_PORT=443
-```
-
-## Special folders
-
-|       Name       |                                     Location                                     |                                 Purpose                                 | Multisite |
-|:----------------:|:--------------------------------------------------------------------------------:|:-----------------------------------------------------------------------:|:---------:|
-| www              | /www (container)<br> /opt/bunkerized-nginx/www (Linux)                           | Static files that need to be delivered by bunkerized-nginx.             | Yes       |
-| http-confs       | /http-confs (container)<br> /opt/bunkerized-nginx/http-confs (Linux)             | Custom nginx configuration files loaded at http context.                | No        |
-| server-confs     | /server-confs (container)<br> /opt/bunkerized-nginx/server-confs (Linux)         | Custom nginx configuration files loaded at server context.              | Yes       |
-| modsec-confs     | /modsec-confs (container)<br> /opt/bunkerized-nginx/modsec-confs (Linux)         | Custom ModSecurity configuration files loaded before the Core Rule Set. | Yes       |
-| modsec-crs-confs | /modsec-crs-confs (container)<br> /opt/bunkerized-nginx/modsec-crs-confs (Linux) | Custom ModSecurity configuration files loaded after the Core Rule Set.  | Yes       |
-| plugins          | /plugins (container)<br> /opt/bunkerized-nginx/plugins (Linux)                   | Location of bunkerized-nginx plugins.                                   | No        |
-| cache            | /cache (container)<br> /opt/bunkerized-nginx/plugins (Linux)                     | Placeholder for caching data like external blacklists.                  | No        |
-| acme-challenge   | /acme-challenge (container)<br> /opt/bunkerized-nginx/acme-challenge (Linux)     | Placeholder for Let's Encrypt challenges.                               | No        |
-
-You will find more information about the special folders in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/special_folders.html).
-
-# Web UI
-
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/web-ui.gif?raw=true" />
-
-You will find more information about the web UI in the [documentation](https://bunkerized-nginx.readthedocs.io/en/latest/web_ui.html).
+Once you have setup BunkerWeb with the integration of your choice, you can follow the [quickstart guide](https://docs.bunkerweb.io/quickstart-guide/) that will cover the following common use cases :
+- Protecting a single HTTP application
+- Protecting multiple HTTP application
+- Retrieving the real IP of clients when operating behind a load balancer
+- Adding custom configurations
 
 # Security tuning
 
-bunkerized-nginx comes with a set of predefined security settings that you can (and you should) tune to meet your own use case. We recommend you to read the [security tuning](https://bunkerized-nginx.readthedocs.io/en/latest/security_tuning.html) section of the documentation.
+BunkerWeb offers many security features that you can configure with [settings](/settings). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.
 
-# Going further
+You will find more information in the [security tuning section](https://docs.bunkerweb.io/security-tuning) of the documentation.
 
-- [Official documentation](https://bunkerized-nginx.readthedocs.io/)
-- [Full concrete examples](https://github.com/bunkerity/bunkerized-nginx/tree/master/examples)
-- [Tutorials in our blog](https://www.bunkerity.com/blog)
+# Settings
+
+To help you tuning BunkerWeb we have made an easy to use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io).
+
+As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server you will need to add the primary (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.
+
+When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`, `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.
+
+Check the [settings section](https://docs.bunkerweb.io/settings) of the documentation to get the full list.
+
+# Web UI
+
+<p align="center">
+	<img alt="Linux" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/demo_bunkerweb_ui.gif" />
+</p>
+
+The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
+
+- Start, stop, restart and reload your BunkerWeb instance
+- Add, edit and delete settings for your web applications
+- Add, edit and delete custom configurations for NGINX and ModSecurity
+- Install and uninstall external plugins
+- View the logs and search pattern
+
+You will find more information in the [Web UI section](https://docs.bunkerweb.io/web-ui) of the documentation.
+
+# Plugins
+
+BunkerWeb comes with a plugin system to make it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.
+
+Here is the list of "official" plugins that we maintain (see the [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) repository for more information) :
+
+|      Name      | Version | Description                                                                                                                      |                                                 Link                                                  |
+| :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
+|   **ClamAV**   |   0.1   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|  **CrowdSec**  |   0.1   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
+| **VirusTotal** |   0.1   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+
+You will find more information in the [plugins section](https://docs.bunkerweb.io/plugins) of the documentation.
+
+# Support
+
+## Professional
+
+We offer professional services related to BunkerWeb like :
+
+* Consulting
+* Support
+* Custom development
+* Partnership
+
+Please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
+
+## Community
+
+To get free community support you can use the following medias :
+
+* The #help channel of BunkerWeb in the [Discord server](https://discord.com/invite/fTf46FmtyD)
+* The help category of [GitHub dicussions](https://github.com/bunkerity/bunkerweb/discussions)
+* The [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb) subreddit
+* The [Server Fault](https://serverfault.com/) and [Super User](https://superuser.com/) forums
+
+Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) to ask for help, use it only for bug reports and feature requests.
 
 # License
 
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerized-nginx/blob/master/LICENSE.md).
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerweb/tree/master/LICENSE.md).
 
-# Contributing
+# Contribute
 
-If you would like to contribute to the project you can read the [contributing guidelines](https://github.com/bunkerity/bunkerized-nginx/blob/master/CONTRIBUTING.md) to get started.
+If you would like to contribute to the plugins you can read the [contributing guidelines](https://github.com/bunkerity/bunkerweb/tree/master/LICENSE.md) to get started.
 
 # Security policy
 
-We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerized-nginx/blob/master/SECURITY.md) for more information.
+We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerweb/tree/master/SECURITY.md) for more information.

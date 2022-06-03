@@ -1,0 +1,18 @@
+{
+	"id": "dummy",
+	"order": 999,
+	"name": "Dummy example plugin",
+	"description": "Just an example plugin.",
+	"version": "0.1",
+	"settings": {
+		"DUMMY_SETTING": {
+			"context": "multisite",
+			"default": "1234",
+			"help": "dummy help",
+			"id": "dummy-id",
+			"label": "dummy label",
+			"regex": "^.*$",
+			"type": "text"
+		}
+	}
+}

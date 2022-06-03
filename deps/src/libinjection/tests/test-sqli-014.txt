@@ -1,0 +1,7 @@
+--TEST--
+sqli test, 1c type that is sqli
+--INPUT--
+1--
+--EXPECTED--
+1c
+

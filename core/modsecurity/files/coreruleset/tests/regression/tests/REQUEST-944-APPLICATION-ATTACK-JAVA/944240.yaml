@@ -1,0 +1,2047 @@
+---
+  meta:
+    author: "spartantri"
+    enabled: true
+    name: "944240.yaml"
+    description: "Positive tests for rule 944240"
+  tests:
+    -
+      test_title: 944240-0
+      desc: "Argument test includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.clonetransformer"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-1
+      desc: "Argument name includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.clonetransformer=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-2
+      desc: "Cookie test includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.clonetransformer
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-3
+      desc: "Cookie name includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.clonetransformer=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-4
+      desc: "Request header test includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.clonetransformer
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-5
+      desc: "XML attribute value includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.clonetransformer\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-6
+      desc: "XML element value includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.clonetransformer</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-7
+      desc: "Nested XML element value includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.clonetransformer</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-8
+      desc: "Content-Type text/plain includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.clonetransformer"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-9
+      desc: "Content-Type application/json arg value includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.clonetransformer\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-10
+      desc: "Content-Type application/json arg name includes keyword runtime.clonetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.clonetransformer\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-11
+      desc: "Argument test includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.forclosure"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-12
+      desc: "Argument name includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.forclosure=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-13
+      desc: "Cookie test includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.forclosure
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-14
+      desc: "Cookie name includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.forclosure=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-15
+      desc: "Request header test includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.forclosure
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-16
+      desc: "XML attribute value includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.forclosure\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-17
+      desc: "XML element value includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.forclosure</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-18
+      desc: "Nested XML element value includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.forclosure</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-19
+      desc: "Content-Type text/plain includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.forclosure"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-20
+      desc: "Content-Type application/json arg value includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.forclosure\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-21
+      desc: "Content-Type application/json arg name includes keyword runtime.forclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.forclosure\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-22
+      desc: "Argument test includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.instantiatefactory"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-23
+      desc: "Argument name includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.instantiatefactory=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-24
+      desc: "Cookie test includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.instantiatefactory
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-25
+      desc: "Cookie name includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.instantiatefactory=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-26
+      desc: "Request header test includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.instantiatefactory
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-27
+      desc: "XML attribute value includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.instantiatefactory\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-28
+      desc: "XML element value includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.instantiatefactory</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-29
+      desc: "Nested XML element value includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.instantiatefactory</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-30
+      desc: "Content-Type text/plain includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.instantiatefactory"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-31
+      desc: "Content-Type application/json arg value includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.instantiatefactory\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-32
+      desc: "Content-Type application/json arg name includes keyword runtime.instantiatefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.instantiatefactory\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-33
+      desc: "Argument test includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.instantiatetransformer"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-34
+      desc: "Argument name includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.instantiatetransformer=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-35
+      desc: "Cookie test includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.instantiatetransformer
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-36
+      desc: "Cookie name includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.instantiatetransformer=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-37
+      desc: "Request header test includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.instantiatetransformer
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-38
+      desc: "XML attribute value includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.instantiatetransformer\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-39
+      desc: "XML element value includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.instantiatetransformer</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-40
+      desc: "Nested XML element value includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.instantiatetransformer</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-41
+      desc: "Content-Type text/plain includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.instantiatetransformer"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-42
+      desc: "Content-Type application/json arg value includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.instantiatetransformer\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-43
+      desc: "Content-Type application/json arg name includes keyword runtime.instantiatetransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.instantiatetransformer\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-44
+      desc: "Argument test includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.invokertransformer"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-45
+      desc: "Argument name includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.invokertransformer=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-46
+      desc: "Cookie test includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.invokertransformer
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-47
+      desc: "Cookie name includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.invokertransformer=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-48
+      desc: "Request header test includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.invokertransformer
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-49
+      desc: "XML attribute value includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.invokertransformer\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-50
+      desc: "XML element value includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.invokertransformer</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-51
+      desc: "Nested XML element value includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.invokertransformer</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-52
+      desc: "Content-Type text/plain includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.invokertransformer"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-53
+      desc: "Content-Type application/json arg value includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.invokertransformer\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-54
+      desc: "Content-Type application/json arg name includes keyword runtime.invokertransformer"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.invokertransformer\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-55
+      desc: "Argument test includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.prototypeclonefactory"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-56
+      desc: "Argument name includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.prototypeclonefactory=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-57
+      desc: "Cookie test includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.prototypeclonefactory
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-58
+      desc: "Cookie name includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.prototypeclonefactory=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-59
+      desc: "Request header test includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.prototypeclonefactory
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-60
+      desc: "XML attribute value includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.prototypeclonefactory\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-61
+      desc: "XML element value includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.prototypeclonefactory</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-62
+      desc: "Nested XML element value includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.prototypeclonefactory</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-63
+      desc: "Content-Type text/plain includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.prototypeclonefactory"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-64
+      desc: "Content-Type application/json arg value includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.prototypeclonefactory\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-65
+      desc: "Content-Type application/json arg name includes keyword runtime.prototypeclonefactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.prototypeclonefactory\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-66
+      desc: "Argument test includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.prototypeserializationfactory"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-67
+      desc: "Argument name includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.prototypeserializationfactory=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-68
+      desc: "Cookie test includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.prototypeserializationfactory
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-69
+      desc: "Cookie name includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.prototypeserializationfactory=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-70
+      desc: "Request header test includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.prototypeserializationfactory
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-71
+      desc: "XML attribute value includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.prototypeserializationfactory\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-72
+      desc: "XML element value includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.prototypeserializationfactory</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-73
+      desc: "Nested XML element value includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.prototypeserializationfactory</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-74
+      desc: "Content-Type text/plain includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.prototypeserializationfactory"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-75
+      desc: "Content-Type application/json arg value includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.prototypeserializationfactory\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-76
+      desc: "Content-Type application/json arg name includes keyword runtime.prototypeserializationfactory"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.prototypeserializationfactory\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""
+    -
+      test_title: 944240-77
+      desc: "Argument test includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.whileclosure"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-78
+      desc: "Argument name includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "runtime.whileclosure=test"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-79
+      desc: "Cookie test includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: test=runtime.whileclosure
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-80
+      desc: "Cookie name includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                Cookie: runtime.whileclosure=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-81
+      desc: "Request header test includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/x-www-form-urlencoded"
+                test: runtime.whileclosure
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-82
+      desc: "XML attribute value includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"runtime.whileclosure\">element_value</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-83
+      desc: "XML element value includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">runtime.whileclosure</element></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-84
+      desc: "Nested XML element value includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">runtime.whileclosure</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-85
+      desc: "Content-Type text/plain includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=runtime.whileclosure"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-86
+      desc: "Content-Type application/json arg value includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"runtime.whileclosure\"}"
+            output:
+              log_contains: "id \"944240\""
+
+    -
+      test_title: 944240-87
+      desc: "Content-Type application/json arg name includes keyword runtime.whileclosure"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                Accept-Encoding: "gzip,deflate"
+                Accept-Language: "en-us,en;q=0.5"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"runtime.whileclosure\": \"test\"}"
+            output:
+              log_contains: "id \"944240\""

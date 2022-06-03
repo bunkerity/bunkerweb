@@ -1,5 +1,0 @@
-filenames:
-  - /var/log/nginx.log
-labels:
-  type: nginx
----

@@ -1,0 +1,11 @@
+--TEST--
+XOR is a logical operator like and,or
+--INPUT--
+SELECT 1 XOR 2;
+--EXPECTED--
+E SELECT
+1 1
+& XOR
+1 2
+; ;
+

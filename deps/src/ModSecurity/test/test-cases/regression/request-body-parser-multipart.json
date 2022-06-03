@@ -1,0 +1,3243 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (normal)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Added file part to the list: name \"image\" file name \"image.jpg\" \\(offset 258, length 10\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500056\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (final CRLF)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Adding request argument \\(BODY\\): name \"a\", value \"1\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500056\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (no final CRLF) - FIXME: test suit cannot work without the ending \\n",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Adding request argument \\(BODY\\): name \"a\", value \"1\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500056\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary contains \"boundary\")",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=------------------------------------------------boundary",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--------------------------------------------------boundary\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "--------------------------------------------------boundary\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r",
+                "--------------------------------------------------boundary--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Adding request argument \\(BODY\\): name \"a\", value \"1\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500056\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary contains \"bOuNdArY\")",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------0xKhTmLbOuNdArY",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "----------0xKhTmLbOuNdArY\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "----------0xKhTmLbOuNdArY\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r",
+                "----------0xKhTmLbOuNdArY--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Adding request argument \\(BODY\\): name \"a\", value \"1\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500056\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (data contains \"--\")",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "--test\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "--\r",
+                "-----------------------------69343412719991675451336310646--\r"
+
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Adding request argument \\(BODY\\): name \"a\", value \"--test\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser error (no final boundary)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Final boundary missing"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_NAME \"@eq 1234\" \"phase:2,deny,id:500067\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser error (no disposition)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Part missing Content-Disposition header"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_NAME \"@eq 1234\" \"phase:2,deny,id:500067\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser error (bad disposition)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Invalid Content-Disposition header"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_NAME \"@eq 1234\" \"phase:2,deny,id:500067\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser error (no disposition name)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Content-Disposition header missing name field"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_NAME \"@eq 1234\" \"phase:2,deny,id:500067\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser error (no disposition name)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                ":\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"nvalid part header \\(header name missing\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_NAME \"@eq 1234\" \"phase:2,deny,id:500067\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (part header folding - space)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                " name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "    name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"name: a.*variable: 1.*"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,status:403,id:500074\"",
+        "SecRule MULTIPART_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500075\"",
+        "SecRule MULTIPART_INVALID_HEADER_FOLDING \"!@eq 0\" \"phase:2,deny,status:403,id:500076\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (part header folding - tab)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "       name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "               name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"name: a.*variable: 1.*"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,status:403,id:500074\"",
+        "SecRule MULTIPART_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500075\"",
+        "SecRule MULTIPART_INVALID_HEADER_FOLDING \"!@eq 0\" \"phase:2,deny,status:403,id:500076\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (part header folding - mixed)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "               name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"name: a.*variable: 1.*"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,status:403,id:500074\"",
+        "SecRule MULTIPART_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500075\"",
+        "SecRule MULTIPART_INVALID_HEADER_FOLDING \"!@eq 0\" \"phase:2,deny,status:403,id:500076\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (part header folding - invalid)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "\fname=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"name: a.*variable: 1.*"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,status:403,id:500074\"",
+        "SecRule MULTIPART_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500075\"",
+        "SecRule MULTIPART_INVALID_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500076\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (part header folding - mixed invalid)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data;\r",
+                "\f\tname=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"name: a.*variable: 1.*"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,status:403,id:500074\"",
+        "SecRule MULTIPART_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500075\"",
+        "SecRule MULTIPART_INVALID_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500076\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (data after final boundary)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646--\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"b\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"name: a.*variable: 1.*",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_DATA_AFTER \"@eq 1\" \"phase:2,deny,status:403,id:500074\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (C-D uses single quotes)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=\"a\"\r",
+                "\r",
+                "1\r",
+                "-----------------------------69343412719991675451336310646\r",
+                "Content-Disposition: form-data; name=';filename=\"dummy';name=b;\"\r",
+                "\r",
+                "2\r",
+                "-----------------------------69343412719991675451336310646--\r"
+
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Duplicate Content-Disposition name",
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_INVALID_QUOTING \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (invalid C-T boundary separator - comma)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data, boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Invalid boundary in C-T \\(malformed\\)",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (invalid C-T boundary separator - space)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (invalid C-T boundary parameter name - case)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; bOundAry=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(case sensitivity\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (invalid C-T boundary parameter name - trailing chars)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary123=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(parameter name\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (multiple C-T boundaries - first quoted)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=\"0000\"; boundary=1111",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Multiple boundary parameters in C-T"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (multiple C-T boundaries - comma separated)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000, boundary=1111",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Multiple boundary parameters in C-T"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary whitespace in C-T - after name)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary =0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary whitespace in C-T - before value)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary= 0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "boundary whitespace in C-T header"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary whitespace in C-T - after value) - apache removes the whitespace, not the case for us... TODO",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000 ",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary special char - trailing whitespace+token)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=0000 1111",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "No boundaries found in payload"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (boundary special char - trailing exclamation+token)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=0000!1111",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(characters\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary - normal)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"0000\"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "boundary was quoted"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary value - whitespace before)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\" 0000\"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "boundary was quoted.*No boundaries found in payload"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary value - whitespace after)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"0000 \"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(characters\\).*boundary was quoted."
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary value - whitespace after)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"0000 \"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(characters\\).*boundary was quoted."
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary value - whitespace between)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"0000 1111\"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "boundary was quoted"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary value - contained quote)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"00\"00\"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--00\"00\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--00\"00\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--00\"00\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--00\"00--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(characters\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (quoted boundary value - two quoted values)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"00\"\"00\"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--00\"00\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--00\"00\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--00\"00\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--00\"00--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(characters\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (partial quoted boundary value - only start quote)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=\"0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(quote\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (partial quoted boundary value - only end quote)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data;boundary=0000\"",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid boundary in C-T \\(quote\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (multipart mixed - normal)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: attachment\r",
+                "Content-Type: multipart/mixed; boundary=BbC04y\r",
+                "\r",
+                "--BbC04y\r",
+                "Content-Disposition: file; filename=\"file1.txt\"\r",
+                "Content-Type: text/plain\r",
+                "\r",
+                "... contents of file1.txt ...\r",
+                "--BbC04y\r",
+                "Content-Disposition: file; filename=\"file2.gif\r",
+                "Content-Type: image/jpeg\r",
+                "Content-Transfer-Encoding: binary\r",
+                "\r",
+                "...contents of file2.gif...\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Invalid Content-Disposition header"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (multipart mixed - missing disposition)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Type: multipart/mixed; boundary=BbC04y\r",
+                "\r",
+                "--BbC04y\r",
+                "Content-Disposition: file; filename=\"file1.txt\"\r",
+                "Content-Type: text/plain\r",
+                "\r",
+                "... contents of file1.txt ...\r",
+                "--BbC04y\r",
+                "Content-Disposition: file; filename=\"file2.gif\r",
+                "Content-Type: image/jpeg\r",
+                "Content-Transfer-Encoding: binary\r",
+                "\r",
+                "...contents of file2.gif...\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Part missing Content-Disposition header"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500095\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500096\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"chain,phase:2,deny,id:500097\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (normal)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name\"\r",
+                "\r",
+                "Brian Rectanus\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"email\"\r",
+                "\r",
+                "brian.rectanus@breach.com\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image1\"; filename=\"image1.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA1\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image2\"; filename=\"image2.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA2\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"image3\"; filename=\"image3.jpg\"\r",
+                "Content-Type: image/jpeg\r",
+                "\r",
+                "BINARYDATA3\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"test\"\r",
+                "\r",
+                "This is test data.\r",
+                "--0000--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log": "Upload file limit exceeded"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecUploadKeepFiles On",
+        "SecUploadDir /tmp",
+        "SecUploadFileLimit 2",
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,id:500161\"",
+        "SecRule MULTIPART_FILE_LIMIT_EXCEEDED \"!@eq 1\" \"phase:2,deny,id:500162\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500163\"",
+        "SecRule &FILES \"!@eq 3\" \"phase:2,deny,id:500164\"",
+        "SecRule &FILES_NAMES \"!@eq 3\" \"phase:2,deny,id:500165\"",
+        "SecRule &FILES_SIZES \"!@eq 3\" \"phase:2,deny,id:500166\"",
+        "SecRule FILES_SIZES:/^image/ \"@eq 0\" \"phase:2,deny,id:500167\"",
+        "SecRule &FILES_TMPNAMES \"!@eq 2\" \"phase:2,deny,id:500168\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., no UNMATCH rule)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., strict mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., wrong lead bound., strict mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332274\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., wrong sep. bound., strict mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332274\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., wrong final bound.)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332274--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., one part, wrong lead)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332274\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., one part, wrong final)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332274--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., all valid, strict mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------3163850615828140691827348175",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-----------------------------3163850615828140691827348175\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "3eeb646795ba8db63b05ba77df2a0b2c\r",
+              "-----------------------------3163850615828140691827348175\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"multipart_text.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "Content-Type: multipart/alternative; boundary=\"00000000000041382f056d9314e6\"\r",
+              "\r",
+              "--00000000000041382f056d9314e6\r",
+              "Content-Type: text/plain; charset=\"UTF-8\"\r",
+              "Content-Transfer-Encoding: quoted-printable\r",
+              "\r",
+              "Hi,\r",
+              "\r",
+              "...\r",
+              "\r",
+              "--00000000000041382f056d9314e6\r",
+              "Content-Type: text/html; charset=\"UTF-8\"\r",
+              "Content-Transfer-Encoding: quoted-printable\r",
+              "\r",
+              "<div ...>\r",
+              "...\r",
+              "</div>\r",
+              "\r",
+              "--00000000000041382f056d9314e6--\r",
+              "\r",
+              "\r",
+              "-----------------------------3163850615828140691827348175--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"!@eq 0\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., permissive mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., wrong lead bound., permissive mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332274\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., wrong sep. bound., permissive mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------8842564605616207552020332273",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-------------------------------8842564605616207552020332273\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "9e433de44c9e9b4ce19603269aa34edb\r",
+              "-------------------------------8842564605616207552020332274\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"msg.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "----ea520cef1a2937d8e928e357992c8fdd\r",
+              "Content-Transfer-Encoding: 7bit\r",
+              "Content-Type: text/plain; charset=US-ASCII;\r",
+              " format=flowed\r",
+              "\r",
+              "Test message, the txt file had been attached.\r",
+              "\r",
+              "--\r",
+              "Ervin\r",
+              "\r",
+              "\r",
+              "-------------------------------8842564605616207552020332273--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500095\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (contains foreign bound., all valid, permissive mode)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------3163850615828140691827348175",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+              "-----------------------------3163850615828140691827348175\r",
+              "Content-Disposition: form-data; name=\"_token\"\r",
+              "\r",
+              "3eeb646795ba8db63b05ba77df2a0b2c\r",
+              "-----------------------------3163850615828140691827348175\r",
+              "Content-Disposition: form-data; name=\"_attachments[]\"; filename=\"multipart_text.txt\"\r",
+              "Content-Type: text/plain\r",
+              "\r",
+              "Content-Type: multipart/alternative; boundary=\"00000000000041382f056d9314e6\"\r",
+              "\r",
+              "--00000000000041382f056d9314e6\r",
+              "Content-Type: text/plain; charset=\"UTF-8\"\r",
+              "Content-Transfer-Encoding: quoted-printable\r",
+              "\r",
+              "Hi,\r",
+              "\r",
+              "...\r",
+              "\r",
+              "--00000000000041382f056d9314e6\r",
+              "Content-Type: text/html; charset=\"UTF-8\"\r",
+              "Content-Transfer-Encoding: quoted-printable\r",
+              "\r",
+              "<div ...>\r",
+              "...\r",
+              "</div>\r",
+              "\r",
+              "--00000000000041382f056d9314e6--\r",
+              "\r",
+              "\r",
+              "-----------------------------3163850615828140691827348175--\r"
+        ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log": "",
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500095\""
+    ]
+  }
+]

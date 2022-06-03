@@ -1,0 +1,32 @@
+---
+  meta:
+    author: csanders-git
+    description: None
+    enabled: true
+    name: 943100.yaml
+  tests:
+  -
+    test_title: 943100-1
+    desc: Session Fixation Attack (943100) from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel,
+              application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash,
+              */*
+            Accept-Encoding: gzip, deflate
+            Accept-Language: zh-sg
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            Referer: http
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /foo.php?bar=blah<script>document.cookie="sessionid=1234;%20domain=.example.dom";</script>
+          version: HTTP/1.1
+        output:
+          log_contains: id "943100"

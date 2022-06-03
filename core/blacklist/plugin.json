@@ -1,0 +1,125 @@
+{
+	"id": "blacklist",
+	"order": 2,
+	"name": "Blacklist",
+	"description": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
+	"version": "0.1",
+	"settings": {
+		"USE_BLACKLIST": {
+			"context": "multisite",
+			"default": "yes",
+			"help": "Activate blacklist feature.",
+			"id": "use-blacklist",
+			"label": "Activate blacklisting",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"BLACKLIST_IP_URLS": {
+			"context": "global",
+			"default": "https://www.dan.me.uk/torlist/?exit",
+			"help": "List of URLs, separated with spaces, containing bad IP/network to block.",
+			"id": "blacklist-ip-urls",
+			"label": "Blacklist IP/network URLs",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_IP": {
+			"context": "multisite",
+			"default": "",
+			"help": "List of IP/network, separated with spaces, to block.",
+			"id": "blacklist-ip",
+			"label": "Blacklist IP/network",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_RDNS": {
+			"context": "multisite",
+			"default": ".shodan.io .censys.io",
+			"help": "List of reverse DNS suffixes, separated with spaces, to block.",
+			"id": "blacklist-rdns",
+			"label": "Blacklist reverse DNS",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_RDNS_URLS": {
+			"context": "global",
+			"default": "",
+			"help": "List of URLs, separated with spaces, containing reverse DNS suffixes to block.",
+			"id": "blacklist-rdns-urls",
+			"label": "Blacklist reverse DNS URLs",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_RDNS_GLOBAL": {
+			"context": "multisite",
+			"default": "yes",
+			"help": "Only perform RDNS blacklist checks on global IP addresses.",
+			"id": "blacklist-rdns-global",
+			"label": "Blacklist reverse DNS global IPs",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_ASN": {
+			"context": "multisite",
+			"default": "",
+			"help": "List of ASN numbers, separated with spaces, to block.",
+			"id": "blacklist-asn",
+			"label": "Blacklist ASN",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_ASN_URLS": {
+			"context": "global",
+			"default": "",
+			"help": "List of URLs, separated with spaces, containing ASN to block.",
+			"id": "blacklist-rdns-urls",
+			"label": "Blacklist ASN URLs",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_USER_AGENT": {
+			"context": "multisite",
+			"default": "",
+			"help": "List of User-Agent, separated with spaces, to block.",
+			"id": "blacklist-user-agent",
+			"label": "Blacklist User-Agent",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_USER_AGENT_URLS": {
+			"context": "global",
+			"default": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
+			"help": "List of URLs, separated with spaces, containing bad User-Agent to block.",
+			"id": "blacklist-user-agent-urls",
+			"label": "Blacklist User-Agent URLs",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_URI": {
+			"context": "multisite",
+			"default": "",
+			"help": "List of URI, separated with spaces, to block.",
+			"id": "blacklist-uri",
+			"label": "Blacklist URI",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"BLACKLIST_URI_URLS": {
+			"context": "global",
+			"default": "",
+			"help": "List of URLs, separated with spaces, containing bad URI to block.",
+			"id": "blacklist-uri-urls",
+			"label": "Blacklist URI URLs",
+			"regex": "^.*$",
+			"type": "text"
+		}
+	},
+	"jobs": [
+		{
+			"name": "blacklist-download",
+			"file": "blacklist-download.py",
+			"every": "hour",
+			"reload": true
+		}
+	]
+}

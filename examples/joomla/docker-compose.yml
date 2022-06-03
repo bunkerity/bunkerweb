@@ -2,48 +2,54 @@ version: '3'
 
 services:
 
-  mywww:
-    image: bunkerity/bunkerized-nginx
-    restart: always
-    depends_on:
-      - myjoomla
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
       - 443:8443
-    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
     volumes:
-      - ./joomla-files:/www:ro
-      - ./letsencrypt:/etc/letsencrypt
+      - bw_data:/data
     environment:
-      - SERVER_NAME=www.example.com             # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - MAX_CLIENT_SIZE=50m
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - REMOTE_PHP=myjoomla
-      - REMOTE_PHP_PATH=/var/www/html
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://myjoomla
+      - LIMIT_REQ_URL_1=/administrator/
+      - LIMIT_REQ_RATE_1=8r/s
+      # Remove the following lines after finishing the installation of PrestaShop
+      - LIMIT_REQ_URL_2=/installation/index.php
+      - LIMIT_REQ_RATE_2=8r/s
 
   myjoomla:
-    image: joomla:fpm-alpine
-    restart: always
+    image: joomla:4-apache
     volumes:
       - ./joomla-files:/var/www/html
     environment:
       - JOOMLA_DB_HOST=mydb
-      - JOOMLA_DB_NAME=joomladb
+      - JOOMLA_DB_NAME=joomla_db
       - JOOMLA_DB_USER=user
-      - JOOMLA_DB_PASSWORD=db-user-pwd          # replace with a stronger password (must match MYSQL_PASSWORD)
+      - JOOMLA_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
 
   mydb:
     image: mariadb
-    restart: always
     volumes:
       - ./db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd         # replace with a stronger password
-      - MYSQL_DATABASE=joomladb
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=joomla_db
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd              # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
+
+volumes:
+  bw_data:

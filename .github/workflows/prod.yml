@@ -1,0 +1,352 @@
+name: Automatic test, build, push and deploy (PROD)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+
+  # Build images for tests
+  setup:
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          config-inline: |
+            [registry."10.20.1.1:5000"]
+              http = true
+              insecure = true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build BW test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: 10.20.1.1:5000/bw-prod:latest,bunkerity/bunkerweb:latest,bunkerity/bunkerweb:${{ env.VERSION }},${{ secrets.PRIVATE_REGISTRY }}/bunkerweb:latest
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-prod:buildcache,mode=max
+      - name: Push BW test image
+        run: docker push 10.20.1.1:5000/bw-prod:latest
+
+      - name: Build autoconf test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: 10.20.1.1:5000/bw-autoconf-prod:latest,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf:latest
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-autoconf-prod:buildcache,mode=max
+      - name: Push autoconf test image
+        run: docker push 10.20.1.1:5000/bw-autoconf-prod:latest
+
+      - name: Build UI test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: 10.20.1.1:5000/bw-ui-prod:latest,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui:latest
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-ui-prod:buildcache,mode=max
+      - name: Push UI test image
+        run: docker push 10.20.1.1:5000/bw-ui-prod:latest
+
+      - name: Build BW test DEB (ubuntu)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-ubuntu
+          platforms: linux/amd64
+          load: true
+          tags: bw-ubuntu-prod:latest
+
+      - name: Build BW test DEB (debian)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-debian
+          platforms: linux/amd64
+          load: true
+          tags: bw-debian-prod:latest
+      
+      - name: Build BW test RPM (centos)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-centos
+          platforms: linux/amd64
+          load: true
+          tags: bw-centos-prod:latest
+      
+      - name: Build BW test RPM (fedora)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-fedora
+          platforms: linux/amd64
+          load: true
+          tags: bw-fedora-prod:latest
+
+  # Check CVE
+  security:
+    needs: setup
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Check security vulnerabilities for BW
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 10.20.1.1:5000/bw-prod:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+
+      - name: Check security vulnerabilities for autoconf
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 10.20.1.1:5000/bw-autoconf-prod:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+
+      - name: Check security vulnerabilities for UI
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 10.20.1.1:5000/bw-ui-prod:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+
+  # Run tests
+  tests:
+    needs: security
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ] ; then
+            echo "BUILD_MODE=prod" >> $GITHUB_ENV
+          else
+            echo "BUILD_MODE=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Run Docker tests
+        run: ./tests/docker.sh ${{ env.BUILD_MODE }}
+
+      - name: Run autoconf tests
+        run: ./tests/autoconf.sh ${{ env.BUILD_MODE }}
+
+      - name: Run Swarm tests
+        run: ./tests/swarm.sh ${{ env.BUILD_MODE }}
+
+      - name: Run Kubernetes tests
+        run: ./tests/kubernetes.sh ${{ env.BUILD_MODE }}
+
+      - name: Run Linux tests
+        run: ./tests/linux.sh ${{ env.BUILD_MODE }}
+    
+  # Cross compile and push to prod registries
+  push:
+    needs: tests
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Login to private repository
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      - name: Build and push BW prod image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/386
+          push: true
+          tags: bunkerity/bunkerweb:latest,bunkerity/bunkerweb:${{ env.VERSION }},${{ secrets.PRIVATE_REGISTRY }}/bunkerweb:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-prod:buildcache
+
+      - name: Build and push BW autoconf image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/386
+          push: true
+          tags: bunkerity/bunkerweb-autoconf:latest,bunkerity/bunkerweb-autoconf:${{ env.VERSION }},${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-autoconf-prod:buildcache
+
+      - name: Build and push BW UI image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/386
+          push: true
+          tags: bunkerity/bunkerweb-ui:latest,bunkerity/bunkerweb-ui:${{ env.VERSION }},${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-ui-prod:buildcache
+
+  # Push to prod registries (ARM)
+  push-arm:
+    needs: tests
+    runs-on: [self-hosted, ARM64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Push BW prod image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: bunkerity/bunkerweb:latest,bunkerity/bunkerweb:${{ env.VERSION }}
+
+      - name: Push autoconf prod image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: bunkerity/bunkerweb-autoconf:latest,bunkerity/bunkerweb-autoconf:${{ env.VERSION }}
+
+      - name: Push UI prod image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: bunkerity/bunkerweb-ui:latest,bunkerity/bunkerweb-ui:${{ env.VERSION }}
+
+  # Deploy to prod infrastructure
+  deploy:
+    needs: push
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: k8s login (prod)
+        uses: azure/k8s-set-context@v2
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_PROD }}
+
+      - name: k8s deploy (prod)
+        run: kubectl rollout restart deployment bunkerweb-controller && kubectl rollout restart daemonset bunkerweb
+
+  # Push DEB/RPM to packagecloud
+  push-linux:
+    needs: tests
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Push Ubuntu DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/prod/ubuntu/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Debian DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/prod/debian/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb
+          PACKAGECLOUD-DISTRIB: debian/bullseye
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push CentOS RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/prod/centos/bunkerweb.${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb
+          PACKAGECLOUD-DISTRIB: el/8
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Fedora RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/prod/fedora/bunkerweb.${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb
+          PACKAGECLOUD-DISTRIB: fedora/36
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

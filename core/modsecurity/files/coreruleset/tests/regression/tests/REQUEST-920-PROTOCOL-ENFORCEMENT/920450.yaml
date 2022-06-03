@@ -1,0 +1,112 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920450.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920450-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-range: "test"
+            output:
+              log_contains: "id \"920450\""
+    -
+      test_title: 920450-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  If: "test"
+            output:
+              log_contains: "id \"920450\""
+    -
+      test_title: 920450-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  lock-token: "test"
+            output:
+              log_contains: "id \"920450\""
+
+    -
+      test_title: 920450-4
+      desc: HTTP header is restricted by policy (920450) from old modsec regressions, we no longer block proxy-connection in 3.0
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "920450"
+
+    -
+      test_title: 920450-5
+      desc: HTTP header is restricted by policy (920450) from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Lock-Token: <opaquelocktoken
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "920450"
+    -
+      test_title: 920450-6
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Range: "test"
+            output:
+              no_log_contains: "id \"920450\""

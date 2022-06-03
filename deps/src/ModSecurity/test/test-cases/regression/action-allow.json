@@ -1,0 +1,101 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing allow action (1/3)",
+    "expected":{
+      "debug_log": "Skipped rule id '500066' as request trough the utilization of an `allow' action",
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"phase:1,allow,msg:'ALLOWED',id:500065\"",
+      "SecAction \"phase:1,deny,msg:'DENIED',id:500066\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing allow action (2/3)",
+    "expected":{
+      "debug_log": "",
+      "http_code": 500
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"phase:1,allow:request,msg:'ALLOWED',id:500065\"",
+      "SecRule ARGS \"@contains value\" \"id:1,t:trim,status:500,deny,phase:3\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing allow action (3/3)",
+    "expected":{
+      "debug_log": "",
+      "http_code": 500
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"phase:1,allow:phase,msg:'ALLOWED',id:500065\"",
+      "SecRule ARGS \"@contains value\" \"id:1,t:trim,status:500,deny,phase:3\""
+    ]
+  }
+]

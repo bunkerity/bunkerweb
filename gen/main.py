@@ -1,84 +1,92 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
-import argparse, os, sys, shutil, glob
+import argparse, os, sys, shutil, glob, traceback
 
-import utils
+import sys
+sys.path.append("/opt/bunkerweb/deps/python")
+sys.path.append("/opt/bunkerweb/gen")
+sys.path.append("/opt/bunkerweb/utils")
+
+from logger import log
+
 from Configurator import Configurator
 from Templator import Templator
 
 if __name__ == "__main__" :
 
-	# Parse arguments
-	parser = argparse.ArgumentParser(description="bunkerized-nginx config generator v1.0")
-	parser.add_argument("--settings", default="/opt/settings.json", type=str, help="path to the files containing the default settings")
-	parser.add_argument("--templates", default="/opt/confs", type=str, help="directory containing the templates files")
-	parser.add_argument("--output", default="/etc/nginx", type=str, help="where to write the rendered files")
-	parser.add_argument("--target", default="/etc/nginx", type=str, help="where nginx will search for configurations files")
-	parser.add_argument("--variables", default="/opt/variables.env", type=str, help="path to the file containing environment variables")
-	args = parser.parse_args()
+    try :
 
-	# Check existences and permissions
-	if not os.path.exists(args.settings) :
-		print("[!] Missing settings file : " + args.settings)
-		sys.exit(1)
-	if not os.access(args.settings, os.R_OK) :
-		print("[!] Can't read settings file : " + args.settings)
-		sys.exit(2)
-	if not os.path.isdir(args.templates) :
-		print("[!] Missing templates directory : " + args.templates)
-		sys.exit(1)
-	if not os.access(args.templates, os.R_OK | os.X_OK) :
-		print("[!] Can't read the templates directory : " + args.templates)
-		sys.exit(2)
-	if not os.path.isdir(args.output) :
-		print("[!] Missing output directory : " + args.output)
-		sys.exit(1)
-	if not os.access(args.output, os.W_OK | os.X_OK) :
-		print("[!] Can't write to the templates directory : " + args.output)
-		sys.exit(2)
-	if not os.path.exists(args.variables) :
-		print("[!] Missing variables file : " + args.variables)
-		sys.exit(1)
-	if not os.access(args.variables, os.R_OK) :
-		print("[!] Can't read variables file : " + args.variables)
-		sys.exit(2)
+        # Parse arguments
+        parser = argparse.ArgumentParser(description="BunkerWeb config generator")
+        parser.add_argument("--settings", default="/opt/bunkerweb/settings.json", type=str, help="file containing the main settings")
+        parser.add_argument("--templates", default="/opt/bunkerweb/confs", type=str, help="directory containing the main template files")
+        parser.add_argument("--core", default="/opt/bunkerweb/core", type=str, help="directory containing the core plugins")
+        parser.add_argument("--plugins", default="/opt/bunkerweb/plugins", type=str, help="directory containing the external plugins")
+        parser.add_argument("--output", default="/etc/nginx", type=str, help="where to write the rendered files")
+        parser.add_argument("--target", default="/etc/nginx", type=str, help="where nginx will search for configurations files")
+        parser.add_argument("--variables", default="/opt/bunkerweb/variables.env", type=str, help="path to the file containing environment variables")
+        args = parser.parse_args()
 
-	# Compute the final config
-	configurator = Configurator()
-	configurator.load_settings(args.settings)
-	variables = utils.load_variables(args.variables)
-	configurator.load_variables(variables)
-	config = configurator.get_config()
+        log("GENERATOR", "ℹ️", "Generator started ...")
+        log("GENERATOR", "ℹ️", "Settings : " + args.settings)
+        log("GENERATOR", "ℹ️", "Templates : " + args.templates)
+        log("GENERATOR", "ℹ️", "Core : " + args.core)
+        log("GENERATOR", "ℹ️", "Plugins : " + args.plugins)
+        log("GENERATOR", "ℹ️", "Output : " + args.output)
+        log("GENERATOR", "ℹ️", "Target : " + args.target)
+        log("GENERATOR", "ℹ️", "Variables : " + args.variables)
 
-	# Remove old files
-	files = glob.glob(args.output + "/*")
-	for file in files :
-		if (file.endswith(".conf") or file.endswith(".env")) and os.path.isfile(file) and not os.path.islink(file) :
-			os.remove(file)
-		elif os.path.isdir(file) and not os.path.islink(file) :
-			shutil.rmtree(file, ignore_errors=False)
+        # Check existences and permissions
+        log("GENERATOR", "ℹ️", "Checking arguments ...")
+        files = [args.settings, args.variables]
+        paths_rx = [args.core, args.plugins, args.templates]
+        paths_rwx = [args.output]
+        for file in files :
+            if not os.path.exists(file) :
+                log("GENERATOR", "❌", "Missing file : " + file)
+                sys.exit(1)
+            if not os.access(file, os.R_OK) :
+                log("GENERATOR", "❌", "Can't read file : " + file)
+                sys.exit(1)
+        for path in paths_rx + paths_rwx :
+            if not os.path.isdir(path) :
+                log("GENERATOR", "❌", "Missing directory : " + path)
+                sys.exit(1)
+            if not os.access(path, os.R_OK | os.X_OK) :
+                log("GENERATOR", "❌", "Missing RX rights on directory : " + path)
+                sys.exit(1)
+        for path in paths_rwx :
+            if not os.access(path, os.W_OK) :
+                log("GENERATOR", "❌", "Missing W rights on directory : " + path)
+                sys.exit(1)
 
-	# Generate the files from templates and config
-	templator = Templator(config, args.templates, args.output, args.target)
-	templator.render_global()
-	if config["MULTISITE"] == "no" :
-		templator.render_site()
-	elif config["SERVER_NAME"] != "" :
-		# Compute a dict of first_server: [list of server_name]
-		map_servers = {}
-		for server_name in config["SERVER_NAME"].split(" ") :
-			if server_name + "_SERVER_NAME" in config :
-				map_servers[server_name] = config[server_name + "_SERVER_NAME"].split(" ")
-		for server_name in config["SERVER_NAME"].split(" ") :
-			if server_name in map_servers :
-				continue
-			for first_server, servers in map_servers.items() :
-				if server_name in servers :
-					continue
-			map_servers[server_name] = [server_name]
-		for first_server, servers in map_servers.items() :
-			templator.render_site(" ".join(servers), first_server)
+        # Compute the config
+        log("GENERATOR", "ℹ️", "Computing config ...")
+        configurator = Configurator(args.settings, args.core, args.plugins, args.variables)
+        config = configurator.get_config()
 
-	# We're done
-	print("[*] Generation done !")
-	sys.exit(0)
+        # Remove old files
+        log("GENERATOR", "ℹ️", "Removing old files ...")
+        files = glob.glob(args.output + "/*")
+        for file in files :
+            if os.path.islink(file) :
+                os.unlink(file)
+            elif os.path.isfile(file) :
+                os.remove(file)
+            elif os.path.isdir(file) :
+                shutil.rmtree(file, ignore_errors=False)
+
+        # Render the templates
+        log("GENERATOR", "ℹ️", "Rendering templates ...")
+        templator = Templator(args.templates, args.core, args.plugins, args.output, args.target, config)
+        templator.render()
+
+        # We're done
+        log("GENERATOR", "ℹ️", "Generator successfully executed !")
+        sys.exit(0)
+
+    except SystemExit as e :
+        sys.exit(e)
+    except :
+        log("GENERATOR", "❌", "Exception while executing generator : " + traceback.format_exc())
+        sys.exit(1)

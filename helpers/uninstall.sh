@@ -7,7 +7,7 @@ function do_and_check_cmd() {
 	output=$("$@" 2>&1)
 	ret="$?"
 	if [ $ret -ne 0 ] ; then
-		echo "[!] Error from command : $*"
+		echo "❌ Error from command : $*"
 		echo "$output"
 		exit $ret
 	fi
@@ -18,7 +18,7 @@ function do_and_check_cmd() {
 
 # Check if we are root
 if [ $(id -u) -ne 0 ] ; then
-	echo "[!] Run me as root"
+	echo "❌ Run me as root"
 	exit 1
 fi
 
@@ -32,45 +32,40 @@ elif [ "$(grep CentOS /etc/os-release)" != "" ] ; then
 	OS="centos"
 fi
 if [ "$OS" = "" ] ; then
-	echo "[!] Unsupported Operating System"
+	echo "❌ Unsupported Operating System"
 	exit 1
 fi
 
 # Stop nginx
 systemctl status nginx > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
-	echo "[*] Stop nginx service"
+	echo "ℹ️ Stop nginx service"
 	do_and_check_cmd systemctl stop nginx
 fi
 
 # Reload old nginx.service file
-echo "[*] Restore old nginx service"
+echo "ℹ️ Restore old nginx service"
 do_and_check_cmd mv /lib/systemd/system/nginx.service.bak /lib/systemd/system/nginx.service
 do_and_check_cmd systemctl daemon-reload
 
 # Remove UI service
-systemctl status bunkerized-nginx-ui > /dev/null 2>&1
+systemctl status bunkerweb-ui > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
-	echo "[*] Stop bunkerized-nginx-ui service"
-	systemctl status nginx > /dev/null 2>&1
-	do_and_check_cmd systemctl stop bunkerized-nginx-ui
+	echo "ℹ️ Stop bunkerweb-ui service"
+	do_and_check_cmd systemctl stop bunkerweb-ui
 fi
-echo "[*] Remove bunkerized-nginx-ui service"
-do_and_check_cmd systemctl disable bunkerized-nginx-ui
-do_and_check_cmd rm -f /lib/systemd/system/bunkerized-nginx-ui.service
+echo "ℹ️ Remove bunkerweb-ui service"
+do_and_check_cmd systemctl disable bunkerweb-ui
+do_and_check_cmd rm -f /lib/systemd/system/bunkerweb-ui.service
 do_and_check_cmd systemctl daemon-reload
 do_and_check_cmd systemctl reset-failed
-sed -i "s@nginx ALL=(root:root) NOPASSWD: /opt/bunkerized-nginx/ui/linux.sh@@" /etc/sudoers
+do_and_check_cmd sed -i "s@nginx ALL=(root:root) NOPASSWD: /opt/bunkerweb/ui/linux.sh@@" /etc/sudoers
 
-# Remove cron
-echo "[*] Remove cron"
-do_and_check_cmd rm -f /etc/crond.d/bunkerized-nginx
-
-# Remove /opt/bunkerized-nginx
-if [ -e "/opt/bunkerized-nginx" ] ; then
-	echo "[*] Remove /opt/bunkerized-nginx"
-	do_and_check_cmd rm -rf /opt/bunkerized-nginx
+# Remove /opt/bunkerweb
+if [ -e "/opt/bunkerweb" ] ; then
+	echo "ℹ️ Remove /opt/bunkerweb"
+	do_and_check_cmd rm -rf /opt/bunkerweb
 fi
 
 # We're done
-echo "[*] bunkerized-nginx successfully uninstalled"
+echo "ℹ️ BunkerWeb successfully uninstalled"

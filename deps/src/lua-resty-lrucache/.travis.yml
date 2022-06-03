@@ -1,0 +1,45 @@
+# vim:st=2 sts=2 sw=2 et:
+
+os: linux
+dist: trusty
+sudo: false
+
+language: c
+compiler: gcc
+
+env:
+  global:
+    - JOBS=3
+    - NGX_BUILD_JOBS=$JOBS
+    - LUAJIT_PREFIX=$TRAVIS_BUILD_DIR/luajit
+    - LUAJIT_LIB=$LUAJIT_PREFIX/lib
+    - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
+    - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+    - TEST_NGINX_SLEEP=0.006
+    - TEST_NGINX_RANDOMIZE=1
+  matrix:
+    - NGINX_VERSION=1.19.3
+
+install:
+  - export NGX_BUILD_CC=$CC
+  - export PATH=$PWD/work/nginx/sbin:$PWD/nginx-devel-utils:$PATH
+  - sudo apt-get install -qq -y cpanminus axel
+  - sudo cpanm --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
+  - git clone https://github.com/openresty/openresty.git ../openresty
+  - git clone https://github.com/openresty/nginx-devel-utils.git
+  - git clone https://github.com/simpl/ngx_devel_kit.git ../ndk-nginx-module
+  - git clone https://github.com/openresty/lua-nginx-module.git ../lua-nginx-module
+  - git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core
+  - git clone https://github.com/openresty/no-pool-nginx.git ../no-pool-nginx
+  - git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git
+  - pushd luajit2/
+  - make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS='-DLUA_USE_APICHECK -DLUA_USE_ASSERT' > build.log 2>&1 || (cat build.log && exit 1)
+  - make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
+  - popd
+  - ngx-build $NGINX_VERSION --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --with-debug > build.log 2>&1 || (cat build.log && exit 1)
+  - nginx -V
+  - ldd `which nginx`|grep -E 'luajit|ssl|pcre'
+
+script:
+  - make lint
+  - prove -j$JOBS -r t/

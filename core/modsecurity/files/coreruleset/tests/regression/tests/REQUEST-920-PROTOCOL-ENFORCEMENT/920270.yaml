@@ -1,0 +1,143 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920270.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920270-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test%00=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920270\""
+    -
+      test_title: 920270-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1%00"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920270\""
+    -
+      test_title: 920270-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test%00=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920270\""
+    -
+      # This causes apache to error before it gets to CRS. Therefore
+      # we'll mark this as a status 400 now until the FTW OR output is added
+      test_title: 920270-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost%00"
+            output:
+              status: [403, 400]
+              # log_contains: "id \"920270\""
+    -
+      test_title: 920270-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Referer: "anything%00"
+            output:
+              log_contains: "id \"920270\""
+    -
+      test_title: 920270-6
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test%40=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920270\""
+    -
+      test_title: 920270-7
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test%FD=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920270\""
+    -
+      test_title: 920270-8
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test%FD=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920270\""
+    -
+      # Test converted from old tests
+      test_title: 920270-9
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?param=foo%00"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                  Accept-Language: "en-us,en;q=0.5"
+                  Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                  Keep-Alive: "300"
+                  Proxy-Connection: "keep-alive"
+            output:
+              log_contains: "id \"920270\""

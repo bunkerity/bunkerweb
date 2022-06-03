@@ -1,0 +1,74 @@
+---
+name: Regression Tests
+
+on:
+  push:
+    paths:
+      - 'rules/**'
+      - 'tests/**'
+      - '.github/**'
+  pull_request:
+    paths:
+      - 'rules/**'
+      - 'tests/**'
+      - '.github/**'
+
+jobs:
+  # "modsec2-apache", "modsec3-apache", "modsec3-nginx"
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      # change to true
+      fail-fast: false
+      matrix:
+        modsec_version: [modsec2-apache]
+        tests: [REQUEST-911-METHOD-ENFORCEMENT,
+                REQUEST-913-SCANNER-DETECTION,
+                REQUEST-920-PROTOCOL-ENFORCEMENT,
+                REQUEST-921-PROTOCOL-ATTACK,
+                REQUEST-930-APPLICATION-ATTACK-LFI,
+                REQUEST-931-APPLICATION-ATTACK-RFI,
+                REQUEST-932-APPLICATION-ATTACK-RCE,
+                REQUEST-933-APPLICATION-ATTACK-PHP,
+                REQUEST-934-APPLICATION-ATTACK-NODEJS,
+                REQUEST-941-APPLICATION-ATTACK-XSS,
+                REQUEST-942-APPLICATION-ATTACK-SQLI,
+                REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION,
+                REQUEST-944-APPLICATION-ATTACK-JAVA]
+        # Will include soon for modsec3-nginx
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python 2
+        uses: actions/setup-python@v1
+        with:
+          python-version: 2.7
+
+      - name: "Run tests for ${{ matrix.modsec_version }}`"
+        env:
+          CONFIG: ${{ matrix.modsec_version }}
+        run: |
+          python -V
+          mkdir -p logs/"${CONFIG}"
+          docker-compose -f ./tests/docker-compose.yml up -d "${CONFIG}"
+          pip install --upgrade setuptools
+          pip install -r tests/regression/requirements.txt
+          # Use mounted volume path
+          if [[ "${CONFIG}" == *"nginx" ]]; then
+            LOGDIR="/var/log/nginx"
+          else
+            LOGDIR="/var/log/apache2"
+          fi
+          sed -ie "s:${LOGDIR}:${GITHUB_WORKSPACE}/logs/${CONFIG}:g" tests/regression/config.ini
+          py.test -vs tests/regression/CRS_Tests.py \
+            --config="${CONFIG}" \
+            --ruledir=./tests/regression/tests/${{ matrix.tests }}
+
+      - name: Clean docker-compose
+        env:
+          CONFIG: modsec2-apache
+        run: |
+          docker-compose -f ./tests/docker-compose.yml stop "${CONFIG}"
+          docker-compose -f ./tests/docker-compose.yml down

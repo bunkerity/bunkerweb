@@ -2,302 +2,384 @@
 
 ## Docker
 
-You can get official prebuilt Docker images of bunkerized-nginx for x86, x64, armv7 and aarch64/arm64 architectures on Docker Hub :
+<figure markdown>
+  ![Overwiew](assets/img/integration-docker.svg){ align=center }
+  <figcaption>Docker integration</figcaption>
+</figure>
+
+Using BunkerWeb as a [Docker](https://www.docker.com/) container is a quick and easy way to test and use it as long as you are familiar with the Docker technology.
+
+We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
+
 ```shell
-$ docker pull bunkerity/bunkerized-nginx
+docker pull bunkerity/bunkerweb:1.4.0
 ```
 
-Or you can build it from source if you wish :
+Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and take a coffee ☕ because it may be long depending on your hardware) :
+
 ```shell
-$ git clone https://github.com/bunkerity/bunkerized-nginx.git
-$ cd bunkerized-nginx
-$ docker build -t bunkerized-nginx .
+git clone https://github.com/bunkerity/bunkerweb.git && \
+cd bunkerweb && \
+docker build -t my-bunkerweb .
 ```
 
-To use bunkerized-nginx as a Docker container you have to pass specific environment variables, mount volumes and redirect ports to make it accessible from the outside.
+Usage and configuration of the BunkerWeb container are based on :
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/docker.png?raw=true" />
+- **Environment variables** to configure BunkerWeb and meet your use cases
+- **Volume** to cache important data and mount custom configuration files
+- **Networks** to expose ports for clients and connect to upstream web services
 
-To demonstrate the use of the Docker image, we will create a simple "Hello World" static file that will be served by bunkerized-nginx.
+### Environment variables
 
-**One important thing to know is that the container runs as an unprivileged user with UID and GID 101. The reason behind this behavior is the security : in case a vulnerability is exploited the attacker won't have full privileges inside the container. But there is also a downside because bunkerized-nginx (heavily) make use of volumes, you will need to adjust the rights on the host.**
+Settings are passed to BunkerWeb using Docker environment variables. You can use the `-e` flag :
 
-First create the environment on the host :
 ```shell
-$ mkdir bunkerized-hello bunkerized-hello/www bunkerized-hello/certs
-$ cd bunkerized-hello
-$ chown root:101 www certs
-$ chmod 750 www
-$ chmod 770 certs
+docker run \
+	   ...
+	   -e MY_SETTING=value \
+	   -e "MY_OTHER_SETTING=value with spaces" \
+	   ...
+	   bunkerity/bunkerweb:1.4.0
 ```
 
-The www folder will contain our static files that will be served by bunkerized-nginx. Whereas the certs folder will store the automatically generated Let's Encrypt certificates.
+Here is the docker-compose equivalent :
 
-Let's create a dummy static page into the www folder :
-```shell
-$ echo "Hello bunkerized World !" > www/index.html
-$ chown root:101 www/index.html
-$ chmod 740 www/index.html
-```
-
-It's time to run the container :
-```shell
-$ docker run \
-         -p 80:8080 \
-         -p 443:8443 \
-         -v "${PWD}/www:/www:ro" \
-         -v "${PWD}/certs:/etc/letsencrypt" \
-         -e SERVER_NAME=www.example.com \
-         -e AUTO_LETS_ENCRYPT=yes \
-         bunkerity/bunkerized-nginx
-```
-
-Or if you prefer docker-compose :
 ```yaml
-version: '3'
+...
 services:
-  mybunkerized:
-    image: bunkerity/bunkerized-nginx
-    ports:
-      - 80:8080
-      - 443:8443
-    volumes:
-      - ./www:/www:ro
-      - ./certs:/etc/letsencrypt
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     environment:
-      - SERVER_NAME=www.example.com
-      - AUTO_LETS_ENCRYPT=yes
+      - MY_SETTING=value
 ```
 
-Important things to note :
-- Replace www.example.com with your own domain (it must points to your server IP address if you want Let's Encrypt to work)
-- Automatic Let's Encrypt is enabled thanks to `AUTO_LETS_ENCRYPT=yes` (since the default is `AUTO_LETS_ENCRYPT=no` you can remove the environment variable to disable Let's Encrypt)
-- The container is exposing TCP/8080 for HTTP and TCP/8443 for HTTPS
-- The /www volume is used to deliver static files and can be mounted as read-only for security reason
-- The /etc/letsencrypt volume is used to store certificates and must be mounted as read/write
+!!! info "Full list"
+    For the complete list of environment variables, see the [settings section](/settings) of the documentation.
 
-Inspect the container logs until bunkerized-nginx is started then visit http(s)://www.example.com to confirm that everything is working as expected.
+### Volume
 
-This example is really simple but, as you can see in the [list of environment variables](https://bunkerized-nginx.readthedocs.io/en/latest/environment_variables.html), you may get a lot of environment variables depending on your use case. To make things cleanier, you can write the environment variables to a file :
+A volume is used to share data with BunkerWeb and store persistent data like certificates, cached files, ...
+
+The easiest way of managing the volume is by using a named one. You will first need to create it :
+
 ```shell
-$ cat variables.env
-SERVER_NAME=www.example.com
-AUTO_LETS_ENCRYPT=yes
+docker volume create bw-data
 ```
 
-And load the file when creating the container :
+Once it's created, you can mount it on `/data` when running the container :
+
 ```shell
-$ docker run ... --env-file "${PWD}/variables.env" ... bunkerity/bunkerized-nginx
+docker run \
+	   ...
+	   -v "${PWD}/bw-data:/data" \
+	   ...
+	   bunkerity/bunkerweb:1.4.0
 ```
 
-Or if you prefer docker-compose :
+Here is the docker-compose equivalent :
+
 ```yaml
 ...
 services:
-  mybunkerized:
-    ...
-    env_file:
-      - ./variables.env
-    ...
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    volumes:
+      - bw-data:/data
 ...
+volumes:
+  bw-data:
+```
+
+!!! warning
+    BunkerWeb runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is the security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+    But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
+    `shell mkdir bw-data && \ chown root:101 bw-data && \ chmod 770 bw-data `
+
+Alternatively, if the folder already exists :
+
+```shell
+chown -R root:101 bw-data && \
+chmod -R 770 bw-data
+```
+
+Mounting the folder :
+
+```shell
+docker run \
+        ...
+      -v ./bw-data:/data \
+        ...
+        bunkerity/bunkerweb:1.4.0
+```
+
+Here is the docker-compose equivalent :
+
+```yaml
+
+...
+services:
+  mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+```
+
+### Networks
+
+The easiest way to connect BunkerWeb to web applications is by using Docker networks.
+
+First of all, you will need to create a network :
+
+```shell
+docker network create mynetwork
+```
+
+Once it's created, you will need to connect the container to that network :
+
+```shell
+docker run \
+       ...
+	   --network mynetwork \
+	   ...
+	   bunkerity/bunkerweb:1.4.0
+```
+
+You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.
+
+Here is the docker-compose equivalent :
+
+```yaml
+...
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    networks:
+      - bw-net
+...
+networks:
+  bw-net:
 ```
 
 ## Docker autoconf
 
-The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called bunkerized-nginx-autoconf which will listen for Docker events and automatically configure bunkerized-nginx instance in real time without recreating the container. Instead of defining environment variables for the bunkerized-nginx container, you simply add labels to your web services and bunkerized-nginx-autoconf will "automagically" take care of the rest.
+<figure markdown>
+  ![Overwiew](assets/img/integration-autoconf.svg){ align=center }
+  <figcaption>Docker autoconf integration</figcaption>
+</figure>
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/autoconf-docker.png?raw=true" />
+!!! info "Docker integration"
+    The Docker autoconf integration is an "evolution" of the Docker one. Please read the [Docker integration section](#docker) first if needed.
 
-First of all, you will need a network to allow communication between bunkerized-nginx and your web services :
+The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
+
+Instead of defining environment variables for the BunkerWeb container, you simply add **labels** to your web applications containers and the **autoconf** will "automagically" take care of the rest.
+
+!!! info "Multisite mode"
+    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](/concepts/#multisite-mode) of the documentation for more information.
+
+First of all, you will need to create the data volume :
+
 ```shell
-$ docker network create services-net
+docker volume create bw-data
 ```
 
-We will also make use of a named volume to share the configuration between autoconf and bunkerized-nginx :
+- One for sharing the persistent data, mounted on **/data**
+- Another one for sharing the generated Nginx configurations, mounted on **/etc/nginx**
+
+Then, you can create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :
+
 ```shell
-$ docker volume create bunkerized-vol
+docker network create --subnet 10.20.30.0/24 bw-autoconf && \
+docker network create bw-services
 ```
 
-You can now create the bunkerized-nginx container :
+- One for communication between **BunkerWeb** and **autoconf**
+- Another one for communication between **BunkerWeb** and **web applications**
+
+You can now create the BunkerWeb container with the `AUTOCONF_MODE=yes` setting and the `bunkerweb.AUTOCONF` label (replace 10.20.30.0/24 with the subnet specified before) :
+
 ```shell
-$ docker run \
-         --name mybunkerized \
-         -l bunkerized-nginx.AUTOCONF \
-         --network services-net \
-         -p 80:8080 \
-         -p 443:8443 \
-         -v "${PWD}/www:/www:ro" \
-         -v "${PWD}/certs:/etc/letsencrypt" \
-         -v bunkerized-vol:/etc/nginx \
-         -e MULTISITE=yes \
-         -e SERVER_NAME= \
-         -e AUTO_LETS_ENCRYPT=yes \
-         bunkerity/bunkerized-nginx
+docker run \
+       -d \
+       --name mybunker \
+	   --network bw-autoconf \
+	   -p 80:8080 \
+	   -p 443:8443 \
+	   -e AUTOCONF_MODE=yes \
+	   -e MULTISITE=yes \
+	   -e SERVER_NAME= \
+	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
+	   -l bunkerweb.AUTOCONF \
+	   bunkerity/bunkerweb:1.4.0 && \
+
+docker network connect bw-services mybunker
 ```
 
-The autoconf one can now be started :
+And the autoconf one :
+
 ```shell
-$ docker run \
-         --name myautoconf \
-         --volumes-from mybunkerized:rw \
-         -v /var/run/docker.sock:/var/run/docker.sock:ro \
-         bunkerity/bunkerized-nginx-autoconf
+docker run \
+       -d \
+	   --name myautoconf \
+	   --network bw-autoconf \
+	   -v bw-data:/data \
+	   -v /var/run/docker.sock:/var/run/docker.sock:ro \
+	   bunkerity/bunkerweb-autoconf:1.4.0
 ```
 
-Here is the docker-compose equivalent :
+Here is the docker-compose equivalent for the BunkerWeb autoconf stack :
+
 ```yaml
 version: '3'
 
 services:
 
-  mybunkerized:
-    image: bunkerity/bunkerized-nginx
-    restart: always
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
-      - 443:8443
+	  - 443:8443
     volumes:
-      - ./certs:/etc/letsencrypt
-      - ./www:/www:ro
-      - bunkerized-vol:/etc/nginx
+      - bw-data:/data
     environment:
+	  - MULTISITE=yes
       - SERVER_NAME=
-      - MULTISITE=yes
-      - AUTO_LETS_ENCRYPT=yes
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     labels:
-      - "bunkerized-nginx.AUTOCONF"
+      - "bunkerweb.AUTOCONF"
     networks:
-      - services-net
+      - bw-autoconf
+	  - bw-services
 
   myautoconf:
-    image: bunkerity/bunkerized-nginx-autoconf
-    restart: always
-    volumes_from:
-      - mybunkerized
+    image: bunkerity/bunkerweb-autoconf:1.4.0
     volumes:
+      - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    depends_on:
-      - mybunkerized
+    networks:
+      - bw-autoconf
 
 volumes:
-  bunkerized-vol:
+  bw-data:
 
 networks:
-  services-net:
-    name: services-net
+  bw-autoconf:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
 ```
 
-Important things to note :
-- autoconf is generating config files and other artefacts for the bunkerized-nginx, they need to share the same volumes
-- autoconf must have access to the Docker socket in order to get events, access to labels and send SIGHUP signal (reload order) to bunkerized-nginx
-- bunkerized-nginx must have the bunkerized-nginx.AUTOCONF label
-- bunkerized-nginx must be started in [multisite mode](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html#multisite) with the `MULTISITE=yes` environment variable
-- When setting the `SERVER_NAME` environment variable to an empty value, bunkerized-nginx won't generate any web service configuration at startup
-- The `AUTO_LETS_ENCRYPT=yes` will be applied to all subsequent web service configuration, unless overriden by the web service labels
+Once the stack is setup, you can now create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically setup BunkerWeb :
 
-Check the logs of both autoconf and bunkerized-nginx to see if everything is working as expected.
-
-You can now create a new web service and add environment variables as labels with the `bunkerized-nginx.` prefix to let the autoconf service "automagically" do the configuration for you :
 ```shell
-$ docker run \
-         --name myservice \
-         --network services-net \
-         -l bunkerized-nginx.SERVER_NAME=www.example.com \
-         -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
-         -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
-         -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myservice \
-         tutum/hello-world
+docker run \
+       -d \
+       --name myapp \
+	   --network bw-services \
+	   -l bunkerweb.MY_SETTING_1=value1 \
+	   -l bunkerweb.MY_SETTING_2=value2 \
+       ...
+	   mywebapp:4.2
 ```
 
-docker-compose equivalent :
+Here is the docker-compose equivalent :
+
 ```yaml
-version: "3"
+...
 
 services:
 
-  myservice:
-    image: tutum/hello-world
+  myapp:
+	image: mywebapp:4.2
     networks:
-      services-net:
+      bw-services:
         aliases:
-          - myservice
+          - myapp
     labels:
-      - "bunkerized-nginx.SERVER_NAME=www.example.com"
-      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
-      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-      - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myservice"
+      - "bunkerweb.MY_SETTING_1=value1"
+	  - "bunkerweb.MY_SETTING_2=value2"
+
+...
 
 networks:
-  services-net:
+  bw-services:
     external:
-      name: services-net
+      name: bw-services
+
+...
 ```
 
-Please note that if you want to override the `AUTO_LETS_ENCRYPT=yes` previously defined in the bunkerized-nginx container, you simply need to add the `bunkerized-nginx.AUTO_LETS_ENCRYPT=no` label.
+## Swarm
 
-Look at the logs of both autoconf and bunkerized-nginx to check if the configuration has been generated and loaded by bunkerized-nginx. You should now be able to visit http(s)://www.example.com.
+<figure markdown>
+  ![Overwiew](assets/img/integration-swarm.svg){ align=center }
+  <figcaption>Docker Swarm integration</figcaption>
+</figure>
 
-When your container is not needed anymore, you can delete it as usual. The autoconf should get the event and generate the configuration again.
+!!! info "Docker autoconf"
+    The Docker autoconf integration is similar of the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
 
-## Docker Swarm
+To automatically configure BunkerWeb instances, a special service, called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
 
-The deployment and configuration is very similar to the "Docker autoconf" one but with services instead of containers. A service based on the bunkerized-nginx-autoconf image needs to be scheduled on a manager node (don't worry it doesn't expose any network port for obvious security reasons). This service will listen for Docker Swarm events like service creation or deletion and generate the configuration according to the labels of each service. Once configuration generation is done, the bunkerized-nginx-autoconf service will send the configuration files and a reload order to all the bunkerized-nginx tasks so they can apply the new configuration. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Docker volume plugin](https://docs.docker.com/engine/extend/)).
+Like the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels starting with the special **bunkerweb.** prefix.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/swarm.png?raw=true" />
+The recommended setup is to schedule the **BunkerWeb service** as a **global service** on all worker nodes and the **autoconf service** as a **single replicated service** on a manager node.
 
-In this setup we will deploy bunkerized-nginx in global mode on all workers and autoconf as a single replica on a manager.
+First of all, you will need to create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :
 
-First of all, you will need to create 2 networks, one for the communication between bunkerized-nginx and autoconf and the other one for the communication between bunkerized-nginx and the web services :
 ```shell
-$ docker network create -d overlay --attachable bunkerized-net
-$ docker network create -d overlay --attachable services-net
+docker network create -d overlay --attachable --subnet 10.20.30.0/24 bw-autoconf && \
+docker network create -d overlay --attachable bw-services
 ```
 
-We can now start the bunkerized-nginx as a service :
+- One for communication between **BunkerWeb** and **autoconf**
+- Another one for communication between **BunkerWeb** and **web applications**
+
+You can now create the BunkerWeb service (replace 10.20.30.0/24 with the subnet specified before) :
+
 ```shell
-$ docker service create \
-         --name mybunkerized \
-         --mode global \
-         --constraint node.role==worker \
-         -l bunkerized-nginx.AUTOCONF \
-         --network bunkerized-net \
-         -p published=80,target=8080,mode=host \
-         -p published=443,target=8443,mode=host \
-         -e SWARM_MODE=yes \
-         -e USE_API=yes \
-         -e API_URI=/ChangeMeToSomethingHardToGuess \
-         -e SERVER_NAME= \
-         -e MULTISITE=yes \
-         -e AUTO_LETS_ENCRYPT=yes \
-         bunkerity/bunkerized-nginx
-$ docker service update \
-         --network-add services-net \
-         mybunkerized
+docker service create \
+       --name mybunker \
+	   --mode global \
+	   --constraint node.role==worker \
+	   --network bw-autoconf \
+	   --network bw-services \
+	   -p published=80,target=8080,mode=host \
+	   -p published=443,target=8443,mode=host \
+	   -e SWARM_MODE=yes \
+	   -e SERVER_NAME= \
+	   -e MULTISITE=yes \
+	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
+	   -l bunkerweb.AUTOCONF \
+	   bunkerity/bunkerweb:1.4.0
 ```
 
-Once bunkerized-nginx has been started you can start the autoconf as a service :
+And the autoconf one :
+
 ```shell
-$ docker service create \
-         --name myautoconf \
-         --replicas 1 \
-         --constraint node.role==manager \
-         --network bunkerized-net \
-         --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
-         --mount type=volume,source=cache-vol,destination=/cache \
-         --mount type=volume,source=certs-vol,destination=/etc/letsencrypt \
-         -e SWARM_MODE=yes \
-         -e API_URI=/ChangeMeToSomethingHardToGuess \
-         bunkerity/bunkerized-nginx-autoconf
+docker service \
+       create \
+	   --name myautoconf \
+	   --constraint node.role==manager \
+	   --network bw-autoconf \
+	   --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
+	   --mount type=volume,source=bw-data,destination=/data \
+	   -e SWARM_MODE=yes \
+	   bunkerity/bunkerweb-autoconf:1.4.0
 ```
 
-Or do the same with docker-compose if you wish :
+Here is the docker-compose equivalent (using `docker stack deploy`) :
+
 ```yaml
-version: '3.8'
+version: '3.5'
 
 services:
 
-  nginx:
-    image: bunkerity/bunkerized-nginx
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - published: 80
         target: 8080
@@ -309,167 +391,161 @@ services:
         protocol: tcp
     environment:
       - SWARM_MODE=yes
-      - USE_API=yes
-      - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from autoconf
-      - MULTISITE=yes
       - SERVER_NAME=
-      - AUTO_LETS_ENCRYPT=yes
+      - MULTISITE=yes
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     networks:
-      - bunkerized-net
-      - services-net
+      - bw-autoconf
+      - bw-services
     deploy:
       mode: global
       placement:
         constraints:
           - "node.role==worker"
-      # mandatory label
       labels:
-        - "bunkerized-nginx.AUTOCONF"
+        - "bunkerweb.AUTOCONF"
 
-  autoconf:
-    image: bunkerity/bunkerized-nginx-autoconf
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - cache-vol:/cache
-      - certs-vol:/etc/letsencrypt
+  myautoconf:
+    image: bunkerity/bunkerweb-autoconf:1.4.0
     environment:
       - SWARM_MODE=yes
-      - API_URI=/ChangeMeToSomethingHardToGuess # must match API_URI from nginx
+    volumes:
+      - bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - bunkerized-net
+      - bw-autoconf
     deploy:
       replicas: 1
       placement:
         constraints:
           - "node.role==manager"
 
-# This will create the networks for you
 networks:
-  bunkerized-net:
+  bw-autoconf:
     driver: overlay
     attachable: true
-    name: bunkerized-net
-  services-net:
+    name: bw-autoconf
+	ipam:
+	  config:
+        - subnet: 10.20.30.0/24
+  bw-services:
     driver: overlay
     attachable: true
-    name: services-net
-# And the volumes too
+    name: bw-services
+
 volumes:
-  cache-vol:
-  certs-vol:
+  bw-data:
 ```
 
-Check the logs of both autoconf and bunkerized-nginx services to see if everything is working as expected.
+Once the BunkerWeb Swarm stack is set up and running (see autoconf logs for more information), you can now deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
 
-You can now create a new service and add environment variables as labels with the `bunkerized-nginx.` prefix to let the autoconf service "automagically" do the configuration for you :
 ```shell
-$ docker service create \
-         --name myservice \
-         --constraint node.role==worker \
-         --network services-net \
-         -l bunkerized-nginx.SERVER_NAME=www.example.com \
-         -l bunkerized-nginx.USE_REVERSE_PROXY=yes \
-         -l bunkerized-nginx.REVERSE_PROXY_URL=/ \
-         -l bunkerized-nginx.REVERSE_PROXY_HOST=http://myservice \
-         tutum/hello-world
+docker service \
+       create \
+       --name myapp \
+       --network bw-services \
+       -l bunkerweb.MY_SETTING_1=value1 \
+       -l bunkerweb.MY_SETTING_2=value2 \
+       ...
+       mywebapp:4.2
 ```
 
-docker-compose equivalent :
+Here is the docker-compose equivalent (using `docker stack deploy`) :
+
 ```yaml
-version: "3"
-
+...
 services:
-
-  myservice:
-    image: tutum/hello-world
+  myapp:
+    image: mywebapp:4.2
     networks:
-      - services-net
+      - bw-services
     deploy:
       placement:
         constraints:
           - "node.role==worker"
       labels:
-        - "bunkerized-nginx.SERVER_NAME=www.example.com"
-        - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
-        - "bunkerized-nginx.REVERSE_PROXY_URL=/"
-        - "bunkerized-nginx.REVERSE_PROXY_HOST=http://myservice"
-
+        - "bunkerweb.MY_SETTING_1=value1"
+        - "bunkerweb.MY_SETTING_2=value2"
+...
 networks:
-  services-net:
+  bw-services:
     external:
-      name: services-net
+      name: bw-services
 ```
-
-Please note that if you want to override the `AUTO_LETS_ENCRYPT=yes` previously defined in the bunkerized-nginx service, you simply need to add the `bunkerized-nginx.AUTO_LETS_ENCRYPT=no` label.
-
-Look at the logs of both autoconf and bunkerized-nginx to check if the configuration has been generated and loaded by bunkerized-nginx. You should now be able to visit http(s)://www.example.com.
-
-When your service is not needed anymore, you can delete it as usual. The autoconf should get the event and generate the configuration again.
 
 ## Kubernetes
 
-**This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
+<figure markdown>
+  ![Overwiew](assets/img/integration-kubernetes.svg){ align=center }
+  <figcaption>Kubernetes integration</figcaption>
+</figure>
 
-The bunkerized-nginx-autoconf acts as an Ingress Controller and connects to the k8s API to get cluster events and generate a new configuration when it's needed. Once the configuration is generated, the Ingress Controller sends the configuration files and a reload order to the bunkerized-nginx instances running in the cluster. If you need to deliver static files (e.g., html, images, css, js, ...) a shared folder accessible from all bunkerized-nginx instances is needed (you can use a storage system like NFS, GlusterFS, CephFS on the host or a [Kubernetes Volume that supports ReadOnlyMany access](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
+The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
 
-<img src="https://github.com/bunkerity/bunkerized-nginx/blob/master/docs/img/kubernetes.png?raw=true" />
+The first step to install BunkerWeb on a Kubernetes cluster is to add a role and permissions on the cluster for the autoconf :
 
-The first step to do is to declare the RBAC authorization that will be used by the Ingress Controller to access the Kubernetes API. A ready-to-use declaration is available here :
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: bunkerized-nginx-ingress-controller
+  name: cr-bunkerweb
 rules:
 - apiGroups: [""]
-  resources: ["services", "pods"]
+  resources: ["services", "pods", "configmaps"]
   verbs: ["get", "watch", "list"]
-- apiGroups: ["extensions"]
+- apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
   verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: bunkerized-nginx-ingress-controller
+  name: sa-bunkerweb
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: bunkerized-nginx-ingress-controller
+  name: crb-bunkerweb
 subjects:
 - kind: ServiceAccount
-  name: bunkerized-nginx-ingress-controller
+  name: sa-bunkerweb
   namespace: default
   apiGroup: ""
 roleRef:
   kind: ClusterRole
-  name: bunkerized-nginx-ingress-controller
+  name: cr-bunkerweb
   apiGroup: rbac.authorization.k8s.io
 ```
 
-Next, you can deploy bunkerized-nginx as a DaemonSet :
+The recommended way of deploying BunkerWeb is using a [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) which means each node in the cluster will run an instance of BunkerWeb :
+
 ```yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: bunkerized-nginx
-  labels:
-    app: bunkerized-nginx
+  name: bunkerweb
 spec:
   selector:
     matchLabels:
-      name: bunkerized-nginx
+      app: bunkerweb
   template:
     metadata:
       labels:
-        name: bunkerized-nginx
-        # this label is mandatory
-        bunkerized-nginx: "yes"
+        app: bunkerweb
+      # mandatory annotation
+      annotations:
+        bunkerweb.io/AUTOCONF: "yes"
     spec:
       containers:
-      - name: bunkerized-nginx
-        image: bunkerity/bunkerized-nginx
+      - name: bunkerweb
+        image: bunkerity/bunkerweb
+        securityContext:
+          runAsUser: 101
+          runAsGroup: 101
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 8080
           hostPort: 80
@@ -478,261 +554,175 @@ spec:
         env:
         - name: KUBERNETES_MODE
           value: "yes"
+        # replace with your DNS resolvers
+        # e.g. : kube-dns.kube-system.svc.cluster.local
         - name: DNS_RESOLVERS
           value: "coredns.kube-system.svc.cluster.local"
         - name: USE_API
           value: "yes"
-        - name: API_URI
-          value: "/ChangeMeToSomethingHardToGuess"
+        # 10.0.0.0/8 is the cluster internal subnet
+        - name: API_WHITELIST_IP
+          value: "127.0.0.0/8 10.0.0.0/8"
         - name: SERVER_NAME
           value: ""
         - name: MULTISITE
           value: "yes"
+        livenessProbe:
+          exec:
+            command:
+            - /opt/bunkerweb/helpers/healthcheck.sh
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 1
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /opt/bunkerweb/helpers/healthcheck.sh
+          initialDelaySeconds: 30
+          periodSeconds: 1
+          timeoutSeconds: 1
+          failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: bunkerized-nginx-service
-  # this label is mandatory
-  labels:
-    bunkerized-nginx: "yes"
-  # this annotation is mandatory
-  annotations:
-    bunkerized-nginx.AUTOCONF: "yes"
+  name: svc-bunkerweb
 spec:
   clusterIP: None
   selector:
-    name: bunkerized-nginx
+    app: bunkerweb
 ```
 
-You can now deploy the autoconf which will act as the ingress controller :
+In order to store persistent data, you will need a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) :
+
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-nginx
+  name: pvc-bunkerweb
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bunkerized-nginx-ingress-controller
-  labels:
-    app: bunkerized-nginx-autoconf
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: bunkerized-nginx-autoconf
-  template:
-    metadata:
-      labels:
-        app: bunkerized-nginx-autoconf
-    spec:
-      serviceAccountName: bunkerized-nginx-ingress-controller
-      volumes:
-      - name: vol-nginx
-        persistentVolumeClaim:
-          claimName: pvc-nginx
-      initContainers:
-      - name: change-data-dir-permissions
-        command:
-        - chown
-        - -R
-        - 101:101
-        - /etc/letsencrypt
-        - /cache
-        image: busybox
-        volumeMounts:
-        - name: vol-nginx
-          mountPath: /etc/letsencrypt
-          subPath: letsencrypt
-        - name: vol-nginx
-          mountPath: /cache
-          subPath: cache
-        securityContext:
-          runAsNonRoot: false
-          runAsUser: 0
-          runAsGroup: 0
-      containers:
-      - name: bunkerized-nginx-autoconf
-        image: bunkerity/bunkerized-nginx-autoconf
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        - name: API_URI
-          value: "/ChangeMeToSomethingHardToGuess"
-        volumeMounts:
-        - name: vol-nginx
-          mountPath: /etc/letsencrypt
-          subPath: letsencrypt
-        - name: vol-nginx
-          mountPath: /cache
-          subPath: cache
 ```
 
-Check the logs of both bunkerized-nginx and autoconf deployments to see if everything is working as expected.
+Now, you can start the autoconf as a single replica [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) :
 
-You can now deploy your web service and make it accessible from within the cluster :
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp
-  labels:
-    app: myapp
+  name: bunkerweb-controller
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
-      app: myapp
+      app: bunkerweb-controller
   template:
     metadata:
       labels:
-        app: myapp
+        app: bunkerweb-controller
     spec:
+      serviceAccountName: sa-bunkerweb
+      volumes:
+      - name: vol-bunkerweb
+        persistentVolumeClaim:
+          claimName: pvc-bunkerweb
       containers:
-      - name: myapp
-        image: containous/whoami
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: myapp
-spec:
-  type: ClusterIP
-  selector:
-    app: myapp
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+      - name: bunkerweb-controller
+        image: bunkerity/bunkerweb-autoconf
+        imagePullPolicy: Always
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        volumeMounts:
+        - name: vol-bunkerweb
+          mountPath: /data
 ```
 
-Last but not least, it's time to define your Ingress resource to make your web service publicly available :
+Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: bunkerized-nginx-ingress
-  # this label is mandatory
-  labels:
-    bunkerized-nginx: "yes"
+  name: ingress
   annotations:
-    # add any global and default environment variables here as annotations with the "bunkerized-nginx." prefix
-    # examples :
-    #bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
-    #bunkerized-nginx.USE_ANTIBOT: "javascript"
-    #bunkerized-nginx.REDIRECT_HTTP_TO_HTTPS: "yes"
-    #bunkerized-nginx.www.example.com_REVERSE_PROXY_WS: "yes"
-    #bunkerized-nginx.www.example.com_USE_MODSECURITY: "no"
+	bunkerweb.io/MY_SETTING_1: "value1"
+	bunkerweb.io/MY_SETTING_2: "value2"
 spec:
-  tls:
-  - hosts:
-    - www.example.com
   rules:
-  - host: "www.example.com"
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: myapp
-            port:
-              number: 80
-```
-
-Check the logs to see if the configuration has been generated and bunkerized-nginx reloaded. You should be able to visit http(s)://www.example.com.
-
-Note that an alternative would be to add annotations directly to your services (a common use-case is for [PHP applications](https://bunkerized-nginx.readthedocs.io/en/latest/quickstart_guide.html#php-applications) because the Ingress resource is only for reverse proxy) without editing the Ingress resource :
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: myapp
-  # this label is mandatory
-  labels:
-    bunkerized-nginx: "yes"
-  annotations:
-    bunkerized-nginx.SERVER_NAME: "www.example.com"
-    bunkerized-nginx.AUTO_LETS_ENCRYPT: "yes"
-    bunkerized-nginx.USE_REVERSE_PROXY: "yes"
-    bunkerized-nginx.REVERSE_PROXY_URL: "/"
-    bunkerized-nginx.REVERSE_PROXY_HOST: "http://myapp.default.svc.cluster.local"
-spec:
-  type: ClusterIP
-  selector:
-    app: myapp
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+...
 ```
 
 ## Linux
 
-**This integration is still in beta, please fill an issue if you find a bug or have an idea on how to improve it.**
+<figure markdown>
+  ![Overwiew](assets/img/integration-linux.svg){ align=center }
+  <figcaption>Linux integration</figcaption>
+</figure>
 
-List of supported Linux distributions :
-- Debian buster (10)
-- Ubuntu focal (20.04)
-- CentOS 7
-- Fedora 34
-- Arch Linux
+List of supported Linux distros :
 
-Unlike containers, Linux integration can be tedious because bunkerized-nginx has a bunch of dependencies that need to be installed before we can use it. Fortunately, we provide a helper script to make the process easier and automatic. Once installed, the configuration is really simple, all you have to do is to edit the `/opt/bunkerized-nginx/variables.env` configuration file and run the `bunkerized-nginx` command to apply it.
+- Debian 11 "Bullseye"
+- Ubuntu 22.04 "Jammy"
+- Fedora 36
+- CentOS Stream 8
 
-First of all you will need to install bunkerized-nginx. The recommended way is to use the official installer script :
-```shell
-$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.2/linux-install.sh -o /tmp/bunkerized-nginx.sh
-```
+Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. The installation is not covered in this documentation but you need to use prebuilt packages from the NGINX official repository as described [here](https://nginx.org/en/linux_packages.html). If you are on Fedora, you can use the prebuilt packages from the Fedora repository.
 
-Before executing it, you should also check the signature :
-```shell
-$ curl -fsSL https://github.com/bunkerity/bunkerized-nginx/releases/download/v1.3.2/linux-install.sh.asc -o /tmp/bunkerized-nginx.sh.asc
-$ gpg --auto-key-locate hkps://keys.openpgp.org --locate-keys contact@bunkerity.com
-$ gpg --verify /tmp/bunkerized-nginx.sh.asc /tmp/bunkerized-nginx.sh
-```
+Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer) :
 
-You can now install bunkerized-nginx (and take a coffee because it may take a while) :
-```shell
-$ chmod +x /tmp/bunkerized-nginx.sh
-$ /tmp/bunkerized-nginx.sh
-```
+=== "Debian"
 
-To demonstrate the configuration on Linux, we will create a simple “Hello World” static file that will be served by bunkerized-nginx.
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+	apt update && \
+	apt install -y bunkerweb
+    ```
 
-Static files are stored inside the `/opt/bunkerized-nginx/www` folder and the unprivileged nginx user must have read access on it :
-```shell
-$ echo "Hello bunkerized World !" > /opt/bunkerized-nginx/www/index.html
-$ chown root:nginx /opt/bunkerized-nginx/www/index.html
-$ chmod 740 /opt/bunkerized-nginx/www/index.html
-```
+=== "Ubuntu"
 
-Here is the example configuration file that needs to be written at `/opt/bunkerized-nginx/variables.env` :
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+	apt update && \
+	apt install -y bunkerweb
+    ```
+
+=== "Fedora"
+
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+	dnf check-update && \
+	dnf install -y bunkerweb
+    ```
+
+=== "CentOS Stream"
+
+    ```shell
+	dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+	dnf check-update && \
+	dnf install -y bunkerweb
+    ```
+
+Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
+
 ```conf
-HTTP_PORT=80
-HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
-SERVER_NAME=www.example.com
-AUTO_LETS_ENCRYPT=yes
+MY_SETTING_1=value1
+MY_SETTING_2=value2
+...
 ```
 
-Important things to note :
-- Replace www.example.com with your own domain (it must points to your server IP address if you want Let’s Encrypt to work)
-- Automatic Let’s Encrypt is enabled thanks to `AUTO_LETS_ENCRYPT=yes` (since the default is `AUTO_LETS_ENCRYPT=no` you can remove the environment variable to disable Let’s Encrypt)
-- The default values for `HTTP_PORT` and `HTTPS_PORT` are `8080` and `8443` hence the explicit declaration with standard ports values
-- Replace the `DNS_RESOLVERS` value with your own DNS resolver(s) if you need nginx to resolve internal DNS requests (e.g., reverse proxy to an internal service)
+BunkerWeb is managed using systemctl :
 
-You can now apply the configuration by running the **bunkerized-nginx** command :
-```shell
-$ bunkerized-nginx
-```
-
-Visit http(s)://www.example.com to confirm that everything is working as expected.
+- Check BunkerWeb status : `systemctl status bunkerweb`
+- Reload the configuration : `systemctl reload bunkerweb`
+- Start it if it's stopped : `systemctl start bunkerweb`
+- Stop it if it's started : `systemctl stop bunkerweb`
+- And restart : `systemctl restart bunkerweb`

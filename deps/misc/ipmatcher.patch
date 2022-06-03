@@ -1,0 +1,11 @@
+--- ipmatcher.lua       2022-04-13 17:16:05.731322800 +0200
++++ ipmatcher.lua2      2022-04-13 17:17:15.801322800 +0200
+@@ -123,7 +123,7 @@
+
+
+ local ngx_log = ngx.log
+-local ngx_INFO = ngx.INFO
++local ngx_INFO = ngx.DEBUG
+ local function log_info(...)
+     if cur_level and ngx_INFO > cur_level then
+         return

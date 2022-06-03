@@ -1,0 +1,409 @@
+v3.0.4 - 2020-Jan-13
+--------------------
+
+ - Fix: audit log data omitted when nolog,auditlog
+   [@martinhsv]
+ - Fix: ModSecurity 3.x inspectFile operator does not pass
+   FILES_TMPNAMES parameter to lua engine
+   [Issue #2204, #2205 - @kadirerdogan]
+ - XML: Remove error messages from stderr
+   [Issue #2010 - @JaiHarpalani, @zimmerle]
+ - Filter comment or blank line for pmFromFile operator
+   [Issue #1645 - @LeeShan87, @victorhora, @tdoubley]
+ - Additional adjustment to Cookie header parsing
+   [@martinhsv]
+ - Restore chained rule part H logging to be more like 2.9 behaviour
+   [Issue #2196 - @martinhsv]
+ - Small fixes in log messages to help debugging the file upload
+   [Issue #2130 - @airween]
+ - Fix Cookie header parsing issues
+   [Issue #2201 - @airween, @martinhsv]
+ - Fix rules with nolog are logging to part H
+   [Issue #2196 - @martinhsv]
+ - Fix argument key-value pair parsing cases
+   [Issue #1904 - @martinhsv]
+ - Fix: audit log part for response body for JSON format to be E
+   [Issue #2066 - @martinhsv, @zimmerle]
+ - Make sure m_rulesMessages is filled after successfull match
+   [Issue #2000, #2048 - @victorhora, @defanator]
+ - Fix @pm lookup for possible matches on offset zero.
+   [@zimmerle, @afoxdavidi, @martinhsv, @marshal09]
+ - Regex lookup on the key name instead of COLLECTION:key
+   [@rdiperri-yottaa, @danbiagini-work, @mmelo-yottaa, @zimmerle]
+ - Missing throw in Operator::instantiate
+   [Issue #2106 - @marduone]
+ - Making block action execution dependent of the SecEngine status
+   [Issue #2113, #2111 - @theMiddleBlue, @airween]
+ - Making block action execution dependent of the SecEngine status
+   [Issue #1960 - @theMiddleBlue, @zimmerle, @airween, @victorhora]
+ - Having body limits to respect the rule engine state
+   [@zimmerle]
+ - Fix SecRuleUpdateTargetById does not match regular expressions
+   [Issue #1872 - @zimmerle, @anush-cr, @victorhora, @j0k2r]  
+ - Adds missing check for runtime ctl:ruleRemoveByTag
+   [Issue #2102, #2099 - @airween]
+ - Adds a new operator verifySVNR that checks for Austrian social
+   security numbers.
+   [Issue #2063 - @Rufus125]
+ - Fix variables output in debug logs
+   [Issue #2057 - @jleproust]
+ - Correct typo validade in log output
+   [Issue #2059 - @nerrehmit]
+ - fix/minor: Error encoding hexa decimal.
+   [Issue #2068 - @tech-ozon-io]
+ - Limit more log variables to 200 characters.
+   [Issue #2073 - @jleproust]
+ - parser: fix parsed file names
+   [@zimmerle]
+ - Allow empty anchored variable
+   [Issue #2024 - @airween]
+ - Fixed FILES_NAMES collection after the end of multipart parsing
+   [Issue #2016 - @airween]
+ - Fixed validateByteRange parsing method
+   [Issue #2017 - @airween]
+ - Removes a memory leak on the JSON parser
+   [@zimmerle]
+ - Enables LMDB on the regression tests.
+   [Issue #2011, #2008 - @WGH-, @mdunc]
+ - Fix: Extra whitespace in some configuration directives causing error
+   [Issue #2006 - @porjo, @zimmerle]
+ - Refactoring on Regex and SMatch classes.
+   [@WGH-]
+ - Fixed buffer overflow in Utils::Md5::hexdigest()
+   [Issue #2002 - @defanator]
+ - Implemented merge() method for ConfigInt, ConfigDouble, ConfigString
+   [Issue #1990 - @defanator]
+ - Adds initially support to the drop action.
+   [@zimmerle]
+ - Complete merging of particular rule properties
+   [Issue #1978 - @defanator]
+ - Replaces AC_CHECK_FILE with 'test -f'
+   [Issue #1984 - @chuckwolber]
+ - Fix inet addr handling on 64 bit big endian systems
+   [Issue #1980 - @airween]
+ - Fix tests on FreeBSD
+   [Issue #1973 - @defanator]
+ - Changes ENV test case to read the default MODSECURTIY env var
+   [Issue #1969 - @zimmerle, @airween, @inittab]
+ - Regression: Sets MODSECURITY env var during the tests execution
+   [Issue #1969 - @zimmerle, @airween, @inittab]
+ - Fix setenv action to strdup key=variable
+   [@zimmerle]
+ - Allow 0 length JSON requests.
+   [Issue #1822 - @allanbomsft, @zimmerle, @victorhora, @marcstern]
+ - Fix "make dist" target to include default configuration
+   [Issue #1966 - @defanator]
+ - Replaced log locking using mutex with fcntl lock
+   [Issue #1949, #1927 - @Cloaked9000]
+ - Correct the usage of modsecurity::Phases::NUMBER_OF_PHASES
+   [Issue #1959 - @weliu]
+ - Adds support to multiple ranges in ctl:ruleRemoveById
+   [Issue #1956 - @theseion, @victorhora, @zimmerle]
+ - Rule variable interpolation broken
+   [Issue #1961 - @soonum, @zimmerle] 
+ - Make the boundary check less strict as per RFC2046
+   [Issue #1943 - @victorhora, @allanbomsft]
+ - Fix buffer size for utf8toUnicode transformation
+   [Issue #1208 - @katef, @victorhora]
+
+
+v3.0.3 - 2018-Nov-05
+--------------------
+
+ - Fix double macros bug
+   [Issue #1943 - @supplient, @zimmerle]
+ - Override the default status code if not suitable to redirect action
+   [Issue #1850 - @zimmerle, @victorhora]
+ - parser: Fix the support for CRLF configuration files
+   [Issue #1945 - @zimmerle, @defanator, @kjakub]
+ - Organizes the server logs
+   [0xb7c36 and 0x5ac20 - @zimmerle, @steven-j-wojcik]
+ - m_lineNumber in Rule not mapping with the correct line number in file
+   [Issue #1844 - @zimmerle, @victorhora, @xizeng]
+ - Using shared_ptr instead of unique_ptr on rules exceptions
+   [Issue #1697 - @zimmerle, @brianp9906, @victorhora, @LeSwiss, @defanator]
+ - Changes debuglogs schema to avoid unecessary str allocation
+   [0xb2840 - @zimmerle]
+ - Fix the SecUnicodeMapFile and SecUnicodeCodePage
+   [0x3094d - @zimmerle, @victorhora]
+ - Changes the timing to save the rule message
+   [0xca270 - @zimmerle]
+ - Fix crash in msc_rules_add_file() when using disruptive action in chain
+   [Issue #1849 - @victorhora, @zimmerle, @rperper]
+ - Fix memory leak in AuditLog::init()
+   [Issue #1897 - @weliu]
+ - Fix RulesProperties::appendRules()
+   [Issue #1901 - @steven-j-wojcik]
+ - Fix RULE lookup in chained rules
+   [0x3077c - @zimmerle]
+ - @ipMatch "Could not add entry" on slash/32 notation in 2.9.0
+   [Issue #849 - @zimmerle, @dune73]
+ - Using values after transformation at MATCHED_VARS
+   [0x14316 - @zimmerle]
+ - Adds support to UpdateActionById.
+   [Issue #1800 - @zimmerle, @victorhora, @NisariAIT]
+ - Add correct C function prototypes for msc_init and msc_create_rule_set
+   [Issue #1922 - @steven-j-wojcik]
+ - Allow LuaJIT 2.1 to be used
+   [Issue #1909 - @victorhora, @mdunc]
+ - Match m_id JSON log with RuleMessage and v2 format
+   [Issue #1185 - @victorhora]
+ - Adds support to setenv action.
+   [Issue #1044 - @zimmerle]
+ - Adds new transaction constructor that accepts the transaction id
+   as parameter.
+   [Issue #1627 - @defanator, @zimmerle]
+ - Adds request IDs and URIs to the debug log
+   [Issue #1627 - @defanator, @zimmerle]
+ - Treating variables exception on load-time instead of run time.
+   [0x028e0 and 0x275a1 - @zimmerle]
+ - Fix: function m.setvar in Lua scripts and add testcases
+   [Issue #1859 - @nowaits, @victorhora]
+ - Fix SecResponseBodyAccess and ctl:requestBodyAccess directives
+   [Issue #1531 - @victorhora, @defanator]
+ - Fix OpenBSD build
+   [Issue #1841 - @victorhora, @zimmerle, @juanfra684]
+ - Fix parser to support GeoLookup with MaxMind
+   [Issue #1884, #1895 - @victorhora, @everping]
+ - parser: Fix simple quote setvar in the end of the line
+   [Issue #1831 - @zimmerle, @csanders-git]
+ - Fix pc file
+   [Issue #1847 - @gquintard]
+ - modsec_rules_check: uses the gnu `.la' instead of `.a' file
+   [Issue #1853 - @ste7677, @victorhora, @zimmerle]
+ - good practices: Initialize variables before use it
+   [Issue #1889 - Marc Stern]
+ - Fix utf-8 character encoding conversion
+   [Issue #1794 - @tinselcity, @zimmerle]
+ - Adds support for ctl:requestBodyProcessor=URLENCODED
+   [Issue #1797 - @victorhora]
+ - Add LUA compatibility for CentOS and try to use LuaJIT first if available
+   [Issue #1622 - @victorhora, @dmitryzykov]
+ - Allow LuaJIT to be used
+   [Issue #1809 - @victorhora, @p0pr0ck5]
+ - Implement support for Lua 5.1
+   [Issue #1809 - @p0pr0ck5, @victorhora]
+ - Variable names must match fully, not partially. Match should be case
+   insensitive.
+   [Issue #1818, #1820, #1810, #1808 - @michaelgranzow-avi, @victorhora,
+                                       @theMiddleBlue, @airween, @zimmerle,
+                                       @LeeShan87]
+ - Improves the performance while loading the rules
+   [Issue #1735 - @zimmerle, @p0pr0ck5, @victorhora]
+ - Allow empty strings to be evaluated by regex::searchAll
+   [Issue #1799, #1785 - @victorhora, @XuanHuyDuong, @zimmerle]
+ - Adds basic pkg-config info
+   [Issue #1790 - @gquintard, @zimmerle]
+ - Fixed LMDB collection errors
+   [Issue #1787 - @airween, @zimmerle]
+ - Fixed false positive MULTIPART_UNMATCHED_BOUNDARY errors
+   [Issue #1747, #1924 - @airween, @victorhora, @defanator, @zimmerle]
+ - Fix ip tree lookup on netmask content
+   [Issue #1793 - @tinselcity, @zimmerle]
+ - Changes the behavior of the default sec actions
+   [Issue #1629 - @mirkodziadzka-avi, @zimmerle, @victorhora]
+ - Refactoring on {global,ip,resources,session,tx,user} collections
+   [Issue #1754, #1778 - @LeeShan87, @zimmerle, @victorhora, @wwd5613,
+                         @sobigboy]
+ - Fix race condition in UniqueId::uniqueId()
+   [Issue #1786 - @weliu]
+ - Fix memory leak in error message for msc_rules_merge C APIs
+   [Issue #1765 - @weliu]
+ - Return false in SharedFiles::open() when an error happens
+   [Issue #1783 - @weliu]
+ - Use rvalue reference in ModSecurity::serverLog
+   [Issue #1769 - @weliu]
+ - Build System: Fix when multiple lines for curl version.
+   [Issue #1771 - @Artistan]
+ - Checks if response body inspection is enabled before process it
+   [Issue #1643 - @zoltan-fedor, @dennus, @defanator, @zimmerle]
+ - Code Cleanup.
+   [Issue #1757, #1755, #1756, #1761 - @p0pr0ck5]
+ - Fix setvar parsing of quoted data
+   [Issue #1733, #1759, #1775 - @victorhora, @JaiHarpalani, @defanator]
+ - Fix LDFLAGS for unit tests.
+   [Issue #1758 - @smlx]
+ - Adds time stamp back to the audit logs
+   [Issue #1762 - @Pjack, @zimmerle]
+ - Disables skip counter if debug log is disabled
+   [@zimmerle]
+ - Cosmetics: Represents amount of skipped rules without decimal
+   [Issue #1737 - @p0pr0ck5]
+ - Add missing escapeSeqDecode, urlEncode and trimLeft/Right tfns to parser
+   [Issue #1752 - @victorhora]
+ - Fix STATUS var parsing and accept STATUS_LINE var for v2 backward comp.
+   [Issue #1738 - @victorhora]
+ - Fix memory leak in modsecurity::utils::expandEnv()
+   [Issue #1750 - @defanator]
+ - Initialize m_dtd member in ValidateDTD class as NULL
+   [Issue #1751 - @airween]
+ - Fix broken @detectxss operator regression test case
+   [Issue #1739 - @p0pr0ck5]
+ - Fix utils::string::ssplit() to handle delimiter in the end of string
+   [Issue #1743, #1744 - @defanator]
+ - Fix variable FILES_TMPNAMES 
+   [Issue #1646, #1610 - @victorhora, @zimmerle, @defanator]
+ - Fix memory leak in Collections
+   [Issue #1729, #1730 - @defanator]
+
+
+v3.0.2 - 2018-Apr-03
+--------------------
+
+ - Fix lib version information while generating the .so file
+   [@gl1f1v21, @zimmerle]
+
+v3.0.1 - 2018-Apr-02
+--------------------
+
+ - Adds support for ctl:ruleRemoveByTag
+   [@zimmerle, @weliu]
+ - Fix SecUploadDir configuration merge
+   [Issue #1720 - @zimmerle, @gjvanetten]
+ - Include all prerequisites for "make check" into dist archive
+   [Issue #1716 - @defanator]
+ - Fix: Reverse logic of checking output in @inspectFile
+   [Issue #1715 - @defanator]
+ - Adds support to libMaxMind
+   [Issue #1307 - @zimmerle, @defanator]
+ - Adds capture action to detectXSS
+   [Issue #1698 - @victorhora]
+ - Temporarily accept invalid MULTIPART_SEMICOLON_MISSING operator
+   [Issue #1701 - @victorhora]
+ - Adds capture action to detectSQLi
+   [Issue #1698 - @zimmerle]
+ - Adds capture action to rbl
+   [Issue #1698 - @zimmerle]
+ - Adds capture action to verifyCC
+   [Issue #1698 - @michaelgranzow-avi, @zimmerle]
+ - Adds capture action to verifySSN
+   [Issue #1698 - @zimmerle]
+ - Adds capture action to verifyCPF
+   [Issue #1698 - @zimmerle]
+ - Prettier error messages for unsupported configurations (UX)
+   [@victorhora]
+ - Add missing verify*** transformation statements to parser
+   [Issue #1006 and #1007 - @victorhora]
+ - Fix a set of compilation warnings
+   [Issue #1650 - @zimmerle, @JayCase]
+ - Check for disruptive action on SecDefaultAction.
+   [Issue #1614 - @zimmerle, @michaelgranzow-avi]
+ - Fix block-block infinite loop.
+   [Issue #1614 - @zimmerle, @michaelgranzow-avi]
+ - Correction remove_by_tag and remove_by_msg logic.
+   [Issue #1636 - @Minasu]
+ - Fix LMDB compile error
+   [Issue #1691 - @airween]
+ - Fix msc_who_am_i() to return pointer to a valid C string
+   [Issue #1640 - @defanator]
+ - Added some cosmetics to autoconf related code
+   [Issue #1652 - @airween]
+ - Fix "make dist" target to include necessary headers for Lua
+   [Issue #1678 - @defanator]
+ - Fix "include /foo/*.conf" for single matched object in directory
+   [Issue #1677 - @defanator, @zimmerle]
+ - Add missing Base64 transformation statements to parser
+   [Issue #1632 - @victorhora, @zimmerle]
+ - Fixed resource load on ip match from file
+   [#1674 - @zimmerle, @StefaanSeys]
+ - Fixed examples compilation while using disable-shared
+   [#1670 - @zimmerle, @ivanbaldo]
+ - Fixed compilation issue while xml is disabled
+   [0x243028 - @zimmerle]
+ - Having LDADD and LDFLAGS organized on Makefile.am
+   [0xd0e85e - @zimmerle]
+ - Checking std::deque size before use it
+   [0x217cbf - @zimmerle, Yaron Dayagi]
+ - perf improvement: Added the concept of RunTimeString and removed
+   all run time parser.
+   [0x3eae51 0x0320e0 0xb5688f 0xfe47a9 0xfa9842 0x1affc3 0x079de4
+    0xc7c04f 0x5262ea 0x01974a 0xd5ee1e - @zimmerle]
+ - perf improvement: Checks debuglog level before format debug msg
+   [0x42ee9 - @zimmerle]
+ - perf. improvement/rx: Only compute dynamic regex in case of macro
+   [0x91ff3 - @zimmerle]
+ - Fix uri on the benchmark utility
+   [0x63bec - @zimmerle]
+ - disable Lua on systems with liblua5.1
+   [Issue #1639 - @victorhora, @defanator]
+
+v3.0.0 - 2017-Dec-13
+--------------------
+
+ - Improvements on LUA build scripts and support for LUA 5.2.
+   [Issue #1617 and #1622 - @victorhora, @zimmerle]
+ - Fix compilation error with disable_debug_log flag
+   [0xfd84e - Izik Abramov]
+ - Improvements on the benchmark tool.
+   [Issue #1615 - @zimmerle]
+ - Fix lua headers on the build scripts
+   [Issue #1621 - @Minasu]
+ - Refactoring on the JSON parser.
+   [Issue #1576, #1577 - Tobias Gutknecht, @zimmerle, @victorhora, @marcstern]
+ - Adds support to WEBAPPID variable.
+   [Issue #1027 - @zimmerle, @victorhora]
+ - Adds support for SecWebAppId.
+   [Issue #1442 - @zimmerle, @victorhora] 
+ - Adds support for SecRuleRemoveByTag.
+   [Issue #1476 - @zimmerle, @victorhora]
+ - Adds support for update target by message.
+   [Issue #1474 - @zimmerle, @victorhora]
+ - Adds support to SecRuleScript directive.
+   [Issue #994 - @zimmerle]
+ - Adds support for the exec action.
+   [Issue #1050 - @zimmerle]
+ - Adds support for transformations inside Lua engine
+   [Issue #994 - @zimmerle]
+ - Adds initial support for Lua engine.
+   [Issue #994 - @zimmerle]
+ - Adds support for @inspectFile operator.
+   [Issue #999 - @zimmerle, @victorhora]
+ - Adds support for RESOURCE variable collection.
+   [Issue #1014 - @zimmerle, @victorhora]
+ - Adds support for @fuzzyHash operator.
+   [Issue #997 - @zimmerle]
+ - Fix build on non x86 arch build
+   [Issue #1598 - @athmane]
+ - Fix memory issue while changing rule target dynamic
+   [Issue #1590 - @zimmerle, @slabber]
+ - Fix log while displaying the name of a dict selection by regex.
+   [@zimmerle]
+ - Setting http response code on the auditlog.
+   [Issue #1592 - @zimmerle]
+ - Refactoring on RuleMessage class, now accepting http code as parameter.
+   [@zimmerle]
+ - Having disruptive msgs as disruptive [instead of warnings] on audit log
+   [Issue #1592 - @zimmerle, @nobodysz]
+ - Parser: Pipes are no longer welcomed inside regex dict element selection.
+   [Issue #1591 - @zimmerle, @slabber]
+ - Avoids unicode initialization on every rules object
+   [Issue #1563 - @zimmerle, @Tiki-God, @sethinsd, @Cloaked9000, @AnoopAlias,
+                  @intelbg]
+ - Makes clear to the user whenever the audit log is empty due to missing
+   JSON support.
+   [Issue #1585 - @zimmerle]
+ - Makes auditlog more verbose on debug logs
+   [Issue: #1559 - @zimmerle]
+ - Enable support for AuditLogFormat
+   Issue: #1583, #1493 and #1453 - @victorhora]
+ - Adds macro expansion for @rx operator
+   [Issue: #1528, #1536 - @asterite3, @zimmerle]
+ - Consideres under quoted variable while loading the rules.
+   [Felipe Zimmerle/@zimmerle, Victor Hora/@victorhora]
+ - Store the connection and url parameters in std::string
+   [Issue: #1571 - @majordaw]
+ - Eliminate some reorder and sign warnings
+   [Issue: #1572 - Dávid Major/@majordaw]
+ - Makes parallel logging to work when SELinux is enabled.
+   [Issue: #1562 - David Buckle/@met3or]
+ - Adds possibility to run the pm operator inside a mutex to avoid concurrent
+   access while working on a thread environment. This option is a compilation
+   flag.
+   [Felipe Zimmerle/@zimmerle]
+
+
+v3.0.0-rc1 - 2017-Aug-28
+------------------------
+
+ Very first public version.
+

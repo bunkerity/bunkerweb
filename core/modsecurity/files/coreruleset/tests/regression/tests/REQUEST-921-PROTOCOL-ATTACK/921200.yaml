@@ -1,0 +1,167 @@
+---
+  meta:
+    author: "Christian Folini"
+    description: "LDAP injection"
+    enabled: true
+    name: 921200.yaml
+  tests:
+  -
+    test_title: 921200-1
+    desc: "Testing for FP, this should not trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          port: 80
+          method: POST
+          data: "foo=(%26(objectCategory=computer)  (userAccountControl:1.2.840.113556.1.4.803:=8192))"
+          uri: "/"
+        output:
+          no_log_contains: id "921200"
+  -
+    test_title: 921200-2
+    desc: "Testing for FP, this should not trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          port: 80
+          method: POST
+          data: "foo=(objectSID=S-1-5-21-73586283-152049171-839522115-1111)"
+          uri: "/"
+        output:
+          no_log_contains: id "921200"
+  -
+    test_title: 921200-3
+    desc: "Testing for FP, this should not trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          port: 80
+          method: POST
+          data: "foo=(userAccountControl:1.2.840.113556.1.4.803:=67108864)(%26(objectCategory=group)(groupType:1.2.840.113556.1.4.803:=2147483648))"
+          uri: "/"
+        output:
+          no_log_contains: id "921200"
+  -
+    test_title: 921200-4
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=bar)(%26)"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"
+  -
+    test_title: 921200-5
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=printer)(uid=*)"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"
+  -
+    test_title: 921200-6
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=void)(objectClass=users))(%26(objectClass=void)"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"
+  -
+    test_title: 921200-7
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=eb9adbd87d)!(sn=*"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"
+  -
+    test_title: 921200-8
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=*)!(sn=*"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"
+  -
+    test_title: 921200-9
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=*)(uid=*))(|(uid=*"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"
+  -
+    test_title: 921200-10
+    desc: "Testing for rule, this should trigger"
+    stages:
+    - stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: POST
+          data: "foo=aaa*aaa)(cn>=bob)"
+          uri: "/"
+          port: 80
+        output:
+          log_contains: id "921200"

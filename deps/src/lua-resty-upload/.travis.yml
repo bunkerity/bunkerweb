@@ -1,0 +1,68 @@
+sudo: required
+dist: trusty
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+cache:
+  directories:
+  - download-cache
+
+env:
+  global:
+    - JOBS=3
+    - NGX_BUILD_JOBS=$JOBS
+    - LUAJIT_PREFIX=/opt/luajit21
+    - LUAJIT_LIB=$LUAJIT_PREFIX/lib
+    - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
+    - LUA_INCLUDE_DIR=$LUAJIT_INC
+    - LUA_CMODULE_DIR=/lib
+    - OPENSSL_PREFIX=/opt/ssl
+    - OPENSSL_LIB=$OPENSSL_PREFIX/lib
+    - OPENSSL_INC=$OPENSSL_PREFIX/include
+    - OPENSSL_VER=1.0.2h
+    - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+    - TEST_NGINX_SLEEP=0.006
+  matrix:
+    - NGINX_VERSION=1.9.15
+    - NGINX_VERSION=1.11.2
+
+install:
+  - if [ ! -d download-cache ]; then mkdir download-cache; fi
+  - if [ ! -f download-cache/openssl-$OPENSSL_VER.tar.gz ]; then wget -O download-cache/openssl-$OPENSSL_VER.tar.gz https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz; fi
+  - sudo apt-get install -qq -y cpanminus axel
+  - sudo cpanm --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
+  - wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+  - git clone https://github.com/openresty/openresty.git ../openresty
+  - git clone https://github.com/openresty/nginx-devel-utils.git
+  - git clone https://github.com/simpl/ngx_devel_kit.git ../ndk-nginx-module
+  - git clone https://github.com/openresty/lua-nginx-module.git ../lua-nginx-module
+  - git clone https://github.com/openresty/no-pool-nginx.git ../no-pool-nginx
+  - git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git
+  - git clone https://github.com/openresty/mockeagain.git
+
+script:
+  - cd luajit2/
+  - make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS='-DLUA_USE_APICHECK -DLUA_USE_ASSERT' > build.log 2>&1 || (cat build.log && exit 1)
+  - sudo make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
+  - cd ..
+  - tar zxf download-cache/openssl-$OPENSSL_VER.tar.gz
+  - cd openssl-$OPENSSL_VER/
+  - ./config shared --prefix=$OPENSSL_PREFIX -DPURIFY > build.log 2>&1 || (cat build.log && exit 1)
+  - make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1)
+  - sudo make PATH=$PATH install_sw > build.log 2>&1 || (cat build.log && exit 1)
+  - cd ../mockeagain/ && make CC=$CC -j$JOBS && cd ..
+  - export PATH=$PWD/work/nginx/sbin:$PWD/nginx-devel-utils:$PATH
+  - export LD_PRELOAD=$PWD/mockeagain/mockeagain.so
+  - export LD_LIBRARY_PATH=$PWD/mockeagain:$LD_LIBRARY_PATH
+  - export TEST_NGINX_RESOLVER=8.8.4.4
+  - export NGX_BUILD_CC=$CC
+  - ngx-build $NGINX_VERSION --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-cc-opt="-I$OPENSSL_INC" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB" --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --with-debug > build.log 2>&1 || (cat build.log && exit 1)
+  - nginx -V
+  - ldd `which nginx`|grep -E 'luajit|ssl|pcre'
+  - prove -r t

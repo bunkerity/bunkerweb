@@ -1,0 +1,34 @@
+---
+  meta:
+    author: "spartantri"
+    enabled: true
+    name: "944200.yaml"
+    description: "Description"
+  tests:
+
+    -
+      test_title: 944200-0FP
+      desc: Argument test includes java serialization magic bytes, raw request
+      stages:
+        -
+          stage:
+            input:
+              stop_magic: true
+              dest_addr: "127.0.0.1"
+              port: 80
+              raw_request: "POST / HTTP/1.0\r\nHost: localhost\r\nUser-Agent: ModSecurity CRS 3 Tests\r\nAccept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5\r\nAccept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\nAccept-Encoding: gzip,deflate\r\nAccept-Language: en-us,en;q=0.5\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 9\r\n\r\ntest=\xac\xed\x00\x05\r\n\r\n"
+            output:
+              no_log_contains: "id \"944200\""
+
+    -
+      test_title: 944200-1
+      desc: Argument test includes java serialization magic bytes, base64 encoded request
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              encoded_request: "UE9TVCAvIEhUVFAvMS4wDQpIb3N0OiBsb2NhbGhvc3QNClVzZXItQWdlbnQ6IE1vZFNlY3VyaXR5IENSUyAzIFRlc3RzDQpBY2NlcHQ6IHRleHQveG1sLGFwcGxpY2F0aW9uL3htbCxhcHBsaWNhdGlvbi94aHRtbCt4bWwsdGV4dC9odG1sO3E9MC45LHRleHQvcGxhaW47cT0wLjgsaW1hZ2UvcG5nLCovKjtxPTAuNQ0KQWNjZXB0LUNoYXJzZXQ6IElTTy04ODU5LTEsdXRmLTg7cT0wLjcsKjtxPTAuNw0KQWNjZXB0LUVuY29kaW5nOiBnemlwLGRlZmxhdGUNCkFjY2VwdC1MYW5ndWFnZTogZW4tdXMsZW47cT0wLjUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24veC13d3ctZm9ybS11cmxlbmNvZGVkDQpDb250ZW50LUxlbmd0aDogOQ0KDQp0ZXN0PaztAAUNCg0K"
+            output:
+              log_contains: "id \"944200\""

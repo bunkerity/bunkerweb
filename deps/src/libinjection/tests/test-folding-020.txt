@@ -1,0 +1,11 @@
+--TEST--
+logical operators folding
+--INPUT--
+1 + foo + 1
+--EXPECTED--
+1 1
+
+
+
+
+

@@ -1,0 +1,54 @@
+###############################################################
+# HOW TO USE UBUNTU                                           #
+###############################################################
+
+# 1. Build the Dockerfile for Ubuntu
+sudo docker build -t ubuntu -f Container/Ubuntu/Dockerfile .
+
+# 2. Run it as daemon
+sudo docker run -d --name ubuntu --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v "Deb_Folder":/data ubuntu
+
+# 3. Execute 
+sudo docker exec -it ubuntu bash
+#______________________________________________________________________________________________________________________#
+
+###############################################################
+# HOW TO USE DEBIAN                                           #
+###############################################################
+# 1. Build the Dockerfile for Debian
+sudo docker build -t debian -f Container/Debian/Dockerfile .
+
+# 2. Run it as daemon
+sudo docker run -d --name debian --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v "Deb_Folder":/data debian
+
+# 3. Execute 
+sudo docker exec -it debian bash
+#______________________________________________________________________________________________________________________#
+
+###############################################################
+# HOW TO USE FEDORA                                           #
+###############################################################
+
+# Build the Dockerfile for Debian
+sudo docker build -t fedora -f Container/Fedora/Dockerfile .
+
+# Run it as daemon
+sudo docker run -d --name fedora --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v "Deb_Folder":/data fedora
+
+# Execute 
+sudo docker exec -it fedora bash
+#______________________________________________________________________________________________________________________#
+
+###############################################################
+# HOW TO USE CENTOS                                           #
+###############################################################
+
+# Build the Dockerfile for Debian
+sudo docker build -t centos -f Container/Centos8/Dockerfile .
+
+# Run it as daemon
+sudo docker run -d --name centos --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v "Deb_Folder":/data centos
+
+# Execute 
+sudo docker exec -it centos bash
+#______________________________________________________________________________________________________________________#

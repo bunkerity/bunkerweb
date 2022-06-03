@@ -1,0 +1,172 @@
+---
+  meta:
+    author: "Andrea Menin"
+    description: None
+    enabled: true
+    name: 941370.yaml
+  tests:
+  -
+    test_title: 941370-1
+    desc: "Bypass using comment in syntax and multiple whitespaces"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=document+%2F%2Afoo%2A%2F+.+++++cookie"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+  -
+    test_title: 941370-2
+    desc: "Bypass using comments in syntax"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          data: "a=document%2F%2Afoo%2A%2F.%2F%2Abar%2A%2Fcookie"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+  -
+    test_title: 941370-3
+    desc: "Bypass using JavaScript global variables"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=window%5B%22alert%22%5D%28window%5B%22document%22%5D%5B%22cookie%22%5D%29"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+  -
+    test_title: 941370-4
+    desc: "Bypass using JavaScript global variables and comments in syntax"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=self%5B%2F%2Afoo%2A%2F%22alert%22%5D%28self%5B%22document%22%2F%2Abar%2A%2F%5D%5B%22cookie%22%5D%29"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+  -
+    test_title: 941370-5
+    desc: "Bypass using JavaScript global variables and string concatenation"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=self%5B%2F%2Afoo%2A%2F%22alert%22%5D%28self%5B%22document%22%2F%2Abar%2A%2F%5D%5B%22cookie%22%5D%29"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+
+  -
+    test_title: 941370-6
+    desc: "Bypass using JavaScript global variables and comments in syntax"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=self++%2F%2Ajhb%2A%2F++%5B++%2F%2Abar%2A%2F++%22alert%22%5D%28%22xss%22%29"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+
+  -
+    test_title: 941370-7
+    desc: "Bypass using JavaScript global variables and jQuery globalEval"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=self%5B%22%24%22%5D%5B%22globalEval%22%5D%28%22alert%281%29%22%29"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+
+  -
+    test_title: 941370-8
+    desc: "Bypass using JavaScript global variables and hex escape sequence"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=self%5B%22%5Cx24%22%5D"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+
+  -
+    test_title: 941370-9
+    desc: "Bypass trying to access document.cookie using alternative syntax like (document)['cookie']"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=%28document%29%5B%22cookie%22%5D"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"
+
+  -
+    test_title: 941370-10
+    desc: "Bypass trying to access document.cookie using alternative syntax and comments like (document/*foo*/)['cookie']"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          data: "a=%28document%2F%2Afoo%2A%2F%29%5B%22cookie%22%5D"
+          version: HTTP/1.1
+        output:
+          log_contains: id "941370"

@@ -1,0 +1,14 @@
+--TEST--
+more blackslash testing
+--INPUT--
+select 1,'\\\\',2;
+--EXPECTED--
+E select
+1 1
+, ,
+s '\\\\'
+, ,
+1 2
+; ;
+
+

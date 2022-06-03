@@ -1,0 +1,6 @@
+t/servroot/
+t/error.log
+luacov*
+lua-resty-http-*/
+lua-resty-http-*.src.rock
+lua-resty-http-*.tar.gz 

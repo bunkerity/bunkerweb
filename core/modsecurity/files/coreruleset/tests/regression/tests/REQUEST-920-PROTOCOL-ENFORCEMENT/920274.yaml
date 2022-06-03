@@ -1,0 +1,85 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920274.yaml"
+    description: "Description"
+  tests:
+    -
+      # Apache will just error on this and return 400
+      # as a result we look for forbidden or 400
+      # In the future FTW should support OR versus AND output
+      # https://github.com/CRS-support/ftw/issues/19
+      test_title: 920274-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost%1F"
+            output:
+                  status: [200, 403, 400]
+                  # log_contains: "id \"920274\""
+    -
+      test_title: 920274-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/index.html?test=test1"
+              headers:
+                  User-Agent: "<ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920274\""
+    -
+      test_title: 920274-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1HI"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Test: "ThisISATEST%5F"
+            output:
+              no_log_contains: "id \"920274\""
+    -
+      test_title: 920274-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1HI"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Test: "ThisIsATest%60"
+            output:
+              log_contains: "id \"920274\""
+    -
+      test_title: 920274-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1HI"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cookie: "ThisIsATest%60"
+            output:
+              no_log_contains: "id \"920274\""

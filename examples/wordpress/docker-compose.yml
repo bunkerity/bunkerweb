@@ -2,52 +2,46 @@ version: '3'
 
 services:
 
-  mywww:
-    image: bunkerity/bunkerized-nginx
-    restart: always
-    depends_on:
-      - mywp
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
       - 443:8443
-    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     volumes:
-      - ./wp-files:/www:ro
-      - ./letsencrypt:/etc/letsencrypt
-      - ./server-confs:/server-confs:ro         # custom confs at server context for permalinks
-      - ./modsec-crs-confs:/modsec-crs-confs:ro # custom Core Rule Set confs to add Wordpress exclusions
-      - ./modsec-confs:/modsec-confs:ro         # avoid some FP with CRS
+      - ./bw-data:/data # contains custom Core Rule Set configs for Wordpress exclusions
     environment:
-      - SERVER_NAME=www.example.com             # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - MAX_CLIENT_SIZE=50m
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - REMOTE_PHP=mywp
-      - REMOTE_PHP_PATH=/var/www/html
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://mywp
 
   mywp:
-    image: wordpress:fpm-alpine
-    restart: always
+    image: wordpress:5-apache
     volumes:
-      - ./wp-files:/var/www/html
+      - ./wp-data:/var/www/html
     environment:
       - WORDPRESS_DB_HOST=mydb
       - WORDPRESS_DB_NAME=wp
       - WORDPRESS_DB_USER=user
-      - WORDPRESS_DB_PASSWORD=db-user-pwd       # replace with a stronger password (must match MYSQL_PASSWORD)
-      - WORDPRESS_TABLE_PREFIX=prefix_          # best practice : replace with a random prefix
+      - WORDPRESS_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - WORDPRESS_TABLE_PREFIX=prefix_    # best practice : replace with a random prefix
 
   mydb:
     image: mariadb
-    restart: always
     volumes:
       - ./db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd         # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=wp
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd              # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)

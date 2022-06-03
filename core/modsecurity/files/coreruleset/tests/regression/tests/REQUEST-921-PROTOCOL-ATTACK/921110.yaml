@@ -1,0 +1,146 @@
+---
+  meta:
+    author: "Christian S.J. Peron, Franziska Bühler"
+    description: None
+    enabled: true
+    name: 921110.yaml
+  tests:
+  -
+    test_title: 921110-1
+    desc: "HTTP Response Splitting"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: POST
+          port: 80
+          data: "var=%0aPOST / HTTP/1.0"
+          version: HTTP/1.0
+        output:
+          log_contains: id "921110"
+  -
+    test_title: 921110-2
+    desc: "HTTP Response Splitting"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: POST
+          port: 80
+          data: "var=aaa%0aGET+/+HTTP/1.1"
+          version: HTTP/1.0
+        output:
+          log_contains: id "921110"
+  -
+    test_title: 921110-3
+    desc: "HTTP Response Splitting"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: POST
+          port: 80
+          data: "var=aaa%0dHEAD+http://example.com/+HTTP/1.1"
+          version: HTTP/1.0
+        output:
+          log_contains: id "921110"
+  -
+    test_title: 921110-4
+    desc: "HTTP Response Splitting"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: POST
+          port: 80
+          data: "var=aaa%0d%0aGet+/foo%0d"
+          version: HTTP/1.0
+        output:
+          log_contains: id "921110"
+  -
+    test_title: 921110-5
+    desc: "HTTP Response Splitting"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: POST
+          port: 80
+          data: "var=aaa%0d%0aGet+foo+bar"
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "921110"
+  -
+    test_title: 921110-6
+    desc: HTTP Request Smuggling bypass with Content-Type text/plain
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Accept: "*/*"
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+            Content-Type: text/plain
+            Content-Length: 36
+          method: POST
+          port: 80
+          uri: /
+          data: "barGET /a.html HTTP/1.1\r\nSomething: GET /b.html HTTP/1.1\r\nHost: foo.com\r\nUser-Agent: foo\r\nAccept: */*\r\n\r\n"
+        output:
+          log_contains: id "921110"
+  -
+    test_title: 921110-7
+    desc: HTTP Request Smuggling with not supported HTTP versions such as HTTP/1.2
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Accept: "*/*"
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /?arg1=GET%20http%3A%2F%2Fwww.foo.bar%20HTTP%2F1.2
+        output:
+          log_contains: id "921110"
+  -
+    test_title: 921110-8
+    desc: HTTP Request Smuggling with not supported HTTP versions such as HTTP/3
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Accept: "*/*"
+            User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+          method: GET
+          port: 80
+          uri: /?arg1=GET%20http%3A%2F%2Fwww.foo.bar%20HTTP%2F3.2
+        output:
+          log_contains: id "921110"

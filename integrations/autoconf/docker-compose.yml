@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - AUTOCONF_MODE=yes
+      - AUTO_LETS_ENCRYPT=yes # will be applied to all the services
+    labels:
+      - "bunkerweb.AUTOCONF"
+    networks:
+      - bw-autoconf
+      - bw-services
+
+  myautoconf:
+    image: bunkerity/bunkerweb-autoconf:1.4.0
+    volumes:
+      - ./bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bw-autoconf
+
+volumes:
+  bw-data:
+  bw-conf:
+
+networks:
+  bw-autoconf:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services

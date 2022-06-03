@@ -1,60 +1,144 @@
-<div class="modal fade" id="modal-edit-id-{{ id_server_name }}" tabindex="-1" aria-labelledby="modal-edit-label-{{ id_server_name }}" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modal-edit-label-{{ id_server_name }}">View/edit {{ service["SERVER_NAME"] }} configuration</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-			<div class="modal-body">
-				<ul class="nav nav-pills mb-3" id="pills-tab-edit" role="tablist">
-{% set check = {"active": "active", "selected": "true"} %}
-{% for k, v in config["CONFIG"].get_settings().items() %}
-					<li class="nav-item" role="presentation">
-						<a class="nav-link {{ check.active }}" id="edit-{{ v["id"] }}-{{ id_server_name }}-tab" data-bs-toggle="pill" href="#edit-{{ v["id"] }}-{{ id_server_name }}" role="tab" aria-controls="edit-{{ v["id"] }}-{{ id_server_name }}" aria-selected="{{ check.selected }}">{{ k }}</a>
-					</li>
-	{% if check.update({"active": "", "selected": "false"}) %}
-	{% endif %}
-{% endfor %}
-				</ul>
-				<form id="form-edit-{{ id_server_name }}">
-					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-					<input type="hidden" value="{{ service["SERVER_NAME"] }}" name="OLD_SERVER_NAME">
-					<div class="tab-content" id="edit-content-{{ id_server_name }}">
-{% set check = {"class": "show active"} %}
-{% for k, v in config["CONFIG"].get_settings().items() %}
-						<div class="tab-pane fade {{ check.class }}" id="edit-{{ v["id"] }}-{{ id_server_name }}" role="tabpanel" aria-labelledby="edit-{{ v["id"] }}-{{ id_server_name }}-tab">
-	{% for param in v["params"] %}
-		{% if param["type"] != "multiple" and param["context"] == "multisite" %}
-							<div class="row mb-3" id="form-edit-{{ id_server_name }}-{{ param["id"] }}">
-								{{ form_service_gen("form-edit-" + id_server_name + "-" + param["id"], param["label"], param["type"], service[param["env"]], param["env"])|safe }}
-							</div>
-		{% elif param["type"] == "multiple" %}
-			{% set gen = {"value": False} %}
-			{% for param2 in param["params"] %}
-				{% if param2["context"] == "multisite" %}
-					{% set x = gen.update({"value": True}) %}
-				{% endif %}
-			{% endfor %}
-			{% if gen["value"] %}
-							<div class="row mb-3" id="form-edit-{{ id_server_name }}-{{ param["id"] }}">
-								{{ form_service_gen_multiple("form-edit-" + id_server_name + "-" + param["id"], param["label"], param["params"])|safe }}
-				{% if template_data.update({"javascript": template_data.javascript + form_service_gen_multiple_values("form-edit-" + id_server_name + "-" + param["id"], param["params"], service)}) %}
-				{% endif %}
-							</div>
-			{% endif %}
-		{% endif %}
-	{% endfor %}
-						</div>
-	{% if check.update({"class": ""}) %}
-	{% endif %}
-{% endfor %}
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" onClick="editService('{{ id_server_name }}');">Save</button>
-			</div>
-		</div>
-	</div>
+<div
+  class="modal fade"
+  id="modal-edit-id-{{ id_server_name }}"
+  tabindex="-1"
+  aria-labelledby="modal-edit-label-{{ id_server_name }}"
+  aria-hidden="true"
+>
+  <form id="form-edit-{{ id_server_name }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input
+      type="hidden"
+      value="{{ service['SERVER_NAME'] }}"
+      name="OLD_SERVER_NAME"
+    />
+    <input type="hidden" value="edit" name="operation" />
+    <div
+      class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered modal-dialog-scrollable"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-edit-label-{{ id_server_name }}">
+            View/edit <i>{{ service["SERVER_NAME"] }}</i> configuration
+          </h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="pb-3 flex-grow-1 d-flex flex-column flex-sm-row">
+            <div class="row flex-grow-sm-1 flex-grow-1">
+              <aside
+                class="col-sm-3 flex-grow-md-1 flex-shrink-1 flex-grow-0 sticky-top pb-md-0 pb-3"
+              >
+                <div class="bg-light border rounded-3 p-1 h-100 sticky-top">
+                  <ul
+                    class="nav nav-pills flex-sm-column flex-row mb-auto justify-content-start text-truncate"
+                    id="pills-tab"
+                    role="tablist"
+                  >
+                    <li class="nav-item">
+                      <a
+                        class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate active"
+                        id="edit-general-{{ id_server_name }}-tab"
+                        data-bs-toggle="pill"
+                        href="#edit-general-{{ id_server_name }}"
+                        role="tab"
+                        aria-controls="edit-general-{{ id_server_name }}"
+                        aria-selected="selected"
+                      >
+                        <span class="d-sm-inline">General</span>
+                        <div
+                          class="d-none px-2 d-sm-inline"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          title="General settings of BunkerWeb"
+                        >
+                          <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                      </a>
+                    </li>
+                    {% for plugin in config["CONFIG"].get_plugins() %} {% if
+                    plugin["settings"] and check_settings(plugin["settings"],
+                    "multisite") %}
+                    <li class="nav-item">
+                      <a
+                        class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate"
+                        id="edit-{{ plugin['id'] }}-{{ id_server_name }}-tab"
+                        data-bs-toggle="pill"
+                        href="#edit-{{ plugin['id'] }}-{{ id_server_name }}"
+                        role="tab"
+                        aria-controls="edit-{{ plugin['id'] }}-{{ id_server_name }}"
+                        aria-selected=""
+                      >
+                        <span class="d-sm-inline">{{ plugin["name"] }}</span>
+                        <div
+                          class="d-none px-2 d-sm-inline"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          title="{{ plugin['description'] }}"
+                        >
+                          <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                      </a>
+                    </li>
+                    {% endif %} {% endfor %}
+                  </ul>
+                </div>
+              </aside>
+              <main class="col overflow-auto h-100">
+                <div class="bg-light border rounded-3 p-3">
+                  <div
+                    class="tab-content"
+                    id="edit-content-{{ id_server_name }}"
+                  >
+                    <div
+                      class="tab-pane fade show active"
+                      id="edit-general-{{ id_server_name }}"
+                      role="tabpanel"
+                      aria-labelledby="edit-general-{{ id_server_name }}-tab"
+                    >
+                      {% for setting, value in
+                      config["CONFIG"].get_settings().items() %} {% if
+                      value["context"] == "multisite" %}
+                      <div
+                        class="d-flex flex-row justify-content-between align-items-center mb-3"
+                        id="form-edit-{{ id_server_name }}-{{ setting['id'] }}"
+                      >
+                        {{ form_service_gen("form-edit-" + id_server_name + "-"
+                        + value["id"], value["help"], value["label"],
+                        value["type"], service[setting], setting,
+                        value["default"], value["select"], value["regex"])|safe
+                        }}
+                      </div>
+                      {% endif %} {% endfor %}
+                    </div>
+                    {% for plugin in config["CONFIG"].get_plugins() %} {% if
+                    plugin["settings"] and check_settings(plugin["settings"],
+                    "multisite") %} {{ form_plugin_gen(service, plugin, "edit",
+                    id_server_name)|safe }} {% endif %} {% endfor %}
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="reset"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-outline-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>

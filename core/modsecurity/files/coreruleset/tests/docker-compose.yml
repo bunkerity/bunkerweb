@@ -1,0 +1,41 @@
+version: '3.1'
+
+# Only one of these will be up at a time for now.
+# Concurrency will be on the tests folder we have.
+
+services:
+  modsec2-apache:
+    image: owasp/modsecurity-crs:v3.2-modsec2-apache
+    environment:
+      - SERVERNAME=modsec2-apache
+      - MODSEC_RULE_ENGINE=DetectionOnly
+      - PARANOIA=5
+    volumes:
+      - ${GITHUB_WORKSPACE}/logs/modsec2-apache:/var/log/apache2
+      - ${GITHUB_WORKSPACE}/rules:/etc/modsecurity.d/owasp-crs/rules
+    ports:
+      - "80:80"
+
+  modsec3-apache:
+    image: owasp/modsecurity-crs:v3.2-modsec3-apache
+    environment:
+      - SERVERNAME=modsec3-apache
+      - MODSEC_RULE_ENGINE=DetectionOnly
+      - PARANOIA=5
+    volumes:
+      - ${GITHUB_WORKSPACE}/logs/modsec3-apache:/var/log/apache2
+      - ${GITHUB_WORKSPACE}/rules:/etc/modsecurity.d/owasp-crs/rules
+    ports:
+      - "80:80"
+
+  modsec3-nginx:
+    image: owasp/modsecurity-crs:v3.2-modsec3-nginx
+    environment:
+      - SERVERNAME=modsec3-nginx
+      - MODSEC_RULE_ENGINE=DetectionOnly
+      - PARANOIA=5
+    volumes:
+      - ${GITHUB_WORKSPACE}/logs/modsec3-nginx:/var/log/nginx
+      - ${GITHUB_WORKSPACE}/rules:/etc/modsecurity.d/owasp-crs/rules
+    ports:
+      - "80:80"

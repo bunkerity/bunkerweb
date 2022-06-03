@@ -1,0 +1,200 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Invalid actions break CRS 3.1 on rule 912160 - 1",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1830",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=£&bar=%C2%A3",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "\\\\xc2\\\\xa3"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \"^$\" \"id:1,expirevar:'ip.dos_burst_counter=%{tx.dos_burst_time_slice}'"
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Invalid actions break CRS 3.1 on rule 912160 - 2",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1830",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=£&bar=%C2%A3",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \".\" \"id:1,setvar:'ip.dos_counter=1',log",
+      "SecRule ip.dos_counter \".\" \"id:4,log",
+      "SecRule ARGS:foo \".\" \"id:2,setvar:'!ip.dos_counter',log",
+      "SecRule ip.dos_counter \".\" \"id:3,log,status:123,block,deny"
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Invalid actions break CRS 3.1 on rule 912160 - 3",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1830",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=£&bar=%C2%A3",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "http_code": 200,
+      "debug_log": "Target value: \"1\""
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \".\" \"id:1,setvar:'global.alerted_970018_iisDefLoc'\"",
+      "SecRule GLOBAL:alerted_970018_iisDefLoc \".\" \"id:4,log\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Invalid actions break CRS 3.1 on rule 912160 - 4",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1830",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=£&bar=%C2%A3",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "http_code": 200,
+      "debug_log": "GLOBAL:alerted_970018_iisDefLoc with value: 1"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx .\" \"id:954100,phase:1,block,capture,t:none,t:lowercase,msg:'Disclosure of IIS install location',logdata:'Matched Data',tag:'application-multi',tag:'language-multi',tag:'platform-iis',tag:'platform-windows',tag:'attack-disclosure',ctl:auditLogParts=+E,rev:3,ver:'OWASP_CRS/3.0.0',severity:'ERROR',chain\"",
+      "SecRule &GLOBAL:alerted_970018_iisDefLoc \"@eq 0\" \"setvar:'global.alerted_970018_iisDefLoc',setvar:'tx.msg=%{rule.msg}',setvar:'tx.outbound_anomaly_score=+%{tx.error_anomaly_score}',setvar:'tx.anomaly_score=+%{tx.error_anomaly_score}'\""
+    ]
+  }
+]
+
+
+

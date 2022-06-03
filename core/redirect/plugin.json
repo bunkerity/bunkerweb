@@ -1,0 +1,27 @@
+{
+	"id": "redirect",
+	"order": 999,
+	"name": "Redirect",
+	"description": "Manage HTTP redirects.",
+	"version": "0.1",
+	"settings": {
+		"REDIRECT_TO": {
+			"context": "multisite",
+			"default": "",
+			"help": "Redirect a whole site to another one.",
+			"id": "redirect-to",
+			"label": "Redirect to",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"REDIRECT_TO_REQUEST_URI": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Append the requested URI to the redirect address.",
+			"id": "redirect-to",
+			"label": "Append request URI",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		}
+	}
+}

@@ -1,0 +1,284 @@
+---
+  meta:
+    author: "csanders-git, Franziska Bühler"
+    enabled: true
+    name: "920420.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920420-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920420\""
+    -
+      test_title: 920420-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "my-new-content-type"
+              data: "test"
+            output:
+              log_contains: "id \"920420\""
+    -
+      test_title: 920420-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "GET"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "my-new-content-type"
+              data: "test"
+            output:
+              log_contains: "id \"920420\""
+    -
+      test_title: 920420-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "PROPFIND"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "my-new-content-type"
+              data: "test"
+            output:
+              log_contains: "id \"920420\""
+    -
+      test_title: 920420-5
+      desc: Request content type is not allowed by policy (920420) from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: multipart/; boundary=0000
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.1
+            data:
+            - --0000
+            - 'Content-Disposition: form-data; name="name"'
+            - ''
+            - John Smith
+            - --0000
+            - 'Content-Disposition: form-data; name="email"'
+            - ''
+            - john.smith@example.com
+            - --0000
+            - 'Content-Disposition: form-data; name="image"; filename="image.jpg"'
+            - 'Content-Type: image/jpeg'
+            - ''
+            - BINARYDATA
+            - --0000--
+          output:
+            log_contains: id "920420"
+    -
+      test_title: 920420-6
+      desc: Request content type is not allowed by policy (920420) from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: multipart/foo; boundary=0000
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.1
+            data:
+            - --0000
+            - 'Content-Disposition: form-data; name="name"'
+            - ''
+            - John Smith
+            - --0000
+            - 'Content-Disposition: form-data; name="email"'
+            - ''
+            - john.smith@example.com
+            - --0000
+            - 'Content-Disposition: form-data; name="image"; filename="image.jpg"'
+            - 'Content-Type: image/jpeg'
+            - ''
+            - BINARYDATA
+            - --0000--
+          output:
+            log_contains: id "920420"
+    -
+      test_title: 920420-7
+      desc: Request content type is not allowed by policy (920420) from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: application/foo; boundary=0000
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.1
+            data:
+            - --0000
+            - 'Content-Disposition: form-data; name="name"'
+            - ''
+            - John Smith
+            - --0000
+            - 'Content-Disposition: form-data; name="email"'
+            - ''
+            - john.smith@example.com
+            - --0000
+            - 'Content-Disposition: form-data; name="image"; filename="image.jpg"'
+            - 'Content-Type: image/jpeg'
+            - ''
+            - BINARYDATA
+            - --0000--
+          output:
+            log_contains: id "920420"
+    -
+      test_title: 920420-8
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "HEAD"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "my-new-content-type"
+              data: "test"
+            output:
+              log_contains: "id \"920420\""
+    -
+      test_title: 920420-9
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "OPTIONS"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/json"
+              data: "test"
+            output:
+              no_log_contains: "id \"920420\""
+    -
+      test_title: 920420-10
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "OPTIONS"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/soap+xml"
+              data: "test"
+            output:
+              no_log_contains: "id \"920420\""
+    -
+      test_title: 920420-11
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "OPTIONS"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application"
+              data: "test"
+            output:
+              log_contains: "id \"920420\""
+    -
+      test_title: 920420-12
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "HEAD"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "multipart/related"
+              data: "test"
+            output:
+              no_log_contains: "id \"920420\""
+    -
+      test_title: 920420-13
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "HEAD"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "Multipart/Related"
+              data: "test"
+            output:
+              no_log_contains: "id \"920420\""

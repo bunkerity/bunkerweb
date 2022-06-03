@@ -2,61 +2,80 @@ version: '3'
 
 services:
 
-  mywww:
-    image: bunkerity/bunkerized-nginx
-    restart: always
-    depends_on:
-      - myui
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
     ports:
       - 80:8080
       - 443:8443
-    # bunkerized-nginx runs as an unprivileged user with UID/GID 101
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
     volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - autoconf:/etc/nginx
+      - bw_data:/data
+      - bw_config:/etc/nginx
     environment:
-      - SERVER_NAME=admin.example.com                                # replace with your domain
+      - SERVER_NAME=www.example.com
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
-      - REDIRECT_HTTP_TO_HTTPS=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - USE_API=yes
-      - API_URI=/ChangeMeToSomethingHardToGuess                      # change it to something hard to guess + must match API_URI from myui service
-      - admin.example.com_SERVE_FILES=no
-      - admin.example.com_USE_REVERSE_PROXY=yes
-      - admin.example.com_REVERSE_PROXY_URL=/admin/                  # change it to something hard to guess
-      - admin.example.com_REVERSE_PROXY_HOST=http://myui:5000
-      - admin.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin # must match REVERSE_PROXY_URL
-      - admin.example.com_USE_MODSECURITY=no
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - www.example.com_USE_UI=yes
+      - www.example.com_SERVE_FILES=no
+      - www.example.com_USE_REVERSE_PROXY=yes
+      - www.example.com_REVERSE_PROXY_URL=/changeme/                     # replace with another url
+      - www.example.com_REVERSE_PROXY_HOST=http://myui:7000
+      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme/   # replace with another url
+      - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
+      - www.example.com_LIMIT_REQ_URL=/changeme/plugins/upload           # replace with another url
+      - www.example.com_LIMIT_REQ_RATE=4r/s
+      - www.example.com_LIMIT_REQ_URL_1=/changeme/logs                   # replace with another url
+      - www.example.com_LIMIT_REQ_RATE_1=4r/s
     labels:
-      - "bunkerized-nginx.UI"
+      - "bunkerweb.UI"
+    networks:
+      - net_ui
+      - net_svc
 
   myui:
-    image: bunkerity/bunkerized-nginx-ui
-    restart: always
+    image: bunkerity/bunkerweb-ui:1.4.0
     depends_on:
       - myuiproxy
     volumes:
-      - autoconf:/etc/nginx
+      - bw_data:/data
+      - bw_config:/etc/nginx
     environment:
-      - ABSOLUTE_URI=https://admin.example.com/admin/ # change it to your full URI
+      - ABSOLUTE_URI=https://www.example.com/changeme/                    # replace with another url
       - DOCKER_HOST=tcp://myuiproxy:2375
-      - API_URI=/ChangeMeToSomethingHardToGuess       # must match API_URI from bunkerized-nginx
-      - ADMIN_USERNAME=admin                          # change it to something hard to guess
-      - ADMIN_PASSWORD=changeme                       # change it to a good password
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme                                           # replace with a stronger password
+    networks:
+      - net_ui
+      - net_docker
 
   myuiproxy:
     image: tecnativa/docker-socket-proxy
-    restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
-      - SWARM=1
-      - SERVICES=1
+    networks:
+      - net_docker
 
 volumes:
-  autoconf:
+  bw_data:
+  bw_config:
+
+
+networks:
+  net_ui:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  net_docker:
+  net_svc:

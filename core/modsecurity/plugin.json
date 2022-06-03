@@ -1,0 +1,36 @@
+{
+	"id": "modsecurity",
+	"order": 999,
+	"name": "ModSecurity",
+	"description": "Management of the ModSecurity WAF.",
+	"version": "0.1",
+	"settings": {
+		"USE_MODSECURITY": {
+			"context": "multisite",
+			"default": "yes",
+			"help": "Enable ModSecurity WAF.",
+			"id": "use-modsecurity",
+			"label": "Use ModSecurity",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"USE_MODSECURITY_CRS": {
+			"context": "multisite",
+			"default": "yes",
+			"help": "Enable OWASP Core Rule Set.",
+			"id": "use-modsecurity-crs",
+			"label": "Use Core Rule Set",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"MODSECURITY_SEC_AUDIT_ENGINE": {
+			"context": "multisite",
+			"default": "RelevantOnly",
+			"help": "SecAuditEngine directive of ModSecurity.",
+			"id": "modsecurity-sec-audit-engine",
+			"label": "SecAuditEngine",
+			"regex": "^.*$",
+			"type": "text"
+		}
+	}
+}

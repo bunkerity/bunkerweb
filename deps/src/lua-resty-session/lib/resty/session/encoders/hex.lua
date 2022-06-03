@@ -1,0 +1,1 @@
+return require "resty.session.encoders.base16"

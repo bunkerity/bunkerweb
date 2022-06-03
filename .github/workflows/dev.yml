@@ -1,0 +1,279 @@
+name: Automatic test, build, push and deploy (DEV)
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+
+  # Build images for tests
+  setup:
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          config-inline: |
+            [registry."10.20.1.1:5000"]
+              http = true
+              insecure = true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build BW test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: 10.20.1.1:5000/bw-tests:latest,bunkerity/bunkerweb:dev,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb:staging
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-tests:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-tests:buildcache,mode=max
+      - name: Push BW test image
+        run: docker push 10.20.1.1:5000/bw-tests:latest
+
+      - name: Build autoconf test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: 10.20.1.1:5000/bw-autoconf-tests:latest,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf:staging,bunkerity/bunkerweb-autoconf:dev
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-autoconf-tests:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-autoconf-tests:buildcache,mode=max
+      - name: Push autoconf test image
+        run: docker push 10.20.1.1:5000/bw-autoconf-tests:latest
+
+      - name: Build UI test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: 10.20.1.1:5000/bw-ui-tests:latest,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui:staging,bunkerity/bunkerweb-ui:dev
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-ui-tests:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-ui-tests:buildcache,mode=max
+      - name: Push UI test image
+        run: docker push 10.20.1.1:5000/bw-ui-tests:latest
+
+      - name: Build BW test DEB (ubuntu)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-ubuntu
+          platforms: linux/amd64
+          load: true
+          tags: bw-ubuntu-dev:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-ubuntu-dev:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-ubuntu-dev:buildcache,mode=max
+
+      - name: Build BW test DEB (debian)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-debian
+          platforms: linux/amd64
+          load: true
+          tags: bw-debian-dev:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-debian-dev:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-debian-dev:buildcache,mode=max
+      
+      - name: Build BW test RPM (centos)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-centos
+          platforms: linux/amd64
+          load: true
+          tags: bw-centos-dev:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-centos-dev:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-centos-dev:buildcache,mode=max
+      
+      - name: Build BW test RPM (fedora)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: linux/Dockerfile-fedora
+          platforms: linux/amd64
+          load: true
+          tags: bw-fedora-dev:latest
+          cache-from: type=registry,ref=10.20.1.1:5000/bw-fedora-dev:buildcache
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-fedora-dev:buildcache,mode=max
+
+  # Run tests
+  tests:
+    needs: setup
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          if [ "$GITHUB_REF" = "refs/heads/main" ] ; then
+            echo "BUILD_MODE=prod" >> $GITHUB_ENV
+          else
+            echo "BUILD_MODE=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Run Docker tests
+        run: ./tests/docker.sh ${{ env.BUILD_MODE }}
+
+      - name: Run autoconf tests
+        run: ./tests/autoconf.sh ${{ env.BUILD_MODE }}
+
+      - name: Run Swarm tests
+        run: ./tests/swarm.sh ${{ env.BUILD_MODE }}
+
+      - name: Run Kubernetes tests
+        run: ./tests/kubernetes.sh ${{ env.BUILD_MODE }}
+
+      - name: Run Linux tests
+        run: ./tests/linux.sh ${{ env.BUILD_MODE }}
+    
+  # Push to dev registries
+  push:
+    needs: tests
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Login to private repository
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      - name: Push BW dev image
+        run: docker push ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb:staging && docker push bunkerity/bunkerweb:dev
+
+      - name: Push autoconf dev image
+        run: docker push ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf:staging && docker push bunkerity/bunkerweb-autoconf:dev
+
+      - name: Push UI dev image
+        run: docker push ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui:staging && docker push bunkerity/bunkerweb-ui:dev
+
+      - name: Build and push dev docs
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docs/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-docs:staging
+
+  # Deploy to staging infrastructure
+  deploy:
+    needs: push
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: k8s login (staging)
+        uses: azure/k8s-set-context@v2
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: k8s deploy (staging)
+        run: kubectl rollout restart deployment bunkerweb-controller && kubectl rollout restart daemonset bunkerweb
+
+  # Push DEB/RPM to packagecloud
+  push-linux:
+    needs: tests
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Remove Ubuntu DEB from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/ubuntu/jammy bunkerweb_${{ env.VERSION }}_amd64.deb
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Ubuntu DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/ubuntu/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Remove Debian DEB from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/debian/bullseye bunkerweb_${{ env.VERSION }}_amd64.deb
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Debian DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/debian/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: debian/bullseye
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Remove CentOS RPM from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/el/8 bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push CentOS RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/centos/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: el/8
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Remove Fedora RPM from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/fedora/36 bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Fedora RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/fedora/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: fedora/36
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

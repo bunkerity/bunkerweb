@@ -1,0 +1,8 @@
+--TEST--
+keywords that can be a function
+--INPUT--
+select current_user;
+--EXPECTED--
+E select
+v current_user
+; ;

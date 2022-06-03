@@ -1,0 +1,83 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920460.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920460-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              uri: "/"
+              headers:
+                Host: "localhost"
+                Accept: "*/*"
+                Content-Length: 22
+                Content-Type: "application/x-www-form-urlencoded"
+                User-Agent: "ModSecurity CRS 3 Tests"
+              data: 'file=cat+/etc/\passw\d'
+              stop_magic: true
+            output:
+              log_contains: "id \"920460\""
+    -
+      test_title: 920460-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?file=cat+/etc/pa\\ssw\\d"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920460\""
+    -
+      test_title: 920460-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?file=\\c"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920460\""
+    -
+      test_title: 920460-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?file=\\\\c"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920460\""
+    -
+      test_title: 920460-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?file=\\\\\\c"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920460\""
