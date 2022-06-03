@@ -2,7 +2,7 @@ name: Automatic test, build, push and deploy (PROD)
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
 
