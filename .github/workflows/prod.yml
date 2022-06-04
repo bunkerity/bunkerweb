@@ -342,7 +342,7 @@ jobs:
       - name: Push CentOS RPM to packagecloud
         uses: danielmundi/upload-packagecloud@v1
         with:
-          PACKAGE-NAME: /opt/packages/prod/centos/bunkerweb.${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGE-NAME: /opt/packages/prod/centos/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: bunkerweb
           PACKAGECLOUD-DISTRIB: el/8
@@ -351,7 +351,7 @@ jobs:
       - name: Push Fedora RPM to packagecloud
         uses: danielmundi/upload-packagecloud@v1
         with:
-          PACKAGE-NAME: /opt/packages/prod/fedora/bunkerweb.${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGE-NAME: /opt/packages/prod/fedora/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: bunkerweb
           PACKAGECLOUD-DISTRIB: fedora/36
