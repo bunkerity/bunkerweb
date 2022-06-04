@@ -12,7 +12,7 @@ function gen_package() {
         type="deb"
     fi
     if [ "$mode" = "dev" ] ; then
-        do_and_check_cmd docker run --rm -v "/tmp/packages/${linux}:/data" "bw-${linux}-${mode}:latest"
+        do_and_check_cmd docker run --rm -v "/tmp/packages/${linux}:/data" "bw-${linux}-tests:latest"
     fi
     name="bunkerweb_${version}-1_amd64"
     if [ "$type" = "rpm" ] ; then

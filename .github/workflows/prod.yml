@@ -151,7 +151,7 @@ jobs:
 
       - name: Set variables
         run: |
-          if [ "$GITHUB_REF" = "refs/heads/main" ] ; then
+          if [ "$GITHUB_REF" = "refs/heads/master" ] ; then
             echo "BUILD_MODE=prod" >> $GITHUB_ENV
           else
             echo "BUILD_MODE=dev" >> $GITHUB_ENV
@@ -203,7 +203,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: nologin
+          username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
       - name: Build and push BW prod image
