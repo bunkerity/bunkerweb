@@ -72,6 +72,9 @@ RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log && \
 	ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
+# Fix CVE-2022-27405 and CVE-2022-27406
+RUN apk add "freetype>=2.10.4-r3"
+
 VOLUME /data
 
 EXPOSE 8080/tcp 8443/tcp

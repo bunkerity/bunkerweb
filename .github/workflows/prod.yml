@@ -113,6 +113,7 @@ jobs:
       - name: Check security vulnerabilities for BW
         uses: aquasecurity/trivy-action@master
         with:
+          vuln-type: os
           image-ref: 10.20.1.1:5000/bw-tests:latest
           format: table
           exit-code: 1
@@ -122,6 +123,7 @@ jobs:
       - name: Check security vulnerabilities for autoconf
         uses: aquasecurity/trivy-action@master
         with:
+          vuln-type: os
           image-ref: 10.20.1.1:5000/bw-autoconf-tests:latest
           format: table
           exit-code: 1
@@ -131,6 +133,7 @@ jobs:
       - name: Check security vulnerabilities for UI
         uses: aquasecurity/trivy-action@master
         with:
+          vuln-type: os
           image-ref: 10.20.1.1:5000/bw-ui-tests:latest
           format: table
           exit-code: 1
