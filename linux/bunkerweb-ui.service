@@ -1,6 +1,6 @@
 [Unit]
-Description=Bunkerweb ui service
-Documentation=Coming soon
+Description=BunkerWeb UI service
+Documentation=https://docs.bunkerweb.io
 After=network.target
 
 [Service]
