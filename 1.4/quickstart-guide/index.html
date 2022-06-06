@@ -655,7 +655,7 @@ documentation for the current version.
 <h1 id="quickstart-guide">Quickstart guide</h1>
 <div class="admonition info">
 <p class="admonition-title">Prerequisites</p>
-<p>We assume that you're already familiar with the <a href="/concepts">core concepts</a> and you have followed the <a href="/integrations">integrations instructions</a> for your environment.</p>
+<p>We assume that you're already familiar with the <a href="/1.4/concepts">core concepts</a> and you have followed the <a href="/1.4/integrations">integrations instructions</a> for your environment.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Going further<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples folder</a> of the repository to get real-world examples.</p>
@@ -669,225 +669,218 @@ documentation for the current version.
 <li><code>REVERSE_PROXY_URL</code> : the public path prefix</li>
 <li><code>REVERSE_PROXY_HOST</code> : (internal) address of the proxied web application</li>
 </ul>
-<p>You will find more settings about reverse proxy in the <a href="/settings/#reverse-proxy">settings section</a> of the documentation.</p>
+<p>You will find more settings about reverse proxy in the <a href="/1.4/settings/#reverse-proxy">settings section</a> of the documentation.</p>
 <h3 id="single-application">Single application</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>When using Docker integration, the easiest way of protecting an existing application is to create a network so BunkerWeb can send requests using the container name.</p>
 <p>Create the Docker network if it's not already created :
-<div class="highlight"><pre><span></span><code>docker network create bw-net
-</code></pre></div></p>
+<code>shell
+docker network create bw-net</code></p>
 <p>Then instantiate your app :
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name myapp <span class="se">\</span>
-       --network bw-net <span class="se">\</span>
-       nginxdemos/hello:plain-text
-</code></pre></div></p>
+<code>shell
+docker run -d \
+       --name myapp \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
 <p>Create the BunkerWeb volume if it's not already created :
-<div class="highlight"><pre><span></span><code>docker volume create bw-data
-</code></pre></div></p>
+<code>shell
+docker volume create bw-data</code></p>
 <p>You can now run BunkerWeb and configure it for your app :
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name mybunker <span class="se">\</span>
-       --network bw-net <span class="se">\</span>
-       -p <span class="m">80</span>:8080 <span class="se">\</span>
-       -p <span class="m">443</span>:8443 <span class="se">\</span>
-       -v bw-data:/data <span class="se">\</span>
-       -e <span class="nv">SERVER_NAME</span><span class="o">=</span>www.example.com <span class="se">\</span>
-       -e <span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">REVERSE_PROXY_URL</span><span class="o">=</span>/ <span class="se">\</span>
-       -e <span class="nv">REVERSE_PROXY_HOST</span><span class="o">=</span>http://myapp <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+<code>shell
+docker run -d \
+       --name mybunker \
+       --network bw-net \
+       -p 80:8080 \
+       -p 443:8443 \
+       -v bw-data:/data \
+       -e SERVER_NAME=www.example.com \
+       -e USE_REVERSE_PROXY=yes \
+       -e REVERSE_PROXY_URL=/ \
+       -e REVERSE_PROXY_HOST=http://myapp \
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REVERSE_PROXY=yes</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_URL=/</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_HOST=http://myapp</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-
-<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-net</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - bw-data:/data
+    environment:
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://myapp
+    networks:
+      - bw-net</p>
+<p>myapp:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>volumes:
+  bw-data:</p>
+<p>networks:
+  bw-net:
+    name: bw-net
+```</p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
 <p>You can instantiate your container and pass the settings as labels :
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name myapp <span class="se">\</span>
-       --network bw-services <span class="se">\</span>
-       -l bunkerweb.SERVER_NAME<span class="o">=</span>www.example.com <span class="se">\</span>
-       -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-       -l bunkerweb.USE_REVERSE_URL<span class="o">=</span>/ <span class="se">\</span>
-       -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp <span class="se">\</span>
-       nginxdemos/hello:plain-text
-</code></pre></div></p>
+<code>shell
+docker run -d \
+       --name myapp \
+       --network bw-services \
+       -l bunkerweb.SERVER_NAME=www.example.com \
+       -l bunkerweb.USE_REVERSE_PROXY=yes \
+       -l bunkerweb.USE_REVERSE_URL=/ \
+       -l bunkerweb.REVERSE_PROXY_HOST=http://myapp \
+       nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp</span><span class="w"></span>
-<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp
+    labels:
+      - "bunkerweb.SERVER_NAME=www.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
 <p>You can instantiate your service and pass the settings as labels :
-<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
-   create <span class="se">\</span>
-   --name myapp <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>www.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_URL<span class="o">=</span>/ <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div></p>
+<code>shell
+docker service \
+   create \
+   --name myapp \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=www.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=www.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
 <p>Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster :
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
 <p>Here is the corresponding Ingress definition to serve and protect the web application :
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span><span class="w"></span>
-<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">bunkerweb.io/AUTOCONF</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span><span class="w"></span>
-<span class="w">    </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">paths</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span><span class="w"></span>
-<span class="w">        </span><span class="nt">backend</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app</span><span class="w"></span>
-<span class="w">            </span><span class="nt">port</span><span class="p">:</span><span class="w"></span>
-<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTOCONF: "yes"
+spec:
+  rules:
+  - host: www.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app
+            port:
+              number: 80</code></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#linux">Linux integration</a> stack running on your machine.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
 <p>The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
-<div class="highlight"><pre><span></span><code>python3 -m http.server -b <span class="m">127</span>.0.0.1
-</code></pre></div></p>
+<code>shell
+python3 -m http.server -b 127.0.0.1</code></p>
 <p>Configuration of BunkerWeb is done by editing the <code>/opt/bunkerweb/variables.env</code> file :
-<div class="highlight"><pre><span></span><code>SERVER_NAME=www.example.com
+<code>conf
+SERVER_NAME=www.example.com
 HTTP_PORT=80
 HTTPS_PORT=443
 DNS_RESOLVERS=8.8.8.8 8.8.4.4
 USE_REVERSE_PROXY=yes
 REVERSE_PROXY_URL=/
-REVERSE_PROXY_HOST=http://127.0.0.1:8000
-</code></pre></div></p>
+REVERSE_PROXY_HOST=http://127.0.0.1:8000</code></p>
 <p>Let's check the status of BunkerWeb :
-<div class="highlight"><pre><span></span><code>systemctl status bunkerweb
-</code></pre></div></p>
+<code>shell
+systemctl status bunkerweb</code></p>
 <p>If it's already running we can just reload it :
-<div class="highlight"><pre><span></span><code>systemctl reload bunkerweb
-</code></pre></div></p>
+<code>shell
+systemctl reload bunkerweb</code></p>
 <p>Otherwise, we will need to start it :
-<div class="highlight"><pre><span></span><code>systemctl start bunkerweb
-</code></pre></div></p>
+<code>shell
+systemctl start bunkerweb</code></p>
 </div>
 </div>
 </div>
@@ -902,508 +895,494 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <div class="tabbed-block">
 <p>When using Docker integration, the easiest way of protecting multiple existing applications is to create a network so BunkerWeb can send requests using the container names.</p>
 <p>Create the Docker network if it's not already created :
-<div class="highlight"><pre><span></span><code>docker network create bw-net
-</code></pre></div></p>
+<code>shell
+docker network create bw-net</code></p>
 <p>Then instantiate your apps :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">App #1</label><label for="__tabbed_3_2">App #2</label><label for="__tabbed_3_3">App #3</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name myapp1 <span class="se">\</span>
-       --network bw-net <span class="se">\</span>
-       nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker run -d \
+       --name myapp1 \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name myapp2 <span class="se">\</span>
-       --network bw-net <span class="se">\</span>
-       nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker run -d \
+       --name myapp2 \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name myapp3 <span class="se">\</span>
-       --network bw-net <span class="se">\</span>
-       nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker run -d \
+       --name myapp3 \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
 </div>
 </div>
 </div>
 <p>Create the BunkerWeb volume if it's not already created :
-<div class="highlight"><pre><span></span><code>docker volume create bw-data
-</code></pre></div></p>
+<code>shell
+docker volume create bw-data</code></p>
 <p>You can now run BunkerWeb and configure it for your apps :
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-       --name mybunker <span class="se">\</span>
-       --network bw-net <span class="se">\</span>
-       -p <span class="m">80</span>:8080 <span class="se">\</span>
-       -p <span class="m">443</span>:8443 <span class="se">\</span>
-       -v bw-data:/data <span class="se">\</span>
-       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes
-       -e <span class="s2">&quot;SERVER_NAME=app1.example.com app2.example.com app3.example.com&quot;</span> <span class="se">\</span>
-       -e <span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">REVERSE_PROXY_URL</span><span class="o">=</span>/ <span class="se">\</span>
-       -e app1.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp1 <span class="se">\</span>
-       -e app2.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp2 <span class="se">\</span>
-       -e app3.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp3 <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+<code>shell
+docker run -d \
+       --name mybunker \
+       --network bw-net \
+       -p 80:8080 \
+       -p 443:8443 \
+       -v bw-data:/data \
+       -e MULTISITE=yes
+       -e "SERVER_NAME=app1.example.com app2.example.com app3.example.com" \
+       -e USE_REVERSE_PROXY=yes \
+       -e REVERSE_PROXY_URL=/ \
+       -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
+       -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
+       -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=app1.example.com app2.example.com app3.example.com</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REVERSE_PROXY=yes</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_URL=/</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1.example.com_REVERSE_PROXY_HOST=http://myapp1</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2.example.com_REVERSE_PROXY_HOST=http://myapp2</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3.example.com_REVERSE_PROXY_HOST=http://myapp3</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp3</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-
-<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-net</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - bw-data:/data
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=app1.example.com app2.example.com app3.example.com
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
+      - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
+      - app3.example.com_REVERSE_PROXY_HOST=http://myapp3
+    networks:
+      - bw-net</p>
+<p>myapp1:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>myapp2:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>myapp3:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>volumes:
+  bw-data:</p>
+<p>networks:
+  bw-net:
+    name: bw-net
+```</p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
 <p>You can instantiate your containers and pass the settings as labels :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">App #1</label><label for="__tabbed_4_2">App #2</label><label for="__tabbed_4_3">App #3</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-   --name myapp1 <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>app1.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_URL<span class="o">=</span>/ <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp1 <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker run -d \
+   --name myapp1 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app1.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.USE_REVERSE_URL=/ \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp1 \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp1</span><span class="w"></span>
-<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app1.example.com&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp1&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp1:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
+    labels:
+      - "bunkerweb.SERVER_NAME=app1.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-   --name myapp2 <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>app2.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_URL<span class="o">=</span>/ <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp2 <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker run -d \
+   --name myapp2 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app2.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.USE_REVERSE_URL=/ \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp2 \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app2.example.com&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp2&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp2:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp2
+    labels:
+      - "bunkerweb.SERVER_NAME=app2.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
-   --name myapp3 <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>app3.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_URL<span class="o">=</span>/ <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp3 <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker run -d \
+   --name myapp3 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app3.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.USE_REVERSE_URL=/ \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp3 \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp3</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp3</span><span class="w"></span>
-<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app3.example.com&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp3&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp3:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp3
+    labels:
+      - "bunkerweb.SERVER_NAME=app3.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 </div>
 </div>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
 <p>You can instantiate your services and pass the settings as labels :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">App #1</label><label for="__tabbed_5_2">App #2</label><label for="__tabbed_5_3">App #3</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
-   create <span class="se">\</span>
-   --name myapp1 <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>app1.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp1 <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_URL<span class="o">=</span>/ <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker service \
+   create \
+   --name myapp1 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app1.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp1 \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp1</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app1.example.com&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp1&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp1:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=app1.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
-   create <span class="se">\</span>
-   --name myapp2 <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>app2.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp2 <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_URL<span class="o">=</span>/ <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker service \
+   create \
+   --name myapp2 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app2.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp2 \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app2.example.com&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp2&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp2:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp2
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=app2.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
-   create <span class="se">\</span>
-   --name myapp3 <span class="se">\</span>
-   --network bw-services <span class="se">\</span>
-   -l bunkerweb.SERVER_NAME<span class="o">=</span>app3.example.com <span class="se">\</span>
-   -l bunkerweb.USE_REVERSE_PROXY<span class="o">=</span>yes <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_HOST<span class="o">=</span>http://myapp3 <span class="se">\</span>
-   -l bunkerweb.REVERSE_PROXY_URL<span class="o">=</span>/ <span class="se">\</span>
-   nginxdemos/hello:plain-text
-</code></pre></div>
+<p><code>shell
+docker service \
+   create \
+   --name myapp3 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app3.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp3 \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp3</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp3</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app3.example.com&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp3&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div></p>
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp3:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp3
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=app3.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
 </div>
 </div>
 </div>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
 <p>Let's also assume that you have some typical Deployments with Services to access the web applications from within the cluster :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">App #1</label><label for="__tabbed_6_2">App #2</label><label for="__tabbed_6_3">App #3</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app1</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app1
+spec:
+  selector:
+    app: app1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2</span><span class="w"></span>
-<span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app2</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2</span><span class="w"></span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  labels:
+    app: app2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app2
+spec:
+  selector:
+    app: app2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3</span><span class="w"></span>
-<span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/hello:plain-text</span><span class="w"></span>
-<span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app3</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3</span><span class="w"></span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app3
+  labels:
+    app: app3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app3
+  template:
+    metadata:
+      labels:
+        app: app3
+    spec:
+      containers:
+      - name: app1
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app3
+spec:
+  selector:
+    app: app3
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
 </div>
 </div>
 </div>
 <p>Here is the corresponding Ingress definition to serve and protect the web applications :
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span><span class="w"></span>
-<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">bunkerweb.io/AUTOCONF</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1.example.com</span><span class="w"></span>
-<span class="w">    </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">paths</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span><span class="w"></span>
-<span class="w">        </span><span class="nt">backend</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app1</span><span class="w"></span>
-<span class="w">            </span><span class="nt">port</span><span class="p">:</span><span class="w"></span>
-<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2.example.com</span><span class="w"></span>
-<span class="w">    </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">paths</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span><span class="w"></span>
-<span class="w">        </span><span class="nt">backend</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app2</span><span class="w"></span>
-<span class="w">            </span><span class="nt">port</span><span class="p">:</span><span class="w"></span>
-<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3.example.com</span><span class="w"></span>
-<span class="w">    </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">paths</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span><span class="w"></span>
-<span class="w">        </span><span class="nt">backend</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-app3</span><span class="w"></span>
-<span class="w">            </span><span class="nt">port</span><span class="p">:</span><span class="w"></span>
-<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTOCONF: "yes"
+spec:
+  rules:
+  - host: app1.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app1
+            port:
+              number: 80
+  - host: app2.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app2
+            port:
+              number: 80
+  - host: app3.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app3
+            port:
+              number: 80</code></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#linux">Linux integration</a> stack running on your machine.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
 <p>Let's assume that you have some web applications running on the same machine as BunkerWeb :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">App #1</label><label for="__tabbed_7_2">App #2</label><label for="__tabbed_7_3">App #3</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
-<div class="highlight"><pre><span></span><code>python3 -m http.server -b <span class="m">127</span>.0.0.1 <span class="m">8001</span>
-</code></pre></div></p>
+<code>shell
+python3 -m http.server -b 127.0.0.1 8001</code></p>
 </div>
 <div class="tabbed-block">
 <p>The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
-<div class="highlight"><pre><span></span><code>python3 -m http.server -b <span class="m">127</span>.0.0.1 <span class="m">8002</span>
-</code></pre></div></p>
+<code>shell
+python3 -m http.server -b 127.0.0.1 8002</code></p>
 </div>
 <div class="tabbed-block">
 <p>The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
-<div class="highlight"><pre><span></span><code>python3 -m http.server -b <span class="m">127</span>.0.0.1 <span class="m">8003</span>
-</code></pre></div></p>
+<code>shell
+python3 -m http.server -b 127.0.0.1 8003</code></p>
 </div>
 </div>
 </div>
 <p>Configuration of BunkerWeb is done by editing the <code>/opt/bunkerweb/variables.env</code> file :
-<div class="highlight"><pre><span></span><code>SERVER_NAME=app1.example.com app2.example.com app3.example.com
+<code>conf
+SERVER_NAME=app1.example.com app2.example.com app3.example.com
 HTTP_PORT=80
 HTTPS_PORT=443
 DNS_RESOLVERS=8.8.8.8 8.8.4.4
@@ -1411,17 +1390,16 @@ USE_REVERSE_PROXY=yes
 REVERSE_PROXY_URL=/
 app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
 app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
-app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
-</code></pre></div></p>
+app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003</code></p>
 <p>Let's check the status of BunkerWeb :
-<div class="highlight"><pre><span></span><code>systemctl status bunkerweb
-</code></pre></div></p>
+<code>shell
+systemctl status bunkerweb</code></p>
 <p>If it's already running we can just reload it :
-<div class="highlight"><pre><span></span><code>systemctl reload bunkerweb
-</code></pre></div></p>
+<code>shell
+systemctl reload bunkerweb</code></p>
 <p>Otherwise, we will need to start it :
-<div class="highlight"><pre><span></span><code>systemctl start bunkerweb
-</code></pre></div></p>
+<code>shell
+systemctl start bunkerweb</code></p>
 </div>
 </div>
 </div>
@@ -1439,7 +1417,7 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <li><code>REAL_IP_FROM</code> : list of trusted IP/network address allowed to send us the "real IP"</li>
 <li><code>REAL_IP_HEADER</code> : the HTTP header containing the real IP or special value "proxy_protocol" when using PROXY protocol</li>
 </ul>
-<p>You will find more settings about real IP in the <a href="/settings/#real-ip">settings section</a> of the documentation.</p>
+<p>You will find more settings about real IP in the <a href="/1.4/settings/#real-ip">settings section</a> of the documentation.</p>
 <h3 id="http-header">HTTP header</h3>
 <p>We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :</p>
 <ul>
@@ -1447,109 +1425,109 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <li>They have IPs in the 1.2.3.0/24 and 100.64.0.0/16 networks</li>
 </ul>
 <p>The following settings need to be set :</p>
-<div class="highlight"><pre><span></span><code>USE_REAL_IP=yes
+<p><code>conf
+USE_REAL_IP=yes
 REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-REAL_IP_HEADER=X-Forwarded-For
-</code></pre></div>
+REAL_IP_HEADER=X-Forwarded-For</code></p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:5"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Docker</label><label for="__tabbed_8_2">Docker autoconf</label><label for="__tabbed_8_3">Swarm</label><label for="__tabbed_8_4">Kubernetes</label><label for="__tabbed_8_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>When starting the BunkerWeb container, you will need to add the settings :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<code>shell
+docker run \
        ...
-       -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
-       -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
+       -e USE_REAL_IP=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=X-Forwarded-For \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER=X-Forwarded-For</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=X-Forwarded-For
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<p>Before running the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
+<code>shell
+docker run \
        ...
-       -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
-       -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
+       -e USE_REAL_IP=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=X-Forwarded-For \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER=X-Forwarded-For</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=X-Forwarded-For
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
-<div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
+<p>Before running the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
+<code>shell
+docker service create \
        ...
-       -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
-       -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
+       -e USE_REAL_IP=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=X-Forwarded-For \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER=X-Forwarded-For</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=X-Forwarded-For
+  ...</code></p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;X-Forwarded-For&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.2.3.0/24</span><span class="nv"> </span><span class="s">100.64.0.0/16&quot;</span><span class="w"></span>
-<span class="nn">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    spec:
+      containers:
+      - name: bunkerweb
+        image: bunkerity/bunkerweb:1.4.0
+        ...
+        env:
+        - name: USE_REAL_IP
+          value: "yes"
+        - name: REAL_IP_HEADER
+          value: "X-Forwarded-For"
+        - name: REAL_IP_FROM
+          value: "1.2.3.0/24 100.64.0.0/16"
+...</code></p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the <code>/opt/bunkerweb/variables.env</code> file :
-<div class="highlight"><pre><span></span><code>...
+<code>conf
+...
 USE_REAL_IP=yes
 REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
 REAL_IP_HEADER=X-Forwarded-For
-...
-</code></pre></div></p>
+...</code></p>
 <p>Don't forget to reload the bunkerweb service once it's done.</p>
 </div>
 </div>
@@ -1561,125 +1539,125 @@ REAL_IP_HEADER=X-Forwarded-For
 <li>They have IPs in the 1.2.3.0/24 and 100.64.0.0/16 networks</li>
 </ul>
 <p>The following settings need to be set :</p>
-<div class="highlight"><pre><span></span><code>USE_REAL_IP=yes
+<p><code>conf
+USE_REAL_IP=yes
 USE_PROXY_PROTOCOL=yes
 REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-REAL_IP_HEADER=proxy_protocol
-</code></pre></div>
+REAL_IP_HEADER=proxy_protocol</code></p>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:5"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><input id="__tabbed_9_4" name="__tabbed_9" type="radio" /><input id="__tabbed_9_5" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Docker</label><label for="__tabbed_9_2">Docker autoconf</label><label for="__tabbed_9_3">Swarm</label><label for="__tabbed_9_4">Kubernetes</label><label for="__tabbed_9_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>When starting the BunkerWeb container, you will need to add the settings :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<code>shell
+docker run \
        ...
-       -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">USE_PROXY_PROTOCOL</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
-       -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
+       -e USE_REAL_IP=yes \
+       -e USE_PROXY_PROTOCOL=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=proxy_protocol \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_PROXY_PROTOCOL=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER=proxy_protocol</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - USE_PROXY_PROTOCOL=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=proxy_protocol
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<p>Before running the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
+<code>shell
+docker run \
        ...
-       -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">USE_PROXY_PROTOCOL</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
-       -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
+       -e USE_REAL_IP=yes \
+       -e USE_PROXY_PROTOCOL=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=proxy_protocol \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_PROXY_PROTOCOL=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER=proxy_protocol</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - USE_PROXY_PROTOCOL=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=proxy_protocol
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
-<div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
+<p>Before running the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
+<code>shell
+docker service create \
        ...
-       -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">USE_PROXY_PROTOCOL</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
-       -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
+       -e USE_REAL_IP=yes \
+       -e USE_PROXY_PROTOCOL=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=proxy_protocol \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_PROXY_PROTOCOL=yes</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER=proxy_protocol</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - USE_PROXY_PROTOCOL=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=proxy_protocol
+  ...</code></p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-<span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_PROXY_PROTOCOL</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_HEADER</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;proxy_protocol&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REAL_IP_FROM</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.2.3.0/24</span><span class="nv"> </span><span class="s">100.64.0.0/16&quot;</span><span class="w"></span>
-<span class="nn">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    spec:
+      containers:
+      - name: bunkerweb
+        image: bunkerity/bunkerweb:1.4.0
+        ...
+        env:
+        - name: USE_REAL_IP
+          value: "yes"
+        - name: USE_PROXY_PROTOCOL
+          value: "yes"
+        - name: REAL_IP_HEADER
+          value: "proxy_protocol"
+        - name: REAL_IP_FROM
+          value: "1.2.3.0/24 100.64.0.0/16"
+...</code></p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the <code>/opt/bunkerweb/variables.env</code> file :
-<div class="highlight"><pre><span></span><code>...
+<code>conf
+...
 USE_REAL_IP=yes
 USE_PROXY_PROTOCOL=yes
 REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
 REAL_IP_HEADER=proxy_protocol
-...
-</code></pre></div></p>
+...</code></p>
 <p>Don't forget to reload the bunkerweb service once it's done.</p>
 </div>
 </div>
 </div>
 <h2 id="custom-configurations">Custom configurations</h2>
-<p>Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info <a href="/security-tuning/#modsecurity">here</a>). Here is the list of custom configurations types :</p>
+<p>Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info <a href="/1.4/security-tuning/#modsecurity">here</a>). Here is the list of custom configurations types :</p>
 <ul>
 <li><strong>http</strong> : http level of NGINX</li>
 <li><strong>server-http</strong> : server level of NGINX</li>
@@ -1693,71 +1671,71 @@ REAL_IP_HEADER=proxy_protocol
 <div class="tabbed-set tabbed-alternate" data-tabs="10:5"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><input id="__tabbed_10_5" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Docker</label><label for="__tabbed_10_2">Docker autoconf</label><label for="__tabbed_10_3">Swarm</label><label for="__tabbed_10_4">Kubernetes</label><label for="__tabbed_10_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker">Docker integration</a>, custom configurations must be written to the volume mounted on /data.</p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, custom configurations must be written to the volume mounted on /data.</p>
 <p>The first thing to do is to create the folders :
-<div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/configs/server-http
-</code></pre></div></p>
+<code>shell
+mkdir -p ./bw-data/configs/server-http</code></p>
 <p>You can now write your configurations :
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;location /hello {</span>
-<span class="s2">    default_type &#39;text/plain&#39;;</span>
-<span class="s2">    content_by_lua_block {</span>
-<span class="s2">        ngx.say(&#39;world&#39;)</span>
-<span class="s2">    }</span>
-<span class="s2">}&quot;</span> &gt; ./bw-data/configs/server-http/hello-world.conf
-</code></pre></div></p>
+<code>shell
+echo "location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}" &gt; ./bw-data/configs/server-http/hello-world.conf</code></p>
 <p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-<div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
-chmod -R <span class="m">770</span> bw-data
-</code></pre></div></p>
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
 <p>When starting the BunkerWeb container, you will need to mount the folder on /data :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<code>shell
+docker run \
        ...
-       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
+       -v "${PWD}/bw-data:/data" \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, custom configurations must be written to the volume mounted on /data.</p>
+<p>When using the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a>, custom configurations must be written to the volume mounted on /data.</p>
 <p>The first thing to do is to create the folders :
-<div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/configs/server-http
-</code></pre></div></p>
+<code>shell
+mkdir -p ./bw-data/configs/server-http</code></p>
 <p>You can now write your configurations :
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;location /hello {</span>
-<span class="s2">    default_type &#39;text/plain&#39;;</span>
-<span class="s2">    content_by_lua_block {</span>
-<span class="s2">        ngx.say(&#39;world&#39;)</span>
-<span class="s2">    }</span>
-<span class="s2">}&quot;</span> &gt; ./bw-data/configs/server-http/hello-world.conf
-</code></pre></div></p>
+<code>shell
+echo "location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}" &gt; ./bw-data/configs/server-http/hello-world.conf</code></p>
 <p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-<div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
-chmod -R <span class="m">770</span> bw-data
-</code></pre></div></p>
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
 <p>When starting the BunkerWeb container, you will need to mount the folder on /data :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<code>shell
+docker run \
        ...
-       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
+       -v "${PWD}/bw-data:/data" \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#swarm">Swarm integration</a>, custom configurations are managed using <a href="https://docs.docker.com/engine/swarm/configs/">Docker Configs</a>.</p>
+<p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, custom configurations are managed using <a href="https://docs.docker.com/engine/swarm/configs/">Docker Configs</a>.</p>
 <p>To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.</p>
 <p>When creating a Config you will need to add special labels :</p>
 <ul>
@@ -1765,17 +1743,17 @@ chmod -R <span class="m">770</span> bw-data
 <li><strong>bunkerweb.CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
 </ul>
 <p>Here is the example :
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;location /hello {</span>
-<span class="s2">    default_type &#39;text/plain&#39;;</span>
-<span class="s2">    content_by_lua_block {</span>
-<span class="s2">        ngx.say(&#39;world&#39;)</span>
-<span class="s2">    }</span>
-<span class="s2">}&quot;</span> <span class="p">|</span> docker config create -l bunkerweb.CONFIG_TYPE<span class="o">=</span>server-http my-config -
-</code></pre></div></p>
+<code>shell
+echo "location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -</code></p>
 <p>There is no update mechanism : the alternative is to remove an existing config using <code>docker config rm</code> and then recreate it.</p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
+<p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
 <p>To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.</p>
 <p>When creating a ConfigMap you will need to add special labels :</p>
 <ul>
@@ -1783,36 +1761,36 @@ chmod -R <span class="m">770</span> bw-data
 <li><strong>bunkerweb.io/CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
 </ul>
 <p>Here is the example :
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cfg-bunkerweb-all-server-http</span><span class="w"></span>
-<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">bunkerweb.io/CONFIG_TYPE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;server-http&quot;</span><span class="w"></span>
-<span class="nt">data</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">myconf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">    </span><span class="no">location /hello {</span><span class="w"></span>
-<span class="w">        </span><span class="no">default_type &#39;text/plain&#39;;</span><span class="w"></span>
-<span class="w">        </span><span class="no">content_by_lua_block {</span><span class="w"></span>
-<span class="w">            </span><span class="no">ngx.say(&#39;world&#39;)</span><span class="w"></span>
-<span class="w">        </span><span class="no">}</span><span class="w"></span>
-<span class="w">    </span><span class="no">}</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-all-server-http
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "server-http"
+data:
+  myconf: |
+    location /hello {
+        default_type 'text/plain';
+        content_by_lua_block {
+            ngx.say('world')
+        }
+    }</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#linux">Linux integration</a>, custom configurations must be written to the /opt/bunkerweb/configs folder.</p>
+<p>When using the <a href="/1.4/integrations/#linux">Linux integration</a>, custom configurations must be written to the /opt/bunkerweb/configs folder.</p>
 <p>Here is an example for server-http/hello-world.conf :
-<div class="highlight"><pre><span></span><code>location /hello {
-    default_type &#39;text/plain&#39;;
+<code>conf
+location /hello {
+    default_type 'text/plain';
     content_by_lua_block {
-        ngx.say(&#39;world&#39;)
+        ngx.say('world')
     }
-}
-</code></pre></div></p>
+}</code></p>
 <p>Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
-<div class="highlight"><pre><span></span><code>chown -R root:nginx /opt/bunkerweb/configs <span class="o">&amp;&amp;</span> <span class="se">\</span>
-chmod -R <span class="m">770</span> /opt/bunkerweb/configs
-</code></pre></div></p>
+<code>shell
+chown -R root:nginx /opt/bunkerweb/configs &amp;&amp; \
+chmod -R 770 /opt/bunkerweb/configs</code></p>
 <p>Don't forget to reload the bunkerweb service once it's done.</p>
 </div>
 </div>

@@ -22,7 +22,8 @@ def print_md_table(settings) :
     print("")
 
 print("# Settings\n")
-print("This section contains the full list of settings supported by BunkerWeb. If you are not familiar with BunkerWeb, you should first read the [concepts](/concepts) section of the documentation. Please follow the instructions for your own [integration](/integrations) on how to apply the settings.\n")
+print("!!! info \"Settings generator tool\"\n\n    To help you tuning BunkerWeb we have made an easy to use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io).\n")
+print("This section contains the full list of settings supported by BunkerWeb. If you are not familiar with BunkerWeb, you should first read the [concepts](/1.4/concepts) section of the documentation. Please follow the instructions for your own [integration](/1.4/integrations) on how to apply the settings.\n")
 print("As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server you will need to add the primary (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.\n")
 print("When settings are considered as \"multiple\", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`, `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.\n")
 

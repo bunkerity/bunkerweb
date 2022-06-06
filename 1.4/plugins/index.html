@@ -712,69 +712,69 @@ documentation for the current version.
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker">Docker integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
 <p>The first thing to do is to create the plugins folder :
-<div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/plugins
-</code></pre></div></p>
+<code>shell
+mkdir -p ./bw-data/plugins</code></p>
 <p>Then you can drop the plugins of your choice into that folder :
-<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
-cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
-</code></pre></div></p>
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* ./bw-data/plugins</code></p>
 <p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-<div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
-chmod -R <span class="m">770</span> bw-data
-</code></pre></div></p>
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
 <p>When starting the BunkerWeb container, you will need to mount the folder on <code>/data</code> :
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<code>shell
+docker run \
        ...
-       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
+       -v "${PWD}/bw-data:/data" \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div></p>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
-</code></pre></div></p>
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
+<p>When using the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
 <p>The easiest way to do it is by starting the Docker autoconf stack with a folder mounted on <code>/data</code> (instead of a named volume). Once the stack is started, you can copy the plugins of your choice to the <code>plugins</code> folder from your host :
-<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
-cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
-</code></pre></div></p>
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* ./bw-data/plugins</code></p>
 <p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-<div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
-chmod -R <span class="m">770</span> bw-data
-</code></pre></div></p>
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#swarm">Swarm integration</a>, the easiest way of installing plugins is by using <code>docker exec</code> and downloading the plugins from the container.</p>
+<p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, the easiest way of installing plugins is by using <code>docker exec</code> and downloading the plugins from the container.</p>
 <p>Execute a shell inside the autoconf container (use <code>docker ps</code> to get the name) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> -it myautoconf /bin/bash
-</code></pre></div></p>
+<code>shell
+docker exec -it myautoconf /bin/bash</code></p>
 <p>Once you have a shell inside the container, you can drop the plugins of your choice inside the <code>/data/plugins</code> folder :
-<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
-cp -rp ./bunkerweb-plugins/* /data/plugins
-</code></pre></div></p>
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* /data/plugins</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#kubernetes">Kubernetes integration</a>, the easiest way of installing plugins is by using <code>kubectl exec</code> and downloading the plugins from the container.</p>
+<p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, the easiest way of installing plugins is by using <code>kubectl exec</code> and downloading the plugins from the container.</p>
 <p>Execute a shell inside the autoconf container (use <code>kubectl get pods</code> to get the name) :
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -it myautoconf -- /bin/bash
-</code></pre></div></p>
+<code>shell
+kubectl exec -it myautoconf -- /bin/bash</code></p>
 <p>Once you have a shell inside the container, you can drop the plugins of your choice inside the <code>/data/plugins</code> folder :
-<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
-cp -rp ./bunkerweb-plugins/* /data/plugins
-</code></pre></div></p>
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* /data/plugins</code></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#linux">Linux integration</a>, plugins must be written to the <code>/opt/bunkerweb/plugins</code> folder :
-<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
-cp -rp ./bunkerweb-plugins/* /data/plugins
-</code></pre></div></p>
+<p>When using the <a href="/1.4/integrations/#linux">Linux integration</a>, plugins must be written to the <code>/opt/bunkerweb/plugins</code> folder :
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* /data/plugins</code></p>
 </div>
 </div>
 </div>
@@ -785,37 +785,37 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <p>If the documentation is not enough you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/core">core plugins</a> (already included in BunkerWeb but they are plugins technically speaking).</p>
 </div>
 <p>The first step is to create a folder that will contain the plugin :</p>
-<div class="highlight"><pre><span></span><code>mkdir myplugin <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> myplugin
-</code></pre></div>
+<p><code>shell
+mkdir myplugin &amp;&amp; \
+cd myplugin</code></p>
 <h3 id="metadata">Metadata</h3>
 <p>A file named <strong>plugin.json</strong> and written at the root of the plugin folder must contain metadata about the plugin. Here is an example :</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;order&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Just an example plugin.&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;DUMMY_SETTING&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;multisite&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;help&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Here is the help of the setting.&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dummy-id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dummy setting&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^.*$&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job.py&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;every&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hour&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<p><code>json
+{
+    "id": "myplugin",
+    "order": 42,
+    "name": "My Plugin",
+    "description": "Just an example plugin.",
+    "version": "1.0",
+    "settings": {
+        "DUMMY_SETTING": {
+            "context": "multisite",
+            "default": "1234",
+            "help": "Here is the help of the setting.",
+            "id": "dummy-id",
+            "label": "Dummy setting",
+            "regex": "^.*$",
+            "type": "text"
+        }
+    }
+    "jobs": [
+        {
+            "name": "my-job",
+            "file": "my-job.py",
+            "every": "hour"
+        }
+    ]
+}</code></p>
 <p>Here are the details of the fields :</p>
 <table>
 <thead>
@@ -970,49 +970,44 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 </tbody>
 </table>
 <h3 id="configurations">Configurations</h3>
-<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="/quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code> and <code>default-server-http</code>).</p>
+<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="/1.4/quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code> and <code>default-server-http</code>).</p>
 <p>Here is an example for a configuration template file inside the <strong>confs/server-http</strong> folder named <strong>example.conf</strong> :</p>
-<div class="highlight"><pre><span></span><code>location /setting {
-    default_type &#39;text/plain&#39;;
+<p><code>conf
+location /setting {
+    default_type 'text/plain';
     content_by_lua_block {
-        ngx.say(&#39;{{ DUMMY_SETTING }}&#39;)
+        ngx.say('{{ DUMMY_SETTING }}')
     }
-}
-</code></pre></div>
+}</code></p>
 <p><code>{{ DUMMY_SETTING }}</code> will be replaced by the value of the <code>DUMMY_SETTING</code> chosen by the user of the plugin.</p>
 <h3 id="lua">LUA</h3>
 <h4 id="main-script">Main script</h4>
 <p>Under the hood, BunkerWeb is using the <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a> to execute code within NGINX. Plugins that need to execute code must provide a lua file at the root directory of the plugin folder using the <code>id</code> value of <strong>plugin.json</strong> as its name. Here is an example named <strong>myplugin.lua</strong> :</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">_M</span>        <span class="o">=</span> <span class="p">{}</span>
-<span class="n">_M</span><span class="p">.</span><span class="n">__index</span>      <span class="o">=</span> <span class="n">_M</span>
-
-<span class="kd">local</span> <span class="n">utils</span>     <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;utils&quot;</span>
-<span class="kd">local</span> <span class="n">datastore</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;datastore&quot;</span>
-<span class="kd">local</span> <span class="n">logger</span>    <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;logger&quot;</span>
-
-<span class="kr">function</span> <span class="nc">_M</span><span class="p">.</span><span class="nf">new</span><span class="p">()</span>
-    <span class="kd">local</span> <span class="n">self</span> <span class="o">=</span> <span class="nb">setmetatable</span><span class="p">({},</span> <span class="n">_M</span><span class="p">)</span>
-    <span class="n">self</span><span class="p">.</span><span class="n">dummy</span> <span class="o">=</span> <span class="s2">&quot;dummy&quot;</span>
-    <span class="kr">return</span> <span class="n">self</span><span class="p">,</span> <span class="kc">nil</span>
-<span class="kr">end</span>
-
-<span class="kr">function</span> <span class="nc">_M</span><span class="p">:</span><span class="nf">init</span><span class="p">()</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;init called&quot;</span><span class="p">)</span>
-    <span class="kr">return</span> <span class="kc">true</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span>
-<span class="kr">end</span>
-
-<span class="kr">function</span> <span class="nc">_M</span><span class="p">:</span><span class="nf">access</span><span class="p">()</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;access called&quot;</span><span class="p">)</span>
-    <span class="kr">return</span> <span class="kc">true</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="kc">nil</span><span class="p">,</span> <span class="kc">nil</span>
-<span class="kr">end</span>
-
-<span class="kr">function</span> <span class="nc">_M</span><span class="p">:</span><span class="nf">log</span><span class="p">()</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;log called&quot;</span><span class="p">)</span>
-    <span class="kr">return</span> <span class="kc">true</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span>
-<span class="kr">end</span>
-
-<span class="kr">return</span> <span class="n">_M</span>
-</code></pre></div>
+<p>```lua
+local _M        = {}
+_M.__index      = _M</p>
+<p>local utils     = require "utils"
+local datastore = require "datastore"
+local logger    = require "logger"</p>
+<p>function _M.new()
+    local self = setmetatable({}, _M)
+    self.dummy = "dummy"
+    return self, nil
+end</p>
+<p>function _M:init()
+    logger.log(ngx.NOTICE, "MYPLUGIN", "init called")
+    return true, "success"
+end</p>
+<p>function _M:access()
+    logger.log(ngx.NOTICE, "MYPLUGIN", "access called")
+    return true, "success", nil, nil
+end</p>
+<p>function _M:log()
+    logger.log(ngx.NOTICE, "MYPLUGIN", "log called")
+    return true, "success"
+end</p>
+<p>return _M
+```</p>
 <p>The 3 functions <code>init</code>, <code>access</code>, and <code>log</code> are automatically called during specific contexts. Here are the details of each function :</p>
 <table>
 <thead>
@@ -1047,23 +1042,20 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <h4 id="libraries">Libraries</h4>
 <p>All directives from <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a> are available. On top of that, you can use the LUA libraries included within BunkerWeb : see <a href="https://github.com/bunkerity/bunkerweb/blob/master/deps/clone.sh">this script</a> for the complete list.</p>
 <p>If you need additional libraries, you can put them in the root folder of the plugin and access them by prefixing them with your plugin ID. Here is an example file named <strong>mylibrary.lua</strong> :</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">_M</span> <span class="o">=</span> <span class="p">{}</span>
-
-<span class="n">_M</span><span class="p">.</span><span class="n">dummy</span> <span class="o">=</span> <span class="kr">function</span> <span class="p">()</span>
-    <span class="kr">return</span> <span class="s2">&quot;dummy&quot;</span>
-<span class="kr">end</span>
-
-<span class="kr">return</span> <span class="n">_M</span>
-</code></pre></div>
+<p>```lua
+local _M = {}</p>
+<p>_M.dummy = function ()
+    return "dummy"
+end</p>
+<p>return _M
+```</p>
 <p>And here is how you can use it from the <strong>myplugin.lua</strong> file :</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">mylibrary</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;myplugin.mylibrary&quot;</span>
-
-<span class="p">...</span>
-
-<span class="n">mylibrary</span><span class="p">.</span><span class="n">dummy</span><span class="p">()</span>
-
-<span class="p">...</span>
-</code></pre></div>
+<p>```lua
+local mylibrary = require "myplugin.mylibrary"</p>
+<p>...</p>
+<p>mylibrary.dummy()</p>
+<p>...
+```</p>
 <h4 id="helpers">Helpers</h4>
 <p>Some helpers modules provide common helpful functions :</p>
 <ul>
@@ -1072,40 +1064,39 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <li><strong>utils</strong> : various useful functions</li>
 </ul>
 <p>To access the functions, you first need to <strong>require</strong> the module :</p>
-<div class="highlight"><pre><span></span><code><span class="p">...</span>
-
-<span class="kd">local</span> <span class="n">utils</span>     <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;utils&quot;</span>
-<span class="kd">local</span> <span class="n">datastore</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;datastore&quot;</span>
-<span class="kd">local</span> <span class="n">logger</span>    <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;logger&quot;</span>
-
-<span class="p">...</span>
-</code></pre></div>
+<p>```lua
+...</p>
+<p>local utils     = require "utils"
+local datastore = require "datastore"
+local logger    = require "logger"</p>
+<p>...
+```</p>
 <p>Retrieve a setting value :</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">value</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">utils</span><span class="p">:</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;DUMMY_SETTING&quot;</span><span class="p">)</span>
-<span class="kr">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="kr">then</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">ERR</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;can&#39;t retrieve setting DUMMY_SETTING : &quot;</span> <span class="o">..</span> <span class="n">err</span><span class="p">)</span>
-<span class="kr">else</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;DUMMY_SETTING = &quot;</span> <span class="o">..</span> <span class="n">value</span><span class="p">)</span>
-<span class="kr">end</span>
-</code></pre></div>
+<p><code>lua
+local value, err = utils:get_variable("DUMMY_SETTING")
+if not value then
+    logger.log(ngx.ERR, "MYPLUGIN", "can't retrieve setting DUMMY_SETTING : " .. err)
+else
+    logger.log(ngx.NOTICE, "MYPLUGIN", "DUMMY_SETTING = " .. value)
+end</code></p>
 <p>Store something in the cache :</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">ok</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">datastore</span><span class="p">:</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;plugin_myplugin_something&quot;</span><span class="p">,</span> <span class="s2">&quot;somevalue&quot;</span><span class="p">)</span>
-<span class="kr">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="kr">then</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">ERR</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;can&#39;t save plugin_myplugin_something into datastore : &quot;</span> <span class="o">..</span> <span class="n">err</span><span class="p">)</span>
-<span class="kr">else</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;successfully saved plugin_myplugin_something into datastore into datastore&quot;</span><span class="p">)</span>
-<span class="kr">end</span>
-</code></pre></div>
+<p><code>lua
+local ok, err = datastore:set("plugin_myplugin_something", "somevalue")
+if not value then
+    logger.log(ngx.ERR, "MYPLUGIN", "can't save plugin_myplugin_something into datastore : " .. err)
+else
+    logger.log(ngx.NOTICE, "MYPLUGIN", "successfully saved plugin_myplugin_something into datastore into datastore")
+end</code></p>
 <p>Check if an IP address is global :</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">ret</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">utils</span><span class="p">.</span><span class="n">ip_is_global</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">remote_addr</span><span class="p">)</span>
-<span class="kr">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="kc">nil</span> <span class="kr">then</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">ERR</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;error while checking if IP &quot;</span> <span class="o">..</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">remote_addr</span> <span class="o">..</span> <span class="s2">&quot; is global or not : &quot;</span> <span class="o">..</span> <span class="n">err</span><span class="p">)</span>
-<span class="kr">elseif</span> <span class="ow">not</span> <span class="n">ret</span> <span class="kr">then</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;IP &quot;</span> <span class="o">..</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">remote_addr</span> <span class="o">..</span> <span class="s2">&quot; is not global&quot;</span><span class="p">)</span>
-<span class="kr">else</span>
-    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;IP &quot;</span> <span class="o">..</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">remote_addr</span> <span class="o">..</span> <span class="s2">&quot; is global&quot;</span><span class="p">)</span>
-<span class="kr">end</span>
-</code></pre></div>
+<p><code>lua
+local ret, err = utils.ip_is_global(ngx.var.remote_addr)
+if ret == nil then
+    logger.log(ngx.ERR, "MYPLUGIN", "error while checking if IP " .. ngx.var.remote_addr .. " is global or not : " .. err)
+elseif not ret then
+    logger.log(ngx.NOTICE, "MYPLUGIN", "IP " .. ngx.var.remote_addr .. " is not global")
+else
+    logger.log(ngx.NOTICE, "MYPLUGIN", "IP " .. ngx.var.remote_addr .. " is global")
+end</code></p>
 <div class="admonition tip">
 <p class="admonition-title">More examples</p>
 <p>If you want to see the full list of available functions, you can have a look at the files present in the <a href="https://github.com/bunkerity/bunkerweb/tree/master/lua">lua directory</a> of the repository.</p>

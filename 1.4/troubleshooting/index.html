@@ -644,66 +644,66 @@ documentation for the current version.
 <div class="admonition tip">
 <p class="admonition-title">List containers</p>
 <p>To list the running containers you can use the following command :
-<div class="highlight"><pre><span></span><code>docker ps
-</code></pre></div></p>
+<code>shell
+docker ps</code></p>
 </div>
 <p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker logs mybunker
-</code></pre></div></p>
+<code>shell
+docker logs mybunker</code></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose logs mybunker
-</code></pre></div></p>
+<code>shell
+docker-compose logs mybunker</code></p>
 </div>
 <div class="tabbed-block">
 <div class="admonition tip">
 <p class="admonition-title">List containers</p>
 <p>To list the running containers you can use the following command :
-<div class="highlight"><pre><span></span><code>docker ps
-</code></pre></div></p>
+<code>shell
+docker ps</code></p>
 </div>
 <p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your containers) :
-<div class="highlight"><pre><span></span><code>docker logs mybunker
-docker logs myautoconf
-</code></pre></div></p>
+<code>shell
+docker logs mybunker
+docker logs myautoconf</code></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> and <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose logs mybunker
-docker-compose logs myautoconf
-</code></pre></div></p>
+<code>shell
+docker-compose logs mybunker
+docker-compose logs myautoconf</code></p>
 </div>
 <div class="tabbed-block">
 <div class="admonition tip">
 <p class="admonition-title">List services</p>
 <p>To list the services you can use the following command :
-<div class="highlight"><pre><span></span><code>docker service ls
-</code></pre></div></p>
+<code>shell
+docker service ls</code></p>
 </div>
 <p>You can use the <code>docker service logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> my with the name of your services) :
-<div class="highlight"><pre><span></span><code>docker service logs mybunker
-docker service logs myautoconf
-</code></pre></div></p>
+<code>shell
+docker service logs mybunker
+docker service logs myautoconf</code></p>
 </div>
 <div class="tabbed-block">
 <div class="admonition tip">
 <p class="admonition-title">List pods</p>
 <p>To list the pods you can use the following command :
-<div class="highlight"><pre><span></span><code>kubectl get pods
-</code></pre></div></p>
+<code>shell
+kubectl get pods</code></p>
 </div>
 <p>You can use the <code>kubectl logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> my with the name of your pods) :
-<div class="highlight"><pre><span></span><code>kubectl logs mybunker
-kubectl logs myautoconf
-</code></pre></div></p>
+<code>shell
+kubectl logs mybunker
+kubectl logs myautoconf</code></p>
 </div>
 <div class="tabbed-block">
 <p>The logs are located inside the <code>/var/log/nginx</code> directory. There is two files :
-<div class="highlight"><pre><span></span><code>cat /var/log/nginx/error.log
-cat /var/log/nginx/access.log
-</code></pre></div></p>
+<code>shell
+cat /var/log/nginx/error.log
+cat /var/log/nginx/access.log</code></p>
 </div>
 </div>
 </div>
 <h2 id="permissions">Permissions</h2>
-<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb especially if you use custom configurations (more info <a href="/quickstart-guide/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
+<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb especially if you use custom configurations (more info <a href="/1.4/quickstart-guide/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
 <h2 id="modsecurity">ModSecurity</h2>
 <p>The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :</p>
 <ul>
@@ -712,75 +712,75 @@ cat /var/log/nginx/access.log
 <li>the default threshold for anomaly score is 5 for requests and 4 for responses</li>
 </ul>
 <p>Let's take the following logs as an example of ModSecurity detection using default configuration (formatted for better readability) :</p>
-<div class="highlight"><pre><span></span><code>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `lfi-os-files.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf&quot;]
-    [line &quot;78&quot;]
-    [id &quot;930120&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;OS File Access Attempt&quot;]
-    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-multi&quot;]
-    [tag &quot;platform-multi&quot;]
-    [tag &quot;attack-lfi&quot;]
-    [tag &quot;paranoia-level/1&quot;]
-    [tag &quot;OWASP_CRS&quot;]
-    [tag &quot;capec/1000/255/153/126&quot;]
-    [tag &quot;PCI/6.5.4&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `unix-shell.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf&quot;]
-    [line &quot;480&quot;]
-    [id &quot;932160&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;Remote Command Execution: Unix Shell Code Found&quot;]
-    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-shell&quot;]
-    [tag &quot;platform-unix&quot;]
-    [tag &quot;attack-rce&quot;]
-    [tag &quot;paranoia-level/1&quot;]
-    [tag &quot;OWASP_CRS&quot;]
-    [tag &quot;capec/1000/152/248/88&quot;]
-    [tag &quot;PCI/6.5.2&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched &quot;Operator `Ge&#39; with parameter `5&#39; against variable `TX:ANOMALY_SCORE&#39; (Value: `10&#39; )
-    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf&quot;]
-    [line &quot;80&quot;]
-    [id &quot;949110&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;Inbound Anomaly Score Exceeded (Total Score: 10)&quot;]
-    [data &quot;&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-multi&quot;]
-    [tag &quot;platform-multi&quot;]
-    [tag &quot;attack-generic&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-</code></pre></div>
+<p><code>log
+2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched "Operator `PmFromFile' with parameter `lfi-os-files.data' against variable `ARGS:id' (Value: `/etc/passwd' )
+    [file "/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf"]
+    [line "78"]
+    [id "930120"]
+    [rev ""]
+    [msg "OS File Access Attempt"]
+    [data "Matched Data: etc/passwd found within ARGS:id: /etc/passwd"]
+    [severity "2"]
+    [ver "OWASP_CRS/3.3.2"]
+    [maturity "0"]
+    [accuracy "0"]
+    [tag "application-multi"]
+    [tag "language-multi"]
+    [tag "platform-multi"]
+    [tag "attack-lfi"]
+    [tag "paranoia-level/1"]
+    [tag "OWASP_CRS"]
+    [tag "capec/1000/255/153/126"]
+    [tag "PCI/6.5.4"]
+    [hostname "172.17.0.2"]
+    [uri "/"]
+    [unique_id "165097447014.179282"]
+    [ref "o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase"],
+    client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"
+2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched "Operator `PmFromFile' with parameter `unix-shell.data' against variable `ARGS:id' (Value: `/etc/passwd' )
+    [file "/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"]
+    [line "480"]
+    [id "932160"]
+    [rev ""]
+    [msg "Remote Command Execution: Unix Shell Code Found"]
+    [data "Matched Data: etc/passwd found within ARGS:id: /etc/passwd"]
+    [severity "2"]
+    [ver "OWASP_CRS/3.3.2"]
+    [maturity "0"]
+    [accuracy "0"]
+    [tag "application-multi"]
+    [tag "language-shell"]
+    [tag "platform-unix"]
+    [tag "attack-rce"]
+    [tag "paranoia-level/1"]
+    [tag "OWASP_CRS"]
+    [tag "capec/1000/152/248/88"]
+    [tag "PCI/6.5.2"]
+    [hostname "172.17.0.2"]
+    [uri "/"]
+    [unique_id "165097447014.179282"]
+    [ref "o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase"],
+    client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"
+2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched "Operator `Ge' with parameter `5' against variable `TX:ANOMALY_SCORE' (Value: `10' )
+    [file "/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf"]
+    [line "80"]
+    [id "949110"]
+    [rev ""]
+    [msg "Inbound Anomaly Score Exceeded (Total Score: 10)"]
+    [data ""]
+    [severity "2"]
+    [ver "OWASP_CRS/3.3.2"]
+    [maturity "0"]
+    [accuracy "0"]
+    [tag "application-multi"]
+    [tag "language-multi"]
+    [tag "platform-multi"]
+    [tag "attack-generic"]
+    [hostname "172.17.0.2"]
+    [uri "/"]
+    [unique_id "165097447014.179282"]
+    [ref ""],
+    client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"</code></p>
 <p>As we can see there are 3 different logs :</p>
 <ol>
 <li>Rule <strong>930120</strong> matched</li>
@@ -788,48 +788,48 @@ cat /var/log/nginx/access.log
 <li>Access denied (rule <strong>949110</strong>)</li>
 </ol>
 <p>One important thing to understand is that rule <strong>949110</strong> is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is <strong>10</strong> in this example). You should never remove the <strong>949110</strong> rule !</p>
-<p>If it's a false-positive you should then focus on both <strong>930120</strong> and <strong>932160</strong> rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info <a href="/quickstart-guide/#custom-configurations">here</a>).</p>
+<p>If it's a false-positive you should then focus on both <strong>930120</strong> and <strong>932160</strong> rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info <a href="/1.4/quickstart-guide/#custom-configurations">here</a>).</p>
 <h2 id="bad-behavior">Bad Behavior</h2>
-<p>A common false-positive case is that the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="/security-tuning/#bad-behavior">here</a>). You should start by reviewing the settings and edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
+<p>A common false-positive case is that the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="/1.4/security-tuning/#bad-behavior">here</a>). You should start by reviewing the settings and edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
 <h2 id="ip-unban">IP unban</h2>
 <p>You can manually unban an IP which can be useful when doing some tests but it needs the setting <code>USE_API</code> set to <code>yes</code> (which is not the default) so you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+docker exec mybunker bwcli unban 1.2.3.4</code></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+docker-compose exec mybunker bwcli unban 1.2.3.4</code></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mya</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+docker exec mybunker bwcli unban 1.2.3.4</code></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+docker-compose exec mybunker bwcli unban 1.2.3.4</code></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your service) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> <span class="k">$(</span>docker ps -q -f <span class="nv">name</span><span class="o">=</span>myautoconf<span class="k">)</span> bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+docker exec $(docker ps -q -f name=myautoconf) bwcli unban 1.2.3.4</code></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>kubectl exec</code> command (replace <code>myautoconf</code> with the name of your pod) :
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> myautoconf bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+kubectl exec myautoconf bwcli unban 1.2.3.4</code></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>bwcli</code> command :
-<div class="highlight"><pre><span></span><code>bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<code>shell
+bwcli unban 1.2.3.4</code></p>
 </div>
 </div>
 </div>
 <h2 id="whitelisting">Whitelisting</h2>
-<p>If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist it using the <a href="/security-tuning/#blacklisting-and-whitelisting">whitelisting feature</a>. We don't recommend using the <code>WHITELIST_URI*</code> or <code>WHITELIST_USER_AGENT*</code> settings unless they are set to secret and unpredictable values. Common use cases are :</p>
+<p>If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist it using the <a href="/1.4/security-tuning/#blacklisting-and-whitelisting">whitelisting feature</a>. We don't recommend using the <code>WHITELIST_URI*</code> or <code>WHITELIST_USER_AGENT*</code> settings unless they are set to secret and unpredictable values. Common use cases are :</p>
 <ul>
 <li>Healthcheck / status bot</li>
 <li>Callback like IPN or webhook</li>

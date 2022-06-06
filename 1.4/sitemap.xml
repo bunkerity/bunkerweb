@@ -2,57 +2,57 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.bunkerweb.io/1.4/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/about/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/concepts/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/integrations/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/migrating/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/plugins/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/quickstart-guide/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/security-tuning/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/settings/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/troubleshooting/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.bunkerweb.io/1.4/web-ui/</loc>
-         <lastmod>2022-06-03</lastmod>
+         <lastmod>2022-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

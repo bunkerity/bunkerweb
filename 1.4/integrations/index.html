@@ -661,14 +661,14 @@ documentation for the current version.
 <figcaption>Docker integration</figcaption>
 </figure>
 <p>Using BunkerWeb as a <a href="https://www.docker.com/">Docker</a> container is a quick and easy way to test and use it as long as you are familiar with the Docker technology.</p>
-<p>We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a> :</p>
-<div class="highlight"><pre><span></span><code>docker pull bunkerity/bunkerweb:1.4.0
-</code></pre></div>
+<p>We provide ready to use prebuilt images for x64 and x86 architectures (armv7 and armv8 are not supported at the moment) on <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a> :</p>
+<p><code>shell
+docker pull bunkerity/bunkerweb:1.4.0</code></p>
 <p>Alternatively, you can build the Docker images directly from the <a href="https://github.com/bunkerity/bunkerweb">source</a> (and take a coffee ☕ because it may be long depending on your hardware) :</p>
-<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb.git <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> bunkerweb <span class="o">&amp;&amp;</span> <span class="se">\</span>
-docker build -t my-bunkerweb .
-</code></pre></div>
+<p><code>shell
+git clone https://github.com/bunkerity/bunkerweb.git &amp;&amp; \
+cd bunkerweb &amp;&amp; \
+docker build -t my-bunkerweb .</code></p>
 <p>Usage and configuration of the BunkerWeb container are based on :</p>
 <ul>
 <li><strong>Environment variables</strong> to configure BunkerWeb and meet your use cases</li>
@@ -677,48 +677,48 @@ docker build -t my-bunkerweb .
 </ul>
 <h3 id="environment-variables">Environment variables</h3>
 <p>Settings are passed to BunkerWeb using Docker environment variables. You can use the <code>-e</code> flag :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<p><code>shell
+docker run \
        ...
-       -e <span class="nv">MY_SETTING</span><span class="o">=</span>value <span class="se">\</span>
-       -e <span class="s2">&quot;MY_OTHER_SETTING=value with spaces&quot;</span> <span class="se">\</span>
+       -e MY_SETTING=value \
+       -e "MY_OTHER_SETTING=value with spaces" \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span><span class="w"></span>
-</code></pre></div>
+<p><code>yaml
+...
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    environment:
+      - MY_SETTING=value</code></p>
 <div class="admonition info">
 <p class="admonition-title">Full list</p>
-<p>For the complete list of environment variables, see the <a href="/settings">settings section</a> of the documentation.</p>
+<p>For the complete list of environment variables, see the <a href="/1.4/settings">settings section</a> of the documentation.</p>
 </div>
 <h3 id="volume">Volume</h3>
 <p>A volume is used to share data with BunkerWeb and store persistent data like certificates, cached files, ...</p>
 <p>The easiest way of managing the volume is by using a named one. You will first need to create it :</p>
-<div class="highlight"><pre><span></span><code>docker volume create bw-data
-</code></pre></div>
+<p><code>shell
+docker volume create bw-data</code></p>
 <p>Once it's created, you can mount it on <code>/data</code> when running the container :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<p><code>shell
+docker run \
        ...
-       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
+       -v "${PWD}/bw-data:/data" \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<span class="nn">...</span><span class="w"></span>
-<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
-</code></pre></div>
+<p><code>yaml
+...
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    volumes:
+      - bw-data:/data
+...
+volumes:
+  bw-data:</code></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>BunkerWeb runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is the security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
@@ -726,48 +726,49 @@ But there is a downside : if you use a <strong>local folder for the persistent d
 <code>shell mkdir bw-data &amp;&amp; \ chown root:101 bw-data &amp;&amp; \ chmod 770 bw-data</code></p>
 </div>
 <p>Alternatively, if the folder already exists :</p>
-<div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
-chmod -R <span class="m">770</span> bw-data
-</code></pre></div>
+<p><code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
 <p>Mounting the folder :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<p><code>shell
+docker run \
         ...
-      -v ./bw-data:/data <span class="se">\</span>
+      -v ./bw-data:/data \
         ...
-        bunkerity/bunkerweb:1.4.0
-</code></pre></div>
+        bunkerity/bunkerweb:1.4.0</code></p>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml</p>
+<p>...
+services:
+  mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+```</p>
 <h3 id="networks">Networks</h3>
 <p>The easiest way to connect BunkerWeb to web applications is by using Docker networks.</p>
 <p>First of all, you will need to create a network :</p>
-<div class="highlight"><pre><span></span><code>docker network create mynetwork
-</code></pre></div>
+<p><code>shell
+docker network create mynetwork</code></p>
 <p>Once it's created, you will need to connect the container to that network :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+<p><code>shell
+docker run \
        ...
-       --network mynetwork <span class="se">\</span>
+       --network mynetwork \
        ...
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div>
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.</p>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-<span class="nn">...</span><span class="w"></span>
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-net</span><span class="p">:</span><span class="w"></span>
-</code></pre></div>
+<p><code>yaml
+...
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    networks:
+      - bw-net
+...
+networks:
+  bw-net:</code></p>
 <h2 id="docker-autoconf">Docker autoconf</h2>
 <figure>
 <p><img align="center" alt="Overwiew" src="../assets/img/integration-autoconf.svg" />
@@ -782,124 +783,116 @@ chmod -R <span class="m">770</span> bw-data
 <p>Instead of defining environment variables for the BunkerWeb container, you simply add <strong>labels</strong> to your web applications containers and the <strong>autoconf</strong> will "automagically" take care of the rest.</p>
 <div class="admonition info">
 <p class="admonition-title">Multisite mode</p>
-<p>The Docker autoconf integration implies the use of <strong>multisite mode</strong>. Please refer to the <a href="/concepts/#multisite-mode">multisite section</a> of the documentation for more information.</p>
+<p>The Docker autoconf integration implies the use of <strong>multisite mode</strong>. Please refer to the <a href="/1.4/concepts/#multisite-mode">multisite section</a> of the documentation for more information.</p>
 </div>
 <p>First of all, you will need to create the data volume :</p>
-<div class="highlight"><pre><span></span><code>docker volume create bw-data
-</code></pre></div>
+<p><code>shell
+docker volume create bw-data</code></p>
 <ul>
 <li>One for sharing the persistent data, mounted on <strong>/data</strong></li>
 <li>Another one for sharing the generated Nginx configurations, mounted on <strong>/etc/nginx</strong></li>
 </ul>
 <p>Then, you can create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :</p>
-<div class="highlight"><pre><span></span><code>docker network create --subnet <span class="m">10</span>.20.30.0/24 bw-autoconf <span class="o">&amp;&amp;</span> <span class="se">\</span>
-docker network create bw-services
-</code></pre></div>
+<p><code>shell
+docker network create --subnet 10.20.30.0/24 bw-autoconf &amp;&amp; \
+docker network create bw-services</code></p>
 <ul>
 <li>One for communication between <strong>BunkerWeb</strong> and <strong>autoconf</strong></li>
 <li>Another one for communication between <strong>BunkerWeb</strong> and <strong>web applications</strong></li>
 </ul>
 <p>You can now create the BunkerWeb container with the <code>AUTOCONF_MODE=yes</code> setting and the <code>bunkerweb.AUTOCONF</code> label (replace 10.20.30.0/24 with the subnet specified before) :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
-       -d <span class="se">\</span>
-       --name mybunker <span class="se">\</span>
-       --network bw-autoconf <span class="se">\</span>
-       -p <span class="m">80</span>:8080 <span class="se">\</span>
-       -p <span class="m">443</span>:8443 <span class="se">\</span>
-       -e <span class="nv">AUTOCONF_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
-       -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
-       -l bunkerweb.AUTOCONF <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.0 <span class="o">&amp;&amp;</span> <span class="se">\</span>
-
-docker network connect bw-services mybunker
-</code></pre></div>
+<p>```shell
+docker run \
+       -d \
+       --name mybunker \
+       --network bw-autoconf \
+       -p 80:8080 \
+       -p 443:8443 \
+       -e AUTOCONF_MODE=yes \
+       -e MULTISITE=yes \
+       -e SERVER_NAME= \
+       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
+       -l bunkerweb.AUTOCONF \
+       bunkerity/bunkerweb:1.4.0 &amp;&amp; \</p>
+<p>docker network connect bw-services mybunker
+```</p>
 <p>And the autoconf one :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
-       -d <span class="se">\</span>
-       --name myautoconf <span class="se">\</span>
-       --network bw-autoconf <span class="se">\</span>
-       -v bw-data:/data <span class="se">\</span>
-       -v /var/run/docker.sock:/var/run/docker.sock:ro <span class="se">\</span>
-       bunkerity/bunkerweb-autoconf:1.4.0
-</code></pre></div>
+<p><code>shell
+docker run \
+       -d \
+       --name myautoconf \
+       --network bw-autoconf \
+       -v bw-data:/data \
+       -v /var/run/docker.sock:/var/run/docker.sock:ro \
+       bunkerity/bunkerweb-autoconf:1.4.0</code></p>
 <p>Here is the docker-compose equivalent for the BunkerWeb autoconf stack :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span><span class="w"></span>
-<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-
-<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
-<span class="w">      </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+version: '3'</p>
+<p>services:</p>
+<p>mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - bw-data:/data
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    labels:
+      - "bunkerweb.AUTOCONF"
+    networks:
+      - bw-autoconf
+      - bw-services</p>
+<p>myautoconf:
+    image: bunkerity/bunkerweb-autoconf:1.4.0
+    volumes:
+      - bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bw-autoconf</p>
+<p>volumes:
+  bw-data:</p>
+<p>networks:
+  bw-autoconf:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+```</p>
 <p>Once the stack is setup, you can now create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically setup BunkerWeb :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
-       -d <span class="se">\</span>
-       --name myapp <span class="se">\</span>
-       --network bw-services <span class="se">\</span>
-       -l bunkerweb.MY_SETTING_1<span class="o">=</span>value1 <span class="se">\</span>
-       -l bunkerweb.MY_SETTING_2<span class="o">=</span>value2 <span class="se">\</span>
+<p><code>shell
+docker run \
+       -d \
+       --name myapp \
+       --network bw-services \
+       -l bunkerweb.MY_SETTING_1=value1 \
+       -l bunkerweb.MY_SETTING_2=value2 \
        ...
-       mywebapp:4.2
-</code></pre></div>
+       mywebapp:4.2</code></p>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp</span><span class="w"></span>
-<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_1=value1&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_2=value2&quot;</span><span class="w"></span>
-
-<span class="nn">...</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-
-<span class="nn">...</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+...</p>
+<p>services:</p>
+<p>myapp:
+    image: mywebapp:4.2
+    networks:
+      bw-services:
+        aliases:
+          - myapp
+    labels:
+      - "bunkerweb.MY_SETTING_1=value1"
+      - "bunkerweb.MY_SETTING_2=value2"</p>
+<p>...</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services</p>
+<p>...
+```</p>
 <h2 id="swarm">Swarm</h2>
 <figure>
 <p><img align="center" alt="Overwiew" src="../assets/img/integration-swarm.svg" />
@@ -914,133 +907,129 @@ docker network connect bw-services mybunker
 <p>Like the <a href="#docker-autoconf">Docker autoconf integration</a>, configuration for web services is defined using labels starting with the special <strong>bunkerweb.</strong> prefix.</p>
 <p>The recommended setup is to schedule the <strong>BunkerWeb service</strong> as a <strong>global service</strong> on all worker nodes and the <strong>autoconf service</strong> as a <strong>single replicated service</strong> on a manager node.</p>
 <p>First of all, you will need to create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :</p>
-<div class="highlight"><pre><span></span><code>docker network create -d overlay --attachable --subnet <span class="m">10</span>.20.30.0/24 bw-autoconf <span class="o">&amp;&amp;</span> <span class="se">\</span>
-docker network create -d overlay --attachable bw-services
-</code></pre></div>
+<p><code>shell
+docker network create -d overlay --attachable --subnet 10.20.30.0/24 bw-autoconf &amp;&amp; \
+docker network create -d overlay --attachable bw-services</code></p>
 <ul>
 <li>One for communication between <strong>BunkerWeb</strong> and <strong>autoconf</strong></li>
 <li>Another one for communication between <strong>BunkerWeb</strong> and <strong>web applications</strong></li>
 </ul>
 <p>You can now create the BunkerWeb service (replace 10.20.30.0/24 with the subnet specified before) :</p>
-<div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
-       --name mybunker <span class="se">\</span>
-       --mode global <span class="se">\</span>
-       --constraint node.role<span class="o">==</span>worker <span class="se">\</span>
-       --network bw-autoconf <span class="se">\</span>
-       --network bw-services <span class="se">\</span>
-       -p <span class="nv">published</span><span class="o">=</span><span class="m">80</span>,target<span class="o">=</span><span class="m">8080</span>,mode<span class="o">=</span>host <span class="se">\</span>
-       -p <span class="nv">published</span><span class="o">=</span><span class="m">443</span>,target<span class="o">=</span><span class="m">8443</span>,mode<span class="o">=</span>host <span class="se">\</span>
-       -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
-       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
-       -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
-       -l bunkerweb.AUTOCONF <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.0
-</code></pre></div>
+<p><code>shell
+docker service create \
+       --name mybunker \
+       --mode global \
+       --constraint node.role==worker \
+       --network bw-autoconf \
+       --network bw-services \
+       -p published=80,target=8080,mode=host \
+       -p published=443,target=8443,mode=host \
+       -e SWARM_MODE=yes \
+       -e SERVER_NAME= \
+       -e MULTISITE=yes \
+       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
+       -l bunkerweb.AUTOCONF \
+       bunkerity/bunkerweb:1.4.0</code></p>
 <p>And the autoconf one :</p>
-<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
-       create <span class="se">\</span>
-       --name myautoconf <span class="se">\</span>
-       --constraint node.role<span class="o">==</span>manager <span class="se">\</span>
-       --network bw-autoconf <span class="se">\</span>
-       --mount <span class="nv">type</span><span class="o">=</span>bind,source<span class="o">=</span>/var/run/docker.sock,destination<span class="o">=</span>/var/run/docker.sock,ro <span class="se">\</span>
-       --mount <span class="nv">type</span><span class="o">=</span>volume,source<span class="o">=</span>bw-data,destination<span class="o">=</span>/data <span class="se">\</span>
-       -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-       bunkerity/bunkerweb-autoconf:1.4.0
-</code></pre></div>
+<p><code>shell
+docker service \
+       create \
+       --name myautoconf \
+       --constraint node.role==manager \
+       --network bw-autoconf \
+       --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
+       --mount type=volume,source=bw-data,destination=/data \
+       -e SWARM_MODE=yes \
+       bunkerity/bunkerweb-autoconf:1.4.0</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.5&#39;</span><span class="w"></span>
-
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
-<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
-<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span><span class="w"></span>
-<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span><span class="w"></span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==manager&quot;</span><span class="w"></span>
-
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span><span class="w"></span>
-<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span><span class="w"></span>
-<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-
-<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+version: '3.5'</p>
+<p>services:</p>
+<p>mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - published: 80
+        target: 8080
+        mode: host
+        protocol: tcp
+      - published: 443
+        target: 8443
+        mode: host
+        protocol: tcp
+    environment:
+      - SWARM_MODE=yes
+      - SERVER_NAME=
+      - MULTISITE=yes
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    networks:
+      - bw-autoconf
+      - bw-services
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.AUTOCONF"</p>
+<p>myautoconf:
+    image: bunkerity/bunkerweb-autoconf:1.4.0
+    environment:
+      - SWARM_MODE=yes
+    volumes:
+      - bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bw-autoconf
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.role==manager"</p>
+<p>networks:
+  bw-autoconf:
+    driver: overlay
+    attachable: true
+    name: bw-autoconf
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    driver: overlay
+    attachable: true
+    name: bw-services</p>
+<p>volumes:
+  bw-data:
+```</p>
 <p>Once the BunkerWeb Swarm stack is set up and running (see autoconf logs for more information), you can now deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :</p>
-<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
-       create <span class="se">\</span>
-       --name myapp <span class="se">\</span>
-       --network bw-services <span class="se">\</span>
-       -l bunkerweb.MY_SETTING_1<span class="o">=</span>value1 <span class="se">\</span>
-       -l bunkerweb.MY_SETTING_2<span class="o">=</span>value2 <span class="se">\</span>
+<p><code>shell
+docker service \
+       create \
+       --name myapp \
+       --network bw-services \
+       -l bunkerweb.MY_SETTING_1=value1 \
+       -l bunkerweb.MY_SETTING_2=value2 \
        ...
-       mywebapp:4.2
-</code></pre></div>
+       mywebapp:4.2</code></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_1=value1&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_2=value2&quot;</span><span class="w"></span>
-<span class="nn">...</span><span class="w"></span>
-<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-</code></pre></div>
+<p><code>yaml
+...
+services:
+  myapp:
+    image: mywebapp:4.2
+    networks:
+      - bw-services
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.MY_SETTING_1=value1"
+        - "bunkerweb.MY_SETTING_2=value2"
+...
+networks:
+  bw-services:
+    external:
+      name: bw-services</code></p>
 <h2 id="kubernetes">Kubernetes</h2>
 <figure>
 <p><img align="center" alt="Overwiew" src="../assets/img/integration-kubernetes.svg" />
@@ -1049,168 +1038,170 @@ docker network create -d overlay --attachable bw-services
 </figure>
 <p>The autoconf acts as an <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress controller</a> and will configure the BunkerWeb instances according to the <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress resources</a>. It also monitors other Kubernetes objects like <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> for custom configurations.</p>
 <p>The first step to install BunkerWeb on a Kubernetes cluster is to add a role and permissions on the cluster for the autoconf :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span><span class="w"></span>
-<span class="nt">rules</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRoleBinding</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crb-bunkerweb</span><span class="w"></span>
-<span class="nt">subjects</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
-<span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<span class="nt">roleRef</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span><span class="w"></span>
-<span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cr-bunkerweb
+rules:
+- apiGroups: [""]
+  resources: ["services", "pods", "configmaps"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "watch", "list"]</p>
+<hr />
+<p>apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-bunkerweb</p>
+<hr />
+<p>apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crb-bunkerweb
+subjects:
+- kind: ServiceAccount
+  name: sa-bunkerweb
+  namespace: default
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: cr-bunkerweb
+  apiGroup: rbac.authorization.k8s.io
+```</p>
 <p>The recommended way of deploying BunkerWeb is using a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a> which means each node in the cluster will run an instance of BunkerWeb :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># mandatory annotation</span><span class="w"></span>
-<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">bunkerweb.io/AUTOCONF</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span><span class="w"></span>
-<span class="w">          </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span><span class="w"></span>
-<span class="w">          </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">          </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">drop</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
-<span class="w">          </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span><span class="w"></span>
-<span class="w">          </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
-<span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># replace with your DNS resolvers</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_API</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/bunkerweb/helpers/healthcheck.sh</span><span class="w"></span>
-<span class="w">          </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">          </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
-<span class="w">          </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">          </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
-<span class="w">        </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/bunkerweb/helpers/healthcheck.sh</span><span class="w"></span>
-<span class="w">          </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">          </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">          </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">          </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
-<span class="nn">---</span><span class="w"></span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-</code></pre></div>
+<p>```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    metadata:
+      labels:
+        app: bunkerweb
+      # mandatory annotation
+      annotations:
+        bunkerweb.io/AUTOCONF: "yes"
+    spec:
+      containers:
+      - name: bunkerweb
+        image: bunkerity/bunkerweb
+        securityContext:
+          runAsUser: 101
+          runAsGroup: 101
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - containerPort: 8080
+          hostPort: 80
+        - containerPort: 8443
+          hostPort: 443
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        # replace with your DNS resolvers
+        # e.g. : kube-dns.kube-system.svc.cluster.local
+        - name: DNS_RESOLVERS
+          value: "coredns.kube-system.svc.cluster.local"
+        - name: USE_API
+          value: "yes"
+        # 10.0.0.0/8 is the cluster internal subnet
+        - name: API_WHITELIST_IP
+          value: "127.0.0.0/8 10.0.0.0/8"
+        - name: SERVER_NAME
+          value: ""
+        - name: MULTISITE
+          value: "yes"
+        livenessProbe:
+          exec:
+            command:
+            - /opt/bunkerweb/helpers/healthcheck.sh
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 1
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /opt/bunkerweb/helpers/healthcheck.sh
+          initialDelaySeconds: 30
+          periodSeconds: 1
+          timeoutSeconds: 1
+          failureThreshold: 3</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb
+spec:
+  clusterIP: None
+  selector:
+    app: bunkerweb
+```</p>
 <p>In order to store persistent data, you will need a <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">PersistentVolumeClaim</a> :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span><span class="w"></span>
-<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">requests</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span><span class="w"></span>
-</code></pre></div>
+<p><code>yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bunkerweb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi</code></p>
 <p>Now, you can start the autoconf as a single replica <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a> :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span><span class="w"></span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
-<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span><span class="w"></span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf</span><span class="w"></span>
-<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span><span class="w"></span>
-<span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w"></span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-bunkerweb</span><span class="w"></span>
-<span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/data</span><span class="w"></span>
-</code></pre></div>
-<p>Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that <a href="/settings">settings</a> need to be set as annotations for the Ingress resource with the special value <strong>bunkerweb.io</strong> for the domain part :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span><span class="w"></span>
-<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value1&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value2&quot;</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
-<span class="nn">...</span><span class="w"></span>
-</code></pre></div>
+<p><code>yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-controller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-controller
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-controller
+    spec:
+      serviceAccountName: sa-bunkerweb
+      volumes:
+      - name: vol-bunkerweb
+        persistentVolumeClaim:
+          claimName: pvc-bunkerweb
+      containers:
+      - name: bunkerweb-controller
+        image: bunkerity/bunkerweb-autoconf
+        imagePullPolicy: Always
+        env:
+        - name: KUBERNETES_MODE
+          value: "yes"
+        volumeMounts:
+        - name: vol-bunkerweb
+          mountPath: /data</code></p>
+<p>Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that <a href="/1.4/settings">settings</a> need to be set as annotations for the Ingress resource with the special value <strong>bunkerweb.io</strong> for the domain part :</p>
+<p><code>yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/MY_SETTING_1: "value1"
+    bunkerweb.io/MY_SETTING_2: "value2"
+spec:
+  rules:
+...</code></p>
 <h2 id="linux">Linux</h2>
 <figure>
 <p><img align="center" alt="Overwiew" src="../assets/img/integration-linux.svg" />
@@ -1224,42 +1215,84 @@ docker network create -d overlay --attachable bw-services
 <li>Fedora 36</li>
 <li>CentOS Stream 8</li>
 </ul>
-<p>Please note that you will need to <strong>install NGINX 1.20.2 before BunkerWeb</strong>. The installation is not covered in this documentation but you need to use prebuilt packages from the NGINX official repository as described <a href="https://nginx.org/en/linux_packages.html">here</a>. If you are on Fedora, you can use the prebuilt packages from the Fedora repository.</p>
-<p>Repositories of Linux packages for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>, they provide a bash script to automatically add and trust the repository (but you can also follow the <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer) :</p>
+<p>Please note that you will need to <strong>install NGINX 1.20.2 before BunkerWeb</strong>. For all distros, except Fedora, using prebuilt packages from <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a> is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official supported way of installing BunkerWeb on Linux.</p>
+<p>Repositories of Linux packages for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>, they provide a bash script to automatically add and trust the repository (but you can also follow the <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer).</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">CentOS Stream</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-apt install -y bunkerweb
-</code></pre></div>
+<p>The first step is to add NGINX official repository :
+<code>shell
+sudo apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring &amp;&amp; \
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+| sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null &amp;&amp; \
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+http://nginx.org/packages/debian `lsb_release -cs` nginx" \
+| sudo tee /etc/apt/sources.list.d/nginx.list</code></p>
+<p>You should now be able to install NGINX 1.20.2 :
+<code>shell
+sudo apt update &amp;&amp; \
+sudo apt install nginx=1.20.2-1~bullseye</code></p>
+<p>And finally install BunkerWeb 1.4.0 :
+<code>shell
+curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash &amp;&amp; \
+apt update &amp;&amp; \
+apt install -y bunkerweb=1.4.0</code></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-apt install -y bunkerweb
-</code></pre></div>
+<p>The first step is to add NGINX official repository :
+<code>shell
+sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring &amp;&amp; \
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+| sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null &amp;&amp; \
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+| sudo tee /etc/apt/sources.list.d/nginx.list</code></p>
+<p>You should now be able to install NGINX 1.20.2 :
+<code>shell
+sudo apt update &amp;&amp; \
+sudo apt install nginx=1.20.2-1~jammy</code></p>
+<p>And finally install BunkerWeb 1.4.0 :
+<code>shell
+curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash &amp;&amp; \
+apt update &amp;&amp; \
+apt install -y bunkerweb=1.4.0</code></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-dnf install -y bunkerweb
-</code></pre></div>
+<p>Fedora already provides NGINX 1.20.2 that we support :
+<code>shell
+sudo dnf install nginx-1.20.2</code></p>
+<p><code>shell
+curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash &amp;&amp; \
+dnf check-update &amp;&amp; \
+dnf install -y bunkerweb-1.4.0</code></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>dnf install -y epel-release <span class="o">&amp;&amp;</span> <span class="se">\</span>
-curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-dnf install -y bunkerweb
-</code></pre></div>
+<p>The first step is to add NGINX official repository, create the following file at <code>/etc/yum.repos.d/nginx.repo</code> :
+<code>conf
+[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true</code></p>
+<p>You should now be able to install NGINX 1.20.2 :
+<code>shell
+sudo dnf install nginx-1.20.2</code></p>
+<p>And finally install BunkerWeb 1.4.0 :
+<code>shell
+dnf install -y epel-release &amp;&amp; \
+curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash &amp;&amp; \
+dnf check-update &amp;&amp; \
+dnf install -y bunkerweb-1.4.0</code></p>
 </div>
 </div>
 </div>
 <p>Configuration of BunkerWeb is done by editing the <code>/opt/bunkerweb/variables.env</code> file :</p>
-<div class="highlight"><pre><span></span><code>MY_SETTING_1=value1
+<p><code>conf
+MY_SETTING_1=value1
 MY_SETTING_2=value2
-...
-</code></pre></div>
+...</code></p>
 <p>BunkerWeb is managed using systemctl :</p>
 <ul>
 <li>Check BunkerWeb status : <code>systemctl status bunkerweb</code></li>
