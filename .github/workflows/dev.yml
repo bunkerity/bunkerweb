@@ -192,7 +192,6 @@ jobs:
           cache-from: type=registry,ref=bunkerity/cache:bw-ui-armv8-cache
           cache-to: type=registry,ref=bunkerity/cache:bw-ui-armv8-cache,mode=min
 
-
   # Run tests
   tests:
     needs: build-bw-amd64
@@ -227,6 +226,37 @@ jobs:
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
       - name: Import BW autoconf image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
+      - name: Import BW UI image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest 10.20.1.1:5000/bw-ui-tests:latest && docker push 10.20.1.1:5000/bw-ui-tests:latest
+
+      # CVE check on OS
+      - name: Check security vulnerabilities for BW
+        uses: aquasecurity/trivy-action@master
+        with:
+          vuln-type: os
+          image-ref: 10.20.1.1:5000/bw-tests:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+      - name: Check security vulnerabilities for autoconf
+        uses: aquasecurity/trivy-action@master
+        with:
+          vuln-type: os
+          image-ref: 10.20.1.1:5000/bw-autoconf-tests:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+      - name: Check security vulnerabilities for UI
+        uses: aquasecurity/trivy-action@master
+        with:
+          vuln-type: os
+          image-ref: 10.20.1.1:5000/bw-ui-tests:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
 
       # Run tests
       - name: Run Docker tests
@@ -270,39 +300,36 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64,linux/386,linux/arm64/v8
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb:staging,bunkerity/bunkerweb:dev
           cache-from: |
             type=registry,ref=bunkerity/cache:bw-amd64-cache
             type=registry,ref=bunkerity/cache:bw-386-cache
-            type=registry,ref=bunkerity/cache:bw-armv7-cache
             type=registry,ref=bunkerity/cache:bw-armv8-cache
       - name: Build and push BW autoconf
         uses: docker/build-push-action@v3
         with:
           context: .
           file: autoconf/Dockerfile
-          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64,linux/386,linux/arm64/v8
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf:staging,bunkerity/bunkerweb-autoconf:dev
           cache-from: |
             type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
             type=registry,ref=bunkerity/cache:bw-autoconf-386-cache
-            type=registry,ref=bunkerity/cache:bw-autoconf-armv7-cache
             type=registry,ref=bunkerity/cache:bw-autoconf-armv8-cache
       - name: Build and push BW UI
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ui/Dockerfile
-          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64,linux/386,linux/arm64/v8
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui:staging,bunkerity/bunkerweb-ui:dev
           cache-from: |
             type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
             type=registry,ref=bunkerity/cache:bw-ui-386-cache
-            type=registry,ref=bunkerity/cache:bw-ui-armv7-cache
             type=registry,ref=bunkerity/cache:bw-ui-armv8-cache
 
   # Push to PackageCloud
