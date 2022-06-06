@@ -674,41 +674,97 @@ List of supported Linux distros :
 - Fedora 36
 - CentOS Stream 8
 
-Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. The installation is not covered in this documentation but you need to use prebuilt packages from the NGINX official repository as described [here](https://nginx.org/en/linux_packages.html). If you are on Fedora, you can use the prebuilt packages from the Fedora repository.
+Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official supported way of installing BunkerWeb on Linux.
 
-Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer) :
+Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
 === "Debian"
 
+    The first step is to add NGINX official repository :
+    ```shell
+	sudo apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
+	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+	echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/debian `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+	```
+
+    You should now be able to install NGINX 1.20.2 :
+	```shell
+	sudo apt update && \
+	sudo apt install nginx=1.20.2-1~bullseye
+	```
+
+	And finally install BunkerWeb 1.4.0 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	apt update && \
-	apt install -y bunkerweb
+	apt install -y bunkerweb=1.4.0
     ```
 
 === "Ubuntu"
 
+    The first step is to add NGINX official repository :
+    ```shell
+	sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
+	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+	echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+	```
+
+    You should now be able to install NGINX 1.20.2 :
+	```shell
+	sudo apt update && \
+	sudo apt install nginx=1.20.2-1~jammy
+	```
+
+	And finally install BunkerWeb 1.4.0 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	apt update && \
-	apt install -y bunkerweb
+	apt install -y bunkerweb=1.4.0
     ```
 
 === "Fedora"
 
+    Fedora already provides NGINX 1.20.2 that we support :
+	```shell
+	sudo dnf install nginx-1.20.2
+	```
+
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
 	dnf check-update && \
-	dnf install -y bunkerweb
+	dnf install -y bunkerweb-1.4.0
     ```
 
 === "CentOS Stream"
 
+    The first step is to add NGINX official repository, create the following file at `/etc/yum.repos.d/nginx.repo` :
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+	```
+
+    You should now be able to install NGINX 1.20.2 :
+	```shell
+	sudo dnf install nginx-1.20.2
+	```
+
+	And finally install BunkerWeb 1.4.0 :
     ```shell
 	dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
 	dnf check-update && \
-	dnf install -y bunkerweb
+	dnf install -y bunkerweb-1.4.0
     ```
 
 Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
