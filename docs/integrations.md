@@ -9,7 +9,7 @@
 
 Using BunkerWeb as a [Docker](https://www.docker.com/) container is a quick and easy way to test and use it as long as you are familiar with the Docker technology.
 
-We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
+We provide ready to use prebuilt images for x64 and x86 architectures (armv7 and armv8 are not supported at the moment) on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
 
 ```shell
 docker pull bunkerity/bunkerweb:1.4.0
