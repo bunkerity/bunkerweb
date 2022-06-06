@@ -15,8 +15,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v2
-        with:
-          buildkitd-flags: --debug
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -135,35 +133,65 @@ jobs:
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
       # Build images
-      - name: Build BW for arm
+      - name: Build BW for armv7
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/arm/v7,linux/arm64/v8
+          platforms: linux/arm/v7
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-arm:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-arm-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-arm-cache,mode=min
-      - name: Build BW autoconf for arm
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-armv7:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-armv7-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-armv7-cache,mode=min
+      - name: Build BW for armv8
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-armv8:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-armv8-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-armv8-cache,mode=min
+      - name: Build BW autoconf for armv7
         uses: docker/build-push-action@v3
         with:
           context: .
           file: autoconf/Dockerfile
-          platforms: linux/arm/v7,linux/arm64/v8
+          platforms: linux/arm/v7
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-arm:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-arm-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-arm-cache,mode=min
-      - name: Build BW UI for arm
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-armv7:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-armv7-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-armv7-cache,mode=min
+      - name: Build BW autoconf for armv8
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-armv8:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-armv8-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-armv8-cache,mode=min
+      - name: Build BW UI for armv7
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ui/Dockerfile
-          platforms: linux/arm/v7,linux/arm64/v8
+          platforms: linux/arm/v7
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-arm:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-ui-arm-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-ui-arm-cache,mode=min
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-armv7:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-ui-armv7-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ui-armv7-cache,mode=min
+      - name: Build BW UI for armv8
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-armv8:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-ui-armv8-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ui-armv8-cache,mode=min
+
 
   # Run tests
   tests:
@@ -248,7 +276,8 @@ jobs:
           cache-from: |
             type=registry,ref=bunkerity/cache:bw-amd64-cache
             type=registry,ref=bunkerity/cache:bw-386-cache
-            type=registry,ref=bunkerity/cache:bw-arm-cache
+            type=registry,ref=bunkerity/cache:bw-armv7-cache
+            type=registry,ref=bunkerity/cache:bw-armv8-cache
       - name: Build and push BW autoconf
         uses: docker/build-push-action@v3
         with:
@@ -260,7 +289,8 @@ jobs:
           cache-from: |
             type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
             type=registry,ref=bunkerity/cache:bw-autoconf-386-cache
-            type=registry,ref=bunkerity/cache:bw-autoconf-arm-cache
+            type=registry,ref=bunkerity/cache:bw-autoconf-armv7-cache
+            type=registry,ref=bunkerity/cache:bw-autoconf-armv8-cache
       - name: Build and push BW UI
         uses: docker/build-push-action@v3
         with:
@@ -272,7 +302,8 @@ jobs:
           cache-from: |
             type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
             type=registry,ref=bunkerity/cache:bw-ui-386-cache
-            type=registry,ref=bunkerity/cache:bw-ui-arm-cache
+            type=registry,ref=bunkerity/cache:bw-ui-armv7-cache
+            type=registry,ref=bunkerity/cache:bw-ui-armv8-cache
 
   # Push to PackageCloud
   push-linux:
