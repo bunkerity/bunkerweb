@@ -29,7 +29,7 @@ jobs:
 
       # Build images
       - name: Build BW for amd64
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/amd64
@@ -38,7 +38,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:buildcache
           cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:buildcache,mode=min
       - name: Build BW autoconf for amd64
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: autoconf/Dockerfile
@@ -48,7 +48,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:buildcache
           cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:buildcache,mode=min
       - name: Build BW UI for amd64
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: ui/Dockerfile
@@ -82,7 +82,7 @@ jobs:
 
       # Build images
       - name: Build BW for 386
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/386
@@ -91,7 +91,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:buildcache
           cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:buildcache,mode=min
       - name: Build BW autoconf for 386
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: autoconf/Dockerfile
@@ -101,7 +101,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache
           cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache,mode=min
       - name: Build BW UI for 386
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: ui/Dockerfile
@@ -135,7 +135,7 @@ jobs:
 
       # Build images
       - name: Build BW for arm
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/arm/v7,linux/arm64/v8
@@ -144,7 +144,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:buildcache
           cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:buildcache,mode=min
       - name: Build BW autoconf for arm
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: autoconf/Dockerfile
@@ -154,7 +154,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:buildcache
           cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:buildcache,mode=min
       - name: Build BW UI for arm
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: ui/Dockerfile
@@ -227,7 +227,7 @@ jobs:
 
       # Build and push
       - name: Build and push BW
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
@@ -238,7 +238,7 @@ jobs:
             type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:buildcache
             type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:buildcache
       - name: Build and push BW autoconf
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: autoconf/Dockerfile
@@ -250,7 +250,7 @@ jobs:
             type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache
             type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:buildcache
       - name: Build and push BW UI
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: ui/Dockerfile
