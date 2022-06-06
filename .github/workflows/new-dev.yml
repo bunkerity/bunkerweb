@@ -56,7 +56,7 @@ jobs:
           file: ui/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-amd64:latest
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest
           cache-from: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
           cache-to: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache,mode=min
 
@@ -198,7 +198,7 @@ jobs:
       - name: Import BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
       - name: Import BW autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-t ests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
 
       # Run tests
       - name: Run Docker tests
