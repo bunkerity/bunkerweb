@@ -6,19 +6,19 @@
 
 ## Volumes
 
-When using container-based integrations like [Docker](/integrations/#docker), [Docker autoconf](/integrations/#docker-autoconf), [Swarm](/integrations/#swarm) or [Kubernetes](/integrations/#kubernetes), volumes for storing data like certificates, cache or custom configurations has changed. We now have a single "bw-data" volume which contains everything and should be easier to manage than bunkerized.
+When using container-based integrations like [Docker](/1.4/integrations/#docker), [Docker autoconf](/1.4/integrations/#docker-autoconf), [Swarm](/1.4/integrations/#swarm) or [Kubernetes](/1.4/integrations/#kubernetes), volumes for storing data like certificates, cache or custom configurations has changed. We now have a single "bw-data" volume which contains everything and should be easier to manage than bunkerized.
 
 ## Removed features
 
 We decided to drop the following features :
 
-- Authelia : we will make an official [plugin](/plugins) for that
+- Authelia : we will make an official [plugin](/1.4/plugins) for that
 - Blocking "bad" referrers : we may add it again in the future
 - ROOT_SITE_SUBFOLDER : we will need to redesign this in the future
 
 ## Replaced BLOCK_*, WHITELIST_* and BLACKLIST_* settings
 
-The blocking mechanisms has been completely redesigned. We have detected that a lot of false positives came from the default blacklists hardcoded into bunkerized. That's why we decided to give the users the choice of their blacklists (and also whitelists) for IP address, reverse DNS, user-agent, URI and ASN, see the [Blacklisting and whitelisting](/security-tuning/#blacklisting-and-whitelisting) section of the [security tuning](/security-tuning).
+The blocking mechanisms has been completely redesigned. We have detected that a lot of false positives came from the default blacklists hardcoded into bunkerized. That's why we decided to give the users the choice of their blacklists (and also whitelists) for IP address, reverse DNS, user-agent, URI and ASN, see the [Blacklisting and whitelisting](/1.4/security-tuning/#blacklisting-and-whitelisting) section of the [security tuning](/1.4/security-tuning).
 
 ## Changed WHITELIST_USER_AGENT setting behavior
 
@@ -26,8 +26,8 @@ The new behavior of the WHITELIST_USER_AGENT setting is to **disable completely 
 
 ## Changed PROXY_REAL_IP_* settings
 
-To avoid any confusion between reverse proxy and real IP, we decided to renamed the `PROXY_REAL_IP_*` settings, you will find more information on the subject [here](/quickstart-guide/#behind-load-balancer-or-reverse-proxy).
+To avoid any confusion between reverse proxy and real IP, we decided to renamed the `PROXY_REAL_IP_*` settings, you will find more information on the subject [here](/1.4/quickstart-guide/#behind-load-balancer-or-reverse-proxy).
 
 ## Default values and new settings
 
-The default value of settings may have changed and we have added many other settings, we recommend you to read the [security tuning](/security-tuning) and [settings](/settings) sections of the documentation.
+The default value of settings may have changed and we have added many other settings, we recommend you to read the [security tuning](/1.4/security-tuning) and [settings](/1.4/settings) sections of the documentation.

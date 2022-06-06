@@ -1,7 +1,7 @@
 # Quickstart guide
 
 !!! info "Prerequisites"
-    We assume that you're already familiar with the [core concepts](/concepts) and you have followed the [integrations instructions](/integrations) for your environment.
+    We assume that you're already familiar with the [core concepts](/1.4/concepts) and you have followed the [integrations instructions](/1.4/integrations) for your environment.
 
 !!! tip "Going further"
 		To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/master/examples) of the repository to get real-world examples.
@@ -16,7 +16,7 @@ The following settings can be used :
 - `REVERSE_PROXY_URL` : the public path prefix
 - `REVERSE_PROXY_HOST` : (internal) address of the proxied web application
 
-You will find more settings about reverse proxy in the [settings section](/settings/#reverse-proxy) of the documentation.
+You will find more settings about reverse proxy in the [settings section](/1.4/settings/#reverse-proxy) of the documentation.
 
 ### Single application
 
@@ -92,7 +92,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Docker autoconf"
 
-    We will assume that you already have the [Docker autoconf integration](/integrations/#docker-autoconf) stack running on your machine and connected to a network called bw-services.
+    We will assume that you already have the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack running on your machine and connected to a network called bw-services.
 
     You can instantiate your container and pass the settings as labels :
     ```shell
@@ -132,7 +132,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Swarm"
 
-    We will assume that you already have the [Swarm integration](/integrations/#swarm) stack running on your cluster.
+    We will assume that you already have the [Swarm integration](/1.4/integrations/#swarm) stack running on your cluster.
 
     You can instantiate your service and pass the settings as labels :
     ```shell
@@ -177,7 +177,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Kubernetes"
 
-    We will assume that you already have the [Kubernetes integration](/integrations/#kubernetes) stack running on your cluster.
+    We will assume that you already have the [Kubernetes integration](/1.4/integrations/#kubernetes) stack running on your cluster.
 
     Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster :
     ```yaml
@@ -240,7 +240,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](/integrations/#linux) stack running on your machine.
+    We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
     ```shell
@@ -383,7 +383,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Docker autoconf"
 
-    We will assume that you already have the [Docker autoconf integration](/integrations/#docker-autoconf) stack running on your machine and connected to a network called bw-services.
+    We will assume that you already have the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack running on your machine and connected to a network called bw-services.
 
     You can instantiate your containers and pass the settings as labels :
     === "App #1"
@@ -495,7 +495,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Swarm"
 
-    We will assume that you already have the [Swarm integration](/integrations/#swarm) stack running on your cluster.
+    We will assume that you already have the [Swarm integration](/1.4/integrations/#swarm) stack running on your cluster.
 
     You can instantiate your services and pass the settings as labels :
     === "App #1"
@@ -623,7 +623,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Kubernetes"
 
-    We will assume that you already have the [Kubernetes integration](/integrations/#kubernetes) stack running on your cluster.
+    We will assume that you already have the [Kubernetes integration](/1.4/integrations/#kubernetes) stack running on your cluster.
 
     Let's also assume that you have some typical Deployments with Services to access the web applications from within the cluster :
 
@@ -782,7 +782,7 @@ You will find more settings about reverse proxy in the [settings section](/setti
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](/integrations/#linux) stack running on your machine.
+    We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
     Let's assume that you have some web applications running on the same machine as BunkerWeb :
 
@@ -848,7 +848,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value "proxy_protocol" when using PROXY protocol
 
-You will find more settings about real IP in the [settings section](/settings/#real-ip) of the documentation.
+You will find more settings about real IP in the [settings section](/1.4/settings/#real-ip) of the documentation.
 
 ### HTTP header
 
@@ -892,7 +892,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
+    Before running the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
     ```shell
     docker run \
            ...
@@ -917,7 +917,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Swarm"
 
-    Before running the [Swarm integration](/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
+    Before running the [Swarm integration](/1.4/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
     ```shell
     docker service create \
            ...
@@ -1026,7 +1026,7 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
+    Before running the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
     ```shell
     docker run \
            ...
@@ -1053,7 +1053,7 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Swarm"
 
-    Before running the [Swarm integration](/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
+    Before running the [Swarm integration](/1.4/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
     ```shell
     docker service create \
            ...
@@ -1124,7 +1124,7 @@ REAL_IP_HEADER=proxy_protocol
 
 ## Custom configurations
 
-Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info [here](/security-tuning/#modsecurity)). Here is the list of custom configurations types :
+Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info [here](/1.4/security-tuning/#modsecurity)). Here is the list of custom configurations types :
 
 - **http** : http level of NGINX
 - **server-http** : server level of NGINX
@@ -1140,7 +1140,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Docker"
 
-    When using the [Docker integration](/integrations/#docker), custom configurations must be written to the volume mounted on /data.
+    When using the [Docker integration](/1.4/integrations/#docker), custom configurations must be written to the volume mounted on /data.
 
     The first thing to do is to create the folders :
     ```shell
@@ -1183,7 +1183,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/integrations/#docker-autoconf), custom configurations must be written to the volume mounted on /data.
+    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), custom configurations must be written to the volume mounted on /data.
 
     The first thing to do is to create the folders :
     ```shell
@@ -1226,7 +1226,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Swarm"
 
-    When using the [Swarm integration](/integrations/#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
+    When using the [Swarm integration](/1.4/integrations/#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
     To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
 
@@ -1249,7 +1249,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](/integrations/#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    When using the [Kubernetes integration](/1.4/integrations/#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
     To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
 
@@ -1278,7 +1278,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Linux"
 
-    When using the [Linux integration](/integrations/#linux), custom configurations must be written to the /opt/bunkerweb/configs folder.
+    When using the [Linux integration](/1.4/integrations/#linux), custom configurations must be written to the /opt/bunkerweb/configs folder.
 
     Here is an example for server-http/hello-world.conf :
     ```conf

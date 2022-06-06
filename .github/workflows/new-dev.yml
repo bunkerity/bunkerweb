@@ -37,8 +37,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-amd64-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-amd64-cache,mode=min
       - name: Build BW autoconf for amd64
         uses: docker/build-push-action@v3
         with:
@@ -47,8 +47,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache,mode=min
       - name: Build BW UI for amd64
         uses: docker/build-push-action@v3
         with:
@@ -57,8 +57,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-amd64:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache,mode=min
 
   # Build bunkerweb/386
   build-bw-386:
@@ -90,8 +90,8 @@ jobs:
           platforms: linux/386
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-386:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-386:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-386:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-386-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-386-cache,mode=min
       - name: Build BW autoconf for 386
         uses: docker/build-push-action@v3
         with:
@@ -100,8 +100,8 @@ jobs:
           platforms: linux/386
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-386-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-386-cache,mode=min
       - name: Build BW UI for 386
         uses: docker/build-push-action@v3
         with:
@@ -110,9 +110,8 @@ jobs:
           platforms: linux/386
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:buildcache,mode=min
-
+          cache-from: ttype=registry,ref=bunkerity/cache:bw-ui-386-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ui-386-cache,mode=min
 
   # Build bunkerweb/arm
   build-bw-arm:
@@ -143,8 +142,8 @@ jobs:
           platforms: linux/arm/v7,linux/arm64/v8
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-arm:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-arm:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-arm:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-arm-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-arm-cache,mode=min
       - name: Build BW autoconf for arm
         uses: docker/build-push-action@v3
         with:
@@ -153,8 +152,8 @@ jobs:
           platforms: linux/arm/v7,linux/arm64/v8
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-arm:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-arm:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-arm:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-arm-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-arm-cache,mode=min
       - name: Build BW UI for arm
         uses: docker/build-push-action@v3
         with:
@@ -163,8 +162,8 @@ jobs:
           platforms: linux/arm/v7,linux/arm64/v8
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-arm:latest
-          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-arm:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-arm:buildcache,mode=min
+          cache-from: type=registry,ref=bunkerity/cache:bw-ui-arm-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ui-arm-cache,mode=min
 
   # Run tests
   tests:
@@ -247,9 +246,9 @@ jobs:
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb:staging,bunkerity/bunkerweb:dev
           cache-from: |
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:buildcache
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-386:buildcache
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-arm:buildcache
+            type=registry,ref=bunkerity/cache:bw-amd64-cache
+            type=registry,ref=bunkerity/cache:bw-386-cache
+            type=registry,ref=bunkerity/cache:bw-arm-cache
       - name: Build and push BW autoconf
         uses: docker/build-push-action@v3
         with:
@@ -259,9 +258,9 @@ jobs:
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf:staging,bunkerity/bunkerweb-autoconf:dev
           cache-from: |
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:buildcache
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:buildcache
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-arm:buildcache
+            type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
+            type=registry,ref=bunkerity/cache:bw-autoconf-386-cache
+            type=registry,ref=bunkerity/cache:bw-autoconf-arm-cache
       - name: Build and push BW UI
         uses: docker/build-push-action@v3
         with:
@@ -271,9 +270,9 @@ jobs:
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui:staging,bunkerity/bunkerweb-ui:dev
           cache-from: |
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:buildcache
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-386:buildcache
-            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-arm:buildcache
+            type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
+            type=registry,ref=bunkerity/cache:bw-ui-386-cache
+            type=registry,ref=bunkerity/cache:bw-ui-arm-cache
 
   # Push to PackageCloud
   push-linux:

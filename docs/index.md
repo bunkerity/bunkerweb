@@ -9,9 +9,9 @@
 
 BunkerWeb is a web server based on the notorious [NGINX](https://nginx.org/) and focused on security.
 
-It integrates into existing environments ([Linux](/integrations/#linux), [Docker](/integrations/#docker), [Swarm](/integrations/#swarm), [Kubernetes](/integrations/#Kubernetes), …) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every setting to meet your use case.
+It integrates into existing environments ([Linux](/1.4/integrations/#linux), [Docker](/1.4/integrations/#docker), [Swarm](/1.4/integrations/#swarm), [Kubernetes](/1.4/integrations/#Kubernetes), …) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every setting to meet your use case.
 
-BunkerWeb contains primary [security features](/security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](/plugins).
+BunkerWeb contains primary [security features](/1.4/security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](/1.4/plugins).
 
 ## Why BunkerWeb ?
 

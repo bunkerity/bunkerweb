@@ -32,11 +32,11 @@ Because the web UI is a web application, the recommended installation procedure 
     * Choose a strong password for the login
     * Put the web UI under a "hard to guess" URI
     * Do not open the web UI on the Internet without any further restrictions
-    * Apply settings listed in the [security tuning section](/security-tuning/) of the documentation
+    * Apply settings listed in the [security tuning section](/1.4/security-tuning/) of the documentation
 
 !!! info "Multisite mode"
 
-    The installation of the web UI implies enabling the [multisite mode](/concepts/#multisite-mode).
+    The installation of the web UI implies enabling the [multisite mode](/1.4/concepts/#multisite-mode).
 
 !!! info "UI specific env variables"
 
@@ -45,7 +45,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Docker"
 
-    When using the [Docker integration](/integrations/#docker), we recommend you to connect the BunkerWeb and web UI using a dedicated network and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the [bunkerweb-ui image](https://hub.docker.com/r/bunkerity/bunkerweb-ui).
+    When using the [Docker integration](/1.4/integrations/#docker), we recommend you to connect the BunkerWeb and web UI using a dedicated network and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the [bunkerweb-ui image](https://hub.docker.com/r/bunkerity/bunkerweb-ui).
 
     Let's start by creating the networks (replace 10.20.30.0/24 with an unused network of your choice) :
     ```shell
@@ -194,7 +194,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Linux"
 
-    The installation of the web UI using the [Linux integration](/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Linux integration](/1.4/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
 
     The first thing to do is to edit the BunkerWeb configuration located at **/opt/bunkerweb/variables.env** to add settings related to the web UI :
     ```conf

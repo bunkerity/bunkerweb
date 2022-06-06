@@ -11,17 +11,17 @@ The first concept is the integration of BunkerWeb into the target environment. W
 
 The following integrations are officially supported :
 
-- [Docker](/integrations/#docker)
-- [Docker autoconf](/integrations/#docker-autoconf)
-- [Swarm](/integrations/#swarm)
-- [Kubernetes](/integrations/#kubernetes)
-- [Linux](/integrations/#linux)
+- [Docker](/1.4/integrations/#docker)
+- [Docker autoconf](/1.4/integrations/#docker-autoconf)
+- [Swarm](/1.4/integrations/#swarm)
+- [Kubernetes](/1.4/integrations/#kubernetes)
+- [Linux](/1.4/integrations/#linux)
 
 If you think that a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
 
 !!! info "Going further"
 
-    The technical details of all BunkerWeb integrations are available in the [integrations section](/integrations) of the documentation.
+    The technical details of all BunkerWeb integrations are available in the [integrations section](/1.4/integrations) of the documentation.
 
 ## Settings
 
@@ -43,7 +43,7 @@ USE_BROTLI=no
 
 !!! info "Going further"
 
-    The complete list of available settings with descriptions and possible values is available in the [settings section](/settings) of the documentation.
+    The complete list of available settings with descriptions and possible values is available in the [settings section](/1.4/settings) of the documentation.
 
 !!! info "Settings generator tool"
 
@@ -78,11 +78,11 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [quickstart guide](/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [quickstart guide](/1.4/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
 
 ## Custom configurations
 
-Because meeting all the use cases only using the settings is not an option (even with [external plugins](/plugins)), you can use custom configurations to solve your specific challenges.
+Because meeting all the use cases only using the settings is not an option (even with [external plugins](/1.4/plugins)), you can use custom configurations to solve your specific challenges.
 
 Under the hood, BunkerWeb uses the notorious NGINX web server, that's why you can leverage its configuration system for your specific needs. Custom NGINX configurations can be included in different [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) like HTTP or server (all servers and/or specific server block).
 
@@ -90,4 +90,4 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [quickstart guide](/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [quickstart guide](/1.4/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.

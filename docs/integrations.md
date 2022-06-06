@@ -54,7 +54,7 @@ services:
 ```
 
 !!! info "Full list"
-    For the complete list of environment variables, see the [settings section](/settings) of the documentation.
+    For the complete list of environment variables, see the [settings section](/1.4/settings) of the documentation.
 
 ### Volume
 
@@ -175,7 +175,7 @@ The downside of using environment variables is that the container needs to be re
 Instead of defining environment variables for the BunkerWeb container, you simply add **labels** to your web applications containers and the **autoconf** will "automagically" take care of the rest.
 
 !!! info "Multisite mode"
-    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](/concepts/#multisite-mode) of the documentation for more information.
+    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](/1.4/concepts/#multisite-mode) of the documentation for more information.
 
 First of all, you will need to create the data volume :
 
@@ -645,7 +645,7 @@ spec:
           mountPath: /data
 ```
 
-Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
+Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/1.4/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
 
 ```yaml
 apiVersion: networking.k8s.io/v1

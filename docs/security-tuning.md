@@ -1,9 +1,9 @@
 # Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](/settings). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [settings](/1.4/settings). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.
 
 !!! tip "Other settings"
-    This section only focuses on security tuning, see the [settings section](/settings) of the documentation for other settings.
+    This section only focuses on security tuning, see the [settings section](/1.4/settings) of the documentation for other settings.
 
 ## HTTP protocol
 
@@ -117,7 +117,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 
 We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).
 
-Tuning ModSecurity and the CRS can be done using [custom configurations](/quickstart-guide/#custom-configurations) :
+Tuning ModSecurity and the CRS can be done using [custom configurations](/1.4/quickstart-guide/#custom-configurations) :
 
 - modsec-crs : before the OWASP Core Rule Set is loaded
 - modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)

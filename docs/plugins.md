@@ -18,7 +18,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker"
 
-    When using the [Docker integration](/integrations/#docker), plugins must be written to the volume mounted on `/data`.
+    When using the [Docker integration](/1.4/integrations/#docker), plugins must be written to the volume mounted on `/data`.
 
     The first thing to do is to create the plugins folder :
     ```shell
@@ -57,7 +57,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data`.
+    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data`.
 
     The easiest way to do it is by starting the Docker autoconf stack with a folder mounted on `/data` (instead of a named volume). Once the stack is started, you can copy the plugins of your choice to the `plugins` folder from your host :
     ```shell
@@ -73,7 +73,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Swarm"
 
-    When using the [Swarm integration](/integrations/#swarm), the easiest way of installing plugins is by using `docker exec` and downloading the plugins from the container.
+    When using the [Swarm integration](/1.4/integrations/#swarm), the easiest way of installing plugins is by using `docker exec` and downloading the plugins from the container.
 
     Execute a shell inside the autoconf container (use `docker ps` to get the name) :
     ```shell
@@ -88,7 +88,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](/integrations/#kubernetes), the easiest way of installing plugins is by using `kubectl exec` and downloading the plugins from the container.
+    When using the [Kubernetes integration](/1.4/integrations/#kubernetes), the easiest way of installing plugins is by using `kubectl exec` and downloading the plugins from the container.
 
     Execute a shell inside the autoconf container (use `kubectl get pods` to get the name) :
     ```shell
@@ -103,7 +103,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Linux"
 
-    When using the [Linux integration](/integrations/#linux), plugins must be written to the `/opt/bunkerweb/plugins` folder :
+    When using the [Linux integration](/1.4/integrations/#linux), plugins must be written to the `/opt/bunkerweb/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins
@@ -192,7 +192,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http` and `default-server-http`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/1.4/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http` and `default-server-http`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
