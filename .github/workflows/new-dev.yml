@@ -184,9 +184,9 @@ jobs:
     
       # Import images to local registry
       - name: Import BW image
-        command: docker pull ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
       - name: Import BW autoconf image
-        command: docker pull ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
 
       # Run tests
       - name: Run Docker tests
