@@ -1,0 +1,355 @@
+name: Automatic test, build, push and deploy (DEV)
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+
+  # Build for amd64
+  build-bw-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build images
+      - name: Build BW for amd64
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:buildcache,mode=min
+      - name: Build BW autoconf for amd64
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:buildcache,mode=min
+      - name: Build BW UI for amd64
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-amd64:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-amd64:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-amd64:buildcache,mode=min
+
+  # Build bunkerweb/386
+  build-bw-386:
+    runs-on: ubuntu-latest
+    steps:
+
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build images
+      - name: Build BW for 386
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/386
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:buildcache,mode=min
+      - name: Build BW autoconf for 386
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/386
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache,mode=min
+      - name: Build BW UI for 386
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/386
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache,mode=min
+
+
+  # Build bunkerweb/arm
+  build-bw-arm:
+    runs-on: [self-hosted, ARM64]
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build images
+      - name: Build BW for arm
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:buildcache,mode=min
+      - name: Build BW autoconf for arm
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:buildcache,mode=min
+      - name: Build BW UI for arm
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-arm:latest
+          cache-from: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-arm:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-arm:buildcache,mode=min
+
+  # Run tests
+  tests:
+    needs: build-bw-amd64
+    runs-on: [self-hosted, X64]
+    steps:
+
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          if [ "$GITHUB_REF" = "refs/heads/main" ] ; then
+            echo "BUILD_MODE=prod" >> $GITHUB_ENV
+          else
+            echo "BUILD_MODE=dev" >> $GITHUB_ENV
+          fi
+    
+      # Import images to local registry
+      - name: Import BW image
+        command: docker pull ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
+      - name: Import BW autoconf image
+        command: docker pull ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
+
+      # Run tests
+      - name: Run Docker tests
+        run: ./tests/docker.sh ${{ env.BUILD_MODE }}
+      - name: Run autoconf tests
+        run: ./tests/autoconf.sh ${{ env.BUILD_MODE }}
+      - name: Run Swarm tests
+        run: ./tests/swarm.sh ${{ env.BUILD_MODE }}
+      - name: Run Kubernetes tests
+        run: ./tests/kubernetes.sh ${{ env.BUILD_MODE }}
+      - name: Run Linux tests
+        run: ./tests/linux.sh ${{ env.BUILD_MODE }}
+
+  # Push to dev registries
+  push-docker:
+    needs: [tests, build-bw-386, build-bw-arm]
+    runs-on: ubuntu-latest
+    steps:
+
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build and push
+      - name: Build and push BW
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb:staging,bunkerity/bunkerweb:dev
+          cache-from: |
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-amd64:buildcache
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-386:buildcache
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-tests-arm:buildcache
+      - name: Build and push BW autoconf
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf:staging,bunkerity/bunkerweb-autoconf:dev
+          cache-from: |
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-amd64:buildcache
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-386:buildcache
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf-tests-arm:buildcache
+      - name: Build and push BW UI
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/amd64,linux/386,linux/arm/v7,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui:staging,bunkerity/bunkerweb-ui:dev
+          cache-from: |
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-amd64:buildcache
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-386:buildcache
+            type=registry,ref=${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui-tests-arm:buildcache
+
+  # Push to PackageCloud
+  push-linux:
+    needs: tests
+    runs-on: [self-hosted, X64]
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set variables
+        run: |
+          VER=$(cat VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Remove Ubuntu DEB from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/ubuntu/jammy bunkerweb_${{ env.VERSION }}_amd64.deb
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Ubuntu DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/ubuntu/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Remove Debian DEB from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/debian/bullseye bunkerweb_${{ env.VERSION }}_amd64.deb
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Debian DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/debian/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: debian/bullseye
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Remove CentOS RPM from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/el/8 bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push CentOS RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/centos/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: el/8
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Remove Fedora RPM from packagecloud
+        run: package_cloud yank bunkerity/bunkerweb-dev/fedora/36 bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Push Fedora RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /opt/packages/dev/fedora/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: fedora/36
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+  # Deploy to staging infrastructure
+  deploy:
+    needs: push-docker
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: k8s login (staging)
+        uses: azure/k8s-set-context@v2
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: k8s deploy (staging)
+        run: kubectl rollout restart deployment bunkerweb-controller && kubectl rollout restart daemonset bunkerweb

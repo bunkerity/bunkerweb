@@ -36,7 +36,7 @@ jobs:
           load: true
           tags: 10.20.1.1:5000/bw-tests:latest,bunkerity/bunkerweb:dev,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb:staging
           cache-from: type=registry,ref=10.20.1.1:5000/bw-tests:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-tests:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-tests:buildcache,mode=min
       - name: Push BW test image
         run: docker push 10.20.1.1:5000/bw-tests:latest
 
@@ -49,7 +49,7 @@ jobs:
           load: true
           tags: 10.20.1.1:5000/bw-autoconf-tests:latest,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-autoconf:staging,bunkerity/bunkerweb-autoconf:dev
           cache-from: type=registry,ref=10.20.1.1:5000/bw-autoconf-tests:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-autoconf-tests:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-autoconf-tests:buildcache,mode=min
       - name: Push autoconf test image
         run: docker push 10.20.1.1:5000/bw-autoconf-tests:latest
 
@@ -62,7 +62,7 @@ jobs:
           load: true
           tags: 10.20.1.1:5000/bw-ui-tests:latest,${{ secrets.PRIVATE_REGISTRY }}/bunkerweb-ui:staging,bunkerity/bunkerweb-ui:dev
           cache-from: type=registry,ref=10.20.1.1:5000/bw-ui-tests:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-ui-tests:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-ui-tests:buildcache,mode=min
       - name: Push UI test image
         run: docker push 10.20.1.1:5000/bw-ui-tests:latest
 
@@ -75,7 +75,7 @@ jobs:
           load: true
           tags: bw-ubuntu-dev:latest
           cache-from: type=registry,ref=10.20.1.1:5000/bw-ubuntu-dev:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-ubuntu-dev:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-ubuntu-dev:buildcache,mode=min
 
       - name: Build BW test DEB (debian)
         uses: docker/build-push-action@v2
@@ -86,7 +86,7 @@ jobs:
           load: true
           tags: bw-debian-dev:latest
           cache-from: type=registry,ref=10.20.1.1:5000/bw-debian-dev:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-debian-dev:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-debian-dev:buildcache,mode=min
       
       - name: Build BW test RPM (centos)
         uses: docker/build-push-action@v2
@@ -97,7 +97,7 @@ jobs:
           load: true
           tags: bw-centos-dev:latest
           cache-from: type=registry,ref=10.20.1.1:5000/bw-centos-dev:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-centos-dev:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-centos-dev:buildcache,mode=min
       
       - name: Build BW test RPM (fedora)
         uses: docker/build-push-action@v2
@@ -108,7 +108,7 @@ jobs:
           load: true
           tags: bw-fedora-dev:latest
           cache-from: type=registry,ref=10.20.1.1:5000/bw-fedora-dev:buildcache
-          cache-to: type=registry,ref=10.20.1.1:5000/bw-fedora-dev:buildcache,mode=max
+          cache-to: type=registry,ref=10.20.1.1:5000/bw-fedora-dev:buildcache,mode=min
 
   # Run tests
   tests:
