@@ -110,7 +110,7 @@ jobs:
           platforms: linux/386
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:latest
-          cache-from: ttype=registry,ref=bunkerity/cache:bw-ui-386-cache
+          cache-from: type=registry,ref=bunkerity/cache:bw-ui-386-cache
           cache-to: type=registry,ref=bunkerity/cache:bw-ui-386-cache,mode=min
 
   # Build bunkerweb/arm
@@ -198,7 +198,7 @@ jobs:
       - name: Import BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
       - name: Import BW autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-t ests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
 
       # Run tests
       - name: Run Docker tests
