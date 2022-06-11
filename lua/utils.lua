@@ -244,6 +244,10 @@ utils.get_reason = function()
 	if os.getenv("REASON") == "modsecurity" then
 		return "modsecurity"
 	end
+	local banned, err = datastore:get("bans_ip_" .. ngx.var.remote_addr)
+	if banned then
+		return banned
+	end
 	if ngx.status == ngx.HTTP_FORBIDDEN then
 		return "unknown"
 	end

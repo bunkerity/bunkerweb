@@ -45,7 +45,7 @@ try :
     elif os.getenv("AUTO_LETS_ENCRYPT") == "yes" and os.getenv("SERVER_NAME") != "" :
         first_server = os.getenv("SERVER_NAME").split(" ")[0]
         domains = os.getenv("SERVER_NAME").replace(" ", ",")
-        if not os.path.exists("/etc/letsencrypt/live/" + first_server + "/cert.pem") :
+        if os.path.exists("/etc/letsencrypt/live/" + first_server + "/cert.pem") :
             logger.log("LETS-ENCRYPT", "ℹ️", "Certificates already exists for domain(s) " + domains)
         else :
             real_email = os.getenv("EMAIL_LETS_ENCRYPT", "contact@" + first_server)
