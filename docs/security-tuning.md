@@ -303,6 +303,6 @@ You can quickly protect sensitive resources like the admin area for example by r
 | :-----------------------: | :---------------: | :------------------------------------------------------------------------------------------- |
 |     `USE_AUTH_BASIC`      |       `no`        | When set to `yes` HTTP auth basic will be enabled.                                           |
 |   `AUTH_BASIC_LOCATION`   |    `sitewide`     | Location (URL) of the sensitive resource. Use special value `sitewide` to enable everywhere. |
-|   `USE_AUTH_BASIC_USER`   |    `changeme`     | The username required.                                                                       |
-| `USE_AUTH_BASIC_PASSWORD` |    `changeme`     | The password required.                                                                       |
-|   `USE_AUTH_BASIC_TEXT`   | `Restricted area` | Text to display in the auth prompt.                                                          |
+|   `AUTH_BASIC_USER`   |    `changeme`     | The username required.                                                                       |
+| `AUTH_BASIC_PASSWORD` |    `changeme`     | The password required.                                                                       |
+|   `AUTH_BASIC_TEXT`   | `Restricted area` | Text to display in the auth prompt.                                                          |
