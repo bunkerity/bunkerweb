@@ -83,8 +83,7 @@ jobs:
         with:
           context: .
           platforms: linux/386
-          push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-386:latest
+          tags: bunkerweb-tests-386:latest
           cache-to: type=registry,ref=bunkerity/cache:bw-386-cache,mode=min
       - name: Build BW autoconf for 386
         uses: docker/build-push-action@v3
@@ -92,8 +91,7 @@ jobs:
           context: .
           file: autoconf/Dockerfile
           platforms: linux/386
-          push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:latest
+          tags: /bunkerweb-autoconf-tests-386:latest
           cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-386-cache,mode=min
       - name: Build BW UI for 386
         uses: docker/build-push-action@v3
@@ -101,8 +99,7 @@ jobs:
           context: .
           file: ui/Dockerfile
           platforms: linux/386
-          push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-386:latest
+          tags: bunkerweb-autoconf-tests-386:latest
           cache-to: type=registry,ref=bunkerity/cache:bw-ui-386-cache,mode=min
 
   # Build bunkerweb/arm

@@ -212,6 +212,36 @@
 			"label": "Reverse proxy bypass",
 			"regex": "^.*$",
 			"type": "text"
+		},
+		"REVERSE_PROXY_CONNECT_TIMEOUT": {
+			"context": "multisite",
+			"default": "60s",
+			"help": "Timeout when connecting to the proxied resource.",
+			"id": "reverse-proxy-connect-timeout",
+			"label": "Reverse proxy connect timeout",
+			"regex": "^.*$",
+			"type": "text",
+			"multiple": "reverse-proxy"
+		},
+		"REVERSE_PROXY_READ_TIMEOUT": {
+			"context": "multisite",
+			"default": "60s",
+			"help": "Timeout when reading from the proxied resource.",
+			"id": "reverse-proxy-read-timeout",
+			"label": "Reverse proxy read timeout",
+			"regex": "^.*$",
+			"type": "text",
+			"multiple": "reverse-proxy"
+		},
+		"REVERSE_PROXY_SEND_TIMEOUT": {
+			"context": "multisite",
+			"default": "60s",
+			"help": "Timeout when sending to the proxied resource.",
+			"id": "reverse-proxy-send-timeout",
+			"label": "Reverse proxy send timeout",
+			"regex": "^.*$",
+			"type": "text",
+			"multiple": "reverse-proxy"
 		}
 	}
 }
