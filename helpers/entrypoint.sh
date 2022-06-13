@@ -40,6 +40,10 @@ function trap_reload() {
 }
 trap "trap_reload" HUP
 
+if [ -f /opt/bunkerweb/tmp/scheduler.pid ] ; then
+	rm -f /opt/bunkerweb/tmp/scheduler.pid
+fi
+
 if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
 	# execute temp nginx with no server
 	export TEMP_NGINX="yes"

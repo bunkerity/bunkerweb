@@ -56,9 +56,19 @@
 		"REVERSE_PROXY_HEADERS": {
 			"context": "multisite",
 			"default": "",
-			"help": "List of HTTP headers to send to proxied resource.",
+			"help": "List of HTTP headers to send to proxied resource separated with ; (values for proxy_set_header directive).",
 			"id": "reverse-proxy-headers",
 			"label": "Reverse proxy headers",
+			"regex": "^.*$",
+			"type": "text",
+			"multiple": "reverse-proxy"
+		},
+        "REVERSE_PROXY_HEADERS_CLIENT": {
+			"context": "multisite",
+			"default": "",
+			"help": "List of HTTP headers to send to client separated with ; (values for add_header directive).",
+			"id": "reverse-proxy-headers-client",
+			"label": "Reverse proxy headers-client",
 			"regex": "^.*$",
 			"type": "text",
 			"multiple": "reverse-proxy"
@@ -81,6 +91,36 @@
 			"label": "Reverse proxy keepalive",
 			"regex": "^(yes|no)$",
 			"type": "check",
+			"multiple": "reverse-proxy"
+		},
+        "REVERSE_PROXY_AUTH_REQUEST": {
+			"context": "multisite",
+			"default": "",
+			"help": "Enable authentication using an external provider (value of auth_request directive).",
+			"id": "reverse-proxy-auth-request",
+			"label": "Reverse proxy auth request",
+			"regex": "^/.*$",
+			"type": "text",
+			"multiple": "reverse-proxy"
+		},
+        "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+			"context": "multisite",
+			"default": "",
+			"help": "Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+			"id": "reverse-proxy-auth-request-signin-url",
+			"label": "Auth request signin URL",
+			"regex": "^http.*$",
+			"type": "text",
+			"multiple": "reverse-proxy"
+		},
+        "REVERSE_PROXY_AUTH_REQUEST_SET": {
+			"context": "multisite",
+			"default": "",
+			"help": "List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).",
+			"id": "reverse-proxy-auth-request-set",
+			"label": "Reverse proxy auth request set",
+			"regex": "^.*$",
+			"type": "text",
 			"multiple": "reverse-proxy"
 		},
 		"USE_PROXY_CACHE": {
