@@ -242,6 +242,7 @@ services:
     volumes:
       - bw-data:/data
     environment:
+	  - AUTOCONF_MODE=yes
 	  - MULTISITE=yes
       - SERVER_NAME=
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -674,7 +675,7 @@ List of supported Linux distros :
 - Fedora 36
 - CentOS Stream 8
 
-Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official supported way of installing BunkerWeb on Linux.
+Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuild packages of BunkerWeb but you can build it from source.
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -702,6 +703,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	apt update && \
 	apt install -y bunkerweb=1.4.0
     ```
+	
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+	```shell
+	sudo apt-mark hold nginx bunkerweb
+	```
 
 === "Ubuntu"
 
@@ -727,6 +733,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	apt update && \
 	apt install -y bunkerweb=1.4.0
     ```
+	
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+	```shell
+	sudo apt-mark hold nginx bunkerweb
+	```
 
 === "Fedora"
 
@@ -740,6 +751,12 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	dnf check-update && \
 	dnf install -y bunkerweb-1.4.0
     ```
+
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+	```shell
+	sudo dnf versionlock add nginx && \
+	sudo dnf versionlock add bunkerweb
+	```
 
 === "CentOS Stream"
 
@@ -763,9 +780,75 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     ```shell
 	dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-	dnf check-update && \
-	dnf install -y bunkerweb-1.4.0
+    dnf check-update && \
+    dnf install -y bunkerweb-1.4.0
     ```
+
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+	```shell
+	sudo dnf versionlock add nginx && \
+	sudo dnf versionlock add bunkerweb
+	```
+
+=== "From source"
+
+    The first step is to install NGINX 1.20.2 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
+	
+	The target installation folder of BunkerWeb is located at `/opt/bunkerweb`, let's create it :
+	```shell
+	mkdir /opt/bunkerweb
+	```
+	
+	You can now clone the BunkerWeb project to the `/tmp` folder :
+	```shell
+	https://github.com/bunkerity/bunkerweb.git /tmp/bunkerweb
+	```
+	
+	BunkerWeb needs some dependencies to be compiled and install to `/opt/bunkerweb/deps`, the easiest way to it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
+	```
+	mkdir /opt/bunkerweb/deps && \
+	/tmp/bunkerweb/deps/install.sh
+	```
+	
+	Additional Python dependencies needs to be installed into the `/opt/bunkerweb/deps/python` folder :
+	```shell
+	mkdir /opt/bunkerweb/deps/python && \
+	pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+	pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
+	```
+	
+	Once dependencies had been installed, you can now copy the BunkerWeb sources to the target `/opt/bunkerweb` folder :
+	```shell
+	for src in api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/bunkerweb-ui.env linux/scripts ; do
+		cp -r /tmp/bunkerweb/${src} /opt/bunkerweb
+	done
+	cp /opt/bunkerweb/helpers/bwcli /usr/local/bin
+	```
+	
+	Additional folders also need to be created :
+	```shell
+	mkdir /opt/bunkerweb/{configs,cache,plugins,tmp}
+	```
+	
+	Permissions needs to be fixed :
+	```shell
+	find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
+	find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
+	find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
+	chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
+	chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/scripts/*.sh /usr/local/bin/bwcli /opt/bunkerweb/ui/main.py && \
+	chown -R root:nginx /opt/bunkerweb
+	```
+	
+	Last but not least, you will need to setup systemd unit files :
+	```shell
+	cp /tmp/bunkerweb/linux/*.service /etc/systemd/system && \
+	systemctl daemon-reload && \
+	systemctl stop nginx && \
+	systemctl disable nginx && \
+	systemctl enable bunkerweb && \
+	systemctl enable bunkerweb-ui
+	```
 
 Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
 

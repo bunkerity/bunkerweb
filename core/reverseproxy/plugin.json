@@ -99,7 +99,7 @@
 			"help": "Enable authentication using an external provider (value of auth_request directive).",
 			"id": "reverse-proxy-auth-request",
 			"label": "Reverse proxy auth request",
-			"regex": "^/.*$",
+			"regex": "^.*$",
 			"type": "text",
 			"multiple": "reverse-proxy"
 		},
@@ -109,7 +109,7 @@
 			"help": "Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
 			"id": "reverse-proxy-auth-request-signin-url",
 			"label": "Auth request signin URL",
-			"regex": "^http.*$",
+			"regex": "^.*$",
 			"type": "text",
 			"multiple": "reverse-proxy"
 		},
