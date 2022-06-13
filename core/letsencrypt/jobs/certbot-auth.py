@@ -15,11 +15,12 @@ try :
     # Get env vars
     is_kubernetes_mode = os.getenv("KUBERNETES_MODE") == "yes"
     is_swarm_mode = os.getenv("SWARM_MODE") == "yes"
+    is_autoconf_mode = os.getenv("AUTOCONF_MODE") == "yes"
     token = os.getenv("CERTBOT_TOKEN")
     validation = os.getenv("CERTBOT_VALIDATION")
 
     # Cluster case
-    if is_kubernetes_mode or is_swarm_mode :
+    if is_kubernetes_mode or is_swarm_mode or is_autoconf_mode :
         for variable, value in os.environ.items() :
             if not variable.startswith("CLUSTER_INSTANCE_") :
                 continue
