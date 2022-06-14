@@ -23,6 +23,7 @@ function exec_docker_example() {
 	sed -i 's@\./bw\-data:/@/tmp/bw\-data:/@g' docker-compose.yml
 	sed -i 's@- bw_data:/@- /tmp/bw\-data:/@g' docker-compose.yml
 	sed -i "s@www.example.com@${TEST_DOMAIN1}@g" docker-compose.yml
+	sed -i "s@auth.example.com@${TEST_DOMAIN1}@g" docker-compose.yml
 	sed -i "s@app1.example.com@${TEST_DOMAIN1_1}@g" docker-compose.yml
 	sed -i "s@app2.example.com@${TEST_DOMAIN1_2}@g" docker-compose.yml
 	sed -i "s@app3.example.com@${TEST_DOMAIN1_3}@g" docker-compose.yml

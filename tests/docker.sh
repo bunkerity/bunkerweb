@@ -48,6 +48,12 @@ fi
 
 echo "Running Docker tests ..."
 
+# authelia
+single_docker_test "authelia" "60" "https://$TEST_DOMAIN1_1 authelia" "https://$TEST_DOMAIN1_2 authelia"
+
+# authentik
+single_docker_test "authentik" "60" "https://$TEST_DOMAIN1_1 authentik" "https://$TEST_DOMAIN1_2 authentik"
+
 # drupal
 single_docker_test "drupal" "60" "https://$TEST_DOMAIN1 drupal"
 
