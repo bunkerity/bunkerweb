@@ -75,7 +75,12 @@ Here is how you can access the logs depending on your integration :
 
 === "Linux"
 
-    The logs are located inside the `/var/log/nginx` directory. There is two files :
+    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
+    ```shell
+    journalctl -u bunkerweb --no-pager
+    ```
+
+    Common logs are located inside the `/var/log/nginx` directory :
     ```shell
     cat /var/log/nginx/error.log
     cat /var/log/nginx/access.log

@@ -683,7 +683,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
     The first step is to add NGINX official repository :
     ```shell
-	sudo apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
+	sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
 	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
 	echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
@@ -694,14 +694,14 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     You should now be able to install NGINX 1.20.2 :
 	```shell
 	sudo apt update && \
-	sudo apt install nginx=1.20.2-1~bullseye
+	sudo apt install -y nginx=1.20.2-1~bullseye
 	```
 
 	And finally install BunkerWeb 1.4.0 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
-	apt update && \
-	apt install -y bunkerweb=1.4.0
+	sudo apt update && \
+	sudo apt install -y bunkerweb=1.4.0
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -713,7 +713,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
     The first step is to add NGINX official repository :
     ```shell
-	sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
+	sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
 	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
 	echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
@@ -724,14 +724,14 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     You should now be able to install NGINX 1.20.2 :
 	```shell
 	sudo apt update && \
-	sudo apt install nginx=1.20.2-1~jammy
+	sudo apt install -y nginx=1.20.2-1~jammy
 	```
 
 	And finally install BunkerWeb 1.4.0 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
-	apt update && \
-	apt install -y bunkerweb=1.4.0
+	sudo apt update && \
+	sudo apt install -y bunkerweb=1.4.0
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -743,13 +743,13 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
     Fedora already provides NGINX 1.20.2 that we support :
 	```shell
-	sudo dnf install nginx-1.20.2
+	sudo dnf install -y nginx-1.20.2
 	```
 
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-	dnf check-update && \
-	dnf install -y bunkerweb-1.4.0
+	sudo dnf check-update && \
+	sudo dnf install -y bunkerweb-1.4.0
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -780,8 +780,8 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     ```shell
 	dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-    dnf check-update && \
-    dnf install -y bunkerweb-1.4.0
+    sudo dnf check-update && \
+    sudo dnf install -y bunkerweb-1.4.0
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :

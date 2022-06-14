@@ -5,7 +5,7 @@ metadata:
   annotations:
     bunkerweb.io/AUTOCONF: "yes"
     bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-    bunkerweb.io/USE_LETS_ENCRYPT_STAGING: "yes"
+
 spec:
   rules:
   - host: app1.example.com

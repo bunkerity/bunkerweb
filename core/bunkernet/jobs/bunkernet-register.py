@@ -18,11 +18,11 @@ try :
     # Multisite case
     if os.getenv("MULTISITE") == "yes" :
         for first_server in os.getenv("SERVER_NAME").split(" ") :
-            if os.getenv(first_server + "_USE_BUNKERNET", os.getenv("USE_BUNKERNET")) == "yes" :
+            if os.getenv(first_server + "_USE_BUNKERNET", os.getenv("USE_BUNKERNET", "yes")) == "yes" :
                 bunkernet_activated = True
                 break
     # Singlesite case
-    elif os.getenv("USE_BUNKERNET") == "yes" :
+    elif os.getenv("USE_BUNKERNET", "yes") == "yes" :
         bunkernet_activated = True
     if not bunkernet_activated :
         logger.log("BUNKERNET", "ℹ️", "BunkerNet is not activated, skipping registration...")
