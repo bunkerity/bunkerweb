@@ -149,9 +149,133 @@ jobs:
           tags: bunkerweb-ui-tests-arm:latest
           cache-to: type=registry,ref=bunkerity/cache:bw-ui-arm-cache,mode=min
 
+  # Build linux ubuntu
+  build-bw-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build image
+      - name: Build BW ubuntu
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: linux/Dockerfile-ubuntu
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest
+
+  # Build linux debian
+  build-bw-debian:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build image
+      - name: Build BW debian
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: linux/Dockerfile-debian
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest
+
+  # Build linux centos
+  build-bw-centos:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build image
+      - name: Build BW centos
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: linux/Dockerfile-centos
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest
+
+  # Build linux fedora
+  build-bw-fedora:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+      # Build image
+      - name: Build BW fedora
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: linux/Dockerfile-fedora
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest
+
   # Run tests
   tests:
-    needs: build-bw-amd64
+    needs: [build-bw-amd64, build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
     runs-on: [self-hosted, X64]
     steps:
 
@@ -185,6 +309,14 @@ jobs:
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
       - name: Import BW UI image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest 10.20.1.1:5000/bw-ui-tests:latest && docker push 10.20.1.1:5000/bw-ui-tests:latest
+      - name: Import Ubuntu image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest bw-ubuntu-tests:latest
+      - name: Import Debian image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest bw-debian-tests:latest
+      - name: Import Centos image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest bw-centos-tests:latest
+      - name: Import Fedora image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest bw-fedora-tests:latest
 
       # CVE check on OS
       - name: Check security vulnerabilities for BW
