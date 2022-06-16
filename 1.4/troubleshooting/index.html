@@ -644,60 +644,63 @@ documentation for the current version.
 <div class="admonition tip">
 <p class="admonition-title">List containers</p>
 <p>To list the running containers you can use the following command :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker ps
+<div class="highlight"><pre><span></span><code>docker ps
 </code></pre></div></p>
 </div>
 <p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker logs mybunker
+<div class="highlight"><pre><span></span><code>docker logs mybunker
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker-compose logs mybunker
+<div class="highlight"><pre><span></span><code>docker-compose logs mybunker
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <div class="admonition tip">
 <p class="admonition-title">List containers</p>
 <p>To list the running containers you can use the following command :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker ps
+<div class="highlight"><pre><span></span><code>docker ps
 </code></pre></div></p>
 </div>
 <p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your containers) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker logs mybunker
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker logs myautoconf
+<div class="highlight"><pre><span></span><code>docker logs mybunker
+docker logs myautoconf
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> and <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker-compose logs mybunker
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>docker-compose logs myautoconf
+<div class="highlight"><pre><span></span><code>docker-compose logs mybunker
+docker-compose logs myautoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <div class="admonition tip">
 <p class="admonition-title">List services</p>
 <p>To list the services you can use the following command :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker service ls
+<div class="highlight"><pre><span></span><code>docker service ls
 </code></pre></div></p>
 </div>
 <p>You can use the <code>docker service logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> my with the name of your services) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker service logs mybunker
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>docker service logs myautoconf
+<div class="highlight"><pre><span></span><code>docker service logs mybunker
+docker service logs myautoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <div class="admonition tip">
 <p class="admonition-title">List pods</p>
 <p>To list the pods you can use the following command :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>kubectl get pods
+<div class="highlight"><pre><span></span><code>kubectl get pods
 </code></pre></div></p>
 </div>
 <p>You can use the <code>kubectl logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> my with the name of your pods) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>kubectl logs mybunker
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>kubectl logs myautoconf
+<div class="highlight"><pre><span></span><code>kubectl logs mybunker
+kubectl logs myautoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>The logs are located inside the <code>/var/log/nginx</code> directory. There is two files :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>cat /var/log/nginx/error.log
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>cat /var/log/nginx/access.log
+<p>For errors related to BunkerWeb services (e.g. not starting), you can use <code>journalctl</code> :
+<div class="highlight"><pre><span></span><code>journalctl -u bunkerweb --no-pager
+</code></pre></div></p>
+<p>Common logs are located inside the <code>/var/log/nginx</code> directory :
+<div class="highlight"><pre><span></span><code>cat /var/log/nginx/error.log
+cat /var/log/nginx/access.log
 </code></pre></div></p>
 </div>
 </div>
@@ -712,74 +715,74 @@ documentation for the current version.
 <li>the default threshold for anomaly score is 5 for requests and 4 for responses</li>
 </ul>
 <p>Let's take the following logs as an example of ModSecurity detection using default configuration (formatted for better readability) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `lfi-os-files.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf&quot;]
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    [line &quot;78&quot;]
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    [id &quot;930120&quot;]
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    [rev &quot;&quot;]
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    [msg &quot;OS File Access Attempt&quot;]
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    [severity &quot;2&quot;]
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    [ver &quot;OWASP_CRS/3.3.2&quot;]
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    [maturity &quot;0&quot;]
-<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    [accuracy &quot;0&quot;]
-<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    [tag &quot;application-multi&quot;]
-<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    [tag &quot;language-multi&quot;]
-<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    [tag &quot;platform-multi&quot;]
-<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    [tag &quot;attack-lfi&quot;]
-<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    [tag &quot;paranoia-level/1&quot;]
-<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>    [tag &quot;OWASP_CRS&quot;]
-<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>    [tag &quot;capec/1000/255/153/126&quot;]
-<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>    [tag &quot;PCI/6.5.4&quot;]
-<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    [hostname &quot;172.17.0.2&quot;]
-<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>    [uri &quot;/&quot;]
-<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>    [unique_id &quot;165097447014.179282&quot;]
-<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>    [ref &quot;o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase&quot;],
-<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `unix-shell.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf&quot;]
-<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>    [line &quot;480&quot;]
-<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>    [id &quot;932160&quot;]
-<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>    [rev &quot;&quot;]
-<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>    [msg &quot;Remote Command Execution: Unix Shell Code Found&quot;]
-<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>    [severity &quot;2&quot;]
-<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>    [ver &quot;OWASP_CRS/3.3.2&quot;]
-<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>    [maturity &quot;0&quot;]
-<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>    [accuracy &quot;0&quot;]
-<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>    [tag &quot;application-multi&quot;]
-<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>    [tag &quot;language-shell&quot;]
-<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>    [tag &quot;platform-unix&quot;]
-<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>    [tag &quot;attack-rce&quot;]
-<a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a>    [tag &quot;paranoia-level/1&quot;]
-<a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a>    [tag &quot;OWASP_CRS&quot;]
-<a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a>    [tag &quot;capec/1000/152/248/88&quot;]
-<a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a>    [tag &quot;PCI/6.5.2&quot;]
-<a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a>    [hostname &quot;172.17.0.2&quot;]
-<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>    [uri &quot;/&quot;]
-<a id="__codelineno-11-46" name="__codelineno-11-46" href="#__codelineno-11-46"></a>    [unique_id &quot;165097447014.179282&quot;]
-<a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a>    [ref &quot;o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase&quot;],
-<a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a>    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-<a id="__codelineno-11-49" name="__codelineno-11-49" href="#__codelineno-11-49"></a>2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched &quot;Operator `Ge&#39; with parameter `5&#39; against variable `TX:ANOMALY_SCORE&#39; (Value: `10&#39; )
-<a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a>    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf&quot;]
-<a id="__codelineno-11-51" name="__codelineno-11-51" href="#__codelineno-11-51"></a>    [line &quot;80&quot;]
-<a id="__codelineno-11-52" name="__codelineno-11-52" href="#__codelineno-11-52"></a>    [id &quot;949110&quot;]
-<a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a>    [rev &quot;&quot;]
-<a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a>    [msg &quot;Inbound Anomaly Score Exceeded (Total Score: 10)&quot;]
-<a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a>    [data &quot;&quot;]
-<a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a>    [severity &quot;2&quot;]
-<a id="__codelineno-11-57" name="__codelineno-11-57" href="#__codelineno-11-57"></a>    [ver &quot;OWASP_CRS/3.3.2&quot;]
-<a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a>    [maturity &quot;0&quot;]
-<a id="__codelineno-11-59" name="__codelineno-11-59" href="#__codelineno-11-59"></a>    [accuracy &quot;0&quot;]
-<a id="__codelineno-11-60" name="__codelineno-11-60" href="#__codelineno-11-60"></a>    [tag &quot;application-multi&quot;]
-<a id="__codelineno-11-61" name="__codelineno-11-61" href="#__codelineno-11-61"></a>    [tag &quot;language-multi&quot;]
-<a id="__codelineno-11-62" name="__codelineno-11-62" href="#__codelineno-11-62"></a>    [tag &quot;platform-multi&quot;]
-<a id="__codelineno-11-63" name="__codelineno-11-63" href="#__codelineno-11-63"></a>    [tag &quot;attack-generic&quot;]
-<a id="__codelineno-11-64" name="__codelineno-11-64" href="#__codelineno-11-64"></a>    [hostname &quot;172.17.0.2&quot;]
-<a id="__codelineno-11-65" name="__codelineno-11-65" href="#__codelineno-11-65"></a>    [uri &quot;/&quot;]
-<a id="__codelineno-11-66" name="__codelineno-11-66" href="#__codelineno-11-66"></a>    [unique_id &quot;165097447014.179282&quot;]
-<a id="__codelineno-11-67" name="__codelineno-11-67" href="#__codelineno-11-67"></a>    [ref &quot;&quot;],
-<a id="__codelineno-11-68" name="__codelineno-11-68" href="#__codelineno-11-68"></a>    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
+<div class="highlight"><pre><span></span><code>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `lfi-os-files.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
+    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf&quot;]
+    [line &quot;78&quot;]
+    [id &quot;930120&quot;]
+    [rev &quot;&quot;]
+    [msg &quot;OS File Access Attempt&quot;]
+    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
+    [severity &quot;2&quot;]
+    [ver &quot;OWASP_CRS/3.3.2&quot;]
+    [maturity &quot;0&quot;]
+    [accuracy &quot;0&quot;]
+    [tag &quot;application-multi&quot;]
+    [tag &quot;language-multi&quot;]
+    [tag &quot;platform-multi&quot;]
+    [tag &quot;attack-lfi&quot;]
+    [tag &quot;paranoia-level/1&quot;]
+    [tag &quot;OWASP_CRS&quot;]
+    [tag &quot;capec/1000/255/153/126&quot;]
+    [tag &quot;PCI/6.5.4&quot;]
+    [hostname &quot;172.17.0.2&quot;]
+    [uri &quot;/&quot;]
+    [unique_id &quot;165097447014.179282&quot;]
+    [ref &quot;o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase&quot;],
+    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
+2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `unix-shell.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
+    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf&quot;]
+    [line &quot;480&quot;]
+    [id &quot;932160&quot;]
+    [rev &quot;&quot;]
+    [msg &quot;Remote Command Execution: Unix Shell Code Found&quot;]
+    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
+    [severity &quot;2&quot;]
+    [ver &quot;OWASP_CRS/3.3.2&quot;]
+    [maturity &quot;0&quot;]
+    [accuracy &quot;0&quot;]
+    [tag &quot;application-multi&quot;]
+    [tag &quot;language-shell&quot;]
+    [tag &quot;platform-unix&quot;]
+    [tag &quot;attack-rce&quot;]
+    [tag &quot;paranoia-level/1&quot;]
+    [tag &quot;OWASP_CRS&quot;]
+    [tag &quot;capec/1000/152/248/88&quot;]
+    [tag &quot;PCI/6.5.2&quot;]
+    [hostname &quot;172.17.0.2&quot;]
+    [uri &quot;/&quot;]
+    [unique_id &quot;165097447014.179282&quot;]
+    [ref &quot;o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase&quot;],
+    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
+2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched &quot;Operator `Ge&#39; with parameter `5&#39; against variable `TX:ANOMALY_SCORE&#39; (Value: `10&#39; )
+    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf&quot;]
+    [line &quot;80&quot;]
+    [id &quot;949110&quot;]
+    [rev &quot;&quot;]
+    [msg &quot;Inbound Anomaly Score Exceeded (Total Score: 10)&quot;]
+    [data &quot;&quot;]
+    [severity &quot;2&quot;]
+    [ver &quot;OWASP_CRS/3.3.2&quot;]
+    [maturity &quot;0&quot;]
+    [accuracy &quot;0&quot;]
+    [tag &quot;application-multi&quot;]
+    [tag &quot;language-multi&quot;]
+    [tag &quot;platform-multi&quot;]
+    [tag &quot;attack-generic&quot;]
+    [hostname &quot;172.17.0.2&quot;]
+    [uri &quot;/&quot;]
+    [unique_id &quot;165097447014.179282&quot;]
+    [ref &quot;&quot;],
+    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
 </code></pre></div>
 <p>As we can see there are 3 different logs :</p>
 <ol>
@@ -797,33 +800,33 @@ documentation for the current version.
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mya</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your service) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>docker <span class="nb">exec</span> <span class="k">$(</span>docker ps -q -f <span class="nv">name</span><span class="o">=</span>myautoconf<span class="k">)</span> bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> <span class="k">$(</span>docker ps -q -f <span class="nv">name</span><span class="o">=</span>myautoconf<span class="k">)</span> bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>kubectl exec</code> command (replace <code>myautoconf</code> with the name of your pod) :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kubectl <span class="nb">exec</span> myautoconf bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> myautoconf bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>You can use the <code>bwcli</code> command :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>bwcli unban <span class="m">1</span>.2.3.4
+<div class="highlight"><pre><span></span><code>bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 </div>
@@ -939,7 +942,7 @@ documentation for the current version.
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.annotate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.467223ff.min.js"></script>

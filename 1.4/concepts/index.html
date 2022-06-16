@@ -642,13 +642,13 @@ documentation for the current version.
 <p>Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.</p>
 <p>Configuration of BunkerWeb is done using what we called the "settings" or "variables". Each setting is identified by a name like <code>AUTO_LETS_ENCRYPT</code> or <code>USE_ANTIBOT</code> for example. You can assign values to the settings to configure BunkerWeb.</p>
 <p>Here is a dummy example of a BunkerWeb configuration :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SERVER_NAME=www.example.com
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>AUTO_LETS_ENCRYPT=yes
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>USE_ANTIBOT=captcha
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>REFERRER_POLICY=no-referrer
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>USE_MODSECURITY=no
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>USE_GZIP=yes
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>USE_BROTLI=no
+<div class="highlight"><pre><span></span><code>SERVER_NAME=www.example.com
+AUTO_LETS_ENCRYPT=yes
+USE_ANTIBOT=captcha
+REFERRER_POLICY=no-referrer
+USE_MODSECURITY=no
+USE_GZIP=yes
+USE_BROTLI=no
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
@@ -665,16 +665,16 @@ documentation for the current version.
 <p>The multisite mode is controlled by the <code>MULTISITE</code> setting which can be set to <code>yes</code> (enabled) or <code>no</code> (disabled, which is the default).</p>
 <p>Each setting has a context which defines "where" it can be applied. If the context is global then the setting can't be set per server (or "per site", "per app") but only to the whole configuration. Otherwise, if the context is multisite, the setting can be set globally and per server. Defining a multisite setting to a specific server is done by adding the server name as a prefix of the setting name like <code>app1.example.com_AUTO_LETS_ENCRYPT</code> or <code>app2.example.com_USE_ANTIBOT</code> for example. When a multisite setting is defined globally (without any server prefix), all the servers will inherit that setting (but can still be overriden if we set the same setting with the server name prefix).</p>
 <p>Here is a dummy example of a multisite BunkerWeb configuration :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>MULTISITE=yes
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>SERVER_NAME=app1.example.com app2.example.com app3.example.com
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>AUTO_LETS_ENCRYPT=yes
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>USE_GZIP=yes
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>USE_BROTLI=yes
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>app1.example.com_USE_ANTIBOT=javascript
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>app1.example.com_USE_MODSECURITY=no
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>app2.example.com_USE_ANTIBOT=cookie
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>app2.example.com_WHITELIST_COUNTRY=FR
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>app3.example.com_USE_BAD_BEHAVIOR=no
+<div class="highlight"><pre><span></span><code>MULTISITE=yes
+SERVER_NAME=app1.example.com app2.example.com app3.example.com
+AUTO_LETS_ENCRYPT=yes
+USE_GZIP=yes
+USE_BROTLI=yes
+app1.example.com_USE_ANTIBOT=javascript
+app1.example.com_USE_MODSECURITY=no
+app2.example.com_USE_ANTIBOT=cookie
+app2.example.com_WHITELIST_COUNTRY=FR
+app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
@@ -792,7 +792,7 @@ documentation for the current version.
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.annotate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.467223ff.min.js"></script>

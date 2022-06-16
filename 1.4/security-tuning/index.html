@@ -700,6 +700,26 @@ documentation for the current version.
     Authentication
   </a>
   
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auth-basic" class="md-nav__link">
+    Auth basic
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auth-request" class="md-nav__link">
+    Auth request
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1039,18 +1059,18 @@ documentation for the current version.
 <li>modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)</li>
 </ul>
 <p>For example, you can add a custom configuration with type <code>modsec-crs</code> to add CRS exclusions :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SecAction \
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> &quot;id:900130,\
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  phase:1,\
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  nolog,\
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  pass,\
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  t:none,\
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  setvar:tx.crs_exclusions_wordpress=1&quot;
+<div class="highlight"><pre><span></span><code>SecAction \
+ &quot;id:900130,\
+  phase:1,\
+  nolog,\
+  pass,\
+  t:none,\
+  setvar:tx.crs_exclusions_wordpress=1&quot;
 </code></pre></div>
 <p>You can also add a custom configuration with type <code>modsec</code> to update loaded CRS rules :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>SecRule REQUEST_FILENAME &quot;/wp-admin/admin-ajax.php&quot; &quot;id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce&quot;
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>SecRule REQUEST_FILENAME &quot;/wp-admin/options.php&quot; &quot;id:2,ctl:ruleRemoveByTag=attack-xss&quot;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveById=930120&quot;
+<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME &quot;/wp-admin/admin-ajax.php&quot; &quot;id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce&quot;
+SecRule REQUEST_FILENAME &quot;/wp-admin/options.php&quot; &quot;id:2,ctl:ruleRemoveByTag=attack-xss&quot;
+SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveById=930120&quot;
 </code></pre></div>
 <h2 id="bad-behavior">Bad behavior</h2>
 <p>When attackers search for and/or exploit vulnerabilities they might generate some "suspicious" HTTP status codes that a "regular" user won’t generate within a period of time. If we detect that kind of behavior we can ban the offending IP address and force the attacker to come up with a new one.</p>
@@ -1408,6 +1428,7 @@ documentation for the current version.
 </table>
 <p>Using both country blacklist and whitelist at the same time makes no sense. If you do please note that only the whitelist will be executed.</p>
 <h2 id="authentication">Authentication</h2>
+<h3 id="auth-basic">Auth basic</h3>
 <p>You can quickly protect sensitive resources like the admin area for example by requiring HTTP basic authentication. Here is the list of related settings :</p>
 <table>
 <thead>
@@ -1429,19 +1450,56 @@ documentation for the current version.
 <td align="left">Location (URL) of the sensitive resource. Use special value <code>sitewide</code> to enable everywhere.</td>
 </tr>
 <tr>
-<td align="center"><code>USE_AUTH_BASIC_USER</code></td>
+<td align="center"><code>AUTH_BASIC_USER</code></td>
 <td align="center"><code>changeme</code></td>
 <td align="left">The username required.</td>
 </tr>
 <tr>
-<td align="center"><code>USE_AUTH_BASIC_PASSWORD</code></td>
+<td align="center"><code>AUTH_BASIC_PASSWORD</code></td>
 <td align="center"><code>changeme</code></td>
 <td align="left">The password required.</td>
 </tr>
 <tr>
-<td align="center"><code>USE_AUTH_BASIC_TEXT</code></td>
+<td align="center"><code>AUTH_BASIC_TEXT</code></td>
 <td align="center"><code>Restricted area</code></td>
 <td align="left">Text to display in the auth prompt.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auth-request">Auth request</h3>
+<p>You can deploy complex authentification (e.g. SSO), by using the auth request settings (see <a href="https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/">here</a> for more information on the feature). Please note that you will find <a href="https://www.authelia.com/">Authelia</a> and <a href="https://goauthentik.io/">Authentik</a> examples in the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">repository</a>.</p>
+<p><strong>Auth request settings are related to reverse proxy rules.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REVERSE_PROXY_AUTH_REQUEST</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Enable authentication using an external provider (value of auth_request directive).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_AUTH_REQUEST_SET</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).</td>
 </tr>
 </tbody>
 </table>
@@ -1549,7 +1607,7 @@ documentation for the current version.
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.annotate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.467223ff.min.js"></script>

@@ -661,13 +661,13 @@ documentation for the current version.
 <figcaption>Docker integration</figcaption>
 </figure>
 <p>Using BunkerWeb as a <a href="https://www.docker.com/">Docker</a> container is a quick and easy way to test and use it as long as you are familiar with the Docker technology.</p>
-<p>We provide ready to use prebuilt images for x64 and x86 architectures (armv7 and armv8 are not supported at the moment) on <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a> :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker pull bunkerity/bunkerweb:1.4.0
+<p>We provide ready to use prebuilt images for x64, x86 armv8 and armv7 architectures on <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a> :</p>
+<div class="highlight"><pre><span></span><code>docker pull bunkerity/bunkerweb:1.4.1
 </code></pre></div>
 <p>Alternatively, you can build the Docker images directly from the <a href="https://github.com/bunkerity/bunkerweb">source</a> (and take a coffee ☕ because it may be long depending on your hardware) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git clone https://github.com/bunkerity/bunkerweb.git <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span> bunkerweb <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>docker build -t my-bunkerweb .
+<div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb.git <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> bunkerweb <span class="o">&amp;&amp;</span> <span class="se">\</span>
+docker build -t my-bunkerweb .
 </code></pre></div>
 <p>Usage and configuration of the BunkerWeb container are based on :</p>
 <ul>
@@ -677,20 +677,20 @@ documentation for the current version.
 </ul>
 <h3 id="environment-variables">Environment variables</h3>
 <p>Settings are passed to BunkerWeb using Docker environment variables. You can use the <code>-e</code> flag :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>       ...
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>       -e <span class="nv">MY_SETTING</span><span class="o">=</span>value <span class="se">\</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>       -e <span class="s2">&quot;MY_OTHER_SETTING=value with spaces&quot;</span> <span class="se">\</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>       ...
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>       bunkerity/bunkerweb:1.4.0
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+       ...
+       -e <span class="nv">MY_SETTING</span><span class="o">=</span>value <span class="se">\</span>
+       -e <span class="s2">&quot;MY_OTHER_SETTING=value with spaces&quot;</span> <span class="se">\</span>
+       ...
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span><span class="w"></span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Full list</p>
@@ -699,25 +699,25 @@ documentation for the current version.
 <h3 id="volume">Volume</h3>
 <p>A volume is used to share data with BunkerWeb and store persistent data like certificates, cached files, ...</p>
 <p>The easiest way of managing the volume is by using a named one. You will first need to create it :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker volume create bw-data
+<div class="highlight"><pre><span></span><code>docker volume create bw-data
 </code></pre></div>
 <p>Once it's created, you can mount it on <code>/data</code> when running the container :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>       ...
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>       ...
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>       bunkerity/bunkerweb:1.4.0
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+       ...
+       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
+       ...
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
+<span class="nn">...</span><span class="w"></span>
+<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -726,47 +726,47 @@ But there is a downside : if you use a <strong>local folder for the persistent d
 <code>shell mkdir bw-data &amp;&amp; \ chown root:101 bw-data &amp;&amp; \ chmod 770 bw-data</code></p>
 </div>
 <p>Alternatively, if the folder already exists :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>chmod -R <span class="m">770</span> bw-data
+<div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chmod -R <span class="m">770</span> bw-data
 </code></pre></div>
 <p>Mounting the folder :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>        ...
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>      -v ./bw-data:/data <span class="se">\</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        ...
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        bunkerity/bunkerweb:1.4.0
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+        ...
+      -v ./bw-data:/data <span class="se">\</span>
+        ...
+        bunkerity/bunkerweb:1.4.1
 </code></pre></div>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 </code></pre></div>
 <h3 id="networks">Networks</h3>
 <p>The easiest way to connect BunkerWeb to web applications is by using Docker networks.</p>
 <p>First of all, you will need to create a network :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>docker network create mynetwork
+<div class="highlight"><pre><span></span><code>docker network create mynetwork
 </code></pre></div>
 <p>Once it's created, you will need to connect the container to that network :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>       ...
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>       --network mynetwork <span class="se">\</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>       ...
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>       bunkerity/bunkerweb:1.4.0
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+       ...
+       --network mynetwork <span class="se">\</span>
+       ...
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div>
 <p>You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.</p>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">  </span><span class="nt">bw-net</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
+<span class="nn">...</span><span class="w"></span>
+<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-net</span><span class="p">:</span><span class="w"></span>
 </code></pre></div>
 <h2 id="docker-autoconf">Docker autoconf</h2>
 <figure>
@@ -785,120 +785,115 @@ But there is a downside : if you use a <strong>local folder for the persistent d
 <p>The Docker autoconf integration implies the use of <strong>multisite mode</strong>. Please refer to the <a href="/1.4/concepts/#multisite-mode">multisite section</a> of the documentation for more information.</p>
 </div>
 <p>First of all, you will need to create the data volume :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker volume create bw-data
+<div class="highlight"><pre><span></span><code>docker volume create bw-data
 </code></pre></div>
-<ul>
-<li>One for sharing the persistent data, mounted on <strong>/data</strong></li>
-<li>Another one for sharing the generated Nginx configurations, mounted on <strong>/etc/nginx</strong></li>
-</ul>
 <p>Then, you can create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>docker network create --subnet <span class="m">10</span>.20.30.0/24 bw-autoconf <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>docker network create bw-services
+<div class="highlight"><pre><span></span><code>docker network create --subnet <span class="m">10</span>.20.30.0/24 bw-autoconf <span class="o">&amp;&amp;</span> <span class="se">\</span>
+docker network create bw-services
 </code></pre></div>
 <ul>
 <li>One for communication between <strong>BunkerWeb</strong> and <strong>autoconf</strong></li>
 <li>Another one for communication between <strong>BunkerWeb</strong> and <strong>web applications</strong></li>
 </ul>
 <p>You can now create the BunkerWeb container with the <code>AUTOCONF_MODE=yes</code> setting and the <code>bunkerweb.AUTOCONF</code> label (replace 10.20.30.0/24 with the subnet specified before) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>       -d <span class="se">\</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>       --name mybunker <span class="se">\</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>       --network bw-autoconf <span class="se">\</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>       -p <span class="m">80</span>:8080 <span class="se">\</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>       -p <span class="m">443</span>:8443 <span class="se">\</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>       -e <span class="nv">AUTOCONF_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>       -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>       -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
-<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>       -l bunkerweb.AUTOCONF <span class="se">\</span>
-<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>       bunkerity/bunkerweb:1.4.0 <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>
-<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>docker network connect bw-services mybunker
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+       -d <span class="se">\</span>
+       --name mybunker <span class="se">\</span>
+       --network bw-autoconf <span class="se">\</span>
+       -p <span class="m">80</span>:8080 <span class="se">\</span>
+       -p <span class="m">443</span>:8443 <span class="se">\</span>
+       -e <span class="nv">AUTOCONF_MODE</span><span class="o">=</span>yes <span class="se">\</span>
+       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
+       -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
+       -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
+       -l bunkerweb.AUTOCONF <span class="se">\</span>
+       bunkerity/bunkerweb:1.4.1 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+
+docker network connect bw-services mybunker
 </code></pre></div>
 <p>And the autoconf one :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>       -d <span class="se">\</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>       --name myautoconf <span class="se">\</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>       --network bw-autoconf <span class="se">\</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>       -v bw-data:/data <span class="se">\</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>       -v /var/run/docker.sock:/var/run/docker.sock:ro <span class="se">\</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>       bunkerity/bunkerweb-autoconf:1.4.0
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+       -d <span class="se">\</span>
+       --name myautoconf <span class="se">\</span>
+       --network bw-autoconf <span class="se">\</span>
+       -v bw-data:/data <span class="se">\</span>
+       -v /var/run/docker.sock:/var/run/docker.sock:ro <span class="se">\</span>
+       bunkerity/bunkerweb-autoconf:1.4.1
 </code></pre></div>
 <p>Here is the docker-compose equivalent for the BunkerWeb autoconf stack :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
-<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span><span class="w"></span>
-<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span><span class="w"></span>
-<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
-<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>
-<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.0</span><span class="w"></span>
-<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
-<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>
-<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a><span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>
-<a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a><span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a><span class="w">    </span><span class="nt">ipam</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a><span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
-<a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a><span class="w">      </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"></span>
-<a id="__codelineno-17-39" name="__codelineno-17-39" href="#__codelineno-17-39"></a><span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-17-40" name="__codelineno-17-40" href="#__codelineno-17-40"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
+
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AUTOCONF_MODE=yes</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span><span class="w"></span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
+
+<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
+
+<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
 </code></pre></div>
 <p>Once the stack is setup, you can now create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically setup BunkerWeb :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>docker run <span class="se">\</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>       -d <span class="se">\</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>       --name myapp <span class="se">\</span>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>       --network bw-services <span class="se">\</span>
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>       -l bunkerweb.MY_SETTING_1<span class="o">=</span>value1 <span class="se">\</span>
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>       -l bunkerweb.MY_SETTING_2<span class="o">=</span>value2 <span class="se">\</span>
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>       ...
-<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>       mywebapp:4.2
+<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
+       -d <span class="se">\</span>
+       --name myapp <span class="se">\</span>
+       --network bw-services <span class="se">\</span>
+       -l bunkerweb.MY_SETTING_1<span class="o">=</span>value1 <span class="se">\</span>
+       -l bunkerweb.MY_SETTING_2<span class="o">=</span>value2 <span class="se">\</span>
+       ...
+       mywebapp:4.2
 </code></pre></div>
 <p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span><span class="w"></span>
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp</span><span class="w"></span>
-<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_1=value1&quot;</span><span class="w"></span>
-<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_2=value2&quot;</span><span class="w"></span>
-<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>
-<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>
-<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a>
-<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="nn">...</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
+
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp</span><span class="w"></span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_1=value1&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_2=value2&quot;</span><span class="w"></span>
+
+<span class="nn">...</span><span class="w"></span>
+
+<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+
+<span class="nn">...</span><span class="w"></span>
 </code></pre></div>
 <h2 id="swarm">Swarm</h2>
 <figure>
@@ -914,132 +909,132 @@ But there is a downside : if you use a <strong>local folder for the persistent d
 <p>Like the <a href="#docker-autoconf">Docker autoconf integration</a>, configuration for web services is defined using labels starting with the special <strong>bunkerweb.</strong> prefix.</p>
 <p>The recommended setup is to schedule the <strong>BunkerWeb service</strong> as a <strong>global service</strong> on all worker nodes and the <strong>autoconf service</strong> as a <strong>single replicated service</strong> on a manager node.</p>
 <p>First of all, you will need to create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>docker network create -d overlay --attachable --subnet <span class="m">10</span>.20.30.0/24 bw-autoconf <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>docker network create -d overlay --attachable bw-services
+<div class="highlight"><pre><span></span><code>docker network create -d overlay --attachable --subnet <span class="m">10</span>.20.30.0/24 bw-autoconf <span class="o">&amp;&amp;</span> <span class="se">\</span>
+docker network create -d overlay --attachable bw-services
 </code></pre></div>
 <ul>
 <li>One for communication between <strong>BunkerWeb</strong> and <strong>autoconf</strong></li>
 <li>Another one for communication between <strong>BunkerWeb</strong> and <strong>web applications</strong></li>
 </ul>
 <p>You can now create the BunkerWeb service (replace 10.20.30.0/24 with the subnet specified before) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>docker service create <span class="se">\</span>
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>       --name mybunker <span class="se">\</span>
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>       --mode global <span class="se">\</span>
-<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>       --constraint node.role<span class="o">==</span>worker <span class="se">\</span>
-<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>       --network bw-autoconf <span class="se">\</span>
-<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>       --network bw-services <span class="se">\</span>
-<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>       -p <span class="nv">published</span><span class="o">=</span><span class="m">80</span>,target<span class="o">=</span><span class="m">8080</span>,mode<span class="o">=</span>host <span class="se">\</span>
-<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>       -p <span class="nv">published</span><span class="o">=</span><span class="m">443</span>,target<span class="o">=</span><span class="m">8443</span>,mode<span class="o">=</span>host <span class="se">\</span>
-<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>       -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>       -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
-<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
-<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>       -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
-<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>       -l bunkerweb.AUTOCONF <span class="se">\</span>
-<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>       bunkerity/bunkerweb:1.4.0
+<div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
+       --name mybunker <span class="se">\</span>
+       --mode global <span class="se">\</span>
+       --constraint node.role<span class="o">==</span>worker <span class="se">\</span>
+       --network bw-autoconf <span class="se">\</span>
+       --network bw-services <span class="se">\</span>
+       -p <span class="nv">published</span><span class="o">=</span><span class="m">80</span>,target<span class="o">=</span><span class="m">8080</span>,mode<span class="o">=</span>host <span class="se">\</span>
+       -p <span class="nv">published</span><span class="o">=</span><span class="m">443</span>,target<span class="o">=</span><span class="m">8443</span>,mode<span class="o">=</span>host <span class="se">\</span>
+       -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
+       -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
+       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
+       -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
+       -l bunkerweb.AUTOCONF <span class="se">\</span>
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div>
 <p>And the autoconf one :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>docker service <span class="se">\</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>       create <span class="se">\</span>
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>       --name myautoconf <span class="se">\</span>
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>       --constraint node.role<span class="o">==</span>manager <span class="se">\</span>
-<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>       --network bw-autoconf <span class="se">\</span>
-<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>       --mount <span class="nv">type</span><span class="o">=</span>bind,source<span class="o">=</span>/var/run/docker.sock,destination<span class="o">=</span>/var/run/docker.sock,ro <span class="se">\</span>
-<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>       --mount <span class="nv">type</span><span class="o">=</span>volume,source<span class="o">=</span>bw-data,destination<span class="o">=</span>/data <span class="se">\</span>
-<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>       -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>       bunkerity/bunkerweb-autoconf:1.4.0
+<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
+       create <span class="se">\</span>
+       --name myautoconf <span class="se">\</span>
+       --constraint node.role<span class="o">==</span>manager <span class="se">\</span>
+       --network bw-autoconf <span class="se">\</span>
+       --mount <span class="nv">type</span><span class="o">=</span>bind,source<span class="o">=</span>/var/run/docker.sock,destination<span class="o">=</span>/var/run/docker.sock,ro <span class="se">\</span>
+       --mount <span class="nv">type</span><span class="o">=</span>volume,source<span class="o">=</span>bw-data,destination<span class="o">=</span>/data <span class="se">\</span>
+       -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
+       bunkerity/bunkerweb-autoconf:1.4.1
 </code></pre></div>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.5&#39;</span><span class="w"></span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
-<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
-<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
-<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span><span class="w"></span>
-<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span><span class="w"></span>
-<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
-<a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a><span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span><span class="w"></span>
-<a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span><span class="w"></span>
-<a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span><span class="w"></span>
-<a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
-<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span><span class="w"></span>
-<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
-<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span><span class="w"></span>
-<a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<a id="__codelineno-23-23" name="__codelineno-23-23" href="#__codelineno-23-23"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<a id="__codelineno-23-24" name="__codelineno-23-24" href="#__codelineno-23-24"></a><span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-25" name="__codelineno-23-25" href="#__codelineno-23-25"></a><span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span><span class="w"></span>
-<a id="__codelineno-23-26" name="__codelineno-23-26" href="#__codelineno-23-26"></a><span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-27" name="__codelineno-23-27" href="#__codelineno-23-27"></a><span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-28" name="__codelineno-23-28" href="#__codelineno-23-28"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<a id="__codelineno-23-29" name="__codelineno-23-29" href="#__codelineno-23-29"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-30" name="__codelineno-23-30" href="#__codelineno-23-30"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
-<a id="__codelineno-23-31" name="__codelineno-23-31" href="#__codelineno-23-31"></a>
-<a id="__codelineno-23-32" name="__codelineno-23-32" href="#__codelineno-23-32"></a><span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-33" name="__codelineno-23-33" href="#__codelineno-23-33"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.0</span><span class="w"></span>
-<a id="__codelineno-23-34" name="__codelineno-23-34" href="#__codelineno-23-34"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-35" name="__codelineno-23-35" href="#__codelineno-23-35"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
-<a id="__codelineno-23-36" name="__codelineno-23-36" href="#__codelineno-23-36"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-37" name="__codelineno-23-37" href="#__codelineno-23-37"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
-<a id="__codelineno-23-38" name="__codelineno-23-38" href="#__codelineno-23-38"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
-<a id="__codelineno-23-39" name="__codelineno-23-39" href="#__codelineno-23-39"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-40" name="__codelineno-23-40" href="#__codelineno-23-40"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<a id="__codelineno-23-41" name="__codelineno-23-41" href="#__codelineno-23-41"></a><span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-42" name="__codelineno-23-42" href="#__codelineno-23-42"></a><span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<a id="__codelineno-23-43" name="__codelineno-23-43" href="#__codelineno-23-43"></a><span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-44" name="__codelineno-23-44" href="#__codelineno-23-44"></a><span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-45" name="__codelineno-23-45" href="#__codelineno-23-45"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==manager&quot;</span><span class="w"></span>
-<a id="__codelineno-23-46" name="__codelineno-23-46" href="#__codelineno-23-46"></a>
-<a id="__codelineno-23-47" name="__codelineno-23-47" href="#__codelineno-23-47"></a><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-48" name="__codelineno-23-48" href="#__codelineno-23-48"></a><span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-49" name="__codelineno-23-49" href="#__codelineno-23-49"></a><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span><span class="w"></span>
-<a id="__codelineno-23-50" name="__codelineno-23-50" href="#__codelineno-23-50"></a><span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<a id="__codelineno-23-51" name="__codelineno-23-51" href="#__codelineno-23-51"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
-<a id="__codelineno-23-52" name="__codelineno-23-52" href="#__codelineno-23-52"></a><span class="w">    </span><span class="nt">ipam</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-53" name="__codelineno-23-53" href="#__codelineno-23-53"></a><span class="w">      </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-54" name="__codelineno-23-54" href="#__codelineno-23-54"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"></span>
-<a id="__codelineno-23-55" name="__codelineno-23-55" href="#__codelineno-23-55"></a><span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-56" name="__codelineno-23-56" href="#__codelineno-23-56"></a><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span><span class="w"></span>
-<a id="__codelineno-23-57" name="__codelineno-23-57" href="#__codelineno-23-57"></a><span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<a id="__codelineno-23-58" name="__codelineno-23-58" href="#__codelineno-23-58"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<a id="__codelineno-23-59" name="__codelineno-23-59" href="#__codelineno-23-59"></a>
-<a id="__codelineno-23-60" name="__codelineno-23-60" href="#__codelineno-23-60"></a><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-23-61" name="__codelineno-23-61" href="#__codelineno-23-61"></a><span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.5&#39;</span><span class="w"></span>
+
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
+<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
+<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
+<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span><span class="w"></span>
+<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span><span class="w"></span>
+<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==manager&quot;</span><span class="w"></span>
+
+<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span><span class="w"></span>
+<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-autoconf</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span><span class="w"></span>
+<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+
+<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
 </code></pre></div>
 <p>Once the BunkerWeb Swarm stack is set up and running (see autoconf logs for more information), you can now deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>docker service <span class="se">\</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>       create <span class="se">\</span>
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>       --name myapp <span class="se">\</span>
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>       --network bw-services <span class="se">\</span>
-<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>       -l bunkerweb.MY_SETTING_1<span class="o">=</span>value1 <span class="se">\</span>
-<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>       -l bunkerweb.MY_SETTING_2<span class="o">=</span>value2 <span class="se">\</span>
-<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>       ...
-<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>       mywebapp:4.2
+<div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
+       create <span class="se">\</span>
+       --name myapp <span class="se">\</span>
+       --network bw-services <span class="se">\</span>
+       -l bunkerweb.MY_SETTING_1<span class="o">=</span>value1 <span class="se">\</span>
+       -l bunkerweb.MY_SETTING_2<span class="o">=</span>value2 <span class="se">\</span>
+       ...
+       mywebapp:4.2
 </code></pre></div>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span><span class="w"></span>
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
-<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
-<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_1=value1&quot;</span><span class="w"></span>
-<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_2=value2&quot;</span><span class="w"></span>
-<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a><span class="nn">...</span><span class="w"></span>
-<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a><span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a><span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-25-18" name="__codelineno-25-18" href="#__codelineno-25-18"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">myapp</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">placement</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role==worker&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_1=value1&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MY_SETTING_2=value2&quot;</span><span class="w"></span>
+<span class="nn">...</span><span class="w"></span>
+<span class="nt">networks</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
 </code></pre></div>
 <h2 id="kubernetes">Kubernetes</h2>
 <figure>
@@ -1049,167 +1044,167 @@ But there is a downside : if you use a <strong>local folder for the persistent d
 </figure>
 <p>The autoconf acts as an <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress controller</a> and will configure the BunkerWeb instances according to the <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress resources</a>. It also monitors other Kubernetes objects like <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> for custom configurations.</p>
 <p>The first step to install BunkerWeb on a Kubernetes cluster is to add a role and permissions on the cluster for the autoconf :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
-<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a><span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a><span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a><span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a><span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a><span class="nn">---</span><span class="w"></span>
-<a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span><span class="w"></span>
-<a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-26-16" name="__codelineno-26-16" href="#__codelineno-26-16"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-26-17" name="__codelineno-26-17" href="#__codelineno-26-17"></a><span class="nn">---</span><span class="w"></span>
-<a id="__codelineno-26-18" name="__codelineno-26-18" href="#__codelineno-26-18"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
-<a id="__codelineno-26-19" name="__codelineno-26-19" href="#__codelineno-26-19"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRoleBinding</span><span class="w"></span>
-<a id="__codelineno-26-20" name="__codelineno-26-20" href="#__codelineno-26-20"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-26-21" name="__codelineno-26-21" href="#__codelineno-26-21"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crb-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-26-22" name="__codelineno-26-22" href="#__codelineno-26-22"></a><span class="nt">subjects</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-26-23" name="__codelineno-26-23" href="#__codelineno-26-23"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span><span class="w"></span>
-<a id="__codelineno-26-24" name="__codelineno-26-24" href="#__codelineno-26-24"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-26-25" name="__codelineno-26-25" href="#__codelineno-26-25"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
-<a id="__codelineno-26-26" name="__codelineno-26-26" href="#__codelineno-26-26"></a><span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<a id="__codelineno-26-27" name="__codelineno-26-27" href="#__codelineno-26-27"></a><span class="nt">roleRef</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-26-28" name="__codelineno-26-28" href="#__codelineno-26-28"></a><span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
-<a id="__codelineno-26-29" name="__codelineno-26-29" href="#__codelineno-26-29"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-26-30" name="__codelineno-26-30" href="#__codelineno-26-30"></a><span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span><span class="w"></span>
+<span class="nt">rules</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
+<span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRoleBinding</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crb-bunkerweb</span><span class="w"></span>
+<span class="nt">subjects</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
+<span class="nt">roleRef</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span><span class="w"></span>
+<span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span><span class="w"></span>
 </code></pre></div>
 <p>The recommended way of deploying BunkerWeb is using a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a> which means each node in the cluster will run an instance of BunkerWeb :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
-<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a><span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a><span class="w">      </span><span class="c1"># mandatory annotation</span><span class="w"></span>
-<a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a><span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-15" name="__codelineno-27-15" href="#__codelineno-27-15"></a><span class="w">        </span><span class="nt">bunkerweb.io/AUTOCONF</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<a id="__codelineno-27-16" name="__codelineno-27-16" href="#__codelineno-27-16"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-17" name="__codelineno-27-17" href="#__codelineno-27-17"></a><span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-18" name="__codelineno-27-18" href="#__codelineno-27-18"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<a id="__codelineno-27-19" name="__codelineno-27-19" href="#__codelineno-27-19"></a><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb</span><span class="w"></span>
-<a id="__codelineno-27-20" name="__codelineno-27-20" href="#__codelineno-27-20"></a><span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-21" name="__codelineno-27-21" href="#__codelineno-27-21"></a><span class="w">          </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span><span class="w"></span>
-<a id="__codelineno-27-22" name="__codelineno-27-22" href="#__codelineno-27-22"></a><span class="w">          </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span><span class="w"></span>
-<a id="__codelineno-27-23" name="__codelineno-27-23" href="#__codelineno-27-23"></a><span class="w">          </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<a id="__codelineno-27-24" name="__codelineno-27-24" href="#__codelineno-27-24"></a><span class="w">          </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-25" name="__codelineno-27-25" href="#__codelineno-27-25"></a><span class="w">            </span><span class="nt">drop</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-26" name="__codelineno-27-26" href="#__codelineno-27-26"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<a id="__codelineno-27-27" name="__codelineno-27-27" href="#__codelineno-27-27"></a><span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-28" name="__codelineno-27-28" href="#__codelineno-27-28"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
-<a id="__codelineno-27-29" name="__codelineno-27-29" href="#__codelineno-27-29"></a><span class="w">          </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
-<a id="__codelineno-27-30" name="__codelineno-27-30" href="#__codelineno-27-30"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span><span class="w"></span>
-<a id="__codelineno-27-31" name="__codelineno-27-31" href="#__codelineno-27-31"></a><span class="w">          </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
-<a id="__codelineno-27-32" name="__codelineno-27-32" href="#__codelineno-27-32"></a><span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-33" name="__codelineno-27-33" href="#__codelineno-27-33"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w"></span>
-<a id="__codelineno-27-34" name="__codelineno-27-34" href="#__codelineno-27-34"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<a id="__codelineno-27-35" name="__codelineno-27-35" href="#__codelineno-27-35"></a><span class="w">        </span><span class="c1"># replace with your DNS resolvers</span><span class="w"></span>
-<a id="__codelineno-27-36" name="__codelineno-27-36" href="#__codelineno-27-36"></a><span class="w">        </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span><span class="w"></span>
-<a id="__codelineno-27-37" name="__codelineno-27-37" href="#__codelineno-27-37"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span><span class="w"></span>
-<a id="__codelineno-27-38" name="__codelineno-27-38" href="#__codelineno-27-38"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span><span class="w"></span>
-<a id="__codelineno-27-39" name="__codelineno-27-39" href="#__codelineno-27-39"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_API</span><span class="w"></span>
-<a id="__codelineno-27-40" name="__codelineno-27-40" href="#__codelineno-27-40"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<a id="__codelineno-27-41" name="__codelineno-27-41" href="#__codelineno-27-41"></a><span class="w">        </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span><span class="w"></span>
-<a id="__codelineno-27-42" name="__codelineno-27-42" href="#__codelineno-27-42"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span><span class="w"></span>
-<a id="__codelineno-27-43" name="__codelineno-27-43" href="#__codelineno-27-43"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span><span class="w"></span>
-<a id="__codelineno-27-44" name="__codelineno-27-44" href="#__codelineno-27-44"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME</span><span class="w"></span>
-<a id="__codelineno-27-45" name="__codelineno-27-45" href="#__codelineno-27-45"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<a id="__codelineno-27-46" name="__codelineno-27-46" href="#__codelineno-27-46"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span><span class="w"></span>
-<a id="__codelineno-27-47" name="__codelineno-27-47" href="#__codelineno-27-47"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<a id="__codelineno-27-48" name="__codelineno-27-48" href="#__codelineno-27-48"></a><span class="w">        </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-49" name="__codelineno-27-49" href="#__codelineno-27-49"></a><span class="w">          </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-50" name="__codelineno-27-50" href="#__codelineno-27-50"></a><span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-51" name="__codelineno-27-51" href="#__codelineno-27-51"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/bunkerweb/helpers/healthcheck.sh</span><span class="w"></span>
-<a id="__codelineno-27-52" name="__codelineno-27-52" href="#__codelineno-27-52"></a><span class="w">          </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<a id="__codelineno-27-53" name="__codelineno-27-53" href="#__codelineno-27-53"></a><span class="w">          </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
-<a id="__codelineno-27-54" name="__codelineno-27-54" href="#__codelineno-27-54"></a><span class="w">          </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<a id="__codelineno-27-55" name="__codelineno-27-55" href="#__codelineno-27-55"></a><span class="w">          </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
-<a id="__codelineno-27-56" name="__codelineno-27-56" href="#__codelineno-27-56"></a><span class="w">        </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-57" name="__codelineno-27-57" href="#__codelineno-27-57"></a><span class="w">          </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-58" name="__codelineno-27-58" href="#__codelineno-27-58"></a><span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-59" name="__codelineno-27-59" href="#__codelineno-27-59"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/bunkerweb/helpers/healthcheck.sh</span><span class="w"></span>
-<a id="__codelineno-27-60" name="__codelineno-27-60" href="#__codelineno-27-60"></a><span class="w">          </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<a id="__codelineno-27-61" name="__codelineno-27-61" href="#__codelineno-27-61"></a><span class="w">          </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<a id="__codelineno-27-62" name="__codelineno-27-62" href="#__codelineno-27-62"></a><span class="w">          </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<a id="__codelineno-27-63" name="__codelineno-27-63" href="#__codelineno-27-63"></a><span class="w">          </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
-<a id="__codelineno-27-64" name="__codelineno-27-64" href="#__codelineno-27-64"></a><span class="nn">---</span><span class="w"></span>
-<a id="__codelineno-27-65" name="__codelineno-27-65" href="#__codelineno-27-65"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<a id="__codelineno-27-66" name="__codelineno-27-66" href="#__codelineno-27-66"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
-<a id="__codelineno-27-67" name="__codelineno-27-67" href="#__codelineno-27-67"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-68" name="__codelineno-27-68" href="#__codelineno-27-68"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-27-69" name="__codelineno-27-69" href="#__codelineno-27-69"></a><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-70" name="__codelineno-27-70" href="#__codelineno-27-70"></a><span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
-<a id="__codelineno-27-71" name="__codelineno-27-71" href="#__codelineno-27-71"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-27-72" name="__codelineno-27-72" href="#__codelineno-27-72"></a><span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># mandatory annotation</span><span class="w"></span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">bunkerweb.io/AUTOCONF</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb</span><span class="w"></span>
+<span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span><span class="w"></span>
+<span class="w">          </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span><span class="w"></span>
+<span class="w">          </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">          </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">drop</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
+<span class="w">          </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span><span class="w"></span>
+<span class="w">          </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># replace with your DNS resolvers</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_API</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/bunkerweb/helpers/healthcheck.sh</span><span class="w"></span>
+<span class="w">          </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">          </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">          </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
+<span class="w">        </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/bunkerweb/helpers/healthcheck.sh</span><span class="w"></span>
+<span class="w">          </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">          </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
+<span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
 </code></pre></div>
 <p>In order to store persistent data, you will need a <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">PersistentVolumeClaim</a> :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
-<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span><span class="w"></span>
-<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span><span class="w"></span>
-<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">    </span><span class="nt">requests</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">requests</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span><span class="w"></span>
 </code></pre></div>
 <p>Now, you can start the autoconf as a single replica <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a> :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
-<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
-<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span><span class="w"></span>
-<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a><span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-15" name="__codelineno-29-15" href="#__codelineno-29-15"></a><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a><span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-29-18" name="__codelineno-29-18" href="#__codelineno-29-18"></a><span class="w">      </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-19" name="__codelineno-29-19" href="#__codelineno-29-19"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-29-20" name="__codelineno-29-20" href="#__codelineno-29-20"></a><span class="w">        </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-21" name="__codelineno-29-21" href="#__codelineno-29-21"></a><span class="w">          </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-29-22" name="__codelineno-29-22" href="#__codelineno-29-22"></a><span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-23" name="__codelineno-29-23" href="#__codelineno-29-23"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
-<a id="__codelineno-29-24" name="__codelineno-29-24" href="#__codelineno-29-24"></a><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf</span><span class="w"></span>
-<a id="__codelineno-29-25" name="__codelineno-29-25" href="#__codelineno-29-25"></a><span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span><span class="w"></span>
-<a id="__codelineno-29-26" name="__codelineno-29-26" href="#__codelineno-29-26"></a><span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-27" name="__codelineno-29-27" href="#__codelineno-29-27"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w"></span>
-<a id="__codelineno-29-28" name="__codelineno-29-28" href="#__codelineno-29-28"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
-<a id="__codelineno-29-29" name="__codelineno-29-29" href="#__codelineno-29-29"></a><span class="w">        </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-29-30" name="__codelineno-29-30" href="#__codelineno-29-30"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-bunkerweb</span><span class="w"></span>
-<a id="__codelineno-29-31" name="__codelineno-29-31" href="#__codelineno-29-31"></a><span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/data</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span><span class="w"></span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span><span class="w"></span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-bunkerweb</span><span class="w"></span>
+<span class="w">        </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span><span class="w"></span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf</span><span class="w"></span>
+<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span><span class="w"></span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w"></span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-bunkerweb</span><span class="w"></span>
+<span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/data</span><span class="w"></span>
 </code></pre></div>
 <p>Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that <a href="/1.4/settings">settings</a> need to be set as annotations for the Ingress resource with the special value <strong>bunkerweb.io</strong> for the domain part :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
-<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w"></span>
-<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span><span class="w"></span>
-<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value1&quot;</span><span class="w"></span>
-<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value2&quot;</span><span class="w"></span>
-<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
-<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a><span class="nn">...</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span><span class="w"></span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value1&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value2&quot;</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
+<span class="nn">...</span><span class="w"></span>
 </code></pre></div>
 <h2 id="linux">Linux</h2>
 <figure>
@@ -1224,83 +1219,140 @@ But there is a downside : if you use a <strong>local folder for the persistent d
 <li>Fedora 36</li>
 <li>CentOS Stream 8</li>
 </ul>
-<p>Please note that you will need to <strong>install NGINX 1.20.2 before BunkerWeb</strong>. For all distros, except Fedora, using prebuilt packages from <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a> is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official supported way of installing BunkerWeb on Linux.</p>
+<p>Please note that you will need to <strong>install NGINX 1.20.2 before BunkerWeb</strong>. For all distros, except Fedora, using prebuilt packages from <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a> is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuild packages of BunkerWeb but you can build it from source.</p>
 <p>Repositories of Linux packages for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>, they provide a bash script to automatically add and trust the repository (but you can also follow the <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">CentOS Stream</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">CentOS Stream</label><label for="__tabbed_1_5">From source</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>The first step is to add NGINX official repository :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>sudo apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>curl https://nginx.org/keys/nginx_signing.key <span class="p">|</span> gpg --dearmor <span class="se">\</span>
-<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="p">|</span> sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="nb">echo</span> <span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
-<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span> <span class="se">\</span>
-<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="p">|</span> sudo tee /etc/apt/sources.list.d/nginx.list
+<div class="highlight"><pre><span></span><code>sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl https://nginx.org/keys/nginx_signing.key <span class="p">|</span> gpg --dearmor <span class="se">\</span>
+<span class="p">|</span> sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">echo</span> <span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
+<span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span> <span class="se">\</span>
+<span class="p">|</span> sudo tee /etc/apt/sources.list.d/nginx.list
 </code></pre></div></p>
 <p>You should now be able to install NGINX 1.20.2 :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>sudo apt install <span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.20.2-1~bullseye
+<div class="highlight"><pre><span></span><code>sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo apt install -y <span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.20.2-1~bullseye
 </code></pre></div></p>
-<p>And finally install BunkerWeb 1.4.0 :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.0
+<p>And finally install BunkerWeb 1.4.1 :
+<div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.1
+</code></pre></div></p>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :
+<div class="highlight"><pre><span></span><code>sudo apt-mark hold nginx bunkerweb
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>The first step is to add NGINX official repository :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>curl https://nginx.org/keys/nginx_signing.key <span class="p">|</span> gpg --dearmor <span class="se">\</span>
-<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="p">|</span> sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="nb">echo</span> <span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
-<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span> <span class="se">\</span>
-<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a><span class="p">|</span> sudo tee /etc/apt/sources.list.d/nginx.list
+<div class="highlight"><pre><span></span><code>sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl https://nginx.org/keys/nginx_signing.key <span class="p">|</span> gpg --dearmor <span class="se">\</span>
+<span class="p">|</span> sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">echo</span> <span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
+<span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span> <span class="se">\</span>
+<span class="p">|</span> sudo tee /etc/apt/sources.list.d/nginx.list
 </code></pre></div></p>
 <p>You should now be able to install NGINX 1.20.2 :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>sudo apt install <span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.20.2-1~jammy
+<div class="highlight"><pre><span></span><code>sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo apt install -y <span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.20.2-1~jammy
 </code></pre></div></p>
-<p>And finally install BunkerWeb 1.4.0 :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.0
+<p>And finally install BunkerWeb 1.4.1 :
+<div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.1
+</code></pre></div></p>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :
+<div class="highlight"><pre><span></span><code>sudo apt-mark hold nginx bunkerweb
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>Fedora already provides NGINX 1.20.2 that we support :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>sudo dnf install nginx-1.20.2
+<div class="highlight"><pre><span></span><code>sudo dnf install -y nginx-1.20.2
 </code></pre></div></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>dnf install -y bunkerweb-1.4.0
+<div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo dnf install -y bunkerweb-1.4.1
 </code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :
+<div class="highlight"><pre><span></span><code>sudo dnf versionlock add nginx <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo dnf versionlock add bunkerweb
+</code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p>The first step is to add NGINX official repository, create the following file at <code>/etc/yum.repos.d/nginx.repo</code> :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>[nginx-stable]
-<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>name=nginx stable repo
-<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>gpgcheck=1
-<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>enabled=1
-<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>gpgkey=https://nginx.org/keys/nginx_signing.key
-<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a>module_hotfixes=true
+<div class="highlight"><pre><span></span><code>[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
 </code></pre></div></p>
 <p>You should now be able to install NGINX 1.20.2 :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>sudo dnf install nginx-1.20.2
+<div class="highlight"><pre><span></span><code>sudo dnf install nginx-1.20.2
 </code></pre></div></p>
-<p>And finally install BunkerWeb 1.4.0 :
-<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>dnf install -y epel-release <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>dnf install -y bunkerweb-1.4.0
+<p>And finally install BunkerWeb 1.4.1 :
+<div class="highlight"><pre><span></span><code>dnf install -y epel-release <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo dnf install -y bunkerweb-1.4.1
+</code></pre></div></p>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :
+<div class="highlight"><pre><span></span><code>sudo dnf versionlock add nginx <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo dnf versionlock add bunkerweb
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p>The first step is to install NGINX 1.20.2 using the repository of your choice or by <a href="https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source">compiling it from source</a>.</p>
+<p>The target installation folder of BunkerWeb is located at <code>/opt/bunkerweb</code>, let's create it :
+<div class="highlight"><pre><span></span><code>mkdir /opt/bunkerweb
+</code></pre></div></p>
+<p>You can now clone the BunkerWeb project to the <code>/tmp</code> folder :
+<div class="highlight"><pre><span></span><code>https://github.com/bunkerity/bunkerweb.git /tmp/bunkerweb
+</code></pre></div></p>
+<p>BunkerWeb needs some dependencies to be compiled and install to <code>/opt/bunkerweb/deps</code>, the easiest way to it is by executing the <a href="https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh">install.sh helper script</a> (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
+<div class="highlight"><pre><span></span><code>mkdir /opt/bunkerweb/deps &amp;&amp; \
+/tmp/bunkerweb/deps/install.sh
+</code></pre></div></p>
+<p>Additional Python dependencies needs to be installed into the <code>/opt/bunkerweb/deps/python</code> folder :
+<div class="highlight"><pre><span></span><code>mkdir /opt/bunkerweb/deps/python <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
+</code></pre></div></p>
+<p>Once dependencies had been installed, you can now copy the BunkerWeb sources to the target <code>/opt/bunkerweb</code> folder :
+<div class="highlight"><pre><span></span><code><span class="k">for</span> src <span class="k">in</span> api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/bunkerweb-ui.env linux/scripts <span class="p">;</span> <span class="k">do</span>
+    cp -r /tmp/bunkerweb/<span class="si">${</span><span class="nv">src</span><span class="si">}</span> /opt/bunkerweb
+<span class="k">done</span>
+cp /opt/bunkerweb/helpers/bwcli /usr/local/bin
+</code></pre></div></p>
+<p>Additional folders also need to be created :
+<div class="highlight"><pre><span></span><code>mkdir /opt/bunkerweb/<span class="o">{</span>configs,cache,plugins,tmp<span class="o">}</span>
+</code></pre></div></p>
+<p>Permissions needs to be fixed :
+<div class="highlight"><pre><span></span><code>find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type f -exec chmod <span class="m">0740</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type d -exec chmod <span class="m">0750</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod <span class="m">750</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chmod <span class="m">770</span> /opt/bunkerweb/cache /opt/bunkerweb/tmp <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chmod <span class="m">750</span> /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/scripts/*.sh /usr/local/bin/bwcli /opt/bunkerweb/ui/main.py <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chown -R root:nginx /opt/bunkerweb
+</code></pre></div></p>
+<p>Last but not least, you will need to setup systemd unit files :
+<div class="highlight"><pre><span></span><code>cp /tmp/bunkerweb/linux/*.service /etc/systemd/system <span class="o">&amp;&amp;</span> <span class="se">\</span>
+systemctl daemon-reload <span class="o">&amp;&amp;</span> <span class="se">\</span>
+systemctl stop nginx <span class="o">&amp;&amp;</span> <span class="se">\</span>
+systemctl disable nginx <span class="o">&amp;&amp;</span> <span class="se">\</span>
+systemctl <span class="nb">enable</span> bunkerweb <span class="o">&amp;&amp;</span> <span class="se">\</span>
+systemctl <span class="nb">enable</span> bunkerweb-ui
 </code></pre></div></p>
 </div>
 </div>
 </div>
 <p>Configuration of BunkerWeb is done by editing the <code>/opt/bunkerweb/variables.env</code> file :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>MY_SETTING_1=value1
-<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>MY_SETTING_2=value2
-<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>...
+<div class="highlight"><pre><span></span><code>MY_SETTING_1=value1
+MY_SETTING_2=value2
+...
 </code></pre></div>
 <p>BunkerWeb is managed using systemctl :</p>
 <ul>
@@ -1414,7 +1466,7 @@ But there is a downside : if you use a <strong>local folder for the persistent d
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.annotate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.467223ff.min.js"></script>
