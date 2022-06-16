@@ -297,6 +297,7 @@ Using both country blacklist and whitelist at the same time makes no sense. If y
 
 ## Authentication
 
+### Auth basic
 You can quickly protect sensitive resources like the admin area for example by requiring HTTP basic authentication. Here is the list of related settings :
 
 |          Setting          |      Default      | Description                                                                                  |
@@ -306,3 +307,14 @@ You can quickly protect sensitive resources like the admin area for example by r
 |   `AUTH_BASIC_USER`   |    `changeme`     | The username required.                                                                       |
 | `AUTH_BASIC_PASSWORD` |    `changeme`     | The password required.                                                                       |
 |   `AUTH_BASIC_TEXT`   | `Restricted area` | Text to display in the auth prompt.                                                          |
+
+### Auth request
+You can deploy complex authentification (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/master/examples).
+
+**Auth request settings are related to reverse proxy rules.**
+
+|                Setting                |             Default              | Context |Multiple|                                                    Description                                                     |
+|---------------------------------------|----------------------------------|---------|--------|--------------------------------------------------------------------------------------------------------------------|
+|`REVERSE_PROXY_AUTH_REQUEST`           |                                  |multisite|yes     |Enable authentication using an external provider (value of auth_request directive).                                 |
+|`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
+|`REVERSE_PROXY_AUTH_REQUEST_SET`       |                                  |multisite|yes     |List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).|

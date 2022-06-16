@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/bunkerweb-1.4.0-blue" />
+	<img src="https://img.shields.io/badge/bunkerweb-1.4.1-blue" />
 	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28DEV%29?label=CI%2FCD%20dev" />
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28PROD%29?label=CI%2FCD%20prod" />

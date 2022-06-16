@@ -249,26 +249,33 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Reverse proxy
 
-|            Setting             |             Default              | Context |Multiple|                                    Description                                    |
-|--------------------------------|----------------------------------|---------|--------|-----------------------------------------------------------------------------------|
-|`USE_REVERSE_PROXY`             |`no`                              |multisite|no      |Activate reverse proxy mode.                                                       |
-|`REVERSE_PROXY_INTERCEPT_ERRORS`|`yes`                             |multisite|no      |Intercept and rewrite errors.                                                      |
-|`REVERSE_PROXY_HOST`            |                                  |multisite|yes     |Full URL of the proxied resource (proxy_pass).                                     |
-|`REVERSE_PROXY_URL`             |                                  |multisite|yes     |Location URL that will be proxied.                                                 |
-|`REVERSE_PROXY_WS`              |`no`                              |multisite|yes     |Enable websocket on the proxied resource.                                          |
-|`REVERSE_PROXY_HEADERS`         |                                  |multisite|yes     |List of HTTP headers to send to proxied resource.                                  |
-|`REVERSE_PROXY_BUFFERING`       |`yes`                             |multisite|yes     |Enable or disable buffering of responses from proxied resource.                    |
-|`REVERSE_PROXY_KEEPALIVE`       |`no`                              |multisite|yes     |Enable or disable keepalive connections with the proxied resource.                 |
-|`USE_PROXY_CACHE`               |`no`                              |multisite|no      |Enable or disable caching of the proxied resources.                                |
-|`PROXY_CACHE_PATH_LEVELS`       |`1:2`                             |global   |no      |Hierarchy levels of the cache.                                                     |
-|`PROXY_CACHE_PATH_ZONE_SIZE`    |`10m`                             |global   |no      |Maximum size of cached metadata when caching proxied resources.                    |
-|`PROXY_CACHE_PATH_PARAMS`       |`max_size=100m`                   |global   |no      |Additional parameters to add to the proxy_cache directive.                         |
-|`PROXY_CACHE_METHODS`           |`GET HEAD`                        |multisite|no      |HTTP methods that should trigger a cache operation.                                |
-|`PROXY_CACHE_MIN_USES`          |`2`                               |multisite|no      |The minimimum number of requests before a response is cached.                      |
-|`PROXY_CACHE_KEY`               |`$scheme$host$request_uri`        |multisite|no      |The key used to uniquely identify a cached response.                               |
-|`PROXY_CACHE_VALID`             |`200=24h 301=1h 302=24h`          |multisite|no      |Define the caching time dependending on the HTTP status code (list of status=time).|
-|`PROXY_NO_CACHE`                |`$http_pragma $http_authorization`|multisite|no      |Conditions to disable caching of responses.                                        |
-|`PROXY_CACHE_BYPASS`            |`0`                               |multisite|no      |Conditions to bypass caching of responses.                                         |
+|                Setting                |             Default              | Context |Multiple|                                                    Description                                                     |
+|---------------------------------------|----------------------------------|---------|--------|--------------------------------------------------------------------------------------------------------------------|
+|`USE_REVERSE_PROXY`                    |`no`                              |multisite|no      |Activate reverse proxy mode.                                                                                        |
+|`REVERSE_PROXY_INTERCEPT_ERRORS`       |`yes`                             |multisite|no      |Intercept and rewrite errors.                                                                                       |
+|`REVERSE_PROXY_HOST`                   |                                  |multisite|yes     |Full URL of the proxied resource (proxy_pass).                                                                      |
+|`REVERSE_PROXY_URL`                    |                                  |multisite|yes     |Location URL that will be proxied.                                                                                  |
+|`REVERSE_PROXY_WS`                     |`no`                              |multisite|yes     |Enable websocket on the proxied resource.                                                                           |
+|`REVERSE_PROXY_HEADERS`                |                                  |multisite|yes     |List of HTTP headers to send to proxied resource separated with ; (values for proxy_set_header directive).          |
+|`REVERSE_PROXY_HEADERS_CLIENT`         |                                  |multisite|yes     |List of HTTP headers to send to client separated with ; (values for add_header directive).                          |
+|`REVERSE_PROXY_BUFFERING`              |`yes`                             |multisite|yes     |Enable or disable buffering of responses from proxied resource.                                                     |
+|`REVERSE_PROXY_KEEPALIVE`              |`no`                              |multisite|yes     |Enable or disable keepalive connections with the proxied resource.                                                  |
+|`REVERSE_PROXY_AUTH_REQUEST`           |                                  |multisite|yes     |Enable authentication using an external provider (value of auth_request directive).                                 |
+|`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
+|`REVERSE_PROXY_AUTH_REQUEST_SET`       |                                  |multisite|yes     |List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).|
+|`USE_PROXY_CACHE`                      |`no`                              |multisite|no      |Enable or disable caching of the proxied resources.                                                                 |
+|`PROXY_CACHE_PATH_LEVELS`              |`1:2`                             |global   |no      |Hierarchy levels of the cache.                                                                                      |
+|`PROXY_CACHE_PATH_ZONE_SIZE`           |`10m`                             |global   |no      |Maximum size of cached metadata when caching proxied resources.                                                     |
+|`PROXY_CACHE_PATH_PARAMS`              |`max_size=100m`                   |global   |no      |Additional parameters to add to the proxy_cache directive.                                                          |
+|`PROXY_CACHE_METHODS`                  |`GET HEAD`                        |multisite|no      |HTTP methods that should trigger a cache operation.                                                                 |
+|`PROXY_CACHE_MIN_USES`                 |`2`                               |multisite|no      |The minimimum number of requests before a response is cached.                                                       |
+|`PROXY_CACHE_KEY`                      |`$scheme$host$request_uri`        |multisite|no      |The key used to uniquely identify a cached response.                                                                |
+|`PROXY_CACHE_VALID`                    |`200=24h 301=1h 302=24h`          |multisite|no      |Define the caching time dependending on the HTTP status code (list of status=time).                                 |
+|`PROXY_NO_CACHE`                       |`$http_pragma $http_authorization`|multisite|no      |Conditions to disable caching of responses.                                                                         |
+|`PROXY_CACHE_BYPASS`                   |`0`                               |multisite|no      |Conditions to bypass caching of responses.                                                                          |
+|`REVERSE_PROXY_CONNECT_TIMEOUT`        |`60s`                             |multisite|yes     |Timeout when connecting to the proxied resource.                                                                    |
+|`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                     |
+|`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                       |
 
 ### Self-signed certificate
 

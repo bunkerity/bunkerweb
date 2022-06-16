@@ -43,13 +43,13 @@ The first step is to install the plugin by putting the plugin files inside the c
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.0
+    	   bunkerity/bunkerweb:1.4.1
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.0
+      image: bunkerity/bunkerweb:1.4.1
       volumes:
         - ./bw-data:/data
       ...

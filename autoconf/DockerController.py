@@ -26,11 +26,6 @@ class DockerController(Controller) :
                 continue
             value = env.replace(variable + "=", "", 1)
             instance["env"][variable] = value
-        server_name = []
-        for controller_service in self._get_controller_services() :
-            if "bunkerweb.SERVER_NAME" in controller_service.labels :
-                server_name.append(controller_service.labels["bunkerweb.SERVER_NAME"].split(" ")[0])
-        instance["env"]["SERVER_NAME"] = " ".join(server_name)
         return [instance]
 
     def _get_controller_services(self) :

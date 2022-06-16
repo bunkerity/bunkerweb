@@ -181,7 +181,7 @@ jobs:
       - name: Set variables
         run: |
           VER=$(cat VERSION | tr -d '\n')
-          if [ "$GITHUB_REF" = "refs/heads/main" ] ; then
+          if [ "$GITHUB_REF" = "refs/heads/master" ] ; then
             echo "BUILD_MODE=prod" >> $GITHUB_ENV
           else
             echo "BUILD_MODE=dev" >> $GITHUB_ENV

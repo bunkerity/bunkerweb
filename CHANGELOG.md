@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.4.1 - 
+## v1.4.1 - 2022/16/06
 - Fix sending local IPs to BunkerNet when DISABLE_DEFAULT_SERVER=yes
 - Fix certbot bug when AUTOCONF_MODE=yes
 - Fix certbot bug when MULTISITE=no

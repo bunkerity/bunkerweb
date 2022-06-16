@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.0
+    image: bunkerity/bunkerweb:1.4.1
     ports:
       - 80:8080
       - 443:8443
@@ -31,7 +31,7 @@ services:
     volumes:
       - ./ghost-data:/var/lib/ghost/content
     environment:
-      - url=http://www.example.com # replace with your domain
+      - url=https://www.example.com # replace with your domain
 
 volumes:
   bw_data:
