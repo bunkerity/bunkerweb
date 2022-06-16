@@ -324,7 +324,7 @@ jobs:
           echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Remove Ubuntu DEB from packagecloud
-        run: package_cloud yank bunkerity/bunkerweb-dev/ubuntu/jammy bunkerweb_${{ env.VERSION }}_amd64.deb
+        run: package_cloud yank bunkerity/bunkerweb-dev/ubuntu/jammy bunkerweb_${{ env.VERSION }}-1_amd64.deb
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
@@ -339,7 +339,7 @@ jobs:
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
       - name: Remove Debian DEB from packagecloud
-        run: package_cloud yank bunkerity/bunkerweb-dev/debian/bullseye bunkerweb_${{ env.VERSION }}_amd64.deb
+        run: package_cloud yank bunkerity/bunkerweb-dev/debian/bullseye bunkerweb_${{ env.VERSION }}-1_amd64.deb
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
