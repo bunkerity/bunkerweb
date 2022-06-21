@@ -10,7 +10,7 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
 # Nginx
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
-    dnf install nginx -y
+    dnf install nginx-1.20.2 -y
 
 # Copy dependencies sources folder
 COPY deps /tmp/bunkerweb/deps
