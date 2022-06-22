@@ -5,6 +5,7 @@
 - Fix static config (SERVER_NAME not empty) support when using autoconf/swarm/k8s
 - Fix config files overwrite when using Docker autoconf
 - Add log_default() plugin hook
+- Add certbot-dns-ovh example
 - Force NGINX version dependencies in Linux packages DEB/RPM
 - Add Discord to supported plugins
 
