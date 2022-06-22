@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.1
+    ports:
+      - 80:8080
+      - 443:8443
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # or for an existing one : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
+    volumes:
+      - bw_data:/data
+      - certs:/certs
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=app1.example.com app2.example.com app3.example.com # replace with your domains
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - USE_CUSTOM_HTTPS=yes
+      - CUSTOM_HTTPS_CERT=/certs/live/example.com/fullchain.pem
+      - CUSTOM_HTTPS_KEY=/certs/live/example.com/privkey.pem
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app2.example.com_REVERSE_PROXY_URL=/
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app3.example.com_REVERSE_PROXY_URL=/
+      - app3.example.com_REVERSE_PROXY_HOST=http://app3
+    networks:
+      - net_app1
+      - net_app2
+      - net_app3
+
+  mycertbot:
+    image: certbot/dns-cloudflare
+    environment:
+      - DOMAINS=*.example.com,example.com
+      - EMAIL=contact@example.com
+    volumes:
+      - certs:/etc/letsencrypt
+      - ./cloudflare.ini:/opt/cloudflare.ini
+      - ./entrypoint.sh:/opt/entrypoint.sh
+    entrypoint: /bin/sh /opt/entrypoint.sh    
+
+  app1:
+    image: tutum/hello-world
+    networks:
+      - net_app1
+
+  app2:
+    image: tutum/hello-world
+    networks:
+      - net_app2
+
+  app3:
+    image: tutum/hello-world
+    networks:
+      - net_app3
+
+volumes:
+  bw_data:
+  certs:
+
+networks:
+  net_app1:
+  net_app2:
+  net_app3:

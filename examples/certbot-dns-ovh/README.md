@@ -2,6 +2,6 @@ Please have a look at the [certbot-dns-ovh documentation](https://certbot-dns-ov
 
 Procedure :
 - Edit domains in the compose file
-- Edit OVH infos (use https://eu.api.ovh.com/createToken/)
+- Edit OVH credentials in ovh.ini file (generate using https://eu.api.ovh.com/createToken/)
 - Run certbot only and wait for certificate to be generated : `docker-compose up -d mycertbot`
 - When certificates are generated, run your services : `docker-compose up -d`

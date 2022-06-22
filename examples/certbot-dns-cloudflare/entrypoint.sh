@@ -12,7 +12,7 @@ if [ -f "/etc/letsencrypt/live/${first_domain}/fullchain.pem" ] ; then
 	certbot renew
 else
 	echo "Asking for certificates ..."
-	certbot certonly -n --dns-ovh --dns-ovh-credentials /opt/ovh.ini --email "$EMAIL" --agree-tos -d "$DOMAINS"
+	certbot certonly -n --dns-cloudflare --dns-cloudflare-credentials /opt/cloudflare.ini --email "$EMAIL" --agree-tos -d "$DOMAINS"
 fi
 
 echo "Fixing permissions ..."
