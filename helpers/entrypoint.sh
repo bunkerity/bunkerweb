@@ -77,6 +77,9 @@ fi
 # generate final configuration
 export TEMP_NGINX="no"
 log "ENTRYPOINT" "ℹ️" "Generating configuration ..."
+if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] || [ "$AUTOCONF_MODE" = "yes" ] ; then
+	export SERVER_NAME=
+fi
 env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "/tmp/variables.env"
 /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env
 if [ "$?" -ne 0 ] ; then

@@ -188,6 +188,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-ubuntu-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ubuntu-cache,mode=min
 
   # Build linux debian
   build-bw-debian:
@@ -219,6 +221,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-debian-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-debian-cache,mode=min
 
   # Build linux centos
   build-bw-centos:
@@ -250,6 +254,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-centos-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-centos-cache,mode=min
 
   # Build linux fedora
   build-bw-fedora:
@@ -281,6 +287,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-fedora-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-fedora-cache,mode=min
 
   # Run tests
   tests:
