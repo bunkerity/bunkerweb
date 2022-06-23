@@ -27,9 +27,9 @@ services:
       - www.example.com_USE_UI=yes
       - www.example.com_SERVE_FILES=no
       - www.example.com_USE_REVERSE_PROXY=yes
-      - www.example.com_REVERSE_PROXY_URL=/changeme/                     # replace with another url
+      - www.example.com_REVERSE_PROXY_URL=/changeme                     # replace with another url
       - www.example.com_REVERSE_PROXY_HOST=http://myui:7000
-      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme/   # replace with another url
+      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme   # replace with another url
       - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
       - www.example.com_LIMIT_REQ_URL=/changeme/plugins/upload           # replace with another url
       - www.example.com_LIMIT_REQ_RATE=4r/s
