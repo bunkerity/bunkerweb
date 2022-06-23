@@ -1,6 +1,16 @@
 # Changelog
 
+## v1.4.2 -
+
+- Fix static config (SERVER_NAME not empty) support when using autoconf/swarm/k8s
+- Fix config files overwrite when using Docker autoconf
+- Add log_default() plugin hook
+- Add various certbot-dns examples
+- Force NGINX version dependencies in Linux packages DEB/RPM
+- Add Discord to supported plugins
+
 ## v1.4.1 - 2022/16/06
+
 - Fix sending local IPs to BunkerNet when DISABLE_DEFAULT_SERVER=yes
 - Fix certbot bug when AUTOCONF_MODE=yes
 - Fix certbot bug when MULTISITE=no

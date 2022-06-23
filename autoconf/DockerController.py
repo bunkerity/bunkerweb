@@ -43,7 +43,7 @@ class DockerController(Controller) :
         raise("get_configs is not supported with DockerController")
 
     def apply_config(self) :
-        return self._config.apply(self._instances, self._services, configs=self._configs)
+        return self._config.apply(self._instances, self._services)
 
     def process_events(self) :
         for event in self.__client.events(decode=True, filters={"type": "container"}) :

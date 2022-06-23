@@ -131,10 +131,11 @@ class Config(ApiCaller, ConfigCaller) :
         self._set_apis(self.__get_apis())
 
         # write configs
-        ret = self.__write_configs()
-        if not ret :
-            success = False
-            log("CONFIG", "❌", "saving custom configs failed, configuration will not work as expected...")
+        if configs != None :
+            ret = self.__write_configs()
+            if not ret :
+                success = False
+                log("CONFIG", "❌", "saving custom configs failed, configuration will not work as expected...")
 
         # get env
         env = self.__get_full_env()

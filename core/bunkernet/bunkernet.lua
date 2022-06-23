@@ -141,11 +141,13 @@ function _M:report(ip, reason, method, url, headers)
 	return self:request("POST", "/report", data)
 end
 
-function _M:log()
-	-- Check if BunkerNet is activated
-	local use_bunkernet = utils.get_variable("USE_BUNKERNET")
-	if use_bunkernet ~= "yes" then
-		return true, "bunkernet not activated"
+function _M:log(bypass_use_bunkernet)
+	if bypass_use_bunkernet then
+		-- Check if BunkerNet is activated
+		local use_bunkernet = utils.get_variable("USE_BUNKERNET")
+		if use_bunkernet ~= "yes" then
+			return true, "bunkernet not activated"
+		end
 	end
 	-- Check if BunkerNet ID is generated
 	if not self.id then
@@ -191,6 +193,27 @@ function _M:log()
 		return false, "can't create report timer : " .. err
 	end
 	return true, "created report timer"
+end
+
+function _M:log_default()
+	-- Check if bunkernet is activated
+	local check, err = utils.has_variable("USE_BUNKERNET", "yes")
+	if check == nil then
+		return false, "error while checking variable USE_BUNKERNET (" .. err .. ")"
+	end
+	if not check then
+		return true, "bunkernet not enabled"
+	end
+	-- Check if default server is disabled
+	local check, err = utils.get_variable("DISABLE_DEFAULT_SERVER", false)
+	if check == nil then
+		return false, "error while getting variable DISABLE_DEFAULT_SERVER (" .. err .. ")"
+	end
+	if check ~= "yes" then
+		return true, "default server not disabled"
+	end
+	-- Call log method
+	return self:log(true)
 end
 
 function _M:access()
