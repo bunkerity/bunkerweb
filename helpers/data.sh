@@ -32,7 +32,7 @@ for folder in "${rx_folders[@]}" ; do
 	fi
 done
 # Check permissions on files
-IFS="\n"
+IFS=$'\n'
 for file in $(find /data -type f) ; do
 	if [ ! -r "${file}" ] ; then
 		log "$1" "❌" "Wrong permissions on ${file} (at least R needed for user nginx with uid 101 and gid 101)"
