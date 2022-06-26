@@ -2,6 +2,8 @@
 
 ## v1.4.2 -
 
+- Fix bwcli unban command when using Linux integration
+- Fix permissions check when filename has a space
 - Fix static config (SERVER_NAME not empty) support when using autoconf/swarm/k8s
 - Fix config files overwrite when using Docker autoconf
 - Add log_default() plugin hook
