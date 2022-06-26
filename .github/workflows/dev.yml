@@ -326,6 +326,14 @@ jobs:
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 10.20.1.1:5000/bw-autoconf-tests:latest && docker push 10.20.1.1:5000/bw-autoconf-tests:latest
       - name: Import BW UI image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest 10.20.1.1:5000/bw-ui-tests:latest && docker push 10.20.1.1:5000/bw-ui-tests:latest
+      - name: Import Ubuntu image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest bw-ubuntu-tests:latest
+      - name: Import Debian image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest bw-debian-tests:latest
+      - name: Import Centos image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest bw-centos-tests:latest
+      - name: Import Fedora image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest bw-fedora-tests:latest
 
       # CVE check on OS
       - name: Check security vulnerabilities for BW

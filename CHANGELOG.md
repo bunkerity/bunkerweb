@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.4.2 -
+## v1.4.2 - 
 
 - Fix bwcli unban command when using Linux integration
 - Fix permissions check when filename has a space

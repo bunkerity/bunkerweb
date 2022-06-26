@@ -46,7 +46,7 @@ function start() {
     #                   STEP1                   #
     # Generate variables.env files to /tmp/     #
     #############################################
-    printf "HTTP_PORT=80\nSERVER_NAME=example.com\nTEMP_NGINX=yes\nUSE_BUNKERNET=no" > "/tmp/variables.env"
+    printf "HTTP_PORT=80\nSERVER_NAME=example.com\nTEMP_NGINX=yes" > "/tmp/variables.env"
     # Test if command worked
     check_ok
     # Exit if failed
@@ -91,7 +91,7 @@ function start() {
     #                   STEP4                   #
     #               Run jobs script             #
     #############################################
-    /opt/bunkerweb/job/main.py --variables /etc/nginx/variables.env --run
+    /opt/bunkerweb/job/main.py --variables /opt/bunkerweb/variables.env --run
     # Test if command worked
     check_ok
     # Exit if failed
