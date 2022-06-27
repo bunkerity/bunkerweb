@@ -25,7 +25,7 @@ class SwarmController(Controller, ConfigCaller) :
             variable = env.split("=")[0]
             value = env.replace(variable + "=", "", 1)
             if self._is_setting(variable) :
-                instance["env"][variable] = value
+                instance_env[variable] = value
         for task in controller_instance.tasks() :
             instance = {}
             instance["name"] = task["ID"]
