@@ -204,8 +204,8 @@ class IngressController(Controller, ConfigCaller) :
                     self.__internal_lock.release()
             except :
                 log("INGRESS-CONTROLLER", "❌", "Unknown exception while reading k8s event (type = " + watch_type + ") : ")
-                    print(format_exc())
-                    exit(2)
+                print(format_exc())
+                exit(2)
 
     def apply_config(self) :
         self._config.stop_scheduler()
