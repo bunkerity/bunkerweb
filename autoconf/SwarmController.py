@@ -11,6 +11,7 @@ class SwarmController(Controller, ConfigCaller) :
 
     def __init__(self, docker_host) :
         super().__init__("swarm")
+        ConfigCaller.__init__(self)
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
         

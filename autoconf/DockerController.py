@@ -10,6 +10,7 @@ class DockerController(Controller, ConfigCaller) :
 
     def __init__(self, docker_host) :
         super().__init__("docker")
+        ConfigCaller.__init__(self)
         self.__client = DockerClient(base_url=docker_host)
 
     def _get_controller_instances(self) :
