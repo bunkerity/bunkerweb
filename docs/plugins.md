@@ -18,9 +18,9 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 ### Automatic
 
-If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archives containing one or more plugin(s).
+If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).
 
-Just use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v0.2.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v0.2.zip`
 
 ### Manual
 

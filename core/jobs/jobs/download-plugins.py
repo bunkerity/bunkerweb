@@ -7,7 +7,7 @@ sys.path.append("/opt/bunkerweb/utils")
 from requests import get
 from zipfile import ZipFile
 from io import BytesIO
-from os import getenv, makedirs, chmod, stat
+from os import getenv, makedirs, chmod, stat, _exit
 from os.path import isfile, dirname
 from stat import S_IEXEC
 from uuid import uuid4
@@ -42,6 +42,7 @@ try :
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "")
     if plugin_urls == "" :
         log("JOBS", "ℹ️", "No external plugins to download")
+        _exit(0)
 
     # Loop on URLs
     for plugin_url in plugin_urls.split(" ") :

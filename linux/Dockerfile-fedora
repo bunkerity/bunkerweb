@@ -41,6 +41,7 @@ COPY VERSION /opt/bunkerweb/VERSION
 
 # Setup BW
 RUN cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
+    chmod 755 /usr/local/bin/bwcli && \
     mkdir /opt/bunkerweb/configs && \
     mkdir /opt/bunkerweb/cache && \
     mkdir /opt/bunkerweb/plugins && \
@@ -48,7 +49,7 @@ RUN cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
     find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
     chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
-    chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /usr/local/bin/bwcli /opt/bunkerweb/ui/main.py && \
+    chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/ui/main.py && \
     find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
     pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/ui/requirements.txt
 
