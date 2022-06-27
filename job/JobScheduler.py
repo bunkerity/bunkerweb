@@ -53,16 +53,16 @@ class JobScheduler(ApiCaller) :
             proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, env=self.__env)
             reload = proc.returncode != 0
             if reload :
-                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx (local)")
+                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx")
             else :
-                log("SCHEDULER", "❌", "Error while reloading nginx (local)")
+                log("SCHEDULER", "❌", "Error while reloading nginx")
         else :
             log("SCHEDULER", "ℹ️", "Reloading nginx ...")
             reload = self._send_to_apis("POST", "/reload")
             if reload :
-                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx (api)")
+                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx")
             else :
-                log("SCHEDULER", "❌", "Error while reloading nginx (api)")
+                log("SCHEDULER", "❌", "Error while reloading nginx")
         return reload
     
     def __gen_conf(self) :
@@ -115,8 +115,13 @@ class JobScheduler(ApiCaller) :
                 success = False
         if reload :
             try :
-                if not self._send_files("/data", "/data") :
-                    success = False
+                if len(self._get_apis()) > 0 :
+                    log("SCHEDULER", "ℹ️", "Sending /data folder ...")
+                    if not self._send_files("/data", "/data") :
+                        success = False
+                        log("SCHEDULER", "❌", "Error while sending /data folder")
+                    else :
+                        log("SCHEDULER", "ℹ️", "Successfuly sent /data folder")
                 if not self.__reload() :
                     success = False
             except :
