@@ -5,6 +5,7 @@ from logger import log
 from base64 import b64decode
 
 from Controller import Controller
+from ConfigCaller import ConfigCaller
 
 class SwarmController(Controller, ConfigCaller) :
 
@@ -35,7 +36,7 @@ class SwarmController(Controller, ConfigCaller) :
 
     def _get_controller_services(self) :
         return self.__client.services.list(filters={"label" : "bunkerweb.SERVER_NAME"})
-        
+
     def _to_services(self, controller_service) :
         service = {}
         for variable, value in controller_service.attrs["Spec"]["Labels"].items() :
@@ -46,6 +47,28 @@ class SwarmController(Controller, ConfigCaller) :
                 continue
             service[real_variable] = value
         return [service]
+
+    def _get_static_services(self) :
+        services = []
+        variables = {}
+        for instance in self.__client.services.list(filters={"label" : "bunkerweb.AUTOCONF"}) :
+            for env in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"] :
+                variable = env.split("=")[0]
+                value = env.replace(variable + "=", "", 1)
+                variables[variable] = value
+        server_names = []
+        if "SERVER_NAME" in variables and variables["SERVER_NAME"] != "" :
+            server_names = variables["SERVER_NAME"].split(" ")
+        for server_name in server_names :
+            service = {}
+            service["SERVER_NAME"] = server_name
+            for variable, value in variables.items() :
+                prefix = variable.split("_")[0]
+                real_variable = variable.replace(prefix + "_", "", 1)
+                if prefix == server_name and self._is_multisite_setting(real_variable) :
+                    service[real_variable] = value
+            services.append(service)
+        return services
 
     def get_configs(self) :
         configs = {}

@@ -110,6 +110,31 @@ class IngressController(Controller, ConfigCaller) :
                         service[variable] = value
         return services
 
+    def _get_static_services(self) :
+        services = []
+        variables = {}
+        for instance in self.__corev1.list_pod_for_all_namespaces(watch=False).items :
+            if instance.metadata.annotations is None or not "bunkerweb.io/AUTOCONF" in instance.metadata.annotations :
+                continue
+            for env in instance.spec.containers[0].env :
+                if env.value is None :
+                    variables[env.name] = ""
+                else :
+                    variables[env.name] = env.value
+        server_names = []
+        if "SERVER_NAME" in variables and variables["SERVER_NAME"] != "" :
+            server_names = variables["SERVER_NAME"].split(" ")
+        for server_name in server_names :
+            service = {}
+            service["SERVER_NAME"] = server_name
+            for variable, value in variables.items() :
+                prefix = variable.split("_")[0]
+                real_variable = variable.replace(prefix + "_", "", 1)
+                if prefix == server_name and self._is_multisite_setting(real_variable) :
+                    service[real_variable] = value
+            services.append(service)
+        return services
+
     def get_configs(self) :
         configs = {}
         supported_config_types = ["http", "stream", "server-http", "server-stream", "default-server-http", "modsec", "modsec-crs"]

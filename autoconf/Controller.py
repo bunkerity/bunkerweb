@@ -58,11 +58,17 @@ class Controller(ABC) :
     def _to_services(self, controller_service) :
         pass
 
+    @abstractmethod
+    def _get_static_services(self) :
+        pass
+
     def get_services(self) :
         services = []
         for controller_service in self._get_controller_services() :
             for service in self._to_services(controller_service) :
                 services.append(service)
+        for static_service in self._get_static_services() :
+            services.append(static_service)
         return services
 
     @abstractmethod
