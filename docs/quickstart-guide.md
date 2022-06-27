@@ -54,7 +54,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e USE_REVERSE_PROXY=yes \
     	   -e REVERSE_PROXY_URL=/ \
     	   -e REVERSE_PROXY_HOST=http://myapp \
-    	   bunkerity/bunkerweb:1.4.1
+    	   bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
@@ -64,7 +64,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.1
+    	image: bunkerity/bunkerweb:1.4.2
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -331,7 +331,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
     	   -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
     	   -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
-    	   bunkerity/bunkerweb:1.4.1
+    	   bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
@@ -341,7 +341,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.1
+    	image: bunkerity/bunkerweb:1.4.2
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -875,13 +875,13 @@ REAL_IP_HEADER=X-Forwarded-For
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=X-Forwarded-For \
     	   ...
-    	   bunkerity/bunkerweb:1.4.1
+    	   bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       ...
       environment:
         - USE_REAL_IP=yes
@@ -900,13 +900,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.1
+           bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       ...
       environment:
         - USE_REAL_IP=yes
@@ -925,13 +925,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.1
+           bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       ...
       environment:
         - USE_REAL_IP=yes
@@ -956,7 +956,7 @@ REAL_IP_HEADER=X-Forwarded-For
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.1
+			image: bunkerity/bunkerweb:1.4.2
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1008,13 +1008,13 @@ REAL_IP_HEADER=proxy_protocol
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=proxy_protocol \
     	   ...
-    	   bunkerity/bunkerweb:1.4.1
+    	   bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1035,13 +1035,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.1
+           bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1062,13 +1062,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.1
+           bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1094,7 +1094,7 @@ REAL_IP_HEADER=proxy_protocol
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.1
+			image: bunkerity/bunkerweb:1.4.2
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1169,13 +1169,13 @@ Some integrations offer a more convenient way of applying configurations for exa
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.1
+    	   bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       volumes:
         - ./bw-data:/data
       ...
@@ -1212,13 +1212,13 @@ Some integrations offer a more convenient way of applying configurations for exa
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.1
+    	   bunkerity/bunkerweb:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.1
+      image: bunkerity/bunkerweb:1.4.2
       volumes:
         - ./bw-data:/data
       ...

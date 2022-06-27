@@ -203,14 +203,14 @@ You can manually unban an IP which can be useful when doing some tests but it ne
 
 === "Docker autoconf"
 
-    You can use the `docker exec` command (replace `mya` with the name of your container) :
+    You can use the `docker exec` command (replace `myautoconf` with the name of your container) :
     ```shell
-    docker exec mybunker bwcli unban 1.2.3.4
+    docker exec myautoconf bwcli unban 1.2.3.4
     ```
 
-    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
+    Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
     ```shell
-    docker-compose exec mybunker bwcli unban 1.2.3.4
+    docker-compose exec myautoconf bwcli unban 1.2.3.4
     ```
 
 === "Swarm"
@@ -229,9 +229,9 @@ You can manually unban an IP which can be useful when doing some tests but it ne
 
 === "Linux"
 
-    You can use the `bwcli` command :
+    You can use the `bwcli` command (as root) :
     ```shell
-    bwcli unban 1.2.3.4
+    sudo bwcli unban 1.2.3.4
     ```
 
 ## Whitelisting
