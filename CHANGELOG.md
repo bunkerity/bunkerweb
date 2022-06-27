@@ -8,10 +8,11 @@
 - Fix permissions check when filename has a space
 - Fix static config (SERVER_NAME not empty) support when using autoconf/swarm/k8s
 - Fix config files overwrite when using Docker autoconf
+- Add EXTERNAL_PLUGIN_URLS setting to automatically download and install external plugins
 - Add log_default() plugin hook
 - Add various certbot-dns examples
 - Force NGINX version dependencies in Linux packages DEB/RPM
-- Add Discord to supported official plugins
+- Add Discord and Slack to list of official plugins
 
 ## v1.4.1 - 2022/16/06
 

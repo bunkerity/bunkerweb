@@ -139,6 +139,15 @@
 			"label": "Open file cache valid time",
 			"regex": "^\\d+(ms|s|m|h|d|w|M|y)$",
 			"type": "text"
+		},
+		"EXTERNAL_PLUGIN_URLS" : {
+			"context": "global",
+			"default": "",
+			"help": "List of external plugins URLs (direct download to .zip file) to download and install (URLs are separated with space).",
+			"id": "external-plugin-urls",
+			"label": "External plugin URLs",
+			"regex": "^.*$",
+			"type": "text"
 		}
 	}
 }
