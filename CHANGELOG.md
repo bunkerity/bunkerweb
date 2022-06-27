@@ -2,6 +2,7 @@
 
 ## v1.4.2 - 
 
+- Fix wrong env file when running jobs using Linux integration
 - Fix bwcli unban command when using Linux integration
 - Fix permissions check when filename has a space
 - Fix static config (SERVER_NAME not empty) support when using autoconf/swarm/k8s
@@ -9,7 +10,7 @@
 - Add log_default() plugin hook
 - Add various certbot-dns examples
 - Force NGINX version dependencies in Linux packages DEB/RPM
-- Add Discord to supported plugins
+- Add Discord to supported official plugins
 
 ## v1.4.1 - 2022/16/06
 

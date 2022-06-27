@@ -5,7 +5,7 @@ from docker import DockerClient
 from Controller import Controller
 from logger import log
 
-class DockerController(Controller) :
+class DockerController(Controller, ConfigCaller) :
 
     def __init__(self, docker_host) :
         super().__init__("docker")
@@ -22,10 +22,9 @@ class DockerController(Controller) :
         instance["env"] = {}
         for env in controller_instance.attrs["Config"]["Env"] :
             variable = env.split("=")[0]
-            if variable in ["PATH", "NGINX_VERSION", "NJS_VERSION", "PKG_RELEASE"] :
-                continue
             value = env.replace(variable + "=", "", 1)
-            instance["env"][variable] = value
+            if self._is_setting(variable) :
+                instance["env"][variable] = value
         return [instance]
 
     def _get_controller_services(self) :
@@ -36,7 +35,10 @@ class DockerController(Controller) :
         for variable, value in controller_service.labels.items() :
             if not variable.startswith("bunkerweb.") :
                 continue
-            service[variable.replace("bunkerweb.", "", 1)] = value
+            real_variable = variable.replace("bunkerweb.", "", 1)
+            if not self._is_multisite_setting(real_variable) :
+                continue
+            service[real_variable] = value
         return [service]
 
     def get_configs(self) :

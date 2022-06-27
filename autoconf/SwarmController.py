@@ -6,7 +6,7 @@ from base64 import b64decode
 
 from Controller import Controller
 
-class SwarmController(Controller) :
+class SwarmController(Controller, ConfigCaller) :
 
     def __init__(self, docker_host) :
         super().__init__("swarm")
@@ -22,7 +22,8 @@ class SwarmController(Controller) :
         for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"] :
             variable = env.split("=")[0]
             value = env.replace(variable + "=", "", 1)
-            instance_env[variable] = value
+            if self._is_setting(variable) :
+                instance["env"][variable] = value
         for task in controller_instance.tasks() :
             instance = {}
             instance["name"] = task["ID"]
@@ -40,7 +41,10 @@ class SwarmController(Controller) :
         for variable, value in controller_service.attrs["Spec"]["Labels"].items() :
             if not variable.startswith("bunkerweb.") :
                 continue
-            service[variable.replace("bunkerweb.", "", 1)] = value
+            real_variable = variable.replace("bunkerweb.", "", 1)
+            if not self._is_multisite_setting(real_variable) :
+                continue
+            service[real_variable] = value
         return [service]
 
     def get_configs(self) :
