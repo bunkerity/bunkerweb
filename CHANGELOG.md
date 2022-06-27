@@ -2,6 +2,7 @@
 
 ## v1.4.2 - 
 
+- Fix various bugs with jobs scheduler when using autoconf/swarm/k8s
 - Fix wrong env file when running jobs using Linux integration
 - Fix bwcli unban command when using Linux integration
 - Fix permissions check when filename has a space

@@ -28,7 +28,6 @@ signal.signal(signal.SIGTERM, exit_handler)
 try :
 
     # Setup /data folder if needed
-    #if swarm or kubernetes :
     proc = subprocess.run(["/opt/bunkerweb/helpers/data.sh", "AUTOCONF"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     if proc.returncode != 0 :
         os._exit(1)

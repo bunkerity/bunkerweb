@@ -120,10 +120,6 @@ class Config(ApiCaller, ConfigCaller) :
         self.stop_scheduler()
 
         # update values
-        # order here is important :
-        # __get_scheduler needs apis
-        # __get_apis needs __config
-        # __get_full_env needs __instances and __services
         self.__instances = instances
         self.__services = services
         self.__configs = configs
@@ -151,7 +147,7 @@ class Config(ApiCaller, ConfigCaller) :
             i += 1
         if self.__scheduler is None :
             self.__scheduler = JobScheduler(env=env, lock=self.__lock, apis=self._get_apis())
-        ret = self.__scheduler.reload(env)
+        ret = self.__scheduler.reload(env, apis=self._get_apis())
         if not ret :
             success = False
             log("CONFIG", "❌", "scheduler.reload() failed, configuration will not work as expected...")

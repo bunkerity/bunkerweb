@@ -69,7 +69,10 @@ class DockerController(Controller, ConfigCaller) :
         raise("get_configs is not supported with DockerController")
 
     def apply_config(self) :
-        return self._config.apply(self._instances, self._services)
+        self._config.stop_scheduler()
+        ret = self._config.apply(self._instances, self._services)
+        self._config.start_scheduler()
+        return ret
 
     def process_events(self) :
         for event in self.__client.events(decode=True, filters={"type": "container"}) :

@@ -53,16 +53,16 @@ class JobScheduler(ApiCaller) :
             proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, env=self.__env)
             reload = proc.returncode != 0
             if reload :
-                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx")
+                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx (local)")
             else :
-                log("SCHEDULER", "❌", "Error while reloading nginx")
+                log("SCHEDULER", "❌", "Error while reloading nginx (local)")
         else :
             log("SCHEDULER", "ℹ️", "Reloading nginx ...")
             reload = self._send_to_apis("POST", "/reload")
             if reload :
-                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx")
+                log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx (api)")
             else :
-                log("SCHEDULER", "❌", "Error while reloading nginx")
+                log("SCHEDULER", "❌", "Error while reloading nginx (api)")
         return reload
     
     def __gen_conf(self) :
@@ -99,7 +99,7 @@ class JobScheduler(ApiCaller) :
                     if every != "once" :
                         self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
                 except :
-                    log("SCHEDULER", "⚠️", "Exception while scheduling jobs for plugin " + plugin + " : " + traceback.format_exc())
+                    log("SCHEDULER", "❌", "Exception while scheduling jobs for plugin " + plugin + " : " + traceback.format_exc())
 
     def run_pending(self) :
         if self.__lock is not None :
@@ -114,12 +114,14 @@ class JobScheduler(ApiCaller) :
             elif ret >= 2 :
                 success = False
         if reload :
-            if not self.__gen_conf() :
+            try :
+                if not self._send_files("/data", "/data") :
+                    success = False
+                if not self.__reload() :
+                    success = False
+            except :
                 success = False
-            if not self._send_files("/data", "/data") :
-                success = False
-            if not self.__reload() :
-                success = False
+                log("SCHEDULER", "❌", "Exception while reloading after job scheduling : " + traceback.format_exc())
         if self.__lock is not None :
             self.__lock.release()
         return success
@@ -135,7 +137,7 @@ class JobScheduler(ApiCaller) :
                     if self.__job_wrapper(path, plugin, name, file) >= 2 :
                         ret = False
                 except :
-                    log("SCHEDULER", "⚠️", "Exception while running once jobs for plugin " + plugin + " : " + traceback.format_exc())
+                    log("SCHEDULER", "❌", "Exception while running once jobs for plugin " + plugin + " : " + traceback.format_exc())
         return ret
 
     def clear(self) :
@@ -149,14 +151,12 @@ class JobScheduler(ApiCaller) :
             with open("/tmp/autoconf.env", "w") as f :
                 for k, v in self.__env.items() :
                     f.write(k + "=" + v + "\n")
-            #print(self.__env)
-            #self.__env.update(os.environ)
             self.clear()
             self.__jobs = self.__get_jobs()
             if not self.run_once() :
                 ret = False
             self.setup()
         except :
-            log("SCHEDULER", "⚠️", "Exception while reloading scheduler " + traceback.format_exc())
+            log("SCHEDULER", "❌", "Exception while reloading scheduler " + traceback.format_exc())
             return False
         return ret

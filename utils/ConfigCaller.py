@@ -1,6 +1,9 @@
 from json import loads
 from glob import glob
 from re import match
+import traceback
+
+from logger import log
 
 class ConfigCaller :
 
@@ -9,7 +12,10 @@ class ConfigCaller :
             self._settings = loads(f.read())
         for plugin in glob("/opt/bunkerweb/core/*/plugin.json") + glob("/opt/bunkerweb/plugins/*/plugin.json") :
             with open(plugin) as f :
-                self._settings.update(loads(f.read())["settings"])
+                try :
+                    self._settings.update(loads(f.read())["settings"])
+                except :
+                    log("CONFIG", "⚠️", "Exception while loading plugin metadata file at " + plugin + " : " + traceback.format_exc())
 
     def _is_setting(self, setting) :
         return setting in self._settings
