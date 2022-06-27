@@ -2,6 +2,7 @@
 
 ## v1.4.2 - 
 
+- Fix "too old resource version" exceptions when using k8s integration
 - Fix missing bwcli command with Linux integration
 - Fix various bugs with jobs scheduler when using autoconf/swarm/k8s
 - Fix bwcli unban command when using Linux integration

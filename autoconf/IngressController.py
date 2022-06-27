@@ -1,7 +1,9 @@
 from traceback import format_exc
 from kubernetes import client, config, watch
+from client.exceptions import ApiException
 from threading import Thread, Lock
 from logger import log
+from sys import exit
 
 from Controller import Controller
 from ConfigCaller import ConfigCaller
@@ -193,11 +195,17 @@ class IngressController(Controller, ConfigCaller) :
                         print(format_exc())
                     self.__internal_lock.release()
                     locked = False
-            except Exception as e :
-                log("INGRESS-CONTROLLER", "❌", "Exception while reading k8s event (type = " + watch_type + ") : ")
-                print(format_exc())
+            except ApiException as e :
+                if e.status != 410 :
+                    log("INGRESS-CONTROLLER", "❌", "Exception while reading k8s event (type = " + watch_type + ") : ")
+                    print(format_exc())
+                    exit(1)
                 if locked :
                     self.__internal_lock.release()
+            except :
+                log("INGRESS-CONTROLLER", "❌", "Unknown exception while reading k8s event (type = " + watch_type + ") : ")
+                    print(format_exc())
+                    exit(2)
 
     def apply_config(self) :
         self._config.stop_scheduler()
