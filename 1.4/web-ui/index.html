@@ -685,7 +685,7 @@ docker volume create bw-confs
    -e <span class="s2">&quot;bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme&quot;</span> <span class="se">\</span>
    -e bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS<span class="o">=</span>no <span class="se">\</span>
    -l bunkerweb.UI <span class="se">\</span>
-   bunkerity/bunkerweb:1.4.1 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+   bunkerity/bunkerweb:1.4.2 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 docker network connect bw-ui mybunker
 </code></pre></div></p>
 <p>Important things to note :</p>
@@ -717,7 +717,7 @@ docker network connect bw-ui mybunker
        -e <span class="nv">ADMIN_USERNAME</span><span class="o">=</span>admin <span class="se">\</span>
        -e <span class="nv">ADMIN_PASSWORD</span><span class="o">=</span>changeme <span class="se">\</span>
        -e <span class="nv">ABSOLUTE_URI</span><span class="o">=</span>http<span class="o">(</span>s<span class="o">)</span>://bwadm.example.com/changeme/
-       bunkerity/bunkerweb-ui:1.4.1 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+       bunkerity/bunkerweb-ui:1.4.2 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 docker network connect bw-docker myui
 </code></pre></div></p>
 <p>Important things to note :</p>
@@ -731,7 +731,7 @@ docker network connect bw-docker myui
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-ui</span><span class="w"></span>
@@ -754,7 +754,7 @@ docker network connect bw-docker myui
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.UI&quot;</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">myui</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.4.2</span><span class="w"></span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mydocker</span><span class="w"></span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>

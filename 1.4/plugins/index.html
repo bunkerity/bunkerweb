@@ -562,6 +562,26 @@ documentation for the current version.
     How to use a plugin
   </a>
   
+    <nav class="md-nav" aria-label="How to use a plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic" class="md-nav__link">
+    Automatic
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual" class="md-nav__link">
+    Manual
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -700,6 +720,18 @@ documentation for the current version.
 <td align="center"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">bunkerweb-plugins/crowdsec</a></td>
 </tr>
 <tr>
+<td align="center"><strong>Discord</strong></td>
+<td align="center">0.1</td>
+<td align="left">Send security notifications to a Discord channel using a Webhook.</td>
+<td align="center"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
+</tr>
+<tr>
+<td align="center"><strong>Slack</strong></td>
+<td align="center">0.1</td>
+<td align="left">Send security notifications to a Slack channel using a Webhook.</td>
+<td align="center"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
+</tr>
+<tr>
 <td align="center"><strong>VirusTotal</strong></td>
 <td align="center">0.1</td>
 <td align="left">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
@@ -708,6 +740,10 @@ documentation for the current version.
 </tbody>
 </table>
 <h2 id="how-to-use-a-plugin">How to use a plugin</h2>
+<h3 id="automatic">Automatic</h3>
+<p>If you want to quickly install external plugins, you can use the <code>EXTERNAL_PLUGIN_URLS</code> setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).</p>
+<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v0.2.zip</code></p>
+<h3 id="manual">Manual</h3>
 <p>The first step is to install the plugin by putting the plugin files inside the corresponding <code>plugins</code> data folder, the procedure depends on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
@@ -729,11 +765,11 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
@@ -1011,9 +1047,14 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
     <span class="kr">return</span> <span class="kc">true</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span>
 <span class="kr">end</span>
 
+<span class="kr">function</span> <span class="nc">_M</span><span class="p">:</span><span class="nf">log_default</span><span class="p">()</span>
+    <span class="n">logger</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">NOTICE</span><span class="p">,</span> <span class="s2">&quot;MYPLUGIN&quot;</span><span class="p">,</span> <span class="s2">&quot;log_default called&quot;</span><span class="p">)</span>
+    <span class="kr">return</span> <span class="kc">true</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span>
+<span class="kr">end</span>
+
 <span class="kr">return</span> <span class="n">_M</span>
 </code></pre></div>
-<p>The 3 functions <code>init</code>, <code>access</code>, and <code>log</code> are automatically called during specific contexts. Here are the details of each function :</p>
+<p>The declared functions are automatically called during specific contexts. Here are the details of each function :</p>
 <table>
 <thead>
 <tr>
@@ -1040,6 +1081,12 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <td align="center"><code>log</code></td>
 <td align="center"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
 <td align="left">Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example.</td>
+<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
+</tr>
+<tr>
+<td align="center"><code>log_default</code></td>
+<td align="center"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
+<td align="left">Same as <code>log</code> but only called on the default server.</td>
 <td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
 </tr>
 </tbody>

@@ -807,11 +807,11 @@ cat /var/log/nginx/access.log
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>You can use the <code>docker exec</code> command (replace <code>mya</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
+<p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your container) :
+<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> myautoconf bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
+<p>Here is the docker-compose equivalent (replace <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
+<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> myautoconf bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -825,8 +825,8 @@ cat /var/log/nginx/access.log
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>You can use the <code>bwcli</code> command :
-<div class="highlight"><pre><span></span><code>bwcli unban <span class="m">1</span>.2.3.4
+<p>You can use the <code>bwcli</code> command (as root) :
+<div class="highlight"><pre><span></span><code>sudo bwcli unban <span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 </div>

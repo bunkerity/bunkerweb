@@ -698,7 +698,7 @@ documentation for the current version.
        -e <span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_URL</span><span class="o">=</span>/ <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_HOST</span><span class="o">=</span>http://myapp <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -706,7 +706,7 @@ documentation for the current version.
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -947,7 +947,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
        -e app1.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp1 <span class="se">\</span>
        -e app2.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp2 <span class="se">\</span>
        -e app3.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp3 <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -955,7 +955,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -1461,11 +1461,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1482,11 +1482,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1503,11 +1503,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1530,7 +1530,7 @@ REAL_IP_HEADER=X-Forwarded-For
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
@@ -1577,11 +1577,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1600,11 +1600,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1623,11 +1623,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1651,7 +1651,7 @@ REAL_IP_HEADER=proxy_protocol
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
@@ -1714,11 +1714,11 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
@@ -1746,11 +1746,11 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.1
+       bunkerity/bunkerweb:1.4.2
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
