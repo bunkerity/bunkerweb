@@ -76,6 +76,9 @@ single_docker_test "load-balancer" "30" "https://$TEST_DOMAIN1 hello"
 # magento
 single_docker_test "magento" "180" "https://$TEST_DOMAIN1 magento"
 
+# mattermost
+single_docker_test "mattermost" "60" "https://$TEST_DOMAIN1 mattermost"
+
 # moodle
 single_docker_test "moodle" "300" "https://$TEST_DOMAIN1 moodle"
 
@@ -93,6 +96,9 @@ single_docker_test "php-singlesite" "30" "https://$TEST_DOMAIN1 hello"
 
 # prestashop
 single_docker_test "prestashop" "120" "https://$TEST_DOMAIN1 prestashop"
+
+# radarr
+single_docker_test "radarr" "60" "https://$TEST_DOMAIN1 radarr"
 
 # redmine
 single_docker_test "redmine" "60" "https://$TEST_DOMAIN1 redmine"

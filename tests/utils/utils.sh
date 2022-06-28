@@ -22,11 +22,11 @@ function exec_docker_example() {
 	sed -i 's@bunkerity/bunkerweb:.*$@10.20.1.1:5000/bw-tests:latest@g' docker-compose.yml
 	sed -i 's@\./bw\-data:/@/tmp/bw\-data:/@g' docker-compose.yml
 	sed -i 's@- bw_data:/@- /tmp/bw\-data:/@g' docker-compose.yml
-	sed -i "s@www.example.com@${TEST_DOMAIN1}@g" docker-compose.yml
-	sed -i "s@auth.example.com@${TEST_DOMAIN1}@g" docker-compose.yml
-	sed -i "s@app1.example.com@${TEST_DOMAIN1_1}@g" docker-compose.yml
-	sed -i "s@app2.example.com@${TEST_DOMAIN1_2}@g" docker-compose.yml
-	sed -i "s@app3.example.com@${TEST_DOMAIN1_3}@g" docker-compose.yml
+	find . -type f -exec sed -i "s@www.example.com@${TEST_DOMAIN1}@g" {} \;
+	find . -type f -exec sed -i "s@auth.example.com@${TEST_DOMAIN1}@g" {} \;
+	find . -type f -exec sed -i "s@app1.example.com@${TEST_DOMAIN1_1}@g" {} \;
+	find . -type f -exec sed -i "s@app2.example.com@${TEST_DOMAIN1_2}@g" {} \;
+	find . -type f -exec sed -i "s@app3.example.com@${TEST_DOMAIN1_3}@g" {} \;
 	find "/tmp/tests/$1" -name "www.example.com" -exec /usr/bin/rename "s/www.example.com/${TEST_DOMAIN1}/" {} \+
 	find "/tmp/tests/$1" -name "app1.example.com" -exec /usr/bin/rename "s/app1.example.com/${TEST_DOMAIN1_1}/" {} \+
 	find "/tmp/tests/$1" -name "app2.example.com" -exec /usr/bin/rename "s/app2.example.com/${TEST_DOMAIN1_2}/" {} \+
