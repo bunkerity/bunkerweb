@@ -12,8 +12,10 @@
 - Add EXTERNAL_PLUGIN_URLS setting to automatically download and install external plugins
 - Add log_default() plugin hook
 - Add various certbot-dns examples
-- Force NGINX version dependencies in Linux packages DEB/RPM
+- Add mattermost example
+- Add radarr example
 - Add Discord and Slack to list of official plugins
+- Force NGINX version dependencies in Linux packages DEB/RPM
 
 ## v1.4.1 - 2022/16/06
 

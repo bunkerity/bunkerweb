@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mybunker:
-    image: bw
+    image: bunkerity/bunkerweb:1.4.2
     ports:
       - 80:8080
       - 443:8443
@@ -22,13 +22,29 @@ services:
       - USE_CLIENT_CACHE=yes
       - SERVE_FILES=no
       - MAX_CLIENT_SIZE=50m
-      - ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT
       - USE_GZIP=yes
+      # Methods used to query the api
+      # more info at https://api.mattermost.com/
+      - ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT
+      # Reverse proxy to Mattermost
+      # second endpoint needs websocket enabled
+      # more info at https://docs.mattermost.com/install/config-proxy-nginx.html
       - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_INTERCEPT_ERRORS=no
       - REVERSE_PROXY_URL_1=/
       - REVERSE_PROXY_HOST_1=http://mattermost:8065
       - REVERSE_PROXY_URL_2=~ /api/v[0-9]+/(users/)?websocket$$
+      - REVERSE_PROXY_HOST_2=http://mattermost:8065
       - REVERSE_PROXY_WS_2=yes
+      # Default limit rate for URLs
+      - LIMIT_REQ_URL_1=/
+      - LIMIT_REQ_RATE_1=3r/s
+      # Limit rate for api endpoints
+      - LIMIT_REQ_URL_2=^/api/
+      - LIMIT_REQ_RATE_2=10r/s
+      # Limit rate for static resources
+      - LIMIT_REQ_URL_3=^/static/
+      - LIMIT_REQ_RATE_3=10r/s
 
   mattermost:
     depends_on:
