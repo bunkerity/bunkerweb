@@ -1,0 +1,1909 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Make your web services secure by default.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.bunkerweb.io/quickstart-guide/">
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.2.5">
+    
+    
+      
+        <title>Quickstart guide - BunkerWeb</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.2d9f7617.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
+        
+      
+    
+    
+<script
+  async
+  defer
+  data-domain="docs.bunkerweb.io"
+  src="https://data.bunkerity.com/js/script.js"
+></script>
+
+    
+      
+    
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quickstart-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+             📢 Looking for tailored support, consulting or
+development for BunkerWeb ? Contact us at
+<a
+  href="mailto:contact@bunkerity.com"
+  style="color: #3f6ec6; text-decoration: underline"
+  >contact@bunkerity.com</a
+>
+for enterprise offers ! 
+          </div>
+        </aside>
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+               You're not viewing the
+documentation for the current version.
+<a href="../.."><strong>Click here to change.</strong></a> 
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="BunkerWeb" class="md-header__button md-logo" aria-label="BunkerWeb" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BunkerWeb
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quickstart guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bunkerity/bunkerweb/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Introduction
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../migrating/" class="md-tabs__link">
+      Migrating from bunkerized
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../concepts/" class="md-tabs__link">
+      Concepts
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../integrations/" class="md-tabs__link">
+      Integrations
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  <li class="md-tabs__item">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
+      Quickstart guide
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../security-tuning/" class="md-tabs__link">
+      Security tuning
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../settings/" class="md-tabs__link">
+      Settings
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../web-ui/" class="md-tabs__link">
+      Web UI
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../troubleshooting/" class="md-tabs__link">
+      Troubleshooting
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../plugins/" class="md-tabs__link">
+      Plugins
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../about/" class="md-tabs__link">
+      About
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BunkerWeb" class="md-nav__button md-logo" aria-label="BunkerWeb" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    BunkerWeb
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bunkerity/bunkerweb/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migrating/" class="md-nav__link">
+        Migrating from bunkerized
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        Integrations
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Quickstart guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Quickstart guide
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#protect-http-applications" class="md-nav__link">
+    Protect HTTP applications
+  </a>
+  
+    <nav class="md-nav" aria-label="Protect HTTP applications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-application" class="md-nav__link">
+    Single application
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-applications" class="md-nav__link">
+    Multiple applications
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behind-load-balancer-or-reverse-proxy" class="md-nav__link">
+    Behind load balancer or reverse proxy
+  </a>
+  
+    <nav class="md-nav" aria-label="Behind load balancer or reverse proxy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-header" class="md-nav__link">
+    HTTP header
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proxy-protocol" class="md-nav__link">
+    Proxy protocol
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-configurations" class="md-nav__link">
+    Custom configurations
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security-tuning/" class="md-nav__link">
+        Security tuning
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings/" class="md-nav__link">
+        Settings
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-ui/" class="md-nav__link">
+        Web UI
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        Plugins
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/bunkerity/bunkerweb/edit/master/docs/quickstart-guide.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+
+<h1 id="quickstart-guide">Quickstart guide</h1>
+<div class="admonition info">
+<p class="admonition-title">Prerequisites</p>
+<p>We assume that you're already familiar with the <a href="/1.4/concepts">core concepts</a> and you have followed the <a href="/1.4/integrations">integrations instructions</a> for your environment.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Going further<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples folder</a> of the repository to get real-world examples.</p>
+</p>
+</div>
+<h2 id="protect-http-applications">Protect HTTP applications</h2>
+<p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
+<p>The following settings can be used :</p>
+<ul>
+<li><code>USE_REVERSE_PROXY</code> : enable/disable reverse proxy mode</li>
+<li><code>REVERSE_PROXY_URL</code> : the public path prefix</li>
+<li><code>REVERSE_PROXY_HOST</code> : (internal) address of the proxied web application</li>
+</ul>
+<p>You will find more settings about reverse proxy in the <a href="/1.4/settings/#reverse-proxy">settings section</a> of the documentation.</p>
+<h3 id="single-application">Single application</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>When using Docker integration, the easiest way of protecting an existing application is to create a network so BunkerWeb can send requests using the container name.</p>
+<p>Create the Docker network if it's not already created :
+<code>shell
+docker network create bw-net</code></p>
+<p>Then instantiate your app :
+<code>shell
+docker run -d \
+       --name myapp \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
+<p>Create the BunkerWeb volume if it's not already created :
+<code>shell
+docker volume create bw-data</code></p>
+<p>You can now run BunkerWeb and configure it for your app :
+<code>shell
+docker run -d \
+       --name mybunker \
+       --network bw-net \
+       -p 80:8080 \
+       -p 443:8443 \
+       -v bw-data:/data \
+       -e SERVER_NAME=www.example.com \
+       -e USE_REVERSE_PROXY=yes \
+       -e REVERSE_PROXY_URL=/ \
+       -e REVERSE_PROXY_HOST=http://myapp \
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - bw-data:/data
+    environment:
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://myapp
+    networks:
+      - bw-net</p>
+<p>myapp:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>volumes:
+  bw-data:</p>
+<p>networks:
+  bw-net:
+    name: bw-net
+```</p>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
+<p>You can instantiate your container and pass the settings as labels :
+<code>shell
+docker run -d \
+       --name myapp \
+       --network bw-services \
+       -l bunkerweb.SERVER_NAME=www.example.com \
+       -l bunkerweb.USE_REVERSE_PROXY=yes \
+       -l bunkerweb.USE_REVERSE_URL=/ \
+       -l bunkerweb.REVERSE_PROXY_HOST=http://myapp \
+       nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent :
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp
+    labels:
+      - "bunkerweb.SERVER_NAME=www.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
+<p>You can instantiate your service and pass the settings as labels :
+<code>shell
+docker service \
+   create \
+   --name myapp \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=www.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=www.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
+<p>Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster :
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
+<p>Here is the corresponding Ingress definition to serve and protect the web application :
+<code>yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTOCONF: "yes"
+spec:
+  rules:
+  - host: www.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app
+            port:
+              number: 80</code></p>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
+<p>The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
+<code>shell
+python3 -m http.server -b 127.0.0.1</code></p>
+<p>Configuration of BunkerWeb is done by editing the <code>/opt/bunkerweb/variables.env</code> file :
+<code>conf
+SERVER_NAME=www.example.com
+HTTP_PORT=80
+HTTPS_PORT=443
+DNS_RESOLVERS=8.8.8.8 8.8.4.4
+USE_REVERSE_PROXY=yes
+REVERSE_PROXY_URL=/
+REVERSE_PROXY_HOST=http://127.0.0.1:8000</code></p>
+<p>Let's check the status of BunkerWeb :
+<code>shell
+systemctl status bunkerweb</code></p>
+<p>If it's already running we can just reload it :
+<code>shell
+systemctl reload bunkerweb</code></p>
+<p>Otherwise, we will need to start it :
+<code>shell
+systemctl start bunkerweb</code></p>
+</div>
+</div>
+</div>
+<h3 id="multiple-applications">Multiple applications</h3>
+<div class="admonition tip">
+<p class="admonition-title">Testing<p>To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
+<code>shell curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server</code></p>
+</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>When using Docker integration, the easiest way of protecting multiple existing applications is to create a network so BunkerWeb can send requests using the container names.</p>
+<p>Create the Docker network if it's not already created :
+<code>shell
+docker network create bw-net</code></p>
+<p>Then instantiate your apps :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">App #1</label><label for="__tabbed_3_2">App #2</label><label for="__tabbed_3_3">App #3</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><code>shell
+docker run -d \
+       --name myapp1 \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
+</div>
+<div class="tabbed-block">
+<p><code>shell
+docker run -d \
+       --name myapp2 \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
+</div>
+<div class="tabbed-block">
+<p><code>shell
+docker run -d \
+       --name myapp3 \
+       --network bw-net \
+       nginxdemos/hello:plain-text</code></p>
+</div>
+</div>
+</div>
+<p>Create the BunkerWeb volume if it's not already created :
+<code>shell
+docker volume create bw-data</code></p>
+<p>You can now run BunkerWeb and configure it for your apps :
+<code>shell
+docker run -d \
+       --name mybunker \
+       --network bw-net \
+       -p 80:8080 \
+       -p 443:8443 \
+       -v bw-data:/data \
+       -e MULTISITE=yes
+       -e "SERVER_NAME=app1.example.com app2.example.com app3.example.com" \
+       -e USE_REVERSE_PROXY=yes \
+       -e REVERSE_PROXY_URL=/ \
+       -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
+       -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
+       -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>mybunker:
+    image: bunkerity/bunkerweb:1.4.0
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - bw-data:/data
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=app1.example.com app2.example.com app3.example.com
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
+      - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
+      - app3.example.com_REVERSE_PROXY_HOST=http://myapp3
+    networks:
+      - bw-net</p>
+<p>myapp1:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>myapp2:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>myapp3:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - bw-net</p>
+<p>volumes:
+  bw-data:</p>
+<p>networks:
+  bw-net:
+    name: bw-net
+```</p>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
+<p>You can instantiate your containers and pass the settings as labels :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">App #1</label><label for="__tabbed_4_2">App #2</label><label for="__tabbed_4_3">App #3</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><code>shell
+docker run -d \
+   --name myapp1 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app1.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.USE_REVERSE_URL=/ \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp1 \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent :
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp1:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
+    labels:
+      - "bunkerweb.SERVER_NAME=app1.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+<div class="tabbed-block">
+<p><code>shell
+docker run -d \
+   --name myapp2 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app2.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.USE_REVERSE_URL=/ \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp2 \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent :
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp2:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp2
+    labels:
+      - "bunkerweb.SERVER_NAME=app2.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+<div class="tabbed-block">
+<p><code>shell
+docker run -d \
+   --name myapp3 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app3.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.USE_REVERSE_URL=/ \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp3 \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent :
+```yaml
+version: '3'</p>
+<p>services:</p>
+<p>myapp3:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp3
+    labels:
+      - "bunkerweb.SERVER_NAME=app3.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
+<p>You can instantiate your services and pass the settings as labels :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">App #1</label><label for="__tabbed_5_2">App #2</label><label for="__tabbed_5_3">App #3</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><code>shell
+docker service \
+   create \
+   --name myapp1 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app1.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp1 \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp1:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=app1.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+<div class="tabbed-block">
+<p><code>shell
+docker service \
+   create \
+   --name myapp2 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app2.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp2 \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp2:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp2
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=app2.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+<div class="tabbed-block">
+<p><code>shell
+docker service \
+   create \
+   --name myapp3 \
+   --network bw-services \
+   -l bunkerweb.SERVER_NAME=app3.example.com \
+   -l bunkerweb.USE_REVERSE_PROXY=yes \
+   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp3 \
+   -l bunkerweb.REVERSE_PROXY_URL=/ \
+   nginxdemos/hello:plain-text</code></p>
+<p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
+```yaml
+version: "3"</p>
+<p>services:</p>
+<p>myapp3:
+    image: nginxdemos/hello:plain-text
+    networks:
+      bw-services:
+        aliases:
+          - myapp3
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.SERVER_NAME=app3.example.com"
+        - "bunkerweb.USE_REVERSE_PROXY=yes"
+        - "bunkerweb.REVERSE_PROXY_URL=/"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"</p>
+<p>networks:
+  bw-services:
+    external:
+      name: bw-services
+```</p>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
+<p>Let's also assume that you have some typical Deployments with Services to access the web applications from within the cluster :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">App #1</label><label for="__tabbed_6_2">App #2</label><label for="__tabbed_6_3">App #3</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app1
+spec:
+  selector:
+    app: app1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
+</div>
+<div class="tabbed-block">
+<p>```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  labels:
+    app: app2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app2
+spec:
+  selector:
+    app: app2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
+</div>
+<div class="tabbed-block">
+<p>```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app3
+  labels:
+    app: app3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app3
+  template:
+    metadata:
+      labels:
+        app: app3
+    spec:
+      containers:
+      - name: app1
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80</p>
+<hr />
+<p>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app3
+spec:
+  selector:
+    app: app3
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```</p>
+</div>
+</div>
+</div>
+<p>Here is the corresponding Ingress definition to serve and protect the web applications :
+<code>yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTOCONF: "yes"
+spec:
+  rules:
+  - host: app1.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app1
+            port:
+              number: 80
+  - host: app2.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app2
+            port:
+              number: 80
+  - host: app3.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-app3
+            port:
+              number: 80</code></p>
+</div>
+<div class="tabbed-block">
+<p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
+<p>Let's assume that you have some web applications running on the same machine as BunkerWeb :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">App #1</label><label for="__tabbed_7_2">App #2</label><label for="__tabbed_7_3">App #3</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
+<code>shell
+python3 -m http.server -b 127.0.0.1 8001</code></p>
+</div>
+<div class="tabbed-block">
+<p>The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
+<code>shell
+python3 -m http.server -b 127.0.0.1 8002</code></p>
+</div>
+<div class="tabbed-block">
+<p>The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
+<code>shell
+python3 -m http.server -b 127.0.0.1 8003</code></p>
+</div>
+</div>
+</div>
+<p>Configuration of BunkerWeb is done by editing the <code>/opt/bunkerweb/variables.env</code> file :
+<code>conf
+SERVER_NAME=app1.example.com app2.example.com app3.example.com
+HTTP_PORT=80
+HTTPS_PORT=443
+DNS_RESOLVERS=8.8.8.8 8.8.4.4
+USE_REVERSE_PROXY=yes
+REVERSE_PROXY_URL=/
+app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
+app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
+app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003</code></p>
+<p>Let's check the status of BunkerWeb :
+<code>shell
+systemctl status bunkerweb</code></p>
+<p>If it's already running we can just reload it :
+<code>shell
+systemctl reload bunkerweb</code></p>
+<p>Otherwise, we will need to start it :
+<code>shell
+systemctl start bunkerweb</code></p>
+</div>
+</div>
+</div>
+<h2 id="behind-load-balancer-or-reverse-proxy">Behind load balancer or reverse proxy</h2>
+<p>When BunkerWeb is itself behind a load balancer or a reverse proxy, you will need to configure it so it can get the real IP address of the clients. If you don't do it, the security features will block the IP address of the load balancer or reverse proxy instead of the client one.</p>
+<p>BunkerWeb actually supports two methods to retrieve the real IP address of the client :</p>
+<ul>
+<li>Using the PROXY protocol</li>
+<li>Using a HTTP header like X-Forwarded-For</li>
+</ul>
+<p>The following settings can be used :</p>
+<ul>
+<li><code>USE_REAL_IP</code> : enable/disable real IP retrieval</li>
+<li><code>USE_PROXY_PROTOCOL</code> : enable/disable PROXY protocol support</li>
+<li><code>REAL_IP_FROM</code> : list of trusted IP/network address allowed to send us the "real IP"</li>
+<li><code>REAL_IP_HEADER</code> : the HTTP header containing the real IP or special value "proxy_protocol" when using PROXY protocol</li>
+</ul>
+<p>You will find more settings about real IP in the <a href="/1.4/settings/#real-ip">settings section</a> of the documentation.</p>
+<h3 id="http-header">HTTP header</h3>
+<p>We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :</p>
+<ul>
+<li>They use the X-Forwarded-For header to set the real IP</li>
+<li>They have IPs in the 1.2.3.0/24 and 100.64.0.0/16 networks</li>
+</ul>
+<p>The following settings need to be set :</p>
+<p><code>conf
+USE_REAL_IP=yes
+REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+REAL_IP_HEADER=X-Forwarded-For</code></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:5"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Docker</label><label for="__tabbed_8_2">Docker autoconf</label><label for="__tabbed_8_3">Swarm</label><label for="__tabbed_8_4">Kubernetes</label><label for="__tabbed_8_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>When starting the BunkerWeb container, you will need to add the settings :
+<code>shell
+docker run \
+       ...
+       -e USE_REAL_IP=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=X-Forwarded-For \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=X-Forwarded-For
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>Before running the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
+<code>shell
+docker run \
+       ...
+       -e USE_REAL_IP=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=X-Forwarded-For \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=X-Forwarded-For
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>Before running the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
+<code>shell
+docker service create \
+       ...
+       -e USE_REAL_IP=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=X-Forwarded-For \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=X-Forwarded-For
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+<code>yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    spec:
+      containers:
+      - name: bunkerweb
+        image: bunkerity/bunkerweb:1.4.0
+        ...
+        env:
+        - name: USE_REAL_IP
+          value: "yes"
+        - name: REAL_IP_HEADER
+          value: "X-Forwarded-For"
+        - name: REAL_IP_FROM
+          value: "1.2.3.0/24 100.64.0.0/16"
+...</code></p>
+</div>
+<div class="tabbed-block">
+<p>You will need to add the settings to the <code>/opt/bunkerweb/variables.env</code> file :
+<code>conf
+...
+USE_REAL_IP=yes
+REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+REAL_IP_HEADER=X-Forwarded-For
+...</code></p>
+<p>Don't forget to reload the bunkerweb service once it's done.</p>
+</div>
+</div>
+</div>
+<h3 id="proxy-protocol">Proxy protocol</h3>
+<p>We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :</p>
+<ul>
+<li>They use the PROXY protocol v1 or v2 to set the real IP</li>
+<li>They have IPs in the 1.2.3.0/24 and 100.64.0.0/16 networks</li>
+</ul>
+<p>The following settings need to be set :</p>
+<p><code>conf
+USE_REAL_IP=yes
+USE_PROXY_PROTOCOL=yes
+REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+REAL_IP_HEADER=proxy_protocol</code></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:5"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><input id="__tabbed_9_4" name="__tabbed_9" type="radio" /><input id="__tabbed_9_5" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Docker</label><label for="__tabbed_9_2">Docker autoconf</label><label for="__tabbed_9_3">Swarm</label><label for="__tabbed_9_4">Kubernetes</label><label for="__tabbed_9_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>When starting the BunkerWeb container, you will need to add the settings :
+<code>shell
+docker run \
+       ...
+       -e USE_REAL_IP=yes \
+       -e USE_PROXY_PROTOCOL=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=proxy_protocol \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - USE_PROXY_PROTOCOL=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=proxy_protocol
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>Before running the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
+<code>shell
+docker run \
+       ...
+       -e USE_REAL_IP=yes \
+       -e USE_PROXY_PROTOCOL=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=proxy_protocol \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - USE_PROXY_PROTOCOL=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=proxy_protocol
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>Before running the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
+<code>shell
+docker service create \
+       ...
+       -e USE_REAL_IP=yes \
+       -e USE_PROXY_PROTOCOL=yes \
+       -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
+       -e REAL_IP_HEADER=proxy_protocol \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  ...
+  environment:
+    - USE_REAL_IP=yes
+    - USE_PROXY_PROTOCOL=yes
+    - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    - REAL_IP_HEADER=proxy_protocol
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+<code>yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    spec:
+      containers:
+      - name: bunkerweb
+        image: bunkerity/bunkerweb:1.4.0
+        ...
+        env:
+        - name: USE_REAL_IP
+          value: "yes"
+        - name: USE_PROXY_PROTOCOL
+          value: "yes"
+        - name: REAL_IP_HEADER
+          value: "proxy_protocol"
+        - name: REAL_IP_FROM
+          value: "1.2.3.0/24 100.64.0.0/16"
+...</code></p>
+</div>
+<div class="tabbed-block">
+<p>You will need to add the settings to the <code>/opt/bunkerweb/variables.env</code> file :
+<code>conf
+...
+USE_REAL_IP=yes
+USE_PROXY_PROTOCOL=yes
+REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+REAL_IP_HEADER=proxy_protocol
+...</code></p>
+<p>Don't forget to reload the bunkerweb service once it's done.</p>
+</div>
+</div>
+</div>
+<h2 id="custom-configurations">Custom configurations</h2>
+<p>Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info <a href="/1.4/security-tuning/#modsecurity">here</a>). Here is the list of custom configurations types :</p>
+<ul>
+<li><strong>http</strong> : http level of NGINX</li>
+<li><strong>server-http</strong> : server level of NGINX</li>
+<li><strong>default-server-http</strong> : server level of NGINX (only apply to the "default server" when the name supplied by the client doesn't match any server name in <code>SERVER_NAME</code>)</li>
+<li><strong>modsec-crs</strong> : before the OWASP Core Rule Set is loaded</li>
+<li><strong>modsec</strong> : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)</li>
+</ul>
+<p>Custom configurations can be applied globally or only for a specific server when applicable and if multisite mode is enabled.</p>
+<p>The howto depends on the integration used but under the hood, applying custom configurations is done by adding files ending with the .conf suffix in their name to specific folders. To apply a custom configuration for a specific server, the file is written to a subfolder which is named as the primary server name.</p>
+<p>Some integrations offer a more convenient way of applying configurations for example using <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> with Swarm or <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> with Kubernetes.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:5"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><input id="__tabbed_10_5" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Docker</label><label for="__tabbed_10_2">Docker autoconf</label><label for="__tabbed_10_3">Swarm</label><label for="__tabbed_10_4">Kubernetes</label><label for="__tabbed_10_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, custom configurations must be written to the volume mounted on /data.</p>
+<p>The first thing to do is to create the folders :
+<code>shell
+mkdir -p ./bw-data/configs/server-http</code></p>
+<p>You can now write your configurations :
+<code>shell
+echo "location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}" &gt; ./bw-data/configs/server-http/hello-world.conf</code></p>
+<p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
+<p>When starting the BunkerWeb container, you will need to mount the folder on /data :
+<code>shell
+docker run \
+       ...
+       -v "${PWD}/bw-data:/data" \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a>, custom configurations must be written to the volume mounted on /data.</p>
+<p>The first thing to do is to create the folders :
+<code>shell
+mkdir -p ./bw-data/configs/server-http</code></p>
+<p>You can now write your configurations :
+<code>shell
+echo "location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}" &gt; ./bw-data/configs/server-http/hello-world.conf</code></p>
+<p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
+<p>When starting the BunkerWeb container, you will need to mount the folder on /data :
+<code>shell
+docker run \
+       ...
+       -v "${PWD}/bw-data:/data" \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+  ...</code></p>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, custom configurations are managed using <a href="https://docs.docker.com/engine/swarm/configs/">Docker Configs</a>.</p>
+<p>To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.</p>
+<p>When creating a Config you will need to add special labels :</p>
+<ul>
+<li><strong>bunkerweb.CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)</li>
+<li><strong>bunkerweb.CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
+</ul>
+<p>Here is the example :
+<code>shell
+echo "location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -</code></p>
+<p>There is no update mechanism : the alternative is to remove an existing config using <code>docker config rm</code> and then recreate it.</p>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
+<p>To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.</p>
+<p>When creating a ConfigMap you will need to add special labels :</p>
+<ul>
+<li><strong>bunkerweb.io/CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)</li>
+<li><strong>bunkerweb.io/CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
+</ul>
+<p>Here is the example :
+<code>yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-all-server-http
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "server-http"
+data:
+  myconf: |
+    location /hello {
+        default_type 'text/plain';
+        content_by_lua_block {
+            ngx.say('world')
+        }
+    }</code></p>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#linux">Linux integration</a>, custom configurations must be written to the /opt/bunkerweb/configs folder.</p>
+<p>Here is an example for server-http/hello-world.conf :
+<code>conf
+location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('world')
+    }
+}</code></p>
+<p>Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+<code>shell
+chown -R root:nginx /opt/bunkerweb/configs &amp;&amp; \
+chmod -R 770 /opt/bunkerweb/configs</code></p>
+<p>Don't forget to reload the bunkerweb service once it's done.</p>
+</div>
+</div>
+</div>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../integrations/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Integrations" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Integrations
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../security-tuning/" class="md-footer__link md-footer__link--next" aria-label="Next: Security tuning" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Security tuning
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2022 Bunkerity
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://discord.com/invite/fTf46FmtyD" target="_blank" rel="noopener" title="discord.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541zM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/bunkerity" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/bunkerity/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/bunkerity" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.bd0b6b67.min.js", "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.467223ff.min.js"></script>
+      
+    
+  </body>
+</html>

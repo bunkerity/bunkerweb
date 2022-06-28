@@ -712,7 +712,7 @@ documentation for the current version.
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker">Docker integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
 <p>The first thing to do is to create the plugins folder :
 <div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/plugins
 </code></pre></div></p>
@@ -729,18 +729,18 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
+<p>When using the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
 <p>The easiest way to do it is by starting the Docker autoconf stack with a folder mounted on <code>/data</code> (instead of a named volume). Once the stack is started, you can copy the plugins of your choice to the <code>plugins</code> folder from your host :
 <div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
 cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
@@ -751,7 +751,7 @@ chmod -R <span class="m">770</span> bw-data
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#swarm">Swarm integration</a>, the easiest way of installing plugins is by using <code>docker exec</code> and downloading the plugins from the container.</p>
+<p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, the easiest way of installing plugins is by using <code>docker exec</code> and downloading the plugins from the container.</p>
 <p>Execute a shell inside the autoconf container (use <code>docker ps</code> to get the name) :
 <div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> -it myautoconf /bin/bash
 </code></pre></div></p>
@@ -761,7 +761,7 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#kubernetes">Kubernetes integration</a>, the easiest way of installing plugins is by using <code>kubectl exec</code> and downloading the plugins from the container.</p>
+<p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, the easiest way of installing plugins is by using <code>kubectl exec</code> and downloading the plugins from the container.</p>
 <p>Execute a shell inside the autoconf container (use <code>kubectl get pods</code> to get the name) :
 <div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -it myautoconf -- /bin/bash
 </code></pre></div></p>
@@ -771,7 +771,7 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#linux">Linux integration</a>, plugins must be written to the <code>/opt/bunkerweb/plugins</code> folder :
+<p>When using the <a href="/1.4/integrations/#linux">Linux integration</a>, plugins must be written to the <code>/opt/bunkerweb/plugins</code> folder :
 <div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
 cp -rp ./bunkerweb-plugins/* /data/plugins
 </code></pre></div></p>
@@ -970,7 +970,7 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 </tbody>
 </table>
 <h3 id="configurations">Configurations</h3>
-<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="/quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code> and <code>default-server-http</code>).</p>
+<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="/1.4/quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code> and <code>default-server-http</code>).</p>
 <p>Here is an example for a configuration template file inside the <strong>confs/server-http</strong> folder named <strong>example.conf</strong> :</p>
 <div class="highlight"><pre><span></span><code>location /setting {
     default_type &#39;text/plain&#39;;

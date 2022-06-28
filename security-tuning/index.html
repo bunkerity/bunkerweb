@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://docs.bunkerweb.io/dev/security-tuning/">
+        <link rel="canonical" href="https://docs.bunkerweb.io/security-tuning/">
       
       <link rel="icon" href="../assets/favicon.png">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.2.5">
@@ -804,10 +804,10 @@ documentation for the current version.
 
 
 <h1 id="security-tuning">Security tuning</h1>
-<p>BunkerWeb offers many security features that you can configure with <a href="/settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.</p>
+<p>BunkerWeb offers many security features that you can configure with <a href="/1.4/settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.</p>
 <div class="admonition tip">
 <p class="admonition-title">Other settings</p>
-<p>This section only focuses on security tuning, see the <a href="/settings">settings section</a> of the documentation for other settings.</p>
+<p>This section only focuses on security tuning, see the <a href="/1.4/settings">settings section</a> of the documentation for other settings.</p>
 </div>
 <h2 id="http-protocol">HTTP protocol</h2>
 <h3 id="default-server">Default server</h3>
@@ -1033,25 +1033,25 @@ documentation for the current version.
 </tbody>
 </table>
 <p>We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).</p>
-<p>Tuning ModSecurity and the CRS can be done using <a href="/quickstart-guide/#custom-configurations">custom configurations</a> :</p>
+<p>Tuning ModSecurity and the CRS can be done using <a href="/1.4/quickstart-guide/#custom-configurations">custom configurations</a> :</p>
 <ul>
 <li>modsec-crs : before the OWASP Core Rule Set is loaded</li>
 <li>modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)</li>
 </ul>
 <p>For example, you can add a custom configuration with type <code>modsec-crs</code> to add CRS exclusions :</p>
-<div class="highlight"><pre><span></span><code>SecAction \
- &quot;id:900130,\
+<p><code>conf
+SecAction \
+ "id:900130,\
   phase:1,\
   nolog,\
   pass,\
   t:none,\
-  setvar:tx.crs_exclusions_wordpress=1&quot;
-</code></pre></div>
+  setvar:tx.crs_exclusions_wordpress=1"</code></p>
 <p>You can also add a custom configuration with type <code>modsec</code> to update loaded CRS rules :</p>
-<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME &quot;/wp-admin/admin-ajax.php&quot; &quot;id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce&quot;
-SecRule REQUEST_FILENAME &quot;/wp-admin/options.php&quot; &quot;id:2,ctl:ruleRemoveByTag=attack-xss&quot;
-SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveById=930120&quot;
-</code></pre></div>
+<p><code>conf
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"</code></p>
 <h2 id="bad-behavior">Bad behavior</h2>
 <p>When attackers search for and/or exploit vulnerabilities they might generate some "suspicious" HTTP status codes that a "regular" user won’t generate within a period of time. If we detect that kind of behavior we can ban the offending IP address and force the attacker to come up with a new one.</p>
 <p>That kind of security measure is implemented and enabled by default in BunkerWeb and is called "Bad behavior". Here is the list of the related settings :</p>

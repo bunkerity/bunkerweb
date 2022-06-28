@@ -10,14 +10,14 @@
       
       
       
-        <link rel="canonical" href="https://docs.bunkerweb.io/dev/troubleshooting/">
+        <link rel="canonical" href="https://docs.bunkerweb.io/plugins/">
       
       <link rel="icon" href="../assets/favicon.png">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.2.5">
     
     
       
-        <title>Troubleshooting - BunkerWeb</title>
+        <title>Plugins - BunkerWeb</title>
       
     
     
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#troubleshooting" class="md-skip">
+        <a href="#plugins" class="md-skip">
           Skip to content
         </a>
       
@@ -126,7 +126,7 @@ documentation for the current version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Troubleshooting
+              Plugins
             
           </span>
         </div>
@@ -288,12 +288,10 @@ documentation for the current version.
         
   
   
-    
-  
 
 
   <li class="md-tabs__item">
-    <a href="./" class="md-tabs__link md-tabs__link--active">
+    <a href="../troubleshooting/" class="md-tabs__link">
       Troubleshooting
     </a>
   </li>
@@ -302,10 +300,12 @@ documentation for the current version.
         
   
   
+    
+  
 
 
   <li class="md-tabs__item">
-    <a href="../plugins/" class="md-tabs__link">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
       Plugins
     </a>
   </li>
@@ -500,6 +500,21 @@ documentation for the current version.
 
   
   
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
     
   
   
@@ -512,12 +527,12 @@ documentation for the current version.
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Troubleshooting
+          Plugins
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Troubleshooting
+        Plugins
       </a>
       
         
@@ -536,44 +551,84 @@ documentation for the current version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#logs" class="md-nav__link">
-    Logs
+  <a href="#official-plugins" class="md-nav__link">
+    Official plugins
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#permissions" class="md-nav__link">
-    Permissions
+  <a href="#how-to-use-a-plugin" class="md-nav__link">
+    How to use a plugin
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#modsecurity" class="md-nav__link">
-    ModSecurity
+  <a href="#writing-a-plugin" class="md-nav__link">
+    Writing a plugin
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing a plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    Metadata
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#bad-behavior" class="md-nav__link">
-    Bad Behavior
+        
+          <li class="md-nav__item">
+  <a href="#configurations" class="md-nav__link">
+    Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#ip-unban" class="md-nav__link">
-    IP unban
+        
+          <li class="md-nav__item">
+  <a href="#lua" class="md-nav__link">
+    LUA
+  </a>
+  
+    <nav class="md-nav" aria-label="LUA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-script" class="md-nav__link">
+    Main script
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#whitelisting" class="md-nav__link">
-    Whitelisting
+        
+          <li class="md-nav__item">
+  <a href="#libraries" class="md-nav__link">
+    Libraries
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#helpers" class="md-nav__link">
+    Helpers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jobs" class="md-nav__link">
+    Jobs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -581,21 +636,6 @@ documentation for the current version.
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../plugins/" class="md-nav__link">
-        Plugins
-      </a>
     </li>
   
 
@@ -627,214 +667,442 @@ documentation for the current version.
             <article class="md-content__inner md-typeset">
               
                 
-<a href="https://github.com/bunkerity/bunkerweb/edit/master/docs/troubleshooting.md" title="Edit this page" class="md-content__button md-icon">
+<a href="https://github.com/bunkerity/bunkerweb/edit/master/docs/plugins.md" title="Edit this page" class="md-content__button md-icon">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
 </a>
 
 
 
-<h1 id="troubleshooting">Troubleshooting</h1>
-<h2 id="logs">Logs</h2>
-<p>When troubleshooting, the logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
-<p>Please note that you can set <code>LOG_LEVEL</code> setting to <code>info</code> (default : <code>notice</code>) to increase the verbosity of BunkerWeb.</p>
-<p>Here is how you can access the logs depending on your integration :</p>
+<h1 id="plugins">Plugins</h1>
+<p>BunkerWeb comes with a plugin system to make it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.</p>
+<h2 id="official-plugins">Official plugins</h2>
+<p>Here is the list of "official" plugins that we maintain (see the <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a> repository for more information) :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Name</th>
+<th align="center">Version</th>
+<th align="left">Description</th>
+<th align="center">Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><strong>ClamAV</strong></td>
+<td align="center">0.1</td>
+<td align="left">Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.</td>
+<td align="center"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
+</tr>
+<tr>
+<td align="center"><strong>CrowdSec</strong></td>
+<td align="center">0.1</td>
+<td align="left">CrowdSec bouncer for BunkerWeb.</td>
+<td align="center"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">bunkerweb-plugins/crowdsec</a></td>
+</tr>
+<tr>
+<td align="center"><strong>VirusTotal</strong></td>
+<td align="center">0.1</td>
+<td align="left">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
+<td align="center"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-to-use-a-plugin">How to use a plugin</h2>
+<p>The first step is to install the plugin by putting the plugin files inside the corresponding <code>plugins</code> data folder, the procedure depends on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="admonition tip">
-<p class="admonition-title">List containers</p>
-<p>To list the running containers you can use the following command :
-<div class="highlight"><pre><span></span><code>docker ps
-</code></pre></div></p>
-</div>
-<p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker logs mybunker
-</code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose logs mybunker
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<div class="admonition tip">
-<p class="admonition-title">List containers</p>
-<p>To list the running containers you can use the following command :
-<div class="highlight"><pre><span></span><code>docker ps
-</code></pre></div></p>
-</div>
-<p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your containers) :
-<div class="highlight"><pre><span></span><code>docker logs mybunker
-docker logs myautoconf
-</code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> and <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose logs mybunker
-docker-compose logs myautoconf
-</code></pre></div></p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
+<p>The first thing to do is to create the plugins folder :
+<code>shell
+mkdir -p ./bw-data/plugins</code></p>
+<p>Then you can drop the plugins of your choice into that folder :
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* ./bw-data/plugins</code></p>
+<p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
+<p>When starting the BunkerWeb container, you will need to mount the folder on <code>/data</code> :
+<code>shell
+docker run \
+       ...
+       -v "${PWD}/bw-data:/data" \
+       ...
+       bunkerity/bunkerweb:1.4.0</code></p>
+<p>Here is the docker-compose equivalent :
+<code>yaml
+mybunker:
+  image: bunkerity/bunkerweb:1.4.0
+  volumes:
+    - ./bw-data:/data
+  ...</code></p>
 </div>
 <div class="tabbed-block">
-<div class="admonition tip">
-<p class="admonition-title">List services</p>
-<p>To list the services you can use the following command :
-<div class="highlight"><pre><span></span><code>docker service ls
-</code></pre></div></p>
-</div>
-<p>You can use the <code>docker service logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> my with the name of your services) :
-<div class="highlight"><pre><span></span><code>docker service logs mybunker
-docker service logs myautoconf
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<div class="admonition tip">
-<p class="admonition-title">List pods</p>
-<p>To list the pods you can use the following command :
-<div class="highlight"><pre><span></span><code>kubectl get pods
-</code></pre></div></p>
-</div>
-<p>You can use the <code>kubectl logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> my with the name of your pods) :
-<div class="highlight"><pre><span></span><code>kubectl logs mybunker
-kubectl logs myautoconf
-</code></pre></div></p>
+<p>When using the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a>, plugins must be written to the volume mounted on <code>/data</code>.</p>
+<p>The easiest way to do it is by starting the Docker autoconf stack with a folder mounted on <code>/data</code> (instead of a named volume). Once the stack is started, you can copy the plugins of your choice to the <code>plugins</code> folder from your host :
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* ./bw-data/plugins</code></p>
+<p>Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+<code>shell
+chown -R root:101 bw-data &amp;&amp; \
+chmod -R 770 bw-data</code></p>
 </div>
 <div class="tabbed-block">
-<p>The logs are located inside the <code>/var/log/nginx</code> directory. There is two files :
-<div class="highlight"><pre><span></span><code>cat /var/log/nginx/error.log
-cat /var/log/nginx/access.log
-</code></pre></div></p>
+<p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, the easiest way of installing plugins is by using <code>docker exec</code> and downloading the plugins from the container.</p>
+<p>Execute a shell inside the autoconf container (use <code>docker ps</code> to get the name) :
+<code>shell
+docker exec -it myautoconf /bin/bash</code></p>
+<p>Once you have a shell inside the container, you can drop the plugins of your choice inside the <code>/data/plugins</code> folder :
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* /data/plugins</code></p>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, the easiest way of installing plugins is by using <code>kubectl exec</code> and downloading the plugins from the container.</p>
+<p>Execute a shell inside the autoconf container (use <code>kubectl get pods</code> to get the name) :
+<code>shell
+kubectl exec -it myautoconf -- /bin/bash</code></p>
+<p>Once you have a shell inside the container, you can drop the plugins of your choice inside the <code>/data/plugins</code> folder :
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* /data/plugins</code></p>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="/1.4/integrations/#linux">Linux integration</a>, plugins must be written to the <code>/opt/bunkerweb/plugins</code> folder :
+<code>shell
+git clone https://github.com/bunkerity/bunkerweb-plugins &amp;&amp; \
+cp -rp ./bunkerweb-plugins/* /data/plugins</code></p>
 </div>
 </div>
 </div>
-<h2 id="permissions">Permissions</h2>
-<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb especially if you use custom configurations (more info <a href="/quickstart-guide/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
-<h2 id="modsecurity">ModSecurity</h2>
-<p>The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :</p>
+<p>When a plugin is installed, you are ready to use it, please refer to the plugin documentation for more information.</p>
+<h2 id="writing-a-plugin">Writing a plugin</h2>
+<div class="admonition tip">
+<p class="admonition-title">Existing plugins</p>
+<p>If the documentation is not enough you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/core">core plugins</a> (already included in BunkerWeb but they are plugins technically speaking).</p>
+</div>
+<p>The first step is to create a folder that will contain the plugin :</p>
+<p><code>shell
+mkdir myplugin &amp;&amp; \
+cd myplugin</code></p>
+<h3 id="metadata">Metadata</h3>
+<p>A file named <strong>plugin.json</strong> and written at the root of the plugin folder must contain metadata about the plugin. Here is an example :</p>
+<p><code>json
+{
+    "id": "myplugin",
+    "order": 42,
+    "name": "My Plugin",
+    "description": "Just an example plugin.",
+    "version": "1.0",
+    "settings": {
+        "DUMMY_SETTING": {
+            "context": "multisite",
+            "default": "1234",
+            "help": "Here is the help of the setting.",
+            "id": "dummy-id",
+            "label": "Dummy setting",
+            "regex": "^.*$",
+            "type": "text"
+        }
+    }
+    "jobs": [
+        {
+            "name": "my-job",
+            "file": "my-job.py",
+            "every": "hour"
+        }
+    ]
+}</code></p>
+<p>Here are the details of the fields :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Field</th>
+<th align="center">Mandatory</th>
+<th align="center">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>id</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Internal ID for the plugin : must be unique among other plugins (including "core" ones) and contain only lowercase chars.</td>
+</tr>
+<tr>
+<td align="center"><code>order</code></td>
+<td align="center">yes</td>
+<td align="center">int</td>
+<td align="left">When the plugin should be executed during the access phase : <code>1</code> for whitelisting, <code>2</code> for blacklisting, <code>3</code> for "standard security feature" or <code>999</code> if your settings don't use the access phase.</td>
+</tr>
+<tr>
+<td align="center"><code>name</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Name of your plugin.</td>
+</tr>
+<tr>
+<td align="center"><code>description</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Description of your plugin.</td>
+</tr>
+<tr>
+<td align="center"><code>version</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Version of your plugin.</td>
+</tr>
+<tr>
+<td align="center"><code>settings</code></td>
+<td align="center">yes</td>
+<td align="center">dict</td>
+<td align="left">List of the settings of your plugin.</td>
+</tr>
+<tr>
+<td align="center"><code>jobs</code></td>
+<td align="center">no</td>
+<td align="center">list</td>
+<td align="left">List of the jobs of your plugin.</td>
+</tr>
+</tbody>
+</table>
+<p>Each setting has the following fields (the key is the ID of the settings used in a configuration) :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Field</th>
+<th align="center">Mandatory</th>
+<th align="center">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>context</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Context of the setting : <code>multisite</code> or <code>global</code>.</td>
+</tr>
+<tr>
+<td align="center"><code>default</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">The default value of the setting.</td>
+</tr>
+<tr>
+<td align="center"><code>help</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Help text about the plugin (shown in web UI).</td>
+</tr>
+<tr>
+<td align="center"><code>id</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Internal ID used by the web UI for HTML elements.</td>
+</tr>
+<tr>
+<td align="center"><code>label</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Label shown by the web UI.</td>
+</tr>
+<tr>
+<td align="center"><code>regex</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">The regex used to validate the value provided by the user.</td>
+</tr>
+<tr>
+<td align="center"><code>type</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">The type of the field : <code>text</code>, <code>check</code> or <code>select</code>.</td>
+</tr>
+<tr>
+<td align="center"><code>multiple</code></td>
+<td align="center">no</td>
+<td align="center">string</td>
+<td align="left">Unique ID to group multiple settings with numbers as suffix.</td>
+</tr>
+<tr>
+<td align="center"><code>select</code></td>
+<td align="center">no</td>
+<td align="center">list</td>
+<td align="left">List of possible string values when <code>type</code> is <code>select</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Each job has the following fields :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Field</th>
+<th align="center">Mandatory</th>
+<th align="center">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>name</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Name of the job.</td>
+</tr>
+<tr>
+<td align="center"><code>file</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Name of the file inside the jobs folder.</td>
+</tr>
+<tr>
+<td align="center"><code>every</code></td>
+<td align="center">yes</td>
+<td align="center">string</td>
+<td align="left">Job scheduling frequency : <code>minute</code>, <code>hour</code>, <code>day</code>, <code>week</code> or <code>once</code> (no frequency, only once before (re)generating the configuration).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configurations">Configurations</h3>
+<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="/1.4/quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code> and <code>default-server-http</code>).</p>
+<p>Here is an example for a configuration template file inside the <strong>confs/server-http</strong> folder named <strong>example.conf</strong> :</p>
+<p><code>conf
+location /setting {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('{{ DUMMY_SETTING }}')
+    }
+}</code></p>
+<p><code>{{ DUMMY_SETTING }}</code> will be replaced by the value of the <code>DUMMY_SETTING</code> chosen by the user of the plugin.</p>
+<h3 id="lua">LUA</h3>
+<h4 id="main-script">Main script</h4>
+<p>Under the hood, BunkerWeb is using the <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a> to execute code within NGINX. Plugins that need to execute code must provide a lua file at the root directory of the plugin folder using the <code>id</code> value of <strong>plugin.json</strong> as its name. Here is an example named <strong>myplugin.lua</strong> :</p>
+<p>```lua
+local _M        = {}
+_M.__index      = _M</p>
+<p>local utils     = require "utils"
+local datastore = require "datastore"
+local logger    = require "logger"</p>
+<p>function _M.new()
+    local self = setmetatable({}, _M)
+    self.dummy = "dummy"
+    return self, nil
+end</p>
+<p>function _M:init()
+    logger.log(ngx.NOTICE, "MYPLUGIN", "init called")
+    return true, "success"
+end</p>
+<p>function _M:access()
+    logger.log(ngx.NOTICE, "MYPLUGIN", "access called")
+    return true, "success", nil, nil
+end</p>
+<p>function _M:log()
+    logger.log(ngx.NOTICE, "MYPLUGIN", "log called")
+    return true, "success"
+end</p>
+<p>return _M
+```</p>
+<p>The 3 functions <code>init</code>, <code>access</code>, and <code>log</code> are automatically called during specific contexts. Here are the details of each function :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Function</th>
+<th align="center">Context</th>
+<th align="left">Description</th>
+<th align="left">Return value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>init</code></td>
+<td align="center"><a href="https://github.com/openresty/lua-nginx-module#init_by_lua">init_by_lua</a></td>
+<td align="left">Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.</td>
+<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
+</tr>
+<tr>
+<td align="center"><code>access</code></td>
+<td align="center"><a href="https://github.com/openresty/lua-nginx-module#access_by_lua">access_by_lua</a></td>
+<td align="left">Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.</td>
+<td align="left"><code>ret</code>, <code>err</code>, <code>return</code>, <code>status</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li><li><code>return</code> (boolean) : true if you want to stop the access phase and send a status to the client</li><li><code>status</code> (number) : the return value to set if <code>return</code> is set to true</li></ul></td>
+</tr>
+<tr>
+<td align="center"><code>log</code></td>
+<td align="center"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
+<td align="left">Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example.</td>
+<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
+</tr>
+</tbody>
+</table>
+<h4 id="libraries">Libraries</h4>
+<p>All directives from <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a> are available. On top of that, you can use the LUA libraries included within BunkerWeb : see <a href="https://github.com/bunkerity/bunkerweb/blob/master/deps/clone.sh">this script</a> for the complete list.</p>
+<p>If you need additional libraries, you can put them in the root folder of the plugin and access them by prefixing them with your plugin ID. Here is an example file named <strong>mylibrary.lua</strong> :</p>
+<p>```lua
+local _M = {}</p>
+<p>_M.dummy = function ()
+    return "dummy"
+end</p>
+<p>return _M
+```</p>
+<p>And here is how you can use it from the <strong>myplugin.lua</strong> file :</p>
+<p>```lua
+local mylibrary = require "myplugin.mylibrary"</p>
+<p>...</p>
+<p>mylibrary.dummy()</p>
+<p>...
+```</p>
+<h4 id="helpers">Helpers</h4>
+<p>Some helpers modules provide common helpful functions :</p>
 <ul>
-<li>Each matched rule will increase an anomaly score (so many rules can match a single request)</li>
-<li>PL1 include rules with fewer chances of false positives (but less security than PL4)</li>
-<li>the default threshold for anomaly score is 5 for requests and 4 for responses</li>
+<li><strong>datastore</strong> : access the global shared data (key/value store)</li>
+<li><strong>logger</strong> : generate logs</li>
+<li><strong>utils</strong> : various useful functions</li>
 </ul>
-<p>Let's take the following logs as an example of ModSecurity detection using default configuration (formatted for better readability) :</p>
-<div class="highlight"><pre><span></span><code>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `lfi-os-files.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf&quot;]
-    [line &quot;78&quot;]
-    [id &quot;930120&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;OS File Access Attempt&quot;]
-    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-multi&quot;]
-    [tag &quot;platform-multi&quot;]
-    [tag &quot;attack-lfi&quot;]
-    [tag &quot;paranoia-level/1&quot;]
-    [tag &quot;OWASP_CRS&quot;]
-    [tag &quot;capec/1000/255/153/126&quot;]
-    [tag &quot;PCI/6.5.4&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `unix-shell.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf&quot;]
-    [line &quot;480&quot;]
-    [id &quot;932160&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;Remote Command Execution: Unix Shell Code Found&quot;]
-    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-shell&quot;]
-    [tag &quot;platform-unix&quot;]
-    [tag &quot;attack-rce&quot;]
-    [tag &quot;paranoia-level/1&quot;]
-    [tag &quot;OWASP_CRS&quot;]
-    [tag &quot;capec/1000/152/248/88&quot;]
-    [tag &quot;PCI/6.5.2&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched &quot;Operator `Ge&#39; with parameter `5&#39; against variable `TX:ANOMALY_SCORE&#39; (Value: `10&#39; )
-    [file &quot;/opt/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf&quot;]
-    [line &quot;80&quot;]
-    [id &quot;949110&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;Inbound Anomaly Score Exceeded (Total Score: 10)&quot;]
-    [data &quot;&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-multi&quot;]
-    [tag &quot;platform-multi&quot;]
-    [tag &quot;attack-generic&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-</code></pre></div>
-<p>As we can see there are 3 different logs :</p>
-<ol>
-<li>Rule <strong>930120</strong> matched</li>
-<li>Rule <strong>932160</strong> matched</li>
-<li>Access denied (rule <strong>949110</strong>)</li>
-</ol>
-<p>One important thing to understand is that rule <strong>949110</strong> is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is <strong>10</strong> in this example). You should never remove the <strong>949110</strong> rule !</p>
-<p>If it's a false-positive you should then focus on both <strong>930120</strong> and <strong>932160</strong> rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info <a href="/quickstart-guide/#custom-configurations">here</a>).</p>
-<h2 id="bad-behavior">Bad Behavior</h2>
-<p>A common false-positive case is that the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="/security-tuning/#bad-behavior">here</a>). You should start by reviewing the settings and edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
-<h2 id="ip-unban">IP unban</h2>
-<p>You can manually unban an IP which can be useful when doing some tests but it needs the setting <code>USE_API</code> set to <code>yes</code> (which is not the default) so you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
+<p>To access the functions, you first need to <strong>require</strong> the module :</p>
+<p>```lua
+...</p>
+<p>local utils     = require "utils"
+local datastore = require "datastore"
+local logger    = require "logger"</p>
+<p>...
+```</p>
+<p>Retrieve a setting value :</p>
+<p><code>lua
+local value, err = utils:get_variable("DUMMY_SETTING")
+if not value then
+    logger.log(ngx.ERR, "MYPLUGIN", "can't retrieve setting DUMMY_SETTING : " .. err)
+else
+    logger.log(ngx.NOTICE, "MYPLUGIN", "DUMMY_SETTING = " .. value)
+end</code></p>
+<p>Store something in the cache :</p>
+<p><code>lua
+local ok, err = datastore:set("plugin_myplugin_something", "somevalue")
+if not value then
+    logger.log(ngx.ERR, "MYPLUGIN", "can't save plugin_myplugin_something into datastore : " .. err)
+else
+    logger.log(ngx.NOTICE, "MYPLUGIN", "successfully saved plugin_myplugin_something into datastore into datastore")
+end</code></p>
+<p>Check if an IP address is global :</p>
+<p><code>lua
+local ret, err = utils.ip_is_global(ngx.var.remote_addr)
+if ret == nil then
+    logger.log(ngx.ERR, "MYPLUGIN", "error while checking if IP " .. ngx.var.remote_addr .. " is global or not : " .. err)
+elseif not ret then
+    logger.log(ngx.NOTICE, "MYPLUGIN", "IP " .. ngx.var.remote_addr .. " is not global")
+else
+    logger.log(ngx.NOTICE, "MYPLUGIN", "IP " .. ngx.var.remote_addr .. " is global")
+end</code></p>
+<div class="admonition tip">
+<p class="admonition-title">More examples</p>
+<p>If you want to see the full list of available functions, you can have a look at the files present in the <a href="https://github.com/bunkerity/bunkerweb/tree/master/lua">lua directory</a> of the repository.</p>
 </div>
-<div class="tabbed-block">
-<p>You can use the <code>docker exec</code> command (replace <code>mya</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose <span class="nb">exec</span> mybunker bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your service) :
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> <span class="k">$(</span>docker ps -q -f <span class="nv">name</span><span class="o">=</span>myautoconf<span class="k">)</span> bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>You can use the <code>kubectl exec</code> command (replace <code>myautoconf</code> with the name of your pod) :
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> myautoconf bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>You can use the <code>bwcli</code> command :
-<div class="highlight"><pre><span></span><code>bwcli unban <span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-</div>
-</div>
-<h2 id="whitelisting">Whitelisting</h2>
-<p>If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist it using the <a href="/security-tuning/#blacklisting-and-whitelisting">whitelisting feature</a>. We don't recommend using the <code>WHITELIST_URI*</code> or <code>WHITELIST_USER_AGENT*</code> settings unless they are set to secret and unpredictable values. Common use cases are :</p>
-<ul>
-<li>Healthcheck / status bot</li>
-<li>Callback like IPN or webhook</li>
-<li>Social media crawler</li>
-</ul>
+<h3 id="jobs">Jobs</h3>
+<p>BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named <strong>jobs</strong> and listing them in the <strong>plugin.json</strong> metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.</p>
 
               
             </article>
@@ -848,7 +1116,7 @@ cat /var/log/nginx/access.log
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../web-ui/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Web UI" rel="prev">
+        <a href="../troubleshooting/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Troubleshooting" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -857,20 +1125,20 @@ cat /var/log/nginx/access.log
               <span class="md-footer__direction">
                 Previous
               </span>
-              Web UI
+              Troubleshooting
             </div>
           </div>
         </a>
       
       
         
-        <a href="../plugins/" class="md-footer__link md-footer__link--next" aria-label="Next: Plugins" rel="next">
+        <a href="../about/" class="md-footer__link md-footer__link--next" aria-label="Next: About" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Plugins
+              About
             </div>
           </div>
           <div class="md-footer__button md-icon">

@@ -445,8 +445,15 @@ documentation for the current version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#changed-authelia-support" class="md-nav__link">
+    Changed Authelia support
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#replaced-block_-whitelist_-and-blacklist_-settings" class="md-nav__link">
-    Replaced BLOCK_, WHITELIST_ and BLACKLIST_* settings
+    Replaced BLOCK_*, WHITELIST_* and BLACKLIST_* settings
   </a>
   
 </li>
@@ -636,25 +643,26 @@ documentation for the current version.
 <h1 id="migrating-from-bunkerized">Migrating from bunkerized</h1>
 <div class="admonition warning">
 <p class="admonition-title">Read this if you were a bunkerized user</p>
-<p>A lot of things have changed since the last bunkerized release. If you want to an upgrade, which we recommend you to do because BunkerWeb is by far better than bunkerized, please read carefully this section and also the whole documentation.</p>
+<p>A lot of things have changed since the last bunkerized release. If you want to do an upgrade, which we recommend you to do because BunkerWeb is by far better than bunkerized, please read carefully this section and also the whole documentation.</p>
 </div>
 <h2 id="volumes">Volumes</h2>
-<p>When using container-based integrations like <a href="/integrations/#docker">Docker</a>, <a href="/integrations/#docker-autoconf">Docker autoconf</a>, <a href="/integrations/#swarm">Swarm</a> or <a href="/integrations/#kubernetes">Kubernetes</a>, volumes for storing data like certificates, cache or custom configurations has changed. We now have a single "bw-data" volume which contains everything and should be easier to manage than bunkerized.</p>
+<p>When using container-based integrations like <a href="/1.4/integrations/#docker">Docker</a>, <a href="/1.4/integrations/#docker-autoconf">Docker autoconf</a>, <a href="/1.4/integrations/#swarm">Swarm</a> or <a href="/1.4/integrations/#kubernetes">Kubernetes</a>, volumes for storing data like certificates, cache or custom configurations has changed. We now have a single "bw-data" volume which contains everything and should be easier to manage than bunkerized.</p>
 <h2 id="removed-features">Removed features</h2>
 <p>We decided to drop the following features :</p>
 <ul>
-<li>Authelia : we will make an official <a href="/plugins">plugin</a> for that</li>
 <li>Blocking "bad" referrers : we may add it again in the future</li>
 <li>ROOT_SITE_SUBFOLDER : we will need to redesign this in the future</li>
 </ul>
-<h2 id="replaced-block_-whitelist_-and-blacklist_-settings">Replaced BLOCK_<em>, WHITELIST_</em> and BLACKLIST_* settings</h2>
-<p>The blocking mechanisms has been completely redesigned. We have detected that a lot of false positives came from the default blacklists hardcoded into bunkerized. That's why we decided to give the users the choice of their blacklists (and also whitelists) for IP address, reverse DNS, user-agent, URI and ASN, see the <a href="/security-tuning/#blacklisting-and-whitelisting">Blacklisting and whitelisting</a> section of the <a href="/security-tuning">security tuning</a>.</p>
+<h2 id="changed-authelia-support">Changed Authelia support</h2>
+<p>Instead of supporting only Authelia, we decided to support generic auth request settings. See the new <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples/authelia">authelia example</a> and <a href="https://docs.bunkerweb.io/1.4/security-tuning/#auth-request">auth request documentation</a> for more information.</p>
+<h2 id="replaced-block_-whitelist_-and-blacklist_-settings">Replaced BLOCK_*, WHITELIST_* and BLACKLIST_* settings</h2>
+<p>The blocking mechanisms has been completely redesigned. We have detected that a lot of false positives came from the default blacklists hardcoded into bunkerized. That's why we decided to give the users the choice of their blacklists (and also whitelists) for IP address, reverse DNS, user-agent, URI and ASN, see the <a href="/1.4/security-tuning/#blacklisting-and-whitelisting">Blacklisting and whitelisting</a> section of the <a href="/1.4/security-tuning">security tuning</a>.</p>
 <h2 id="changed-whitelist_user_agent-setting-behavior">Changed WHITELIST_USER_AGENT setting behavior</h2>
 <p>The new behavior of the WHITELIST_USER_AGENT setting is to <strong>disable completely security checks</strong> if the User-Agent value of a client match any of the patterns. In bunkerized it was used to ignore specific User-Agent values when <code>BLOCK_USER_AGENT</code> was set to <code>yes</code> to avoid false positives. You can choose the blacklist of your choice to avoid FP (see previous section).</p>
 <h2 id="changed-proxy_real_ip_-settings">Changed PROXY_REAL_IP_* settings</h2>
-<p>To avoid any confusion between reverse proxy and real IP, we decided to renamed the <code>PROXY_REAL_IP_*</code> settings, you will find more information on the subject <a href="/quickstart-guide/#behind-load-balancer-or-reverse-proxy">here</a>.</p>
+<p>To avoid any confusion between reverse proxy and real IP, we decided to renamed the <code>PROXY_REAL_IP_*</code> settings, you will find more information on the subject <a href="/1.4/quickstart-guide/#behind-load-balancer-or-reverse-proxy">here</a>.</p>
 <h2 id="default-values-and-new-settings">Default values and new settings</h2>
-<p>The default value of settings may have changed and we have added many other settings, we recommend you to read the <a href="/security-tuning">security tuning</a> and <a href="/settings">settings</a> sections of the documentation.</p>
+<p>The default value of settings may have changed and we have added many other settings, we recommend you to read the <a href="/1.4/security-tuning">security tuning</a> and <a href="/1.4/settings">settings</a> sections of the documentation.</p>
 
               
             </article>

@@ -627,16 +627,16 @@ documentation for the current version.
 <p>The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of the goals of BunkerWeb is to integrate seamlessly into existing environments.</p>
 <p>The following integrations are officially supported :</p>
 <ul>
-<li><a href="/integrations/#docker">Docker</a></li>
-<li><a href="/integrations/#docker-autoconf">Docker autoconf</a></li>
-<li><a href="/integrations/#swarm">Swarm</a></li>
-<li><a href="/integrations/#kubernetes">Kubernetes</a></li>
-<li><a href="/integrations/#linux">Linux</a></li>
+<li><a href="/1.4/integrations/#docker">Docker</a></li>
+<li><a href="/1.4/integrations/#docker-autoconf">Docker autoconf</a></li>
+<li><a href="/1.4/integrations/#swarm">Swarm</a></li>
+<li><a href="/1.4/integrations/#kubernetes">Kubernetes</a></li>
+<li><a href="/1.4/integrations/#linux">Linux</a></li>
 </ul>
 <p>If you think that a new integration should be supported, do not hesitate to open a <a href="https://github.com/bunkerity/bunkerweb/issues">new issue</a> on the GitHub repository.</p>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>The technical details of all BunkerWeb integrations are available in the <a href="/integrations">integrations section</a> of the documentation.</p>
+<p>The technical details of all BunkerWeb integrations are available in the <a href="/1.4/integrations">integrations section</a> of the documentation.</p>
 </div>
 <h2 id="settings">Settings</h2>
 <p>Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.</p>
@@ -652,7 +652,7 @@ USE_BROTLI=no
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>The complete list of available settings with descriptions and possible values is available in the <a href="/settings">settings section</a> of the documentation.</p>
+<p>The complete list of available settings with descriptions and possible values is available in the <a href="/1.4/settings">settings section</a> of the documentation.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Settings generator tool</p>
@@ -678,15 +678,15 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of multisite mode in the <a href="/quickstart-guide">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of multisite mode in the <a href="/1.4/quickstart-guide">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="custom-configurations">Custom configurations</h2>
-<p>Because meeting all the use cases only using the settings is not an option (even with <a href="/plugins">external plugins</a>), you can use custom configurations to solve your specific challenges.</p>
+<p>Because meeting all the use cases only using the settings is not an option (even with <a href="/1.4/plugins">external plugins</a>), you can use custom configurations to solve your specific challenges.</p>
 <p>Under the hood, BunkerWeb uses the notorious NGINX web server, that's why you can leverage its configuration system for your specific needs. Custom NGINX configurations can be included in different <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">contexts</a> like HTTP or server (all servers and/or specific server block).</p>
 <p>Another core component of BunkerWeb is the ModSecurity Web Application Firewall : you can also use custom configurations to fix some false positives or add custom rules for example.</p>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of custom configurations in the <a href="/quickstart-guide">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of custom configurations in the <a href="/1.4/quickstart-guide">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples</a> directory of the repository.</p>
 </div>
 
               

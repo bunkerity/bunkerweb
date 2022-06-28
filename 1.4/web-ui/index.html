@@ -641,12 +641,12 @@ documentation for the current version.
 <li>Choose a strong password for the login</li>
 <li>Put the web UI under a "hard to guess" URI</li>
 <li>Do not open the web UI on the Internet without any further restrictions</li>
-<li>Apply settings listed in the <a href="/security-tuning/">security tuning section</a> of the documentation</li>
+<li>Apply settings listed in the <a href="/1.4/security-tuning/">security tuning section</a> of the documentation</li>
 </ul>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Multisite mode</p>
-<p>The installation of the web UI implies enabling the <a href="/concepts/#multisite-mode">multisite mode</a>.</p>
+<p>The installation of the web UI implies enabling the <a href="/1.4/concepts/#multisite-mode">multisite mode</a>.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">UI specific env variables</p>
@@ -658,7 +658,7 @@ documentation for the current version.
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker">Docker integration</a>, we recommend you to connect the BunkerWeb and web UI using a dedicated network and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">bunkerweb-ui image</a>.</p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, we recommend you to connect the BunkerWeb and web UI using a dedicated network and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">bunkerweb-ui image</a>.</p>
 <p>Let's start by creating the networks (replace 10.20.30.0/24 with an unused network of your choice) :
 <div class="highlight"><pre><span></span><code>docker network create --subnet <span class="m">10</span>.20.30.0/24 bw-ui <span class="o">&amp;&amp;</span> <span class="se">\</span>
 docker network create bw-services
@@ -685,7 +685,7 @@ docker volume create bw-confs
    -e <span class="s2">&quot;bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme&quot;</span> <span class="se">\</span>
    -e bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS<span class="o">=</span>no <span class="se">\</span>
    -l bunkerweb.UI <span class="se">\</span>
-   bunkerity/bunkerweb:1.4.0 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+   bunkerity/bunkerweb:1.4.1 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 docker network connect bw-ui mybunker
 </code></pre></div></p>
 <p>Important things to note :</p>
@@ -717,7 +717,7 @@ docker network connect bw-ui mybunker
        -e <span class="nv">ADMIN_USERNAME</span><span class="o">=</span>admin <span class="se">\</span>
        -e <span class="nv">ADMIN_PASSWORD</span><span class="o">=</span>changeme <span class="se">\</span>
        -e <span class="nv">ABSOLUTE_URI</span><span class="o">=</span>http<span class="o">(</span>s<span class="o">)</span>://bwadm.example.com/changeme/
-       bunkerity/bunkerweb-ui:1.4.0 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+       bunkerity/bunkerweb-ui:1.4.1 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 docker network connect bw-docker myui
 </code></pre></div></p>
 <p>Important things to note :</p>
@@ -731,7 +731,7 @@ docker network connect bw-docker myui
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-ui</span><span class="w"></span>
@@ -754,7 +754,7 @@ docker network connect bw-docker myui
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.UI&quot;</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">myui</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.4.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.4.1</span><span class="w"></span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mydocker</span><span class="w"></span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
@@ -791,7 +791,7 @@ docker network connect bw-docker myui
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>The installation of the web UI using the <a href="/integrations/#linux">Linux integration</a> is pretty straightforward because it is installed with BunkerWeb.</p>
+<p>The installation of the web UI using the <a href="/1.4/integrations/#linux">Linux integration</a> is pretty straightforward because it is installed with BunkerWeb.</p>
 <p>The first thing to do is to edit the BunkerWeb configuration located at <strong>/opt/bunkerweb/variables.env</strong> to add settings related to the web UI :
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443

@@ -700,6 +700,26 @@ documentation for the current version.
     Authentication
   </a>
   
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auth-basic" class="md-nav__link">
+    Auth basic
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auth-request" class="md-nav__link">
+    Auth request
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -804,10 +824,10 @@ documentation for the current version.
 
 
 <h1 id="security-tuning">Security tuning</h1>
-<p>BunkerWeb offers many security features that you can configure with <a href="/settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.</p>
+<p>BunkerWeb offers many security features that you can configure with <a href="/1.4/settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.</p>
 <div class="admonition tip">
 <p class="admonition-title">Other settings</p>
-<p>This section only focuses on security tuning, see the <a href="/settings">settings section</a> of the documentation for other settings.</p>
+<p>This section only focuses on security tuning, see the <a href="/1.4/settings">settings section</a> of the documentation for other settings.</p>
 </div>
 <h2 id="http-protocol">HTTP protocol</h2>
 <h3 id="default-server">Default server</h3>
@@ -1033,7 +1053,7 @@ documentation for the current version.
 </tbody>
 </table>
 <p>We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).</p>
-<p>Tuning ModSecurity and the CRS can be done using <a href="/quickstart-guide/#custom-configurations">custom configurations</a> :</p>
+<p>Tuning ModSecurity and the CRS can be done using <a href="/1.4/quickstart-guide/#custom-configurations">custom configurations</a> :</p>
 <ul>
 <li>modsec-crs : before the OWASP Core Rule Set is loaded</li>
 <li>modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)</li>
@@ -1408,6 +1428,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <p>Using both country blacklist and whitelist at the same time makes no sense. If you do please note that only the whitelist will be executed.</p>
 <h2 id="authentication">Authentication</h2>
+<h3 id="auth-basic">Auth basic</h3>
 <p>You can quickly protect sensitive resources like the admin area for example by requiring HTTP basic authentication. Here is the list of related settings :</p>
 <table>
 <thead>
@@ -1429,19 +1450,56 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td align="left">Location (URL) of the sensitive resource. Use special value <code>sitewide</code> to enable everywhere.</td>
 </tr>
 <tr>
-<td align="center"><code>USE_AUTH_BASIC_USER</code></td>
+<td align="center"><code>AUTH_BASIC_USER</code></td>
 <td align="center"><code>changeme</code></td>
 <td align="left">The username required.</td>
 </tr>
 <tr>
-<td align="center"><code>USE_AUTH_BASIC_PASSWORD</code></td>
+<td align="center"><code>AUTH_BASIC_PASSWORD</code></td>
 <td align="center"><code>changeme</code></td>
 <td align="left">The password required.</td>
 </tr>
 <tr>
-<td align="center"><code>USE_AUTH_BASIC_TEXT</code></td>
+<td align="center"><code>AUTH_BASIC_TEXT</code></td>
 <td align="center"><code>Restricted area</code></td>
 <td align="left">Text to display in the auth prompt.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auth-request">Auth request</h3>
+<p>You can deploy complex authentification (e.g. SSO), by using the auth request settings (see <a href="https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/">here</a> for more information on the feature). Please note that you will find <a href="https://www.authelia.com/">Authelia</a> and <a href="https://goauthentik.io/">Authentik</a> examples in the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">repository</a>.</p>
+<p><strong>Auth request settings are related to reverse proxy rules.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REVERSE_PROXY_AUTH_REQUEST</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Enable authentication using an external provider (value of auth_request directive).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_AUTH_REQUEST_SET</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).</td>
 </tr>
 </tbody>
 </table>

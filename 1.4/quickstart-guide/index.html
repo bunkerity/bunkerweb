@@ -655,7 +655,7 @@ documentation for the current version.
 <h1 id="quickstart-guide">Quickstart guide</h1>
 <div class="admonition info">
 <p class="admonition-title">Prerequisites</p>
-<p>We assume that you're already familiar with the <a href="/concepts">core concepts</a> and you have followed the <a href="/integrations">integrations instructions</a> for your environment.</p>
+<p>We assume that you're already familiar with the <a href="/1.4/concepts">core concepts</a> and you have followed the <a href="/1.4/integrations">integrations instructions</a> for your environment.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Going further<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">examples folder</a> of the repository to get real-world examples.</p>
@@ -669,7 +669,7 @@ documentation for the current version.
 <li><code>REVERSE_PROXY_URL</code> : the public path prefix</li>
 <li><code>REVERSE_PROXY_HOST</code> : (internal) address of the proxied web application</li>
 </ul>
-<p>You will find more settings about reverse proxy in the <a href="/settings/#reverse-proxy">settings section</a> of the documentation.</p>
+<p>You will find more settings about reverse proxy in the <a href="/1.4/settings/#reverse-proxy">settings section</a> of the documentation.</p>
 <h3 id="single-application">Single application</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
@@ -698,7 +698,7 @@ documentation for the current version.
        -e <span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_URL</span><span class="o">=</span>/ <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_HOST</span><span class="o">=</span>http://myapp <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -706,7 +706,7 @@ documentation for the current version.
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -733,7 +733,7 @@ documentation for the current version.
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
 <p>You can instantiate your container and pass the settings as labels :
 <div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
        --name myapp <span class="se">\</span>
@@ -768,7 +768,7 @@ documentation for the current version.
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
 <p>You can instantiate your service and pass the settings as labels :
 <div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
    create <span class="se">\</span>
@@ -808,7 +808,7 @@ documentation for the current version.
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
 <p>Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster :
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
@@ -866,7 +866,7 @@ documentation for the current version.
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#linux">Linux integration</a> stack running on your machine.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
 <p>The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
 <div class="highlight"><pre><span></span><code>python3 -m http.server -b <span class="m">127</span>.0.0.1
 </code></pre></div></p>
@@ -947,7 +947,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
        -e app1.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp1 <span class="se">\</span>
        -e app2.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp2 <span class="se">\</span>
        -e app3.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp3 <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -955,7 +955,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -996,7 +996,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack running on your machine and connected to a network called bw-services.</p>
 <p>You can instantiate your containers and pass the settings as labels :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">App #1</label><label for="__tabbed_4_2">App #2</label><label for="__tabbed_4_3">App #3</label></div>
 <div class="tabbed-content">
@@ -1103,7 +1103,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 </div>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack running on your cluster.</p>
 <p>You can instantiate your services and pass the settings as labels :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">App #1</label><label for="__tabbed_5_2">App #2</label><label for="__tabbed_5_3">App #3</label></div>
 <div class="tabbed-content">
@@ -1225,7 +1225,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 </div>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a> stack running on your cluster.</p>
 <p>Let's also assume that you have some typical Deployments with Services to access the web applications from within the cluster :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">App #1</label><label for="__tabbed_6_2">App #2</label><label for="__tabbed_6_3">App #3</label></div>
 <div class="tabbed-content">
@@ -1381,7 +1381,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have the <a href="/integrations/#linux">Linux integration</a> stack running on your machine.</p>
+<p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
 <p>Let's assume that you have some web applications running on the same machine as BunkerWeb :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">App #1</label><label for="__tabbed_7_2">App #2</label><label for="__tabbed_7_3">App #3</label></div>
 <div class="tabbed-content">
@@ -1439,7 +1439,7 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <li><code>REAL_IP_FROM</code> : list of trusted IP/network address allowed to send us the "real IP"</li>
 <li><code>REAL_IP_HEADER</code> : the HTTP header containing the real IP or special value "proxy_protocol" when using PROXY protocol</li>
 </ul>
-<p>You will find more settings about real IP in the <a href="/settings/#real-ip">settings section</a> of the documentation.</p>
+<p>You will find more settings about real IP in the <a href="/1.4/settings/#real-ip">settings section</a> of the documentation.</p>
 <h3 id="http-header">HTTP header</h3>
 <p>We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :</p>
 <ul>
@@ -1461,11 +1461,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1475,18 +1475,18 @@ REAL_IP_HEADER=X-Forwarded-For
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
+<p>Before running the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
 <div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
        ...
        -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1496,18 +1496,18 @@ REAL_IP_HEADER=X-Forwarded-For
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
+<p>Before running the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
 <div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
        ...
        -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1530,7 +1530,7 @@ REAL_IP_HEADER=X-Forwarded-For
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
@@ -1577,11 +1577,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1592,7 +1592,7 @@ REAL_IP_HEADER=proxy_protocol
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
+<p>Before running the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a> stack, you will need to add the settings for the BunkerWeb container :
 <div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
        ...
        -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
@@ -1600,11 +1600,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1615,7 +1615,7 @@ REAL_IP_HEADER=proxy_protocol
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>Before running the <a href="/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
+<p>Before running the <a href="/1.4/integrations/#swarm">Swarm integration</a> stack, you will need to add the settings for the BunkerWeb service :
 <div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
        ...
        -e <span class="nv">USE_REAL_IP</span><span class="o">=</span>yes <span class="se">\</span>
@@ -1623,11 +1623,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1651,7 +1651,7 @@ REAL_IP_HEADER=proxy_protocol
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
@@ -1679,7 +1679,7 @@ REAL_IP_HEADER=proxy_protocol
 </div>
 </div>
 <h2 id="custom-configurations">Custom configurations</h2>
-<p>Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info <a href="/security-tuning/#modsecurity">here</a>). Here is the list of custom configurations types :</p>
+<p>Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info <a href="/1.4/security-tuning/#modsecurity">here</a>). Here is the list of custom configurations types :</p>
 <ul>
 <li><strong>http</strong> : http level of NGINX</li>
 <li><strong>server-http</strong> : server level of NGINX</li>
@@ -1693,7 +1693,7 @@ REAL_IP_HEADER=proxy_protocol
 <div class="tabbed-set tabbed-alternate" data-tabs="10:5"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><input id="__tabbed_10_5" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Docker</label><label for="__tabbed_10_2">Docker autoconf</label><label for="__tabbed_10_3">Swarm</label><label for="__tabbed_10_4">Kubernetes</label><label for="__tabbed_10_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker">Docker integration</a>, custom configurations must be written to the volume mounted on /data.</p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, custom configurations must be written to the volume mounted on /data.</p>
 <p>The first thing to do is to create the folders :
 <div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/configs/server-http
 </code></pre></div></p>
@@ -1714,18 +1714,18 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, custom configurations must be written to the volume mounted on /data.</p>
+<p>When using the <a href="/1.4/integrations/#docker-autoconf">Docker autoconf integration</a>, custom configurations must be written to the volume mounted on /data.</p>
 <p>The first thing to do is to create the folders :
 <div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/configs/server-http
 </code></pre></div></p>
@@ -1746,18 +1746,18 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.0
+       bunkerity/bunkerweb:1.4.1
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.0</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.1</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#swarm">Swarm integration</a>, custom configurations are managed using <a href="https://docs.docker.com/engine/swarm/configs/">Docker Configs</a>.</p>
+<p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, custom configurations are managed using <a href="https://docs.docker.com/engine/swarm/configs/">Docker Configs</a>.</p>
 <p>To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.</p>
 <p>When creating a Config you will need to add special labels :</p>
 <ul>
@@ -1775,7 +1775,7 @@ chmod -R <span class="m">770</span> bw-data
 <p>There is no update mechanism : the alternative is to remove an existing config using <code>docker config rm</code> and then recreate it.</p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
+<p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
 <p>To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.</p>
 <p>When creating a ConfigMap you will need to add special labels :</p>
 <ul>
@@ -1800,7 +1800,7 @@ chmod -R <span class="m">770</span> bw-data
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#linux">Linux integration</a>, custom configurations must be written to the /opt/bunkerweb/configs folder.</p>
+<p>When using the <a href="/1.4/integrations/#linux">Linux integration</a>, custom configurations must be written to the /opt/bunkerweb/configs folder.</p>
 <p>Here is an example for server-http/hello-world.conf :
 <div class="highlight"><pre><span></span><code>location /hello {
     default_type &#39;text/plain&#39;;
