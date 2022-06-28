@@ -1,0 +1,87 @@
+version: '3'
+
+services:
+
+  mybunker:
+    image: bw
+    ports:
+      - 80:8080
+      - 443:8443
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
+    volumes:
+      - bw_data:/data
+    environment:
+      - SERVER_NAME=www.example.com # replace with your domain
+      - AUTO_LETS_ENCRYPT=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - SERVE_FILES=no
+      - MAX_CLIENT_SIZE=50m
+      - ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL_1=/
+      - REVERSE_PROXY_HOST_1=http://mattermost:8065
+      - REVERSE_PROXY_URL_2=~ /api/v[0-9]+/(users/)?websocket$$
+      - REVERSE_PROXY_WS_2=yes
+
+  mattermost:
+    depends_on:
+      - postgres
+    image: mattermost/${MATTERMOST_IMAGE}:${MATTERMOST_IMAGE_TAG}
+    restart: ${RESTART_POLICY}
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    read_only: ${MATTERMOST_CONTAINER_READONLY}
+    tmpfs:
+      - /tmp
+    volumes:
+      - ${MATTERMOST_CONFIG_PATH}:/mattermost/config:rw
+      - ${MATTERMOST_DATA_PATH}:/mattermost/data:rw
+      - ${MATTERMOST_LOGS_PATH}:/mattermost/logs:rw
+      - ${MATTERMOST_PLUGINS_PATH}:/mattermost/plugins:rw
+      - ${MATTERMOST_CLIENT_PLUGINS_PATH}:/mattermost/client/plugins:rw
+      - ${MATTERMOST_BLEVE_INDEXES_PATH}:/mattermost/bleve-indexes:rw
+      # When you want to use SSO with GitLab, you have to add the cert pki chain of GitLab inside Alpine
+      # to avoid Token request failed: certificate signed by unknown authority 
+      # (link: https://github.com/mattermost/mattermost-server/issues/13059 and https://github.com/mattermost/docker/issues/34)
+      # - ${GITLAB_PKI_CHAIN_PATH}:/etc/ssl/certs/pki_chain.pem:ro
+    environment:
+      # timezone inside container
+      - TZ
+      # necessary Mattermost options/variables (see env.example)
+      - MM_SQLSETTINGS_DRIVERNAME
+      - MM_SQLSETTINGS_DATASOURCE
+      # necessary for bleve
+      - MM_BLEVESETTINGS_INDEXDIR
+      # additional settings
+      - MM_SERVICESETTINGS_SITEURL
+
+  postgres:
+    image: postgres:${POSTGRES_IMAGE_TAG}
+    restart: ${RESTART_POLICY}
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 100
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    volumes:
+      - ${POSTGRES_DATA_PATH}:/var/lib/postgresql/data
+    environment:
+      # timezone inside container
+      - TZ
+      # necessary Postgres options/variables
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+
+volumes:
+  bw_data:

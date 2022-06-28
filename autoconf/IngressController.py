@@ -1,6 +1,6 @@
 from traceback import format_exc
 from kubernetes import client, config, watch
-from client.exceptions import ApiException
+from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
 from logger import log
 from sys import exit
