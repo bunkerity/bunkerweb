@@ -72,18 +72,6 @@ class DockerController(Controller, ConfigCaller) :
         configs = {}
         for config_type in self._supported_config_types :
             configs[config_type] = {}
-        # get non-site configs from disk
-        global_configs = {
-            "http": glob("/data/configs/http/*.conf"),
-            "default-server-http": glob("/data/configs/default-server-http/*.conf"),
-            "server-http": glob("/data/configs/server-http/*.conf"),
-            "modsec": glob("/data/configs/modsec/*.conf"),
-            "modsec-crs": glob("/data/configs/modsec-crs/*.conf")
-        }
-        for config_type, config_paths in global_configs.items() :
-            for config_path in config_paths :
-                with open(config_path) as f :
-                configs[config_type][basename(config_path)] = f.read()
         # get site configs from labels
         for container in self.__client.containers.list(filters={"label" : "bunkerweb.SERVER_NAME"}) :
             # extract server_name
