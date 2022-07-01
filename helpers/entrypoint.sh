@@ -46,24 +46,28 @@ fi
 
 if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
 	# extract and drop configs
-	for var_name in $(compgen -v) ; do
-		extracted=$(echo "$var_name" | | sed -r 's/^([a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
+	for var_name in $(compgen -e) ; do
+		extracted=$(echo "$var_name" | sed -r 's/^([a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
 		site=$(echo "$extracted" | cut -d ' ' -f 1)
-		type=$(echo "$extracted" | cut -d ' ' -f 2 | tr '[:upper:]' '[:lower:]' | sed 's/_/-/')
+		type=$(echo "$extracted" | cut -d ' ' -f 2 | grep -E '(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)' | tr '[:upper:]' '[:lower:]' | sed 's/_/-/')
 		name=$(echo "$extracted" | cut -d ' ' -f 3)
-		if [ "$type" = "" ] ; then
+		if [ "$type" = "" ] || [ "$name" = "" ] ; then
 			continue
 		fi
+		target="/data/configs/${type}/"
 		if [ "$site" != "" ] && [ ! -d "/data/configs/${type}/${site}" ] ; then
-			mkdir "/data/configs/${type}/${site}"
+			target="${target}/${site}/"
+			mkdir "$target"
 		fi
-		echo "${!var_name}" > "/data/configs/${type}/${site}/${name}.conf"
+		target="${target}${name}.conf"
+		log "ENTRYPOINT" "ℹ️" "Saving custom config to $target ..."
+		echo "${!var_name}" > "$target"
 	done
 
 	# execute temp nginx with no server
 	export TEMP_NGINX="yes"
 	log "ENTRYPOINT" "ℹ️" "Generating configuration for temp nginx ..."
-	env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "/tmp/variables.env"
+	get_env > "/tmp/variables.env"
 	/opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env
 	if [ "$?" -ne 0 ] ; then
 		log "ENTRYPOINT" "❌" "Generator failed"
@@ -95,7 +99,7 @@ log "ENTRYPOINT" "ℹ️" "Generating configuration ..."
 if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] || [ "$AUTOCONF_MODE" = "yes" ] ; then
 	export SERVER_NAME=
 fi
-env | grep -E -v "^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME)=" > "/tmp/variables.env"
+get_env > "/tmp/variables.env"
 /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env
 if [ "$?" -ne 0 ] ; then
 	log "ENTRYPOINT" "❌" "Generator failed"

@@ -93,7 +93,11 @@ volumes:
 !!! warning
     BunkerWeb runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is the security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
     But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
-    `shell mkdir bw-data && \ chown root:101 bw-data && \ chmod 770 bw-data `
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
 
 Alternatively, if the folder already exists :
 

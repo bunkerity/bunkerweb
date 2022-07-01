@@ -51,3 +51,12 @@ function log() {
 	echo "$when $category - $severity - $message"
 }
 
+# get only interesting env (var=value)
+function get_env() {
+for var_name in $(compgen -e) ; do
+	filter=$(echo -n "$var_name" | sed -r 's/^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME|([a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*))$//g')
+	if [ "$filter" != "" ] ; then
+		echo "${var_name}=${!var_name}"
+	fi
+done
+}
