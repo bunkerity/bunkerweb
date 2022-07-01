@@ -45,6 +45,21 @@ if [ -f /opt/bunkerweb/tmp/scheduler.pid ] ; then
 fi
 
 if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
+	# extract and drop configs
+	for var_name in $(compgen -v) ; do
+		extracted=$(echo "$var_name" | | sed -r 's/^([a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
+		site=$(echo "$extracted" | cut -d ' ' -f 1)
+		type=$(echo "$extracted" | cut -d ' ' -f 2 | tr '[:upper:]' '[:lower:]' | sed 's/_/-/')
+		name=$(echo "$extracted" | cut -d ' ' -f 3)
+		if [ "$type" = "" ] ; then
+			continue
+		fi
+		if [ "$site" != "" ] && [ ! -d "/data/configs/${type}/${site}" ] ; then
+			mkdir "/data/configs/${type}/${site}"
+		fi
+		echo "${!var_name}" > "/data/configs/${type}/${site}/${name}.conf"
+	done
+
 	# execute temp nginx with no server
 	export TEMP_NGINX="yes"
 	log "ENTRYPOINT" "ℹ️" "Generating configuration for temp nginx ..."
