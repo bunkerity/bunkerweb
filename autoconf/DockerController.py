@@ -1,6 +1,9 @@
 import traceback
 
 from docker import DockerClient
+from glob import glob
+from os.path import basename
+from re import search
 
 from Controller import Controller
 from ConfigCaller import ConfigCaller
@@ -66,7 +69,46 @@ class DockerController(Controller, ConfigCaller) :
         return services
 
     def get_configs(self) :
-        raise("get_configs is not supported with DockerController")
+        configs = {}
+        for config_type in self._supported_config_types :
+            configs[config_type] = {}
+        # get non-site configs from disk
+        global_configs = {
+            "http": glob("/data/configs/http/*.conf"),
+            "default-server-http": glob("/data/configs/default-server-http/*.conf"),
+            "server-http": glob("/data/configs/server-http/*.conf"),
+            "modsec": glob("/data/configs/modsec/*.conf"),
+            "modsec-crs": glob("/data/configs/modsec-crs/*.conf")
+        }
+        for config_type, config_paths in global_configs.items() :
+            for config_path in config_paths :
+                with open(config_path) as f :
+                configs[config_type][basename(config_path)] = f.read()
+        # get site configs from labels
+        for container in self.__client.containers.list(filters={"label" : "bunkerweb.SERVER_NAME"}) :
+            # extract server_name
+            server_name = ""
+            for variable, value in controller_service.labels.items() :
+                if not variable.startswith("bunkerweb.") :
+                    continue
+                real_variable = variable.replace("bunkerweb.", "", 1)
+                if real_variable == "SERVER_NAME" :
+                    server_name = value.split(" ")[0]
+                    break
+            # extract configs
+            if server_name == "" :
+                continue
+            for variable, value in controller_service.labels.items() :
+                if not variable.startswith("bunkerweb.") :
+                    continue
+                real_variable = variable.replace("bunkerweb.", "", 1)
+                result = search(r"^CUSTOM_CONF_(SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$ ", real_variable)
+                if result is None :
+                    continue
+                type = result.group(1).lower().replace("_", "-")
+                name = result.group(2)
+                configs[type][server_name + "/" + name] = value
+        return configs
 
     def apply_config(self) :
         self._config.stop_scheduler()
@@ -78,7 +120,8 @@ class DockerController(Controller, ConfigCaller) :
         for event in self.__client.events(decode=True, filters={"type": "container"}) :
             self._instances = self.get_instances()
             self._services = self.get_services()
-            if not self._config.update_needed(self._instances, self._services) :
+            self._configs = self.get_configs()
+            if not self._config.update_needed(self._instances, self._services, configs=self._configs) :
                 continue
             log("DOCKER-CONTROLLER", "ℹ️", "Catched docker event, deploying new configuration ...")
             try :

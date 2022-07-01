@@ -1219,8 +1219,8 @@ Some integrations offer a more convenient way of applying configurations for exa
 
     **Using labels**
 
-    !!! info "Limitations using labels"
-        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http** and any global configurations is not possible.
+    !!! warning "Limitations using labels"
+        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http** or any global configurations (like **server-http** for all services) is not possible : you will need to mount files for that purpose.
 
     The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
     
@@ -1233,7 +1233,7 @@ Some integrations offer a more convenient way of applying configurations for exa
       image: nginxdemos/hello:plain-text
       labels:
         - |
-          CUSTOM_CONF_SERVER_HTTP_hello-world=
+          bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
           location /hello {
             default_type 'text/plain';
             content_by_lua_block {
