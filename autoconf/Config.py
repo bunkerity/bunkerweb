@@ -4,8 +4,8 @@ from time import sleep
 from subprocess import run, DEVNULL, STDOUT
 from glob import glob
 from shutil import rmtree
-from os import makedirs
-from os.path import dirname
+from os import makedirs, remove, listdir
+from os.path import dirname, isdir
 from json import loads
 
 from API import API
@@ -93,8 +93,6 @@ class Config(ApiCaller, ConfigCaller) :
     def __write_configs(self) :
         ret = True
         for config_type in self.__configs :
-            rmtree("/data/configs/" + config_type)
-            makedirs("/data/configs/" + config_type, exist_ok=True)
             for file, data in self.__configs[config_type].items() :
                 path = "/data/configs/" + config_type + "/" + file
                 if not path.endswith(".conf") :
@@ -109,6 +107,32 @@ class Config(ApiCaller, ConfigCaller) :
                 except :
                     print(format_exc())
                     log("CONFIG", "❌", "Can't save file " + path)
+                    ret = False
+        return ret
+
+    def __remove_configs(self) :
+        ret = True
+        for config_type in self.__configs :
+            for file, data in self.__configs[config_type].items() :
+                path = "/data/configs/" + config_type + "/" + file
+                if not path.endswith(".conf") :
+                    path += ".conf"
+                try :
+                    remove(path)
+                except :
+                    print(format_exc())
+                    log("CONFIG", "❌", "Can't remove file " + path)
+                    ret = False
+        check_empty_dirs = []
+        for type in ["server-http", "modsec", "modsec-crs"] :
+            check_empty_dirs.extend(glob("/data/configs/" + type + "/*"))
+        for check_empty_dirs in check_empty_dirs :
+            if isdir(check_empty_dir) and len(listdir(check_empty_dir)) == 0 :
+                try :
+                    rmtree(check_empty_dir)
+                except :
+                    print(format_exc())
+                    log("CONFIG", "❌", "Can't remove directory " + check_empty_dir)
                     ret = False
         return ret
 
@@ -163,10 +187,10 @@ class Config(ApiCaller, ConfigCaller) :
         if proc.returncode != 0 :
             success = False
             log("CONFIG", "❌", "config generator failed, configuration will not work as expected...")
-        cmd = "chown -R root:101 /etc/nginx"
-        run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
-        cmd = "chmod -R 770 /etc/nginx" 
-        run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
+        # cmd = "chown -R root:101 /etc/nginx"
+        # run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
+        # cmd = "chmod -R 770 /etc/nginx" 
+        # run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
 
         # send nginx configs
         # send data folder
@@ -183,6 +207,13 @@ class Config(ApiCaller, ConfigCaller) :
         if not ret :
             success = False
             log("CONFIG", "❌", "reload failed, configuration will not work as expected...")
+
+        # remove autoconf configs
+        if configs != None :
+            ret = self.__remove_configs()
+            if not ret :
+                success = False
+                log("CONFIG", "❌", "removing custom configs failed, configuration will not work as expected...")
 
         return success
 
