@@ -1140,7 +1140,35 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Docker"
 
-    When using the [Docker integration](/1.4/integrations/#docker), custom configurations must be written to the volume mounted on /data.
+    When using the [Docker integration](/1.4/integrations/#docker), you have two choices for adding custom configurations :
+
+    - Using specific settings `*_CUSTOM_CONF_*` as environment variable (easiest)
+    - Writing .conf files to the volume mounted on /data
+
+    **Using settings**
+
+    The custom setting to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
+
+    - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
+    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC` and `MODSEC_CRS`
+    - `<NAME>` : the name of your config without the .conf suffix
+
+    Here is a dummy example using a docker-compose file :
+    ```yaml
+        mybunker:
+      image: bunkerity/bunkerweb:1.4.2
+      environment:
+        - |
+          CUSTOM_CONF_SERVER_HTTP_test=
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+                ngx.say('world')
+    	  }
+      ...
+    ```
+
+    **Using files**
 
     The first thing to do is to create the folders :
     ```shell
@@ -1198,12 +1226,6 @@ Some integrations offer a more convenient way of applying configurations for exa
     		ngx.say('world')
     	}
     }" > ./bw-data/configs/server-http/hello-world.conf
-    ```
-
-    Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-    ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
     ```
 
     When starting the BunkerWeb autoconf container, you will need to mount the folder on /data :
