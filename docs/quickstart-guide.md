@@ -1142,29 +1142,30 @@ Some integrations offer a more convenient way of applying configurations for exa
 
     When using the [Docker integration](/1.4/integrations/#docker), you have two choices for adding custom configurations :
     
-    - Using specific settings `*_CUSTOM_CONF_*` as environment variable (easiest)
+    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (easiest)
     - Writing .conf files to the volume mounted on /data
     
     **Using settings**
     
-    The custom setting to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
+    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
     
     - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
     - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC` and `MODSEC_CRS`
-    - `<NAME>` : the name of your config without the .conf suffix
+    - `<NAME>` : the name of config without the .conf suffix
 
     Here is a dummy example using a docker-compose file :
     ```yaml
-        mybunker:
+    mybunker:
       image: bunkerity/bunkerweb:1.4.2
       environment:
         - |
-          CUSTOM_CONF_SERVER_HTTP_test=
+          CUSTOM_CONF_SERVER_HTTP_hello-world=
           location /hello {
             default_type 'text/plain';
             content_by_lua_block {
-                ngx.say('world')
-    	  }
+              ngx.say('world')
+    	    }
+          }
       ...
     ```
 
@@ -1211,7 +1212,37 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), custom configurations must be written to the volume mounted on /data.
+    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), you have two choices for adding custom configurations :
+
+    - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
+    - Writing .conf files to the volume mounted on /data
+
+    **Using labels**
+
+    !!! info "Limitations using labels"
+        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http** and any global configurations is not possible.
+
+    The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
+    
+    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC` and `MODSEC_CRS`
+    - `<NAME>` : the name of config without the .conf suffix
+
+    Here is a dummy example using a docker-compose file :
+    ```yaml
+    myapp:
+      image: nginxdemos/hello:plain-text
+      labels:
+        - |
+          CUSTOM_CONF_SERVER_HTTP_hello-world=
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+                ngx.say('world')
+    	  }
+      ...
+    ```
+
+    **Using files**
 
     The first thing to do is to create the folders :
     ```shell
