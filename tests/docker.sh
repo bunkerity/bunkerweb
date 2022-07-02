@@ -58,6 +58,9 @@ single_docker_test "authelia" "60" "https://$TEST_DOMAIN1_1 authelia" "https://$
 # drupal
 single_docker_test "drupal" "60" "https://$TEST_DOMAIN1 drupal"
 
+# docker configs
+single_docker_test "docker-configs" "30" "https://$TEST_DOMAIN1_1/hello world" "https://$TEST_DOMAIN1_2/hello world" "https://$TEST_DOMAIN1/app1 app1" "https://$TEST_DOMAIN1/app2 app2"
+
 # ghost
 single_docker_test "ghost" "30" "https://$TEST_DOMAIN1 ghost"
 

@@ -102,6 +102,9 @@ single_autoconf_test "autoconf-reverse-proxy" "60" "https://$TEST_DOMAIN1_1 hell
 # php
 single_autoconf_test "autoconf-php" "60" "https://$TEST_DOMAIN1_1 app1" "https://$TEST_DOMAIN1_2 app2" "https://$TEST_DOMAIN1_3 app3"
 
+# configs
+single_docker_test "autoconf-configs" "60" "https://$TEST_DOMAIN1/hello app1" "https://$TEST_DOMAIN2/hello app2" "https://$TEST_DOMAIN3/hello app3"
+
 # cleanup
 current_dir="$(pwd)"
 cd "/tmp/autoconf"
