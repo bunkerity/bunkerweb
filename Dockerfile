@@ -74,6 +74,8 @@ RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 
 # Fix CVE-2022-27405 and CVE-2022-27406
 RUN apk add "freetype>=2.10.4-r3"
+# Fix multiple CVE for curl/libcurl
+RUN apk add "curl>=7.79.1-r2" "libcurl>=7.79.1-r2"
 
 VOLUME /data
 
