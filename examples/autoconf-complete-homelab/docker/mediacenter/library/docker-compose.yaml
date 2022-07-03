@@ -1,0 +1,154 @@
+version: '3.5'
+
+services:
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+    networks:
+      bw-services:
+        aliases:
+          - radarr
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - path/to/config:/config
+      - path/to/data:/data # should be same as transmission
+    labels:
+      - "bunkerweb.SERVER_NAME=radarr.example.com"
+      - "bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT"
+      - "bunkerweb.REVERSE_PROXY_WS=yes"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://radarr:7878"
+      - "bunkerweb.LIMIT_REQ_URL_1=^/api"
+      - "bunkerweb.LIMIT_REQ_RATE_1=10r/s"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST=/authelia"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email"
+      - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
+      - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
+      - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
+      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+    networks:
+      bw-services:
+        aliases:
+          - sonarr
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - path/to/config:/config
+      - path/to/data:/data # should be same as transmission
+    labels:
+      - "bunkerweb.SERVER_NAME=sonarr.example.com"
+      - "bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT"
+      - "bunkerweb.REVERSE_PROXY_WS=yes"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://sonarr:8989"
+      - "bunkerweb.LIMIT_REQ_URL_1=^/api"
+      - "bunkerweb.LIMIT_REQ_RATE_1=10r/s"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST=/authelia"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email"
+      - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
+      - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
+      - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
+      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+
+  prowlarr:
+    container_name: prowlarr
+    image: linuxserver/prowlarr:develop
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+    volumes:
+      - path/to/config:/config
+    networks:
+      bw-services:
+        aliases:
+          - prowlarr
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "bunkerweb.SERVER_NAME=prowlarr.example.com"
+      - "bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT"
+      - "bunkerweb.REVERSE_PROXY_WS=yes"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://prowlarr:9696"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST=/authelia"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email"
+      - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
+      - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
+      - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
+      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+
+  flaresolverr:
+    container_name: flaresolverr
+    image: flaresolverr/flaresolverr
+    restart: unless-stopped
+    ports:
+      - 8191:8191
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+  transmission:
+    container_name: transmission
+    image: linuxserver/transmission
+    restart: unless-stopped
+    networks:
+      bw-services:
+        aliases:
+          - transmission
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - path/to/config:/config
+      - path/to/data/downloads:/data/downloads # path to /data should be same as other services
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "bunkerweb.SERVER_NAME=transmission.example.com"
+      - "bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://transmission:9091"
+      - "bunkerweb.LIMIT_REQ_RATE=10r/s"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST=/authelia"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      - "bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email"
+      - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
+      - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
+      - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
+      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+
+networks:
+  bw-services:
+    name: bw-services
