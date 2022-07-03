@@ -1,0 +1,53 @@
+version: '3.5'
+
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.4.2
+    container_name: mybunker
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    environment:
+      - MULTISITE=yes
+      - AUTOCONF_MODE=yes
+      - REDIRECT_HTTP_TO_HTTPS=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - SERVER_NAME=
+      - USE_GZIP=yes
+      - SERVE_FILES=no
+      - BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    labels:
+      - "bunkerweb.AUTOCONF"
+    networks:
+      - bw-autoconf
+      - bw-services
+
+  myautoconf:
+    image: bunkerity/bunkerweb-autoconf:1.4.2
+    container_name: myautoconf
+    restart: always
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # you can also run ./setup.sh as root to do this for you
+    # more info at https://docs.bunkerweb.io
+    volumes:
+      - ./bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bw-autoconf
+
+networks:
+  bw-autoconf:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
