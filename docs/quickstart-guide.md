@@ -1141,13 +1141,13 @@ Some integrations offer a more convenient way of applying configurations for exa
 === "Docker"
 
     When using the [Docker integration](/1.4/integrations/#docker), you have two choices for adding custom configurations :
-
+    
     - Using specific settings `*_CUSTOM_CONF_*` as environment variables (easiest)
     - Writing .conf files to the volume mounted on /data
-
+    
     **Using settings**
-
-    The custom setting to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
+    
+    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
 
     - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
     - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC` and `MODSEC_CRS`
