@@ -1183,7 +1183,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), custom configurations must be written to the volume mounted on /data.
+    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), custom configurations must be written to the volume mounted on /data. Starting from 1.4.1, the volume only needs to be mounted on the autoconf container.
 
     The first thing to do is to create the folders :
     ```shell
@@ -1206,19 +1206,19 @@ Some integrations offer a more convenient way of applying configurations for exa
     chmod -R 770 bw-data
     ```
 
-    When starting the BunkerWeb container, you will need to mount the folder on /data :
+    When starting the BunkerWeb autoconf container, you will need to mount the folder on /data :
     ```shell
     docker run \
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb-autoconf:1.4.2
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+    myautoconf:
+      image: bunkerity/bunkerweb-autoconf:1.4.2
       volumes:
         - ./bw-data:/data
       ...
