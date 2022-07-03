@@ -1,0 +1,30 @@
+version: '3.5'
+
+services:
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+    networks:
+      bw-services:
+        aliases:
+          - authelia
+    volumes:
+      - ./config:/config
+    labels:
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.SERVER_NAME=auth.example.com"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://authelia:9091"
+      - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
+
+networks:
+  bw-services:
+    name: bw-services
