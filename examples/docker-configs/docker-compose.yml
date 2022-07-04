@@ -61,5 +61,5 @@ services:
   myapp2:
     image: tutum/hello-world
 
-  volumes:
-    bw_data:
+volumes:
+  bw_data:
