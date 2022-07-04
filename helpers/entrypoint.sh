@@ -61,7 +61,8 @@ if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF
 		fi
 		target="${target}${name}.conf"
 		log "ENTRYPOINT" "ℹ️" "Saving custom config to $target ..."
-		echo "${!var_name}" > "$target"
+        content=$(python3 -c "import os ; print(os.environ['${var_name}'])")
+		echo "${content}" > "$target"
 	done
 
 	# execute temp nginx with no server
