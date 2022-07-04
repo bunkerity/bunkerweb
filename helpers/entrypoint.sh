@@ -47,7 +47,7 @@ fi
 if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
 	# extract and drop configs
 	for var_name in $(python3 -c 'import os ; [print(k) for k in os.environ]') ; do
-		extracted=$(echo "$var_name" | sed -r 's/^([a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
+		extracted=$(echo "$var_name" | sed -r 's/^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
 		site=$(echo "$extracted" | cut -d ' ' -f 1)
 		type=$(echo "$extracted" | cut -d ' ' -f 2 | grep -E '(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)' | tr '[:upper:]' '[:lower:]' | sed 's/_/-/')
 		name=$(echo "$extracted" | cut -d ' ' -f 3)
