@@ -163,7 +163,7 @@ function curl_assert() {
 		if [ "$ws" = "" ] ; then
 			data="$(curl -k -L -s --cookie /dev/null -H "User-Agent: LegitOne" "$url" | grep -i "$str")"
 		else
-			data="$(echo "test" | /tmp/websocat_amd64-linux - --text wss://test1.bunkerity.com/ws/ | grep -i "$str")"
+			data="$(echo "test" | /tmp/websocat_amd64-linux - --text "$url" | grep -i "$str")"
 		fi
 		if [ "$data" != "" ] && [ $? -eq 0 ] ; then
 			return 0
