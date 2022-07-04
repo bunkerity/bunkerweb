@@ -62,4 +62,4 @@ services:
     image: tutum/hello-world
 
   volumes:
-    bw-data:
+    bw_data:
