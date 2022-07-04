@@ -25,9 +25,9 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
       - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
       # global config applied at server context
       - |
         CUSTOM_CONF_SERVER_HTTP_hello-world=
