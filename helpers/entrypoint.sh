@@ -55,9 +55,11 @@ if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF
 			continue
 		fi
 		target="/data/configs/${type}/"
-		if [ "$site" != "" ] && [ ! -d "/data/configs/${type}/${site}" ] ; then
+		if [ "$site" != "" ] ; then
 			target="${target}/${site}/"
-			mkdir "$target"
+            if [ ! -d "/data/configs/${type}/${site}" ] ; then
+                mkdir "$target"
+            fi
 		fi
 		target="${target}${name}.conf"
 		log "ENTRYPOINT" "ℹ️" "Saving custom config to $target ..."
