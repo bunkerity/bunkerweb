@@ -40,7 +40,7 @@ services:
       # site configs applied at server context
       - |
         app1.example.com_CUSTOM_CONF_SERVER_HTTP_dummy=
-        location /app1 {
+        location = /app1 {
         	default_type 'text/plain';
         	content_by_lua_block {
         		ngx.say('hello app1')
@@ -48,7 +48,7 @@ services:
         }
       - |
         app2.example.com_CUSTOM_CONF_SERVER_HTTP_dummy=
-        location /app2 {
+        location = /app2 {
         	default_type 'text/plain';
         	content_by_lua_block {
         		ngx.say('hello app2')
