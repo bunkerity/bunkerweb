@@ -42,9 +42,9 @@ function single_docker_test() {
 # Setup data folder if not present
 if [ ! -d "/tmp/bw-data" ] ; then
 	mkdir /tmp/bw-data
-	sudo chown 101:101 /tmp/bw-data
-	sudo chmod 777 /tmp/bw-data
 fi
+sudo chown 101:101 /tmp/bw-data
+sudo chmod 777 /tmp/bw-data
 
 echo "Running Docker tests ..."
 
