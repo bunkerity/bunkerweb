@@ -45,6 +45,10 @@ if [ ! -d "/tmp/bw-data" ] ; then
 fi
 sudo chown 101:101 /tmp/bw-data
 sudo chmod 777 /tmp/bw-data
+if [ -d "/tmp/bw-data/configs" ] ; then
+    sudo chown -R 101:101 /tmp/bw-data/configs
+    sudo chmod -R 777 /tmp/bw-data/configs
+fi
 
 echo "Running Docker tests ..."
 
