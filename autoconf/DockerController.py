@@ -76,7 +76,7 @@ class DockerController(Controller, ConfigCaller) :
         for container in self.__client.containers.list(filters={"label" : "bunkerweb.SERVER_NAME"}) :
             # extract server_name
             server_name = ""
-            for variable, value in controller_service.labels.items() :
+            for variable, value in container.labels.items() :
                 if not variable.startswith("bunkerweb.") :
                     continue
                 real_variable = variable.replace("bunkerweb.", "", 1)
@@ -86,7 +86,7 @@ class DockerController(Controller, ConfigCaller) :
             # extract configs
             if server_name == "" :
                 continue
-            for variable, value in controller_service.labels.items() :
+            for variable, value in container.labels.items() :
                 if not variable.startswith("bunkerweb.") :
                     continue
                 real_variable = variable.replace("bunkerweb.", "", 1)
