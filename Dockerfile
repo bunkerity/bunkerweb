@@ -72,10 +72,8 @@ RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log && \
 	ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
-# Fix CVE-2022-27405 and CVE-2022-27406
-RUN apk add "freetype>=2.10.4-r3"
-# Fix multiple CVE for curl/libcurl
-RUN apk add "curl>=7.79.1-r2" "libcurl>=7.79.1-r2"
+# Fix CVEs
+RUN apk add "freetype>=2.10.4-r3" "curl>=7.79.1-r2" "libcurl>=7.79.1-r2" "openssl>=1.1.1q-r0"
 
 VOLUME /data
 
