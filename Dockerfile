@@ -73,7 +73,7 @@ RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 	ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
 # Fix CVEs
-RUN apk add "freetype>=2.10.4-r3" "curl>=7.79.1-r2" "libcurl>=7.79.1-r2" "openssl>=1.1.1q-r0"
+RUN apk add "freetype>=2.10.4-r3" "curl>=7.79.1-r2" "libcurl>=7.79.1-r2" "openssl>=1.1.1q-r0" "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0"
 
 VOLUME /data
 
