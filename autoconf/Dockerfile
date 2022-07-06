@@ -47,6 +47,9 @@ RUN apk add --no-cache git && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt && \
     ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
+# Fix CVEs
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0"
+
 VOLUME /data /etc/nginx
 
 WORKDIR /opt/bunkerweb/autoconf
