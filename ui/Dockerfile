@@ -47,6 +47,9 @@ RUN addgroup -g 101 nginx && \
     chmod -R 770 /etc/nginx && \
     ln -s /usr/local/bin/python /usr/bin/python3
 
+# Fix CVEs
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0"
+
 VOLUME /data /etc/nginx
 
 EXPOSE 5000
