@@ -7,6 +7,15 @@ BunkerWeb offers many security features that you can configure with [settings](/
 
 ## HTTP protocol
 
+### Deny status code
+
+The first thing to define is the kind of action to do when a client access is denied. You can control the action with the `DENY_STATUS_CODE` setting which allows the following values :
+
+- `403` : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)
+- `444` : close the connection (no web page or custom content will be displayed)
+
+The default value is `403` and we suggest you to set it to `444` only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.
+
 ### Default server
 
 In the HTTP protocol, the Host header is used to determine which server the client wants to send the request to. That header is facultative and may be missing from the request or can be set as an unknown value. This is a common case, a lot of bots are scanning the Internet and are trying to exploit services or simply doing some fingerprinting.
