@@ -63,7 +63,7 @@ A volume is used to share data with BunkerWeb and store persistent data like cer
 The easiest way of managing the volume is by using a named one. You will first need to create it :
 
 ```shell
-docker volume create bw-data
+docker volume create bw_data
 ```
 
 Once it's created, you can mount it on `/data` when running the container :
@@ -71,7 +71,7 @@ Once it's created, you can mount it on `/data` when running the container :
 ```shell
 docker run \
 	   ...
-	   -v "${PWD}/bw-data:/data" \
+	   -v bw_data:/data \
 	   ...
 	   bunkerity/bunkerweb:1.4.2
 ```
@@ -84,13 +84,14 @@ services:
   mybunker:
     image: bunkerity/bunkerweb:1.4.2
     volumes:
-      - bw-data:/data
+      - bw_data:/data
 ...
 volumes:
-  bw-data:
+  bw_data:
 ```
 
-!!! warning
+!!! warning "Using local folder for persistent data"
+
     BunkerWeb runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is the security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
     But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
     ```shell
@@ -99,36 +100,37 @@ volumes:
     chmod 770 bw-data
     ```
 
-Alternatively, if the folder already exists :
+    Alternatively, if the folder already exists :
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
 
-```shell
-chown -R root:101 bw-data && \
-chmod -R 770 bw-data
-```
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+	```shell
+	grep ^$(whoami): /etc/subuid && \
+	grep ^$(whoami): /etc/subgid
+	```
 
-Mounting the folder :
-
-```shell
-docker run \
-        ...
-      -v ./bw-data:/data \
-        ...
-        bunkerity/bunkerweb:1.4.2
-```
-
-Here is the docker-compose equivalent :
-
-```yaml
-
-...
-services:
-  mybunker:
-  image: bunkerity/bunkerweb:1.4.2
-  volumes:
-    - ./bw-data:/data
-```
+    For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+	
+	Or if the folder already exists :
+	```shell
+    sudo chgrp -R 100100 bw-data && \
+    chmod -R 770 bw-data
+    ```
 
 ### Networks
+
+By default, BunkerWeb container is listening (inside the container) on **8080/tcp** for **HTTP** and **8443/tcp** for **HTTPS**.
+
+!!! warning "Privileged ports in rootless mode"
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) and want to redirect privileged ports (< 1024) like 80 and 443 to BunkerWeb, please refer to the prerequisites [here](https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports).
 
 The easiest way to connect BunkerWeb to web applications is by using Docker networks.
 
