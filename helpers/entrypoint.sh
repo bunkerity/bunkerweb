@@ -49,9 +49,9 @@ if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF
 	for var_name in $(python3 -c 'import os ; [print(k) for k in os.environ]') ; do
 		extracted=$(echo "$var_name" | sed -r 's/^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
 		site=$(echo "$extracted" | cut -d ' ' -f 1)
-		type=$(echo "$extracted" | cut -d ' ' -f 2 | grep -E '(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)' | tr '[:upper:]' '[:lower:]' | sed 's/_/-/')
+		type=$(echo "$extracted" | cut -d ' ' -f 2 | grep -E '^(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)$' | tr '[:upper:]' '[:lower:]' | sed 's/_/-/')
 		name=$(echo "$extracted" | cut -d ' ' -f 3)
-		if [ "$type" = "" ] || [ "$name" = "" ] ; then
+		if [ "$name" = "" ] || [ "$(echo -n "$type" | grep -E '^(http|default-server-http|server-http|modsec|modsec-crs)$')" = "" ] ; then
 			continue
 		fi
 		target="/data/configs/${type}/"
