@@ -106,7 +106,7 @@ volumes:
     chmod -R 770 bw-data
     ```
 
-    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
 	```shell
 	grep ^$(whoami): /etc/subuid && \
 	grep ^$(whoami): /etc/subgid
@@ -129,8 +129,13 @@ volumes:
 
 By default, BunkerWeb container is listening (inside the container) on **8080/tcp** for **HTTP** and **8443/tcp** for **HTTPS**.
 
-!!! warning "Privileged ports in rootless mode"
+!!! warning "Privileged ports in rootless mode or when using podman"
     If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) and want to redirect privileged ports (< 1024) like 80 and 443 to BunkerWeb, please refer to the prerequisites [here](https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports).
+	
+    If you are using [podman](https://podman.io/) you can lower the minimum number for unprivileged ports :
+    ```shell
+    sudo sysctl net.ipv4.ip_unprivileged_port_start=1
+    ```
 
 The easiest way to connect BunkerWeb to web applications is by using Docker networks.
 
