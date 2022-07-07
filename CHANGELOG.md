@@ -2,7 +2,7 @@
 
 ## v1.4.3 -
 
-- Fix various documentation errors/typos
+- Fix various documentation errors/typos and add various enhancements
 - Fix ui.env not read when using Linux integration
 - Fix check if BunkerNet is activated on default server
 - Add \*_CUSTOM_CONF_\* setting to automatically add custom config files from setting value

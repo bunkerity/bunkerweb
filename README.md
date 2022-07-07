@@ -223,7 +223,7 @@ Check the [settings section](https://docs.bunkerweb.io/latest/settings) of the d
 # Web UI
 
 <p align="center">
-	<a href="https://www.youtube.com/watch?v=2n4EarhW7-Y"><img alt="BunkerWeb UI demo" src="https://yt-embed.herokuapp.com/embed?v=2n4EarhW7-Y" /></a>
+	<a href="https://www.youtube.com/watch?v=2n4EarhW7-Y" target="_blank"><img alt="BunkerWeb UI demo" src="https://yt-embed.herokuapp.com/embed?v=2n4EarhW7-Y" /></a>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
