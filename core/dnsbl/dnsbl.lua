@@ -56,7 +56,7 @@ function _M:access()
 		if dnsbl == "ok" then
 			return true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (not blacklisted)", nil, nil
 		end
-		return true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (server = " .. dnsbl .. ")", true, ngx.HTTP_FORBIDDEN
+		return true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (server = " .. dnsbl .. ")", true, utils.get_deny_status()
 	end
 
 	-- Don't go further if IP is not global
@@ -84,7 +84,7 @@ function _M:access()
 		local result, err = self:is_in_dnsbl(dnsbl, ngx.var.remote_addr)
 		if result then
 			self:add_to_cache(ngx.var.remote_addr, dnsbl)
-			return ret, "client IP " .. ngx.var.remote_addr .. " is in DNSBL (server = " .. dnsbl .. ")", true, ngx.HTTP_FORBIDDEN
+			return ret, "client IP " .. ngx.var.remote_addr .. " is in DNSBL (server = " .. dnsbl .. ")", true, utils.get_deny_status()
 		end
 	end
 	

@@ -2,7 +2,13 @@
 
 ## v1.4.3 -
 
-- Add \*_CUSTOM_CONF_\* setting to automatically add custom config files from setting value 
+- Fix various documentation errors/typos
+- Fix ui.env not read when using Linux integration
+- Fix check if BunkerNet is activated on default server
+- Add \*_CUSTOM_CONF_\* setting to automatically add custom config files from setting value
+- Add DENY_HTTP_STATUS setting to choose standard 403 error (default) or to close connection (444)
+- Add documentation about Docker in rootless mode and podman
+- Migrate CI/CD to another provider
 
 ## v1.4.2 - 2022/06/28
 

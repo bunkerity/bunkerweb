@@ -33,7 +33,7 @@ function _M:access()
 		if data.result == "ok" then
 			return true, "client IP " .. ngx.var.remote_addr .. " is in country cache (not blacklisted, country = " .. data.country .. ")", nil, nil
 		end
-		return true, "client IP " .. ngx.var.remote_addr .. " is in country cache (blacklisted, country = " .. data.country .. ")", true, ngx.HTTP_FORBIDDEN
+		return true, "client IP " .. ngx.var.remote_addr .. " is in country cache (blacklisted, country = " .. data.country .. ")", true, utils.get_deny_status()
 	end
 	
 	-- Don't go further if IP is not global
@@ -60,7 +60,7 @@ function _M:access()
 			end
 		end
 		self:add_to_cache(ngx.var.remote_addr, country, "ko")
-		return true, "client IP " .. ngx.var.remote_addr .. " is not whitelisted (country = " .. country .. ")", true, ngx.HTTP_FORBIDDEN
+		return true, "client IP " .. ngx.var.remote_addr .. " is not whitelisted (country = " .. country .. ")", true, utils.get_deny_status()
 	end
 	
 	-- And then blacklist
@@ -68,7 +68,7 @@ function _M:access()
 		for bl_country in blacklist:gmatch("%S+") do
 			if bl_country == country then
 				self:add_to_cache(ngx.var.remote_addr, country, "ko")
-				return true, "client IP " .. ngx.var.remote_addr .. " is blacklisted (country = " .. country .. ")", true, ngx.HTTP_FORBIDDEN
+				return true, "client IP " .. ngx.var.remote_addr .. " is blacklisted (country = " .. country .. ")", true, utils.get_deny_status()
 			end
 		end
 	end

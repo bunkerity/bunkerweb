@@ -31,7 +31,7 @@
 			"label": "Auto redirect HTTP to HTTPS",
 			"regex": ".*",
 			"type": "text"
-		},		
+		},
 		"ALLOWED_METHODS": {
 			"context": "multisite",
 			"default": "GET|POST|HEAD",
@@ -148,6 +148,19 @@
 			"label": "External plugin URLs",
 			"regex": "^.*$",
 			"type": "text"
+		},
+		"DENY_HTTP_STATUS": {
+			"context": "global",
+			"default": "403",
+			"help": "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
+			"id": "deny-http-status",
+			"label": "Deny HTTP status",
+			"regex": "^(403|444)$",
+			"type": "select",
+			"select": [
+				"403",
+				"444"
+			]
 		}
 	}
 }

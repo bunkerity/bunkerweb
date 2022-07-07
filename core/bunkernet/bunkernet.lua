@@ -142,7 +142,7 @@ function _M:report(ip, reason, method, url, headers)
 end
 
 function _M:log(bypass_use_bunkernet)
-	if bypass_use_bunkernet then
+	if not bypass_use_bunkernet then
 		-- Check if BunkerNet is activated
 		local use_bunkernet = utils.get_variable("USE_BUNKERNET")
 		if use_bunkernet ~= "yes" then
@@ -232,7 +232,7 @@ function _M:access()
 	local db = cjson.decode(data)
 	for index, value in ipairs(db.ip) do
 		if value == ngx.var.remote_addr then
-			return true, "ip is in database", true, ngx.exit(ngx.HTTP_FORBIDDEN)
+			return true, "ip is in database", true, utils.get_deny_status()
 		end
 	end
 	return true, "ip is not in database", false, nil

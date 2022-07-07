@@ -127,7 +127,7 @@ function _M:access()
 	end
 	
 	-- Method is suspicious, let's deny the request
-	return true, "unsupported HTTP method for Antibot", true, ngx.HTTP_FORBIDDEN
+	return true, "unsupported HTTP method for Antibot", true, utils.get_deny_status()
 
 end
 

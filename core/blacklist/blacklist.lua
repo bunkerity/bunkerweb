@@ -61,17 +61,17 @@ function _M:access()
 	-- Check the cache
 	local cached_ip, err = self:is_in_cache("ip" .. ngx.var.remote_addr)
 	if cached_ip and cached_ip ~= "ok" then
-		return true, "IP is in blacklist cache (info = " .. cached_ip .. ")", true, ngx.HTTP_FORBIDDEN
+		return true, "IP is in blacklist cache (info = " .. cached_ip .. ")", true, utils.get_deny_status()
 	end
 	local cached_uri, err = self:is_in_cache("uri" .. ngx.var.uri)
 	if cached_uri and cached_uri ~= "ok" then
-		return true, "URI is in blacklist cache (info = " .. cached_uri .. ")", true, ngx.HTTP_FORBIDDEN
+		return true, "URI is in blacklist cache (info = " .. cached_uri .. ")", true, utils.get_deny_status()
 	end
 	local cached_ua = true
 	if ngx.var.http_user_agent then
 		cached_ua, err = self:is_in_cache("ua" .. ngx.var.http_user_agent)
 		if cached_ua and cached_ua ~= "ok" then
-			return true, "User-Agent is in blacklist cache (info = " .. cached_ua .. ")", true, ngx.HTTP_FORBIDDEN
+			return true, "User-Agent is in blacklist cache (info = " .. cached_ua .. ")", true, utils.get_deny_status()
 		end
 	end
 	if cached_ip and cached_uri and cached_ua then
@@ -106,7 +106,7 @@ function _M:access()
 		else
 			if ipm:match(ngx.var.remote_addr) then
 				self:add_to_cache("ip" .. ngx.var.remote_addr, "ip/net")
-				return ret, "client IP " .. ngx.var.remote_addr .. " is in blacklist", true, ngx.HTTP_FORBIDDEN
+				return ret, "client IP " .. ngx.var.remote_addr .. " is in blacklist", true, utils.get_deny_status()
 			end
 		end
 	end
@@ -137,7 +137,7 @@ function _M:access()
 			for i, suffix in ipairs(blacklists["RDNS"]) do
 				if rdns:sub(-#suffix) == suffix then
 					self:add_to_cache("ip" .. ngx.var.remote_addr, "rDNS " .. suffix)
-					return ret, "client IP " .. ngx.var.remote_addr .. " is in blacklist (info = rDNS " .. suffix .. ")", true, ngx.HTTP_FORBIDDEN
+					return ret, "client IP " .. ngx.var.remote_addr .. " is in blacklist (info = rDNS " .. suffix .. ")", true, utils.get_deny_status()
 				end
 			end
 		end
@@ -160,7 +160,7 @@ function _M:access()
 				for i, asn_bl in ipairs(blacklists["ASN"]) do
 					if tostring(asn) == asn_bl then
 						self:add_to_cache("ip" .. ngx.var.remote_addr, "ASN " .. tostring(asn))
-						return ret, "client IP " .. ngx.var.remote_addr .. " is in blacklist (kind = ASN " .. tostring(asn) .. ")", true, ngx.HTTP_FORBIDDEN
+						return ret, "client IP " .. ngx.var.remote_addr .. " is in blacklist (kind = ASN " .. tostring(asn) .. ")", true, utils.get_deny_status()
 					end
 				end
 			end
@@ -185,7 +185,7 @@ function _M:access()
 		for i, ua_bl in ipairs(blacklists["USER_AGENT"]) do
 			if ngx.var.http_user_agent:match(ua_bl) then
 				self:add_to_cache("ua" .. ngx.var.http_user_agent, "UA " .. ua_bl)
-				return ret, "client User-Agent " .. ngx.var.http_user_agent .. " is in blacklist (matched " .. ua_bl .. ")", true, ngx.HTTP_FORBIDDEN
+				return ret, "client User-Agent " .. ngx.var.http_user_agent .. " is in blacklist (matched " .. ua_bl .. ")", true, utils.get_deny_status()
 			end
 		end
 		-- UA is not blacklisted
@@ -207,7 +207,7 @@ function _M:access()
 		for i, uri_bl in ipairs(blacklists["URI"]) do
 			if ngx.var.uri:match(uri_bl) then
 				self:add_to_cache("uri" .. ngx.var.uri, "URI " .. uri_bl)
-				return ret, "client URI " .. ngx.var.uri .. " is in blacklist (matched " .. uri_bl .. ")", true, ngx.HTTP_FORBIDDEN
+				return ret, "client URI " .. ngx.var.uri .. " is in blacklist (matched " .. uri_bl .. ")", true, utils.get_deny_status()
 			end
 		end
 	end

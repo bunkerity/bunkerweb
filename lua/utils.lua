@@ -248,7 +248,7 @@ utils.get_reason = function()
 	if banned then
 		return banned
 	end
-	if ngx.status == ngx.HTTP_FORBIDDEN then
+	if ngx.status == utils.get_deny_status() then
 		return "unknown"
 	end
 	return nil
@@ -345,6 +345,15 @@ utils.rand = function(nb)
 		result = result .. charset[math.random(1, #charset)]
 	end
 	return result
+end
+
+utils.get_deny_status = function ()
+	local status, err = datastore:get("variable_DENY_HTTP_STATUS")
+	if not status then
+		logger.log(ngx.ERR, "UTILS", "Can't get DENY_HTTP_STATUS variable " .. err)
+		return 403
+	end
+	return tonumber(status)
 end
 
 return utils
