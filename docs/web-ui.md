@@ -73,7 +73,7 @@ Because the web UI is a web application, the recommended installation procedure 
        -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
        -e bwadm.example.com_USE_UI=yes \
        -e bwadm.example.com_USE_REVERSE_PROXY=yes \
-       -e bwadm.example.com_REVERSE_PROXY_URL=/changeme \
+       -e bwadm.example.com_REVERSE_PROXY_URL=/changeme/ \
        -e bwadm.example.com_REVERSE_PROXY_HOST=http://myui:7000 \
        -e "bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme" \
        -e bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no \
@@ -101,8 +101,8 @@ Because the web UI is a web application, the recommended installation procedure 
     docker run -d \
            --name mydocker \
            --network bw-docker \
-           --privileged \
            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+           -e CONTAINERS=1 \
            tecnativa/docker-socket-proxy
     ```
 
@@ -177,6 +177,8 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
 
     networks:
       bw-services:
@@ -208,8 +210,8 @@ Because the web UI is a web application, the recommended installation procedure 
     API_WHITELIST_IP=127.0.0.0/8
     bwadm.example.com_USE_UI=yes
     bwadm.example.com_USE_REVERSE_PROXY=yes
-    bwadm.example.com_REVERSE_PROXY_URL=/changeme
-    bwadm.example.com_REVERSE_PROXY_HOST=http://myui:7000
+    bwadm.example.com_REVERSE_PROXY_URL=/changeme/
+    bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme
     bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
     ...
@@ -218,7 +220,7 @@ Because the web UI is a web application, the recommended installation procedure 
     Important things to note :
 
     * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace the `/changeme` URL with a custom one of your choice
+    * replace the `/changeme` URLs with a custom one of your choice
 
     Once the configuration file is edited, you will need to reload BunkerWeb :
     ```shell

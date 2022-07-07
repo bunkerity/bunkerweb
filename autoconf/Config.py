@@ -126,7 +126,7 @@ class Config(ApiCaller, ConfigCaller) :
         check_empty_dirs = []
         for type in ["server-http", "modsec", "modsec-crs"] :
             check_empty_dirs.extend(glob("/data/configs/" + type + "/*"))
-        for check_empty_dirs in check_empty_dirs :
+        for check_empty_dir in check_empty_dirs :
             if isdir(check_empty_dir) and len(listdir(check_empty_dir)) == 0 :
                 try :
                     rmtree(check_empty_dir)
