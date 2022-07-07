@@ -5,7 +5,7 @@ start_ui() {
   export PYTHONPATH=/opt/bunkerweb/deps/python/
   echo "Starting UI"
   set -a
-  . /opt/bunkerweb/bunkerweb-ui.env
+  . /opt/bunkerweb/ui.env
   set +a
   export FLASK_APP=/opt/bunkerweb/ui/main.py
   python3 -m flask run --host=127.0.0.1 --port=7000

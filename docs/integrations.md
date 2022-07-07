@@ -223,6 +223,9 @@ docker run \
 docker network connect bw-services mybunker
 ```
 
+!!! info "Using Docker in rootless mode"
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), you will need to replace the mount with the following value : `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
+
 And the autoconf one :
 
 ```shell
