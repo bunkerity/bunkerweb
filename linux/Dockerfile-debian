@@ -61,7 +61,7 @@ RUN cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
 
 # Copy Linux files
 COPY linux/variables.env /opt/bunkerweb/variables.env
-COPY linux/bunkerweb-ui.env /opt/bunkerweb/bunkerweb-ui.env
+COPY linux/ui.env /opt/bunkerweb/ui.env
 COPY linux/scripts /opt/bunkerweb/scripts
 COPY linux/fpm.sh /opt/fpm.sh
 RUN chmod +x /opt/bunkerweb/scripts/*.sh /opt/fpm.sh

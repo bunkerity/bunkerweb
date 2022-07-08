@@ -8,7 +8,7 @@
 - Add \*_CUSTOM_CONF_\* setting to automatically add custom config files from setting value
 - Add DENY_HTTP_STATUS setting to choose standard 403 error (default) or to close connection (444) when access is denied
 - Add documentation about Docker in rootless mode and podman
-- Migrate CI/CD to another provider
+- Migrate CI/CD infrastructure to another provider
 
 ## v1.4.2 - 2022/06/28
 

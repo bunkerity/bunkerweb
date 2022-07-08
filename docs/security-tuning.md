@@ -69,6 +69,20 @@ Various security headers are available and most of them can be set using BunkerW
 |  `X-Content-Type-Options`   | `X_CONTENT_TYPE_OPTIONS`    |                                                                                                                                                                                                                                                                                                                                                           `nosniff`                                                                                                                                                                                                                                                                                                                                                           |
 |     `X-XSS-Protection`      | `X_XSS_PROTECTION`          |                                                                                                                                                                                                                                                                                                                                                        `1; mode=block`                                                                                                                                                                                                                                                                                                                                                        |
 
+#### CORS
+
+[Cross-Origin Resource Sharing](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) lets you manage how your service can be contacted from different origins. Please note that you will have to allow the `OPTIONS` HTTP method using the `ALLOWED_METHODS` if you want to enable it (more info [here](https://docs.bunkerweb.io/1.4/security-tuning/#allowed-methods)). Here is the list of settings related to CORS :
+
+|        Setting         |                                      Default                                       | Context |Multiple|                   Description                    |
+|------------------------|------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
+|`USE_CORS`              |`no`                                                                                |multisite|no      |Use CORS                                          |
+|`CORS_ALLOW_ORIGIN`     |`*`                                                                                 |multisite|no      |Value of the Access-Control-Allow-Origin header.  |
+|`CORS_EXPOSE_HEADERS`   |`Content-Length,Content-Range`                                                      |multisite|no      |Value of the Access-Control-Expose-Headers header.|
+|`CORS_MAX_AGE`          |`86400`                                                                             |multisite|no      |Value of the Access-Control-Max-Age header.       |
+|`CORS_ALLOW_CREDENTIALS`|`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header. |
+|`CORS_ALLOW_METHODS`    |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header. |
+|`CORS_ALLOW_HEADERS`    |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header. |
+
 ## HTTPS
 
 Besides the HTTPS configuration, the following settings related to HTTPS can be set :
