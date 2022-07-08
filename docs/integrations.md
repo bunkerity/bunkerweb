@@ -828,7 +828,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	
 	Once dependencies had been installed, you can now copy the BunkerWeb sources to the target `/opt/bunkerweb` folder :
 	```shell
-	for src in api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/bunkerweb-ui.env linux/scripts ; do
+	for src in api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/ui.env linux/scripts ; do
 		cp -r /tmp/bunkerweb/${src} /opt/bunkerweb
 	done
 	cp /opt/bunkerweb/helpers/bwcli /usr/local/bin

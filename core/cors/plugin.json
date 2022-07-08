@@ -1,0 +1,72 @@
+{
+	"id": "cors",
+	"order": 999,
+	"name": "CORS",
+	"description": "Cross-Origin Resource Sharing.",
+	"version": "0.1",
+	"settings": {
+		"USE_CORS": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Use CORS",
+			"id": "use-cors",
+			"label": "Use CORS",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"CORS_ALLOW_ORIGIN": {
+			"context": "multisite",
+			"default": "*",
+			"help": "Value of the Access-Control-Allow-Origin header.",
+			"id": "cors-allow-origin",
+			"label": "Access-Control-Allow-Origin value",
+			"regex": "^.*$",
+			"type": "text"
+		},
+        "CORS_EXPOSE_HEADERS": {
+			"context": "multisite",
+			"default": "Content-Length,Content-Range",
+			"help": "Value of the Access-Control-Expose-Headers header.",
+			"id": "cors-expose-headers",
+			"label": "Access-Control-Expose-Headers value",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"CORS_MAX_AGE": {
+			"context": "multisite",
+			"default": "86400",
+			"help": "Value of the Access-Control-Max-Age header.",
+			"id": "cors-max-age",
+			"label": "Access-Control-Max-Age value",
+			"regex": "^[0-9]+$",
+			"type": "text"
+		},
+		"CORS_ALLOW_CREDENTIALS": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Send the Access-Control-Allow-Credentials header.",
+			"id": "cors-allow-credentials",
+			"label": "Send Access-Control-Allow-Credentials",
+			"regex": "^(yes|no)$",
+			"type": "check"
+		},
+		"CORS_ALLOW_METHODS": {
+			"context": "multisite",
+			"default": "GET, POST, OPTIONS",
+			"help": "Value of the Access-Control-Allow-Methods header.",
+			"id": "cors-allow-methods",
+			"label": "Access-Control-Allow-Methods value",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"CORS_ALLOW_HEADERS": {
+			"context": "multisite",
+			"default": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
+			"help": "Value of the Access-Control-Allow-Headers header.",
+			"id": "cors-allow-headers",
+			"label": "Access-Control-Allow-Headers value",
+			"regex": "^.*$",
+			"type": "text"
+		}
+	}
+}
