@@ -874,3 +874,51 @@ BunkerWeb is managed using systemctl :
 - Start it if it's stopped : `systemctl start bunkerweb`
 - Stop it if it's started : `systemctl stop bunkerweb`
 - And restart : `systemctl restart bunkerweb`
+
+## Ansible
+
+<figure markdown>
+  ![Overwiew](assets/img/integration-linux.svg){ align=center }
+  <figcaption>Linux integration</figcaption>
+</figure>
+
+List of supported Linux distros :
+
+- Debian 11 "Bullseye"
+- Ubuntu 22.04 "Jammy"
+- Fedora 36
+- CentOS Stream 8
+
+Ansible is an IT automation tool working with python. Ansible work with ssh to connect to remote server, so make sure to have a ssh key. The role will deploy bunkerweb on your remote server.
+
+First of all download the role from ansible-galaxy: (TODO)
+
+Next create an inventory by adding the IP adress or FQDN of one or more remote systems, either in `/etc/ansible/hosts` or in your own playbook `inventory.yml`
+
+```
+[remotehosts]
+192.0.2.50
+192.0.2.51
+192.0.2.52
+```
+
+The next step we're going to set up the SSH connections so Ansible can connect to the managed nodes.
+Firstly: Add your public SSH keys to the `authorized_keys` file on each remote system
+Secondly: 
+Test the SSH connections:
+`ssh username@192.0.2.50`
+
+In order to use the role, we will create the playbook file named `playbook.yml` for example:
+```yaml
+---
+- hosts: all
+  become: true
+
+  roles:
+    - bunkerweb
+```
+
+Run the playbook:
+`ansible-playbook -i inventory.yml playbook.yml`
+
+The configurations by default for Bunkerweb are minimals, so check out the rest of the documentations to configure Bunkerweb as you desire [quickstart-guide](http://localhost:8000/quickstart-guide/).
