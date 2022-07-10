@@ -6,7 +6,8 @@
 - Fix ui.env not read when using Linux integration
 - Fix check if BunkerNet is activated on default server
 - Add \*_CUSTOM_CONF_\* setting to automatically add custom config files from setting value
-- Add DENY_HTTP_STATUS setting to choose standard 403 error (default) or to close connection (444) when access is denied
+- Add DENY_HTTP_STATUS setting to choose standard 403 error page (default) or 444 to close connection when access is denied
+- Add CORS (Cross-Origin Resource Sharing) core plugin
 - Add documentation about Docker in rootless mode and podman
 - Migrate CI/CD infrastructure to another provider
 
