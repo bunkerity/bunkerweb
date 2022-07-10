@@ -273,6 +273,42 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     systemctl start bunkerweb
     ```
 
+=== "Ansible"
+
+    We will assume that you already have a service running and you want to use bunkerweb as a reverse-proxy.
+
+    The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
+    ```shell
+    python3 -m http.server -b 127.0.0.1
+    ```
+
+    Configuration of the `variables.env` file :
+    ```conf
+    SERVER_NAME=www.example.com
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/
+    REVERSE_PROXY_HOST=http://127.0.0.1:8000
+    ```
+
+    In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+            variables_env: ../variables.env
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
+
 ### Multiple applications
 
 !!! tip "Testing"
@@ -832,6 +868,57 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     systemctl start bunkerweb
     ```
 
+=== "Ansible"
+
+    Let's assume that you have some web applications running on the same machine as BunkerWeb :
+
+    === "App #1"
+    	The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
+    	```shell
+    	python3 -m http.server -b 127.0.0.1 8001
+    	```
+
+    === "App #2"
+    	The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
+    	```shell
+    	python3 -m http.server -b 127.0.0.1 8002
+    	```
+
+    === "App #3"
+    	The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
+    	```shell
+    	python3 -m http.server -b 127.0.0.1 8003
+    	```
+
+    Configuration of the `variables.env` file :
+    ```conf
+    SERVER_NAME=app1.example.com app2.example.com app3.example.com
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/
+    app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
+    app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
+    app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
+    ```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+            variables_env: ../variables.env
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
+
 ## Behind load balancer or reverse proxy
 
 When BunkerWeb is itself behind a load balancer or a reverse proxy, you will need to configure it so it can get the real IP address of the clients. If you don't do it, the security features will block the IP address of the load balancer or reverse proxy instead of the client one.
@@ -981,6 +1068,33 @@ REAL_IP_HEADER=X-Forwarded-For
 
     Don't forget to reload the bunkerweb service once it's done.
 
+=== "Ansible"
+
+    You will need to add the settings to your `variables.env` file :
+    ```conf
+	...
+	USE_REAL_IP=yes
+	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+	REAL_IP_HEADER=X-Forwarded-For
+	...
+	```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+            variables_env: ../variables.env
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
+
 ### Proxy protocol
 
 We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :
@@ -1121,6 +1235,34 @@ REAL_IP_HEADER=proxy_protocol
 	```
 
     Don't forget to reload the bunkerweb service once it's done.
+
+=== "Ansible"
+
+    You will need to add the settings to your `variables.env` file :
+    ```conf
+	...
+	USE_REAL_IP=yes
+	USE_PROXY_PROTOCOL=yes
+	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+	REAL_IP_HEADER=proxy_protocol
+	...
+	```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+            variables_env: ../variables.env
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
 
 ## Custom configurations
 
@@ -1350,3 +1492,41 @@ Some integrations offer a more convenient way of applying configurations for exa
     ```
 
     Don't forget to reload the bunkerweb service once it's done.
+
+=== "Ansible"
+
+    When the variable `custom_configs` is set to "true" , you could use the 
+	`custom_configs_path[]` variable to write the configs to the /opt/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+    ```conf
+	location /hello {
+		default_type 'text/plain';
+		content_by_lua_block {
+			ngx.say('world')
+		}
+	}
+	```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+        	custom_configs: true
+        	custom_configs_path: {
+          	server-http: ../hello-world.conf,
+          	#http: ../http.conf,
+          	#default-server-http: ../default-server-http.conf,
+          	#modsec-crs: ../modsec-crs,
+          	#modsec: ../modsec
+          }
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
