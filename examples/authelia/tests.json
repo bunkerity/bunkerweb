@@ -1,0 +1,22 @@
+{
+	"name": "authelia",
+	"kinds": [
+		"docker",
+		"autoconf",
+		"swarm",
+		"kubernetes"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://TEST_DOMAIN1_1
+			"string": "authelia"
+		},
+		{
+			"type": "string",
+			"url": "https://TEST_DOMAIN1_2
+			"string": "authelia"
+		}
+	]
+}
