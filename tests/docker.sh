@@ -81,7 +81,7 @@ single_docker_test "joomla" "60" "https://$TEST_DOMAIN1 joomla"
 single_docker_test "load-balancer" "30" "https://$TEST_DOMAIN1 hello"
 
 # magento
-single_docker_test "magento" "180" "https://$TEST_DOMAIN1 magento"
+single_docker_test "magento" "300" "https://$TEST_DOMAIN1 magento"
 
 # mattermost
 single_docker_test "mattermost" "60" "https://$TEST_DOMAIN1 mattermost"
