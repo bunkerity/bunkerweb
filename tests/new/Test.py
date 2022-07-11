@@ -6,6 +6,7 @@ from traceback import format_exc
 from shutil import rmtree
 from os.path import isdir, join
 from os import mkdir, makedirs, walk
+from re import sub, MULTILINE
 
 class Test(ABC) :
 
@@ -14,7 +15,7 @@ class Test(ABC) :
         self.__kind = kind
         self.__timeout = timeout
         self.__tests = tests
-        self._log("instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s") 
+        self._log("instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s")
 
     def _log(self, msg, error=False) :
         when = datetime.datetime.today().strftime("[%Y-%m-%d %H:%M:%S]")
@@ -26,7 +27,6 @@ class Test(ABC) :
 
     # Class method
     # called once before running all the different tests for a given integration
-    # must be override if specific actions needs to be done
     def init() :
         try :
             if not isdir("/tmp/bw-data") :
@@ -35,7 +35,9 @@ class Test(ABC) :
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs :
                 if isdir(rm_dir) :
-                    rmtree("/tmp/bw-data/" + rm_dir, ignore_errors=True)
+                    rmtree("/tmp/bw-data/" + rm_dir)
+            if not isdir("/tmp/tests") :
+                mkdir("/tmp/tests")
         except :
             self._log("exception while running Test.init()\n" + format_exc(), error=True)
             return False
@@ -45,16 +47,19 @@ class Test(ABC) :
     # must be override if specific actions needs to be done
     def _setup_test(self) :
         try :
+            rm_dirs = ["configs", "plugins", "www"]
+            for rm_dir in rm_dirs :
+                if isdir(rm_dir) :
+                    rmtree("/tmp/bw-data/" + rm_dir)
             if isdir("/tmp/tests/" + self._name) :
                 rmtree("/tmp/tests/" + self._name)
-            makedirs("/tmp/tests/" + self._name, exist_ok=True)
+            copytree("./examples/" + self._name, "/tmp/tests/" + self._name)
         except :
             self._log("exception while running Test._setup_test()\n" + format_exc(), error=True)
             return False
         return True
 
     # called after running the tests
-    # must be override if specific actions needs to be done
     def _cleanup_test(self) :
         try :
             rmtree("/tmp/tests/" + self._name)
@@ -79,7 +84,7 @@ class Test(ABC) :
                 elapsed = str(int(time() - start))
                 self._log("success (" + elapsed + "/" + str(self.__timeout) + "s)")
                 return self._cleanup_test()
-            self._log("tests no ok, retrying in 1s ...", error=True)
+            self._log("tests not ok, retrying in 1s ...", error=True)
             sleep(1)
         self._log("failed (timeout = " + str(self.__timeout) + "s)", error=True)
         self._cleanup_test()
@@ -98,14 +103,20 @@ class Test(ABC) :
     def _replace_in_file(path, old, new) :
         with open(path, "r") as f :
             content = f.read()
-        content = content.replace(old, new)
+        content = sub(old, new, content, flags=MULTILINE)
         with open(path, "w") as f :
             f.write(content)
+
+    def _replace_in_files(path, old, new) :
+        for root, dirs, files in walk(path) :
+            for name in files :
+                self._replace_in_file(join(root, name), old, new)
 
     def _rename(path, old, new) :
         for root, dirs, files in walk(path) :
             for name in dirs + files :
                 full_path = join(root, name)
                 if old in full_path :
-                    new_path = full_path.replace(old, new)
-                    rename(full_path, new_path)
+                    new_path = sub(old, new, full_path)
+                    if full_path != new_path :
+                        rename(full_path, new_path)
