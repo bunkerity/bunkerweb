@@ -304,6 +304,15 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
             variables_env: ../variables.env
 	```
 
+	Or in INI format :
+	```ini
+	[all]
+	host
+
+	[all:vars]
+	variables_env = ../variables.env
+	```
+
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
@@ -907,11 +916,44 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 	```yaml
 	all:
   	  children:
-        Groups:
+        host1:
           hosts: 
             "Your_IP_Address":
-          vars:
-            variables_env: ../variables.env
+		  vars:
+        	variables_env: ../variables.env
+		host2:
+          hosts: 
+            "Your_IP_Address":
+		  vars:
+        	variables_env = variables.env
+			enable_ui=true
+		host3:
+          hosts: 
+            "Your_IP_Address":
+		  vars:
+        	variables_env = ../variables.env
+			custom_site=../site
+			plugins=../plugins
+	```
+
+	Or in INI format :
+	```ini
+	[all]
+	host1
+	host2
+	host3
+	
+	[host1:vars]
+	variables_env = ../variables.env
+
+	[host2:vars]
+	variables_env = variables.env
+	enable_ui=true
+
+	[host3:vars]
+	variables_env = ../variables.env
+	custom_site=../site
+	plugins=../plugins
 	```
 
 	Run the playbook :
@@ -1090,6 +1132,15 @@ REAL_IP_HEADER=X-Forwarded-For
             variables_env: ../variables.env
 	```
 
+	Or in INI format :
+	```ini
+	[all]
+	host
+	
+	[all:vars]
+	variables_env = ../variables.env
+	```
+
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
@@ -1257,6 +1308,15 @@ REAL_IP_HEADER=proxy_protocol
             "Your_IP_Address":
           vars:
             variables_env: ../variables.env
+	```
+
+	Or in INI format :
+	```ini
+	[all]
+	host
+	
+	[all:vars]
+	variables_env = ../variables.env
 	```
 
 	Run the playbook :
@@ -1524,6 +1584,16 @@ Some integrations offer a more convenient way of applying configurations for exa
           	#modsec-crs: ../modsec-crs,
           	#modsec: ../modsec
           }
+	```
+
+	Or in INI format :
+	```ini
+	[all]
+	host
+	
+	[all:vars]
+	custom_configs=true
+	custom_configs_path={'server-http': '../hello-world.conf', 'http': '../http.conf', 'default-server-http': '../default-server-http.conf', 'modsec-crs': '../modsec-crs', 'modsec': '../modsec'}
 	```
 
 	Run the playbook :

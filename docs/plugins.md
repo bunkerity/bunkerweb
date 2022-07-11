@@ -119,6 +119,16 @@ The first step is to install the plugin by putting the plugin files inside the c
     cp -rp ./bunkerweb-plugins/* /data/plugins
     ```
 
+=== "Ansible"
+    When using the [Ansible integration](/1.4/integrations/#ansible), plugins must be written to the varaibles `plugins` within your Ansible inventory. :
+    ```ini
+    [all]
+    "Your_IP"
+
+    [all:vars]
+    plugins="PathToYourPlugins"
+    ```
+
 When a plugin is installed, you are ready to use it, please refer to the plugin documentation for more information.
 
 ## Writing a plugin
