@@ -374,7 +374,7 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 Plugin pages are used to display information about your plugin. You can create a page by creating a subfolder named **ui** next to the file **plugin.json** and putting a **template.html** file inside it. The template file will be used to display the page.
 
-A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the library flask) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**.
+A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the library flask) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. We recommend to use the url_for function to generate the action URL to avoid any problems. Like this : **{{ url_for('plugins') }}/<*plugin_id*>**.
 
 !!! info "Template variables"
 
@@ -405,13 +405,21 @@ Otherwise, the form will not be submitted because of the CSRF token protection.
 
     Plugins pages are displayed in the **Plugins** section of the Web UI.
 
+!!! info "useful information"
+
+    You can use Python libraries in your **actions.py** file. You just have to **import** them. Here are the main list of available libraries :
+    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`
+
+    In your **template.html** file, you can use the following functions :
+    `csrf_token` and `url_for`
+
 For example, I have a plugin called **myplugin** and I want to create a custom page. I just have to create a subfolder called **ui** and put a **template.html** file inside it. I want my plugin to display a form that will submit the data to the plugin. I can then use the **request** object (from the library flask) to get the values of the form. For that I create a **actions.py** file in the same **ui** folder as my **template.html** file. I define a function called **myplugin** that returns a dictionary with the template variables I want to display.
 
 ```html
 <html>
     <body>
         <p>{{ foo }}</p>
-        <form action="/plugins/myplugin" method="POST">
+        <form action="{{ url_for('plugins') }}/myplugin" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="text" name="foo" />
             <input type="submit" value="Submit" />

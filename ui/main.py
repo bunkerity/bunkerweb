@@ -998,11 +998,13 @@ def plugins():
                 "id": page.lower().replace(" ", "-"),
                 "name": page,
                 # Render the template with the plugin's data if it corresponds to the last submitted form else with the default data
-                "content": template.render(csrf_token=generate_csrf)
+                "content": template.render(csrf_token=generate_csrf, url_for=url_for)
                 if app.config["PLUGIN_ARGS"] is None
                 or app.config["PLUGIN_ARGS"]["plugin"] != page.lower()
                 else template.render(
-                    csrf_token=generate_csrf, **app.config["PLUGIN_ARGS"]["args"]
+                    csrf_token=generate_csrf,
+                    url_for=url_for,
+                    **app.config["PLUGIN_ARGS"]["args"],
                 ),
                 # Only the first plugin page is active
                 "active": active,
