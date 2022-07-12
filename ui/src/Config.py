@@ -49,10 +49,6 @@ class Config:
                 if "template.html" in listdir(f"{foldername}/ui"):
                     self.__plugins_pages.append(plugin["name"])
 
-        for filename in iglob("/opt/bunkerweb/plugins/**/plugin.json"):
-            with open(filename, "r") as f:
-                self.__plugins.append(json_load(f))
-
         self.__plugins.sort(key=lambda plugin: plugin.get("name"))
         self.__plugins_pages.sort()
         self.__plugins_settings = {
