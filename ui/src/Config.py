@@ -1,8 +1,8 @@
 from copy import deepcopy
+from os import listdir
 from flask import flash
-from operator import xor
 from os.path import isfile
-from typing import Tuple
+from typing import List, Tuple
 from json import load as json_load
 from uuid import uuid4
 from glob import iglob
@@ -13,35 +13,48 @@ from subprocess import run, DEVNULL, STDOUT
 class Config:
     def __init__(self):
         with open("/opt/bunkerweb/settings.json", "r") as f:
-            self.__settings = json_load(f)
+            self.__settings: dict = json_load(f)
 
-        self.__plugins = []
-        for filename in iglob("/opt/bunkerweb/core/**/plugin.json"):
-            with open(filename, "r") as f:
-                self.__plugins.append(json_load(f))
-
-        for filename in iglob("/opt/bunkerweb/plugins/**/plugin.json"):
-            with open(filename, "r") as f:
-                self.__plugins.append(json_load(f))
-
-        self.__plugins.sort(key=lambda plugin: plugin.get("name"))
-        self.__plugins_settings = {
-            **{k: v for x in self.__plugins for k, v in x["settings"].items()},
-            **self.__settings,
-        }
+        self.reload_plugins()
 
     def reload_plugins(self) -> None:
-        self.__plugins.clear()
+        self.__plugins = []
+        self.__plugins_pages = []
 
-        for filename in iglob("/opt/bunkerweb/core/**/plugin.json"):
-            with open(filename, "r") as f:
-                self.__plugins.append(json_load(f))
+        for foldername in iglob("/opt/bunkerweb/plugins/*"):
+            content = listdir(foldername)
+            if "plugin.json" not in content:
+                continue
+
+            with open(f"{foldername}/plugin.json", "r") as f:
+                plugin = json_load(f)
+
+            self.__plugins.append(plugin)
+
+            if "ui" in content:
+                if "template.html" in listdir(f"{foldername}/ui"):
+                    self.__plugins_pages.append(plugin["name"])
+
+        for foldername in iglob("/opt/bunkerweb/core/*"):
+            content = listdir(foldername)
+            if "plugin.json" not in content:
+                continue
+
+            with open(f"{foldername}/plugin.json", "r") as f:
+                plugin = json_load(f)
+
+            self.__plugins.append(plugin)
+
+            if "ui" in content:
+                if "template.html" in listdir(f"{foldername}/ui"):
+                    self.__plugins_pages.append(plugin["name"])
 
         for filename in iglob("/opt/bunkerweb/plugins/**/plugin.json"):
             with open(filename, "r") as f:
                 self.__plugins.append(json_load(f))
 
         self.__plugins.sort(key=lambda plugin: plugin.get("name"))
+        self.__plugins_pages.sort()
         self.__plugins_settings = {
             **{k: v for x in self.__plugins for k, v in x["settings"].items()},
             **self.__settings,
@@ -148,8 +161,11 @@ class Config:
     def get_plugins_settings(self) -> dict:
         return self.__plugins_settings
 
-    def get_plugins(self) -> dict:
+    def get_plugins(self) -> List[dict]:
         return self.__plugins
+
+    def get_plugins_pages(self) -> List[str]:
+        return self.__plugins_pages
 
     def get_settings(self) -> dict:
         return self.__settings

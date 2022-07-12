@@ -369,3 +369,62 @@ end
 ### Jobs
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
+
+### Plugin page
+
+Plugin pages are used to display information about your plugin. You can create a page by creating a subfolder named **ui** next to the file **plugin.json** and putting a **template.html** file inside it. The template file will be used to display the page.
+
+A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the library flask) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**.
+
+!!! info "Template variables"
+
+    Your template file can use template variables to display the content of your plugin. Like *Jinja2*, the template variables can be accessed by using the `{{` and `}}` delimiters. To use template variables, your custom function must return a dictionary with the template variables. The dictionary keys are the template variables names and the values are the values to display. Example :
+    ```json
+    {
+        "foo": "bar"
+    }
+    ```
+    ```html
+    <html>
+        <body>
+            <p>{{ foo }}</p>
+        </body>
+    </html>
+    ```
+    Will display : `bar`
+
+If you want to submit your form through a POST request, you need to add the following line to your form :
+
+```html
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+```
+
+Otherwise, the form will not be submitted because of the CSRF token protection.
+
+!!! tip "Plugins pages"
+
+    Plugins pages are displayed in the **Plugins** section of the Web UI.
+
+For example, I have a plugin called **myplugin** and I want to create a custom page. I just have to create a subfolder called **ui** and put a **template.html** file inside it. I want my plugin to display a form that will submit the data to the plugin. I can then use the **request** object (from the library flask) to get the values of the form. For that I create a **actions.py** file in the same **ui** folder as my **template.html** file. I define a function called **myplugin** that returns a dictionary with the template variables I want to display.
+
+```html
+<html>
+    <body>
+        <p>{{ foo }}</p>
+        <form action="/plugins/myplugin" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="text" name="foo" />
+            <input type="submit" value="Submit" />
+        </form>
+    </body>
+</html>
+```
+
+```python
+from flask import request
+
+def myplugin():
+    return {
+        "foo": request.form["foo"]
+    }
+```

@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Union
 from subprocess import run
 
 from api.API import API
@@ -126,17 +126,17 @@ class Instances:
 
         return instances
 
-    def reload_instances(self) -> list[str]:
+    def reload_instances(self) -> Union[list[str], str]:
         not_reloaded: list[str] = []
         for instance in self.get_instances():
             if instance.health is False:
                 not_reloaded.append(instance.name)
                 continue
 
-            if self.reload_instance(None, instance).startswith("Can't reload"):
+            if self.reload_instance(instance=instance).startswith("Can't reload"):
                 not_reloaded.append(instance.name)
 
-        return not_reloaded
+        return not_reloaded or "Successfully reloaded instances"
 
     def reload_instance(self, id: int = None, instance: Instance = None) -> str:
         if instance is None:

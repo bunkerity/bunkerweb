@@ -1,6 +1,11 @@
+from email import message
 import os
 from shutil import rmtree, copytree, chown
 from logging import getLogger, INFO, ERROR, StreamHandler, Formatter
+from traceback import format_exc
+from typing import Optional
+from jinja2 import Template
+from threading import Thread
 from flask import (
     Flask,
     flash,
@@ -12,15 +17,16 @@ from flask import (
     url_for,
 )
 from flask_login import LoginManager, login_required, login_user, logout_user
-from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, load as json_load
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
 from dateutil.parser import parse as dateutil_parse
 from requests import get
 from requests.utils import default_headers
-from sys import path as sys_path, exit as sys_exit
+from sys import path as sys_path, exit as sys_exit, modules as sys_modules
 from copy import deepcopy
+from re import match as re_match
 from docker import DockerClient
 from docker.errors import (
     NotFound as docker_NotFound,
@@ -144,6 +150,9 @@ try:
         WTF_CSRF_SSL_STRICT=False,
         USER=user,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
+        PLUGIN_ARGS=None,
+        RELOADING=False,
+        TO_FLASH=[],
     )
 except FileNotFoundError as e:
     logger.error(repr(e), e.filename)
@@ -161,6 +170,50 @@ app.jinja_env.globals.update(gen_folders_tree_html=gen_folders_tree_html)
 app.jinja_env.globals.update(check_settings=check_settings)
 
 
+def manage_bunkerweb(method: str, operation: str = "reloads", *args):
+    # Do the operation
+    if method == "services":
+        if operation == "new":
+            operation, error = app.config["CONFIG"].new_service(args[0])
+        elif operation == "edit":
+            operation = app.config["CONFIG"].edit_service(args[1], args[0])
+        elif operation == "delete":
+            operation, error = app.config["CONFIG"].delete_service(args[2])
+
+        if error:
+            app.config["TO_FLASH"].append({"content": operation, "type": "error"})
+        else:
+            app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+    if method == "global_config":
+        operation = app.config["CONFIG"].edit_global_conf(args[0])
+        app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+    elif method == "plugins":
+        app.config["CONFIG"].reload_config()
+
+    if operation == "reload":
+        operation = app.config["INSTANCES"].reload_instance(args[0])
+    elif operation == "start":
+        operation = app.config["INSTANCES"].start_instance(args[0])
+    elif operation == "stop":
+        operation = app.config["INSTANCES"].stop_instance(args[0])
+    elif operation == "restart":
+        operation = app.config["INSTANCES"].restart_instance(args[0])
+    else:
+        operation = app.config["INSTANCES"].reload_instances()
+
+    if isinstance(operation, list):
+        for op in operation:
+            app.config["TO_FLASH"].append(
+                {"content": f"Reload failed for the instance {op}", "type": "error"}
+            )
+    elif operation.startswith("Can't"):
+        app.config["TO_FLASH"].append({"content": operation, "type": "error"})
+    else:
+        app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+
+    app.config["RELOADING"] = False
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id, vars["ADMIN_PASSWORD"])
@@ -172,7 +225,7 @@ csrf.init_app(app)
 
 
 @app.errorhandler(CSRFError)
-def handle_csrf_error(e):
+def handle_csrf_error(_):
     """
     It takes a CSRFError exception as an argument, and returns a Flask response
 
@@ -192,8 +245,13 @@ def index():
 @app.route("/loading")
 @login_required
 def loading():
-    next_url = request.values.get("next")
-    return render_template("loading.html", next=next_url)
+    next_url: str = request.values.get("next", None) or url_for("home")
+    message: Optional[str] = request.values.get("message", None)
+    return render_template(
+        "loading.html",
+        message=message if message is not None else "Loading",
+        next=next_url,
+    )
 
 
 @app.route("/home")
@@ -291,30 +349,25 @@ def instances():
             flash("Missing INSTANCE_ID parameter.", "error")
             return redirect(url_for("loading", next=url_for("instances")))
 
-        # Do the operation
-        if request.form["operation"] == "reload":
-            operation = app.config["INSTANCES"].reload_instance(
-                request.form["INSTANCE_ID"]
-            )
-        elif request.form["operation"] == "start":
-            operation = app.config["INSTANCES"].start_instance(
-                request.form["INSTANCE_ID"]
-            )
-        elif request.form["operation"] == "stop":
-            operation = app.config["INSTANCES"].stop_instance(
-                request.form["INSTANCE_ID"]
-            )
-        elif request.form["operation"] == "restart":
-            operation = app.config["INSTANCES"].restart_instance(
-                request.form["INSTANCE_ID"]
-            )
+        app.config["RELOADING"] = True
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=("instances", request.form["operation"], request.form["INSTANCE_ID"]),
+        ).start()
 
-        if operation.startswith("Can't"):
-            flash(operation, "error")
-        else:
-            flash(operation)
-
-        return redirect(url_for("loading", next=url_for("instances")))
+        return redirect(
+            url_for(
+                "loading",
+                next=url_for("instances"),
+                message=(
+                    f"{request.form['operation'].title()}ing"
+                    if request.form["operation"] is not "stop"
+                    else "Stopping"
+                )
+                + " instance",
+            )
+        )
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
@@ -394,33 +447,32 @@ def services():
 
         error = 0
 
-        # Do the operation
+        # Reload instances
+        app.config["RELOADING"] = True
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=(
+                "services",
+                request.form["operation"],
+                variables,
+                request.form.get("OLD_SERVER_NAME", None),
+                request.form.get("SERVER_NAME", None),
+            ),
+        ).start()
+
+        message = ""
+
         if request.form["operation"] == "new":
-            operation, error = app.config["CONFIG"].new_service(variables)
+            message = f"Creating service {variables['SERVER_NAME'].split(' ')[0]}"
         elif request.form["operation"] == "edit":
-            operation = app.config["CONFIG"].edit_service(
-                request.form["OLD_SERVER_NAME"], variables
+            message = (
+                f"Saving configuration for service {request.form['OLD_SERVER_NAME']}"
             )
         elif request.form["operation"] == "delete":
-            operation, error = app.config["CONFIG"].delete_service(
-                request.form["SERVER_NAME"]
-            )
+            message = f"Deleting service {request.form['SERVER_NAME']}"
 
-        if error:
-            flash(operation, "error")
-            return redirect(url_for("loading", next=url_for("services")))
-
-        flash(operation)
-
-        # Reload instances
-        _reloads = app.config["INSTANCES"].reload_instances()
-        if not _reloads:
-            for _reload in _reloads:
-                flash(f"Reload failed for the instance {_reload}", "error")
-        else:
-            flash("Successfully reloaded instances")
-
-        return redirect(url_for("loading", next=url_for("services")))
+        return redirect(url_for("loading", next=url_for("services"), message=message))
 
     # Display services
     services = app.config["CONFIG"].get_services()
@@ -461,26 +513,25 @@ def global_config():
         if error:
             return redirect(url_for("loading", next=url_for("global_config")))
 
-        error = 0
-
-        # Do the operation
-        operation = app.config["CONFIG"].edit_global_conf(variables)
-
-        if error:
-            flash(operation, "error")
-            return redirect(url_for("loading", next=url_for("global_config")))
-
-        flash(operation)
-
         # Reload instances
-        _reloads = app.config["INSTANCES"].reload_instances()
-        if not _reloads:
-            for _reload in _reloads:
-                flash(f"Reload failed for the instance {_reload}", "error")
-        else:
-            flash("Successfully reloaded instances")
+        app.config["RELOADING"] = True
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=(
+                "global_config",
+                "reloads",
+                variables,
+            ),
+        ).start()
 
-        return redirect(url_for("loading", next=url_for("global_config")))
+        return redirect(
+            url_for(
+                "loading",
+                next=url_for("global_config"),
+                message="Saving global configuration",
+            )
+        )
 
     # Display services
     services = app.config["CONFIG"].get_services()
@@ -558,12 +609,12 @@ def configs():
         flash(operation)
 
         # Reload instances
-        _reloads = app.config["INSTANCES"].reload_instances()
-        if not _reloads:
-            for _reload in _reloads:
-                flash(f"Reload failed for the instance {_reload}", "error")
-        else:
-            flash("Successfully reloaded instances")
+        app.config["RELOADING"] = True
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=("configs",),
+        ).start()
 
         return redirect(url_for("loading", next=url_for("configs")))
 
@@ -868,24 +919,24 @@ def plugins():
 
                     error = 0
 
+            # Fix permissions for plugins folders
             for root, dirs, files in os.walk("/opt/bunkerweb/plugins", topdown=False):
                 for name in files + dirs:
                     chown(os.path.join(root, name), "nginx", "nginx")
                     os.chmod(os.path.join(root, name), 0o770)
 
-        app.config["CONFIG"].reload_config()
-
         if operation:
             flash(operation)
 
         # Reload instances
-        _reloads = app.config["INSTANCES"].reload_instances()
-        if not _reloads:
-            for _reload in _reloads:
-                flash(f"Reload failed for the instance {_reload}", "error")
-        else:
-            flash("Successfully reloaded instances")
+        app.config["RELOADING"] = True
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=("plugins",),
+        ).start()
 
+        # Remove tmp folder
         if os.path.exists("/opt/bunkerweb/tmp/ui"):
             try:
                 rmtree("/opt/bunkerweb/tmp/ui")
@@ -893,8 +944,11 @@ def plugins():
                 pass
 
         app.config["CONFIG"].reload_plugins()
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(
+            url_for("loading", next=url_for("plugins"), message="Reloading plugins")
+        )
 
+    # Initialize plugins tree
     plugins = [
         {
             "name": "plugins",
@@ -918,8 +972,47 @@ def plugins():
             ],
         }
     ]
+    # Populate plugins tree
+    plugins_pages = app.config["CONFIG"].get_plugins_pages()
 
-    return render_template("plugins.html", folders=plugins)
+    pages = []
+    active = True
+    for page in plugins_pages:
+        with open(
+            f"/opt/bunkerweb/"
+            + (
+                "plugins"
+                if os.path.exists(
+                    f"/opt/bunkerweb/plugins/{page.lower()}/ui/template.html"
+                )
+                else "core"
+            )
+            + f"/{page.lower()}/ui/template.html",
+            "r",
+        ) as f:
+            # Convert the file content to a jinja2 template
+            template = Template(f.read())
+
+        pages.append(
+            {
+                "id": page.lower().replace(" ", "-"),
+                "name": page,
+                # Render the template with the plugin's data if it corresponds to the last submitted form else with the default data
+                "content": template.render(csrf_token=generate_csrf)
+                if app.config["PLUGIN_ARGS"] is None
+                or app.config["PLUGIN_ARGS"]["plugin"] != page.lower()
+                else template.render(
+                    csrf_token=generate_csrf, **app.config["PLUGIN_ARGS"]["args"]
+                ),
+                # Only the first plugin page is active
+                "active": active,
+            }
+        )
+        active = False
+
+    app.config["PLUGIN_ARGS"] = None
+
+    return render_template("plugins.html", folders=plugins, pages=pages)
 
 
 @app.route("/plugins/upload", methods=["POST"])
@@ -942,6 +1035,85 @@ def upload_plugin():
             f.write(file.read())
 
     return {"status": "ok"}, 201
+
+
+@app.route("/plugins/<plugin>", methods=["GET", "POST"])
+@login_required
+def custom_plugin(plugin):
+    if not re_match(r"^[a-zA-Z0-9_-]{1,64}$", plugin):
+        flash(
+            f"Invalid plugin id, <b>{plugin}</b> (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)",
+            "error",
+        )
+        return redirect(url_for("loading", next=url_for("plugins")))
+
+    if not os.path.exists(
+        f"/opt/bunkerweb/plugins/{plugin}/ui/actions.py"
+    ) and not os.path.exists(f"/opt/bunkerweb/core/{plugin}/ui/actions.py"):
+        flash(
+            f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
+            "error",
+        )
+        return redirect(url_for("loading", next=url_for("plugins")))
+
+    # Add the custom plugin to sys.path
+    sys_path.append(
+        f"/opt/bunkerweb/"
+        + (
+            "plugins"
+            if os.path.exists(f"/opt/bunkerweb/plugins/{plugin}/ui/actions.py")
+            else "core"
+        )
+        + f"/{plugin}/ui/"
+    )
+    try:
+        # Try to import the custom plugin
+        import actions
+    except:
+        flash(
+            f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
+            "error",
+        )
+        return redirect(url_for("loading", next=url_for("plugins")))
+
+    error = False
+    res = None
+
+    try:
+        # Try to get the custom plugin custom function and call it
+        method = getattr(actions, plugin)
+        res = method()
+    except AttributeError:
+        flash(
+            f"The plugin <b>{plugin}</b> does not have a <i>{plugin}</i> method",
+            "error",
+        )
+        error = True
+        return redirect(url_for("loading", next=url_for("plugins")))
+    except:
+        flash(
+            f"An error occurred while executing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
+            "error",
+        )
+        error = True
+    finally:
+        # Remove the custom plugin from the shared library
+        sys_path.pop()
+        del sys_modules["actions"]
+        del actions
+
+        if (
+            request.method != "POST"
+            or error is True
+            or res is None
+            or isinstance(res, dict) is False
+        ):
+            return redirect(url_for("loading", next=url_for("plugins")))
+
+    app.config["PLUGIN_ARGS"] = {"plugin": plugin, "args": res}
+
+    flash(f"Your action <b>{plugin}</b> has been executed")
+    return redirect(url_for("loading", next=url_for("plugins")))
 
 
 @app.route("/cache", methods=["GET"])
@@ -1210,6 +1382,21 @@ def login():
             401,
         )
     return render_template("login.html")
+
+
+@app.route("/check_reloading")
+@login_required
+def check_reloading():
+    if app.config["RELOADING"] is False:
+        for f in app.config["TO_FLASH"]:
+            if f["type"] == "error":
+                flash(f["content"], "error")
+            else:
+                flash(f["content"])
+
+        app.config["TO_FLASH"].clear()
+
+    return jsonify({"reloading": app.config["RELOADING"]})
 
 
 @app.route("/logout")
