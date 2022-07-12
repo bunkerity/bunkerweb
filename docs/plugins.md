@@ -405,7 +405,7 @@ Otherwise, the form will not be submitted because of the CSRF token protection.
 
     Plugins pages are displayed in the **Plugins** section of the Web UI.
 
-!!! info "useful information"
+!!! info "Useful information"
 
     You can use Python libraries in your **actions.py** file. You just have to **import** them. Here are the main list of available libraries :
     `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`
