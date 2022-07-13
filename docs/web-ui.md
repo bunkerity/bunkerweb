@@ -280,16 +280,15 @@ Because the web UI is a web application, the recommended installation procedure 
     In YAML format:
     
     ```yaml
-	  all:
-  	  children:
-        Groups:
-          hosts: 
-            "Your_IP_Address":
-          vars:
+	all:
+  	children:
+      Groups:
+        hosts: 
+          "Your_IP_Address":
+        vars:
           enable_ui: true # Activate the UI
           custom_ui: "PathToYourFile" # Path to your UI file
-          }
-	  ```
+	```
 
     Or in INI format :
     ```ini
