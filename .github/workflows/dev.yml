@@ -364,9 +364,15 @@ jobs:
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
 
+      # Prepare tests
+      - name: Install tests dependencies
+        run: pip3 install -r ./tests/requirements.txt
+
       # Run tests
       - name: Run Docker tests
-        run: ./tests/docker.sh ${{ env.BUILD_MODE }}
+        run: ./tests/main.py "docker"
+      - name: Temp stop tests
+        run: exit 1
       - name: Run autoconf tests
         run: ./tests/autoconf.sh ${{ env.BUILD_MODE }}
       - name: Run Swarm tests

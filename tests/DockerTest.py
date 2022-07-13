@@ -1,6 +1,7 @@
 from Test import Test
 from os.path import isdir, join, isfile
-from os import chown, walk, getenv
+from os import chown, walk, getenv, listdir
+from shutil import copytree
 from traceback import format_exc
 from subprocess import run
 
@@ -33,6 +34,7 @@ class DockerTest(Test) :
             super()._setup_test()
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/docker-compose.yml"
+            example_data = "./examples/" + self._name + "/bw-data"
             self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             self._replace_in_file(compose, r"\- bw_data:/", "/tmp/bw-data:/")
@@ -42,7 +44,18 @@ class DockerTest(Test) :
             setup = test + "/setup-docker.sh"
             if isfile(setup) :
                 run("./docker-setup.sh", cwd=test, shell=True, check=True)
-            
+            if isdir(example_data) :
+                for cp_dir in listdir(example_data) :
+                    if isdir(join(example_data, cp_dir)) :
+                        copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
+            cmd = "docker-compose pull"
+            proc = run(cmd.split(" "), shell=True, cwd=test)
+            if proc.returncode != 0 :
+                raise("docker-compose pull failed")
+            cmd = "docker-compose up -d"
+            proc = run(cmd.split(" "), shell=True, cwd=test)
+            if proc.returncode != 0 :
+                raise("docker-compose up failed")
         except :
             self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
             return False
@@ -50,4 +63,15 @@ class DockerTest(Test) :
         
 
     def _cleanup_test(self) :
-        pass
+        try :
+            test = "/tmp/tests/" + self._name
+            cmd = "docker-compose down -v"
+            proc = run(cmd.split(" "), shell=True, cwd=test)
+            if proc.returncode != 0 :
+                raise("docker-compose down failed")
+            super()._cleanup_test()
+        except :
+            self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
+            return False
+        return True
+        
