@@ -43,7 +43,9 @@ class DockerTest(Test) :
                 self._rename(test, ex_domain, test_domain)
             setup = test + "/setup-docker.sh"
             if isfile(setup) :
-                run("./docker-setup.sh", cwd=test, shell=True, check=True)
+                proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)
+                if proc.returncode != 0 :
+                    raise(Exception("setup-docker failed"))
             if isdir(example_data) :
                 for cp_dir in listdir(example_data) :
                     if isdir(join(example_data, cp_dir)) :
@@ -56,9 +58,10 @@ class DockerTest(Test) :
                 raise(Exception("docker-compose up failed"))
         except :
             self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
+            self._cleanup_test()
             return False
+        self._cleanup_test()
         return True
-        
 
     def _cleanup_test(self) :
         try :

@@ -45,6 +45,11 @@ class Test(ABC) :
             return False
         return True
 
+    # Class method
+    # called once all tests ended
+    def end() :
+        pass
+
     # called before starting the tests
     # must be override if specific actions needs to be done
     def _setup_test(self) :
@@ -64,7 +69,7 @@ class Test(ABC) :
     # called after running the tests
     def _cleanup_test(self) :
         try :
-            rmtree("/tmp/tests/" + self._name)
+            run("sudo rm -rf /tmp/tests/" + self._name, shell=True)
         except :
             self._log("exception while running Test._cleanup_test()\n" + format_exc(), error=True)
             return False
@@ -89,7 +94,6 @@ class Test(ABC) :
             self._log("tests not ok, retrying in 1s ...", error=True)
             sleep(1)
         self._log("failed (timeout = " + str(self.__timeout) + "s)", error=True)
-        self._cleanup_test()
         return False
 
     # run a single test

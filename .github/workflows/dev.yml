@@ -373,6 +373,8 @@ jobs:
       # Run tests
       - name: Run Docker tests
         run: ./tests/main.py "docker"
+      - name: Run Autoconf tests
+        run: ./tests/main.py "autoconf"
       - name: Temp stop tests
         run: exit 1
       - name: Run autoconf tests
