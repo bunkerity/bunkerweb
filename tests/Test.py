@@ -7,6 +7,7 @@ from shutil import rmtree
 from os.path import isdir, join
 from os import mkdir, makedirs, walk, chmod
 from re import sub, MULTILINE
+from datetime.datetime import today
 
 class Test(ABC) :
 
@@ -18,7 +19,7 @@ class Test(ABC) :
         self._log("instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s")
 
     def _log(self, msg, error=False) :
-        when = datetime.datetime.today().strftime("[%Y-%m-%d %H:%M:%S]")
+        when = today().strftime("[%Y-%m-%d %H:%M:%S]")
         what = self._name + " - " + self.__kind + " - " + msg
         if error :
             print(when + " " + what, flush=True, file=stderr)
