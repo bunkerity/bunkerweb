@@ -44,5 +44,6 @@ for example in glob("./examples/*") :
                     exit(1)
         except :
             log("TESTS", "❌", "Exception while executing test for example " + example + " : " + format_exc())
+            exit(1)
 
 log("TESTS", "ℹ️", "All tests finished for " + test_type + " !")
