@@ -6,7 +6,7 @@ from traceback import format_exc
 from shutil import copytree
 from os.path import isdir, join
 from os import mkdir, makedirs, walk, chmod
-from re import sub, match, MULTILINE
+from re import sub, search, MULTILINE
 from datetime import datetime
 from subprocess import run
 
@@ -98,12 +98,13 @@ class Test(ABC) :
             if test["type"] == "string" :
                 ex_url = test["url"]
                 for ex_domain, test_domain in self._domains.items() :
-                    if match(ex_domain, ex_url) :
+                    if search(ex_domain, ex_url) :
                         ex_url = sub(ex_domain, test_domain, ex_url)
                 r = get(ex_url, timeout=5)
                 return test["string"] in r.text
         except :
             self._log("exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc(), error=True)
+            return False
         raise(Exception("unknow test type " + test["type"]))
 
     def _replace_in_file(self, path, old, new) :
