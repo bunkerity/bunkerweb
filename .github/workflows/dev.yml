@@ -370,7 +370,7 @@ jobs:
 
       # Run tests
       - name: Run Docker tests
-        run: sudo ./tests/main.py "docker"
+        run: ./tests/main.py "docker"
       - name: Temp stop tests
         run: exit 1
       - name: Run autoconf tests
