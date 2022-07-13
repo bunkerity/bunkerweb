@@ -1600,3 +1600,594 @@ Some integrations offer a more convenient way of applying configurations for exa
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
+
+## FPM
+
+Using PHP with Nginx is a bit tricky. 
+
+The following settings can be used :
+
+- `REMOTE_PHP` : Hostname of the remote PHP-FPM instance.
+- `REMOTE_PHP_PATH` : Root folder containing files in the remote PHP-FPM instance.
+- `DISABLE_DEFAULT_SERVER` : Close connection if the request vhost is unknown.
+
+### Single application
+
+=== "Docker"
+
+    When using the [Docker integration](/1.4/integrations/#docker), you have two steps for adding custom configurations :
+    
+    - Using specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables
+    - Writing yours files in yours folder and mounte the volume on /data
+    
+    Create the Docker network if it's not already created :
+    ```shell
+    docker network create bw-net
+    ```
+
+	Then instance the PHP-FPM container :
+    ```shell
+    docker run -d \
+       	--name myphp \
+       	--network bw-net \
+       	-v AbsolutePath/bw-data/www:/app \
+       	php:fpm
+    ```
+
+    You can now run BunkerWeb and configure it for your app :
+    ```shell
+    docker run -d \
+           --name mybunker \
+    	   --network bw-net \
+    	   -p 80:8080 \
+    	   -p 443:8443 \
+    	   -v AbsolutePath/bw-data:/data \
+    	   -e SERVER_NAME=www.example.com \
+		   -e AUTO_LETS_ENCRYPT=yes \
+		   -e DISABLE_DEFAULT_SERVER=yes \
+		   -e USE_CLIENT_CACHE=yes \
+		   -e USE_GZIP=yes \
+		   -e REMOTE_PHP=myphp \
+		   -e REMOTE_PHP_PATH=/app \
+    	   bunkerity/bunkerweb:1.4.2
+    ```
+
+	Here is the docker-compose equivalent :
+    ```yaml
+    version: '3'
+
+    services:
+
+      mybunker:
+    	image: bunkerity/bunkerweb:1.4.2
+    	ports:
+    	  - 80:8080
+    	  - 443:8443
+    	volumes:
+    	  - ./bw-data:/data
+    	environment:
+    	  - SERVER_NAME=www.example.com # replace with your domain
+      	  - AUTO_LETS_ENCRYPT=yes
+      	  - DISABLE_DEFAULT_SERVER=yes
+      	  - USE_CLIENT_CACHE=yes
+      	  - USE_GZIP=yes
+      	  - REMOTE_PHP=myphp
+      	  - REMOTE_PHP_PATH=/app
+    	networks:
+    	  - bw-net
+
+      myphp:
+    	image: php:fpm
+		volumes:
+		  - ./bw-data:/data
+    	networks:
+    	  - bw-net
+
+    networks:
+      bw-net:
+    ```
+
+=== "Docker autoconf"
+
+    We will assume that you already have the Docker autoconf integration stack running on your machine and connected to a network called bw-services.
+
+	You can instantiate your container and pass the settings as labels :
+    ```shell
+    docker run -d \
+        --name mybunker \
+    	--network bw-autoconf \
+		-v ./www:/www \
+	   -p 80:8080 \
+	   -p 443:8443 \
+    	-e AUTOCONF_MODE=yes \
+       -e MULTISITE=yes \
+       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
+        -e SERVER_NAME= \
+       -l bunkerweb.AUTOCONF \
+        bunkerity/bunkerweb:1.4.2
+    ```
+
+    === "App #1"
+    	```shell
+    	docker run -d \
+       		--name myphp1 \
+       		--network bw-services \
+       		-v ./www/app1.example.com:/app \
+       		-l bunkerweb.DISABLE_DEFAULT_SERVER=yes \
+       		-l bunkerweb.SERVER_NAME=app1.example.com \
+       		-l bunkerweb.USE_CLIENT_CACHE=yes \
+       		-l bunkerweb.USE_GZIP=yes \
+       		-l bunkerweb.REMOTE_PHP=myphp1 \
+       		-l bunkerweb.REMOTE_PHP_PATH=/app \
+       		-l bunkerweb.ROOT_FOLDER=/www/app1.example.com \
+       		php:fpm
+    	```
+
+    === "App #2"
+    	```shell
+    	docker run -d \
+       		--name myphp2 \
+       		--network bw-services \
+       		-v ./www/app2.example.com:/app \
+       		-l bunkerweb.DISABLE_DEFAULT_SERVER=yes \
+       		-l bunkerweb.SERVER_NAME=app2.example.com \
+       		-l bunkerweb.USE_CLIENT_CACHE=yes \
+       		-l bunkerweb.USE_GZIP=yes \
+       		-l bunkerweb.REMOTE_PHP=myphp2 \
+       		-l bunkerweb.REMOTE_PHP_PATH=/app \
+       		-l bunkerweb.ROOT_FOLDER=/www/app2.example.com \
+       		php:fpm
+    	```
+
+	Here is the docker-compose equivalent :
+	```yaml
+	version: '3'
+
+	services:
+
+  	  mybunker:
+    	image: bunkerity/bunkerweb:1.4.2
+    	volumes: 
+      	  - ./www:/www
+    	ports:
+      	  - 80:8080
+      	  - 443:8443
+    	environment:
+      	  - AUTOCONF_MODE=yes
+      	  - MULTISITE=yes
+      	  - SERVER_NAME=
+      	  - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    	labels:
+      	  - "bunkerweb.AUTOCONF"
+    	networks:
+      	  - bw-autoconf
+      	  - bw-services
+
+  	  myautoconf:
+    	image: bunkerity/bunkerweb-autoconf:1.4.2
+    	volumes:
+      	  - bw-data:/data
+      	  - /var/run/docker.sock:/var/run/docker.sock:ro
+    	networks:
+      	  - bw-autoconf
+
+  	  myphp1:
+    	image: php:fpm
+    	volumes:
+      	  - ./www/app1.example.com:/app
+    	networks:
+      	  bw-services:
+        	aliases:
+            	- myphp1
+    	labels:
+      	  - "bunkerweb.DISABLE_DEFAULT_SERVER=yes"
+      	  - "bunkerweb.SERVER_NAME=app1.example.com"
+      	  - "bunkerweb.USE_CLIENT_CACHE=yes"
+      	  - "bunkerweb.USE_GZIP=yes"
+      	  - "bunkerweb.REMOTE_PHP=myphp1"
+      	  - "bunkerweb.REMOTE_PHP_PATH=/app"
+      	  - "bunkerweb.ROOT_FOLDER=/www/app1.example.com"
+
+  	  myphp2:
+    	image: php:fpm
+    	volumes:
+      	  - ./www/app2.example.com:/app
+    	networks:
+      	  bw-services:
+        	aliases:
+            	- myphp2
+    	labels:
+      	  - "bunkerweb.DISABLE_DEFAULT_SERVER=yes"
+      	  - "bunkerweb.SERVER_NAME=app2.example.com"
+      	  - "bunkerweb.USE_CLIENT_CACHE=yes"
+      	  - "bunkerweb.USE_GZIP=yes"
+      	  - "bunkerweb.REMOTE_PHP=myphp2"
+      	  - "bunkerweb.REMOTE_PHP_PATH=/app"
+      	  - "bunkerweb.ROOT_FOLDER=/www/app2.example.com"
+
+	volumes:
+  	  bw-data:
+
+	networks:
+  	  bw-autoconf:
+    	ipam:
+      	  driver: default
+      	  config:
+        	- subnet: 10.20.30.0/24
+  	  bw-services:
+    	name: bw-services
+	```
+
+=== "Linux"
+
+    We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
+
+    You have to install php-fpm 
+    ```shell
+    apt install php-fpm
+    ```
+
+    Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
+    ```conf
+    SERVER_NAME=www.example.com
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/
+    REVERSE_PROXY_HOST=http://127.0.0.1:8000
+    ```
+
+    Let's check the status of BunkerWeb :
+    ```shell
+    systemctl status bunkerweb
+    ```
+
+    If it's already running we can just reload it :
+    ```shell
+    systemctl reload bunkerweb
+    ```
+
+    Otherwise, we will need to start it :
+    ```shell
+    systemctl start bunkerweb
+    ```
+
+=== "Ansible"
+
+    When the variable `custom_configs` is set to "true" , you could use the 
+	`custom_configs_path[]` variable to write the configs to the /opt/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+    ```conf
+	location /hello {
+		default_type 'text/plain';
+		content_by_lua_block {
+			ngx.say('world')
+		}
+	}
+	```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+        	custom_configs: true
+        	custom_configs_path: {
+          	server-http: ../hello-world.conf,
+          	#http: ../http.conf,
+          	#default-server-http: ../default-server-http.conf,
+          	#modsec-crs: ../modsec-crs,
+          	#modsec: ../modsec
+          }
+	```
+
+	Or in INI format :
+	```ini
+	[all]
+	host
+	
+	[all:vars]
+	custom_configs=true
+	custom_configs_path={'server-http': '../hello-world.conf', 'http': '../http.conf', 'default-server-http': '../default-server-http.conf', 'modsec-crs': '../modsec-crs', 'modsec': '../modsec'}
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
+
+### Multiple applications
+
+=== "Docker"
+
+    When using the [Docker integration](/1.4/integrations/#docker), you have two steps for adding custom configurations :
+    
+    - Using specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables
+    - Writing yours files in yours folder and mounte the volume on /data
+    
+    Create the Docker networks if it's not already created :
+    ```shell
+    docker network create net_app1
+	docker network create net_app2
+    ```
+
+    Then instantiate your apps :
+    === "App #1"
+    	```shell
+    	docker run -d \
+    		   --name myphp1 \
+    		   --network net_app1 \
+			   -v bw-data/www/app1.example.com:/app
+    		   php:fpm
+    	```
+    === "App #2"
+    	```shell
+    	docker run -d \
+    		   --name myphp2 \
+    		   --network net_app2 \
+			   -v bw-data/www/app2.example.com:/app
+    		   php:fpm
+    	```
+
+    You can now run BunkerWeb and configure it for your app :
+    ```shell
+    docker run -d \
+           --name mybunker \
+    	   --network net_app1 \
+    	   --network net_app2 \
+    	   -p 80:8080 \
+    	   -p 443:8443 \
+    	   -v ./bw-data:/data \
+    	   -e SERVER_NAME=app1.example.com app2.exemple.com \
+		   -e MULTISITE=yes \
+		   -e AUTO_LETS_ENCRYPT=yes \
+		   -e DISABLE_DEFAULT_SERVER=yes \
+		   -e USE_CLIENT_CACHE=yes \
+		   -e USE_GZIP=yes \
+		   -e app1.exemple.com_REMOTE_PHP=myphp1 \
+		   -e app1.exemple.com_REMOTE_PHP_PATH=/app \
+		   -e app2.exemple.com_REMOTE_PHP=myphp2 \
+		   -e app2.exemple.com_REMOTE_PHP_PATH=/app \
+    	   bunkerity/bunkerweb:1.4.2
+    ```
+
+	Here is the docker-compose equivalent :
+    ```yaml
+    version: '3'
+
+    services:
+
+      mybunker:
+    	image: bunkerity/bunkerweb:1.4.2
+    	ports:
+    	  - 80:8080
+    	  - 443:8443
+    	volumes:
+    	  - ./bw-data:/data
+    	environment:
+    	  - SERVER_NAME=www.example.com # replace with your domain
+      	  - AUTO_LETS_ENCRYPT=yes
+      	  - DISABLE_DEFAULT_SERVER=yes
+      	  - USE_CLIENT_CACHE=yes
+      	  - USE_GZIP=yes
+      	  - REMOTE_PHP=myphp
+      	  - REMOTE_PHP_PATH=/app
+    	networks:
+    	  - bw-net
+
+      myphp:
+    	image: php:fpm
+		volumes:
+		  - ./bw-data:/data
+    	networks:
+    	  - bw-net
+
+    networks:
+      bw-net:
+    ```
+
+=== "Docker autoconf"
+
+    We will assume that you already have the Docker autoconf integration stack running on your machine and connected to a network called bw-services.
+
+	You can instantiate your container and pass the settings as labels :
+    ```shell
+    docker run -d \
+        --name mybunker \
+    	--network bw-autoconf \
+		-v ./www:/www \
+	   -p 80:8080 \
+	   -p 443:8443 \
+    	-e AUTOCONF_MODE=yes \
+       -e MULTISITE=yes \
+       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
+        -e SERVER_NAME= \
+       -l bunkerweb.AUTOCONF \
+        bunkerity/bunkerweb:1.4.2
+    ```
+
+    === "App #1"
+    	```shell
+    	docker run -d \
+       		--name myphp1 \
+       		--network bw-services \
+       		-v ./www/app1.example.com:/app \
+       		-l bunkerweb.DISABLE_DEFAULT_SERVER=yes \
+       		-l bunkerweb.SERVER_NAME=app1.example.com \
+       		-l bunkerweb.USE_CLIENT_CACHE=yes \
+       		-l bunkerweb.USE_GZIP=yes \
+       		-l bunkerweb.REMOTE_PHP=myphp1 \
+       		-l bunkerweb.REMOTE_PHP_PATH=/app \
+       		-l bunkerweb.ROOT_FOLDER=/www/app1.example.com \
+       		php:fpm
+    	```
+
+    === "App #2"
+    	```shell
+    	docker run -d \
+       		--name myphp2 \
+       		--network bw-services \
+       		-v ./www/app2.example.com:/app \
+       		-l bunkerweb.DISABLE_DEFAULT_SERVER=yes \
+       		-l bunkerweb.SERVER_NAME=app2.example.com \
+       		-l bunkerweb.USE_CLIENT_CACHE=yes \
+       		-l bunkerweb.USE_GZIP=yes \
+       		-l bunkerweb.REMOTE_PHP=myphp2 \
+       		-l bunkerweb.REMOTE_PHP_PATH=/app \
+       		-l bunkerweb.ROOT_FOLDER=/www/app2.example.com \
+       		php:fpm
+    	```
+
+	Here is the docker-compose equivalent :
+	```yaml
+	version: '3'
+
+	services:
+
+  	  mybunker:
+    	image: bunkerity/bunkerweb:1.4.2
+    	volumes: 
+      	  - ./www:/www
+    	ports:
+      	  - 80:8080
+      	  - 443:8443
+    	environment:
+      	  - AUTOCONF_MODE=yes
+      	  - MULTISITE=yes
+      	  - SERVER_NAME=
+      	  - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    	labels:
+      	  - "bunkerweb.AUTOCONF"
+    	networks:
+      	  - bw-autoconf
+      	  - bw-services
+
+  	  myautoconf:
+    	image: bunkerity/bunkerweb-autoconf:1.4.2
+    	volumes:
+      	  - bw-data:/data
+      	  - /var/run/docker.sock:/var/run/docker.sock:ro
+    	networks:
+      	  - bw-autoconf
+
+  	  myphp1:
+    	image: php:fpm
+    	volumes:
+      	  - ./www/app1.example.com:/app
+    	networks:
+      	  bw-services:
+        	aliases:
+            	- myphp1
+    	labels:
+      	  - "bunkerweb.DISABLE_DEFAULT_SERVER=yes"
+      	  - "bunkerweb.SERVER_NAME=app1.example.com"
+      	  - "bunkerweb.USE_CLIENT_CACHE=yes"
+      	  - "bunkerweb.USE_GZIP=yes"
+      	  - "bunkerweb.REMOTE_PHP=myphp1"
+      	  - "bunkerweb.REMOTE_PHP_PATH=/app"
+      	  - "bunkerweb.ROOT_FOLDER=/www/app1.example.com"
+
+  	  myphp2:
+    	image: php:fpm
+    	volumes:
+      	  - ./www/app2.example.com:/app
+    	networks:
+      	  bw-services:
+        	aliases:
+            	- myphp2
+    	labels:
+      	  - "bunkerweb.DISABLE_DEFAULT_SERVER=yes"
+      	  - "bunkerweb.SERVER_NAME=app2.example.com"
+      	  - "bunkerweb.USE_CLIENT_CACHE=yes"
+      	  - "bunkerweb.USE_GZIP=yes"
+      	  - "bunkerweb.REMOTE_PHP=myphp2"
+      	  - "bunkerweb.REMOTE_PHP_PATH=/app"
+      	  - "bunkerweb.ROOT_FOLDER=/www/app2.example.com"
+
+	volumes:
+  	  bw-data:
+
+	networks:
+  	  bw-autoconf:
+    	ipam:
+      	  driver: default
+      	  config:
+        	- subnet: 10.20.30.0/24
+  	  bw-services:
+    	name: bw-services
+	```
+
+=== "Linux"
+
+    When using the [Linux integration](/1.4/integrations/#linux), custom configurations must be written to the /opt/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+    ```conf
+	location /hello {
+		default_type 'text/plain';
+		content_by_lua_block {
+			ngx.say('world')
+		}
+	}
+	```
+
+    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+    ```shell
+    chown -R root:nginx /opt/bunkerweb/configs && \
+    chmod -R 770 /opt/bunkerweb/configs
+    ```
+
+    Don't forget to reload the bunkerweb service once it's done.
+
+=== "Ansible"
+
+    When the variable `custom_configs` is set to "true" , you could use the 
+	`custom_configs_path[]` variable to write the configs to the /opt/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+    ```conf
+	location /hello {
+		default_type 'text/plain';
+		content_by_lua_block {
+			ngx.say('world')
+		}
+	}
+	```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	```yaml
+	all:
+  	  children:
+        Groups:
+          hosts: 
+            "Your_IP_Address":
+          vars:
+        	custom_configs: true
+        	custom_configs_path: {
+          	server-http: ../hello-world.conf,
+          	#http: ../http.conf,
+          	#default-server-http: ../default-server-http.conf,
+          	#modsec-crs: ../modsec-crs,
+          	#modsec: ../modsec
+          }
+	```
+
+	Or in INI format :
+	```ini
+	[all]
+	host
+	
+	[all:vars]
+	custom_configs=true
+	custom_configs_path={'server-http': '../hello-world.conf', 'http': '../http.conf', 'default-server-http': '../default-server-http.conf', 'modsec-crs': '../modsec-crs', 'modsec': '../modsec'}
+	```
+
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
