@@ -4,6 +4,8 @@ from sys import path, argv, exit
 from glob import glob
 from os import getcwd
 from os.path import isfile
+from traceback import format_exc
+from json import loads
 path.append(getcwd() + "/utils")
 path.append(getcwd() + "/tests")
 
@@ -41,6 +43,6 @@ for example in glob("./examples/*") :
                     log("TESTS", "❌", "Tests failed for " + tests["name"])
                     exit(1)
         except :
-            log("TESTS", "❌", "Exception while executing test for example " + example + " : " + traceback.format_exc())
+            log("TESTS", "❌", "Exception while executing test for example " + example + " : " + format_exc())
 
 log("TESTS", "ℹ️", "All tests finished for " + test_type + " !")
