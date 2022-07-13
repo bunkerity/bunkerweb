@@ -101,7 +101,7 @@ class Test(ABC) :
                     if search(ex_domain, ex_url) :
                         ex_url = sub(ex_domain, test_domain, ex_url)
                 r = get(ex_url, timeout=5)
-                return test["string"] in r.text
+                return test["string"].casefold() in r.text.casefold()
         except :
             self._log("exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc(), error=True)
             return False
