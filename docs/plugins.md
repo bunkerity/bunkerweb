@@ -408,7 +408,7 @@ Otherwise, the form will not be submitted because of the CSRF token protection.
 !!! info "Useful information"
 
     You can use Python libraries in your **actions.py** file. You just have to **import** them. Here are the main list of available libraries :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`
+    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blob/master/ui/requirements.txt)
 
     In your **template.html** file, you can use the following functions :
     `csrf_token` and `url_for`
