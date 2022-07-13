@@ -3,7 +3,7 @@ from sys import stderr
 from time import time, sleep
 from requests import get
 from traceback import format_exc
-from shutil import rmtree
+from shutil import rmtree, copytree
 from os.path import isdir, join
 from os import mkdir, makedirs, walk, chmod
 from re import sub, MULTILINE
@@ -101,19 +101,19 @@ class Test(ABC) :
             self._log("exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc(), error=True)
         raise("unknow test type " + test["type"])
 
-    def _replace_in_file(path, old, new) :
+    def _replace_in_file(self, path, old, new) :
         with open(path, "r") as f :
             content = f.read()
         content = sub(old, new, content, flags=MULTILINE)
         with open(path, "w") as f :
             f.write(content)
 
-    def _replace_in_files(path, old, new) :
+    def _replace_in_files(self, path, old, new) :
         for root, dirs, files in walk(path) :
             for name in files :
                 self._replace_in_file(join(root, name), old, new)
 
-    def _rename(path, old, new) :
+    def _rename(self, path, old, new) :
         for root, dirs, files in walk(path) :
             for name in dirs + files :
                 full_path = join(root, name)

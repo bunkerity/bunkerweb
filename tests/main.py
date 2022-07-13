@@ -2,7 +2,7 @@
 
 from sys import path, argv, exit
 from glob import glob
-from os import getcwd
+from os import getcwd, _exit
 from os.path import isfile
 from traceback import format_exc
 from json import loads
@@ -41,7 +41,7 @@ for example in glob("./examples/*") :
                     test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"])
                 if not test_obj.run_tests() :
                     log("TESTS", "❌", "Tests failed for " + tests["name"])
-                    exit(1)
+                    _exit(1)
         except :
             log("TESTS", "❌", "Exception while executing test for example " + example + " : " + format_exc())
             exit(1)
