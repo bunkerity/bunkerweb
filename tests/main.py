@@ -37,7 +37,7 @@ for example in glob("./examples/*") :
                 continue
             for test in tests["tests"] :
                 test_obj = None
-                if test_obj == "docker" :
+                if test_type == "docker" :
                     test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"])
                 if not test_obj.run_tests() :
                     log("TESTS", "❌", "Tests failed for " + tests["name"])
