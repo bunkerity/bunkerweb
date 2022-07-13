@@ -367,6 +367,8 @@ jobs:
       # Prepare tests
       - name: Install tests dependencies
         run: pip3 install -r ./tests/requirements.txt
+      - name: Set variables
+        run: cat /opt/.runner_env >> $GITHUB_ENV
 
       # Run tests
       - name: Run Docker tests
