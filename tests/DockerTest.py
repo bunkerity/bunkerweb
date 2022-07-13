@@ -37,7 +37,7 @@ class DockerTest(Test) :
             example_data = "./examples/" + self._name + "/bw-data"
             self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
-            self._replace_in_file(compose, r"\- bw_data:/", "/tmp/bw-data:/")
+            self._replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items() :
                 self._replace_in_files(test, ex_domain, test_domain)
                 self._rename(test, ex_domain, test_domain)
