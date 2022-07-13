@@ -3,11 +3,12 @@ from sys import stderr
 from time import time, sleep
 from requests import get
 from traceback import format_exc
-from shutil import rmtree, copytree
+from shutil import copytree
 from os.path import isdir, join
 from os import mkdir, makedirs, walk, chmod
 from re import sub, match, MULTILINE
 from datetime import datetime
+from subprocess import run
 
 class Test(ABC) :
 
@@ -36,7 +37,7 @@ class Test(ABC) :
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs :
                 if isdir(rm_dir) :
-                    rmtree("/tmp/bw-data/" + rm_dir)
+                    run("rm -rf /tmp/bw-data/" + rm_dir, shell=True)
             if not isdir("/tmp/tests") :
                 mkdir("/tmp/tests")
         except :
@@ -50,10 +51,10 @@ class Test(ABC) :
         try :
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs :
-                if isdir(rm_dir) :
-                    rmtree("/tmp/bw-data/" + rm_dir)
+                if isdir("/tmp/bw-data/" + rm_dir) :
+                    run("rm -rf /tmp/bw-data/" + rm_dir, shell=True)
             if isdir("/tmp/tests/" + self._name) :
-                rmtree("/tmp/tests/" + self._name)
+                run("/tmp/tests/" + self._name, shell=True)
             copytree("./examples/" + self._name, "/tmp/tests/" + self._name)
         except :
             self._log("exception while running Test._setup_test()\n" + format_exc(), error=True)
