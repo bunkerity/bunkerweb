@@ -10,12 +10,12 @@
 	"tests": [
 		{
 			"type": "string",
-			"url": "https://TEST_DOMAIN1_1",
+			"url": "https://app1.example.com",
 			"string": "authelia"
 		},
 		{
 			"type": "string",
-			"url": "https://TEST_DOMAIN1_2",
+			"url": "https://app2.example.com",
 			"string": "authelia"
 		}
 	]

@@ -9,7 +9,7 @@ class DockerTest(Test) :
 
     def __init__(self, name, timeout, tests) :
         super().__init__(name, "docker", timeout, tests)
-        self.__domains = {
+        self._domains = {
             r"www\.example\.com": getenv("TEST_DOMAIN1"),
             r"auth\.example\.com": getenv("TEST_DOMAIN1"),
             r"app1\.example\.com": getenv("TEST_DOMAIN1_1"),
@@ -38,7 +38,7 @@ class DockerTest(Test) :
             self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             self._replace_in_file(compose, r"\- bw_data:/", "/tmp/bw-data:/")
-            for ex_domain, test_domain in self.__domains.items() :
+            for ex_domain, test_domain in self._domains.items() :
                 self._replace_in_files(test, ex_domain, test_domain)
                 self._rename(test, ex_domain, test_domain)
             setup = test + "/setup-docker.sh"
@@ -48,14 +48,12 @@ class DockerTest(Test) :
                 for cp_dir in listdir(example_data) :
                     if isdir(join(example_data, cp_dir)) :
                         copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
-            cmd = "docker-compose pull"
-            proc = run(cmd.split(" "), shell=True, cwd=test)
+            proc = run("docker-compose pull", shell=True, cwd=test)
             if proc.returncode != 0 :
-                raise("docker-compose pull failed")
-            cmd = "docker-compose up -d"
-            proc = run(cmd.split(" "), shell=True, cwd=test)
+                raise(Exception("docker-compose pull failed"))
+            proc = run("docker-compose up -d", shell=True, cwd=test)
             if proc.returncode != 0 :
-                raise("docker-compose up failed")
+                raise(Exception("docker-compose up failed"))
         except :
             self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
             return False
@@ -65,10 +63,9 @@ class DockerTest(Test) :
     def _cleanup_test(self) :
         try :
             test = "/tmp/tests/" + self._name
-            cmd = "docker-compose down -v"
-            proc = run(cmd.split(" "), shell=True, cwd=test)
+            proc = run("docker-compose down -v", shell=True, cwd=test)
             if proc.returncode != 0 :
-                raise("docker-compose down failed")
+                raise(Exception("docker-compose down failed"))
             super()._cleanup_test()
         except :
             self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
