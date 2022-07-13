@@ -99,7 +99,7 @@ class Test(ABC) :
                 for ex_domain, test_domain in self._domains.items() :
                     if match(ex_domain, ex_url) :
                         ex_url = sub(ex_domain, test_domain, ex_url)
-                r = get(test["url"], timeout=5)
+                r = get(ex_url, timeout=5)
                 return test["string"] in r.text
         except :
             self._log("exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc(), error=True)
