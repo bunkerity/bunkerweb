@@ -5,7 +5,7 @@ from requests import get
 from traceback import format_exc
 from shutil import rmtree
 from os.path import isdir, join
-from os import mkdir, makedirs, walk
+from os import mkdir, makedirs, walk, chmod
 from re import sub, MULTILINE
 
 class Test(ABC) :
@@ -39,7 +39,7 @@ class Test(ABC) :
             if not isdir("/tmp/tests") :
                 mkdir("/tmp/tests")
         except :
-            self._log("exception while running Test.init()\n" + format_exc(), error=True)
+            print("exception while running Test.init()\n" + format_exc(), flush=True, file=stderr)
             return False
         return True
 
