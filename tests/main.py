@@ -7,6 +7,7 @@ from os.path import isfile
 path.append(getcwd() + "/utils")
 path.append(getcwd() + "/tests")
 
+from Test import Test
 from DockerTest import DockerTest
 from logger import log
 
