@@ -7,8 +7,8 @@ from subprocess import run
 
 class DockerTest(Test) :
 
-	def __init__(self, name, timeout, tests) :
-		super().__init__(name, "docker", timeout, tests)
+    def __init__(self, name, timeout, tests) :
+        super().__init__(name, "docker", timeout, tests)
         self.__domains = {
             r"www\.example\.com": getenv("TEST_DOMAIN1"),
             r"auth\.example\.com": getenv("TEST_DOMAIN1"),

@@ -2,7 +2,8 @@
 
 from sys import path, argv, exit
 from glob import glob
-from os import getcwd, isfile
+from os import getcwd
+from os.path import isfile
 path.append(getcwd() + "/utils")
 path.append(getcwd() + "/tests")
 
