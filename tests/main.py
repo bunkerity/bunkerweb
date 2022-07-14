@@ -11,6 +11,7 @@ path.append(getcwd() + "/tests")
 
 from Test import Test
 from DockerTest import DockerTest
+from AutoconfTest import AutoconfTest
 from logger import log
 
 if len(argv) != 2 :
@@ -28,6 +29,9 @@ end_fun = None
 if test_type == "docker" :
     ret = DockerTest.init()
     end_fun = DockerTest.end
+elif test_type == "autoconf" :
+    ret = AutoconfTest.init()
+    end_fun = AutoconfTest.end
 if not ret :
     log("TESTS", "❌", "Test.init() failed")
     exit(1)

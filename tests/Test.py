@@ -26,7 +26,7 @@ class Test(ABC) :
         try :
             if not isdir("/tmp/bw-data") :
                 mkdir("/tmp/bw-data")
-            chmod("/tmp/bw-data", 0o777)
+            run("sudo chmod 777 /tmp/bw-data", shell=True)
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs :
                 if isdir(rm_dir) :
