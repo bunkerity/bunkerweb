@@ -61,7 +61,6 @@ class DockerTest(Test) :
             log("DOCKER", "❌", "exception while running DockerTest._setup_test()\n" + format_exc())
             self._cleanup_test()
             return False
-        self._cleanup_test()
         return True
 
     def _cleanup_test(self) :

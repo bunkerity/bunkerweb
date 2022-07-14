@@ -102,7 +102,6 @@ class AutoconfTest(Test) :
             log("AUTOCONF", "❌", "exception while running AutoconfTest._setup_test()\n" + format_exc())
             self._cleanup_test()
             return False
-        self._cleanup_test()
         return True
 
     def _cleanup_test(self) :
