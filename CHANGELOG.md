@@ -10,6 +10,7 @@
 - Add DENY_HTTP_STATUS setting to choose standard 403 error page (default) or 444 to close connection when access is denied
 - Add CORS (Cross-Origin Resource Sharing) core plugin
 - Add documentation about Docker in rootless mode and podman
+- Improve automatic tests setup
 - Migrate CI/CD infrastructure to another provider
 
 ## v1.4.2 - 2022/06/28

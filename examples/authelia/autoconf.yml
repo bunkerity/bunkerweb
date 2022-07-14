@@ -50,7 +50,10 @@ services:
   # AUTHELIA
   authelia:
     image: authelia/authelia
-    container_name: authelia
+    networks:
+      bw-services:
+        aliases:
+          - authelia
     volumes:
       - ./authelia:/config
     restart: unless-stopped
@@ -67,7 +70,10 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: redis
+    networks:
+      bw-services:
+        aliases:
+          - redis
     volumes:
       - ./redis:/data
     expose:
