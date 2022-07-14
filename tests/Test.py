@@ -9,6 +9,7 @@ from os import mkdir, makedirs, walk, chmod
 from re import sub, search, MULTILINE
 from datetime import datetime
 from subprocess import run
+from logger import log
 
 class Test(ABC) :
 
@@ -17,15 +18,7 @@ class Test(ABC) :
         self.__kind = kind
         self.__timeout = timeout
         self.__tests = tests
-        self._log("instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s")
-
-    def _log(self, msg, error=False) :
-        when = datetime.today().strftime("[%Y-%m-%d %H:%M:%S]")
-        what = self._name + " - " + self.__kind + " - " + msg
-        if error :
-            print(when + " " + what, flush=True, file=stderr)
-        else :
-            print(when + " " + what, flush=True)
+        log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s")
 
     # Class method
     # called once before running all the different tests for a given integration
@@ -41,7 +34,7 @@ class Test(ABC) :
             if not isdir("/tmp/tests") :
                 mkdir("/tmp/tests")
         except :
-            print("exception while running Test.init()\n" + format_exc(), flush=True, file=stderr)
+            log("TEST", "❌", "exception while running Test.init()\n" + format_exc())
             return False
         return True
 
@@ -62,7 +55,7 @@ class Test(ABC) :
                 run("sudo rm -rf /tmp/tests/" + self._name, shell=True)
             copytree("./examples/" + self._name, "/tmp/tests/" + self._name)
         except :
-            self._log("exception while running Test._setup_test()\n" + format_exc(), error=True)
+            log("TEST", "❌", "exception while running Test._setup_test()\n" + format_exc())
             return False
         return True
 
@@ -71,7 +64,7 @@ class Test(ABC) :
         try :
             run("sudo rm -rf /tmp/tests/" + self._name, shell=True)
         except :
-            self._log("exception while running Test._cleanup_test()\n" + format_exc(), error=True)
+            log("TEST", "❌", "exception while running Test._cleanup_test()\n" + format_exc())
             return False
         return True
 
@@ -89,11 +82,11 @@ class Test(ABC) :
                     break
             if all_ok :
                 elapsed = str(int(time() - start))
-                self._log("success (" + elapsed + "/" + str(self.__timeout) + "s)")
+                log("TEST", "ℹ️", "success (" + elapsed + "/" + str(self.__timeout) + "s)")
                 return self._cleanup_test()
-            self._log("tests not ok, retrying in 1s ...", error=True)
+            log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
             sleep(1)
-        self._log("failed (timeout = " + str(self.__timeout) + "s)", error=True)
+        log("TEST", "❌", "failed (timeout = " + str(self.__timeout) + "s)")
         return False
 
     # run a single test
@@ -107,7 +100,7 @@ class Test(ABC) :
                 r = get(ex_url, timeout=5)
                 return test["string"].casefold() in r.text.casefold()
         except :
-            self._log("exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc(), error=True)
+            log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc())
             return False
         raise(Exception("unknow test type " + test["type"]))
 

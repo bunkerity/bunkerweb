@@ -5,6 +5,7 @@ from shutil import copytree
 from traceback import format_exc
 from subprocess import run
 from time import sleep
+from logger import log
 
 class AutoconfTest(Test) :
 
@@ -52,7 +53,7 @@ class AutoconfTest(Test) :
             if not healthy :
                 raise(Exception("autoconf stack is not healthy"))
         except :
-            self._log("exception while running AutoconfTest.init()\n" + format_exc(), error=True)
+            log("AUTOCONF", "❌", "exception while running AutoconfTest.init()\n" + format_exc())
             return False
         return True
 
@@ -66,7 +67,7 @@ class AutoconfTest(Test) :
                 ret = False
             rmtree("/tmp/autoconf")
         except :
-            self._log("exception while running AutoconfTest.end()\n" + format_exc(), error=True)
+            log("AUTOCONF", "❌", "exception while running AutoconfTest.end()\n" + format_exc())
             return False
         return ret
 
@@ -74,7 +75,7 @@ class AutoconfTest(Test) :
         try :
             super()._setup_test()
             test = "/tmp/tests/" + self._name
-            compose = "/tmp/tests/" + self._name + "/docker-compose.yml"
+            compose = "/tmp/tests/" + self._name + "/service.yml"
             example_data = "./examples/" + self._name + "/bw-data"
             self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
@@ -91,14 +92,14 @@ class AutoconfTest(Test) :
                 for cp_dir in listdir(example_data) :
                     if isdir(join(example_data, cp_dir)) :
                         copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
-            proc = run("docker-compose pull", shell=True, cwd=test)
+            proc = run("docker-compose -f autoconf.yml pull", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose pull failed"))
-            proc = run("docker-compose up -d", shell=True, cwd=test)
+            proc = run("docker-compose -f autoconf.yml up -d", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose up failed"))
         except :
-            self._log("exception while running AutoconfTest._setup_test()\n" + format_exc(), error=True)
+            log("AUTOCONF", "❌", "exception while running AutoconfTest._setup_test()\n" + format_exc())
             self._cleanup_test()
             return False
         self._cleanup_test()
@@ -107,12 +108,12 @@ class AutoconfTest(Test) :
     def _cleanup_test(self) :
         try :
             test = "/tmp/tests/" + self._name
-            proc = run("docker-compose down -v", shell=True, cwd=test)
+            proc = run("docker-compose -f autoconf.yml down -v", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose down failed"))
             super()._cleanup_test()
         except :
-            self._log("exception while running AutoconfTest._setup_test()\n" + format_exc(), error=True)
+            log("AUTOCONF", "❌", "exception while running AutoconfTest._cleanup_test()\n" + format_exc())
             return False
         return True
         

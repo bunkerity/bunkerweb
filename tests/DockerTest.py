@@ -4,6 +4,7 @@ from os import chown, walk, getenv, listdir
 from shutil import copytree
 from traceback import format_exc
 from subprocess import run
+from logger import log
 
 class DockerTest(Test) :
 
@@ -21,11 +22,11 @@ class DockerTest(Test) :
         try :
             if not Test.init() :
                 return False
-            for root, dirs, files in walk("/tmp/bw-data") :
-                for name in dirs + files :
-                    chown(join(root, name), 101, 101)
+            proc = run("sudo chown -R 101:101 /tmp/bw-data", shell=True)
+            if proc.returncode != 0 :
+                raise(Exception("chown failed (autoconf stack)"))
         except :
-            self._log("exception while running DockerTest.init()\n" + format_exc(), error=True)
+            log("DOCKER", "❌", "exception while running DockerTest.init()\n" + format_exc())
             return False
         return True
 
@@ -57,7 +58,7 @@ class DockerTest(Test) :
             if proc.returncode != 0 :
                 raise(Exception("docker-compose up failed"))
         except :
-            self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
+            log("DOCKER", "❌", "exception while running DockerTest._setup_test()\n" + format_exc())
             self._cleanup_test()
             return False
         self._cleanup_test()
@@ -71,7 +72,7 @@ class DockerTest(Test) :
                 raise(Exception("docker-compose down failed"))
             super()._cleanup_test()
         except :
-            self._log("exception while running DockerTest._setup_test()\n" + format_exc(), error=True)
+            log("DOCKER", "❌", "exception while running DockerTest._cleanup_test()\n" + format_exc())
             return False
         return True
         
