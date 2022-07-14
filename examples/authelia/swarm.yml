@@ -4,15 +4,7 @@ services:
 
   # APPLICATIONS
   app1:
-    image: node
-    working_dir: /home/node/app
-    networks:
-      - bw-services
-    volumes:
-      - ./js-app:/home/node/app
-    environment:
-      - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
+    image: tutum/hello-world
     deploy:
       placement:
         constraints:
@@ -56,9 +48,17 @@ services:
     image: authelia/authelia
     networks:
       - bw-services
-    volumes:
-      - ./authelia:/config
-    restart: unless-stopped
+    configs:
+      - source: config_authelia_configuration
+        target: /config/configuration.yml
+        uid: "0"
+        gid: "0"
+        mode: 0444
+      - source: config_authelia_users_database
+        target: /config/users_database.yml
+        uid: "0"
+        gid: "0"
+        mode: 0444
     healthcheck:
       disable: true
     environment:
@@ -79,10 +79,7 @@ services:
     networks:
       - bw-services
     volumes:
-      - ./redis:/data
-    expose:
-      - 6379
-    restart: unless-stopped
+      - redis:/data
     environment:
       - TZ=Europe/Paris
     deploy:
@@ -94,3 +91,12 @@ networks:
   bw-services:
     external:
       name: bw-services
+
+volumes:
+  redis:
+
+configs:
+  config_authelia_configuration:
+    file: ./authelia/configuration.yml
+  config_authelia_users_database:
+    file: ./authelia/users_database.yml

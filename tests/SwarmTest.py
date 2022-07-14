@@ -32,7 +32,7 @@ class SwarmTest(Test) :
             compose = "/tmp/swarm/stack.yml"
             Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             Test.replace_in_file(compose, r"bunkerity/bunkerweb-autoconf:.*$", "10.20.1.1:5000/bw-autoconf-tests:latest")
-            Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
+            Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run("docker stack deploy -c stack.yml bunkerweb", cwd="/tmp/swarm", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker stack deploy failed (swarm stack)"))
@@ -60,7 +60,7 @@ class SwarmTest(Test) :
             proc = run("docker stack rm bunkerweb", shell=True)
             if proc.returncode != 0 :
                 ret = False
-            proc = run("docker network rm services_net autoconf_net", shell=True)
+            proc = run("docker network rm bw-services bw-autoconf", shell=True)
             if proc.returncode != 0 :
                 ret = False
             rmtree("/tmp/swarm")
@@ -118,5 +118,5 @@ class SwarmTest(Test) :
         run("docker service logs bunkerweb_mybunker", shell=True)
         run("docker service logs bunkerweb_myautoconf", shell=True)
         proc = run('docker stack services --format "{{ .Name }}" "' + self._name + '"', shell=True, capture_output=True)
-        for service in proc.stdout.decode().readlines() :
+        for service in proc.stdout.decode().splitlines() :
             run('docker service logs "' + service + '"', shell=True)
