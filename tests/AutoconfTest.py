@@ -45,7 +45,7 @@ class AutoconfTest(Test) :
                 proc = run('docker inspect --format "{{json .State.Health }}" autoconf_mybunker_1', cwd="/tmp/autoconf", shell=True, capture_output=True)
                 if proc.returncode != 0 :
                     raise(Exception("docker-compose inspect failed (autoconf stack)"))
-                if "healthy" in proc.stdout :
+                if "healthy" in proc.stdout.decode() :
                     healthy = True
                     break
                 sleep(1)
