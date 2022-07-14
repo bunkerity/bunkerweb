@@ -48,7 +48,7 @@ RUN addgroup -g 101 nginx && \
     ln -s /usr/local/bin/python /usr/bin/python3
 
 # Fix CVEs
-RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0"
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0"
 
 VOLUME /data /etc/nginx
 

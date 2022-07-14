@@ -48,7 +48,7 @@ RUN apk add --no-cache git && \
     ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
 # Fix CVEs
-RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0"
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0"
 
 VOLUME /data /etc/nginx
 
