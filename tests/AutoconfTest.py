@@ -30,9 +30,9 @@ class AutoconfTest(Test) :
                 rmtree("/tmp/autoconf")
             copytree("./integrations/autoconf", "/tmp/autoconf")
             compose = "/tmp/autoconf/docker-compose.yml"
-            self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
-            self._replace_in_file(compose, r"bunkerity/bunkerweb-autoconf:.*$", "10.20.1.1:5000/bw-autoconf-tests:latest")
-            self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb-autoconf:.*$", "10.20.1.1:5000/bw-autoconf-tests:latest")
+            Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             proc = run("docker-compose pull", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose pull failed (autoconf stack)"))
@@ -77,12 +77,12 @@ class AutoconfTest(Test) :
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/service.yml"
             example_data = "./examples/" + self._name + "/bw-data"
-            self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
-            self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
-            self._replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
+            Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
+            Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items() :
-                self._replace_in_files(test, ex_domain, test_domain)
-                self._rename(test, ex_domain, test_domain)
+                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.rename(test, ex_domain, test_domain)
             setup = test + "/setup-autoconf.sh"
             if isfile(setup) :
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)

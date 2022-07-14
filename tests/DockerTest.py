@@ -36,12 +36,12 @@ class DockerTest(Test) :
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/docker-compose.yml"
             example_data = "./examples/" + self._name + "/bw-data"
-            self._replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
-            self._replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
-            self._replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
+            Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
+            Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items() :
-                self._replace_in_files(test, ex_domain, test_domain)
-                self._rename(test, ex_domain, test_domain)
+                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.rename(test, ex_domain, test_domain)
             setup = test + "/setup-docker.sh"
             if isfile(setup) :
                 proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)

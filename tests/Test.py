@@ -109,19 +109,19 @@ class Test(ABC) :
     def _debug_fail(self) :
         pass
 
-    def _replace_in_file(self, path, old, new) :
+    def replace_in_file(path, old, new) :
         with open(path, "r") as f :
             content = f.read()
         content = sub(old, new, content, flags=MULTILINE)
         with open(path, "w") as f :
             f.write(content)
 
-    def _replace_in_files(self, path, old, new) :
+    def replace_in_files(path, old, new) :
         for root, dirs, files in walk(path) :
             for name in files :
-                self._replace_in_file(join(root, name), old, new)
+                Test.replace_in_file(join(root, name), old, new)
 
-    def _rename(self, path, old, new) :
+    def rename(path, old, new) :
         for root, dirs, files in walk(path) :
             for name in dirs + files :
                 full_path = join(root, name)
