@@ -50,7 +50,7 @@ class Test(ABC) :
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs :
                 if isdir("/tmp/bw-data/" + rm_dir) :
-                    run("sudo rm -rf /tmp/bw-data/" + rm_dir, shell=True)
+                    run("sudo rm -rf /tmp/bw-data/" + rm_dir + "/*", shell=True)
             if isdir("/tmp/tests/" + self._name) :
                 run("sudo rm -rf /tmp/tests/" + self._name, shell=True)
             copytree("./examples/" + self._name, "/tmp/tests/" + self._name)
@@ -86,6 +86,7 @@ class Test(ABC) :
                 return self._cleanup_test()
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
             sleep(1)
+        self._cleanup_test()
         self._debug_fail()
         log("TEST", "❌", "failed (timeout = " + str(self.__timeout) + "s)")
         return False
