@@ -47,6 +47,8 @@ for example in glob("./examples/*") :
             test_obj = None
             if test_type == "docker" :
                 test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"])
+            elif test_type == "autoconf" :
+                test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"])
             if not test_obj.run_tests() :
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
                 end_fun()
