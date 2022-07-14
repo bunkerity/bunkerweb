@@ -41,7 +41,7 @@ class Test(ABC) :
     # Class method
     # called once all tests ended
     def end() :
-        pass
+        return True
 
     # called before starting the tests
     # must be override if specific actions needs to be done
@@ -101,7 +101,7 @@ class Test(ABC) :
                 r = get(ex_url, timeout=5)
                 return test["string"].casefold() in r.text.casefold()
         except :
-            log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + ex_url + "\n" + format_exc())
+            #log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + ex_url + "\n" + format_exc())
             return False
         raise(Exception("unknow test type " + test["type"]))
 
