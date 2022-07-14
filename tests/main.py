@@ -12,6 +12,7 @@ path.append(getcwd() + "/tests")
 from Test import Test
 from DockerTest import DockerTest
 from AutoconfTest import AutoconfTest
+from SwarmTest import SwarmTest
 from logger import log
 
 if len(argv) != 2 :
@@ -32,6 +33,9 @@ if test_type == "docker" :
 elif test_type == "autoconf" :
     ret = AutoconfTest.init()
     end_fun = AutoconfTest.end
+elif test_type == "swarm" :
+    ret = SwarmTest.init()
+    end_fun = SwarmTest.end
 if not ret :
     log("TESTS", "❌", "Test.init() failed")
     exit(1)
@@ -49,6 +53,8 @@ for example in glob("./examples/*") :
                 test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"])
             elif test_type == "autoconf" :
                 test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"])
+            elif test_type == "swarm" :
+                test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"])
             if not test_obj.run_tests() :
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
                 end_fun()
