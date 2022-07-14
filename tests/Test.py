@@ -86,8 +86,8 @@ class Test(ABC) :
                 return self._cleanup_test()
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
             sleep(1)
-        self._cleanup_test()
         self._debug_fail()
+        self._cleanup_test()
         log("TEST", "❌", "failed (timeout = " + str(self.__timeout) + "s)")
         return False
 

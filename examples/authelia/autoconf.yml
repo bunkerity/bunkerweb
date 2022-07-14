@@ -26,7 +26,7 @@ services:
       - bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email
       - bunkerweb.REVERSE_PROXY_URL_999=/authelia
       - bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify
-      - bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL
+      - bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""
 
   app2:
     image: tutum/hello-world
@@ -45,7 +45,7 @@ services:
       - bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email
       - bunkerweb.REVERSE_PROXY_URL_999=/authelia
       - bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify
-      - bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL
+      - bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""
 
   # AUTHELIA
   authelia:
