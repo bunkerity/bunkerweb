@@ -116,4 +116,9 @@ class AutoconfTest(Test) :
             log("AUTOCONF", "❌", "exception while running AutoconfTest._cleanup_test()\n" + format_exc())
             return False
         return True
-        
+
+    def _debug_fail(self) :
+        autoconf = "/tmp/autoconf"
+        proc = run("docker-compose logs", shell=True, cwd=autoconf)
+        test = "/tmp/tests/" + self._name
+        proc = run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)

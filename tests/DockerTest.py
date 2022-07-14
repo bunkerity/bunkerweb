@@ -75,4 +75,8 @@ class DockerTest(Test) :
             log("DOCKER", "❌", "exception while running DockerTest._cleanup_test()\n" + format_exc())
             return False
         return True
+
+    def _debug_fail(self) :
+        test = "/tmp/tests/" + self._name
+        proc = run("docker-compose logs", shell=True, cwd=test)
         

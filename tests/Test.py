@@ -86,6 +86,7 @@ class Test(ABC) :
                 return self._cleanup_test()
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
             sleep(1)
+        self._debug_fail()
         log("TEST", "❌", "failed (timeout = " + str(self.__timeout) + "s)")
         return False
 
@@ -100,9 +101,13 @@ class Test(ABC) :
                 r = get(ex_url, timeout=5)
                 return test["string"].casefold() in r.text.casefold()
         except :
-            log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + test["url"] + "\n" + format_exc())
+            log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + ex_url + "\n" + format_exc())
             return False
         raise(Exception("unknow test type " + test["type"]))
+
+    # called when tests fail : typical case is to show logs
+    def _debug_fail(self) :
+        pass
 
     def _replace_in_file(self, path, old, new) :
         with open(path, "r") as f :
