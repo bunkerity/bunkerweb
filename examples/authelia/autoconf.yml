@@ -16,6 +16,7 @@ services:
       - NODE_ENV=production
     command: bash -c "npm install express && node index.js"
     labels:
+      - bunkerweb.SERVER_NAME=app1.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://app1:3000
