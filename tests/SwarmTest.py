@@ -13,8 +13,8 @@ class SwarmTest(Test) :
         super().__init__(name, "swarm", timeout, tests)
         self._domains = {
             r"www\.example\.com": getenv("TEST_DOMAIN1"),
-            r"auth\.example\.com": getenv("TEST_DOMAIN2"),
-            r"app1\.example\.com": getenv("TEST_DOMAIN3"),
+            r"auth\.example\.com": getenv("TEST_DOMAIN1"),
+            r"app1\.example\.com": getenv("TEST_DOMAIN1"),
             r"app2\.example\.com": getenv("TEST_DOMAIN2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN3")
         }
@@ -79,6 +79,7 @@ class SwarmTest(Test) :
             for ex_domain, test_domain in self._domains.items() :
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
+            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-swarm.sh"
             if isfile(setup) :
                 proc = run("sudo ./setup-swarm.sh", cwd=test, shell=True)

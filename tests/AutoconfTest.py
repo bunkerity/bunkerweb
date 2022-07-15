@@ -83,6 +83,7 @@ class AutoconfTest(Test) :
             for ex_domain, test_domain in self._domains.items() :
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
+            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-autoconf.sh"
             if isfile(setup) :
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)

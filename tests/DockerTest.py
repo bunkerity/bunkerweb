@@ -42,6 +42,7 @@ class DockerTest(Test) :
             for ex_domain, test_domain in self._domains.items() :
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
+            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-docker.sh"
             if isfile(setup) :
                 proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)
