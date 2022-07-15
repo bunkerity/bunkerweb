@@ -12,8 +12,8 @@ class SwarmTest(Test) :
     def __init__(self, name, timeout, tests) :
         super().__init__(name, "swarm", timeout, tests)
         self._domains = {
-            r"www\.example\.com": getenv("TEST_DOMAIN1"),
-            r"auth\.example\.com": getenv("TEST_DOMAIN1"),
+            r"www\.example\.com": getenv("TEST_DOMAIN1_1"),
+            r"auth\.example\.com": getenv("TEST_DOMAIN1_2"),
             r"app1\.example\.com": getenv("TEST_DOMAIN1"),
             r"app2\.example\.com": getenv("TEST_DOMAIN2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN3")
