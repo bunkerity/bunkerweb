@@ -13,6 +13,7 @@ from Test import Test
 from DockerTest import DockerTest
 from AutoconfTest import AutoconfTest
 from SwarmTest import SwarmTest
+from KubernetesTest import KubernetesTest
 from logger import log
 
 if len(argv) != 2 :
@@ -36,6 +37,9 @@ elif test_type == "autoconf" :
 elif test_type == "swarm" :
     ret = SwarmTest.init()
     end_fun = SwarmTest.end
+elif test_type == "kubernetes" :
+    ret = KubernetesTest.init()
+    end_fun = KubernetesTest.end
 if not ret :
     log("TESTS", "❌", "Test.init() failed")
     exit(1)
@@ -55,6 +59,8 @@ for example in glob("./examples/*") :
                 test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"])
             elif test_type == "swarm" :
                 test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"])
+            elif test_type == "kubernetes" :
+                test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"])
             if not test_obj.run_tests() :
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
                 end_fun()

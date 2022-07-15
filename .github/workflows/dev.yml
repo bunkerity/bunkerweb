@@ -375,8 +375,10 @@ jobs:
         # run: ./tests/main.py "docker"
       # - name: Run Autoconf tests
         # run: ./tests/main.py "autoconf"
-      - name: Run Swarm tests
-        run: ./tests/main.py "swarm"
+      # - name: Run Swarm tests
+        # run: ./tests/main.py "swarm"
+      - name: Run Kubernetes tests
+        run: ./tests/main.py "kubernetes"
       - name: Temp stop tests
         run: exit 1
       - name: Run autoconf tests

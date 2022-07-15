@@ -61,9 +61,6 @@ class SwarmTest(Test) :
             proc = run("docker stack rm bunkerweb", shell=True)
             if proc.returncode != 0 :
                 ret = False
-            proc = run("docker network rm bw-services bw-autoconf", shell=True)
-            if proc.returncode != 0 :
-                ret = False
             rmtree("/tmp/swarm")
         except :
             log("SWARM", "❌", "exception while running SwarmTest.end()\n" + format_exc())
