@@ -201,7 +201,7 @@ data:
     #    port: 25
     #    sender: admin@example.com
     ...
-  users_database.yml:
+  users_database.yml: |
     ---
     ###############################################################
     #                         Users Database                      #
