@@ -12,11 +12,11 @@ class SwarmTest(Test) :
     def __init__(self, name, timeout, tests) :
         super().__init__(name, "swarm", timeout, tests)
         self._domains = {
-            r"www\.example\.com": getenv("TEST_DOMAIN2"),
-            r"auth\.example\.com": getenv("TEST_DOMAIN3"),
-            r"app1\.example\.com": getenv("TEST_DOMAIN2"),
-            r"app2\.example\.com": getenv("TEST_DOMAIN3"),
-            r"app3\.example\.com": getenv("TEST_DOMAIN2")
+            r"www\.example\.com": getenv("TEST_DOMAIN1"),
+            r"auth\.example\.com": getenv("TEST_DOMAIN2"),
+            r"app1\.example\.com": getenv("TEST_DOMAIN3"),
+            r"app2\.example\.com": getenv("TEST_DOMAIN2"),
+            r"app3\.example\.com": getenv("TEST_DOMAIN3")
         }
 
     def init() :
@@ -47,6 +47,7 @@ class SwarmTest(Test) :
                 i += 1
             if not healthy :
                 raise(Exception("swarm stack is not healthy"))
+            sleep(60)
         except :
             log("SWARM", "❌", "exception while running SwarmTest.init()\n" + format_exc())
             return False
