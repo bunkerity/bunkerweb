@@ -120,6 +120,5 @@ class KubernetesTest(Test) :
 
     def _debug_fail(self) :
         proc = run('sudo kubectl get pods --no-headers -o custom-columns=":metadata.name"', shell=True, capture_output=True)
-        if proc.returncode != 0 :
-            for pod in proc.stdout.decode().splitlines() :
-                run("sudo kubectl logs " + pod, shell=True)
+        for pod in proc.stdout.decode().splitlines() :
+            run("sudo kubectl logs " + pod, shell=True)

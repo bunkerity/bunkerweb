@@ -48,7 +48,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: svc-athelia
+            name: svc-authelia
             port:
               number: 9091
 ---
