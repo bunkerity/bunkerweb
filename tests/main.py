@@ -17,7 +17,7 @@ from KubernetesTest import KubernetesTest
 from LinuxTest import LinuxTest
 from logger import log
 
-if len(argv) != 2 :
+if len(argv) <= 1 :
     log("TESTS", "❌", "Missing type argument")
     exit(1)
 
