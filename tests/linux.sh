@@ -22,7 +22,7 @@ function gen_package() {
 function build_image() {
 	mode="$1"
 	linux="$2"
-	do_and_check_cmd docker build -t "bw-${linux}" --build-arg "target=${mode}" -f "./Dockerfile-${linux}" .
+	do_and_check_cmd docker build -t "bw-${linux}" --build-arg "target=${mode}" -f "./tests/Dockerfile-${linux}" .
 }
 
 echo "Linux tests"
