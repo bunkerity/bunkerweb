@@ -30,7 +30,7 @@ class LinuxTest(Test) :
             proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("chown failed (autoconf stack)"))
-            if isdir("/tmp/linux")
+            if isdir("/tmp/linux") :
                 rmdir("/tmp/linux")
             mkdir("/tmp/linux")
             chmod("/tmp/linux", 0o0777)
