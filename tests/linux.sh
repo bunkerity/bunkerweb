@@ -19,6 +19,11 @@ function gen_package() {
     do_and_check_cmd cp "/tmp/packages/${linux}/bunkerweb.$type" "/opt/packages/${mode}/${linux}/${name}.${type}"
 }
 
+function build_image() {
+	mode="$1"
+	linux="$2"
+	do_and_check_cmd docker build -t "bw-${linux}" --build-arg "target=${mode}" -f "./Dockerfile-${linux}" .
+}
 
 echo "Linux tests"
 
@@ -37,5 +42,11 @@ gen_package "$1" "ubuntu"
 gen_package "$1" "debian"
 gen_package "$1" "centos"
 gen_package "$1" "fedora"
+
+# Build test images
+build_image "$1" "ubuntu"
+build_image "$1" "debian"
+build_image "$1" "centos"
+build_image "$1" "fedora"
 
 exit 0

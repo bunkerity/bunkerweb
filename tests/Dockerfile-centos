@@ -14,10 +14,13 @@ rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 COPY linux/nginx.repo /etc/yum.repos.d/nginx.repo
-#COPY linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
 RUN dnf install yum-utils epel-release -y && \
 	dnf install nginx-1.20.2 -y
+
+ARG target=dev
+COPY /opt/packages/${target}/centos/*.rpm /opt
+RUN dnf install -y /opt/*.rpm
 
 VOLUME /run /tmp
 
