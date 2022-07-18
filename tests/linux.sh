@@ -22,7 +22,7 @@ function gen_package() {
 function build_image() {
 	mode="$1"
 	linux="$2"
-	do_and_check_cmd docker build -t "bw-${linux}" --build-arg "target=${mode}" -f "./tests/Dockerfile-${linux}" .
+	do_and_check_cmd docker build -t "bw-${linux}" -f "./tests/Dockerfile-${linux}" .
 }
 
 echo "Linux tests"
@@ -43,10 +43,13 @@ gen_package "$1" "debian"
 gen_package "$1" "centos"
 gen_package "$1" "fedora"
 
+# Copy packages in the Docker context
+do_and_check_cmd cp -r "/opt/packages/$1" ./packages
+
 # Build test images
-build_image "$1" "ubuntu"
-build_image "$1" "debian"
-build_image "$1" "centos"
-build_image "$1" "fedora"
+build_image "ubuntu"
+build_image "debian"
+build_image "centos"
+build_image "fedora"
 
 exit 0

@@ -22,8 +22,7 @@ RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core python3-pip && \
     dnf install nginx-1.20.2 -y
 
-ARG target=dev
-COPY /opt/packages/${target}/fedora/*.rpm /opt
+COPY ./packages/fedora/*.rpm /opt
 RUN dnf install -y /opt/*.rpm
 
 VOLUME [ "/sys/fs/cgroup" ]
