@@ -381,6 +381,14 @@ jobs:
         # run: ./tests/main.py "kubernetes"
       - name: Generate Linux packages and build test images
         run: ./tests/linux.sh ${{ env.BUILD_MODE }}
+      - name: Run Linux Ubuntu tests
+        run: ./tests/main.py "linux" "ubuntu"
+      - name: Run Linux Debian tests
+        run: ./tests/main.py "linux" "debian"
+      - name: Run Linux CentOS tests
+        run: ./tests/main.py "linux" "centos"
+      - name: Run Linux Fedora tests
+        run: ./tests/main.py "linux" "fedora"
       - name: Temp stop tests
         run: exit 1
       - name: Run autoconf tests

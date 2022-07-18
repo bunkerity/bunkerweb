@@ -14,6 +14,7 @@ from DockerTest import DockerTest
 from AutoconfTest import AutoconfTest
 from SwarmTest import SwarmTest
 from KubernetesTest import KubernetesTest
+from LinuxTest import LinuxTest
 from logger import log
 
 if len(argv) != 2 :
@@ -40,6 +41,10 @@ elif test_type == "swarm" :
 elif test_type == "kubernetes" :
     ret = KubernetesTest.init()
     end_fun = KubernetesTest.end
+elif test_type == "linux" :
+    distro = argv[2]
+    ret = LinuxTest.init(distro)
+    end_fun = LinuxTest.end
 if not ret :
     log("TESTS", "❌", "Test.init() failed")
     exit(1)
@@ -61,6 +66,8 @@ for example in glob("./examples/*") :
                 test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"])
             elif test_type == "kubernetes" :
                 test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"])
+            elif test_type == "linux" :
+                test_obj = LinuxTest(tests["name"], tests["timeout"], tests["tests"], distro)
             if not test_obj.run_tests() :
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
                 end_fun()
@@ -70,7 +77,11 @@ for example in glob("./examples/*") :
             end_fun()
             exit(1)
 
-if not end_fun() :
+if test_type == "linux" :
+    ret = end_fun(distro)
+else :
+    ret = end_fun()
+if not ret :
     log("TESTS", "❌", "Test.end() failed")
     exit(1)
 

@@ -24,8 +24,6 @@ function build_image() {
 	do_and_check_cmd docker build -t "bw-${linux}" -f "./tests/Dockerfile-${linux}" .
 }
 
-echo "Linux tests"
-
 if [ ! -d /opt/packages ] ; then
     do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian,fedora,centos}
     do_and_check_cmd sudo chmod -R 777 /opt/packages/
@@ -37,18 +35,26 @@ fi
 do_and_check_cmd mkdir /tmp/packages
 
 # Generate packages
+echo "Building ubuntu package ..."
 gen_package "$1" "ubuntu"
+echo "Building debian package ..."
 gen_package "$1" "debian"
+echo "Building centos package ..."
 gen_package "$1" "centos"
+echo "Building fedora package ..."
 gen_package "$1" "fedora"
 
 # Copy packages in the Docker context
 do_and_check_cmd cp -r "/opt/packages/$1" ./packages
 
 # Build test images
+echo "Building ubuntu test image ..."
 build_image "ubuntu"
+echo "Building debian test image ..."
 build_image "debian"
+echo "Building centos test image ..."
 build_image "centos"
+echo "Building fedora test image ..."
 build_image "fedora"
 
 exit 0
