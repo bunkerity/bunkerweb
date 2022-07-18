@@ -20,8 +20,7 @@ function gen_package() {
 }
 
 function build_image() {
-	mode="$1"
-	linux="$2"
+	linux="$1"
 	do_and_check_cmd docker build -t "bw-${linux}" -f "./tests/Dockerfile-${linux}" .
 }
 
