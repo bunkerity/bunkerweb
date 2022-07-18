@@ -1822,53 +1822,178 @@ The following settings can be used :
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    You have to install php-fpm 
-    ```shell
-    apt install php-fpm
-    ```
-
     Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
-    ```conf
-    SERVER_NAME=www.example.com
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=8.8.8.8 8.8.4.4
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/
-    REVERSE_PROXY_HOST=http://127.0.0.1:8000
-    ```
+	Depanding of your system, you may need to change ```LOCAL_PHP_PATH```.
+
+	=== "Ubuntu"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php/php-fpm.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
+
+	=== "Debian"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php/php-fpm.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
+
+	=== "CentOs"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php-fpm/www.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
+
+	=== "Fedora"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php-fpm/www.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
 
     Let's check the status of BunkerWeb :
     ```shell
     systemctl status bunkerweb
     ```
-
     If it's already running we can just reload it :
     ```shell
     systemctl reload bunkerweb
     ```
 
-    Otherwise, we will need to start it :
+	Then you will have to install php-fpm 
     ```shell
-    systemctl start bunkerweb
+    apt install php-fpm
     ```
+
+	Depending on your system, the configuration of the php-fpm service may change:
+	=== "Ubuntu"
+	By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Debian"
+	By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "CentOs"
+	By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Fedora"
+	By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+    Reload the php-fpm service :
+	```shell
+	systemctl reload php-fpm
+	```
 
 === "Ansible"
 
-    When the variable `custom_configs` is set to "true" , you could use the 
-	`custom_configs_path[]` variable to write the configs to the /opt/bunkerweb/configs folder.
+    You will need to add the settings to your `variables.env` file accordingly to your system :
 
-    Here is an example for server-http/hello-world.conf :
-    ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
+    === "Ubuntu"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php/php-fpm.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
 
-	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	=== "Debian"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php/php-fpm.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
+
+	=== "CentOs"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php-fpm/www.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
+
+	=== "Fedora"
+    	```conf
+    	SERVER_NAME=www.example.com
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		LOCAL_PHP=/run/php-fpm/www.sock
+		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+    	```
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb and `custom_site` to add your own site configuration :
 	```yaml
 	all:
   	  children:
@@ -1876,14 +2001,8 @@ The following settings can be used :
           hosts: 
             "Your_IP_Address":
           vars:
-        	custom_configs: true
-        	custom_configs_path: {
-          	server-http: ../hello-world.conf,
-          	#http: ../http.conf,
-          	#default-server-http: ../default-server-http.conf,
-          	#modsec-crs: ../modsec-crs,
-          	#modsec: ../modsec
-          }
+            variables_env: ../variables.env,
+			custom_site=../site
 	```
 
 	Or in INI format :
@@ -1892,13 +2011,64 @@ The following settings can be used :
 	host
 	
 	[all:vars]
-	custom_configs=true
-	custom_configs_path={'server-http': '../hello-world.conf', 'http': '../http.conf', 'default-server-http': '../default-server-http.conf', 'modsec-crs': '../modsec-crs', 'modsec': '../modsec'}
+	variables_env = ../variables.env
+	custom_site = ../site
 	```
 
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
+	```
+
+	Then you will have to install php-fpm 
+    ```shell
+    apt install php-fpm
+    ```
+
+	Depending on your system, the configuration of the php-fpm service may change:
+	=== "Ubuntu"
+	By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Debian"
+	By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "CentOs"
+	By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Fedora"
+	By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+    Reload the php-fpm service :
+	```shell
+	systemctl reload php-fpm
 	```
 
 ### Multiple applications
@@ -2124,42 +2294,207 @@ The following settings can be used :
 
 === "Linux"
 
-    When using the [Linux integration](/1.4/integrations/#linux), custom configurations must be written to the /opt/bunkerweb/configs folder.
+    We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    Here is an example for server-http/hello-world.conf :
-    ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
+    If you have multiple services to protect, the easiest way to do it is by enabling the “multisite” mode. When using multisite, bunkerized-nginx will create one server block per server defined in the SERVER_NAME environment variable. You can configure each servers independently by adding the server name as a prefix.
 
-    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+	=== "Ubuntu"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+    	```
+
+	=== "Debian"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+    	```
+
+	=== "CentOs"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
+    	```
+
+	=== "Fedora"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
+    	```
+
+	When using the multisite mode, some special folders must have a specific structure with subfolders named the same as the servers defined in the `SERVER_NAME` environment variable. Let’s take the app2.example.com as an example : if some static files need to be served by nginx, you need to place them under www/app2.example.com.
+
+    Let's check the status of BunkerWeb :
     ```shell
-    chown -R root:nginx /opt/bunkerweb/configs && \
-    chmod -R 770 /opt/bunkerweb/configs
+    systemctl status bunkerweb
+    ```
+    If it's already running we can just reload it :
+    ```shell
+    systemctl reload bunkerweb
     ```
 
-    Don't forget to reload the bunkerweb service once it's done.
+	Then you will have to install php-fpm 
+    ```shell
+    apt install php-fpm
+    ```
+
+	Depending on your system, the configuration of the php-fpm service may change:
+	=== "Ubuntu"
+		By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Debian"
+		By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "CentOs"
+		By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Fedora"
+		By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+    Reload the php-fpm service :
+	```shell
+	systemctl reload php-fpm
+	```
 
 === "Ansible"
 
-    When the variable `custom_configs` is set to "true" , you could use the 
-	`custom_configs_path[]` variable to write the configs to the /opt/bunkerweb/configs folder.
+    You will need to add the settings to your `variables.env` file accordingly to your system :
 
-    Here is an example for server-http/hello-world.conf :
-    ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
+    === "Ubuntu"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+    	```
 
-	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	=== "Debian"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+    	```
+
+	=== "CentOs"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
+    	```
+
+	=== "Fedora"
+    	```conf
+    	SERVER_NAME=app1.example.com app2.example.com
+		MULTISITE=yes
+		HTTP_PORT=80
+		HTTPS_PORT=443
+		DNS_RESOLVERS=8.8.8.8 8.8.4.4
+		DISABLE_DEFAULT_SERVER=no
+		USE_CLIENT_CACHE=yes
+		USE_GZIP=yes
+		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
+		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
+    	```
+
+	When using the multisite mode, some special folders must have a specific structure with subfolders named the same as the servers defined in the `SERVER_NAME` environment variable. Let’s take the app2.example.com as an example : if some static files need to be served by nginx, you need to place them under www/app2.example.com.
+
+	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb and `custom_site` to add your own site configuration :
 	```yaml
 	all:
   	  children:
@@ -2167,14 +2502,8 @@ The following settings can be used :
           hosts: 
             "Your_IP_Address":
           vars:
-        	custom_configs: true
-        	custom_configs_path: {
-          	server-http: ../hello-world.conf,
-          	#http: ../http.conf,
-          	#default-server-http: ../default-server-http.conf,
-          	#modsec-crs: ../modsec-crs,
-          	#modsec: ../modsec
-          }
+            variables_env: ../variables.env,
+			custom_site=../site
 	```
 
 	Or in INI format :
@@ -2183,11 +2512,62 @@ The following settings can be used :
 	host
 	
 	[all:vars]
-	custom_configs=true
-	custom_configs_path={'server-http': '../hello-world.conf', 'http': '../http.conf', 'default-server-http': '../default-server-http.conf', 'modsec-crs': '../modsec-crs', 'modsec': '../modsec'}
+	variables_env = ../variables.env
+	custom_site = ../site
 	```
 
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
+	```
+
+	Then you will have to install php-fpm 
+    ```shell
+    apt install php-fpm
+    ```
+
+	Depending on your system, the configuration of the php-fpm service may change:
+	=== "Ubuntu"
+		By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Debian"
+		By default, the user and the group of the php-fpm service is "www-data".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "CentOs"
+		By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+	=== "Fedora"
+		By default, the user and the group of the php-fpm service is "apache".
+    	```conf
+		[www]
+		user = nginx
+		group = nginx
+		listen.owner = nginx
+		listen.group = nginx
+    	```
+
+    Reload the php-fpm service :
+	```shell
+	systemctl reload php-fpm
 	```
