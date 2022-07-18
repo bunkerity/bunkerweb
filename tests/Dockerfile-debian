@@ -32,8 +32,7 @@ RUN apt update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bullseye
 
 COPY ./packages/debian/*.deb /opt
-RUN apt install -y /opt/*.deb
 
-VOLUME [ "/sys/fs/cgroup" ]
+VOLUME ["/sys/fs/cgroup"]
 
 CMD ["/lib/systemd/systemd"]

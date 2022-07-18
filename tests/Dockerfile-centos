@@ -19,7 +19,6 @@ RUN dnf install yum-utils epel-release -y && \
 	dnf install nginx-1.20.2 -y
 
 COPY ./packages/centos/*.rpm /opt
-RUN dnf install -y /opt/*.rpm
 
 VOLUME /run /tmp
 

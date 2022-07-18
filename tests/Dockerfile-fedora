@@ -23,8 +23,7 @@ RUN dnf update -y && \
     dnf install nginx-1.20.2 -y
 
 COPY ./packages/fedora/*.rpm /opt
-RUN dnf install -y /opt/*.rpm
 
-VOLUME [ "/sys/fs/cgroup" ]
+VOLUME ["/sys/fs/cgroup"]
 
 CMD ["/usr/sbin/init"]
