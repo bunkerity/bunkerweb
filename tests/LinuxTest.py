@@ -34,21 +34,31 @@ class LinuxTest(Test) :
                 rmtree("/tmp/linux")
             mkdir("/tmp/linux")
             chmod("/tmp/linux", 0o0777)
-            cmd = "docker run -v /tmp/bw-data/letsencrypt:/etc/letsencrypt -v /tmp/bw-data/cache:/opt/bunkerweb/cache -v /tmp/bw-data/configs:/opt/bunkerweb/configs -v /tmp/bw-data/www:/opt/bunkerweb/www -v /tmp/linux/variables.env:/opt/bunkerweb/variables.env -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-" + distro
+            cmd = "docker run -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-" + distro
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker run failed (linux stack)"))
-            cmd = "docker exec linux-" + distro + " "
             if distro in ["ubuntu", "debian"] :
-                cmd += " apt install -y /opt/\\$(ls /opt | grep deb)"
+                cmd = "apt install -y /opt/\$(ls /opt | grep deb)"
             elif distro in ["centos", "fedora"] :
-                cmd += " dnf install -y /opt/\\$(ls /opt | grep rpm)"
-            proc = run(cmd, shell=True)
+                cmd = "dnf install -y /opt/\$(ls /opt | grep rpm)"
+            proc = TestLinux.docker_exec(distro, cmd)
             if proc.returncode != 0 :
                 raise(Exception("docker exec apt install failed (linux stack)"))
-            proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb", shell=True)
+            proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl start failed (linux stack)"))
+            cp_dirs = {
+                "/tmp/bw-data/letsencrypt": "/etc/letsencrypt",
+                "/tmp/bw-data/cache": "/opt/bunkerweb/cache"
+            }
+            for src, dst in cp_dirs.items() :
+                proc = LinuxTest.docker_cp(distro, src, dst)
+                if proc.returncode != 0 :
+                    raise(Exception("docker cp failed for " + src + " (linux stack)"))
+                proc = LinuxTest.docker_exec(distro, "chown -R nginx:nginx " + dst + "/*")
+                if proc.returncode != 0 :
+                    raise(Exception("docker exec failed for directory " + src + " (linux stack)"))
         except :
             log("LINUX", "❌", "exception while running LinuxTest.init()\n" + format_exc())
             return False
@@ -78,10 +88,10 @@ class LinuxTest(Test) :
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-linux.sh"
             if isfile(setup) :
-                proc = run("docker cp /tmp/" + self._name + " linux-" + self.__distro + ":/opt/tests", cwd=test, shell=True)
+                proc = LinuxTest.docker_cp(self.__distro, "/tmp/" + self._name, "/opt/tests")
                 if proc.returncode != 0 :
                     raise(Exception("docker cp failed (linux stack)"))
-                proc = LinuxTest.docker_exec(self.__distro, "/opt/tests/" + self._name + "/setup-linux.sh")
+                proc = LinuxTest.docker_exec(self.__distro, "cd /opt/tests/" + self._name + " && ./setup-linux.sh")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec setup failed (linux stack)"))
             if isdir(example_data) :
@@ -106,7 +116,10 @@ class LinuxTest(Test) :
         # return True
 
     def _debug_fail(self) :
-        LinuxTestdocker_exec(self.__distro, "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager")
+        LinuxTest.docker_exec(self.__distro, "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager")
     
     def docker_exec(distro, cmd_linux) :
         return run("docker exec linux-" + distro + " /bin/bash -c \"" + cmd_linux + "\"", shell=True)
+
+    def docker_cp(distro, src, dst) :
+        return run("docker cp " + src + " linux-" + distro + ":" + dst)

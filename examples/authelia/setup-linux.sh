@@ -15,3 +15,4 @@ cp ./authelia/* /etc/authelia
 sed -i "s@/config/@/etc/authelia/@g" /etc/authelia/configuration.yml
 systemctl daemon-reload
 systemctl start authelia
+cp variables.env /opt/bunkerweb/variables.env
