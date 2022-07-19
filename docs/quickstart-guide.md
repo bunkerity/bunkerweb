@@ -1893,7 +1893,7 @@ The following settings can be used :
 
 	Depending on your system, the configuration of the php-fpm service may change:
 	=== "Ubuntu"
-	By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -1903,7 +1903,7 @@ The following settings can be used :
     	```
 
 	=== "Debian"
-	By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -1913,7 +1913,7 @@ The following settings can be used :
     	```
 
 	=== "CentOs"
-	By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -1923,7 +1923,7 @@ The following settings can be used :
     	```
 
 	=== "Fedora"
-	By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2027,7 +2027,7 @@ The following settings can be used :
 
 	Depending on your system, the configuration of the php-fpm service may change:
 	=== "Ubuntu"
-	By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2037,7 +2037,7 @@ The following settings can be used :
     	```
 
 	=== "Debian"
-	By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2047,7 +2047,7 @@ The following settings can be used :
     	```
 
 	=== "CentOs"
-	By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2057,7 +2057,7 @@ The following settings can be used :
     	```
 
 	=== "Fedora"
-	By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2380,7 +2380,7 @@ The following settings can be used :
 
 	Depending on your system, the configuration of the php-fpm service may change:
 	=== "Ubuntu"
-		By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2390,7 +2390,7 @@ The following settings can be used :
     	```
 
 	=== "Debian"
-		By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2400,7 +2400,7 @@ The following settings can be used :
     	```
 
 	=== "CentOs"
-		By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2410,7 +2410,7 @@ The following settings can be used :
     	```
 
 	=== "Fedora"
-		By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2528,7 +2528,7 @@ The following settings can be used :
 
 	Depending on your system, the configuration of the php-fpm service may change:
 	=== "Ubuntu"
-		By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2538,7 +2538,7 @@ The following settings can be used :
     	```
 
 	=== "Debian"
-		By default, the user and the group of the php-fpm service is "www-data".
+		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2548,7 +2548,7 @@ The following settings can be used :
     	```
 
 	=== "CentOs"
-		By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
@@ -2558,7 +2558,7 @@ The following settings can be used :
     	```
 
 	=== "Fedora"
-		By default, the user and the group of the php-fpm service is "apache".
+		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
     	```conf
 		[www]
 		user = nginx
