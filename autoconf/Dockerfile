@@ -48,7 +48,7 @@ RUN apk add --no-cache git && \
     ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
 # Fix CVEs
-RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1"
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1" "busybox>=1.35.0-r17" "ssl_client>=1.35.0-r17"
 
 VOLUME /data /etc/nginx
 
