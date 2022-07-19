@@ -118,4 +118,4 @@ class LinuxTest(Test) :
         return run("docker exec linux-" + distro + " /bin/bash -c \"" + cmd_linux + "\"", shell=True)
 
     def docker_cp(distro, src, dst) :
-        return run("docker cp " + src + " linux-" + distro + ":" + dst, shell=True)
+        return run("sudo docker cp " + src + " linux-" + distro + ":" + dst, shell=True)
