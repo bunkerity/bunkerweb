@@ -70,11 +70,17 @@ for example in glob("./examples/*") :
                 test_obj = LinuxTest(tests["name"], tests["timeout"], tests["tests"], distro)
             if not test_obj.run_tests() :
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
-                end_fun()
+                if test_type == "linux" :
+                    ret = end_fun(distro)
+                else :
+                    ret = end_fun()
                 _exit(1)
         except :
             log("TESTS", "❌", "Exception while executing test for example " + example + " : " + format_exc())
-            end_fun()
+            if test_type == "linux" :
+                ret = end_fun(distro)
+            else :
+                ret = end_fun()
             exit(1)
 
 if test_type == "linux" :

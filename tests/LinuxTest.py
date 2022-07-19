@@ -81,23 +81,18 @@ class LinuxTest(Test) :
         try :
             super()._setup_test()
             test = "/tmp/tests/" + self._name
-            example_data = "./examples/" + self._name + "/bw-data"
             for ex_domain, test_domain in self._domains.items() :
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-linux.sh"
             if isfile(setup) :
-                proc = LinuxTest.docker_cp(self.__distro, "/tmp/" + self._name, "/opt/tests")
+                proc = LinuxTest.docker_cp(self.__distro, test, "/opt/tests")
                 if proc.returncode != 0 :
                     raise(Exception("docker cp failed (linux stack)"))
-                proc = LinuxTest.docker_exec(self.__distro, "cd /opt/tests/" + self._name + " && ./setup-linux.sh")
+                proc = LinuxTest.docker_exec(self.__distro, "cd /opt/tests/ && ./setup-linux.sh")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec setup failed (linux stack)"))
-            if isdir(example_data) :
-                for cp_dir in listdir(example_data) :
-                    if isdir(join(example_data, cp_dir)) :
-                        copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
             proc = LinuxTest.docker_exec(self.__distro, "systemctl restart bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl restart failed (linux stack)"))
