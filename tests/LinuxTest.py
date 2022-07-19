@@ -38,11 +38,11 @@ class LinuxTest(Test) :
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker run failed (linux stack)"))
-            cmd = "docker exec linux-" + distro + " " 
+            cmd = "docker exec linux-" + distro + " "
             if distro in ["ubuntu", "debian"] :
-                cmd += " apt install -y /opt/*.deb"
+                cmd += " apt install -y /opt/\\$(ls /opt | grep deb)"
             elif distro in ["centos", "fedora"] :
-                cmd += " dnf install -y /opt/*.rpm"
+                cmd += " dnf install -y /opt/\\$(ls /opt | grep rpm)"
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker exec apt install failed (linux stack)"))
