@@ -34,7 +34,7 @@ class LinuxTest(Test) :
                 rmtree("/tmp/linux")
             mkdir("/tmp/linux")
             chmod("/tmp/linux", 0o0777)
-            cmd = "docker run -v /tmp/bw-data/letsencrypt:/etc/letsencrypt -v /tmp/bw-data/cache:/opt/bunkerweb/cache -v /tmp/bw-data/configs:/opt/bunkerweb/configs -v /tmp/bw-data/www:/opt/bunkerweb/www -v /tmp/linux/variables.env:/opt/bunkerweb/variables.env -p 80:80 -p 443:443 --rm --name linux-" + self.__distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-" + distro
+            cmd = "docker run -v /tmp/bw-data/letsencrypt:/etc/letsencrypt -v /tmp/bw-data/cache:/opt/bunkerweb/cache -v /tmp/bw-data/configs:/opt/bunkerweb/configs -v /tmp/bw-data/www:/opt/bunkerweb/www -v /tmp/linux/variables.env:/opt/bunkerweb/variables.env -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-" + distro
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker run failed (linux stack)"))
@@ -46,7 +46,7 @@ class LinuxTest(Test) :
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker exec apt install failed (linux stack)"))
-            proc = run("systemctl start bunkerweb", shell=True)
+            proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl start failed (linux stack)"))
         except :
@@ -81,14 +81,14 @@ class LinuxTest(Test) :
                 proc = run("docker cp /tmp/" + self._name + " linux-" + self.__distro + ":/opt/tests", cwd=test, shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("docker cp failed (linux stack)"))
-                proc = self.__docker_exec("/opt/tests/" + self._name + "/setup-linux.sh")
+                proc = LinuxTest.docker_exec(self.__distro, "/opt/tests/" + self._name + "/setup-linux.sh")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec setup failed (linux stack)"))
             if isdir(example_data) :
                 for cp_dir in listdir(example_data) :
                     if isdir(join(example_data, cp_dir)) :
                         copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
-            proc = self.__docker_exec("systemctl restart bunkerweb")
+            proc = LinuxTest.docker_exec(self.__distro, "systemctl restart bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl restart failed (linux stack)"))
         except :
@@ -106,7 +106,7 @@ class LinuxTest(Test) :
         # return True
 
     def _debug_fail(self) :
-        self.__docker_exec("cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager")
+        LinuxTestdocker_exec(self.__distro, "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager")
     
-    def __docker_exec(self, cmd_linux) :
-        return run("docker exec linux-" + self.__distro + " /bin/bash -c \"" + cmd_linux + "\"", shell=True)
+    def docker_exec(distro, cmd_linux) :
+        return run("docker exec linux-" + distro + " /bin/bash -c \"" + cmd_linux + "\"", shell=True)
