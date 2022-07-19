@@ -1649,6 +1649,7 @@ The following settings can be used :
 		   -e USE_GZIP=yes \
 		   -e REMOTE_PHP=myphp \
 		   -e REMOTE_PHP_PATH=/app \
+		   -e ROOT_FOLDER=/www/example.com \
     	   bunkerity/bunkerweb:1.4.2
     ```
 
@@ -1673,6 +1674,7 @@ The following settings can be used :
       	  - USE_GZIP=yes
       	  - REMOTE_PHP=myphp
       	  - REMOTE_PHP_PATH=/app
+		  - ROOT_FOLDER=/www/example.com
     	networks:
     	  - bw-net
 
@@ -1817,6 +1819,14 @@ The following settings can be used :
   	  bw-services:
     	name: bw-services
 	```
+
+=== "Swarm"
+
+	!!! warning "FPM is not supported for Swarm"
+
+=== "Kubernetes"
+
+	!!! warning "FPM is not supported for Swarm"
 
 === "Linux"
 
@@ -2293,11 +2303,19 @@ The following settings can be used :
     	name: bw-services
 	```
 
+=== "Swarm"
+
+	!!! warning "FPM is not supported for Swarm"
+
+=== "Kubernetes"
+
+	!!! warning "FPM is not supported for Swarm"
+
 === "Linux"
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    If you have multiple services to protect, the easiest way to do it is by enabling the `“multisite”` mode. When using multisite, bunkerized-nginx will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
+    If you have multiple services to protect, the easiest way to do it is by enabling the `“multisite”` mode. When using multisite, Bunkerweb will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
 
 	=== "Ubuntu"
     	```conf
