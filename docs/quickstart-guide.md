@@ -1822,8 +1822,9 @@ The following settings can be used :
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
-	Depanding of your system, you may need to change ```LOCAL_PHP_PATH```.
+    Configuration of BunkerWeb is done by editing your local `variables.env` file :
+
+	Depanding of your system, you may need to change `LOCAL_PHP_PATH`.
 
 	=== "Ubuntu"
     	```conf
@@ -2002,7 +2003,7 @@ The following settings can be used :
             "Your_IP_Address":
           vars:
             variables_env: ../variables.env,
-			custom_site=../site
+			custom_site= ../site
 	```
 
 	Or in INI format :
@@ -2078,7 +2079,7 @@ The following settings can be used :
     When using the [Docker integration](/1.4/integrations/#docker), you have two steps for adding custom configurations :
     
     - Using specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables
-    - Writing yours files in yours folder and mounte the volume on /data
+    - Writing yours files in yours folder and mount the volume on /data
     
     Create the Docker networks if it's not already created :
     ```shell
@@ -2296,7 +2297,7 @@ The following settings can be used :
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    If you have multiple services to protect, the easiest way to do it is by enabling the “multisite” mode. When using multisite, bunkerized-nginx will create one server block per server defined in the SERVER_NAME environment variable. You can configure each servers independently by adding the server name as a prefix.
+    If you have multiple services to protect, the easiest way to do it is by enabling the `“multisite”` mode. When using multisite, bunkerized-nginx will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
 
 	=== "Ubuntu"
     	```conf
