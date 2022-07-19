@@ -5,7 +5,7 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 1
 fi
 
-curl https://github.com/authelia/authelia/releases/download/v4.36.2/authelia-v4.36.2-linux-amd64.tar.gz -o /tmp/authelia.tar.gz
+curl https://github.com/authelia/authelia/releases/download/v4.36.2/authelia-v4.36.2-linux-amd64.tar.gz -Lo /tmp/authelia.tar.gz
 cd /tmp/
 tar -xvzf authelia.tar.gz
 mv authelia-linux-amd64 /usr/bin/authelia
