@@ -31,7 +31,7 @@ class LinuxTest(Test) :
             if proc.returncode != 0 :
                 raise(Exception("chown failed (autoconf stack)"))
             if isdir("/tmp/linux") :
-                rmdir("/tmp/linux")
+                rmtree("/tmp/linux")
             mkdir("/tmp/linux")
             chmod("/tmp/linux", 0o0777)
             cmd = "docker run -v /tmp/bw-data/letsencrypt:/etc/letsencrypt -v /tmp/bw-data/cache:/opt/bunkerweb/cache -v /tmp/bw-data/configs:/opt/bunkerweb/configs -v /tmp/bw-data/www:/opt/bunkerweb/www -v /tmp/linux/variables.env:/opt/bunkerweb/variables.env -p 80:80 -p 443:443 --rm --name linux-" + self.__distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-" + distro
