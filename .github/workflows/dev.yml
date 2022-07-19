@@ -345,6 +345,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
       - name: Check security vulnerabilities for autoconf
         uses: aquasecurity/trivy-action@master
         with:
@@ -354,6 +355,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
       - name: Check security vulnerabilities for UI
         uses: aquasecurity/trivy-action@master
         with:
@@ -363,6 +365,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
 
       # Prepare tests
       - name: Install tests dependencies
