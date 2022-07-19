@@ -1,6 +1,6 @@
 from Test import Test
 from os.path import isdir, join, isfile
-from os import chown, walk, getenv, listdir, mkdir
+from os import chown, walk, getenv, listdir, mkdir, chmod
 from shutil import copytree, rmtree
 from traceback import format_exc
 from subprocess import run
