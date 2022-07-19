@@ -42,7 +42,7 @@ class LinuxTest(Test) :
                 cmd = "apt install -y /opt/\$(ls /opt | grep deb)"
             elif distro in ["centos", "fedora"] :
                 cmd = "dnf install -y /opt/\$(ls /opt | grep rpm)"
-            proc = TestLinux.docker_exec(distro, cmd)
+            proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0 :
                 raise(Exception("docker exec apt install failed (linux stack)"))
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
