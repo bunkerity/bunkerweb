@@ -88,10 +88,10 @@ class LinuxTest(Test) :
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-linux.sh"
             if isfile(setup) :
-                proc = LinuxTest.docker_cp(self.__distro, test, "/opt/tests")
+                proc = LinuxTest.docker_cp(self.__distro, test, "/opt/" + self._name)
                 if proc.returncode != 0 :
                     raise(Exception("docker cp failed (linux stack)"))
-                proc = LinuxTest.docker_exec(self.__distro, "cd /opt/tests/ && ./setup-linux.sh")
+                proc = LinuxTest.docker_exec(self.__distro, "cd /opt/" + self._name + " && ./setup-linux.sh")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec setup failed (linux stack)"))
             proc = LinuxTest.docker_exec(self.__distro, "systemctl restart bunkerweb")
@@ -118,4 +118,4 @@ class LinuxTest(Test) :
         return run("docker exec linux-" + distro + " /bin/bash -c \"" + cmd_linux + "\"", shell=True)
 
     def docker_cp(distro, src, dst) :
-        return run("docker cp " + src + " linux-" + distro + ":" + dst, shell=True)
+        return run("sudo docker cp " + src + " linux-" + distro + ":" + dst, shell=True)

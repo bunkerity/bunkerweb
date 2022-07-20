@@ -93,7 +93,7 @@ function start() {
     #                   STEP4                   #
     #               Run jobs script             #
     #############################################
-    /opt/bunkerweb/job/main.py --variables /etc/nginx/variables.env --run
+    /opt/bunkerweb/job/main.py --variables /opt/bunkerweb/variables.env --run
     # Test if command worked
     check_ok
     # Exit if failed

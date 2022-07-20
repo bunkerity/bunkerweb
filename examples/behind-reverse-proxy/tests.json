@@ -1,0 +1,14 @@
+{
+	"name": "behind-reverse-proxy",
+	"kinds": [
+		"docker"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "string",
+			"url": "http://www.example.com",
+			"string": "hello"
+		}
+	]
+}

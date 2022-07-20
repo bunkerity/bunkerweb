@@ -76,7 +76,7 @@ class AutoconfTest(Test) :
             super()._setup_test()
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/autoconf.yml"
-            example_data = "./examples/" + self._name + "/bw-data"
+            example_data = "/tmp/tests/" + self._name + "/bw-data"
             Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
@@ -92,6 +92,8 @@ class AutoconfTest(Test) :
             if isdir(example_data) :
                 for cp_dir in listdir(example_data) :
                     if isdir(join(example_data, cp_dir)) :
+                        if isdir(join("/tmp/bw-data", cp_dir)) :
+                            run("sudo rm -rf " + join("/tmp/bw-data", cp_dir), shell=True)
                         copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
             proc = run("docker-compose -f autoconf.yml pull", shell=True, cwd=test)
             if proc.returncode != 0 :

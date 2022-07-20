@@ -1,0 +1,24 @@
+{
+	"name": "autoconf-php",
+	"kinds": [
+		"autoconf"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://app1.example.com",
+			"string": "app1"
+		},
+		{
+			"type": "string",
+			"url": "https://app2.example.com",
+			"string": "app2"
+		},
+		{
+			"type": "string",
+			"url": "https://app3.example.com",
+			"string": "app3"
+		}
+	]
+}

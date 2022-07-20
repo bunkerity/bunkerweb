@@ -12,7 +12,7 @@ def request(method, url, _id=None) :
     if _id is not None :
         data["id"] = _id
     try :
-        resp = requests.request(method, getenv("BUNKERNET_SERVER") + url, json=data, headers=headers, timeout=5)
+        resp = requests.request(method, getenv("BUNKERNET_SERVER", "https://api.bunkerweb.io") + url, json=data, headers=headers, timeout=5)
         status = resp.status_code
         if status == 429 :
             return True, 429, "rate limited"

@@ -15,7 +15,7 @@ rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 COPY linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
-RUN dnf install curl yum-utils epel-release -y && \
+RUN dnf install php-fpm curl yum-utils epel-release -y && \
 	dnf install nginx-1.20.2 -y
 
 COPY ./packages/centos/*.rpm /opt

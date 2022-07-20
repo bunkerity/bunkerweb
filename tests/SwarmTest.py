@@ -82,10 +82,12 @@ class SwarmTest(Test) :
                 proc = run("sudo ./setup-swarm.sh", cwd=test, shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("setup-swarm failed"))
-            if isdir(example_data) :
-                for cp_dir in listdir(example_data) :
-                    if isdir(join(example_data, cp_dir)) :
-                        copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
+            # if isdir(example_data) :
+                # for cp_dir in listdir(example_data) :
+                    # if isdir(join(example_data, cp_dir)) :
+                        # if isdir(join("/tmp/bw-data", cp_dir)) :
+                            # run("sudo rm -rf " + join("/tmp/bw-data", cp_dir), shell=True)
+                        # copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
             proc = run('docker stack deploy -c swarm.yml "' + self._name + '"', shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker stack deploy failed"))
