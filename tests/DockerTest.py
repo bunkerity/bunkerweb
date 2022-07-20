@@ -35,7 +35,7 @@ class DockerTest(Test) :
             super()._setup_test()
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/docker-compose.yml"
-            example_data = "./examples/" + self._name + "/bw-data"
+            example_data = "/tmp/tests/" + self._name + "/bw-data"
             Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
