@@ -94,10 +94,10 @@ class KubernetesTest(Test) :
                 proc = run("sudo ./setup-kubernetes.sh", cwd=test, shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("setup-kubernetes failed"))
-            if isdir(example_data) :
-                for cp_dir in listdir(example_data) :
-                    if isdir(join(example_data, cp_dir)) :
-                        copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
+            # if isdir(example_data) :
+                # for cp_dir in listdir(example_data) :
+                    # if isdir(join(example_data, cp_dir)) :
+                        # copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
             proc = run("sudo kubectl apply -f kubernetes.yml", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("kubectl apply failed"))
