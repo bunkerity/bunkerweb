@@ -6,8 +6,8 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 chown -R 101:101 bw-data
-find ./bw-data/ -type f -exec chmod 0644 {} \;
-find ./bw-data/ -type d -exec chmod 0755 {} \;
+find ./bw-data/ -type f -exec chmod 0640 {} \;
+find ./bw-data/ -type d -exec chmod 0750 {} \;
 chown -R 101:33 ./bw-data/www
-find ./bw-data/www -type f -exec chmod 0664 {} \;
-find ./bw-data/www -type d -exec chmod 0775 {} \;
+find ./bw-data/www -type f -exec chmod 0660 {} \;
+find ./bw-data/www -type d -exec chmod 0770 {} \;

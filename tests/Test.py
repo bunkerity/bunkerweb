@@ -18,7 +18,7 @@ class Test(ABC) :
         self.__kind = kind
         self.__timeout = timeout
         self.__tests = tests
-        log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s")
+        log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s for " + self._name)
 
     # Class method
     # called once before running all the different tests for a given integration

@@ -49,7 +49,8 @@ class DockerTest(Test) :
                 if proc.returncode != 0 :
                     raise(Exception("setup-docker failed"))
             if isdir(example_data) :
-                for cp_dir in listdir(example_data) :
+                proc = run("sudo ls " + example_data, shell=True, capture_output=True)
+                for cp_dir in proc.stdout.decode().splitlines() :
                     if isdir(join(example_data, cp_dir)) :
                         if isdir(join("/tmp/bw-data", cp_dir)) :
                             run("sudo rm -rf " + join("/tmp/bw-data", cp_dir), shell=True)
