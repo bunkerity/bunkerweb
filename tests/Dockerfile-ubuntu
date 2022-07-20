@@ -24,7 +24,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
     /lib/systemd/system/systemd-update-utmp*
 
 RUN apt update && \
-    apt-get install curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common python3-pip -y && \
+    apt-get install php-fpm curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common python3-pip -y && \
     echo "deb https://nginx.org/packages/ubuntu/ jammy nginx" > /etc/apt/sources.list.d/nginx.list && \
     echo "deb-src https://nginx.org/packages/ubuntu/ jammy nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
