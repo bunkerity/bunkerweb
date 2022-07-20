@@ -69,7 +69,6 @@ COPY linux/fpm-debian /opt/.fpm
 COPY linux/bunkerweb.service /opt/bunkerweb.service
 COPY linux/bunkerweb-ui.service /opt/bunkerweb-ui.service
 
-
 # Generate DEB at startup
 VOLUME /data
 WORKDIR /opt

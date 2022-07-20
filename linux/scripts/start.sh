@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /opt/bunkerweb/helpers/utils.sh
+
 #############################################################
 #                           Help                            #  
 #############################################################
@@ -20,9 +22,9 @@ export PYTHONPATH=/opt/bunkerweb/deps/python/
 
 # Add nginx to sudoers
 if [ ! -f /etc/sudoers.d/nginx ]; then
-    echo "Adding nginx user to sudoers file ..."
-    echo "nginx ALL=(ALL) NOPASSWD: /bin/systemctl restart bunkerweb" >> /etc/sudoers.d/nginx
-    echo "Done !"
+    log "ℹ️" "Adding nginx user to sudoers file ..."
+    log "ℹ️" "nginx ALL=(ALL) NOPASSWD: /bin/systemctl restart bunkerweb" >> /etc/sudoers.d/nginx
+    #log "$1" "ℹ️"
 fi
 
 #############################################################
@@ -55,8 +57,8 @@ function start() {
         echo "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Generate variables.env files to /tmp/"
-    echo "OK !"
+    log "ℹ️" "Generate variables.env files to /tmp/"
+    #echo "OK !"
     #############################################
     #                   STEP2                   #
     # Generate first temporary config           #
@@ -67,11 +69,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Generate first temporary config"
-    echo "OK !"
+    log "ℹ️" "Generate first temporary config"
+    #echo "OK !"
     #############################################
     #                   STEP3                   #
     #               Execute nginx               #
@@ -82,11 +84,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Execute nginx"
-    echo "OK !"
+    log "ℹ️" "Execute nginx"
+    #echo "OK !"
     #############################################
     #                   STEP4                   #
     #               Run jobs script             #
@@ -97,11 +99,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Run jobs script"
-    echo "OK !"
+    log "ℹ️" "Run jobs script"
+    #echo "OK !"
     #############################################
     #                   STEP5                   #
     #                 Quit nginx                #
@@ -112,11 +114,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Quit nginx"
-    echo "OK !"
+    log "ℹ️" "Quit nginx"
+    #echo "OK !"
     #############################################
     #                   STEP6                   #
     #           Generate final confs            #
@@ -127,11 +129,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Generate final confs"
-    echo "OK !"
+    log "ℹ️" "Generate final confs"
+    #echo "OK !"
     #############################################
     #                   STEP7                   #
     #              Run jobs infinite            #
@@ -142,11 +144,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Run jobs infinite"
-    echo "OK !"
+    log "ℹ️" "Run jobs infinite"
+    #echo "OK !"
     #############################################
     #                   STEP8                   #
     #                Start nginx                #
@@ -157,11 +159,11 @@ function start() {
     # Exit if failed
     if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    echo "Start nginx"
-    echo "OK !"
+    log "ℹ️" "Start nginx"
+    #echo "OK !"
 }
 
 function stop()
@@ -173,47 +175,47 @@ function stop()
     then
         var=$( cat $PID_FILE_PATH )
         kill -SIGINT $var
-        echo "Killing : $var"
+        log "ℹ️" echo "Killing : $var"
     else
-        echo "File doesn't exist"
+        log "❌" "File doesn't exist"
     fi
 
     # Check if nginx running and if so, stop it
     SERVICE="nginx"
     if pgrep -x "$SERVICE" >/dev/null
     then
-        echo "Stopping $SERVICE service"
+        log "ℹ️" "Stopping $SERVICE service"
         nginx -s stop
     else
-        echo "$SERVICE already stopped"
+        log "ℹ️" "$SERVICE already stopped"
     fi
-    echo "Done !"
+    #echo "Done !"
 }
 
 function reload()
 {
-    echo "Reloading Bunkerweb service ..."
+    log "ℹ️" "Reloading Bunkerweb service ..."
     # Check if pid file exist and remove it if so
     PID_FILE_PATH="/opt/bunkerweb/tmp/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
         var=$( cat $PID_FILE_PATH )
         kill -SIGHUP $var
-        echo "Reloading : $var"
+        log "ℹ️" "Reloading : $var"
     else
-        echo "File doesn't exist"
+        log "❌" "File doesn't exist"
     fi
 
     # Check if nginx running and if so, reload it
     SERVICE="nginx"
     if pgrep -x "$SERVICE" >/dev/null
     then
-        echo "Reloading $SERVICE service"
+        log "ℹ️" "Reloading $SERVICE service"
         nginx -s reload
     else
-        echo "$SERVICE already stopped"
+        log "ℹ️" "$SERVICE already stopped"
     fi
-    echo "Done !"
+    #echo "Done !"
 }
 
 # List of differents args
