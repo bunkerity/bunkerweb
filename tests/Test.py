@@ -77,6 +77,7 @@ class Test(ABC) :
             all_ok = True
             for test in self.__tests :
                 ok = self.__run_test(test)
+                sleep(1)
                 if not ok :
                     all_ok = False
                     break
@@ -85,7 +86,6 @@ class Test(ABC) :
                 log("TEST", "ℹ️", "success (" + elapsed + "/" + str(self.__timeout) + "s)")
                 return self._cleanup_test()
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
-            sleep(1)
         self._debug_fail()
         self._cleanup_test()
         log("TEST", "❌", "failed (timeout = " + str(self.__timeout) + "s)")
@@ -99,6 +99,7 @@ class Test(ABC) :
                 for ex_domain, test_domain in self._domains.items() :
                     if search(ex_domain, ex_url) :
                         ex_url = sub(ex_domain, test_domain, ex_url)
+                        break
                 r = get(ex_url, timeout=5)
                 return test["string"].casefold() in r.text.casefold()
         except :
