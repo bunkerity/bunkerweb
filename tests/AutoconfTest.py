@@ -92,6 +92,8 @@ class AutoconfTest(Test) :
             if isdir(example_data) :
                 for cp_dir in listdir(example_data) :
                     if isdir(join(example_data, cp_dir)) :
+                        if isdir(join("/tmp/bw-data", cp_dir)) :
+                            run("sudo rm -rf " + join("/tmp/bw-data", cp_dir), shell=True)
                         copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
             proc = run("docker-compose -f autoconf.yml pull", shell=True, cwd=test)
             if proc.returncode != 0 :
