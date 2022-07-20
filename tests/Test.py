@@ -5,7 +5,7 @@ from requests import get
 from traceback import format_exc
 from shutil import copytree
 from os.path import isdir, join
-from os import mkdir, makedirs, walk, chmod
+from os import mkdir, makedirs, walk, chmod, rename
 from re import sub, search, MULTILINE
 from datetime import datetime
 from subprocess import run
@@ -126,7 +126,6 @@ class Test(ABC) :
         for root, dirs, files in walk(path) :
             for name in dirs + files :
                 full_path = join(root, name)
-                if old in full_path :
-                    new_path = sub(old, new, full_path)
-                    if full_path != new_path :
-                        rename(full_path, new_path)
+                new_path = sub(old, new, full_path)
+                if full_path != new_path :
+                    rename(full_path, new_path)
