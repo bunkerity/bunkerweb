@@ -90,7 +90,7 @@ class AutoconfTest(Test) :
                 if proc.returncode != 0 :
                     raise(Exception("setup-autoconf failed"))
             if isdir(example_data) :
-                proc = run("sudo cp -rp " + example_data + "/* /tmp/bw-data", shell=True)
+                proc = run("sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'", shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("cp bw-data failed"))
             proc = run("docker-compose -f autoconf.yml pull", shell=True, cwd=test)
