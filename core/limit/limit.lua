@@ -102,7 +102,7 @@ function _M:access()
 	local _, _, rate_max, rate_time = rate:find("(%d+)r/(.)")
 
 	-- Get current requests timestamps
-	local requests, err = datastore:get("plugin_limit_cache_" .. ngx.var.remote_addr .. ngx.var.uri)
+	local requests, err = datastore:get("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri)
 	if not requests and err ~= "not found" then
 		return false, err, nil, nil
 	elseif err == "not found" then
@@ -133,7 +133,7 @@ function _M:access()
 	end
 
 	-- Save the new timestamps
-	local ok, err = datastore:set("plugin_limit_cache_" .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(new_timestamps), delay)
+	local ok, err = datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(new_timestamps), delay)
 	if not ok then
 		return false, "can't update timestamps : " .. err, nil, nil
 	end
