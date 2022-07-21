@@ -12,7 +12,7 @@
 		{
 			"type": "string",
 			"url": "https://www.example.com",
-			"string": "hello"
+			"string": "gogs"
 		}
 	]
 }
