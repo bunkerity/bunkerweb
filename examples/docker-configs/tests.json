@@ -8,7 +8,7 @@
 		{
 			"type": "string",
 			"url": "http://app1.example.com/hello",
-			"string": "hello"
+			"string": "world"
 		},
 		{
 			"type": "string",
