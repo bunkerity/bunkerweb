@@ -90,7 +90,7 @@ class DockerController(Controller, ConfigCaller) :
                 if not variable.startswith("bunkerweb.") :
                     continue
                 real_variable = variable.replace("bunkerweb.", "", 1)
-                result = search(r"^CUSTOM_CONF_(SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$ ", real_variable)
+                result = search(r"^CUSTOM_CONF_(SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$", real_variable)
                 if result is None :
                     continue
                 cfg_type = result.group(1).lower().replace("_", "-")
