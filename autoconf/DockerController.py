@@ -93,14 +93,14 @@ class DockerController(Controller, ConfigCaller) :
                 result = search(r"^CUSTOM_CONF_(SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$ ", real_variable)
                 if result is None :
                     continue
-                type = result.group(1).lower().replace("_", "-")
-                name = result.group(2)
-                configs[type][server_name + "/" + name] = value
+                cfg_type = result.group(1).lower().replace("_", "-")
+                cfg_name = result.group(2)
+                configs[cfg_type][server_name + "/" + cfg_name] = value
         return configs
 
     def apply_config(self) :
         self._config.stop_scheduler()
-        ret = self._config.apply(self._instances, self._services)
+        ret = self._config.apply(self._instances, self._services, configs=self._configs)
         self._config.start_scheduler()
         return ret
 

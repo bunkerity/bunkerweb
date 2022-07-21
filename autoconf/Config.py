@@ -60,7 +60,7 @@ class Config(ApiCaller, ConfigCaller) :
             return True
         if services != self.__services :
             return True
-        if configs is not None and configs != self.__configs :
+        if not configs is None and configs != self.__configs :
             return True
         return False
 
