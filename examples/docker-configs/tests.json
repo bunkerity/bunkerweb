@@ -13,7 +13,7 @@
 		{
 			"type": "string",
 			"url": "http://app2.example.com/hello",
-			"string": "hello"
+			"string": "world"
 		},
 		{
 			"type": "string",
