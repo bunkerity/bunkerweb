@@ -99,6 +99,7 @@ class AutoconfTest(Test) :
             proc = run("docker-compose -f autoconf.yml up -d", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose up failed"))
+            sleep(30)
         except :
             log("AUTOCONF", "❌", "exception while running AutoconfTest._setup_test()\n" + format_exc())
             self._cleanup_test()
