@@ -1,0 +1,14 @@
+{
+	"name": "load-balancer",
+	"kinds": [
+		"docker"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://www.example.com",
+			"string": "hello"
+		}
+	]
+}
