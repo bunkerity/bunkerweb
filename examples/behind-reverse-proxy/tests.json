@@ -7,7 +7,7 @@
 	"tests": [
 		{
 			"type": "string",
-			"url": "http://www.example.com",
+			"url": "https://www.example.com",
 			"string": "hello"
 		}
 	]

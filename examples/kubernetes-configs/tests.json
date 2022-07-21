@@ -1,19 +1,24 @@
 {
-	"name": "docker-configs",
+	"name": "kubernetes-configs",
 	"kinds": [
-		"docker"
+		"kubernetes"
 	],
 	"timeout": 60,
 	"tests": [
 		{
 			"type": "string",
 			"url": "https://app1.example.com/hello",
-			"string": "world"
+			"string": "hello"
 		},
 		{
 			"type": "string",
 			"url": "https://app2.example.com/hello",
-			"string": "world"
+			"string": "hello"
+		},
+		{
+			"type": "string",
+			"url": "https://app3.example.com/hello",
+			"string": "hello"
 		},
 		{
 			"type": "string",
@@ -24,6 +29,11 @@
 			"type": "string",
 			"url": "https://app2.example.com/app2",
 			"string": "app2"
+		},
+		{
+			"type": "string",
+			"url": "https://app3.example.com/app3",
+			"string": "app3"
 		}
 	]
 }
