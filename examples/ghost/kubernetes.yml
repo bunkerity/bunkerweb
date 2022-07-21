@@ -1,0 +1,54 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/USE_GZIP: "yes"
+spec:
+  rules:
+  - host: www.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-ghost
+            port:
+              number: 2368
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghost
+  labels:
+    app: ghost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ghost
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      containers:
+      - name: ghost
+        image: ghost:alpine
+        env:
+        - name: URL
+          value: "https://www.example.com"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-ghost
+spec:
+  selector:
+    app: ghost
+  ports:
+    - protocol: TCP
+      port: 2368
+      targetPort: 2368

@@ -1,0 +1,18 @@
+{
+	"name": "gogs",
+	"kinds": [
+		"docker",
+		"autoconf",
+		"swarm",
+		"kubernetes",
+		"linux"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://www.example.com",
+			"string": "hello"
+		}
+	]
+}

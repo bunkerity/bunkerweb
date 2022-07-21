@@ -25,7 +25,6 @@ services:
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mygogs:3000
-      - WHITELIST_USER_AGENT=^git
       - REVERSE_PROXY_HEADERS_1=Authorization $http_authorization
       - MAX_CLIENT_SIZE=1G
 

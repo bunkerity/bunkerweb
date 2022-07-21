@@ -27,7 +27,6 @@ services:
       - REVERSE_PROXY_HOST=http://myjoomla
       - LIMIT_REQ_URL_1=/administrator/
       - LIMIT_REQ_RATE_1=8r/s
-      # Remove the following lines after finishing the installation of PrestaShop
       - LIMIT_REQ_URL_2=/installation/index.php
       - LIMIT_REQ_RATE_2=8r/s
 

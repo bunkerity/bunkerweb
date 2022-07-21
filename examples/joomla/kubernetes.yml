@@ -1,0 +1,104 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_1: "/administrator/"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_1: "8r/s"
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_2: "/installation/index.php"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_2: "8r/s"
+spec:
+  rules:
+  - host: www.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-joomla
+            port:
+              number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joomla
+  labels:
+    app: joomla
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joomla
+  template:
+    metadata:
+      labels:
+        app: joomla
+    spec:
+      containers:
+      - name: joomla
+        image: joomla:4-apache
+        env:
+        - name: JOOMLA_DB_HOST
+          value: "svc-db"
+        - name: JOOMLA_DB_NAME
+          value: "joomla_db"
+        - name: JOOMLA_DB_USER
+          value: "user"
+        - name: JOOMLA_DB_PASSWORD
+          value: "db-user-pwd"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-joomla
+spec:
+  selector:
+    app: svc-joomla
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  labels:
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: mariadb
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "db-root-password"
+        - name: MYSQL_DATABASE
+          value: "joomla_db"
+        - name: MYSQL_USER
+          value: "user"
+        - name: MYSQL_PASSWORD
+          value: "db-user-pwd"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-db
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
