@@ -51,8 +51,8 @@ services:
     volumes:
       - ./bw-data/www/app3.example.com:/app # folder containing PHP app3 (don't forget to rename it)
     labels:
-      - bunkerweb.SERVER_NAME=app2.example.com
-      - bunkerweb.REMOTE_PHP=myapp2
+      - bunkerweb.SERVER_NAME=app3.example.com
+      - bunkerweb.REMOTE_PHP=myapp3
       - bunkerweb.REMOTE_PHP_PATH=/app
 
 networks:
