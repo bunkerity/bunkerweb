@@ -1,0 +1,17 @@
+{
+	"name": "load-balancer",
+	"kinds": [
+		"docker",
+		"autoconf",
+		"swarm",
+		"kubernetes"
+	],
+	"timeout": 180,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://www.example.com",
+			"string": "hello"
+		}
+	]
+}

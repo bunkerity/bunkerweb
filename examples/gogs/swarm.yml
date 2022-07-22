@@ -30,6 +30,9 @@ networks:
     external:
       name: bw-services
 
+volumes:
+  gogs_data:
+
 configs:
   config_gogs_app:
     file: ./gogs-data/gogs/conf/app.ini

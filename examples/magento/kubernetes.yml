@@ -4,8 +4,6 @@ metadata:
   name: ingress
   annotations:
     bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-    bunkerweb.io/LIMIT_REQ_URL_1: "/core/install.php"
-    bunkerweb.io/LIMIT_REQ_RATE_1: "5r/s"
 spec:
   rules:
   - host: www.example.com
@@ -15,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: drupal
+            name: magento
             port:
-              number: 80
+              number: 8080

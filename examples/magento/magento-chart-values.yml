@@ -1,0 +1,7 @@
+magentoHost: "https://www.example.com"
+magentoUsername: "user"
+magentoPassword: "changeme42"
+magentoEmail: "contact@example.com"
+magentoFirstName: "John"
+magentoLastName: "Doe"
+magentoAdminUri: "/admin"

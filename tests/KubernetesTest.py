@@ -109,7 +109,13 @@ class KubernetesTest(Test) :
 
     def _cleanup_test(self) :
         try :
-            proc = run("sudo kubectl delete -f kubernetes.yml", shell=True, cwd="/tmp/tests/" + self._name)
+            test = "/tmp/tests/" + self._name
+            cleanup = test + "/cleanup-kubernetes.sh"
+            if isfile(cleanup) :
+                proc = run("sudo ./cleanup-kubernetes.sh", cwd=test, shell=True)
+                if proc.returncode != 0 :
+                    raise(Exception("cleanup-kubernetes failed"))
+            proc = run("sudo kubectl delete -f kubernetes.yml", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("kubectl delete failed"))
             super()._cleanup_test()

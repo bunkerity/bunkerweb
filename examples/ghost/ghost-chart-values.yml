@@ -1,0 +1,4 @@
+ghostUsername: "user"
+ghostPassword: "changeme42"
+ghostHost: "www.example.com"
+ghostEnableHttps: true
