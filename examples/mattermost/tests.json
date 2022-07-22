@@ -1,17 +1,16 @@
 {
-	"name": "magento",
+	"name": "mattermost",
 	"kinds": [
 		"docker",
 		"autoconf",
-		"swarm",
 		"kubernetes"
 	],
-	"timeout": 180,
+	"timeout": 60,
 	"tests": [
 		{
 			"type": "string",
 			"url": "https://www.example.com",
-			"string": "hello"
+			"string": "mattermost"
 		}
 	]
 }
