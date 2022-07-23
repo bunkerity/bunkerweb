@@ -1,0 +1,16 @@
+{
+	"name": "mongo-express",
+	"kinds": [
+		"docker",
+		"autoconf",
+		"swarm"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "status",
+			"url": "https://www.example.com",
+			"status": 401
+		}
+	]
+}

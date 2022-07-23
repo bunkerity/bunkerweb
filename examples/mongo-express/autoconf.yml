@@ -2,27 +2,12 @@ version: "3"
 
 services:
 
-  mybunker:
-    image: bunkerity/bunkerweb:1.4.2
-    ports:
-      - 80:8080
-      - 443:8443
-    volumes:
-      - ./bw-data:/data
-    environment:
-      - SERVER_NAME=www.example.com                 # replace with your domain
-      - SERVE_FILES=no
-      - DISABLE_DEFAULT_SERVER=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://mongo-ui:8081
-
   mongo:
     image: mongo:latest
+    networks:
+      bw-services:
+        aliases:
+          - mongo
     volumes:
       - ./db:/data/db
     environment:
@@ -32,6 +17,10 @@ services:
 
   mongo-ui:
     image: mongo-express:latest
+    networks:
+      bw-services:
+        aliases:
+          - mongo-ui
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root        # replace with a less obvious username  
@@ -41,3 +30,12 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo
+    labels:
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://mongo-ui:8081
+
+networks:
+  bw-services:
+    external:
+      name: bw-services

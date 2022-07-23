@@ -5,5 +5,5 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 1
 fi
 
-chown -R root:101 bw_data
-chmod -R 770 bw_data
+chown -R root:101 bw-data
+chmod -R 770 bw-data

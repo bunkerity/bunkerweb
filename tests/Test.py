@@ -94,14 +94,17 @@ class Test(ABC) :
     # run a single test
     def __run_test(self, test) :
         try :
+            ex_url = test["url"]
+            for ex_domain, test_domain in self._domains.items() :
+                if search(ex_domain, ex_url) :
+                    ex_url = sub(ex_domain, test_domain, ex_url)
+                    break
             if test["type"] == "string" :
-                ex_url = test["url"]
-                for ex_domain, test_domain in self._domains.items() :
-                    if search(ex_domain, ex_url) :
-                        ex_url = sub(ex_domain, test_domain, ex_url)
-                        break
                 r = get(ex_url, timeout=5)
                 return test["string"].casefold() in r.text.casefold()
+            elif test["type"] == "status" :
+                r = get(ex_url, timeout=5)
+                return test["status"] == r.status_code
         except :
             #log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + ex_url + "\n" + format_exc())
             return False
