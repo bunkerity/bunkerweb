@@ -1,0 +1,17 @@
+{
+	"name": "prestashop",
+	"kinds": [
+		"docker",
+        "autoconf",
+        "swarm",
+        "kubernetes"
+	],
+	"timeout": 120,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://www.example.com",
+			"string": "prestashop"
+		}
+	]
+}

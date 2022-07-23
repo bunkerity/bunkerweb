@@ -1,0 +1,45 @@
+version: '3.5'
+
+services:
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    networks:
+      - bw-services
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - rr_config:/config
+      - rr_movies:/movies #optional
+      - rr_downloads:/downloads #optional
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.MAX_CLIENT_SIZE=50m
+        # Methods used by the radarr API
+        # more info at https://radarr.video/docs/api/
+        - bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT
+        # Proxy requests to radarr
+        # websocket is needed
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://radarr:7878
+        - bunkerweb.REVERSE_PROXY_WS=yes
+        # Increase request rate for API endpoints
+        - bunkerweb.LIMIT_REQ_URL_1=^/api/
+        - bunkerweb.LIMIT_REQ_RATE_1=10r/s
+
+networks:
+  bw-services:
+    external:
+      name: bw-services
+
+volumes:
+  rr_config:
+  rr_downloads:
+  rr_movies:

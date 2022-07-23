@@ -1,0 +1,4 @@
+moodleSiteName: "My Moodle"
+moodleUsername: "admin"
+moodlePassword: "changeme42"
+moodleEmail: "admin@example.com"
