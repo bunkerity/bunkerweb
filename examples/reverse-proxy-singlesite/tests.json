@@ -1,0 +1,21 @@
+{
+	"name": "reverse-proxy-singlesite",
+	"kinds": [
+		"docker",
+        "autoconf",
+        "swarm"
+	],
+	"timeout": 60,
+	"tests": [
+		{
+			"type": "string",
+			"url": "https://www.example.com/app1",
+			"string": "hello"
+		},
+        {
+			"type": "string",
+			"url": "https://www.example.com/app2",
+			"string": "hello"
+		},
+	]
+}

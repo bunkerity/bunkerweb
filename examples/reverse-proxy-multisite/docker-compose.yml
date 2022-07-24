@@ -33,13 +33,7 @@ services:
       - net_app2
 
   app1:
-    image: node
-    working_dir: /home/node/app
-    volumes:
-      - ./js-app:/home/node/app
-    environment:
-      - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
+    image: tutum/hello-world
     networks:
       - net_app1
 

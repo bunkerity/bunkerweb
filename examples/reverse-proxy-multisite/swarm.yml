@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  app1:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=app1.example.com
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://app1
+
+  app2:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=app2.example.com
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://app2
+
+networks:
+  bw-services:
+    external:
+      name: bw-services

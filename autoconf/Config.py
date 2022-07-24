@@ -74,7 +74,8 @@ class Config(ApiCaller, ConfigCaller) :
         server_names = []
         for service in self.__services :
             first_server = service["SERVER_NAME"].split(" ")[0]
-            server_names.append(first_server)
+            if not first_server in server_names :
+                server_names.append(first_server)
             for variable, value in service.items() :
                 config[first_server + "_" + variable] = value
         config["SERVER_NAME"] = " ".join(server_names)

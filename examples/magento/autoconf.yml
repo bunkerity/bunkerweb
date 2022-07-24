@@ -23,10 +23,10 @@ services:
       - MAGENTO_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
       - ELASTICSEARCH_HOST=myelasticsearch
     labels:
-      - SERVER_NAME=www.example.com
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://mymagento:8080
+      - bunkerweb.SERVER_NAME=www.example.com
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://mymagento:8080
 
   myelasticsearch:
     image: bitnami/elasticsearch:7

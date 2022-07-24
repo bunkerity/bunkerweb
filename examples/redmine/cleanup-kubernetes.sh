@@ -5,5 +5,4 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 1
 fi
 
-chown -R root:101 bw-data
-chmod -R 770 bw-data
+helm delete redmine
