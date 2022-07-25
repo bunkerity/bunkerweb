@@ -282,7 +282,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     python3 -m http.server -b 127.0.0.1
     ```
 
-    Configuration of the `variables.env` file :
+    Content of the `my_variables.env` configuration file :
     ```conf
     SERVER_NAME=www.example.com
     HTTP_PORT=80
@@ -293,27 +293,24 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     REVERSE_PROXY_HOST=http://127.0.0.1:8000
     ```
 
-    In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
 	```yaml
-	all:
-  	  children:
-        Groups:
-          hosts: 
-            "Your_IP_Address":
-          vars:
-            variables_env: ../variables.env
+	[mybunkers]
+    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
 	```
+    
+    Or alternatively, in your playbook file :
+    ```yaml
+    ---
+    - hosts: all
+      become: true
+      vars:
+        - variables_env: "{{ playbook_dir }}/my_variables.env"
+      roles:
+        - bunkerweb
+    ```
 
-	Or in INI format :
-	```ini
-	[all]
-	host
-
-	[all:vars]
-	variables_env = ../variables.env
-	```
-
-	Run the playbook :
+	You can now run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```

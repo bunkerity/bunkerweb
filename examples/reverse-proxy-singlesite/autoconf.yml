@@ -16,8 +16,8 @@ services:
       - |
         bunkerweb.CUSTOM_CONF_SERVER_HTTP_redirects=
         port_in_redirect off;
-        location ~ ^/(app1|app2)$ {
-          rewrite ^(.*)$ $1/ permanent;
+        location ~ ^/(app1|app2)$$ {
+          rewrite ^(.*)$$ $$1/ permanent;
         }
 
   app2:
@@ -34,8 +34,8 @@ services:
       - |
         bunkerweb.CUSTOM_CONF_SERVER_HTTP_redirects=
         port_in_redirect off;
-        location ~ ^/(app1|app2)$ {
-          rewrite ^(.*)$ $1/ permanent;
+        location ~ ^/(app1|app2)$$ {
+          rewrite ^(.*)$$ $$1/ permanent;
         }
 
 networks:
