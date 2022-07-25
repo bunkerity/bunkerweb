@@ -6,6 +6,7 @@
         "swarm"
 	],
 	"timeout": 60,
+	"no_copy_container": true,
 	"tests": [
 		{
 			"type": "string",

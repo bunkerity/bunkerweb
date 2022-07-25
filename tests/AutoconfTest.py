@@ -9,8 +9,8 @@ from logger import log
 
 class AutoconfTest(Test) :
 
-    def __init__(self, name, timeout, tests) :
-        super().__init__(name, "autoconf", timeout, tests)
+    def __init__(self, name, timeout, tests, no_copy_container=False) :
+        super().__init__(name, "autoconf", timeout, tests, no_copy_container=no_copy_container)
         self._domains = {
             r"www\.example\.com": getenv("TEST_DOMAIN1"),
             r"auth\.example\.com": getenv("TEST_DOMAIN1"),
