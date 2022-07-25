@@ -17,6 +17,6 @@
 			"type": "string",
 			"url": "https://www.example.com/app2",
 			"string": "hello"
-		},
+		}
 	]
 }
