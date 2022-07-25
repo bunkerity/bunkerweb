@@ -16,6 +16,7 @@ The following integrations are officially supported :
 - [Swarm](/1.4/integrations/#swarm)
 - [Kubernetes](/1.4/integrations/#kubernetes)
 - [Linux](/1.4/integrations/#linux)
+- [Ansible](/1.4/integrations/#ansible)
 
 If you think that a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
 

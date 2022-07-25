@@ -889,7 +889,9 @@ List of supported Linux distros :
 - Fedora 36
 - CentOS Stream 8
 
-[Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool working with python. Ansible work with ssh to connect to remote server, so make sure to have a ssh key. The role will deploy and configure BunkerWeb on your remote server(s).
+[Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
+
+A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
 
 First of all download the role from ansible-galaxy :
 ```shell
@@ -898,13 +900,13 @@ ansible-galaxy install bunkerity.bunkerweb
 
 Next create an inventory by adding the IP adress or FQDN of one or more remote systems, either in `/etc/ansible/hosts` or in your own playbook `inventory.yml` :
 ```toml
-[remotehosts]
+[mybunkers]
 192.0.2.50
 192.0.2.51
 192.0.2.52
 ```
 
-The next step we're going to set up is the SSH connection so Ansible can connect to the managed nodes. Add your public SSH keys to the `authorized_keys` file on each remote system and ensure you can't successfully connect.
+The next step we're going to set up is the SSH connection so Ansible can connect to the managed nodes. Add your public SSH keys to the `authorized_keys` file on each remote system and ensure you can successfully connect. 
 
 In order to use the role, we will create the playbook file named `playbook.yml` for example :
 ```yaml
@@ -916,6 +918,21 @@ In order to use the role, we will create the playbook file named `playbook.yml` 
 ```
 
 Run the playbook :
-`ansible-playbook -i inventory.yml playbook.yml`
+```shell
+ansible-playbook -i inventory.yml playbook.yml
+```
 
-The configurations by default for Bunkerweb are minimals, so check out the rest of the documentations to configure BunkerWeb as you desire [quickstart-guide](http://localhost:8000/quickstart-guide/).
+Configuration of BunkerWeb is done by using specific role variables :
+
+| Name  | Type  | Description  | Default value  |
+|:-----:|:-----:|--------------|----------------|
+| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.2` |
+| `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
+| `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
+| `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |
+| `enable_ui` | boolean | Activate the web UI. | `false` |
+| `custom_ui` | string | Path of the ui.env file to configure the web UI. | `files/ui.env` |
+| `custom_configs` | boolean | Enable provisioning of custom configurations using the `custom_configs_path` variable. | `false` |
+| `custom_configs_path` | Dictionary | Each entry is a path of the folder containing custom configurations. Keys are the type of custom configs : `http`, `server-http`, `modsec`, `modsec-crs` and `default-server-http` | empty values |
+| `custom_site` | string | Path of the www directory to upload. | empty value |
+| `plugins` | string | Path of the plugins directory to upload. | empty value |

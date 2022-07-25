@@ -22,7 +22,6 @@ services:
       - AUTO_LETS_ENCRYPT=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
-      - AUTO_LETS_ENCRYPT=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mongo-ui:8081
