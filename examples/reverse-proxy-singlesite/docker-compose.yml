@@ -23,9 +23,9 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL_1=~ ^/app1/(.+)$$
+      - REVERSE_PROXY_URL_1=~ ^/app1/(.*)$$
       - REVERSE_PROXY_HOST_1=http://app1/$$1
-      - REVERSE_PROXY_URL_2=~ ^/app2/(.+)$$
+      - REVERSE_PROXY_URL_2=~ ^/app2/(.*)$$
       - REVERSE_PROXY_HOST_2=http://app2/$$1
       - |
         CUSTOM_CONF_SERVER_HTTP_redirects=
