@@ -116,11 +116,14 @@ class Test(ABC) :
         pass
 
     def replace_in_file(path, old, new) :
-        with open(path, "r") as f :
-            content = f.read()
-        content = sub(old, new, content, flags=MULTILINE)
-        with open(path, "w") as f :
-            f.write(content)
+        try :
+            with open(path, "r") as f :
+                content = f.read()
+            content = sub(old, new, content, flags=MULTILINE)
+            with open(path, "w") as f :
+                f.write(content)
+        except :
+            log("TEST", "⚠️", "can't replace file " + path)
 
     def replace_in_files(path, old, new) :
         for root, dirs, files in walk(path) :

@@ -1517,7 +1517,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
 === "Ansible"
 
-    You can use the `custom_configs_path[]` variable to write the configs to the `/opt/bunkerweb/configs` folder. TODO
+    The `custom_configs_path[]` variable is a dictionary with configuration types (`http`, `server-http`, `modsec`, `modsec-crs`) as keys and the corresponding values are path containing the configuration files.
 
     Here is an example for server-http/hello-world.conf :
     ```conf
@@ -1529,32 +1529,22 @@ Some integrations offer a more convenient way of applying configurations for exa
 	}
 	```
 
-	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb :
+	And the corresponding `custom_configs_path[server-http]` variable used in your inventory
 	```yaml
-	all:
-  	  children:
-        Groups:
-          hosts: 
-            "Your_IP_Address":
-          vars:
-        	custom_configs: true
-        	custom_configs_path: {
-          	server-http: ../hello-world.conf,
-          	#http: ../http.conf,
-          	#default-server-http: ../default-server-http.conf,
-          	#modsec-crs: ../modsec-crs,
-          	#modsec: ../modsec
-          }
+    [mybunkers]
+    192.168.0.42 custom_configs_path={"server-http": "{{ playbook_dir }}/server-http"}
 	```
 
-	Or in INI format :
-	```ini
-	[all]
-	host
-	
-	[all:vars]
-	custom_configs=true
-	custom_configs_path={'server-http': '../hello-world.conf', 'http': '../http.conf', 'default-server-http': '../default-server-http.conf', 'modsec-crs': '../modsec-crs', 'modsec': '../modsec'}
+	Or alternatively, in your playbook file : 
+	```yaml
+    - hosts: all
+      become: true
+      vars:
+        - custom_configs_path: {
+            server-http: "{{ playbook_dir }}/server-http"
+          }
+      roles:
+        - bunkerweb
 	```
 
 	Run the playbook :
