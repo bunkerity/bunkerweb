@@ -22,6 +22,16 @@ services:
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://mywp
+      - |
+        bunkerweb.CUSTOM_CONF_HTTP_MODSEC_CRS_wordpress=
+        SecAction \
+         "id:900130,\
+          phase:1,\
+          nolog,\
+          pass,\
+          t:none,\
+          setvar:tx.crs_exclusions_wordpress=1"
+
 
   mydb:
     image: mariadb

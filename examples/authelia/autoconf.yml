@@ -4,17 +4,11 @@ services:
 
   # APPLICATIONS
   app1:
-    image: node
-    working_dir: /home/node/app
+    image: tutum/hello-world
     networks:
       bw-services:
         aliases:
           - app1
-    volumes:
-      - ./js-app:/home/node/app
-    environment:
-      - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
     labels:
       - bunkerweb.SERVER_NAME=app1.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes

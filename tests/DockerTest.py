@@ -48,7 +48,7 @@ class DockerTest(Test) :
                 proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("setup-docker failed"))
-            if isdir(example_data) :
+            if isdir(example_data) and not self._no_copy_container :
                 proc = run("sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'", shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("cp bw-data failed"))

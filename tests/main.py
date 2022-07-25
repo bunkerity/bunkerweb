@@ -58,10 +58,13 @@ for example in glob("./examples/*") :
                 log("TESTS", "ℹ️", "Skipping tests for " + tests["name"] + " (not in kinds)")
                 continue
             test_obj = None
+            no_copy_container = False
+            if "no_copy_container" in tests :
+                no_copy_container = tests["no_copy_container"]
             if test_type == "docker" :
-                test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"])
+                test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"], no_copy_container=no_copy_container)
             elif test_type == "autoconf" :
-                test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"])
+                test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"], no_copy_container=no_copy_container)
             elif test_type == "swarm" :
                 test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"])
             elif test_type == "kubernetes" :

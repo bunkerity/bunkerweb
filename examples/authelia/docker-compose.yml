@@ -34,7 +34,7 @@ services:
       - auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
       # Applications
       - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1:3000
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1
       - app1.example.com_REVERSE_PROXY_AUTH_REQUEST=/authelia
       - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri
       - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email
@@ -48,13 +48,7 @@ services:
 
   # APPLICATIONS
   app1:
-    image: node
-    working_dir: /home/node/app
-    volumes:
-      - ./js-app:/home/node/app
-    environment:
-      - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
+    image: tutum/hello-world
   app2:
     image: tutum/hello-world
 

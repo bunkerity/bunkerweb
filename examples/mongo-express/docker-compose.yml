@@ -7,8 +7,14 @@ services:
     ports:
       - 80:8080
       - 443:8443
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
     volumes:
-      - ./bw-data:/data
+      - bw_data:/data
     environment:
       - SERVER_NAME=www.example.com                 # replace with your domain
       - SERVE_FILES=no
@@ -20,6 +26,9 @@ services:
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mongo-ui:8081
+      - |
+        CUSTOM_CONF_MODSEC_mongo-express=
+        SecRule REQUEST_FILENAME "@rx ^/db" "id:1,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"
 
   mongo:
     image: mongo:latest
@@ -41,3 +50,6 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo
+
+volumes:
+  bw_data:

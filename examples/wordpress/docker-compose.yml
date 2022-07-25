@@ -13,7 +13,7 @@ services:
     # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     volumes:
-      - ./bw-data:/data # contains custom Core Rule Set configs for Wordpress exclusions
+      - bw_data:/data
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
@@ -24,6 +24,15 @@ services:
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mywp
+      - |
+        CUSTOM_CONF_HTTP_MODSEC_CRS_wordpress=
+        SecAction \
+         "id:900130,\
+          phase:1,\
+          nolog,\
+          pass,\
+          t:none,\
+          setvar:tx.crs_exclusions_wordpress=1"
 
   mywp:
     image: wordpress:5-apache
@@ -45,3 +54,6 @@ services:
       - MYSQL_DATABASE=wp
       - MYSQL_USER=user
       - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+
+volumes:
+  bw_data:

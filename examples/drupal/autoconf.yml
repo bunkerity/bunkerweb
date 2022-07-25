@@ -20,7 +20,16 @@ services:
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://mydrupal
       - bunkerweb.LIMIT_REQ_URL_1=/core/install.php
-      - bunkerweb.LIMIT_REQ_RATE_1=5r/s    
+      - bunkerweb.LIMIT_REQ_RATE_1=5r/s
+      - |
+        bunkerweb.CUSTOM_CONF_MODSEC_CRS_drupal=
+        SecAction \
+         "id:900130,\
+          phase:1,\
+          nolog,\
+          pass,\
+          t:none,\
+          setvar:tx.crs_exclusions_drupal=1"
 
   mydb:
     image: mariadb

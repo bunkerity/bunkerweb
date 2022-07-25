@@ -57,13 +57,7 @@ services:
 
   # APPLICATIONS
   app1:
-    image: node
-    working_dir: /home/node/app
-    volumes:
-      - ./js-app:/home/node/app
-    environment:
-      - NODE_ENV=production
-    command: bash -c "npm install express && node index.js"
+    image: tutum/hello-world
   app2:
     image: tutum/hello-world
 

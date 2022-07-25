@@ -13,11 +13,12 @@ from logger import log
 
 class Test(ABC) :
 
-    def __init__(self, name, kind, timeout, tests) :
+    def __init__(self, name, kind, timeout, tests, no_copy_container=False) :
         self._name = name
         self.__kind = kind
         self.__timeout = timeout
         self.__tests = tests
+        self._no_copy_container = no_copy_container
         log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s for " + self._name)
 
     # Class method

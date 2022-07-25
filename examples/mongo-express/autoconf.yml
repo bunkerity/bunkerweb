@@ -35,6 +35,9 @@ services:
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://mongo-ui:8081
+      - |
+        bunkerweb.CUSTOM_CONF_MODSEC_mongo-express=
+        SecRule REQUEST_FILENAME "@rx ^/db" "id:1,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"
 
 networks:
   bw-services:

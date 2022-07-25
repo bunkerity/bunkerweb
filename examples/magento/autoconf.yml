@@ -27,6 +27,11 @@ services:
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://mymagento:8080
+      - |
+        bunkerweb.CUSTOM_CONF_SERVER_HTTP_magento=
+        proxy_busy_buffers_size 512k;
+        proxy_buffers 4 512k;
+        proxy_buffer_size 256k;
 
   myelasticsearch:
     image: bitnami/elasticsearch:7

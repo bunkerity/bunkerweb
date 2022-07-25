@@ -1,5 +1,5 @@
 {
-	"name": "tomcat",
+	"name": "wordpress",
 	"kinds": [
 		"docker",
         "autoconf",
@@ -7,6 +7,7 @@
         "kubernetes"
 	],
 	"timeout": 60,
+	"no_copy_container": true,
 	"tests": [
 		{
 			"type": "string",

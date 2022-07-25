@@ -89,7 +89,7 @@ class AutoconfTest(Test) :
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("setup-autoconf failed"))
-            if isdir(example_data) :
+            if isdir(example_data) and not self._no_copy_container :
                 proc = run("sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'", shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("cp bw-data failed"))
