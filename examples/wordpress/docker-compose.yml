@@ -25,7 +25,7 @@ services:
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mywp
       - |
-        CUSTOM_CONF_HTTP_MODSEC_CRS_wordpress=
+        CUSTOM_CONF_MODSEC_CRS_wordpress=
         SecAction \
          "id:900130,\
           phase:1,\
