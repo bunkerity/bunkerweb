@@ -1799,7 +1799,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. We recommend you to use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to make it search for PHP files inside the `/opt/bunkerweb/www` folder. Communication with the PHP-FPM service will be done using UNIX socket file.
+    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
@@ -1812,7 +1812,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	listen.mode = 0660
 	```
 
-	Don't forget to reload/restart your PHP-FPM service :
+	Don't forget to restart your PHP-FPM service :
 	```shell
 	systemctl restart php-fpm
 	```
@@ -1847,138 +1847,64 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl reload bunkerweb
     ```
 
-=== "Ansible"
-
-    You will need to add the settings to your `variables.env` file accordingly to your system :
-
-    === "Ubuntu"
-    	```conf
-    	SERVER_NAME=www.example.com
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		LOCAL_PHP=/run/php/php-fpm.sock
-		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
-    	```
-
-	=== "Debian"
-    	```conf
-    	SERVER_NAME=www.example.com
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		LOCAL_PHP=/run/php/php-fpm.sock
-		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
-    	```
-
-	=== "CentOs"
-    	```conf
-    	SERVER_NAME=www.example.com
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		LOCAL_PHP=/run/php-fpm/www.sock
-		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
-    	```
-
-	=== "Fedora"
-    	```conf
-    	SERVER_NAME=www.example.com
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		LOCAL_PHP=/run/php-fpm/www.sock
-		LOCAL_PHP_PATH=/opt/bunkerweb/www/	
-    	```
-
-	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb and `custom_site` to add your own site configuration :
-	```yaml
-	all:
-  	  children:
-        Groups:
-          hosts: 
-            "Your_IP_Address":
-          vars:
-            variables_env: ../variables.env,
-			custom_site= ../site
-	```
-
-	Or in INI format :
-	```ini
-	[all]
-	host
-	
-	[all:vars]
-	variables_env = ../variables.env
-	custom_site = ../site
-	```
-
-	Run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
-
-	Then you will have to install php-fpm 
+	Otherwise, we will need to start it : 
     ```shell
-    apt install php-fpm
+    systemctl start bunkerweb
     ```
 
-	Depending on your system, the configuration of the php-fpm service may change:
-	=== "Ubuntu"
-		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
+=== "Ansible"
 
-	=== "Debian"
-		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
+	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	=== "CentOs"
-		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	```ini
+	[www]
+	user = www-data
+	group = www-data
+	listen = /run/php/php-fpm.sock
+	listen.ower = www-data
+	listen.group = nginx
+	listen.mode = 0660
+	```
 
-	=== "Fedora"
-		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
+	!!! info "PHP-FPM with Ansible"
+		The PHP-FPM configuration part using Ansible is out-of-scope of this documentation.
+	
+	Content of the `my_variables.env` configuration file :
+	```env
+	HTTP_PORT=80
+	HTTPS_PORT=443
+	DNS_RESOLVERS=8.8.8.8 8.8.4.4
+	DISABLE_DEFAULT_SERVER=yes
+	SERVER_NAME=www.example.com
+	AUTO_LETS_ENCRYPT=yes
+	USE_CLIENT_CACHE=yes
+	USE_GZIP=yes
+	LOCAL_PHP=/run/php/php-fpm.sock
+	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+	```
+	
+	The `custom_site` variable can be used to specificy a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+	```ini
+	[mybunkers]
+	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
+	```
+	
+	Or alternatively, in your playbook file : 
+	```yaml
+	- hosts: all
+	  become: true
+	  vars:
+		- variables_env: "{{ playbook_dir }}/my_variables.env"
+		- custom_www: "{{ playbook_dir }}/my_app"
+		- custom_www_owner: "www-data"
+	  roles:
+		- bunkerweb
+	```
 
-    Reload the php-fpm service :
+	You can now run the playbook :
 	```shell
-	systemctl reload php-fpm
+	ansible-playbook -i inventory.yml playbook.yml
 	```
 
 ### Multiple applications
