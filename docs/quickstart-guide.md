@@ -317,8 +317,15 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 ### Multiple applications
 
 !!! tip "Testing"
-		To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
-		`shell curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server `
+	To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
+	```shell
+	curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server
+	```
+	
+	If you are using HTTPS, you will need to play with SNI :
+	```shell
+	curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
+	```
 
 === "Docker"
 
@@ -1612,9 +1619,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	   -v "${PWD}/bw-data:/data" \
     	   -e SERVER_NAME=www.example.com \
 		   -e AUTO_LETS_ENCRYPT=yes \
-		   -e DISABLE_DEFAULT_SERVER=yes \
-		   -e USE_CLIENT_CACHE=yes \
-		   -e USE_GZIP=yes \
 		   -e REMOTE_PHP=myphp \
 		   -e REMOTE_PHP_PATH=/app \
     	   bunkerity/bunkerweb:1.4.2
@@ -1636,9 +1640,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	environment:
     	  - SERVER_NAME=www.example.com
       	  - AUTO_LETS_ENCRYPT=yes
-      	  - DISABLE_DEFAULT_SERVER=yes
-      	  - USE_CLIENT_CACHE=yes
-      	  - USE_GZIP=yes
       	  - REMOTE_PHP=myphp
       	  - REMOTE_PHP_PATH=/app
     	networks:
@@ -1683,8 +1684,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       -v "${PWD}/bw-data/www:/app" \
 	       -l bunkerweb.SERVER_NAME=www.example.com \
 	       -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
-	       -l bunkerweb.USE_CLIENT_CACHE=yes \
-	       -l bunkerweb.USE_GZIP=yes \
 	       -l bunkerweb.REMOTE_PHP=myphp \
 	       -l bunkerweb.REMOTE_PHP_PATH=/app \
 	       php:fpm
@@ -1707,8 +1706,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	labels:
       	  - bunkerweb.SERVER_NAME=www.example.com
 		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
-      	  - bunkerweb.USE_CLIENT_CACHE=yes
-      	  - bunkerweb.USE_GZIP=yes
       	  - bunkerweb.REMOTE_PHP=myphp
       	  - bunkerweb.REMOTE_PHP_PATH=/app
       	  - bunkerweb.ROOT_FOLDER=/app
@@ -1752,8 +1749,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       -v "${PWD}/bw-data/www:/app" \
 	       -l bunkerweb.SERVER_NAME=www.example.com \
 	       -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
-	       -l bunkerweb.USE_CLIENT_CACHE=yes \
-	       -l bunkerweb.USE_GZIP=yes \
 	       -l bunkerweb.REMOTE_PHP=myphp \
 	       -l bunkerweb.REMOTE_PHP_PATH=/app \
 	       php:fpm
@@ -1778,8 +1773,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           labels:
       	    - bunkerweb.SERVER_NAME=www.example.com
 	        - bunkerweb.AUTO_LETS_ENCRYPT=yes
-      	    - bunkerweb.USE_CLIENT_CACHE=yes
-      	    - bunkerweb.USE_GZIP=yes
       	    - bunkerweb.REMOTE_PHP=myphp
       	    - bunkerweb.REMOTE_PHP_PATH=/app
       	    - bunkerweb.ROOT_FOLDER=/app
@@ -1792,7 +1785,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Kubernetes"
 
-	!!! warning "FPM is not supported for Kubernetes"
+	!!! warning "PHP is not supported for Kubernetes"
 		Kubernetes integration allows configuration through [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and the BunkerWeb controller only supports HTTP applications at the moment.
 
 === "Linux"
@@ -1829,11 +1822,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	HTTP_PORT=80
 	HTTPS_PORT=443
 	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	DISABLE_DEFAULT_SERVER=yes
 	SERVER_NAME=www.example.com
 	AUTO_LETS_ENCRYPT=yes
-	USE_CLIENT_CACHE=yes
-	USE_GZIP=yes
 	LOCAL_PHP=/run/php/php-fpm.sock
 	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
 	```
@@ -1875,11 +1865,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	HTTP_PORT=80
 	HTTPS_PORT=443
 	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	DISABLE_DEFAULT_SERVER=yes
 	SERVER_NAME=www.example.com
 	AUTO_LETS_ENCRYPT=yes
-	USE_CLIENT_CACHE=yes
-	USE_GZIP=yes
 	LOCAL_PHP=/run/php/php-fpm.sock
 	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
 	```
@@ -1908,6 +1895,17 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	```
 
 ### Multiple applications
+
+!!! tip "Testing"
+	To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
+	```shell
+	curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server
+	```
+
+	If you are using HTTPS, you will need to play with SNI :
+	```shell
+	curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
+	```
 
 === "Docker"
 
