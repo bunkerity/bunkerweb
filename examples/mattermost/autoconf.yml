@@ -39,6 +39,7 @@ services:
       # additional settings
       - MM_SERVICESETTINGS_SITEURL
     labels:
+      - bunkerweb.SERVER_NAME=www.example.com
       - bunkerweb.MAX_CLIENT_SIZE=50m
       # Methods used to query the api
       # more info at https://api.mattermost.com/
