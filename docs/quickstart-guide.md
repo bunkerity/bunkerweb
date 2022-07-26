@@ -1909,54 +1909,75 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Docker"
 
-    When using the [Docker integration](/1.4/integrations/#docker), you have two steps for adding custom configurations :
+	When using the [Docker integration](/1.4/integrations/#docker), to support PHP applications, you will need to :
     
-    - Using specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables
-    - Writing yours files in yours folder and mount the volume on /data
-    
-    Create the Docker networks if it's not already created :
+	- Copy your application files into the `www` subfolder of the `bw-data` volume of BunkerWeb (each application will be in its own subfolder named the same as the primary server name)
+	- Setup a PHP-FPM container for your application and mount the `bw-data/www/subfolder` folder
+    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
+
+	Create the `bw-data/www` subfolders :
+	```shell
+	mkdir -p bw-data/www/{app1.example.com,app2.example.com,app3.example.com}
+	```
+
+    You can create a Docker network if it's not already created :
     ```shell
-    docker network create net_app1
-	docker network create net_app2
+    docker network create bw-net
     ```
 
-    Then instantiate your apps :
-    === "App #1"
-    	```shell
-    	docker run -d \
-    		   --name myphp1 \
-    		   --network net_app1 \
-			   -v bw-data/www/app1.example.com:/app
-    		   php:fpm
-    	```
-    === "App #2"
-    	```shell
-    	docker run -d \
-    		   --name myphp2 \
-    		   --network net_app2 \
-			   -v bw-data/www/app2.example.com:/app
-    		   php:fpm
-    	```
+	Now you can copy your application files to the `bw-data/www` subfolders. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+	```shell
+	chown -R 33:101 ./bw-data/www && \
+    find ./bw-data/www -type f -exec chmod 0640 {} \; && \
+    find ./bw-data/www -type d -exec chmod 0750 {} \;
+	```
 
-    You can now run BunkerWeb and configure it for your app :
+	Let's create the PHP-FPM containers, give them a name, connect them to the network and mount the application files :
+	
+	=== "App #1"
+		```shell
+		docker run -d \
+       	       --name myphp1 \
+       	       --network bw-net \
+       	       -v "${PWD}/bw-data/www/app1.example.com:/app" \
+       	       php:fpm
+		```
+
+	=== "App #2"
+		```shell
+		docker run -d \
+       	       --name myphp2 \
+       	       --network bw-net \
+       	       -v "${PWD}/bw-data/www/app2.example.com:/app" \
+       	       php:fpm
+		```
+
+	=== "App #3"
+		```shell
+		docker run -d \
+       	       --name myphp3 \
+       	       --network bw-net \
+       	       -v "${PWD}/bw-data/www/app3.example.com:/app" \
+       	       php:fpm
+		```
+
+    You can now run BunkerWeb and configure it for your PHP applications :
     ```shell
     docker run -d \
            --name mybunker \
-    	   --network net_app1 \
-    	   --network net_app2 \
-    	   -p 80:8080 \
-    	   -p 443:8443 \
-    	   -v ./bw-data:/data \
-    	   -e SERVER_NAME=app1.example.com app2.exemple.com \
-		   -e MULTISITE=yes \
-		   -e AUTO_LETS_ENCRYPT=yes \
-		   -e DISABLE_DEFAULT_SERVER=yes \
-		   -e USE_CLIENT_CACHE=yes \
-		   -e USE_GZIP=yes \
-		   -e app1.exemple.com_REMOTE_PHP=myphp1 \
-		   -e app1.exemple.com_REMOTE_PHP_PATH=/app \
-		   -e app2.exemple.com_REMOTE_PHP=myphp2 \
-		   -e app2.exemple.com_REMOTE_PHP_PATH=/app \
+           --network bw-net \
+           -p 80:8080 \
+           -p 443:8443 \
+           -v "${PWD}/bw-data:/data" \
+	       -e MULTISITE=yes \
+           -e "SERVER_NAME=app1.example.com app2.example.com app3.example.com" \
+	       -e AUTO_LETS_ENCRYPT=yes \
+	       -e app1.example.com_REMOTE_PHP=myphp1 \
+	       -e app1.example.com_REMOTE_PHP_PATH=/app \
+	       -e app2.example.com_REMOTE_PHP=myphp2 \
+	       -e app2.example.com_REMOTE_PHP_PATH=/app \
+	       -e app3.example.com_REMOTE_PHP=myphp3 \
+	       -e app3.example.com_REMOTE_PHP_PATH=/app \
     	   bunkerity/bunkerweb:1.4.2
     ```
 
@@ -1974,20 +1995,36 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	volumes:
     	  - ./bw-data:/data
     	environment:
-    	  - SERVER_NAME=www.example.com # replace with your domain
+    	  - SERVER_NAME=app1.example.com app2.example.com app3.example.com
+	      - MULTISITE=yes
       	  - AUTO_LETS_ENCRYPT=yes
-      	  - DISABLE_DEFAULT_SERVER=yes
-      	  - USE_CLIENT_CACHE=yes
-      	  - USE_GZIP=yes
-      	  - REMOTE_PHP=myphp
-      	  - REMOTE_PHP_PATH=/app
+      	  - app1.example.com_REMOTE_PHP=myphp1
+      	  - app1.example.com_REMOTE_PHP_PATH=/app
+      	  - app2.example.com_REMOTE_PHP=myphp2
+      	  - app2.example.com_REMOTE_PHP_PATH=/app
+      	  - app3.example.com_REMOTE_PHP=myphp3
+      	  - app3.example.com_REMOTE_PHP_PATH=/app
     	networks:
     	  - bw-net
 
-      myphp:
-    	image: php:fpm
+      myphp1:
+        image: php:fpm
 		volumes:
-		  - ./bw-data:/data
+		  - ./bw-data/www/app1.example.com:/app
+    	networks:
+    	  - bw-net
+
+      myphp2:
+        image: php:fpm
+		volumes:
+		  - ./bw-data/www/app2.example.com:/app
+    	networks:
+    	  - bw-net
+
+      myphp3:
+        image: php:fpm
+		volumes:
+		  - ./bw-data/www/app3.example.com:/app
     	networks:
     	  - bw-net
 
