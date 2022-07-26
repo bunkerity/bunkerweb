@@ -376,8 +376,8 @@ jobs:
       # Run tests
       # - name: Run Docker tests
         # run: ./tests/main.py "docker"
-      - name: Run Autoconf tests
-        run: ./tests/main.py "autoconf"
+      # - name: Run Autoconf tests
+        # run: ./tests/main.py "autoconf"
       - name: Run Swarm tests
         run: ./tests/main.py "swarm"
       - name: Run Kubernetes tests

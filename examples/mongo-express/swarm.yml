@@ -35,6 +35,7 @@ services:
         constraints:
           - "node.role==worker"
       labels:
+        - bunkerweb.SERVER_NAME=www.example.com
         - bunkerweb.USE_REVERSE_PROXY=yes
         - bunkerweb.REVERSE_PROXY_URL=/
         - bunkerweb.REVERSE_PROXY_HOST=http://mongo-ui:8081
