@@ -1529,7 +1529,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 	}
 	```
 
-	And the corresponding `custom_configs_path[server-http]` variable used in your inventory
+	And the corresponding `custom_configs_path[server-http]` variable used in your inventory :
 	```yaml
     [mybunkers]
     192.168.0.42 custom_configs_path={"server-http": "{{ playbook_dir }}/server-http"}
@@ -1552,47 +1552,64 @@ Some integrations offer a more convenient way of applying configurations for exa
 	ansible-playbook -i inventory.yml playbook.yml
 	```
 
-## FPM
+## PHP
 
-Using PHP with Nginx is a bit tricky. 
+!!! warning "Support is in beta"
+	At the moment, PHP support with BunkerWeb is still in beta and we recommend you to use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
 
-The following settings can be used :
+BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) instances. We will assume that you are already familiar with managing that kind of services.
+
+ The following settings can be used :
 
 - `REMOTE_PHP` : Hostname of the remote PHP-FPM instance.
 - `REMOTE_PHP_PATH` : Root folder containing files in the remote PHP-FPM instance.
-- `DISABLE_DEFAULT_SERVER` : Close connection if the request vhost is unknown.
+- `LOCAL_PHP` : Path to the local socket file of PHP-FPM instance.
+- `LOCAL_PHP_PATH` : Root folder containing files in the local PHP-FPM instance.
 
 ### Single application
 
 === "Docker"
 
-    When using the [Docker integration](/1.4/integrations/#docker), you have two steps for adding custom configurations :
+    When using the [Docker integration](/1.4/integrations/#docker), to support PHP applications, you will need to :
     
-    - Using specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables
-    - Writing yours files in yours folder and mounte the volume on /data
-    
-    Create the Docker network if it's not already created :
+	- Copy your application files into the `www` subfolder of the `bw-data` volume of BunkerWeb
+	- Setup a PHP-FPM container for your application and mount the `bw-data/www` folder
+    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
+
+	Create the `bw-data/www` folder :
+	```shell
+	mkdir -p bw-data/www
+	```
+
+    You can create a Docker network if it's not already created :
     ```shell
     docker network create bw-net
     ```
 
-	Then instance the PHP-FPM container :
+	Now you can copy your application files to the `bw-data/www` folder. Please note that you will need to fix the permissions so BunkerWeb (UID/GID) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+	```shell
+	chown -R 33:101 ./bw-data/www && \
+    find ./bw-data/www -type f -exec chmod 0640 {} \; && \
+    find ./bw-data/www -type d -exec chmod 0750 {} \;
+	```
+
+	Let's create the PHP-FPM container, give it a name, connect it to the network and mount the application files :
     ```shell
     docker run -d \
-       	--name myphp \
-       	--network bw-net \
-       	-v AbsolutePath/bw-data/www:/app \
-       	php:fpm
+       	   --name myphp \
+       	   --network bw-net \
+       	   -v "${PWD}/bw-data/www:/app" \
+       	   php:fpm
     ```
 
-    You can now run BunkerWeb and configure it for your app :
+    You can now run BunkerWeb and configure it for your PHP application :
     ```shell
     docker run -d \
            --name mybunker \
     	   --network bw-net \
     	   -p 80:8080 \
     	   -p 443:8443 \
-    	   -v AbsolutePath/bw-data:/data \
+    	   -v "${PWD}/bw-data:/data" \
     	   -e SERVER_NAME=www.example.com \
 		   -e AUTO_LETS_ENCRYPT=yes \
 		   -e DISABLE_DEFAULT_SERVER=yes \
@@ -1600,7 +1617,6 @@ The following settings can be used :
 		   -e USE_GZIP=yes \
 		   -e REMOTE_PHP=myphp \
 		   -e REMOTE_PHP_PATH=/app \
-		   -e ROOT_FOLDER=/www/example.com \
     	   bunkerity/bunkerweb:1.4.2
     ```
 
@@ -1618,14 +1634,13 @@ The following settings can be used :
     	volumes:
     	  - ./bw-data:/data
     	environment:
-    	  - SERVER_NAME=www.example.com # replace with your domain
+    	  - SERVER_NAME=www.example.com
       	  - AUTO_LETS_ENCRYPT=yes
       	  - DISABLE_DEFAULT_SERVER=yes
       	  - USE_CLIENT_CACHE=yes
       	  - USE_GZIP=yes
       	  - REMOTE_PHP=myphp
       	  - REMOTE_PHP_PATH=/app
-		  - ROOT_FOLDER=/www/example.com
     	networks:
     	  - bw-net
 
