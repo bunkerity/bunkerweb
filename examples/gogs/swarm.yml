@@ -21,6 +21,7 @@ services:
       labels:
         - bunkerweb.SERVER_NAME=www.example.com
         - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
         - bunkerweb.REVERSE_PROXY_HOST=http://mygogs:3000
         - bunkerweb.REVERSE_PROXY_HEADERS_1=Authorization $http_authorization
         - bunkerweb.MAX_CLIENT_SIZE=1G
