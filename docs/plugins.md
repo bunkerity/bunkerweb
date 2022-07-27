@@ -387,7 +387,7 @@ end
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
 
-### Plugin page (web UI)
+### Plugin page
 
 Plugin pages are used to display information about your plugin and interact with the user inside the [web UI](/1.4/web-ui).
 
@@ -397,37 +397,26 @@ Everything related to the web UI is located inside a subfolder named **ui** at t
     The **template.html** file is a Jinja2 template, please refer to the [Jinja2 documentation](https://jinja.palletsprojects.com) if needed.
 
 
+A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the [Flask library](https://flask.palletsprojects.com)) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. The helper function `url_for` will generate for you the prefix of the URL : `{{ url_for('plugins') }}/plugin_id`.
 
+If you want to display variables generated from your **actions.py** in your template file, you can return a dictionary with variables name as keys and variables value as values. Here is dummy example where we return a single variable :
 
+```python
+function myplugin(request) :
+	return {"foo": "bar"}
+```
 
+And we display it in the **template.html** file :
+```html
+{% if foo %}
+Content of foo is : {{ foo }}.
+{% endif %}
+```
 
-
-A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the library flask) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. We recommend to use the url_for function to generate the action URL to avoid any problems. Like this : **{{ url_for('plugins') }}/<*plugin_id*>**.
-
-!!! info "Template variables"
-
-    Your template file can use template variables to display the content of your plugin. Like *Jinja2*, the template variables can be accessed by using the `{{` and `}}` delimiters. To use template variables, your custom function must return a dictionary with the template variables. The dictionary keys are the template variables names and the values are the values to display. Example :
-    ```json
-    {
-        "foo": "bar"
-    }
-    ```
-    ```html
-    <html>
-        <body>
-            <p>{{ foo }}</p>
-        </body>
-    </html>
-    ```
-    Will display : `bar`
-
-If you want to submit your form through a POST request, you need to add the following line to your form :
-
+Please note that every form submission is protected via a CSRF token, you will need to include the follow snippet into your forms :
 ```html
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 ```
-
-Otherwise, the form will not be submitted because of the CSRF token protection.
 
 !!! tip "Plugins pages"
 
