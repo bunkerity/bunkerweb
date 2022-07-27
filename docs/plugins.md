@@ -389,20 +389,19 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 ### Plugin page
 
-Plugin pages are used to display information about your plugin and interact with the user inside the [web UI](/1.4/web-ui).
+Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](/1.4/web-ui).
 
-Everything related to the web UI is located inside a subfolder named **ui** at the root of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
+Everything related to the web UI is located inside a subfolder named **ui** at the root directory of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
 
 !!! info "Jinja 2 template"
     The **template.html** file is a Jinja2 template, please refer to the [Jinja2 documentation](https://jinja.palletsprojects.com) if needed.
-
 
 A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the [Flask library](https://flask.palletsprojects.com)) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. The helper function `url_for` will generate for you the prefix of the URL : `{{ url_for('plugins') }}/plugin_id`.
 
 If you want to display variables generated from your **actions.py** in your template file, you can return a dictionary with variables name as keys and variables value as values. Here is dummy example where we return a single variable :
 
 ```python
-function myplugin(request) :
+def myplugin() :
 	return {"foo": "bar"}
 ```
 
@@ -418,38 +417,15 @@ Please note that every form submission is protected via a CSRF token, you will n
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 ```
 
-!!! tip "Plugins pages"
-
-    Plugins pages are displayed in the **Plugins** section of the Web UI.
-
-!!! info "Useful information"
-
-    You can use Python libraries in your **actions.py** file. You just have to **import** them. Here are the main list of available libraries :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blob/master/ui/requirements.txt)
-
-    In your **template.html** file, you can use the following functions :
-    `csrf_token` and `url_for`
-
-For example, I have a plugin called **myplugin** and I want to create a custom page. I just have to create a subfolder called **ui** and put a **template.html** file inside it. I want my plugin to display a form that will submit the data to the plugin. I can then use the **request** object (from the library flask) to get the values of the form. For that I create a **actions.py** file in the same **ui** folder as my **template.html** file. I define a function called **myplugin** that returns a dictionary with the template variables I want to display.
-
-```html
-<html>
-    <body>
-        <p>{{ foo }}</p>
-        <form action="{{ url_for('plugins') }}/myplugin" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <input type="text" name="foo" />
-            <input type="submit" value="Submit" />
-        </form>
-    </body>
-</html>
-```
+Retrieving user submitted data is pretty simple thanks to the request module provided by Flask :
 
 ```python
 from flask import request
 
-def myplugin():
-    return {
-        "foo": request.form["foo"]
-    }
+def myplugin() :
+	my_form_value = request.form["my_form_input"]
 ```
+
+!!! info "Python libraries"
+    You can use Python libraries that are already available like :
+    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blob/master/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
