@@ -16,7 +16,7 @@ class Test(ABC) :
     def __init__(self, name, kind, timeout, tests, no_copy_container=False) :
         self._name = name
         self.__kind = kind
-        self.__timeout = timeout
+        self._timeout = timeout
         self.__tests = tests
         self._no_copy_container = no_copy_container
         log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s for " + self._name)
@@ -74,7 +74,7 @@ class Test(ABC) :
         if not self._setup_test() :
             return False
         start = time()
-        while time() < start + self.__timeout :
+        while time() < start + self._timeout :
             all_ok = True
             for test in self.__tests :
                 ok = self.__run_test(test)
@@ -84,12 +84,12 @@ class Test(ABC) :
                     break
             if all_ok :
                 elapsed = str(int(time() - start))
-                log("TEST", "ℹ️", "success (" + elapsed + "/" + str(self.__timeout) + "s)")
+                log("TEST", "ℹ️", "success (" + elapsed + "/" + str(self._timeout) + "s)")
                 return self._cleanup_test()
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
         self._debug_fail()
         self._cleanup_test()
-        log("TEST", "❌", "failed (timeout = " + str(self.__timeout) + "s)")
+        log("TEST", "❌", "failed (timeout = " + str(self._timeout) + "s)")
         return False
 
     # run a single test

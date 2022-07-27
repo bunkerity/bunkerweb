@@ -33,7 +33,6 @@ services:
         location ~ ^/(app1|app2)$$ {
           rewrite ^(.*)$$ $$1/ permanent;
         }
-        
 
   app1:
     image: tutum/hello-world

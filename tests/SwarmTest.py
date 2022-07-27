@@ -91,6 +91,17 @@ class SwarmTest(Test) :
             proc = run('docker stack deploy -c swarm.yml "' + self._name + '"', shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker stack deploy failed"))
+            i = 0
+            healthy = False
+            while i < self._timeout :
+                proc = run('docker stack ps --no-trunc --format "{{ .CurrentState }}" ' + self._name + ' | grep -v "Running"', cwd="/tmp/swarm", shell=True, capture_output=True)
+                if "" == proc.stdout.decode() :
+                    healthy = True
+                    break
+                sleep(1)
+                i += 1
+            if not healthy :
+                raise(Exception("swarm stack is not healthy"))
         except :
             log("SWARM", "❌", "exception while running SwarmTest._setup_test()\n" + format_exc())
             self._cleanup_test()

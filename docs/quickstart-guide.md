@@ -2288,7 +2288,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Linux"
 
-We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
+	We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
     By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
