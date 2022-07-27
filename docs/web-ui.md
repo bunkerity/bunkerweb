@@ -1,8 +1,7 @@
 # Web UI
 
 !!! note "Supported integrations"
-
-    At the moment, the web UI is only supported with the [Docker](integrations/#docker) and [Linux](docs/integrations/#linux) integrations. Please note that we plan to support more integrations as the project evolves.
+    At the moment, the web UI is only supported with the [Docker](/1.4/integrations/#docker), [Linux](/1.4/integrations/#linux) and [Ansible](/1.4/integrations/#ansible) integrations. Please note that we plan to support more integrations as the project evolves.
 
 ## Overview
 
@@ -245,7 +244,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Ansible"
 
-    The installation of the web UI using the [Ansible integration](/1.4/integrations/#ansible) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Ansible integration](/1.4/integrations/#ansible) is pretty straightforward because it is already installed with BunkerWeb, the variable `enable_ui` can be set to `true` in order to activate the web UI service and the variable `custom_ui` can be used to specify the configuration file for the web UI.
 
     The first thing to do is to edit your local BunkerWeb configuration and add settings related to the web UI :
     ```conf
@@ -271,48 +270,37 @@ Because the web UI is a web application, the recommended installation procedure 
     * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
     * replace the `/changeme` URLs with a custom one of your choice
 
-    Once the configuration file is edited, you will start your playbook :
-    ```shell
-    ansible-playbook -i inventory.yml playbook.yml
-    ```
-    
-    The inventory to go with the playbook:
-    In YAML format:
-    
-    ```yaml
-	all:
-  	children:
-      Groups:
-        hosts: 
-          "Your_IP_Address":
-        vars:
-          enable_ui: true # Activate the UI
-          custom_ui: "PathToYourFile" # Path to your UI file
+	You can now create a local `my_ui.env` file containing the settings of the web UI :
+	```env
+	ADMIN_USERNAME=admin
+	ADMIN_PASSWORD=changeme
+	ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
 	```
-
-    Or in INI format :
-    ```ini
-    [all]
-    "Your_IP_Address"
-
-    [all:vars]
-    enable_ui: true # Activate the UI
-    custom_ui: "PathToYourFile" # Path to your UI file
-    ```
-
-    You can edit your local UI file containing the settings of the web UI :
-    ```conf
-    ADMIN_USERNAME=admin
-    ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-    ```
 
     Important things to note :
 
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/opt/bunkerweb/variables.env**)
-    * replace the username `admin` and password `changeme` with strong ones
+    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used when creating the BunkerWeb container)
+    * Replace the username `admin` and password `changeme` with strong ones
 
-    Deplay your playbook :
-	  ```shell
-	  ansible-playbook -i inventory.yml playbook.yml
+	In your Ansible inventory, you can use the `enable_ui` variable to enable the web UI service and the `custom_ui`variable to specify the configuration file for the web UI :
+	```yaml
+	[mybunkers]
+	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" enable_ui=true custom_ui="{{ playbook_dir }}/my_ui.env"
+	```
+
+	Or alternatively, in your playbook file :
+	```yaml
+	- hosts: all
+	  become: true
+	  vars:
+		- variables_env: "{{ playbook_dir }}/my_variables.env"
+		- enable_ui: true
+		- custom_ui="{{ playbook_dir }}/my_ui.env"
+	  roles:
+		- bunkerweb
+	```
+
+    You can now run the playbook and be able to access the web UI :
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
     ```

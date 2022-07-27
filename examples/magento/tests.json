@@ -6,7 +6,7 @@
 		"swarm",
 		"kubernetes"
 	],
-	"timeout": 180,
+	"timeout": 360,
 	"no_copy_container": true,
 	"tests": [
 		{
