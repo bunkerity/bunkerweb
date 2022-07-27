@@ -2034,55 +2034,67 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Docker autoconf"
 
-    We will assume that you already have the Docker autoconf integration stack running on your machine and connected to a network called bw-services.
+    When using the [Docker autoconf integration](/integrations/#docker-autoconf), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folders containing your PHP applications and mount them both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM containers.
 
-	You can instantiate your container and pass the settings as labels :
+    First of all create the application folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your web files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
-    docker run -d \
-        --name mybunker \
-    	--network bw-autoconf \
-		-v ./www:/www \
-	   -p 80:8080 \
-	   -p 443:8443 \
-    	-e AUTOCONF_MODE=yes \
-       -e MULTISITE=yes \
-       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-        -e SERVER_NAME= \
-       -l bunkerweb.AUTOCONF \
-        bunkerity/bunkerweb:1.4.2
-    ```
+	chown -R 33:101 ./myapps && \
+    find ./myapps -type f -exec chmod 0640 {} \; && \
+    find ./myapps -type d -exec chmod 0750 {} \;
+	```
+	
+	When you create the BunkerWeb container, simply mount the folder containing your PHP applications to a specific endpoint like `/apps` :
+	```shell
+	docker run -d \
+	       ...
+		   -v "${PWD}/myapps:/apps" \
+		   ...
+		   bunkerity/bunkerweb:1.4.2
+	```
+	
+	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :
+	
+	=== "App #1"
+		```shell
+		docker run -d \
+			   --name myphp1 \
+			   --network bw-services \
+			   -v "${PWD}/myapps/app1:/app" \
+			   -l bunkerweb.SERVER_NAME=app1.example.com \
+			   -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+			   -l bunkerweb.REMOTE_PHP=myphp1 \
+			   -l bunkerweb.REMOTE_PHP_PATH=/app \
+			   -l bunkerweb.ROOT_FOLDER=/apps/app1 \
+			   php:fpm
+		```
 
-    === "App #1"
-    	```shell
-    	docker run -d \
-       		--name myphp1 \
-       		--network bw-services \
-       		-v ./www/app1.example.com:/app \
-       		-l bunkerweb.DISABLE_DEFAULT_SERVER=yes \
-       		-l bunkerweb.SERVER_NAME=app1.example.com \
-       		-l bunkerweb.USE_CLIENT_CACHE=yes \
-       		-l bunkerweb.USE_GZIP=yes \
-       		-l bunkerweb.REMOTE_PHP=myphp1 \
-       		-l bunkerweb.REMOTE_PHP_PATH=/app \
-       		-l bunkerweb.ROOT_FOLDER=/www/app1.example.com \
-       		php:fpm
-    	```
+	=== "App #2"
+		```shell
+		docker run -d \
+			   --name myphp2 \
+			   --network bw-services \
+			   -v "${PWD}/myapps/app2:/app" \
+			   -l bunkerweb.SERVER_NAME=app2.example.com \
+			   -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+			   -l bunkerweb.REMOTE_PHP=myphp2 \
+			   -l bunkerweb.REMOTE_PHP_PATH=/app \
+			   -l bunkerweb.ROOT_FOLDER=/apps/app2 \
+			   php:fpm
+		```
 
-    === "App #2"
-    	```shell
-    	docker run -d \
-       		--name myphp2 \
-       		--network bw-services \
-       		-v ./www/app2.example.com:/app \
-       		-l bunkerweb.DISABLE_DEFAULT_SERVER=yes \
-       		-l bunkerweb.SERVER_NAME=app2.example.com \
-       		-l bunkerweb.USE_CLIENT_CACHE=yes \
-       		-l bunkerweb.USE_GZIP=yes \
-       		-l bunkerweb.REMOTE_PHP=myphp2 \
-       		-l bunkerweb.REMOTE_PHP_PATH=/app \
-       		-l bunkerweb.ROOT_FOLDER=/www/app2.example.com \
-       		php:fpm
-    	```
+	=== "App #3"
+		```shell
+		docker run -d \
+			   --name myphp3 \
+			   --network bw-services \
+			   -v "${PWD}/myapps/app3:/app" \
+			   -l bunkerweb.SERVER_NAME=app3.example.com \
+			   -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+			   -l bunkerweb.REMOTE_PHP=myphp3 \
+			   -l bunkerweb.REMOTE_PHP_PATH=/app \
+			   -l bunkerweb.ROOT_FOLDER=/apps/app3 \
+			   php:fpm
+		```
 
 	Here is the docker-compose equivalent :
 	```yaml
@@ -2090,77 +2102,55 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	services:
 
-  	  mybunker:
-    	image: bunkerity/bunkerweb:1.4.2
-    	volumes: 
-      	  - ./www:/www
-    	ports:
-      	  - 80:8080
-      	  - 443:8443
-    	environment:
-      	  - AUTOCONF_MODE=yes
-      	  - MULTISITE=yes
-      	  - SERVER_NAME=
-      	  - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-    	labels:
-      	  - "bunkerweb.AUTOCONF"
-    	networks:
-      	  - bw-autoconf
-      	  - bw-services
-
-  	  myautoconf:
-    	image: bunkerity/bunkerweb-autoconf:1.4.2
-    	volumes:
-      	  - bw-data:/data
-      	  - /var/run/docker.sock:/var/run/docker.sock:ro
-    	networks:
-      	  - bw-autoconf
-
   	  myphp1:
     	image: php:fpm
     	volumes:
-      	  - ./www/app1.example.com:/app
+      	  - ./myapps/app1:/app
     	networks:
       	  bw-services:
         	aliases:
             	- myphp1
     	labels:
-      	  - "bunkerweb.DISABLE_DEFAULT_SERVER=yes"
-      	  - "bunkerweb.SERVER_NAME=app1.example.com"
-      	  - "bunkerweb.USE_CLIENT_CACHE=yes"
-      	  - "bunkerweb.USE_GZIP=yes"
-      	  - "bunkerweb.REMOTE_PHP=myphp1"
-      	  - "bunkerweb.REMOTE_PHP_PATH=/app"
-      	  - "bunkerweb.ROOT_FOLDER=/www/app1.example.com"
+      	  - bunkerweb.SERVER_NAME=app1.example.com
+		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
+      	  - bunkerweb.REMOTE_PHP=myphp1
+      	  - bunkerweb.REMOTE_PHP_PATH=/app
+      	  - bunkerweb.ROOT_FOLDER=/apps/app1
 
   	  myphp2:
     	image: php:fpm
     	volumes:
-      	  - ./www/app2.example.com:/app
+      	  - ./myapps/app2:/app
     	networks:
       	  bw-services:
         	aliases:
             	- myphp2
     	labels:
-      	  - "bunkerweb.DISABLE_DEFAULT_SERVER=yes"
-      	  - "bunkerweb.SERVER_NAME=app2.example.com"
-      	  - "bunkerweb.USE_CLIENT_CACHE=yes"
-      	  - "bunkerweb.USE_GZIP=yes"
-      	  - "bunkerweb.REMOTE_PHP=myphp2"
-      	  - "bunkerweb.REMOTE_PHP_PATH=/app"
-      	  - "bunkerweb.ROOT_FOLDER=/www/app2.example.com"
+      	  - bunkerweb.SERVER_NAME=app2.example.com
+		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
+      	  - bunkerweb.REMOTE_PHP=myphp2
+      	  - bunkerweb.REMOTE_PHP_PATH=/app
+      	  - bunkerweb.ROOT_FOLDER=/apps/app2
 
-	volumes:
-  	  bw-data:
+  	  myphp3:
+    	image: php:fpm
+    	volumes:
+      	  - ./myapps/app3:/app
+    	networks:
+      	  bw-services:
+        	aliases:
+            	- myphp3
+    	labels:
+      	  - bunkerweb.SERVER_NAME=app3.example.com
+		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
+      	  - bunkerweb.REMOTE_PHP=myphp3
+      	  - bunkerweb.REMOTE_PHP_PATH=/app
+      	  - bunkerweb.ROOT_FOLDER=/apps/app3
 
 	networks:
-  	  bw-autoconf:
-    	ipam:
-      	  driver: default
-      	  config:
-        	- subnet: 10.20.30.0/24
-  	  bw-services:
-    	name: bw-services
+	  bw-services:
+	    external:
+	      name: bw-services
 	```
 
 === "Swarm"
