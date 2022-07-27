@@ -7,7 +7,7 @@ services:
     networks:
       - bw-services
     volumes:
-      - ./joomla-files:/var/www/html
+      - joomla_files:/var/www/html
     environment:
       - JOOMLA_DB_HOST=mydb
       - JOOMLA_DB_NAME=joomla_db
@@ -30,7 +30,7 @@ services:
   mydb:
     image: mariadb
     volumes:
-      - ./db-data:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - bw-services
     environment:
@@ -47,3 +47,7 @@ networks:
   bw-services:
     external:
       name: bw-services
+
+volumes:
+  joomla_files:
+  db_data:
