@@ -1,9 +1,9 @@
-version: '3.5'
+version: '3.3'
 
 services:
 
   radarr:
-    image: lscr.io/linuxserver/radarr:latest
+    image: linuxserver/radarr:latest
     networks:
       - bw-services
     environment:
