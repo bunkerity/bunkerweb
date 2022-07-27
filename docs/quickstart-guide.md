@@ -1739,8 +1739,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   bunkerity/bunkerweb:1.4.2
 	```
 
-
-
 	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
 	```shell
 	docker service create \
@@ -1754,7 +1752,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       php:fpm
 	```
 
-	Here is the docker-compose equivalent :
+	Here is the docker-compose equivalent (using `docker stack deploy`) :
 	```yaml
 	version: '3'
 
@@ -2036,7 +2034,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     When using the [Docker autoconf integration](/integrations/#docker-autoconf), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folders containing your PHP applications and mount them both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM containers.
 
-    First of all create the application folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your web files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+    First of all create the applications folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your web files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
 	chown -R 33:101 ./myapps && \
     find ./myapps -type f -exec chmod 0640 {} \; && \
@@ -2155,83 +2153,183 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Swarm"
 
-	!!! warning "FPM is not supported for Swarm"
+	!!! info "Shared volume"
+		Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances.
+
+    When using the [Docker Swarm integration](/integrations/#swarm), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP applications and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM containers. As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
+
+    FFirst of all create the applications folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+    ```shell
+	chown -R 33:101 /shared/myapps && \
+    find /shared/myapps -type f -exec chmod 0640 {} \; && \
+    find /shared/myapps -type d -exec chmod 0750 {} \;
+	```
+	
+	When you create the BunkerWeb service, simply mount the folder containing your PHP applications to a specific endpoint like `/apps` :
+	```shell
+	docker service create \
+	       ...
+		   -v "/shared/myapps:/apps" \
+		   ...
+		   bunkerity/bunkerweb:1.4.2
+	```
+
+	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
+	
+	=== "App #1"
+		```shell
+		docker service create \
+			   --name myphp1 \
+			   --network bw-services \
+			   -v /shared/myapps/app1:/app \
+			   -l bunkerweb.SERVER_NAME=app1.example.com \
+			   -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+			   -l bunkerweb.REMOTE_PHP=myphp1 \
+			   -l bunkerweb.REMOTE_PHP_PATH=/app \
+			   -l bunkerweb.ROOT_FOLDER=/apps/app1 \
+			   php:fpm
+		```
+
+	=== "App #2"
+		```shell
+		docker service create \
+			   --name myphp2 \
+			   --network bw-services \
+			   -v /shared/myapps/app2:/app \
+			   -l bunkerweb.SERVER_NAME=app2.example.com \
+			   -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+			   -l bunkerweb.REMOTE_PHP=myphp2 \
+			   -l bunkerweb.REMOTE_PHP_PATH=/app \
+			   -l bunkerweb.ROOT_FOLDER=/apps/app2 \
+			   php:fpm
+		```
+
+	=== "App #2"
+		```shell
+		docker service create \
+			   --name myphp3 \
+			   --network bw-services \
+			   -v /shared/myapps/app3:/app \
+			   -l bunkerweb.SERVER_NAME=app3.example.com \
+			   -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+			   -l bunkerweb.REMOTE_PHP=myphp3 \
+			   -l bunkerweb.REMOTE_PHP_PATH=/app \
+			   -l bunkerweb.ROOT_FOLDER=/apps/app3 \
+			   php:fpm
+		```
+
+	Here is the docker-compose equivalent (using `docker stack deploy`) :
+	```yaml
+	version: '3'
+
+	services:
+
+  	  myphp1:
+    	image: php:fpm
+    	volumes:
+      	  - /shared/myapps/app1:/app
+    	networks:
+      	  - bw-services
+	    deploy:
+	      placement:
+	        constraints:
+	          - "node.role==worker"
+          labels:
+      	    - bunkerweb.SERVER_NAME=app1.example.com
+	        - bunkerweb.AUTO_LETS_ENCRYPT=yes
+      	    - bunkerweb.REMOTE_PHP=myphp1
+      	    - bunkerweb.REMOTE_PHP_PATH=/app
+      	    - bunkerweb.ROOT_FOLDER=/apps/app1
+
+  	  myphp2:
+    	image: php:fpm
+    	volumes:
+      	  - /shared/myapps/app2:/app
+    	networks:
+      	  - bw-services
+	    deploy:
+	      placement:
+	        constraints:
+	          - "node.role==worker"
+          labels:
+      	    - bunkerweb.SERVER_NAME=app2.example.com
+	        - bunkerweb.AUTO_LETS_ENCRYPT=yes
+      	    - bunkerweb.REMOTE_PHP=myphp2
+      	    - bunkerweb.REMOTE_PHP_PATH=/app
+      	    - bunkerweb.ROOT_FOLDER=/apps/app2
+
+  	  myphp3:
+    	image: php:fpm
+    	volumes:
+      	  - /shared/myapps/app3:/app
+    	networks:
+      	  - bw-services
+	    deploy:
+	      placement:
+	        constraints:
+	          - "node.role==worker"
+          labels:
+      	    - bunkerweb.SERVER_NAME=app3.example.com
+	        - bunkerweb.AUTO_LETS_ENCRYPT=yes
+      	    - bunkerweb.REMOTE_PHP=myphp3
+      	    - bunkerweb.REMOTE_PHP_PATH=/app
+      	    - bunkerweb.ROOT_FOLDER=/apps/app3
+
+	networks:
+	  bw-services:
+	    external:
+	      name: bw-services
+	```
 
 === "Kubernetes"
 
-	!!! warning "FPM is not supported for Swarm"
+	!!! warning "PHP is not supported for Kubernetes"
+		Kubernetes integration allows configuration through [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and the BunkerWeb controller only supports HTTP applications at the moment.
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
+We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    If you have multiple services to protect, the easiest way to do it is by enabling the `“multisite”` mode. When using multisite, Bunkerweb will create one server block per server defined in the `SERVER_NAME` environment variable. You can configure each servers independently by adding the server name as a prefix.
+    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	=== "Ubuntu"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
-    	```
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	```ini
+	[www]
+	user = www-data
+	group = www-data
+	listen = /run/php/php-fpm.sock
+	listen.ower = www-data
+	listen.group = nginx
+	listen.mode = 0660
+	```
 
-	=== "Debian"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
-    	```
+	Don't forget to restart your PHP-FPM service :
+	```shell
+	systemctl restart php-fpm
+	```
 
-	=== "CentOs"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
-    	```
+	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
+	```shell
+	chown -R www-data:nginx /opt/bunkerweb/www && \
+	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
+	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+	```
 
-	=== "Fedora"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
-    	```
-
-	When using the multisite mode, some special folders must have a specific structure with subfolders named the same as the servers defined in the `SERVER_NAME` environment variable. Let’s take the app2.example.com as an example : if some static files need to be served by nginx, you need to place them under www/app2.example.com.
+	You can now edit the `/opt/bunkerweb/variable.env` file :
+	```env
+	HTTP_PORT=80
+	HTTPS_PORT=443
+	DNS_RESOLVERS=8.8.8.8 8.8.4.4
+	SERVER_NAME=app1.example.com app2.example.com app3.example.com
+	MULTISITE=yes
+	AUTO_LETS_ENCRYPT=yes
+	app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+	app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+	app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+	app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+	app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
+	```
 
     Let's check the status of BunkerWeb :
     ```shell
@@ -2242,201 +2340,64 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl reload bunkerweb
     ```
 
-	Then you will have to install php-fpm 
+	Otherwise, we will need to start it : 
     ```shell
-    apt install php-fpm
+    systemctl start bunkerweb
     ```
-
-	Depending on your system, the configuration of the php-fpm service may change:
-	=== "Ubuntu"
-		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-	=== "Debian"
-		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-	=== "CentOs"
-		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-	=== "Fedora"
-		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-    Reload the php-fpm service :
-	```shell
-	systemctl reload php-fpm
-	```
 
 === "Ansible"
 
-    You will need to add the settings to your `variables.env` file accordingly to your system :
+	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-    === "Ubuntu"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
-    	```
-
-	=== "Debian"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
-    	```
-
-	=== "CentOs"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
-    	```
-
-	=== "Fedora"
-    	```conf
-    	SERVER_NAME=app1.example.com app2.example.com
-		MULTISITE=yes
-		HTTP_PORT=80
-		HTTPS_PORT=443
-		DNS_RESOLVERS=8.8.8.8 8.8.4.4
-		DISABLE_DEFAULT_SERVER=no
-		USE_CLIENT_CACHE=yes
-		USE_GZIP=yes
-		app1.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app2.example.com_LOCAL_PHP=/run/php-fpm/www.sock
-		app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-		app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com	
-    	```
-
-	When using the multisite mode, some special folders must have a specific structure with subfolders named the same as the servers defined in the `SERVER_NAME` environment variable. Let’s take the app2.example.com as an example : if some static files need to be served by nginx, you need to place them under www/app2.example.com.
-
-	In your Ansible inventory, you can use the `variables_env` variable to configure BunkerWeb and `custom_site` to add your own site configuration :
-	```yaml
-	all:
-  	  children:
-        Groups:
-          hosts: 
-            "Your_IP_Address":
-          vars:
-            variables_env: ../variables.env,
-			custom_site=../site
-	```
-
-	Or in INI format :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
-	[all]
-	host
-	
-	[all:vars]
-	variables_env = ../variables.env
-	custom_site = ../site
+	[www]
+	user = www-data
+	group = www-data
+	listen = /run/php/php-fpm.sock
+	listen.ower = www-data
+	listen.group = nginx
+	listen.mode = 0660
 	```
 
-	Run the playbook :
+	!!! info "PHP-FPM with Ansible"
+		The PHP-FPM configuration part using Ansible is out-of-scope of this documentation.
+
+	Content of the `my_variables.env` configuration file :
+	```env
+	HTTP_PORT=80
+	HTTPS_PORT=443
+	DNS_RESOLVERS=8.8.8.8 8.8.4.4
+	SERVER_NAME=app1.example.com app2.example.com app3.example.com
+	MULTISITE=yes
+	AUTO_LETS_ENCRYPT=yes
+	app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+	app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+	app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+	app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+	app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
+	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
+	```
+
+	The `custom_site` variable can be used to specificy a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+	```ini
+	[mybunkers]
+	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
+	```
+
+	Or alternatively, in your playbook file : 
+	```yaml
+	- hosts: all
+	  become: true
+	  vars:
+		- variables_env: "{{ playbook_dir }}/my_variables.env"
+		- custom_www: "{{ playbook_dir }}/my_app"
+		- custom_www_owner: "www-data"
+	  roles:
+		- bunkerweb
+	```
+
+	You can now run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
-	```
-
-	Then you will have to install php-fpm 
-    ```shell
-    apt install php-fpm
-    ```
-
-	Depending on your system, the configuration of the php-fpm service may change:
-	=== "Ubuntu"
-		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-	=== "Debian"
-		By default, the user and the group of the php-fpm service is "www-data", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-	=== "CentOs"
-		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-	=== "Fedora"
-		By default, the user and the group of the php-fpm service is "apache", so change it to your user.
-    	```conf
-		[www]
-		user = nginx
-		group = nginx
-		listen.owner = nginx
-		listen.group = nginx
-    	```
-
-    Reload the php-fpm service :
-	```shell
-	systemctl reload php-fpm
 	```
