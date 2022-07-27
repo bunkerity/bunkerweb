@@ -387,9 +387,20 @@ end
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
 
-### Plugin page
+### Plugin page (web UI)
 
-Plugin pages are used to display information about your plugin. You can create a page by creating a subfolder named **ui** next to the file **plugin.json** and putting a **template.html** file inside it. The template file will be used to display the page.
+Plugin pages are used to display information about your plugin and interact with the user inside the [web UI](/1.4/web-ui).
+
+Everything related to the web UI is located inside a subfolder named **ui** at the root of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
+
+!!! info "Jinja 2 template"
+    The **template.html** file is a Jinja2 template, please refer to the [Jinja2 documentation](https://jinja.palletsprojects.com) if needed.
+
+
+
+
+
+
 
 A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the library flask) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. We recommend to use the url_for function to generate the action URL to avoid any problems. Like this : **{{ url_for('plugins') }}/<*plugin_id*>**.
 

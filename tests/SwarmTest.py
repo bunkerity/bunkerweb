@@ -120,6 +120,13 @@ class SwarmTest(Test) :
                 proc = run('docker config rm "' + config + '"', shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("docker config rm failed"))
+            proc = run("docker service create --mode global --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --restart-condition none --name pruner -d docker docker volume prune -f", shell=True)
+            if proc.returncode != 0 :
+                raise(Exception("docker pruner create failed"))
+            sleep(10)
+            proc = run("docker service rm pruner", shell=True)
+            if proc.returncode != 0 :
+                raise(Exception("docker pruner rm failed"))
             super()._cleanup_test()
         except :
             log("SWARM", "❌", "exception while running SwarmTest._cleanup_test()\n" + format_exc())
