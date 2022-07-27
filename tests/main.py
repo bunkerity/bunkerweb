@@ -59,16 +59,19 @@ for example in glob("./examples/*") :
                 continue
             test_obj = None
             no_copy_container = False
+            delay = 0
             if "no_copy_container" in tests :
                 no_copy_container = tests["no_copy_container"]
+            if "delay" in tests :
+                delay = tests["delay"]
             if test_type == "docker" :
-                test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"], no_copy_container=no_copy_container)
+                test_obj = DockerTest(tests["name"], tests["timeout"], tests["tests"], no_copy_container=no_copy_container, delay=delay)
             elif test_type == "autoconf" :
-                test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"], no_copy_container=no_copy_container)
+                test_obj = AutoconfTest(tests["name"], tests["timeout"], tests["tests"], no_copy_container=no_copy_container, delay=delay)
             elif test_type == "swarm" :
-                test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"])
+                test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"], delay=delay)
             elif test_type == "kubernetes" :
-                test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"])
+                test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"], delay=delay)
             elif test_type == "linux" :
                 test_obj = LinuxTest(tests["name"], tests["timeout"], tests["tests"], distro)
             if not test_obj.run_tests() :

@@ -120,16 +120,33 @@ The first step is to install the plugin by putting the plugin files inside the c
     ```
 
 === "Ansible"
-    When using the [Ansible integration](/1.4/integrations/#ansible), plugins must be written to the varaibles `plugins` within your Ansible inventory. :
+    When using the [Ansible integration](/1.4/integrations/#ansible), you can use the `plugins` variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.
+	
+	Let's assume that you have plugins inside the `bunkerweb-plugins` folder :
+	```shell
+	git clone https://github.com/bunkerity/bunkerweb-plugins
+	```
+
+	In your Ansible inventory, you can use the `plugins` variable to set the path of plugins folder : 
     ```ini
-    [all]
-    "Your_IP"
-
-    [all:vars]
-    plugins="PathToYourPlugins"
+	[mybunkers]
+	192.168.0.42 ... plugins="{{ playbook_dir }}/bunkerweb-plugins"
     ```
+	
+	Or alternatively, in your playbook file :
+	```yaml
+	- hosts: all
+	  become: true
+	  vars:
+		- variables_env: "{{ playbook_dir }}/my_variables.env"
+	  roles:
+		- bunkerweb
+	```
 
-When a plugin is installed, you are ready to use it, please refer to the plugin documentation for more information.
+	Run the playbook :
+	```shell
+	ansible-playbook -i inventory.yml playbook.yml
+	```
 
 ## Writing a plugin
 

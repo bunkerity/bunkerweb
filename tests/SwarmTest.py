@@ -9,8 +9,8 @@ from logger import log
 
 class SwarmTest(Test) :
 
-    def __init__(self, name, timeout, tests) :
-        super().__init__(name, "swarm", timeout, tests)
+    def __init__(self, name, timeout, tests, delay=0) :
+        super().__init__(name, "swarm", timeout, tests, delay=delay)
         self._domains = {
             r"www\.example\.com": getenv("TEST_DOMAIN1_1"),
             r"auth\.example\.com": getenv("TEST_DOMAIN1_2"),

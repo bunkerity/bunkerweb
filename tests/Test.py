@@ -13,12 +13,13 @@ from logger import log
 
 class Test(ABC) :
 
-    def __init__(self, name, kind, timeout, tests, no_copy_container=False) :
+    def __init__(self, name, kind, timeout, tests, no_copy_container=False, delay=0) :
         self._name = name
         self.__kind = kind
         self._timeout = timeout
         self.__tests = tests
         self._no_copy_container = no_copy_container
+        self.__delay = delay
         log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s for " + self._name)
 
     # Class method
@@ -73,6 +74,9 @@ class Test(ABC) :
     def run_tests(self) :
         if not self._setup_test() :
             return False
+        if self.__delay != 0 :
+            log("TEST", "ℹ️", "delay is set, sleeping " + str(self.__delay) + "s")
+            sleep(self.__delay)
         start = time()
         while time() < start + self._timeout :
             all_ok = True
