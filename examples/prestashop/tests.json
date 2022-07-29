@@ -6,7 +6,7 @@
         "swarm",
         "kubernetes"
 	],
-	"timeout": 120,
+	"timeout": 180,
 	"tests": [
 		{
 			"type": "string",

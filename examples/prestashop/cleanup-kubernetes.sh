@@ -6,3 +6,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm delete prestashop
+kubectl delete pvc data-prestashop-mariadb-0
