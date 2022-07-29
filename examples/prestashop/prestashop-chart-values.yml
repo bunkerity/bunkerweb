@@ -6,3 +6,5 @@ prestashopFirstName: "Prestashop"
 prestashopLastName: "User"
 prestashopCountry: "us"
 prestashopLanguage: "en"
+service:
+  type: ClusterIP
