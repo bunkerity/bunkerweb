@@ -1,4 +1,4 @@
-prestashopHost: "https://www.example.com"
+prestashopHost: "www.example.com"
 prestashopUsername: "user@example.com"
 prestashopPassword: "changeme42"
 prestashopEmail: "user@example.com"
