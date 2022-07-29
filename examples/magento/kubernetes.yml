@@ -17,6 +17,7 @@ spec:
             port:
               number: 8080
 ---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cfg-bunkerweb-magento
