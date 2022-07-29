@@ -82,6 +82,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
+  storageClassName: ""
   volumeName: pv-bunkerweb
 ---
 apiVersion: apps/v1
@@ -115,3 +116,5 @@ spec:
         volumeMounts:
         - name: vol-bunkerweb
           mountPath: /data
+      nodeSelector:
+        kubernetes.io/hostname: srv1
