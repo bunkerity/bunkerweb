@@ -82,6 +82,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
+  volumeName: pv-bunkerweb
 ---
 apiVersion: apps/v1
 kind: Deployment
