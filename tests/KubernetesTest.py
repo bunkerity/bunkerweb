@@ -43,6 +43,7 @@ class KubernetesTest(Test) :
             proc = run("sudo kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("kubectl apply bunkerweb failed (k8s stack)"))
+            healthy = False
             i = 0
             while i < 30 :
                 proc = run('sudo kubectl get pods | grep bunkerweb | grep -v Running', shell=True, capture_output=True)
