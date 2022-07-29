@@ -10,7 +10,7 @@
 	"tests": [
 		{
 			"type": "string",
-			"url": "https://www.example.com",
+			"url": "https://www.example.com/administration",
 			"string": "prestashop"
 		}
 	]
