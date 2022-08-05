@@ -6,3 +6,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm delete wordpress
+kubectl delete pvc data-wordpress-mariadb-0

@@ -6,3 +6,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm delete drupal
+kubectl delete pvc data-drupal-mariadb-0

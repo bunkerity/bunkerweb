@@ -72,4 +72,8 @@ function _M:log()
 	return true, "success"
 end
 
+function _M:log_default()
+	return _M:log()
+end
+
 return _M
