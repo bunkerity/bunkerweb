@@ -6,3 +6,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm delete ghost
+kubectl delete pvc data-ghost-mysql-0
