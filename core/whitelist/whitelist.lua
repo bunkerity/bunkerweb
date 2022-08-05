@@ -52,25 +52,28 @@ function _M:access()
 	-- Check if access is needed
 	local access_needed, err = utils.get_variable("USE_WHITELIST")
 	if access_needed == nil then
-		return false, err
+		return false, err, nil, nil
 	end
 	if access_needed ~= "yes" then
-		return true, "Whitelist not activated"
+		return true, "Whitelist not activated", nil, nil
 	end
 
 	-- Check the cache
 	local cached_ip, err = self:is_in_cache("ip" .. ngx.var.remote_addr)
 	if cached_ip and cached_ip ~= "ok" then
+		ngx.var.is_whitelisted = "yes"
 		return true, "IP is in whitelist cache (info = " .. cached_ip .. ")", true, ngx.OK
 	end
 	local cached_uri, err = self:is_in_cache("uri" .. ngx.var.uri)
 	if cached_uri and cached_uri ~= "ok" then
+		ngx.var.is_whitelisted = "yes"
 		return true, "URI is in whitelist cache (info = " .. cached_uri .. ")", true, ngx.OK
 	end
 	local cached_ua = true
 	if ngx.var.http_user_agent then
 		cached_ua, err = self:is_in_cache("ua" .. ngx.var.http_user_agent)
 		if cached_ua and cached_ua ~= "ok" then
+			ngx.var.is_whitelisted = "yes"
 			return true, "User-Agent is in whitelist cache (info = " .. cached_ua .. ")", true, ngx.OK
 		end
 	end
@@ -106,6 +109,7 @@ function _M:access()
 		else
 			if ipm:match(ngx.var.remote_addr) then
 				self:add_to_cache("ip" .. ngx.var.remote_addr, "ip/net")
+				ngx.var.is_whitelisted = "yes"
 				return ret, "client IP " .. ngx.var.remote_addr .. " is in whitelist", true, ngx.OK
 			end
 		end
@@ -137,6 +141,7 @@ function _M:access()
 			for i, suffix in ipairs(whitelists["RDNS"]) do
 				if rdns:sub(-#suffix) == suffix then
 					self:add_to_cache("ip" .. ngx.var.remote_addr, "rDNS " .. suffix)
+					ngx.var.is_whitelisted = "yes"
 					return ret, "client IP " .. ngx.var.remote_addr .. " is in whitelist (info = rDNS " .. suffix .. ")", true, ngx.OK
 				end
 			end
@@ -160,6 +165,7 @@ function _M:access()
 				for i, asn_bl in ipairs(whitelists["ASN"]) do
 					if tostring(asn) == asn_bl then
 						self:add_to_cache("ip" .. ngx.var.remote_addr, "ASN " .. tostring(asn))
+						ngx.var.is_whitelisted = "yes"
 						return ret, "client IP " .. ngx.var.remote_addr .. " is in whitelist (kind = ASN " .. tostring(asn) .. ")", true, ngx.OK
 					end
 				end
@@ -185,6 +191,7 @@ function _M:access()
 		for i, ua_bl in ipairs(whitelists["USER_AGENT"]) do
 			if ngx.var.http_user_agent:match(ua_bl) then
 				self:add_to_cache("ua" .. ngx.var.http_user_agent, "UA " .. ua_bl)
+				ngx.var.is_whitelisted = "yes"
 				return ret, "client User-Agent " .. ngx.var.http_user_agent .. " is in whitelist (matched " .. ua_bl .. ")", true, ngx.OK
 			end
 		end
@@ -207,6 +214,7 @@ function _M:access()
 		for i, uri_bl in ipairs(whitelists["URI"]) do
 			if ngx.var.uri:match(uri_bl) then
 				self:add_to_cache("uri" .. ngx.var.uri, "URI " .. uri_bl)
+				ngx.var.is_whitelisted = "yes"
 				return ret, "client URI " .. ngx.var.uri .. " is in whitelist (matched " .. uri_bl .. ")", true, ngx.OK
 			end
 		end

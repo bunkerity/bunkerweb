@@ -23,6 +23,9 @@ function _M:log()
 	if not self.status_codes:match(tostring(ngx.status)) then
 		return true, "not increasing counter"
 	end
+	if ngx.var.is_whitelisted == "yes" then
+		return true, "client is whitelisted"
+	end
 	local count, err = datastore:get("plugin_badbehavior_count_" .. ngx.var.remote_addr)
 	if not count and err ~= "not found" then
 		return false, "can't get counts from the datastore : " .. err
