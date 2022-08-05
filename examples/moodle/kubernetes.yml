@@ -15,4 +15,4 @@ spec:
           service:
             name: moodle
             port:
-              number: 8080
+              number: 80
