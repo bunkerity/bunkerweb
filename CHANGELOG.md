@@ -9,6 +9,7 @@
 - Fix check if BunkerNet is activated on default server
 - Fix request crash when mmdb lookup fails
 - Fix bad behavior trigger when request is whitelisted
+- Fix bad behavior not triggered when request is on default server
 - Add Ansible integration in beta
 - Add \*_CUSTOM_CONF_\* setting to automatically add custom config files from setting value
 - Add DENY_HTTP_STATUS setting to choose standard 403 error page (default) or 444 to close connection when access is denied
