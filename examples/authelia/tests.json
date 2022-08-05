@@ -8,6 +8,7 @@
 		"linux"
 	],
 	"timeout": 60,
+	"delay": 60,
 	"tests": [
 		{
 			"type": "string",
