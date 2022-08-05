@@ -8,6 +8,7 @@
 	],
 	"timeout": 360,
 	"no_copy_container": true,
+	"delay": 180,
 	"tests": [
 		{
 			"type": "string",

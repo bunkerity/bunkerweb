@@ -1,4 +1,4 @@
-magentoHost: "https://www.example.com"
+magentoHost: "www.example.com"
 magentoUsername: "user"
 magentoPassword: "changeme42"
 magentoEmail: "contact@example.com"
