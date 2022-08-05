@@ -6,3 +6,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm delete joomla
+kubectl delete pvc data-joomla-mariadb-0

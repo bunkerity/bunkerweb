@@ -6,3 +6,5 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm delete redmine
+kubectl delete pvc data-redmine-mariadb-0
+kubectl delete pvc data-redmine-postgresql-0
