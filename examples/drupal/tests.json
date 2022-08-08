@@ -4,8 +4,7 @@
 		"docker",
 		"autoconf",
 		"swarm",
-		"kubernetes",
-		"linux"
+		"kubernetes"
 	],
 	"no_copy_container": true, 
 	"timeout": 60,

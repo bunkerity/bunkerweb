@@ -90,10 +90,13 @@ class LinuxTest(Test) :
             if isfile(setup) :
                 proc = LinuxTest.docker_cp(self.__distro, test, "/opt/" + self._name)
                 if proc.returncode != 0 :
-                    raise(Exception("docker cp failed (linux stack)"))
+                    raise(Exception("docker cp failed (test)"))
                 proc = LinuxTest.docker_exec(self.__distro, "cd /opt/" + self._name + " && ./setup-linux.sh")
                 if proc.returncode != 0 :
-                    raise(Exception("docker exec setup failed (linux stack)"))
+                    raise(Exception("docker exec setup failed (test)"))
+            proc = LinuxTest.docker_exec(self.__distro, "cp /opt/" + self._name + "/variables.env /opt/bunkerweb") :
+            if proc.returncode != 0 :
+                raise(Exception("docker exec cp variables.env failed (test)"))
             proc = LinuxTest.docker_exec(self.__distro, "systemctl restart bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl restart failed (linux stack)"))
@@ -102,14 +105,6 @@ class LinuxTest(Test) :
             self._cleanup_test()
             return False
         return True
-
-    # def _cleanup_test(self) :
-        # try :
-            # super()._cleanup_test()
-        # except :
-            # log("AUTOCONF", "❌", "exception while running AutoconfTest._cleanup_test()\n" + format_exc())
-            # return False
-        # return True
 
     def _debug_fail(self) :
         LinuxTest.docker_exec(self.__distro, "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager")

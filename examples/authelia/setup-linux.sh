@@ -17,4 +17,3 @@ sed -i "s@host: redis@@g" /etc/authelia/configuration.yml
 sed -i "s@port: 6379@@g" /etc/authelia/configuration.yml
 systemctl daemon-reload
 systemctl start authelia
-cp variables.env /opt/bunkerweb/variables.env

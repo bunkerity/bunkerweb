@@ -380,8 +380,8 @@ jobs:
         # run: ./tests/main.py "autoconf"
       # - name: Run Swarm tests
         # run: ./tests/main.py "swarm"
-      - name: Run Kubernetes tests
-        run: ./tests/main.py "kubernetes"
+      # - name: Run Kubernetes tests
+        # run: ./tests/main.py "kubernetes"
       - name: Generate Linux packages and build test images
         run: ./tests/linux.sh ${{ env.BUILD_MODE }}
       - name: Run Linux Ubuntu tests
