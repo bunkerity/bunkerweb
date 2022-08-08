@@ -44,7 +44,13 @@ if [ -f /opt/bunkerweb/tmp/scheduler.pid ] ; then
 	rm -f /opt/bunkerweb/tmp/scheduler.pid
 fi
 
-if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
+is_configured=no
+if [ -f /etc/nginx/variables.env ] ; then
+	is_configured=yes
+	log "ENTRYPOINT" "⚠️" "Looks like BunkerWeb configuration is already generated, will not generate it again"
+fi
+
+if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] && [ "$is_configured" != "yes" ] ; then
 	# extract and drop configs
 	for var_name in $(python3 -c 'import os ; [print(k) for k in os.environ]') ; do
 		extracted=$(echo "$var_name" | sed -r 's/^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*)$/\1 \2 \3/g')
@@ -97,19 +103,20 @@ if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF
 fi
 
 # generate final configuration
-export TEMP_NGINX="no"
-log "ENTRYPOINT" "ℹ️" "Generating configuration ..."
-if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] || [ "$AUTOCONF_MODE" = "yes" ] ; then
-	export SERVER_NAME=
+if [ "$is_configured" != "yes" ] ; then
+	export TEMP_NGINX="no"
+	log "ENTRYPOINT" "ℹ️" "Generating configuration ..."
+	if [ "$SWARM_MODE" = "yes" ] || [ "$KUBERNETES_MODE" = "yes" ] || [ "$AUTOCONF_MODE" = "yes" ] ; then
+		export SERVER_NAME=
+	fi
+	get_env > "/tmp/variables.env"
+	/opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env
+	if [ "$?" -ne 0 ] ; then
+		log "ENTRYPOINT" "❌" "Generator failed"
+		exit 1
+	fi
+	log "ENTRYPOINT" "ℹ️" "Generator is successful"
 fi
-get_env > "/tmp/variables.env"
-/opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env
-if [ "$?" -ne 0 ] ; then
-	log "ENTRYPOINT" "❌" "Generator failed"
-	exit 1
-fi
-log "ENTRYPOINT" "ℹ️" "Generator is successful"
-
 # execute job scheduler
 if [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
 	log "ENTRYPOINT" "ℹ️" "Executing job scheduler ..."
