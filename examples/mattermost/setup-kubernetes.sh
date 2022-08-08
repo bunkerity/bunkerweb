@@ -6,4 +6,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 helm repo add mattermost https://helm.mattermost.com
-helm install mattermost mattermost/mattermost-team-edition
+helm install -f mattermost-chart-values.yml mattermost mattermost/mattermost-team-edition
