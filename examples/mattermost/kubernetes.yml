@@ -31,6 +31,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: mattermost
+            name: mattermost-team-edition
             port:
               number: 8065
