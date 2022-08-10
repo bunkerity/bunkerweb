@@ -59,6 +59,7 @@ class LinuxTest(Test) :
                 proc = LinuxTest.docker_exec(distro, "chown -R nginx:nginx " + dst + "/*")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec failed for directory " + src + " (linux stack)"))
+            # TODO : php install
             sleep(60)
         except :
             log("LINUX", "❌", "exception while running LinuxTest.init()\n" + format_exc())
