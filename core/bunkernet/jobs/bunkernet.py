@@ -26,8 +26,8 @@ def request(method, url, _id=None) :
 def register() :
     return request("POST", "/register")
 
-def ping() :
-    return request("GET", "/ping", _id=get_id())
+def ping(_id=None) :
+    return request("GET", "/ping", _id=get_id() if _id is None else _id)
 
 def data() :
     return request("GET", "/db", _id=get_id())

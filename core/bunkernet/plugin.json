@@ -34,7 +34,7 @@
 		{
 			"name": "bunkernet-data",
 			"file": "bunkernet-data.py",
-			"every": "hour",
+			"every": "day",
 			"reload": true
 		}
 	]

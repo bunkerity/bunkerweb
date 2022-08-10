@@ -32,6 +32,7 @@ try :
     os.makedirs("/opt/bunkerweb/cache/bunkernet", exist_ok=True)
     
     # Ask an ID if needed
+    bunkernet_id = None
     if not os.path.isfile("/opt/bunkerweb/cache/bunkernet/instance.id") :
         logger.log("BUNKERNET", "ℹ️", "Registering instance on BunkerNet API ...")
         ok, status, data = register()
@@ -47,31 +48,47 @@ try :
         elif data["result"] != "ok" :
             logger.log("BUNKERNET", "❌", "Received error from BunkerNet API while sending register request : " + data["data"])
             os._exit(1)
-        with open("/opt/bunkerweb/cache/bunkernet/instance.id", "w") as f :
-            f.write(data["data"])
+        bunkernet_id = data["data"]
         logger.log("BUNKERNET", "ℹ️", "Successfully registered on BunkerNet API with instance id " + get_id())
     else :
+        with open("/opt/bunkerweb/cache/bunkernet/instance.id", "r") as f :
+            bunkernet_id = f.read()
         logger.log("BUNKERNET", "ℹ️", "Already registered on BunkerNet API with instance id " + get_id())
 
     # Ping
     logger.log("BUNKERNET", "ℹ️", "Checking connectivity with BunkerNet API ...")
-    ok, status, data = ping()
-    if not ok :
-        logger.log("BUNKERNET", "❌", "Error while sending ping request to BunkerNet API : " + data)
-        os._exit(2)
-    elif status == 429 :
-        logger.log("BUNKERNET", "⚠️", "BunkerNet API is rate limiting us, trying again later...")
-        os._exit(0)
-    elif status == 401 :
-        logger.log("BUNKERNET", "⚠️", "Instance ID is not registered, removing it and retrying a register later...")
-        os.remove("/opt/bunkerweb/cache/bunkernet/instance.id")
-        os._exit(1)
-    elif data["result"] != "ok" :
-        logger.log("BUNKERNET", "❌", "Received error from BunkerNet API while sending ping request : " + data["data"] + ", removing instance ID")
-        os._exit(1)
-    logger.log("BUNKERNET", "ℹ️", "Successfully checked connectivity with BunkerNet API")
+    bunkernet_ping = False
+    for i in range(0, 5) :
+        ok, status, data = ping(bunkernet_id)
+        retry = False
+        if not ok :
+            logger.log("BUNKERNET", "❌", "Error while sending ping request to BunkerNet API : " + data)
+            retry = True
+        elif status == 429 :
+            logger.log("BUNKERNET", "⚠️", "BunkerNet API is rate limiting us, trying again later...")
+            retry = True
+        elif status == 401 :
+            logger.log("BUNKERNET", "⚠️", "Instance ID is not registered, removing it and retrying a register later...")
+            os.remove("/opt/bunkerweb/cache/bunkernet/instance.id")
+            os._exit(2)
+        elif data["result"] != "ok" :
+            logger.log("BUNKERNET", "❌", "Received error from BunkerNet API while sending ping request : " + data["data"] + ", removing instance ID")
+            retry = True
+        if not retry :
+            bunkernet_ping = True
+            break
+        logger.log("BUNKERNET", "⚠️", "Waiting 1s and trying again ...")
+        os.sleep(1)
 
-    status = 1
+    if bunkernet_ping :
+        logger.log("BUNKERNET", "ℹ️", "Connectivity with BunkerWeb is successful !")
+        status = 1
+        if not os.path.isfile("/opt/bunkerweb/cache/bunkernet/instance.id") :
+            with open("/opt/bunkerweb/cache/bunkernet/instance.id", "w") as f :
+                f.write(bunkernet_id)
+    else :
+        logger.log("BUNKERNET", "❌", "Connectivity with BunkerWeb failed ...")
+        status = 2
 
 except :
     status = 2
