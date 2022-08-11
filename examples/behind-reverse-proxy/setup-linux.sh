@@ -15,7 +15,7 @@ elif [ ! -z $APT ] ; then
 fi
 
 cp haproxy.cfg /etc/haproxy
-sed -i "s/8080/80/"
+sed -i "s/8080/80/" /etc/haproxy/haproxy.cfg
 systemctl stop haproxy
 systemctl start haproxy
 
