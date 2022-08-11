@@ -1794,13 +1794,15 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
+	...
 	[www]
 	user = www-data
 	group = www-data
 	listen = /run/php/php-fpm.sock
-	listen.ower = www-data
+	listen.owner = www-data
 	listen.group = nginx
 	listen.mode = 0660
+	...
 	```
 
 	Don't forget to restart your PHP-FPM service :
@@ -1846,13 +1848,15 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
+	...
 	[www]
 	user = www-data
 	group = www-data
 	listen = /run/php/php-fpm.sock
-	listen.ower = www-data
+	listen.owner = www-data
 	listen.group = nginx
 	listen.mode = 0660
+	...
 	```
 
 	!!! info "PHP-FPM with Ansible"
@@ -2294,13 +2298,15 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
+	...
 	[www]
 	user = www-data
 	group = www-data
 	listen = /run/php/php-fpm.sock
-	listen.ower = www-data
+	listen.owner = www-data
 	listen.group = nginx
 	listen.mode = 0660
+	...
 	```
 
 	Don't forget to restart your PHP-FPM service :
@@ -2351,13 +2357,15 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
+	...
 	[www]
 	user = www-data
 	group = www-data
 	listen = /run/php/php-fpm.sock
-	listen.ower = www-data
+	listen.owner = www-data
 	listen.group = nginx
 	listen.mode = 0660
+	...
 	```
 
 	!!! info "PHP-FPM with Ansible"
