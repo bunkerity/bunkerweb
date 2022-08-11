@@ -49,7 +49,7 @@ try :
             logger.log("BUNKERNET", "❌", "Received error from BunkerNet API while sending register request : " + data["data"])
             os._exit(1)
         bunkernet_id = data["data"]
-        logger.log("BUNKERNET", "ℹ️", "Successfully registered on BunkerNet API with instance id " + get_id())
+        logger.log("BUNKERNET", "ℹ️", "Successfully registered on BunkerNet API with instance id " + data["data"])
     else :
         with open("/opt/bunkerweb/cache/bunkernet/instance.id", "r") as f :
             bunkernet_id = f.read()
