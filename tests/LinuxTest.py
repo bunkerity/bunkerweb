@@ -118,6 +118,17 @@ class LinuxTest(Test) :
             return False
         return True
 
+    def _cleanup_test(self) :
+        try :
+            proc = LinuxTest.docker_exec(self.__distro, "rm -rf /opt/bunkerweb/www/* ; rm -rf /opt/bunkerweb/confs/* ; rm -rf /opt/bunkerweb/plugins/*")
+            if proc.returncode != 0 :
+                raise(Exception("docker exec rm failed (cleanup)"))
+            super()._cleanup_test()
+        except :
+            log("DOCKER", "❌", "exception while running DockerTest._cleanup_test()\n" + format_exc())
+            return False
+        return True
+
     def _debug_fail(self) :
         LinuxTest.docker_exec(self.__distro, "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager")
     
