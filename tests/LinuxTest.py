@@ -59,14 +59,16 @@ class LinuxTest(Test) :
                 proc = LinuxTest.docker_exec(distro, "chown -R nginx:nginx " + dst + "/*")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec failed for directory " + src + " (linux stack)"))
-            # ubuntu : /etc/php/8.1/fpm/pool.d/www.conf / www-data
-            # debian : /etc/php/7.4/fpm/pool.d/www.conf / www-data
-            # fedora : /etc/php-fpm.d/www.conf / apache
-            # centos : /etc/php-fpm.d/www.conf / apache
-            if self.__distro in ["ubuntu", "debian"] :
+            if distro in ["ubuntu", "debian"] :
                 LinuxTest.docker_exec(distro, "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm")
-            elif self.__distro in ["centos", "fedora"] :
+                if distro == "ubuntu" :
+                    LinuxTest.docker_cp(distro, "./tests/www-deb.conf", "/etc/php/8.1/fpm/pool.d/www.conf")
+                elif distro == "debian" :
+                    LinuxTest.docker_cp(distro, "./tests/www-deb.conf", "/etc/php/7.4/fpm/pool.d/www.conf")
+            elif distro in ["centos", "fedora"] :
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm")
+                LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
+            LinuxTest.docker_exec(distro, "systemctl stop php-fpm ; systemctl start php-fpm")
             sleep(60)
         except :
             log("LINUX", "❌", "exception while running LinuxTest.init()\n" + format_exc())
