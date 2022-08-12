@@ -120,7 +120,7 @@ class LinuxTest(Test) :
 
     def _cleanup_test(self) :
         try :
-            proc = LinuxTest.docker_exec(self.__distro, "rm -rf /opt/bunkerweb/www/* ; rm -rf /opt/bunkerweb/confs/* ; rm -rf /opt/bunkerweb/plugins/*")
+            proc = LinuxTest.docker_exec(self.__distro, "rm -rf /opt/bunkerweb/www/* ; rm -rf /opt/bunkerweb/configs/* ; rm -rf /opt/bunkerweb/plugins/*")
             if proc.returncode != 0 :
                 raise(Exception("docker exec rm failed (cleanup)"))
             super()._cleanup_test()
