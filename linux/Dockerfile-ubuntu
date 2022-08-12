@@ -57,7 +57,8 @@ RUN cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
     chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
     chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/ui/main.py /opt/bunkerweb/www && \
     find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-    pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/ui/requirements.txt
+    pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/ui/requirements.txt && \
+	chmod 755 /opt/bunkerweb
 
 # Copy Linux files
 COPY linux/variables.env /opt/bunkerweb/variables.env

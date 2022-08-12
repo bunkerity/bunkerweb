@@ -22,7 +22,8 @@ RUN dnf install -y python39-pip brotli brotli-devel gperftools-devel perl libxsl
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /opt/bunkerweb/deps/python && \
-    pip3.9 install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+    pip3.9 install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+	chmod 755 /opt/bunkerweb
 
 # Copy BW files
 # can't exclude deps from . so we are copying everything by hand
