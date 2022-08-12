@@ -405,7 +405,7 @@ jobs:
 
   # Push to dev registries
   push-docker:
-    needs: [tests, build-bw-386, build-bw-arm]
+    needs: [tests, build-bw-386] #, build-bw-arm]
     runs-on: ubuntu-latest
     steps:
 
