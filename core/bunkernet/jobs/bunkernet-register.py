@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, os, traceback
+import sys, os, traceback, time
 
 sys.path.append("/opt/bunkerweb/deps/python")
 sys.path.append("/opt/bunkerweb/utils")
@@ -78,7 +78,7 @@ try :
             bunkernet_ping = True
             break
         logger.log("BUNKERNET", "⚠️", "Waiting 1s and trying again ...")
-        os.sleep(1)
+        time.sleep(1)
 
     if bunkernet_ping :
         logger.log("BUNKERNET", "ℹ️", "Connectivity with BunkerWeb is successful !")
