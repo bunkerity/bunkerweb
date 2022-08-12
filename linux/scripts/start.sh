@@ -5,9 +5,9 @@
 #############################################################
 #                           Help                            #  
 #############################################################
-Help()
+function display_help()
 {
-    # Dispaly Help
+    # Display Help
     echo "Usage of this script"
     echo 
     echo "Syntax: start [start|stop|reload]"
@@ -21,23 +21,10 @@ Help()
 export PYTHONPATH=/opt/bunkerweb/deps/python/
 
 # Add nginx to sudoers
-if [ ! -f /etc/sudoers.d/nginx ]; then
-    log "ℹ️" "Adding nginx user to sudoers file ..."
-    log "ℹ️" "nginx ALL=(ALL) NOPASSWD: /bin/systemctl restart bunkerweb" >> /etc/sudoers.d/nginx
-    #log "$1" "ℹ️"
+if [ ! -f /etc/sudoers.d/bunkerweb ]; then
+    log "ENTRYPOINT" "ℹ️" "Adding nginx user to sudoers ..."
+    echo "nginx ALL=(ALL) NOPASSWD: /bin/systemctl restart bunkerweb" > /etc/sudoers.d/bunkerweb
 fi
-
-#############################################################
-#                           Checker                         #  
-#############################################################
-
-function check_ok() {
-    if [ $? -eq 0 ]; then
-        result="$?"
-    else
-        result="$?"
-    fi
-}
 
 #############################################################
 #                           Start                           #  
@@ -48,174 +35,183 @@ function start() {
     #                   STEP1                   #
     # Generate variables.env files to /tmp/     #
     #############################################
+	log "ENTRYPOINT" "ℹ️" "Generate variables.env files to /tmp/ ..."
     printf "HTTP_PORT=80\nSERVER_NAME=example.com\nTEMP_NGINX=yes" > "/tmp/variables.env"
-    # Test if command worked
-    check_ok
-    # Exit if failed
-    if [ $result -ne 0 ];
+    result=$?
+	if [ $result -ne 0 ];
     then
-        echo "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Generate variables.env files to /tmp/"
-    #echo "OK !"
+
     #############################################
     #                   STEP2                   #
     # Generate first temporary config           #
     #############################################
+	log "ENTRYPOINT" "ℹ️" "Generate temporary config ..."
     /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Generate first temporary config"
-    #echo "OK !"
+
     #############################################
     #                   STEP3                   #
     #               Execute nginx               #
     #############################################
-    nginx
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    log "ENTRYPOINT" "ℹ️" "Execute temporary BunkerWeb ..."
+	nginx
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
-    fi
-    log "ℹ️" "Execute nginx"
-    #echo "OK !"
+    fi    
+
     #############################################
     #                   STEP4                   #
     #               Run jobs script             #
     #############################################
+	log "ENTRYPOINT" "ℹ️" "Run jobs once ..."
     /opt/bunkerweb/job/main.py --variables /opt/bunkerweb/variables.env --run
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Run jobs script"
-    #echo "OK !"
+
     #############################################
     #                   STEP5                   #
     #                 Quit nginx                #
     ############################################# 
-    nginx -s quit
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    log "ENTRYPOINT" "ℹ️" "Stop temporary BunkerWeb ..."
+	nginx -s quit
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Quit nginx"
-    #echo "OK !"
+
     #############################################
     #                   STEP6                   #
     #           Generate final confs            #
-    ############################################# 
+    #############################################
+	log "ENTRYPOINT" "ℹ️" "Generate final config ..."
     /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /opt/bunkerweb/variables.env
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Generate final confs"
-    #echo "OK !"
+
     #############################################
     #                   STEP7                   #
     #              Run jobs infinite            #
-    ############################################# 
+    #############################################
+	log "ENTRYPOINT" "ℹ️" "Run jobs scheduler ..."
     /opt/bunkerweb/job/main.py --variables /etc/nginx/variables.env &
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Run jobs infinite"
-    #echo "OK !"
+
     #############################################
     #                   STEP8                   #
     #                Start nginx                #
-    ############################################# 
+    #############################################
+	log "ENTRYPOINT" "ℹ️" "Start BunkerWeb ..."
     nginx -g "daemon off; user nginx;"
-    # Test if command worked
-    check_ok
-    # Exit if failed
+    result=$?
     if [ $result -ne 0 ];
     then
-        log "❌" "Your command exited with non-zero status $result"
+        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
         exit 1
     fi
-    log "ℹ️" "Start nginx"
-    #echo "OK !"
 }
 
 function stop()
 {
-    echo "Stoping Bunkerweb service ..."
+	ret=0
+    log "ENTRYPOINT" "ℹ️" "Stopping BunkerWeb service ..."
+	
     # Check if pid file exist and remove it if so
     PID_FILE_PATH="/opt/bunkerweb/tmp/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
-        var=$( cat $PID_FILE_PATH )
+        var=$(cat "$PID_FILE_PATH")
+		log "ENTRYPOINT" "ℹ️" "Sending stop signal to scheduler ..."
         kill -SIGINT $var
-        log "ℹ️" echo "Killing : $var"
+		result=$?
+		if [ $result -ne 0 ] ; then
+			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+			exit 1
+		fi
     else
-        log "❌" "File doesn't exist"
+        log "ENTRYPOINT" "❌" "Scheduler is not running"
+		ret=1
     fi
 
     # Check if nginx running and if so, stop it
     SERVICE="nginx"
-    if pgrep -x "$SERVICE" >/dev/null
+    if pgrep -x "$SERVICE" > /dev/null
     then
-        log "ℹ️" "Stopping $SERVICE service"
-        nginx -s stop
+        log "ENTRYPOINT" "ℹ️" "Sending stop signal to BunkerWeb ..."
+        nginx -s quit
+		result=$?
+		if [ $result -ne 0 ] ; then
+			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+			exit 1
+		fi
     else
-        log "ℹ️" "$SERVICE already stopped"
+        log "ENTRYPOINT" "❌" "BunkerWeb is not running"
+		exit 1
     fi
-    #echo "Done !"
+	exit $ret
 }
 
 function reload()
 {
-    log "ℹ️" "Reloading Bunkerweb service ..."
+    log "ENTRYPOINT" "ℹ️" "Reloading BunkerWeb service ..."
+
     # Check if pid file exist and remove it if so
     PID_FILE_PATH="/opt/bunkerweb/tmp/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
-        var=$( cat $PID_FILE_PATH )
+        var=$(cat "$PID_FILE_PATH")
+		log "ENTRYPOINT" "ℹ️" "Sending reload signal to scheduler ..."
         kill -SIGHUP $var
-        log "ℹ️" "Reloading : $var"
+		result=$?
+		if [ $result -ne 0 ] ; then
+			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+			exit 1
+		fi
     else
-        log "❌" "File doesn't exist"
+        log "ENTRYPOINT" "❌" "Scheduler is not running"
+		exit 1
     fi
 
     # Check if nginx running and if so, reload it
     SERVICE="nginx"
-    if pgrep -x "$SERVICE" >/dev/null
+    if pgrep -x "$SERVICE" > /dev/null
     then
-        log "ℹ️" "Reloading $SERVICE service"
+        log "ENTRYPOINT" "ℹ️" "Sending reload signal to BunkerWeb ..."
         nginx -s reload
+		result=$?
+		if [ $result -ne 0 ] ; then
+			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+			exit 1
+		fi
     else
-        log "ℹ️" "$SERVICE already stopped"
+        log "ENTRYPOINT" "❌" "BunkerWeb is not running"
+		exit 1
     fi
-    #echo "Done !"
 }
 
 # List of differents args
@@ -232,5 +228,5 @@ case $1 in
     *)
     echo "Invalid option!"
     echo "List of option available:"
-    Help
+    display_help
 esac
