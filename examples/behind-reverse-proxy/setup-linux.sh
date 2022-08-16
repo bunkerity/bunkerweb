@@ -15,11 +15,10 @@ elif [ ! -z $APT ] ; then
 fi
 
 cp haproxy.cfg /etc/haproxy
-sed -i "s/8080/80/" /etc/haproxy/haproxy.cfg
+sed -i "s/*:8080/*:80/" /etc/haproxy/haproxy.cfg
 sed -i "s/mybunker/127.0.0.1/" /etc/haproxy/haproxy.cfg
 systemctl stop bunkerweb
 systemctl stop haproxy
-#systemctl start haproxy
-haproxy -f /etc/haproxy/haproxy.cfg > /tmp/haproxy.log &
+systemctl start haproxy
 
 echo "hello" > /opt/bunkerweb/www/index.html
