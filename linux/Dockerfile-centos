@@ -22,8 +22,7 @@ RUN dnf install -y python39-pip brotli brotli-devel gperftools-devel perl libxsl
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /opt/bunkerweb/deps/python && \
-    pip3.9 install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
-	chmod 755 /opt/bunkerweb
+    pip3.9 install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
 
 # Copy BW files
 # can't exclude deps from . so we are copying everything by hand
@@ -54,7 +53,8 @@ RUN cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
     chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
     chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/ui/main.py /opt/bunkerweb/www && \
     find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-    pip3.9 install --no-cache-dir --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/ui/requirements.txt
+    pip3.9 install --no-cache-dir --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/ui/requirements.txt && \
+	chmod 755 /opt/bunkerweb
 
 # Copy Linux files
 COPY linux/variables.env /opt/bunkerweb/variables.env
