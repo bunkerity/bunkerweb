@@ -70,7 +70,7 @@ class LinuxTest(Test) :
             elif distro in ["centos", "fedora"] :
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm")
                 LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
-                LinuxTest.docker_exec(distro, "systemctl stop php-fpm ; systemctl start php-fpm")
+                LinuxTest.docker_exec(distro, "mkdir /run/php ; chmod 777 /run/php ; systemctl stop php-fpm ; systemctl start php-fpm")
             sleep(60)
         except :
             log("LINUX", "❌", "exception while running LinuxTest.init()\n" + format_exc())
