@@ -35,14 +35,15 @@ function start() {
     #                   STEP1                   #
     # Generate variables.env files to /tmp/     #
     #############################################
-	log "ENTRYPOINT" "ℹ️" "Generate variables.env files to /tmp/ ..."
-    printf "HTTP_PORT=80\nSERVER_NAME=example.com\nTEMP_NGINX=yes" > "/tmp/variables.env"
-    result=$?
+	log "ENTRYPOINT" "ℹ️" "Generate variables.env files to /tmp ..."
+	cp /opt/bunkerweb/variables.env /tmp/variables.env
+	result=$?
 	if [ $result -ne 0 ];
     then
-        log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
-        exit 1
-    fi
+		log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+		exit 1
+	fi
+	printf "\nTEMP_NGINX=yes" >> /tmp/variables.env
 
     #############################################
     #                   STEP2                   #
