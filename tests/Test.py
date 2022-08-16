@@ -73,6 +73,7 @@ class Test(ABC) :
     # run all the tests
     def run_tests(self) :
         if not self._setup_test() :
+            self._debug_fail()
             return False
         if self.__delay != 0 :
             log("TEST", "ℹ️", "delay is set, sleeping " + str(self.__delay) + "s")
