@@ -4,7 +4,7 @@
 		"docker",
 		"linux"
 	],
-	"timeout": 60,
+	"timeout": 120,
 	"tests": [
 		{
 			"type": "string",
