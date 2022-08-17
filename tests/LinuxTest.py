@@ -109,7 +109,7 @@ class LinuxTest(Test) :
             proc = LinuxTest.docker_exec(self.__distro, "cp /opt/" + self._name + "/variables.env /opt/bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec cp variables.env failed (test)"))
-            proc = LinuxTest.docker_exec(self.__distro, "systemctl restart bunkerweb")
+            proc = LinuxTest.docker_exec(self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl restart failed (linux stack)"))
         except :
