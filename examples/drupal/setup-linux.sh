@@ -5,11 +5,19 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 1
 fi
 
-curl https://ftp.drupal.org/files/projects/drupal-9.4.2.tar.gz -Lo /tmp/drupal.tar.gz
-tar -xvzf /tmp/drupal.tar.gz -C /tmp
-cp -r /tmp/drupal-9.4.2/* /opt/bunkerweb/www
-chown -R www-data:nginx /opt/bunkerweb/www
-find /opt/bunkerweb/www -type d -exec chmod 750 /opt/bunkerweb/www {} \;
-find /opt/bunkerweb/www -type f -exec chmod 640 /opt/bunkerweb/www {} \;
-systemctl start php-fpm
-cp variables.env /opt/bunkerweb/variables.env
+if id www-data > /dev/null 2>&1 ; then
+	user="www-data"
+elif id apache > /dev/null 2>&1 ; then
+	user="apache"
+else
+	echo "❌ No PHP user found"
+	exit 1
+fi
+curl https://releases.mattermost.com/7.2.0/mattermost-7.2.0-linux-amd64.tar.gz -Lo /tmp/mattermost.tar.gz
+tar -xvzf /tmp/mattermost.tar.gz -C /tmp
+cd /tmp/drupal-*
+cp -r * /opt/bunkerweb/www
+chown -R $user:nginx /opt/bunkerweb/www
+find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
+find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+cp -r bw-data/configs/* /opt/bunkerweb/configs

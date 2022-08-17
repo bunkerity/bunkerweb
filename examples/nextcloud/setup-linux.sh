@@ -13,8 +13,10 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-curl https://downloads.joomla.org/fr/cms/joomla4/4-1-5/Joomla_4-1-5-Stable-Full_Package.zip?format=zip -Lo /tmp/joomla.zip
-unzip /tmp/joomla.zip -d /opt/bunkerweb/www
+curl https://download.nextcloud.com/server/releases/latest.zip -Lo /tmp/nextcloud.zip
+unzip /tmp/nextcloud.zip -d /tmp
+cp -r /tmp/nextcloud/* /opt/bunkerweb/www
 chown -R $user:nginx /opt/bunkerweb/www
 find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
 find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+cp -r bw-data/configs/* /opt/bunkerweb/configs

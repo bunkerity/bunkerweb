@@ -2,7 +2,8 @@
 	"name": "php-multisite",
 	"kinds": [
 		"docker",
-		"autoconf"
+		"autoconf",
+		"linux"
 	],
 	"timeout": 60,
 	"tests": [
