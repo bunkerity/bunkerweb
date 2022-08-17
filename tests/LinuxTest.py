@@ -114,6 +114,7 @@ class LinuxTest(Test) :
                 raise(Exception("docker exec systemctl restart failed (linux stack)"))
         except :
             log("LINUX", "❌", "exception while running LinuxTest._setup_test()\n" + format_exc())
+            self._debug_fail()
             self._cleanup_test()
             return False
         return True
