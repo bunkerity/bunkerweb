@@ -4,8 +4,7 @@
 		"docker",
 		"autoconf",
 		"swarm",
-        "kubernetes",
-		"linux"
+	        "kubernetes"
 	],
 	"timeout": 300,
 	"delay": 180,
