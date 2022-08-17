@@ -98,11 +98,11 @@ class LinuxTest(Test) :
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            proc = LinuxTest.docker_cp(self.__distro, test, "/opt/" + self._name)
+            if proc.returncode != 0 :
+                raise(Exception("docker cp failed (test)"))
             setup = test + "/setup-linux.sh"
             if isfile(setup) :
-                proc = LinuxTest.docker_cp(self.__distro, test, "/opt/" + self._name)
-                if proc.returncode != 0 :
-                    raise(Exception("docker cp failed (test)"))
                 proc = LinuxTest.docker_exec(self.__distro, "cd /opt/" + self._name + " && ./setup-linux.sh")
                 if proc.returncode != 0 :
                     raise(Exception("docker exec setup failed (test)"))
