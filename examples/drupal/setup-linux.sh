@@ -23,3 +23,4 @@ find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
 find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
 cd "$current_dir"
 cp -r ./bw-data/configs/* /opt/bunkerweb/configs
+chown -R nginx:nginx /opt/bunkerweb/configs

@@ -19,3 +19,5 @@ cp -r /tmp/wordpress/* /opt/bunkerweb/www
 chown -R $user:nginx /opt/bunkerweb/www
 find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
 find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+cp -r ./bw-data/configs/* /opt/bunkerweb/configs
+chown -R nginx:nginx /opt/bunkerweb/configs
