@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 curl https://download.moodle.org/download.php/direct/stable400/moodle-4.0.2.tgz -Lo /tmp/moodle.tgz
-tar -xvzf /tmp/moodle.tgz -C /tmp
+tar -xzf /tmp/moodle.tgz -C /tmp
 cp -r /tmp/moodle/* /opt/bunkerweb/www
 chown -R $user:nginx /opt/bunkerweb/www
 find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;

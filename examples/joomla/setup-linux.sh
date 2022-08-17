@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 curl https://downloads.joomla.org/fr/cms/joomla4/4-1-5/Joomla_4-1-5-Stable-Full_Package.zip?format=zip -Lo /tmp/joomla.zip
-unzip /tmp/joomla.zip -d /opt/bunkerweb/www
+unzip -qq /tmp/joomla.zip -d /opt/bunkerweb/www
 chown -R $user:nginx /opt/bunkerweb/www
 find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
 find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;

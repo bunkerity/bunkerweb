@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 curl https://download.nextcloud.com/server/releases/latest.zip -Lo /tmp/nextcloud.zip
-unzip /tmp/nextcloud.zip -d /tmp
+unzip -qq /tmp/nextcloud.zip -d /tmp
 cp -r /tmp/nextcloud/* /opt/bunkerweb/www
 chown -R $user:nginx /opt/bunkerweb/www
 find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;

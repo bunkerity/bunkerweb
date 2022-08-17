@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 curl https://releases.mattermost.com/7.2.0/mattermost-7.2.0-linux-amd64.tar.gz -Lo /tmp/mattermost.tar.gz
-tar -xvzf /tmp/mattermost.tar.gz -C /tmp
+tar -xzf /tmp/mattermost.tar.gz -C /tmp
 cd /tmp/drupal-*
 cp -r * /opt/bunkerweb/www
 chown -R $user:nginx /opt/bunkerweb/www

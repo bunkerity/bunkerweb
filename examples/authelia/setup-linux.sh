@@ -6,7 +6,7 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 curl https://github.com/authelia/authelia/releases/download/v4.36.2/authelia-v4.36.2-linux-amd64.tar.gz -Lo /tmp/authelia.tar.gz
-tar -xvzf /tmp/authelia.tar.gz -C /tmp
+tar -xzf /tmp/authelia.tar.gz -C /tmp
 mv /tmp/authelia-linux-amd64 /usr/bin/authelia
 mv /tmp/authelia.service /etc/systemd/system
 mkdir /etc/authelia
