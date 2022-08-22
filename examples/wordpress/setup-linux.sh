@@ -21,3 +21,5 @@ find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
 find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
 cp -r ./bw-data/configs/* /opt/bunkerweb/configs
 chown -R nginx:nginx /opt/bunkerweb/configs
+find /opt/bunkerweb/configs -type f -exec chmod 0644 {} \;
+find /opt/bunkerweb/configs -type d -exec chmod 0755 {} \;
