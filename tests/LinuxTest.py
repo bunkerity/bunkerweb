@@ -60,7 +60,7 @@ class LinuxTest(Test) :
                 if proc.returncode != 0 :
                     raise(Exception("docker exec failed for directory " + src + " (linux stack)"))
             if distro in ["ubuntu", "debian"] :
-                LinuxTest.docker_exec(distro, "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm")
+                LinuxTest.docker_exec(distro, "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip")
                 if distro == "ubuntu" :
                     LinuxTest.docker_cp(distro, "./tests/www-deb.conf", "/etc/php/8.1/fpm/pool.d/www.conf")
                     LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
@@ -68,7 +68,7 @@ class LinuxTest(Test) :
                     LinuxTest.docker_cp(distro, "./tests/www-deb.conf", "/etc/php/7.4/fpm/pool.d/www.conf")
                     LinuxTest.docker_exec(distro, "systemctl stop php7.4-fpm ; systemctl start php7.4-fpm")
             elif distro in ["centos", "fedora"] :
-                LinuxTest.docker_exec(distro, "dnf install -y php-fpm")
+                LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
                 LinuxTest.docker_exec(distro, "mkdir /run/php ; chmod 777 /run/php ; systemctl stop php-fpm ; systemctl start php-fpm")
             sleep(60)
