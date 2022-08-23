@@ -27,10 +27,13 @@ services:
       - ME_CONFIG_MONGODB_ADMINPASSWORD=toor        # replace with a better password
       - ME_CONFIG_BASICAUTH_USERNAME=changeme       # replace with a better username
       - ME_CONFIG_BASICAUTH_PASSWORD=changeme       # replace with a better password
-    restart: unless-stopped
     depends_on:
       - mongo
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 10
       placement:
         constraints:
           - "node.role==worker"

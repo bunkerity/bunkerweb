@@ -374,10 +374,10 @@ jobs:
         run: cat /opt/.runner_env >> $GITHUB_ENV
 
       # Run tests
-      - name: Run Docker tests
-        run: ./tests/main.py "docker"
-      - name: Run Autoconf tests
-        run: ./tests/main.py "autoconf"
+      # - name: Run Docker tests
+        # run: ./tests/main.py "docker"
+      # - name: Run Autoconf tests
+        # run: ./tests/main.py "autoconf"
       - name: Run Swarm tests
         run: ./tests/main.py "swarm"
       - name: Run Kubernetes tests
@@ -392,16 +392,6 @@ jobs:
         run: ./tests/main.py "linux" "centos"
       - name: Run Linux Fedora tests
         run: ./tests/main.py "linux" "fedora"
-      - name: Temp stop tests
-        run: exit 1
-      - name: Run autoconf tests
-        run: ./tests/autoconf.sh ${{ env.BUILD_MODE }}
-      - name: Run Swarm tests
-        run: ./tests/swarm.sh ${{ env.BUILD_MODE }}
-      - name: Run Kubernetes tests
-        run: ./tests/kubernetes.sh ${{ env.BUILD_MODE }}
-      - name: Run Linux tests
-        run: ./tests/linux.sh ${{ env.BUILD_MODE }}
 
   # Push to dev registries
   push-docker:
