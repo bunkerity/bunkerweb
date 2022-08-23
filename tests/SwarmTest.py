@@ -94,8 +94,18 @@ class SwarmTest(Test) :
             i = 0
             healthy = False
             while i < self._timeout :
-                proc = run('docker stack ps --no-trunc --format "{{ .CurrentState }}" ' + self._name + ' | grep -v "Running"', cwd="/tmp/swarm", shell=True, capture_output=True)
-                if "" == proc.stdout.decode() :
+                proc = run('docker stack services --format "{{ .Name }}" ' + self._name, cwd="/tmp/swarm", shell=True, capture_output=True)
+                if proc.returncode != 0 :
+                    raise(Exception("swarm stack is not healthy (cmd1 failed)"))
+                all_healthy = True
+                for service in proc.stdout.decode().splitlines() :
+                    proc2 = run('docker service ps --format "{{ .CurrentState }}" ' + service, cwd="/tmp/swarm", shell=True, capture_output=True)
+                    if proc2.returncode != 0 :
+                        raise(Exception("swarm stack is not healthy (cmd2 failed)"))
+                    if not "Running" in proc2.stdout.decode() :
+                        all_healthy = False
+                        break
+                if all_healthy :
                     healthy = True
                     break
                 sleep(1)
