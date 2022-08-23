@@ -32,6 +32,7 @@ services:
       - ./ghost-data:/var/lib/ghost/content
     environment:
       - url=https://www.example.com # replace with your domain
+      - NODE_ENV=development
 
 volumes:
   bw_data:
