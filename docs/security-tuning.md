@@ -9,7 +9,7 @@ BunkerWeb offers many security features that you can configure with [settings](/
 
 ### Deny status code
 
-The first thing to define is the kind of action to do when a client access is denied. You can control the action with the `DENY_STATUS_CODE` setting which allows the following values :
+The first thing to define is the kind of action to do when a client access is denied. You can control the action with the `DENY_HTTP_STATUS` setting which allows the following values :
 
 - `403` : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)
 - `444` : close the connection (no web page or custom content will be displayed)

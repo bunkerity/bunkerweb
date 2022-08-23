@@ -12,6 +12,7 @@ services:
           - myghost
     environment:
       - url=https://www.example.com # replace with your domain
+      - NODE_ENV=development
     labels:
       - bunkerweb.SERVER_NAME=www.example.com # replace with your domain
       - bunkerweb.USE_REVERSE_PROXY=yes

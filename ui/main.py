@@ -362,7 +362,7 @@ def instances():
                 next=url_for("instances"),
                 message=(
                     f"{request.form['operation'].title()}ing"
-                    if request.form["operation"] is not "stop"
+                    if request.form["operation"] != "stop"
                     else "Stopping"
                 )
                 + " instance",

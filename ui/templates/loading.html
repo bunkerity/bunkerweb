@@ -23,11 +23,12 @@
     </footer>
   </body>
   <script>
-    check_reloading();
     const reloading = setInterval(check_reloading, 1000);
 
     async function check_reloading() {
-      const response = await fetch(`${location.href.replace("/loading", "/check_reloading")}`);
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000)
+      const response = await fetch(`${location.href.replace("/loading", "/check_reloading")}`, { signal: controller.signal });
 
       if (response.status === 200) {
         res = await response.json();
