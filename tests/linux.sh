@@ -47,6 +47,9 @@ if [ -d /tmp/packages ] ; then
 fi
 do_and_check_cmd mkdir /tmp/packages
 
+# Remove old packages
+find /opt/packages/ -type f | xargs rm
+
 # Generate packages
 echo "Building ubuntu package ..."
 gen_package "$1" "ubuntu"
