@@ -349,17 +349,25 @@ jobs:
 
       # Run tests
       - name: Run Docker tests
-        run: ./tests/docker.sh ${{ env.BUILD_MODE }}
-      - name: Run autoconf tests
-        run: ./tests/autoconf.sh ${{ env.BUILD_MODE }}
+        run: ./tests/main.py "docker"
+      - name: Run Autoconf tests
+        run: ./tests/main.py "autoconf"
       - name: Run Swarm tests
-        run: ./tests/swarm.sh ${{ env.BUILD_MODE }}
+        run: ./tests/main.py "swarm"
       - name: Run Kubernetes tests
-        run: ./tests/kubernetes.sh ${{ env.BUILD_MODE }}
-      - name: Run Linux tests
+        run: ./tests/main.py "kubernetes"
+      - name: Generate Linux packages and build test images
         run: ./tests/linux.sh ${{ env.BUILD_MODE }}
+      - name: Run Linux Ubuntu tests
+        run: ./tests/main.py "linux" "ubuntu"
+      - name: Run Linux Debian tests
+        run: ./tests/main.py "linux" "debian"
+      - name: Run Linux CentOS tests
+        run: ./tests/main.py "linux" "centos"
+      - name: Run Linux Fedora tests
+        run: ./tests/main.py "linux" "fedora"
 
-  # Push to dev registries
+  # Push to prod registries
   push-docker:
     needs: [tests, build-bw-386, build-bw-arm]
     runs-on: ubuntu-latest
