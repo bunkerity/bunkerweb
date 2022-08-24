@@ -12,7 +12,7 @@ Using BunkerWeb as a [Docker](https://www.docker.com/) container is a quick and 
 We provide ready to use prebuilt images for x64, x86 armv8 and armv7 architectures on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
 
 ```shell
-docker pull bunkerity/bunkerweb:1.4.2
+docker pull bunkerity/bunkerweb:1.4.3
 ```
 
 Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and take a coffee ☕ because it may be long depending on your hardware) :
@@ -39,7 +39,7 @@ docker run \
 	   -e MY_SETTING=value \
 	   -e "MY_OTHER_SETTING=value with spaces" \
 	   ...
-	   bunkerity/bunkerweb:1.4.2
+	   bunkerity/bunkerweb:1.4.3
 ```
 
 Here is the docker-compose equivalent :
@@ -48,7 +48,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.4.3
     environment:
       - MY_SETTING=value
 ```
@@ -73,7 +73,7 @@ docker run \
 	   ...
 	   -v bw_data:/data \
 	   ...
-	   bunkerity/bunkerweb:1.4.2
+	   bunkerity/bunkerweb:1.4.3
 ```
 
 Here is the docker-compose equivalent :
@@ -82,7 +82,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.4.3
     volumes:
       - bw_data:/data
 ...
@@ -152,7 +152,7 @@ docker run \
        ...
 	   --network mynetwork \
 	   ...
-	   bunkerity/bunkerweb:1.4.2
+	   bunkerity/bunkerweb:1.4.3
 ```
 
 You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.
@@ -163,7 +163,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.4.3
     networks:
       - bw-net
 ...
@@ -218,7 +218,7 @@ docker run \
 	   -e SERVER_NAME= \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
 	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.4.2 && \
+	   bunkerity/bunkerweb:1.4.3 && \
 
 docker network connect bw-services mybunker
 ```
@@ -235,7 +235,7 @@ docker run \
 	   --network bw-autoconf \
 	   -v bw-data:/data \
 	   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-	   bunkerity/bunkerweb-autoconf:1.4.2
+	   bunkerity/bunkerweb-autoconf:1.4.3
 ```
 
 Here is the docker-compose equivalent for the BunkerWeb autoconf stack :
@@ -246,7 +246,7 @@ version: '3'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.4.3
     ports:
       - 80:8080
 	  - 443:8443
@@ -262,7 +262,7 @@ services:
 	  - bw-services
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.2
+    image: bunkerity/bunkerweb-autoconf:1.4.3
     volumes:
       - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -364,7 +364,7 @@ docker service create \
 	   -e MULTISITE=yes \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
 	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.4.2
+	   bunkerity/bunkerweb:1.4.3
 ```
 
 And the autoconf one :
@@ -378,7 +378,7 @@ docker service \
 	   --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
 	   --mount type=volume,source=bw-data,destination=/data \
 	   -e SWARM_MODE=yes \
-	   bunkerity/bunkerweb-autoconf:1.4.2
+	   bunkerity/bunkerweb-autoconf:1.4.3
 ```
 
 Here is the docker-compose equivalent (using `docker stack deploy`) :
@@ -389,7 +389,7 @@ version: '3.5'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.4.3
     ports:
       - published: 80
         target: 8080
@@ -416,7 +416,7 @@ services:
         - "bunkerweb.AUTOCONF"
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.2
+    image: bunkerity/bunkerweb-autoconf:1.4.3
     environment:
       - SWARM_MODE=yes
     volumes:
@@ -706,11 +706,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo apt install -y nginx=1.20.2-1~bullseye
 	```
 
-	And finally install BunkerWeb 1.4.2 :
+	And finally install BunkerWeb 1.4.3 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	sudo apt update && \
-	sudo apt install -y bunkerweb=1.4.2
+	sudo apt install -y bunkerweb=1.4.3
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -736,11 +736,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo apt install -y nginx=1.20.2-1~jammy
 	```
 
-	And finally install BunkerWeb 1.4.2 :
+	And finally install BunkerWeb 1.4.3 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	sudo apt update && \
-	sudo apt install -y bunkerweb=1.4.2
+	sudo apt install -y bunkerweb=1.4.3
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -758,7 +758,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
 	sudo dnf check-update && \
-	sudo dnf install -y bunkerweb-1.4.2
+	sudo dnf install -y bunkerweb-1.4.3
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -785,12 +785,12 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf install nginx-1.20.2
 	```
 
-	And finally install BunkerWeb 1.4.2 :
+	And finally install BunkerWeb 1.4.3 :
     ```shell
 	dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.4.2
+    sudo dnf install -y bunkerweb-1.4.3
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -870,7 +870,6 @@ MY_SETTING_2=value2
 BunkerWeb is managed using systemctl :
 
 - Check BunkerWeb status : `systemctl status bunkerweb`
-- Reload the configuration : `systemctl reload bunkerweb`
 - Start it if it's stopped : `systemctl start bunkerweb`
 - Stop it if it's started : `systemctl stop bunkerweb`
 - And restart : `systemctl restart bunkerweb`
@@ -895,7 +894,7 @@ A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galax
 
 First of all download the role from ansible-galaxy :
 ```shell
-ansible-galaxy install bunkerity.bunkerweb
+ansible-galaxy install fl0ppy_d1sk.bunkerweb
 ```
 
 Next create an inventory by adding the IP adress or FQDN of one or more remote systems, either in `/etc/ansible/hosts` or in your own playbook `inventory.yml` :
@@ -914,7 +913,7 @@ In order to use the role, we will create the playbook file named `playbook.yml` 
 - hosts: all
   become: true
   roles:
-    - bunkerweb
+    - fl0ppy_d1sk.bunkerweb
 ```
 
 Run the playbook :
@@ -926,13 +925,14 @@ Configuration of BunkerWeb is done by using specific role variables :
 
 | Name  | Type  | Description  | Default value  |
 |:-----:|:-----:|--------------|----------------|
-| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.2` |
+| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.3` |
 | `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
 | `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
 | `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |
 | `enable_ui` | boolean | Activate the web UI. | `false` |
 | `custom_ui` | string | Path of the ui.env file to configure the web UI. | `files/ui.env` |
-| `custom_configs` | boolean | Enable provisioning of custom configurations using the `custom_configs_path` variable. | `false` |
 | `custom_configs_path` | Dictionary | Each entry is a path of the folder containing custom configurations. Keys are the type of custom configs : `http`, `server-http`, `modsec`, `modsec-crs` and `default-server-http` | empty values |
-| `custom_site` | string | Path of the www directory to upload. | empty value |
-| `plugins` | string | Path of the plugins directory to upload. | empty value |
+| `custom_www` | string | Path of the www directory to upload. | empty value |
+| `custom_plugins` | string | Path of the plugins directory to upload. | empty value |
+| `custom_www_owner` | string | Default owner for www files and folders. | `nginx` |
+| `custom_www_group` | string | Default group for www files and folders. | `nginx` |

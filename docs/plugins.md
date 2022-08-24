@@ -53,13 +53,13 @@ The first step is to install the plugin by putting the plugin files inside the c
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       volumes:
         - ./bw-data:/data
       ...
@@ -130,7 +130,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 	In your Ansible inventory, you can use the `plugins` variable to set the path of plugins folder : 
     ```ini
 	[mybunkers]
-	192.168.0.42 ... plugins="{{ playbook_dir }}/bunkerweb-plugins"
+	192.168.0.42 ... custom_plugins="{{ playbook_dir }}/bunkerweb-plugins"
     ```
 	
 	Or alternatively, in your playbook file :
@@ -138,9 +138,9 @@ The first step is to install the plugin by putting the plugin files inside the c
 	- hosts: all
 	  become: true
 	  vars:
-		- variables_env: "{{ playbook_dir }}/my_variables.env"
+		- custom_plugins: "{{ playbook_dir }}/bunkerweb-plugins"
 	  roles:
-		- bunkerweb
+		- fl0ppy_d1sk.bunkerweb
 	```
 
 	Run the playbook :

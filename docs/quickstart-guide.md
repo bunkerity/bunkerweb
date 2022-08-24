@@ -54,7 +54,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e USE_REVERSE_PROXY=yes \
     	   -e REVERSE_PROXY_URL=/ \
     	   -e REVERSE_PROXY_HOST=http://myapp \
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
@@ -64,7 +64,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.2
+    	image: bunkerity/bunkerweb:1.4.3
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -263,9 +263,9 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     systemctl status bunkerweb
     ```
 
-    If it's already running we can just reload it :
+    If it's already running we can restart it :
     ```shell
-    systemctl reload bunkerweb
+    systemctl restart bunkerweb
     ```
 
     Otherwise, we will need to start it :
@@ -306,7 +306,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - bunkerweb
+        - fl0ppy_d1sk.bunkerweb
     ```
 
 	You can now run the playbook :
@@ -379,7 +379,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
     	   -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
     	   -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
@@ -389,7 +389,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.2
+    	image: bunkerity/bunkerweb:1.4.3
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -871,9 +871,9 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     systemctl status bunkerweb
     ```
 
-    If it's already running we can just reload it :
+    If it's already running we can restart it :
     ```shell
-    systemctl reload bunkerweb
+    systemctl restart bunkerweb
     ```
 
     Otherwise, we will need to start it :
@@ -916,13 +916,13 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
     app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
     ```
-
+	[]()
 	In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
 	```yaml
 	[mybunkers]
     192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
 	```
-
+	[]()
 	Or alternatively, in your playbook file : 
 	```yaml
     - hosts: all
@@ -930,9 +930,9 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - bunkerweb
+        - fl0ppy_d1sk.bunkerweb
 	```
-
+	[]()
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
@@ -981,13 +981,13 @@ REAL_IP_HEADER=X-Forwarded-For
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=X-Forwarded-For \
     	   ...
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1006,13 +1006,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.2
+           bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1031,13 +1031,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.2
+           bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1062,7 +1062,7 @@ REAL_IP_HEADER=X-Forwarded-For
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.2
+			image: bunkerity/bunkerweb:1.4.3
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1085,7 +1085,7 @@ REAL_IP_HEADER=X-Forwarded-For
 	...
 	```
 
-    Don't forget to reload the bunkerweb service once it's done.
+    Don't forget to restart the bunkerweb service once it's done.
 
 === "Ansible"
 
@@ -1111,7 +1111,7 @@ REAL_IP_HEADER=X-Forwarded-For
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - bunkerweb
+        - fl0ppy_d1sk.bunkerweb
 	```
 
 	Run the playbook :
@@ -1146,13 +1146,13 @@ REAL_IP_HEADER=proxy_protocol
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=proxy_protocol \
     	   ...
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1173,13 +1173,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.2
+           bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1200,13 +1200,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.2
+           bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1232,7 +1232,7 @@ REAL_IP_HEADER=proxy_protocol
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.2
+			image: bunkerity/bunkerweb:1.4.3
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1258,7 +1258,7 @@ REAL_IP_HEADER=proxy_protocol
 	...
 	```
 
-    Don't forget to reload the bunkerweb service once it's done.
+    Don't forget to restart the bunkerweb service once it's done.
 
 === "Ansible"
 
@@ -1285,7 +1285,7 @@ REAL_IP_HEADER=proxy_protocol
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - bunkerweb
+        - fl0ppy_d1sk.bunkerweb
 	```
 
 	Run the playbook :
@@ -1327,7 +1327,7 @@ Some integrations offer a more convenient way of applying configurations for exa
     Here is a dummy example using a docker-compose file :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1369,13 +1369,13 @@ Some integrations offer a more convenient way of applying configurations for exa
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.2
+      image: bunkerity/bunkerweb:1.4.3
       volumes:
         - ./bw-data:/data
       ...
@@ -1436,13 +1436,13 @@ Some integrations offer a more convenient way of applying configurations for exa
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb-autoconf:1.4.2
+    	   bunkerity/bunkerweb-autoconf:1.4.3
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     myautoconf:
-      image: bunkerity/bunkerweb-autoconf:1.4.2
+      image: bunkerity/bunkerweb-autoconf:1.4.3
       volumes:
         - ./bw-data:/data
       ...
@@ -1520,7 +1520,7 @@ Some integrations offer a more convenient way of applying configurations for exa
     chmod -R 770 /opt/bunkerweb/configs
     ```
 
-    Don't forget to reload the bunkerweb service once it's done.
+    Don't forget to restart the bunkerweb service once it's done.
 
 === "Ansible"
 
@@ -1551,7 +1551,7 @@ Some integrations offer a more convenient way of applying configurations for exa
             server-http: "{{ playbook_dir }}/server-http"
           }
       roles:
-        - bunkerweb
+        - fl0ppy_d1sk.bunkerweb
 	```
 
 	Run the playbook :
@@ -1595,6 +1595,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	Now you can copy your application files to the `bw-data/www` folder. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
 	```shell
+	chown -R 101:101 ./bw-data && \
 	chown -R 33:101 ./bw-data/www && \
     find ./bw-data/www -type f -exec chmod 0640 {} \; && \
     find ./bw-data/www -type d -exec chmod 0750 {} \;
@@ -1621,7 +1622,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   -e AUTO_LETS_ENCRYPT=yes \
 		   -e REMOTE_PHP=myphp \
 		   -e REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
 	Here is the docker-compose equivalent :
@@ -1631,7 +1632,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.2
+    	image: bunkerity/bunkerweb:1.4.3
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -1673,7 +1674,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "${PWD}/myapp:/app" \
 		   ...
-		   bunkerity/bunkerweb:1.4.2
+		   bunkerity/bunkerweb:1.4.3
 	```
 	
 	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
@@ -1681,9 +1682,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	docker run -d \
 	       --name myphp \
 	       --network bw-services \
-	       -v "${PWD}/bw-data/www:/app" \
+	       -v "${PWD}/myapp:/app" \
 	       -l bunkerweb.SERVER_NAME=www.example.com \
 	       -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+		   -l bunkerweb.ROOT_FOLDER=/app \
 	       -l bunkerweb.REMOTE_PHP=myphp \
 	       -l bunkerweb.REMOTE_PHP_PATH=/app \
 	       php:fpm
@@ -1706,10 +1708,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	labels:
       	  - bunkerweb.SERVER_NAME=www.example.com
 		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
+		  - bunkerweb.ROOT_FOLDER=/app
       	  - bunkerweb.REMOTE_PHP=myphp
       	  - bunkerweb.REMOTE_PHP_PATH=/app
-      	  - bunkerweb.ROOT_FOLDER=/app
-	
+
 	networks:
 	  bw-services:
 	    external:
@@ -1736,7 +1738,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "/shared/myapp:/app" \
 		   ...
-		   bunkerity/bunkerweb:1.4.2
+		   bunkerity/bunkerweb:1.4.3
 	```
 
 	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
@@ -1744,9 +1746,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	docker service create \
 	       --name myphp \
 	       --network bw-services \
-	       -v "${PWD}/bw-data/www:/app" \
+	       -v "/shared/myapp:/app" \
 	       -l bunkerweb.SERVER_NAME=www.example.com \
 	       -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
+		   -l bunkerweb.ROOT_FOLDER=/app \
 	       -l bunkerweb.REMOTE_PHP=myphp \
 	       -l bunkerweb.REMOTE_PHP_PATH=/app \
 	       php:fpm
@@ -1771,10 +1774,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           labels:
       	    - bunkerweb.SERVER_NAME=www.example.com
 	        - bunkerweb.AUTO_LETS_ENCRYPT=yes
+			- bunkerweb.ROOT_FOLDER=/app
       	    - bunkerweb.REMOTE_PHP=myphp
       	    - bunkerweb.REMOTE_PHP_PATH=/app
-      	    - bunkerweb.ROOT_FOLDER=/app
-	
+
 	networks:
 	  bw-services:
 	    external:
@@ -1832,9 +1835,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```shell
     systemctl status bunkerweb
     ```
-    If it's already running we can just reload it :
+    If it's already running we can restart it :
     ```shell
-    systemctl reload bunkerweb
+    systemctl restart bunkerweb
     ```
 
 	Otherwise, we will need to start it : 
@@ -1888,7 +1891,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		- custom_www: "{{ playbook_dir }}/my_app"
 		- custom_www_owner: "www-data"
 	  roles:
-		- bunkerweb
+		- fl0ppy_d1sk.bunkerweb
 	```
 
 	You can now run the playbook :
@@ -1929,6 +1932,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	Now you can copy your application files to the `bw-data/www` subfolders. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
 	```shell
+	chown -R 101:101 ./bw-data && \
 	chown -R 33:101 ./bw-data/www && \
     find ./bw-data/www -type f -exec chmod 0640 {} \; && \
     find ./bw-data/www -type d -exec chmod 0750 {} \;
@@ -1980,7 +1984,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       -e app2.example.com_REMOTE_PHP_PATH=/app \
 	       -e app3.example.com_REMOTE_PHP=myphp3 \
 	       -e app3.example.com_REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.4.2
+    	   bunkerity/bunkerweb:1.4.3
     ```
 
 	Here is the docker-compose equivalent :
@@ -1990,7 +1994,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.2
+    	image: bunkerity/bunkerweb:1.4.3
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -2051,7 +2055,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "${PWD}/myapps:/apps" \
 		   ...
-		   bunkerity/bunkerweb:1.4.2
+		   bunkerity/bunkerweb:1.4.3
 	```
 	
 	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :
@@ -2111,7 +2115,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	networks:
       	  bw-services:
         	aliases:
-            	- myphp1
+              - myphp1
     	labels:
       	  - bunkerweb.SERVER_NAME=app1.example.com
 		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
@@ -2126,7 +2130,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	networks:
       	  bw-services:
         	aliases:
-            	- myphp2
+              - myphp2
     	labels:
       	  - bunkerweb.SERVER_NAME=app2.example.com
 		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
@@ -2141,7 +2145,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     	networks:
       	  bw-services:
         	aliases:
-            	- myphp3
+              - myphp3
     	labels:
       	  - bunkerweb.SERVER_NAME=app3.example.com
 		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
@@ -2175,7 +2179,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "/shared/myapps:/apps" \
 		   ...
-		   bunkerity/bunkerweb:1.4.2
+		   bunkerity/bunkerweb:1.4.3
 	```
 
 	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
@@ -2341,9 +2345,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```shell
     systemctl status bunkerweb
     ```
-    If it's already running we can just reload it :
+    If it's already running we can restart it :
     ```shell
-    systemctl reload bunkerweb
+    systemctl restart bunkerweb
     ```
 
 	Otherwise, we will need to start it : 
@@ -2402,7 +2406,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		- custom_www: "{{ playbook_dir }}/my_app"
 		- custom_www_owner: "www-data"
 	  roles:
-		- bunkerweb
+		- fl0ppy_d1sk.bunkerweb
 	```
 
 	You can now run the playbook :

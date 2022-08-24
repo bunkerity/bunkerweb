@@ -3,7 +3,7 @@ version: '3.5'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.4.3
     ports:
       - published: 80
         target: 8080
@@ -31,7 +31,7 @@ services:
         - "bunkerweb.AUTOCONF"
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.2
+    image: bunkerity/bunkerweb-autoconf:1.4.3
     environment:
       - SWARM_MODE=yes
     volumes:

@@ -73,10 +73,10 @@ Because the web UI is a web application, the recommended installation procedure 
        -e bwadm.example.com_USE_REVERSE_PROXY=yes \
        -e bwadm.example.com_REVERSE_PROXY_URL=/changeme/ \
        -e bwadm.example.com_REVERSE_PROXY_HOST=http://myui:7000 \
-       -e "bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme" \
+       -e "bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
        -e bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no \
        -l bunkerweb.UI \
-       bunkerity/bunkerweb:1.4.2 && \
+       bunkerity/bunkerweb:1.4.3 && \
     docker network connect bw-ui mybunker
     ```
 
@@ -115,7 +115,7 @@ Because the web UI is a web application, the recommended installation procedure 
            -e ADMIN_USERNAME=admin \
            -e ADMIN_PASSWORD=changeme \
            -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-           bunkerity/bunkerweb-ui:1.4.2 && \
+           bunkerity/bunkerweb-ui:1.4.3 && \
     docker network connect bw-docker myui
     ```
 
@@ -131,7 +131,7 @@ Because the web UI is a web application, the recommended installation procedure 
     services:
 
       mybunker:
-        image: bunkerity/bunkerweb:1.4.2
+        image: bunkerity/bunkerweb:1.4.3
         networks:
           - bw-services
           - bw-ui
@@ -154,7 +154,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - "bunkerweb.UI"
 
       myui:
-        image: bunkerity/bunkerweb-ui:1.4.2
+        image: bunkerity/bunkerweb-ui:1.4.3
         depends_on:
           - mydocker
         networks:
@@ -210,7 +210,7 @@ Because the web UI is a web application, the recommended installation procedure 
     bwadm.example.com_USE_REVERSE_PROXY=yes
     bwadm.example.com_REVERSE_PROXY_URL=/changeme/
     bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme
+    bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
     ...
     ```
@@ -220,9 +220,9 @@ Because the web UI is a web application, the recommended installation procedure 
     * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
     * replace the `/changeme` URLs with a custom one of your choice
 
-    Once the configuration file is edited, you will need to reload BunkerWeb :
+    Once the configuration file is edited, you will need to restart BunkerWeb :
     ```shell
-    systemctl reload bunkerweb
+    systemctl restart bunkerweb
     ```
 
     You can edit the **/opt/bunkerweb/ui.env** file containing the settings of the web UI :
@@ -260,7 +260,7 @@ Because the web UI is a web application, the recommended installation procedure 
     bwadm.example.com_USE_REVERSE_PROXY=yes
     bwadm.example.com_REVERSE_PROXY_URL=/changeme/
     bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    bwadm.example.com_REVERSE_PROXY_HEADER=X-Script-Name /changeme
+    bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
     ...
     ```
@@ -295,9 +295,9 @@ Because the web UI is a web application, the recommended installation procedure 
 	  vars:
 		- variables_env: "{{ playbook_dir }}/my_variables.env"
 		- enable_ui: true
-		- custom_ui="{{ playbook_dir }}/my_ui.env"
+		- custom_ui: "{{ playbook_dir }}/my_ui.env"
 	  roles:
-		- bunkerweb
+		- fl0ppy_d1sk.bunkerweb
 	```
 
     You can now run the playbook and be able to access the web UI :
