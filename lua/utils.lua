@@ -317,7 +317,7 @@ utils.get_country = function(ip)
 	if not mmdb.country_db then
 		return false, "mmdb country not loaded"
 	end
-	local ok, result, err = pcall(mmdb.country_db:lookup(ip))
+	local ok, result, err = pcall(mmdb.country_db.lookup, mmdb.country_db, ip)
 	if not ok then
 		return nil, result
 	end
@@ -331,7 +331,7 @@ utils.get_asn = function(ip)
 	if not mmdb.asn_db then
 		return false, "mmdb asn not loaded"
 	end
-	local ok, result, err = pcall(mmdb.asn_db:lookup(ip))
+	local ok, result, err = pcall(mmdb.asn_db.lookup, mmdb.asn_db, ip)
 	if not ok then
 		return nil, result
 	end
