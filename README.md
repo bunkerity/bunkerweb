@@ -88,6 +88,7 @@ The following integrations are officially supported :
 - [Swarm](https://docs.bunkerweb.io/latest/integrations/#swarm)
 - [Kubernetes](https://docs.bunkerweb.io/latest/integrations/#kubernetes)
 - [Linux](https://docs.bunkerweb.io/latest/integrations/#linux)
+- [Ansible](https://docs.bunkerweb.io/latest/integrations/#ansible)
 
 ## Settings
 

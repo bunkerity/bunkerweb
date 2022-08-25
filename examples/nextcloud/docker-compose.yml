@@ -58,7 +58,7 @@ services:
         SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:1000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
 
   mync:
-    image: nextcloud:stable-apache
+    image: nextcloud:24-apache
     volumes:
       - ./nc-files:/var/www/html
     environment:
@@ -73,7 +73,7 @@ services:
       - APACHE_DISABLE_REWRITE_IP=1
 
   mydb:
-    image: mariadb
+    image: mariadb:10.9
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
       - ./db-data:/var/lib/mysql
