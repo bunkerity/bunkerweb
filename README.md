@@ -196,6 +196,25 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/latest/integrations/#linux) of the documentation.
 
+## Ansible
+
+<p align="center">
+	<img alt="Ansible" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-ansible.svg" />
+</p>
+
+List of supported Linux distros :
+
+- Debian 11 "Bullseye"
+- Ubuntu 22.04 "Jammy"
+- Fedora 36
+- CentOS Stream 8
+
+[Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
+
+A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/fl0ppy_d1sk/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
+
+You will find more information in the [Ansible section](https://docs.bunkerweb.io/latest/integrations/#ansible) of the documentation.
+
 # Quickstart guide
 
 Once you have setup BunkerWeb with the integration of your choice, you can follow the [quickstart guide](https://docs.bunkerweb.io/latest/quickstart-guide/) that will cover the following common use cases :

@@ -890,7 +890,7 @@ List of supported Linux distros :
 
 [Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
-A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
+A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/fl0ppy_d1sk/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
 
 First of all download the role from ansible-galaxy :
 ```shell
