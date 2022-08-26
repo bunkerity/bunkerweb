@@ -499,6 +499,13 @@ documentation for the current version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#deny-status-code" class="md-nav__link">
+    Deny status code
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#default-server" class="md-nav__link">
     Default server
   </a>
@@ -551,6 +558,13 @@ documentation for the current version.
           <li class="md-nav__item">
   <a href="#security-headers" class="md-nav__link">
     Security headers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cors" class="md-nav__link">
+    CORS
   </a>
   
 </li>
@@ -830,6 +844,13 @@ documentation for the current version.
 <p>This section only focuses on security tuning, see the <a href="/1.4/settings">settings section</a> of the documentation for other settings.</p>
 </div>
 <h2 id="http-protocol">HTTP protocol</h2>
+<h3 id="deny-status-code">Deny status code</h3>
+<p>The first thing to define is the kind of action to do when a client access is denied. You can control the action with the <code>DENY_HTTP_STATUS</code> setting which allows the following values :</p>
+<ul>
+<li><code>403</code> : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)</li>
+<li><code>444</code> : close the connection (no web page or custom content will be displayed)</li>
+</ul>
+<p>The default value is <code>403</code> and we suggest you to set it to <code>444</code> only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.</p>
 <h3 id="default-server">Default server</h3>
 <p>In the HTTP protocol, the Host header is used to determine which server the client wants to send the request to. That header is facultative and may be missing from the request or can be set as an unknown value. This is a common case, a lot of bots are scanning the Internet and are trying to exploit services or simply doing some fingerprinting.</p>
 <p>You can disable any request containing undefined or unknown Host value by setting <code>DISABLE_DEFAULT_SERVER</code> to <code>yes</code> (default : <code>no</code>). Please note that clients won't even receive a response, the TCP connection will be closed (using the special 444 status code of NGINX).</p>
@@ -902,6 +923,70 @@ documentation for the current version.
 <td align="center"><code>X-XSS-Protection</code></td>
 <td align="left"><code>X_XSS_PROTECTION</code></td>
 <td align="center"><code>1; mode=block</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="cors">CORS</h4>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing</a> lets you manage how your service can be contacted from different origins. Please note that you will have to allow the <code>OPTIONS</code> HTTP method using the <code>ALLOWED_METHODS</code> if you want to enable it (more info <a href="https://docs.bunkerweb.io/1.4/security-tuning/#allowed-methods">here</a>). Here is the list of settings related to CORS :</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_CORS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Use CORS</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_ORIGIN</code></td>
+<td><code>*</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Allow-Origin header.</td>
+</tr>
+<tr>
+<td><code>CORS_EXPOSE_HEADERS</code></td>
+<td><code>Content-Length,Content-Range</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Expose-Headers header.</td>
+</tr>
+<tr>
+<td><code>CORS_MAX_AGE</code></td>
+<td><code>86400</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Max-Age header.</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_CREDENTIALS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Send the Access-Control-Allow-Credentials header.</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_METHODS</code></td>
+<td><code>GET, POST, OPTIONS</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Allow-Methods header.</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_HEADERS</code></td>
+<td><code>DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Allow-Headers header.</td>
 </tr>
 </tbody>
 </table>

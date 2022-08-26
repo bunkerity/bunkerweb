@@ -522,6 +522,13 @@ documentation for the current version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#ansible" class="md-nav__link">
+    Ansible
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -662,7 +669,7 @@ documentation for the current version.
 </figure>
 <p>Using BunkerWeb as a <a href="https://www.docker.com/">Docker</a> container is a quick and easy way to test and use it as long as you are familiar with the Docker technology.</p>
 <p>We provide ready to use prebuilt images for x64, x86 armv8 and armv7 architectures on <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a> :</p>
-<div class="highlight"><pre><span></span><code>docker pull bunkerity/bunkerweb:1.4.2
+<div class="highlight"><pre><span></span><code>docker pull bunkerity/bunkerweb:1.4.3
 </code></pre></div>
 <p>Alternatively, you can build the Docker images directly from the <a href="https://github.com/bunkerity/bunkerweb">source</a> (and take a coffee ☕ because it may be long depending on your hardware) :</p>
 <div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb.git <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -682,13 +689,13 @@ docker build -t my-bunkerweb .
        -e <span class="nv">MY_SETTING</span><span class="o">=</span>value <span class="se">\</span>
        -e <span class="s2">&quot;MY_OTHER_SETTING=value with spaces&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.2
+       bunkerity/bunkerweb:1.4.3
 </code></pre></div>
 <p>Here is the docker-compose equivalent :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span><span class="w"></span>
 </code></pre></div>
@@ -699,52 +706,61 @@ docker build -t my-bunkerweb .
 <h3 id="volume">Volume</h3>
 <p>A volume is used to share data with BunkerWeb and store persistent data like certificates, cached files, ...</p>
 <p>The easiest way of managing the volume is by using a named one. You will first need to create it :</p>
-<div class="highlight"><pre><span></span><code>docker volume create bw-data
+<div class="highlight"><pre><span></span><code>docker volume create bw_data
 </code></pre></div>
 <p>Once it's created, you can mount it on <code>/data</code> when running the container :</p>
 <div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
        ...
-       -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
+       -v bw_data:/data <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.2
+       bunkerity/bunkerweb:1.4.3
 </code></pre></div>
 <p>Here is the docker-compose equivalent :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw_data:/data</span><span class="w"></span>
 <span class="nn">...</span><span class="w"></span>
 <span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">bw_data</span><span class="p">:</span><span class="w"></span>
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Warning</p>
+<p class="admonition-title">Using local folder for persistent data</p>
 <p>BunkerWeb runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is the security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
 But there is a downside : if you use a <strong>local folder for the persistent data</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can write data to it. Something like that should do the trick :
-<code>shell mkdir bw-data &amp;&amp; \ chown root:101 bw-data &amp;&amp; \ chmod 770 bw-data</code></p>
-</div>
-<p>Alternatively, if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>mkdir bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chown root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chmod <span class="m">770</span> bw-data
+</code></pre></div></p>
+<p>Alternatively, if the folder already exists :
 <div class="highlight"><pre><span></span><code>chown -R root:101 bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
 chmod -R <span class="m">770</span> bw-data
-</code></pre></div>
-<p>Mounting the folder :</p>
-<div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
-        ...
-      -v ./bw-data:/data <span class="se">\</span>
-        ...
-        bunkerity/bunkerweb:1.4.2
-</code></pre></div>
-<p>Here is the docker-compose equivalent :</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
-<span class="nt">services</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
-</code></pre></div>
+</code></pre></div></p>
+<p>If you are using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a> or <a href="https://podman.io/">podman</a>, UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+<div class="highlight"><pre><span></span><code>grep ^<span class="k">$(</span>whoami<span class="k">)</span>: /etc/subuid <span class="o">&amp;&amp;</span> <span class="se">\</span>
+grep ^<span class="k">$(</span>whoami<span class="k">)</span>: /etc/subgid
+</code></pre></div></p>
+<p>For example, if you have a value of <strong>100000</strong>, the mapped UID/GID will be <strong>100100</strong> (100000 + 100) :
+<div class="highlight"><pre><span></span><code>mkdir bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
+sudo chgrp <span class="m">100100</span> bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chmod <span class="m">770</span> bw-data
+</code></pre></div></p>
+<p>Or if the folder already exists :
+<div class="highlight"><pre><span></span><code>sudo chgrp -R <span class="m">100100</span> bw-data <span class="o">&amp;&amp;</span> <span class="se">\</span>
+chmod -R <span class="m">770</span> bw-data
+</code></pre></div></p>
+</div>
 <h3 id="networks">Networks</h3>
+<p>By default, BunkerWeb container is listening (inside the container) on <strong>8080/tcp</strong> for <strong>HTTP</strong> and <strong>8443/tcp</strong> for <strong>HTTPS</strong>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Privileged ports in rootless mode or when using podman</p>
+<p>If you are using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a> and want to redirect privileged ports (&lt; 1024) like 80 and 443 to BunkerWeb, please refer to the prerequisites <a href="https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports">here</a>.</p>
+<p>If you are using <a href="https://podman.io/">podman</a> you can lower the minimum number for unprivileged ports :
+<div class="highlight"><pre><span></span><code>sudo sysctl net.ipv4.ip_unprivileged_port_start<span class="o">=</span><span class="m">1</span>
+</code></pre></div></p>
+</div>
 <p>The easiest way to connect BunkerWeb to web applications is by using Docker networks.</p>
 <p>First of all, you will need to create a network :</p>
 <div class="highlight"><pre><span></span><code>docker network create mynetwork
@@ -754,14 +770,14 @@ chmod -R <span class="m">770</span> bw-data
        ...
        --network mynetwork <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.2
+       bunkerity/bunkerweb:1.4.3
 </code></pre></div>
 <p>You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.</p>
 <p>Here is the docker-compose equivalent :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span><span class="w"></span>
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-net</span><span class="w"></span>
 <span class="nn">...</span><span class="w"></span>
@@ -807,10 +823,14 @@ docker network create bw-services
        -e <span class="nv">SERVER_NAME</span><span class="o">=</span> <span class="se">\</span>
        -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
        -l bunkerweb.AUTOCONF <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.2 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+       bunkerity/bunkerweb:1.4.3 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 
 docker network connect bw-services mybunker
 </code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Using Docker in rootless mode</p>
+<p>If you are using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a>, you will need to replace the mount of the docker socket with the following value : <code>$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro</code>.</p>
+</div>
 <p>And the autoconf one :</p>
 <div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
        -d <span class="se">\</span>
@@ -818,7 +838,7 @@ docker network connect bw-services mybunker
        --network bw-autoconf <span class="se">\</span>
        -v bw-data:/data <span class="se">\</span>
        -v /var/run/docker.sock:/var/run/docker.sock:ro <span class="se">\</span>
-       bunkerity/bunkerweb-autoconf:1.4.2
+       bunkerity/bunkerweb-autoconf:1.4.3
 </code></pre></div>
 <p>Here is the docker-compose equivalent for the BunkerWeb autoconf stack :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -826,7 +846,7 @@ docker network connect bw-services mybunker
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -842,7 +862,7 @@ docker network connect bw-services mybunker
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span><span class="w"></span>
@@ -930,7 +950,7 @@ docker network create -d overlay --attachable bw-services
        -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="s2">&quot;API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24&quot;</span> <span class="se">\</span>
        -l bunkerweb.AUTOCONF <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.2
+       bunkerity/bunkerweb:1.4.3
 </code></pre></div>
 <p>And the autoconf one :</p>
 <div class="highlight"><pre><span></span><code>docker service <span class="se">\</span>
@@ -941,7 +961,7 @@ docker network create -d overlay --attachable bw-services
        --mount <span class="nv">type</span><span class="o">=</span>bind,source<span class="o">=</span>/var/run/docker.sock,destination<span class="o">=</span>/var/run/docker.sock,ro <span class="se">\</span>
        --mount <span class="nv">type</span><span class="o">=</span>volume,source<span class="o">=</span>bw-data,destination<span class="o">=</span>/data <span class="se">\</span>
        -e <span class="nv">SWARM_MODE</span><span class="o">=</span>yes <span class="se">\</span>
-       bunkerity/bunkerweb-autoconf:1.4.2
+       bunkerity/bunkerweb-autoconf:1.4.3
 </code></pre></div>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.5&#39;</span><span class="w"></span>
@@ -949,7 +969,7 @@ docker network create -d overlay --attachable bw-services
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
@@ -976,7 +996,7 @@ docker network create -d overlay --attachable bw-services
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.AUTOCONF&quot;</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.3</span><span class="w"></span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWARM_MODE=yes</span><span class="w"></span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
@@ -1236,10 +1256,10 @@ curl https://nginx.org/keys/nginx_signing.key <span class="p">|</span> gpg --dea
 <div class="highlight"><pre><span></span><code>sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
 sudo apt install -y <span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.20.2-1~bullseye
 </code></pre></div></p>
-<p>And finally install BunkerWeb 1.4.2 :
+<p>And finally install BunkerWeb 1.4.3 :
 <div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
 sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.2
+sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.3
 </code></pre></div></p>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :
 <div class="highlight"><pre><span></span><code>sudo apt-mark hold nginx bunkerweb
@@ -1258,10 +1278,10 @@ curl https://nginx.org/keys/nginx_signing.key <span class="p">|</span> gpg --dea
 <div class="highlight"><pre><span></span><code>sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
 sudo apt install -y <span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.20.2-1~jammy
 </code></pre></div></p>
-<p>And finally install BunkerWeb 1.4.2 :
+<p>And finally install BunkerWeb 1.4.3 :
 <div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
 sudo apt update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.2
+sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.4.3
 </code></pre></div></p>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :
 <div class="highlight"><pre><span></span><code>sudo apt-mark hold nginx bunkerweb
@@ -1273,7 +1293,7 @@ sudo apt install -y <span class="nv">bunkerweb</span><span class="o">=</span><sp
 </code></pre></div></p>
 <div class="highlight"><pre><span></span><code>curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
 sudo dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-sudo dnf install -y bunkerweb-1.4.2
+sudo dnf install -y bunkerweb-1.4.3
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :
 <div class="highlight"><pre><span></span><code>sudo dnf versionlock add nginx <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -1293,11 +1313,11 @@ module_hotfixes=true
 <p>You should now be able to install NGINX 1.20.2 :
 <div class="highlight"><pre><span></span><code>sudo dnf install nginx-1.20.2
 </code></pre></div></p>
-<p>And finally install BunkerWeb 1.4.2 :
+<p>And finally install BunkerWeb 1.4.3 :
 <div class="highlight"><pre><span></span><code>dnf install -y epel-release <span class="o">&amp;&amp;</span> <span class="se">\</span>
 curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh <span class="p">|</span> sudo bash <span class="o">&amp;&amp;</span> <span class="se">\</span>
 sudo dnf check-update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-sudo dnf install -y bunkerweb-1.4.2
+sudo dnf install -y bunkerweb-1.4.3
 </code></pre></div></p>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :
 <div class="highlight"><pre><span></span><code>sudo dnf versionlock add nginx <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -1322,7 +1342,7 @@ pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python 
 pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
 </code></pre></div></p>
 <p>Once dependencies had been installed, you can now copy the BunkerWeb sources to the target <code>/opt/bunkerweb</code> folder :
-<div class="highlight"><pre><span></span><code><span class="k">for</span> src <span class="k">in</span> api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/bunkerweb-ui.env linux/scripts <span class="p">;</span> <span class="k">do</span>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> src <span class="k">in</span> api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/ui.env linux/scripts <span class="p">;</span> <span class="k">do</span>
     cp -r /tmp/bunkerweb/<span class="si">${</span><span class="nv">src</span><span class="si">}</span> /opt/bunkerweb
 <span class="k">done</span>
 cp /opt/bunkerweb/helpers/bwcli /usr/local/bin
@@ -1357,11 +1377,124 @@ MY_SETTING_2=value2
 <p>BunkerWeb is managed using systemctl :</p>
 <ul>
 <li>Check BunkerWeb status : <code>systemctl status bunkerweb</code></li>
-<li>Reload the configuration : <code>systemctl reload bunkerweb</code></li>
 <li>Start it if it's stopped : <code>systemctl start bunkerweb</code></li>
 <li>Stop it if it's started : <code>systemctl stop bunkerweb</code></li>
 <li>And restart : <code>systemctl restart bunkerweb</code></li>
 </ul>
+<h2 id="ansible">Ansible</h2>
+<figure>
+<p><img align="center" alt="Overwiew" src="../assets/img/integration-ansible.svg" />
+  </p>
+<figcaption>Ansible integration</figcaption>
+</figure>
+<p>List of supported Linux distros :</p>
+<ul>
+<li>Debian 11 "Bullseye"</li>
+<li>Ubuntu 22.04 "Jammy"</li>
+<li>Fedora 36</li>
+<li>CentOS Stream 8</li>
+</ul>
+<p><a href="https://docs.ansible.com/ansible/latest/index.html">Ansible</a> is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.</p>
+<p>A specific BunkerWeb Ansible role is available on <a href="https://galaxy.ansible.com/fl0ppy_d1sk/bunkerweb">Ansible Galaxy</a> (source code is available <a href="https://github.com/bunkerity/bunkerweb-ansible">here</a>).</p>
+<p>First of all download the role from ansible-galaxy :
+<div class="highlight"><pre><span></span><code>ansible-galaxy install fl0ppy_d1sk.bunkerweb
+</code></pre></div></p>
+<p>Next create an inventory by adding the IP adress or FQDN of one or more remote systems, either in <code>/etc/ansible/hosts</code> or in your own playbook <code>inventory.yml</code> :
+<div class="highlight"><pre><span></span><code><span class="k">[mybunkers]</span><span class="w"></span>
+<span class="mf">192.0.2.50</span><span class="w"></span>
+<span class="mf">192.0.2.51</span><span class="w"></span>
+<span class="mf">192.0.2.52</span><span class="w"></span>
+</code></pre></div></p>
+<p>The next step we're going to set up is the SSH connection so Ansible can connect to the managed nodes. Add your public SSH keys to the <code>authorized_keys</code> file on each remote system and ensure you can successfully connect. </p>
+<p>In order to use the role, we will create the playbook file named <code>playbook.yml</code> for example :
+<div class="highlight"><pre><span></span><code><span class="nn">---</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span><span class="w"></span>
+<span class="w">  </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+</code></pre></div></p>
+<p>Run the playbook :
+<div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
+</code></pre></div></p>
+<p>Configuration of BunkerWeb is done by using specific role variables :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Name</th>
+<th align="center">Type</th>
+<th>Description</th>
+<th>Default value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>bunkerweb_version</code></td>
+<td align="center">string</td>
+<td>Version of BunkerWeb to install.</td>
+<td><code>1.4.3</code></td>
+</tr>
+<tr>
+<td align="center"><code>nginx_version</code></td>
+<td align="center">string</td>
+<td>Version of NGINX to install.</td>
+<td><code>1.20.2</code></td>
+</tr>
+<tr>
+<td align="center"><code>freeze_versions</code></td>
+<td align="center">boolean</td>
+<td>Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades.</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td align="center"><code>variables_env</code></td>
+<td align="center">string</td>
+<td>Path of the variables.env file to configure BunkerWeb.</td>
+<td><code>files/variables.env</code></td>
+</tr>
+<tr>
+<td align="center"><code>enable_ui</code></td>
+<td align="center">boolean</td>
+<td>Activate the web UI.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td align="center"><code>custom_ui</code></td>
+<td align="center">string</td>
+<td>Path of the ui.env file to configure the web UI.</td>
+<td><code>files/ui.env</code></td>
+</tr>
+<tr>
+<td align="center"><code>custom_configs_path</code></td>
+<td align="center">Dictionary</td>
+<td>Each entry is a path of the folder containing custom configurations. Keys are the type of custom configs : <code>http</code>, <code>server-http</code>, <code>modsec</code>, <code>modsec-crs</code> and <code>default-server-http</code></td>
+<td>empty values</td>
+</tr>
+<tr>
+<td align="center"><code>custom_www</code></td>
+<td align="center">string</td>
+<td>Path of the www directory to upload.</td>
+<td>empty value</td>
+</tr>
+<tr>
+<td align="center"><code>custom_plugins</code></td>
+<td align="center">string</td>
+<td>Path of the plugins directory to upload.</td>
+<td>empty value</td>
+</tr>
+<tr>
+<td align="center"><code>custom_www_owner</code></td>
+<td align="center">string</td>
+<td>Default owner for www files and folders.</td>
+<td><code>nginx</code></td>
+</tr>
+<tr>
+<td align="center"><code>custom_www_group</code></td>
+<td align="center">string</td>
+<td>Default group for www files and folders.</td>
+<td><code>nginx</code></td>
+</tr>
+</tbody>
+</table>
 
               
             </article>

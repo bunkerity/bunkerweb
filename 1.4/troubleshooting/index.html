@@ -638,7 +638,7 @@ documentation for the current version.
 <p>When troubleshooting, the logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
 <p>Please note that you can set <code>LOG_LEVEL</code> setting to <code>info</code> (default : <code>notice</code>) to increase the verbosity of BunkerWeb.</p>
 <p>Here is how you can access the logs depending on your integration :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label><label for="__tabbed_1_6">Ansible</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="admonition tip">
@@ -701,6 +701,15 @@ kubectl logs myautoconf
 <p>Common logs are located inside the <code>/var/log/nginx</code> directory :
 <div class="highlight"><pre><span></span><code>cat /var/log/nginx/error.log
 cat /var/log/nginx/access.log
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p>For errors related to BunkerWeb services (e.g. not starting), you can use <code>journalctl</code> :
+<div class="highlight"><pre><span></span><code>ansible -i inventory.yml all -a <span class="s2">&quot;journalctl -u bunkerweb --no-pager&quot;</span> --become
+</code></pre></div></p>
+<p>Common logs are located inside the <code>/var/log/nginx</code> directory :
+<div class="highlight"><pre><span></span><code>ansible -i inventory.yml all -a <span class="s2">&quot;cat /var/log/nginx/error.log&quot;</span> --become
+ansible -i inventory.yml all -a <span class="s2">&quot;cat /var/log/nginx/access.log&quot;</span> --become
 </code></pre></div></p>
 </div>
 </div>
@@ -796,7 +805,7 @@ cat /var/log/nginx/access.log
 <p>A common false-positive case is that the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="/1.4/security-tuning/#bad-behavior">here</a>). You should start by reviewing the settings and edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
 <h2 id="ip-unban">IP unban</h2>
 <p>You can manually unban an IP which can be useful when doing some tests but it needs the setting <code>USE_API</code> set to <code>yes</code> (which is not the default) so you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:6"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label><label for="__tabbed_2_6">Ansible</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
@@ -827,6 +836,11 @@ cat /var/log/nginx/access.log
 <div class="tabbed-block">
 <p>You can use the <code>bwcli</code> command (as root) :
 <div class="highlight"><pre><span></span><code>sudo bwcli unban <span class="m">1</span>.2.3.4
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p>You can use the <code>bwcli</code> command :
+<div class="highlight"><pre><span></span><code>ansible -i inventory.yml all -a <span class="s2">&quot;bwcli unban 1.2.3.4&quot;</span> --become
 </code></pre></div></p>
 </div>
 </div>

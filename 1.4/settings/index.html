@@ -563,6 +563,13 @@ documentation for the current version.
 </li>
         
           <li class="md-nav__item">
+  <a href="#cors" class="md-nav__link">
+    CORS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#client-cache" class="md-nav__link">
     Client cache
   </a>
@@ -1292,6 +1299,69 @@ documentation for the current version.
 </tr>
 </tbody>
 </table>
+<h3 id="cors">CORS</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_CORS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Use CORS</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_ORIGIN</code></td>
+<td><code>*</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Allow-Origin header.</td>
+</tr>
+<tr>
+<td><code>CORS_EXPOSE_HEADERS</code></td>
+<td><code>Content-Length,Content-Range</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Expose-Headers header.</td>
+</tr>
+<tr>
+<td><code>CORS_MAX_AGE</code></td>
+<td><code>86400</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Max-Age header.</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_CREDENTIALS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Send the Access-Control-Allow-Credentials header.</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_METHODS</code></td>
+<td><code>GET, POST, OPTIONS</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Allow-Methods header.</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_HEADERS</code></td>
+<td><code>DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Value of the Access-Control-Allow-Headers header.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="client-cache">Client cache</h3>
 <table>
 <thead>
@@ -1821,6 +1891,13 @@ documentation for the current version.
 <td>global</td>
 <td>no</td>
 <td>List of external plugins URLs (direct download to .zip file) to download and install (URLs are separated with space).</td>
+</tr>
+<tr>
+<td><code>DENY_HTTP_STATUS</code></td>
+<td><code>403</code></td>
+<td>global</td>
+<td>no</td>
+<td>HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.</td>
 </tr>
 </tbody>
 </table>
