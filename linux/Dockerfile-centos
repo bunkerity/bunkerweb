@@ -1,7 +1,7 @@
 FROM quay.io/centos/centos:stream8
 
 ENV OS=centos
-ENV NGINX_VERSION 1.20.2
+ENV NGINX_VERSION 1.22.0
 
 # Install fpm
 RUN dnf install -y epel-release && \
@@ -14,7 +14,7 @@ COPY deps /tmp/bunkerweb/deps
 # Nginx
 COPY linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install yum-utils -y && \
-	dnf install nginx-1.20.2 -y 
+	dnf install nginx-1.22.0 -y
 
 # Compile and install dependencies
 RUN dnf install -y python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \

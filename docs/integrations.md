@@ -684,7 +684,7 @@ List of supported Linux distros :
 - Fedora 36
 - CentOS Stream 8
 
-Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuild packages of BunkerWeb but you can build it from source.
+Please note that you will need to **install NGINX 1.22.0 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuild packages of BunkerWeb but you can build it from source.
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -700,10 +700,10 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     | sudo tee /etc/apt/sources.list.d/nginx.list
 	```
 
-    You should now be able to install NGINX 1.20.2 :
+    You should now be able to install NGINX 1.22.0 :
 	```shell
 	sudo apt update && \
-	sudo apt install -y nginx=1.20.2-1~bullseye
+	sudo apt install -y nginx=1.22.0-1~bullseye
 	```
 
 	And finally install BunkerWeb 1.4.3 :
@@ -730,10 +730,10 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     | sudo tee /etc/apt/sources.list.d/nginx.list
 	```
 
-    You should now be able to install NGINX 1.20.2 :
+    You should now be able to install NGINX 1.22.0 :
 	```shell
 	sudo apt update && \
-	sudo apt install -y nginx=1.20.2-1~jammy
+	sudo apt install -y nginx=1.22.0-1~jammy
 	```
 
 	And finally install BunkerWeb 1.4.3 :
@@ -750,9 +750,9 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 === "Fedora"
 
-    Fedora already provides NGINX 1.20.2 that we support :
+    Fedora already provides NGINX 1.22.0 that we support :
 	```shell
-	sudo dnf install -y nginx-1.20.2
+	sudo dnf install -y nginx-1.22.0
 	```
 
     ```shell
@@ -780,9 +780,9 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     module_hotfixes=true
 	```
 
-    You should now be able to install NGINX 1.20.2 :
+    You should now be able to install NGINX 1.22.0 :
 	```shell
-	sudo dnf install nginx-1.20.2
+	sudo dnf install nginx-1.22.0
 	```
 
 	And finally install BunkerWeb 1.4.3 :
@@ -801,7 +801,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 === "From source"
 
-    The first step is to install NGINX 1.20.2 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
+    The first step is to install NGINX 1.22.0 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
 	
 	The target installation folder of BunkerWeb is located at `/opt/bunkerweb`, let's create it :
 	```shell
@@ -926,7 +926,7 @@ Configuration of BunkerWeb is done by using specific role variables :
 | Name  | Type  | Description  | Default value  |
 |:-----:|:-----:|--------------|----------------|
 | `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.3` |
-| `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
+| `nginx_version` | string | Version of NGINX to install. | `1.22.0` |
 | `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
 | `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |
 | `enable_ui` | boolean | Activate the web UI. | `false` |

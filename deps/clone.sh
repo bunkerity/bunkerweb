@@ -68,10 +68,10 @@ function do_and_check_cmd() {
 	return 0
 }
 
-# nginx 1.20.2
+# nginx 1.22.0
 echo "ℹ️ Download nginx"
-NGINX_VERSION="1.20.2"
-secure_download "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" "nginx-${NGINX_VERSION}.tar.gz" "8b65e881ea4ac6162cbf32e5e95cf47a6d5418819f8763ca4a781cffa38187dd7886d4bc195d000a7046111a27121ff25800f8645405174995247e6738b4279a"
+NGINX_VERSION="1.22.0"
+secure_download "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" "nginx-${NGINX_VERSION}.tar.gz" "074782dba9cd5f8f493fbb57e20bda6dc9171814d919a47ee9f825d93f12c9f9d496e25d063c983191b55ad6a236bcef252ce16ecc1d253dc8b23433557559b1"
 if [ -f "deps/src/nginx-${NGINX_VERSION}.tar.gz" ] ; then
 	do_and_check_cmd tar -xvzf deps/src/nginx-${NGINX_VERSION}.tar.gz -C deps/src
 	do_and_check_cmd rm -f deps/src/nginx-${NGINX_VERSION}.tar.gz

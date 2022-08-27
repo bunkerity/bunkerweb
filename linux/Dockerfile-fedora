@@ -1,7 +1,7 @@
 FROM fedora:36
 
 ENV OS=fedora
-ENV NGINX_VERSION 1.20.2
+ENV NGINX_VERSION 1.22.0
 
 # Install fpm
 RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
@@ -10,7 +10,7 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
 # Nginx
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
-    dnf install nginx-1.20.2 -y
+    dnf install nginx-1.22.0 -y
 
 # Copy dependencies sources folder
 COPY deps /tmp/bunkerweb/deps

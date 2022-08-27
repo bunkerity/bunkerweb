@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NGINX_VERSION="${NGINX_VERSION-1.20.2}"
+NGINX_VERSION="${NGINX_VERSION-1.22.0}"
 BUILD_MODE="${BUILD_MODE-prod}"
 
 function git_secure_checkout() {

@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-ENV NGINX_VERSION 1.20.2
+ENV NGINX_VERSION 1.22.0
 
 # Install fpm
 RUN apt update && \
