@@ -1,5 +1,64 @@
 #!/bin/bash
 
+function git_update_checker() {
+  	repo="$1"
+  	commit="$2"
+  	main_tmp_folder="/tmp/bunkerweb"
+  	mkdir -p "${main_tmp_folder}"
+  	echo "ℹ️ Check updates for ${repo}"
+  	folder="$(echo "$repo" | sed -E "s@https://github.com/.*/(.*)\.git@\1@")"
+  	output="$(git clone "$repo" "${main_tmp_folder}/${folder}" 2>&1)"
+    if [ $? -ne 0 ] ; then
+      echo "❌ Error cloning $1"
+      echo "$output"
+      rm -rf "${main_tmp_folder}/${folder}" || true
+      return
+    fi
+  	old_dir="$(pwd)"
+    cd "${main_tmp_folder}/${folder}"
+    output="$(git checkout "${commit}^{commit}" 2>&1)"
+    if [ $? -ne 0 ] ; then
+      echo "❌ Commit hash $commit is absent from repository $repo"
+      echo "$output"
+      rm -rf "${main_tmp_folder}/${folder}" || true
+      cd "$old_dir"
+      return
+    fi
+    output="$(git fetch 2>&1)"
+    if [ $? -ne 0 ] ; then
+      echo "⚠️Upgrade version checker error on $repo"
+      echo "$output"
+      rm -rf "${main_tmp_folder}/${folder}" || true
+      cd "$old_dir"
+      return
+    fi
+    latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+    if [ $? -ne 0 ] ; then
+      echo "⚠️Upgrade version checker error on getting latest tag $repo"
+      echo "$latest_tag"
+      rm -rf "${main_tmp_folder}/${folder}" || true
+      cd "$old_dir"
+      return
+    fi
+    latest_release=$(curl --silent "https://api.github.com/repos/$full_name_repo/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ $? -ne 0 ] ; then
+      echo "⚠️Upgrade version checker error on getting latest release $repo"
+      echo "$latest_release"
+      rm -fr "${main_tmp_folder}/${folder}" || true
+      cd "$old_dir"
+      return
+    fi
+    current_tag=$(git describe --tags)
+    if [[ ! -z "$latest_tag" ]] && [[ "$current_tag" != *"$latest_tag"* ]]; then
+      echo "ℹ ️Update checker: new tag found: $latest_tag, current tag/release: $current_tag, please update"
+    fi
+    if [[ ! -z "$latest_release" ]] && [[ "$current_tag" != *"$latest_release"* ]]; then
+      echo "ℹ ️Update checker: new tag found: $latest_release, current tag/release: $current_tag, please update"
+    fi
+    rm -rf "${main_tmp_folder}/${folder}" || true
+    cd "$old_dir"
+}
+
 function git_secure_clone() {
 	repo="$1"
 	commit="$2"
@@ -28,6 +87,7 @@ function git_secure_clone() {
 		fi
 	else
 		echo "⚠️ Skipping clone of $repo because target directory is already present"
+		git_update_checker $repo $commit
 	fi
 }
 
