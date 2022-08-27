@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -31,12 +31,12 @@ namespace modsecurity {
 namespace actions {
 namespace transformations {
 
-Sha1::Sha1(std::string action)
+Sha1::Sha1(const std::string &action) 
     : Transformation(action) {
     this->action_kind = 1;
 }
 
-std::string Sha1::evaluate(std::string value,
+std::string Sha1::evaluate(const std::string &value,
     Transaction *transaction) {
 
     return Utils::Sha1::digest(value);

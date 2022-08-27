@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -34,12 +34,12 @@ namespace variables {
 
 class Resource_DictElement : public Variable {
  public:
-    explicit Resource_DictElement(std::string dictElement)
+    explicit Resource_DictElement(const std::string &dictElement)
         : Variable("RESOURCE:" + dictElement),
         m_dictElement("RESOURCE:" + dictElement) { }
 
     void evaluate(Transaction *t,
-        Rule *rule,
+        RuleWithActions *rule,
         std::vector<const VariableValue *> *l) override {
         t->m_collections.m_resource_collection->resolveMultiMatches(
             m_name, t->m_collections.m_resource_collection_key,
@@ -56,7 +56,7 @@ class Resource_NoDictElement : public Variable {
         : Variable("RESOURCE") { }
 
     void evaluate(Transaction *t,
-        Rule *rule,
+        RuleWithActions *rule,
         std::vector<const VariableValue *> *l) override {
         t->m_collections.m_resource_collection->resolveMultiMatches(m_name,
             t->m_collections.m_resource_collection_key,
@@ -67,12 +67,12 @@ class Resource_NoDictElement : public Variable {
 
 class Resource_DictElementRegexp : public VariableRegex {
  public:
-    explicit Resource_DictElementRegexp(std::string dictElement)
+    explicit Resource_DictElementRegexp(const std::string &dictElement)
         : VariableRegex("RESOURCE:", dictElement),
         m_dictElement(dictElement) { }
 
     void evaluate(Transaction *t,
-        Rule *rule,
+        RuleWithActions *rule,
         std::vector<const VariableValue *> *l) override {
         t->m_collections.m_resource_collection->resolveRegularExpression(
             m_dictElement, t->m_collections.m_resource_collection_key,
@@ -90,7 +90,7 @@ class Resource_DynamicElement : public Variable {
         m_string(std::move(dictElement)) { }
 
     void evaluate(Transaction *t,
-        Rule *rule,
+        RuleWithActions *rule,
         std::vector<const VariableValue *> *l) override {
         std::string string = m_string->evaluate(t);
         t->m_collections.m_resource_collection->resolveMultiMatches(
@@ -99,14 +99,14 @@ class Resource_DynamicElement : public Variable {
             t->m_rules->m_secWebAppId.m_value, l, m_keyExclusion);
     }
 
-    void del(Transaction *t, std::string k) {
+    static void del(Transaction *t, const std::string &k) {
         t->m_collections.m_resource_collection->del(k,
             t->m_collections.m_resource_collection_key,
             t->m_rules->m_secWebAppId.m_value);
     }
 
-    void storeOrUpdateFirst(Transaction *t, std::string var,
-        std::string value) {
+    static void storeOrUpdateFirst(Transaction *t, const std::string &var,
+        const std::string &value) {
         t->m_collections.m_resource_collection->storeOrUpdateFirst(
             var, t->m_collections.m_resource_collection_key,
             t->m_rules->m_secWebAppId.m_value, value);

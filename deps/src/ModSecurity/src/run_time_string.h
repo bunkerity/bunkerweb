@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -46,14 +46,14 @@ class RunTimeString {
  public:
     RunTimeString() :
         m_containsMacro(false) { }
-    void appendText(std::string text);
+    void appendText(const std::string &text);
     void appendVar(std::unique_ptr<modsecurity::variables::Variable> var);
     std::string evaluate(Transaction *t);
     std::string evaluate(Transaction *t, Rule *r);
     std::string evaluate() {
         return evaluate(NULL);
     }
-    inline bool containsMacro() { return m_containsMacro; }
+    inline bool containsMacro() const { return m_containsMacro; }
     bool m_containsMacro;
 
  protected:

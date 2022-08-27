@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 namespace modsecurity {
 namespace operators {
 
-bool Contains::evaluate(Transaction *transaction, Rule *rule,
+bool Contains::evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string &input, std::shared_ptr<RuleMessage> ruleMessage) {
     std::string p(m_string->evaluate(transaction));
     size_t offset = input.find(p);

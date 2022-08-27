@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -113,7 +113,7 @@ int ValidateUtf8Encoding::detect_utf8_character(
     return unicode_len;
 }
 
-bool ValidateUtf8Encoding::evaluate(Transaction *transaction, Rule *rule,
+bool ValidateUtf8Encoding::evaluate(Transaction *transaction, RuleWithActions *rule,
     const std::string &str, std::shared_ptr<RuleMessage> ruleMessage) {
     unsigned int i, bytes_left;
 

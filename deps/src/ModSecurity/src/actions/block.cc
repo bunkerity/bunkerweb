@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include <string>
 #include <memory>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/transaction.h"
 #include "modsecurity/rule.h"
-#include "modsecurity/rules.h"
 #include "modsecurity/intervention.h"
 #include "src/actions/data/status.h"
 
@@ -29,11 +29,11 @@ namespace modsecurity {
 namespace actions {
 
 
-bool Block::evaluate(Rule *rule, Transaction *transaction,
+bool Block::evaluate(RuleWithActions *rule, Transaction *transaction,
     std::shared_ptr<RuleMessage> rm) {
     ms_dbg_a(transaction, 8, "Marking request as disruptive.");
 
-    for (Action *a : transaction->m_rules->m_defaultActions[rule->m_phase]) {
+    for (auto &a : transaction->m_rules->m_defaultActions[rule->getPhase()]) {
         if (a->isDisruptive() == false) {
             continue;
         }

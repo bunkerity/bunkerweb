@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -36,14 +36,17 @@ namespace collection {
 
 Collections::Collections(Collection *global,
     Collection *ip, Collection *session, Collection *user,
-    Collection *resource) : m_global_collection_key(""),
+    Collection *resource)
+    : m_global_collection_key(""),
     m_ip_collection_key(""),
+    m_session_collection_key(""),
+    m_user_collection_key(""),
     m_resource_collection_key(""),
     m_global_collection(global),
-    m_resource_collection(resource),
     m_ip_collection(ip),
     m_session_collection(session),
     m_user_collection(user),
+    m_resource_collection(resource),
     m_tx_collection(new backend::InMemoryPerProcess("TX")) {
     }
 

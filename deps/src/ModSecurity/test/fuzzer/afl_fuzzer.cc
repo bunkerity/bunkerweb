@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,17 +15,16 @@
 
 
 #include <string.h>
-
+#include "modsecurity/rules_set.h"
 #include "modsecurity/modsecurity.h"
-#include "modsecurity/rules.h"
 #include "src/actions/transformations/transformation.h"
 
 /**
  * for i in $(ls -l src/actions/transformations/*.h | awk {'print $9'}); do echo "#include \"$i\""; done;
  *
  */
-#include "src/actions/transformations/base64_decode_ext.h"
 #include "src/actions/transformations/base64_decode.h"
+#include "src/actions/transformations/base64_decode_ext.h"
 #include "src/actions/transformations/base64_encode.h"
 #include "src/actions/transformations/cmd_line.h"
 #include "src/actions/transformations/compress_whitespace.h"
@@ -44,8 +43,8 @@
 #include "src/actions/transformations/parity_even_7bit.h"
 #include "src/actions/transformations/parity_odd_7bit.h"
 #include "src/actions/transformations/parity_zero_7bit.h"
-#include "src/actions/transformations/remove_comments_char.h"
 #include "src/actions/transformations/remove_comments.h"
+#include "src/actions/transformations/remove_comments_char.h"
 #include "src/actions/transformations/remove_nulls.h"
 #include "src/actions/transformations/remove_whitespace.h"
 #include "src/actions/transformations/replace_comments.h"
@@ -56,6 +55,7 @@
 #include "src/actions/transformations/trim.h"
 #include "src/actions/transformations/trim_left.h"
 #include "src/actions/transformations/trim_right.h"
+#include "src/actions/transformations/upper_case.h"
 #include "src/actions/transformations/url_decode.h"
 #include "src/actions/transformations/url_decode_uni.h"
 #include "src/actions/transformations/url_encode.h"
@@ -118,11 +118,19 @@ using namespace modsecurity;
 #include <signal.h>
 #include <string.h>
 
+inline void op_test(const std::string &opName, const std::string &s) {
+    Operator *op = Operator::instantiate(opName, "");
+    op->init("", nullptr);
+    op->evaluate(nullptr, nullptr, s, nullptr);
+    delete op;
+}
 
 int main(int argc, char** argv) {
     uint8_t buf[128];
 
+#if 0
     std::string lastString;
+#endif
 
     while (__AFL_LOOP(1000)) {
         ssize_t read_bytes;
@@ -132,10 +140,12 @@ int main(int argc, char** argv) {
 
         std::string currentString = std::string(read_bytes, 128);
         std::string s = currentString;
+#if 0
         std::string z = lastString;
+#endif
 
         ModSecurity *ms = new ModSecurity();
-        Rules *rules = new Rules();
+        RulesSet *rules = new RulesSet();
         // Here it is possible to load a real transaction from a JSON.
         // like we do on the regression tests.
         Transaction *t = new Transaction(ms, rules, NULL);
@@ -147,8 +157,8 @@ int main(int argc, char** argv) {
         * for i in $(grep "class " -Ri src/actions/transformations/* | grep " :" | grep -v "InstantCache" | awk {'print $2'}); do echo $i *$(echo $i | awk '{print tolower($0)}') = new $i\(\"$i\"\)\; $(echo $i | awk '{print tolower($0)}')-\>evaluate\(s, NULL\)\; delete $(echo $i | awk '{print tolower($0)}')\;; done;
         *
         */
-Base64DecodeExt *base64decodeext = new Base64DecodeExt("Base64DecodeExt"); base64decodeext->evaluate(s, NULL); delete base64decodeext;
 Base64Decode *base64decode = new Base64Decode("Base64Decode"); base64decode->evaluate(s, NULL); delete base64decode;
+Base64DecodeExt *base64decodeext = new Base64DecodeExt("Base64DecodeExt"); base64decodeext->evaluate(s, NULL); delete base64decodeext;
 Base64Encode *base64encode = new Base64Encode("Base64Encode"); base64encode->evaluate(s, NULL); delete base64encode;
 CmdLine *cmdline = new CmdLine("CmdLine"); cmdline->evaluate(s, NULL); delete cmdline;
 CompressWhitespace *compresswhitespace = new CompressWhitespace("CompressWhitespace"); compresswhitespace->evaluate(s, NULL); delete compresswhitespace;
@@ -167,8 +177,8 @@ NormalisePathWin *normalisepathwin = new NormalisePathWin("NormalisePathWin"); n
 ParityEven7bit *parityeven7bit = new ParityEven7bit("ParityEven7bit"); parityeven7bit->evaluate(s, NULL); delete parityeven7bit;
 ParityOdd7bit *parityodd7bit = new ParityOdd7bit("ParityOdd7bit"); parityodd7bit->evaluate(s, NULL); delete parityodd7bit;
 ParityZero7bit *parityzero7bit = new ParityZero7bit("ParityZero7bit"); parityzero7bit->evaluate(s, NULL); delete parityzero7bit;
-RemoveCommentsChar *removecommentschar = new RemoveCommentsChar("RemoveCommentsChar"); removecommentschar->evaluate(s, NULL); delete removecommentschar;
 RemoveComments *removecomments = new RemoveComments("RemoveComments"); removecomments->evaluate(s, NULL); delete removecomments;
+RemoveCommentsChar *removecommentschar = new RemoveCommentsChar("RemoveCommentsChar"); removecommentschar->evaluate(s, NULL); delete removecommentschar;
 RemoveNulls *removenulls = new RemoveNulls("RemoveNulls"); removenulls->evaluate(s, NULL); delete removenulls;
 RemoveWhitespace *removewhitespace = new RemoveWhitespace("RemoveWhitespace"); removewhitespace->evaluate(s, NULL); delete removewhitespace;
 ReplaceComments *replacecomments = new ReplaceComments("ReplaceComments"); replacecomments->evaluate(s, NULL); delete replacecomments;
@@ -179,11 +189,11 @@ Transformation *transformation = new Transformation("Transformation"); transform
 Trim *trim = new Trim("Trim"); trim->evaluate(s, NULL); delete trim;
 TrimLeft *trimleft = new TrimLeft("TrimLeft"); trimleft->evaluate(s, NULL); delete trimleft;
 TrimRight *trimright = new TrimRight("TrimRight"); trimright->evaluate(s, NULL); delete trimright;
+UpperCase *uppercase = new UpperCase("UpperCase"); uppercase->evaluate(s, NULL); delete uppercase;
 UrlDecode *urldecode = new UrlDecode("UrlDecode"); urldecode->evaluate(s, NULL); delete urldecode;
 UrlDecodeUni *urldecodeuni = new UrlDecodeUni("UrlDecodeUni"); urldecodeuni->evaluate(s, NULL); delete urldecodeuni;
 UrlEncode *urlencode = new UrlEncode("UrlEncode"); urlencode->evaluate(s, NULL); delete urlencode;
 Utf8ToUnicode *utf8tounicode = new Utf8ToUnicode("Utf8ToUnicode"); utf8tounicode->evaluate(s, NULL); delete utf8tounicode;
-
 
 
         /**
@@ -192,47 +202,46 @@ Utf8ToUnicode *utf8tounicode = new Utf8ToUnicode("Utf8ToUnicode"); utf8tounicode
         * for i in $(grep "class " -Ri src/operators/* | grep " :" | awk {'print $2'}); do echo $i *$(echo $i | awk '{print tolower($0)}') = new $i\(\"$i\", z, false\)\; $(echo $i | awk '{print tolower($0)}')-\>evaluate\(t, s\)\; delete $(echo $i | awk '{print tolower($0)}')\;; done;
         *
         */
-BeginsWith *beginswith = new BeginsWith("BeginsWith", z, false); beginswith->evaluate(t, s); delete beginswith;
-Contains *contains = new Contains("Contains", z, false); contains->evaluate(t, s); delete contains;
-ContainsWord *containsword = new ContainsWord("ContainsWord", z, false); containsword->evaluate(t, s); delete containsword;
-DetectSQLi *detectsqli = new DetectSQLi("DetectSQLi", z, false); detectsqli->evaluate(t, s); delete detectsqli;
-DetectXSS *detectxss = new DetectXSS("DetectXSS", z, false); detectxss->evaluate(t, s); delete detectxss;
-EndsWith *endswith = new EndsWith("EndsWith", z, false); endswith->evaluate(t, s); delete endswith;
-Eq *eq = new Eq("Eq", z, false); eq->evaluate(t, s); delete eq;
-FuzzyHash *fuzzyhash = new FuzzyHash("FuzzyHash", z, false); fuzzyhash->evaluate(t, s); delete fuzzyhash;
-Ge *ge = new Ge("Ge", z, false); ge->evaluate(t, s); delete ge;
-GeoLookup *geolookup = new GeoLookup("GeoLookup", z, false); geolookup->evaluate(t, s); delete geolookup;
-GsbLookup *gsblookup = new GsbLookup("GsbLookup", z, false); gsblookup->evaluate(t, s); delete gsblookup;
-Gt *gt = new Gt("Gt", z, false); gt->evaluate(t, s); delete gt;
-InspectFile *inspectfile = new InspectFile("InspectFile", z, false); inspectfile->evaluate(t, s); delete inspectfile;
-IpMatchF *ipmatchf = new IpMatchF("IpMatchF", z, false); ipmatchf->evaluate(t, s); delete ipmatchf;
-IpMatchFromFile *ipmatchfromfile = new IpMatchFromFile("IpMatchFromFile", z, false); ipmatchfromfile->evaluate(t, s); delete ipmatchfromfile;
-IpMatch *ipmatch = new IpMatch("IpMatch", z, false); ipmatch->evaluate(t, s); delete ipmatch;
-Le *le = new Le("Le", z, false); le->evaluate(t, s); delete le;
-Lt *lt = new Lt("Lt", z, false); lt->evaluate(t, s); delete lt;
-NoMatch *nomatch = new NoMatch("NoMatch", z, false); nomatch->evaluate(t, s); delete nomatch;
-PmF *pmf = new PmF("PmF", z, false); pmf->evaluate(t, s); delete pmf;
-PmFromFile *pmfromfile = new PmFromFile("PmFromFile", z, false); pmfromfile->evaluate(t, s); delete pmfromfile;
-Pm *pm = new Pm("Pm", z, false); pm->evaluate(t, s); delete pm;
-// Rbl test is too slow to be tested here.
-// Rbl *rbl = new Rbl("Rbl", z, false); rbl->evaluate(t, s); delete rbl;
-Rsub *rsub = new Rsub("Rsub", z, false); rsub->evaluate(t, s); delete rsub;
-Rx *rx = new Rx("Rx", z, false); rx->evaluate(t, s); delete rx;
+op_test("BeginsWith", s);
+op_test("Contains", s);
+op_test("ContainsWord", s);
+op_test("DetectSQLi", s);
+op_test("DetectXSS", s);
+op_test("EndsWith", s);
+op_test("Eq", s);
+//op_test("FuzzyHash", s);
+op_test("Ge", s);
+//op_test("GeoLookup", s);
+//op_test("GsbLookup", s);
+op_test("Gt", s);
+//op_test("InspectFile", s);
+//op_test("IpMatchF", s);
+//op_test("IpMatchFromFile", s);
+op_test("IpMatch", s);
+op_test("Le", s);
+op_test("Lt", s);
+op_test("NoMatch", s);
+//op_test("PmF", s);
+//op_test("PmFromFile", s);
+op_test("Pm", s);
+op_test("Rbl", s);
+op_test("Rsub", s);
+op_test("Rx", s);
+op_test("StrEq", s);
+op_test("StrMatch", s);
+op_test("UnconditionalMatch", s);
+//op_test("ValidateByteRange", s);
+//op_test("ValidateDTD", s);
+//op_test("ValidateHash", s);
+//op_test("ValidateSchema", s);
+//op_test("ValidateUrlEncoding", s);
+op_test("ValidateUtf8Encoding", s);
+op_test("VerifyCC", s);
+op_test("VerifyCPF", s);
+op_test("VerifySSN", s);
+op_test("VerifySVNR", s);
+op_test("Within", s);
 
-StrEq *streq = new StrEq("StrEq", z, false); streq->evaluate(t, s); delete streq;
-
-StrMatch *strmatch = new StrMatch("StrMatch", z, false); strmatch->evaluate(t, s); delete strmatch;
-UnconditionalMatch *unconditionalmatch = new UnconditionalMatch("UnconditionalMatch", z, false); unconditionalmatch->evaluate(t, s); delete unconditionalmatch;
-ValidateByteRange *validatebyterange = new ValidateByteRange("ValidateByteRange", z, false); validatebyterange->evaluate(t, s); delete validatebyterange;
-ValidateDTD *validatedtd = new ValidateDTD("ValidateDTD", z, false); validatedtd->evaluate(t, s); delete validatedtd;
-ValidateHash *validatehash = new ValidateHash("ValidateHash", z, false); validatehash->evaluate(t, s); delete validatehash;
-ValidateSchema *validateschema = new ValidateSchema("ValidateSchema", z, false); validateschema->evaluate(t, s); delete validateschema;
-ValidateUrlEncoding *validateurlencoding = new ValidateUrlEncoding("ValidateUrlEncoding", z, false); validateurlencoding->evaluate(t, s); delete validateurlencoding;
-ValidateUtf8Encoding *validateutf8encoding = new ValidateUtf8Encoding("ValidateUtf8Encoding", z, false); validateutf8encoding->evaluate(t, s); delete validateutf8encoding;
-VerifyCC *verifycc = new VerifyCC("VerifyCC", z, false); verifycc->evaluate(t, s); delete verifycc;
-VerifyCPF *verifycpf = new VerifyCPF("VerifyCPF", z, false); verifycpf->evaluate(t, s); delete verifycpf;
-VerifySSN *verifyssn = new VerifySSN("VerifySSN", z, false); verifyssn->evaluate(t, s); delete verifyssn;
-Within *within = new Within("Within", z, false); within->evaluate(t, s); delete within;
 
         /**
         * ModSec API
@@ -261,8 +270,9 @@ Within *within = new Within("Within", z, false); within->evaluate(t, s); delete 
         delete t;
         delete rules;
         delete ms;
-
+#if 0
         lastString = currentString;
+#endif
     }
     return 0;
 }

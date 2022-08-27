@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -36,9 +36,8 @@ bool Rx::init(const std::string &arg, std::string *error) {
 }
 
 
-bool Rx::evaluate(Transaction *transaction, Rule *rule,
+bool Rx::evaluate(Transaction *transaction, RuleWithActions *rule,
     const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
-    std::list<SMatch> matches;
     Regex *re;
 
     if (m_param.empty() && !m_string->m_containsMacro) {
@@ -52,29 +51,33 @@ bool Rx::evaluate(Transaction *transaction, Rule *rule,
         re = m_re;
     }
 
-    matches = re->searchAll(input);
-    if (rule && rule->m_containsCaptureAction && transaction) {
-        int i = 0;
-        matches.reverse();
-        for (const SMatch& a : matches) {
+    std::vector<Utils::SMatchCapture> captures;
+    if (re->hasError()) {
+        ms_dbg_a(transaction, 3, "Error with regular expression: \"" + re->pattern + "\"");
+        return false;
+    }
+    re->searchOneMatch(input, captures);
+
+    if (rule && rule->hasCaptureAction() && transaction) {
+        for (const Utils::SMatchCapture& capture : captures) {
+            const std::string capture_substring(input.substr(capture.m_offset,capture.m_length));
             transaction->m_collections.m_tx_collection->storeOrUpdateFirst(
-                std::to_string(i), a.str());
+                std::to_string(capture.m_group), capture_substring);
             ms_dbg_a(transaction, 7, "Added regex subexpression TX." +
-                std::to_string(i) + ": " + a.str());
-            transaction->m_matched.push_back(a.str());
-            i++;
+                std::to_string(capture.m_group) + ": " + capture_substring);
+            transaction->m_matched.push_back(capture_substring);
         }
     }
 
-    for (const auto & i : matches) {
-        logOffset(ruleMessage, i.offset(), i.str().size());
+    for (const auto & capture : captures) {
+        logOffset(ruleMessage, capture.m_offset, capture.m_length);
     }
 
     if (m_string->m_containsMacro) {
         delete re;
     }
 
-    if (matches.size() > 0) {
+    if (!captures.empty()) {
         return true;
     }
 

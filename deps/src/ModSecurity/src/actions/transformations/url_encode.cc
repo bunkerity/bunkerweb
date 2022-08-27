@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -31,7 +31,7 @@ namespace actions {
 namespace transformations {
 
 
-UrlEncode::UrlEncode(std::string action)
+UrlEncode::UrlEncode(const std::string &action) 
     : Transformation(action) {
     this->action_kind = 1;
 }
@@ -87,7 +87,7 @@ std::string UrlEncode::url_enc(const char *input,
 }
 
 
-std::string UrlEncode::evaluate(std::string value,
+std::string UrlEncode::evaluate(const std::string &value,
     Transaction *transaction) {
     int changed;
 

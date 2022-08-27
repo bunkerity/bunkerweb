@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include "modsecurity/rules_properties.h"
+#include "modsecurity/rules_set_properties.h"
 #include "modsecurity/transaction.h"
 
 namespace modsecurity {
@@ -42,11 +42,11 @@ bool RequestBodyAccess::init(std::string *error) {
     return true;
 }
 
-bool RequestBodyAccess::evaluate(Rule *rule, Transaction *transaction) {
+bool RequestBodyAccess::evaluate(RuleWithActions *rule, Transaction *transaction) {
     if (m_request_body_access) {
-        transaction->m_requestBodyAccess = RulesProperties::TrueConfigBoolean;
+        transaction->m_requestBodyAccess = RulesSetProperties::TrueConfigBoolean;
     } else {
-        transaction->m_requestBodyAccess = RulesProperties::FalseConfigBoolean;
+        transaction->m_requestBodyAccess = RulesSetProperties::FalseConfigBoolean;
     }
 
     return true;

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -31,8 +31,8 @@ class CustomDebugLog : public modsecurity::debug_log::DebugLog {
     void write(int level, const std::string& message) override;
     void write(int level, const std::string &id,
         const std::string &uri, const std::string &msg) override;
-    bool contains(const std::string& pattern);
-    std::string log_messages();
+    bool const contains(const std::string& pattern) const;
+    std::string const log_messages() const;
     std::string error_log_messages();
     int getDebugLogLevel() override;
 

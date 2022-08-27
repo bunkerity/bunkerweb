@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -30,7 +30,7 @@
 namespace modsecurity {
 
 
-void RunTimeString::appendText(std::string text) {
+void RunTimeString::appendText(const std::string &text) {
     std::unique_ptr<RunTimeElementHolder> r(new RunTimeElementHolder);
     r->m_string = text;
     m_elements.push_back(std::move(r));
@@ -58,7 +58,9 @@ std::string RunTimeString::evaluate(Transaction *t, Rule *r) {
             s.append(z->m_string);
         } else if (z->m_var != NULL && t != NULL) {
             std::vector<const VariableValue *> l;
-            z->m_var->evaluate(t, r, &l);
+            // FIXME: This cast should be removed.
+            RuleWithOperator *rr = dynamic_cast<RuleWithOperator *>(r);
+            z->m_var->evaluate(t, rr, &l);
             if (l.size() > 0) {
                 s.append(l[0]->getValue());
             }

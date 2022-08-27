@@ -69,14 +69,12 @@ if test -n "${PCRE_VERSION}"; then
     AC_MSG_CHECKING(for PCRE JIT)
     save_CFLAGS=$CFLAGS
     save_LDFLAGS=$LDFLAGS
+    save_LIBS=$LIBS
     CFLAGS="${PCRE_CFLAGS} ${CFLAGS}"
-    LDFLAGS="${LDFLAGS} ${PCRE_LDADD}"
-    AC_TRY_COMPILE([ #include <stdio.h>
-                     #include <pcre.h> ],
-        [ int jit = 0;
-          pcre_free_study(NULL);
-          pcre_config(PCRE_CONFIG_JIT, &jit);
-          if (jit != 1) return 1; ],
+    LDFLAGS="${PCRE_LDADD} ${LDFLAGS}"
+    LIBS="${PCRE_LDADD} ${LIBS}"
+    AC_TRY_LINK([ #include <pcre.h> ],
+        [ pcre_jit_exec(NULL, NULL, NULL, 0, 0, 0, NULL, 0, NULL); ],
         [ pcre_jit_available=yes ], [:]
     )
 
@@ -87,7 +85,8 @@ if test -n "${PCRE_VERSION}"; then
         AC_MSG_RESULT(no)
     fi
     CFLAGS=$save_CFLAGS
-    LDFLAGS=$save_$LDFLAGS
+    LDFLAGS=$save_LDFLAGS
+    LIBS=$save_LIBS
 fi
 
 AC_SUBST(PCRE_CONFIG)

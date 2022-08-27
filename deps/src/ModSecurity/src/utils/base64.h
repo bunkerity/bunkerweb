@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,9 +32,10 @@ class Base64 {
     static std::string decode(const std::string& data);
     static std::string decode_forgiven(const std::string& data);
 
-    static void decode_forgiven_engine(unsigned char *output,
-        size_t output_size, size_t *aiming_size, const unsigned char *input,
-        size_t input_size);
+    static void decode_forgiven_engine(unsigned char *plain_text,
+        size_t plain_text_size, size_t *aiming_size,
+        const unsigned char *encoded,
+        size_t input_len);
 };
 
 

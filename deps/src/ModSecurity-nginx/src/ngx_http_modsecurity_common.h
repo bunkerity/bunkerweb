@@ -56,7 +56,7 @@
 
 #define MODSECURITY_NGINX_MAJOR "1"
 #define MODSECURITY_NGINX_MINOR "0"
-#define MODSECURITY_NGINX_PATCHLEVEL "2"
+#define MODSECURITY_NGINX_PATCHLEVEL "3"
 #define MODSECURITY_NGINX_TAG ""
 #define MODSECURITY_NGINX_TAG_NUM "100"
 
@@ -140,8 +140,13 @@ extern ngx_module_t ngx_http_modsecurity_module;
 int ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_request_t *r, ngx_int_t early_log);
 ngx_http_modsecurity_ctx_t *ngx_http_modsecurity_create_ctx(ngx_http_request_t *r);
 char *ngx_str_to_char(ngx_str_t a, ngx_pool_t *p);
+#if (NGX_PCRE2)
+#define ngx_http_modsecurity_pcre_malloc_init(x) NULL
+#define ngx_http_modsecurity_pcre_malloc_done(x) (void)x
+#else
 ngx_pool_t *ngx_http_modsecurity_pcre_malloc_init(ngx_pool_t *pool);
 void ngx_http_modsecurity_pcre_malloc_done(ngx_pool_t *old_pool);
+#endif
 
 /* ngx_http_modsecurity_body_filter.c */
 ngx_int_t ngx_http_modsecurity_body_filter_init(void);

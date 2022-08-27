@@ -178,13 +178,12 @@ fi
 echo "ℹ️ Download lbase64"
 git_secure_clone "https://github.com/iskolbin/lbase64.git" "c261320edbdf82c16409d893a96c28c704aa0ab8"
 
-# ModSecurity v3.0.4 (looks like v3.0.5 has a memleak on reload)
-# TODO : test v3.0.6
+# ModSecurity v3.0.8
 echo "ℹ️ Download ModSecurity"
 if [ ! -d "deps/src/ModSecurity" ] ; then
         dopatch="yes"
 fi
-git_secure_clone "https://github.com/SpiderLabs/ModSecurity.git" "753145fbd1d6751a6b14fdd700921eb3cc3a1d35"
+git_secure_clone "https://github.com/SpiderLabs/ModSecurity.git" "996c7e1e1f782111331e0ff37cbaf6c6a29c3530"
 if [ "$dopatch" = "yes" ] ; then
         do_and_check_cmd patch deps/src/ModSecurity/configure.ac deps/misc/modsecurity.patch
 fi
@@ -193,13 +192,13 @@ echo "ℹ️ Download libinjection"
 git_secure_clone "https://github.com/libinjection/libinjection.git" "49904c42a6e68dc8f16c022c693e897e4010a06c"
 do_and_check_cmd cp -r deps/src/libinjection deps/src/ModSecurity/others
 
-# ModSecurity-nginx v1.0.2
+# ModSecurity-nginx v1.0.3
 echo "ℹ️ Download ModSecurity-nginx"
 dopatch="no"
 if [ ! -d "deps/src/ModSecurity-nginx" ] ; then
 	dopatch="yes"
 fi
-git_secure_clone "https://github.com/SpiderLabs/ModSecurity-nginx.git" "2497e6ac654d0b117b9534aa735b757c6b11c84f"
+git_secure_clone "https://github.com/SpiderLabs/ModSecurity-nginx.git" "d59e4ad121df702751940fd66bcc0b3ecb51a079"
 if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_log.c deps/misc/modsecurity-nginx.patch
 fi

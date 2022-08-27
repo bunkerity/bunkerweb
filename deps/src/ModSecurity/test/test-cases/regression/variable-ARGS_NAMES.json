@@ -164,6 +164,58 @@
       "SecRuleEngine On",
       "SecRule ARGS_NAMES \"@contains test \" \"id:1,phase:3,pass,t:trim\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_POST_NAMES (3/x)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=0000",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name1\"\r",
+                "\r",
+                "content1\r",
+                "--0000\r",
+                "Content-Disposition: form-data; name=\"name2\"\r",
+                "\r",
+                "content2\r",
+                "--0000--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"name1\" \\(Variable: ARGS_NAMES:name1\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule ARGS_NAMES \"@contains test \" \"id:1,phase:3,pass,t:trim\""
+    ]
   }
 ]
 

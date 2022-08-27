@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -25,7 +25,7 @@ namespace actions {
 namespace ctl {
 
 
-bool RequestBodyProcessorXML::evaluate(Rule *rule,
+bool RequestBodyProcessorXML::evaluate(RuleWithActions *rule,
     Transaction *transaction) {
     transaction->m_requestBodyProcessor = Transaction::XMLRequestBody;
     transaction->m_variableReqbodyProcessor.set("XML",

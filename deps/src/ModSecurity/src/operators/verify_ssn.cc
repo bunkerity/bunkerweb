@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 namespace modsecurity {
 namespace operators {
 
+
 int VerifySSN::convert_to_int(const char c) {
     int n;
     if ((c >= '0') && (c <= '9')) {
@@ -37,6 +38,7 @@ int VerifySSN::convert_to_int(const char c) {
     }
     return n;
 }
+
 
 bool VerifySSN::verify(const char *ssnumber, int len) {
     int i;
@@ -108,7 +110,7 @@ invalid:
 }
 
 
-bool VerifySSN::evaluate(Transaction *t, Rule *rule,
+bool VerifySSN::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
     std::list<SMatch> matches;
     bool is_ssn = false;
@@ -120,15 +122,15 @@ bool VerifySSN::evaluate(Transaction *t, Rule *rule,
 
     for (i = 0; i < input.size() - 1 && is_ssn == false; i++) {
         matches = m_re->searchAll(input.substr(i, input.size()));
-        for (const auto & i : matches) {
-            is_ssn = verify(i.str().c_str(), i.str().size());
+        for (const auto & j : matches) {
+            is_ssn = verify(j.str().c_str(), j.str().size());
             if (is_ssn) {
-                logOffset(ruleMessage, i.offset(), i.str().size());
-                if (rule && t && rule->m_containsCaptureAction) {
+                logOffset(ruleMessage, j.offset(), j.str().size());
+                if (rule && t && rule->hasCaptureAction()) {
                     t->m_collections.m_tx_collection->storeOrUpdateFirst(
-                        "0", i.str());
+                        "0", j.str());
                     ms_dbg_a(t, 7, "Added VerifySSN match TX.0: " + \
-                        i.str());
+                        j.str());
                 }
 
                 goto out;

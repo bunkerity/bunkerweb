@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include <modsecurity/modsecurity.h>
 #include <modsecurity/transaction.h>
-#include <modsecurity/rules.h>
+#include <modsecurity/rules_set.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,12 +24,13 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 
+
 #define FORKS 5
 #define REQUESTS_PER_PROCESS 100
 
 
 char main_rule_uri[] = "basic_rules.conf";
-Rules *rules = NULL;
+RulesSet *rules = NULL;
 ModSecurity *modsec = NULL;
 
 
@@ -41,11 +42,14 @@ void process_special_request (int j) {
     msc_process_uri(transaction,
         "http://www.modsecurity.org/test?foo=herewego",
         "GET", "1.1");
-    msc_add_request_header(transaction, "User-Agent",
-        "Basic ModSecurity example");
+    msc_add_request_header(transaction,
+        (const unsigned char *) "User-Agent",
+        (const unsigned char *) "Basic ModSecurity example");
     msc_process_request_headers(transaction);
     msc_process_request_body(transaction);
-    msc_add_response_header(transaction, "Content-type", "text/html");
+    msc_add_response_header(transaction,
+        (const unsigned char *) "Content-type",
+        (const unsigned char *) "text/html");
     msc_process_response_headers(transaction, 200, "HTTP 1.0");
     msc_process_response_body(transaction);
     msc_process_logging(transaction);
@@ -69,11 +73,14 @@ void process_request (int j) {
         msc_process_uri(transaction,
             "http://www.modsecurity.org/test?key1=value1&key2=value2&key3=value3",
             "GET", "1.1");
-        msc_add_request_header(transaction, "User-Agent",
-            "Basic ModSecurity example");
+        msc_add_request_header(transaction,
+            (const unsigned char *) "User-Agent",
+            (const unsigned char *) "Basic ModSecurity example");
         msc_process_request_headers(transaction);
         msc_process_request_body(transaction);
-        msc_add_response_header(transaction, "Content-type", "text/html");
+        msc_add_response_header(transaction,
+            (const unsigned char *) "Content-type",
+            (const unsigned char *) "text/html");
         msc_process_response_headers(transaction, 200, "HTTP 1.0");
         msc_process_response_body(transaction);
         msc_process_logging(transaction);
@@ -90,7 +97,6 @@ int main (int argc, char **argv)
 {
     int ret;
     const char *error = NULL;
-    int i = 0;
     pid_t pid;
     int f;
 

@@ -3,10 +3,6 @@ dnl CHECK_YAJL(ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
 
 AC_DEFUN([PROG_YAJL], [
 
-# Needed if pkg-config will be used.
-AC_REQUIRE([PKG_PROG_PKG_CONFIG])
-
-
 # Possible names for the yajl library/package (pkg-config)
 YAJL_POSSIBLE_LIB_NAMES="yajl2 yajl"
 
@@ -32,13 +28,13 @@ AC_ARG_WITH(
 )
 
 if test "x${with_yajl}" == "xno"; then
-    AC_DEFINE(HAVE_GEOIP, 0, [Support for GeoIP was disabled by the utilization of --without-yajl or --with-yajl=no])
-    AC_MSG_NOTICE([Support for GeoIP was disabled by the utilization of --without-yajl or --with-yajl=no])
+    AC_DEFINE(HAVE_YAJL, 0, [Support for YAJL was disabled by the utilization of --without-yajl or --with-yajl=no])
+    AC_MSG_NOTICE([Support for YAJL was disabled by the utilization of --without-yajl or --with-yajl=no])
     YAJL_DISABLED=yes
 else
     if test "x${with_yajl}" == "xyes"; then
         YAJL_MANDATORY=yes
-        AC_MSG_NOTICE([GeoIP support was marked as mandatory by the utilization of --with-yajl=yes])
+        AC_MSG_NOTICE([YAJL support was marked as mandatory by the utilization of --with-yajl=yes])
     fi
 #        for x in ${YAJL_POSSIBLE_LIB_NAMES}; do
 #            CHECK_FOR_YAJL_AT(${x})
@@ -49,7 +45,7 @@ else
 
 #    if test "x${with_yajl}" != "xyes" or test "x${with_yajl}" == "xyes"; then
         if test "x${with_yajl}" == "x" || test "x${with_yajl}" == "xyes"; then
-            # Nothing about GeoIP was informed, using the pkg-config to figure things out.
+            # Nothing about YAJL was informed, using the pkg-config to figure things out.
             if test -n "${PKG_CONFIG}"; then
                 YAJL_PKG_NAME=""
                 for x in ${YAJL_POSSIBLE_LIB_NAMES}; do
@@ -59,7 +55,7 @@ else
                     fi
                 done
             fi
-            AC_MSG_NOTICE([Nothing about GeoIP was informed during the configure phase. Trying to detect it on the platform...])
+            AC_MSG_NOTICE([Nothing about YAJL was informed during the configure phase. Trying to detect it on the platform...])
             if test -n "${YAJL_PKG_NAME}"; then
                 # Package was found using the pkg-config scripts
                 YAJL_VERSION="`${PKG_CONFIG} ${YAJL_PKG_NAME} --modversion`"

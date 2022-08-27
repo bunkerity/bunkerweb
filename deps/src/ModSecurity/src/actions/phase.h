@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -25,19 +25,19 @@ class Transaction;
 
 namespace modsecurity {
 class Transaction;
-class Rule;
+class RuleWithOperator;
 
 namespace actions {
 
 
 class Phase : public Action {
  public:
-    explicit Phase(std::string action) : Action(action, ConfigurationKind),
+    explicit Phase(const std::string &action) : Action(action, ConfigurationKind),
         m_phase(0),
         m_secRulesPhase(0) { }
 
     bool init(std::string *error) override;
-    bool evaluate(Rule *rule, Transaction *transaction) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
 
     int m_phase;
     int m_secRulesPhase;

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -33,11 +33,11 @@ namespace data {
 
 class Status : public Action {
  public:
-    explicit Status(std::string action) : Action(action, 2),
+    explicit Status(const std::string &action) : Action(action, 2),
     m_status(0) { }
 
     bool init(std::string *error) override;
-    bool evaluate(Rule *rule, Transaction *transaction,
+    bool evaluate(RuleWithActions *rule, Transaction *transaction,
         std::shared_ptr<RuleMessage> rm) override;
 
     int m_status;

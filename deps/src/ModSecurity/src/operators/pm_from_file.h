@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,12 +32,13 @@ class PmFromFile : public Pm {
     /** @ingroup ModSecurity_Operator */
     explicit PmFromFile(std::unique_ptr<RunTimeString> param)
         : Pm("PmFromFile", std::move(param)) { }
-    explicit PmFromFile(std::string n, std::unique_ptr<RunTimeString> param)
+    explicit PmFromFile(const std::string &n, std::unique_ptr<RunTimeString> param)
         : Pm(n, std::move(param)) { }
 
     bool init(const std::string &file, std::string *error) override;
 
-    bool isComment(const std::string &s);
+private:
+    static bool isComment(const std::string &s);
 };
 
 

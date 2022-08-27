@@ -1,6 +1,6 @@
 /*
  * ModSecurity for Apache 2.x, http://www.modsecurity.org/
- * Copyright (c) 2004-2013 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -290,7 +290,7 @@ TreeNode *CPTAddElement(unsigned char *ipdata, unsigned int ip_bitmask, CPTTree 
     unsigned char *buffer = NULL;
     unsigned char bitlen = 0;
     int bit_validation = 0, test_bit = 0;
-    int i = 0;
+    size_t i = 0;
     unsigned int x, y;
     TreeNode *node = NULL, *new_node = NULL;
     TreeNode *parent = NULL, *i_node = NULL;

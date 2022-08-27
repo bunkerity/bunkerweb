@@ -3,10 +3,6 @@ dnl CHECK_LMDB(ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
 
 AC_DEFUN([PROG_LMDB], [
 
-# Needed if pkg-config will be used.LMDB
-AC_REQUIRE([PKG_PROG_PKG_CONFIG])
-
-
 # Possible names for the lmdb library/package (pkg-config)
 LMDB_POSSIBLE_LIB_NAMES="lmdb"
 

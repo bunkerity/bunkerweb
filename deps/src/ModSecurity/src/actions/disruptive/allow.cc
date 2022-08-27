@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include <iostream>
 #include <string>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/transaction.h"
 #include "modsecurity/rule.h"
-#include "modsecurity/rules.h"
 #include "src/utils/string.h"
 #include "modsecurity/modsecurity.h"
 
@@ -49,7 +49,7 @@ bool Allow::init(std::string *error) {
 }
 
 
-bool Allow::evaluate(Rule *rule, Transaction *transaction) {
+bool Allow::evaluate(RuleWithActions *rule, Transaction *transaction) {
     ms_dbg_a(transaction, 4, "Dropping the evaluation of upcoming rules " \
         "in favor of an `allow' action of type: " \
         + allowTypeToName(m_allowType));

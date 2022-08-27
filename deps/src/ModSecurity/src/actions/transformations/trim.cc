@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,15 +32,25 @@ namespace transformations {
 
 
 std::string *Trim::ltrim(std::string *s) {
-    s->erase(s->begin(), std::find_if(s->begin(), s->end(),
-        std::not1(std::ptr_fun<int, int>(std::isspace))));
+    s->erase(
+        s->begin(),
+        std::find_if(s->begin(), s->end(), [](unsigned char c) {
+            return !std::isspace(c);
+        })
+    );
+
     return s;
 }
 
 
 std::string *Trim::rtrim(std::string *s) {
-    s->erase(std::find_if(s->rbegin(), s->rend(),
-        std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s->end());
+    s->erase(
+        std::find_if(s->rbegin(), s->rend(), [](unsigned char c) {
+            return !std::isspace(c);
+        }).base(),
+        s->end()
+    );
+
     return s;
 }
 
@@ -50,15 +60,16 @@ std::string *Trim::trim(std::string *s) {
 }
 
 
-Trim::Trim(std::string action)
+Trim::Trim(const std::string &action) 
     : Transformation(action) {
     this->action_kind = 1;
 }
 
 
 std::string
-Trim::evaluate(std::string value,
+Trim::evaluate(const std::string &val,
     Transaction *transaction) {
+    std::string value(val);
     return *this->trim(&value);
 }
 

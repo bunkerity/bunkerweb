@@ -42,7 +42,6 @@ noinst_HEADERS = \
 
 
 unit_tests_LDADD = \
-	$(top_builddir)/src/.libs/libmodsecurity.a \
 	$(CURL_LDADD) \
 	$(GEOIP_LDADD) \
 	$(MAXMIND_LDADD) \
@@ -51,12 +50,18 @@ unit_tests_LDADD = \
 	$(LMDB_LDADD) \
 	$(LUA_LDADD) \
 	$(PCRE_LDADD) \
+	$(PCRE2_LDADD) \
 	$(SSDEEP_LDADD) \
 	$(YAJL_LDADD)
 
 
 unit_tests_LDFLAGS = \
+	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
+	-lmodsecurity \
+	-lpthread \
+	-lm \
+	-lstdc++ \
 	$(MAXMIND_LDFLAGS) \
 	$(LMDB_LDFLAGS) \
 	$(LUA_LDFLAGS) \
@@ -77,6 +82,7 @@ unit_tests_CPPFLAGS = \
 	$(GLOBAL_CPPFLAGS) \
 	$(LMDB_CFLAGS) \
 	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(YAJL_CFLAGS) \
 	$(LUA_CFLAGS) \
 	$(SSDEEP_CFLAGS) \
@@ -92,7 +98,6 @@ regression_tests_SOURCES = \
         regression/custom_debug_log.cc
 
 regression_tests_LDADD = \
-	$(top_builddir)/src/.libs/libmodsecurity.a \
 	$(CURL_LDADD) \
 	$(GEOIP_LDADD) \
 	$(MAXMIND_LDADD) \
@@ -101,12 +106,18 @@ regression_tests_LDADD = \
 	$(LMDB_LDADD) \
 	$(LUA_LDADD) \
 	$(PCRE_LDADD) \
+	$(PCRE2_LDADD) \
 	$(SSDEEP_LDADD) \
 	$(YAJL_LDADD)
 
 
 regression_tests_LDFLAGS = \
+	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
+	-lmodsecurity \
+	-lpthread \
+	-lm \
+	-lstdc++ \
 	$(MAXMIND_LDFLAGS) \
 	$(YAJL_LDFLAGS) \
 	$(LMDB_LDFLAGS) \
@@ -129,6 +140,7 @@ regression_tests_CPPFLAGS = \
 	$(LUA_CFLAGS) \
 	$(SSDEEP_CFLAGS) \
 	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(YAJL_CFLAGS) \
 	$(LIBXML2_CFLAGS)
 
@@ -141,7 +153,6 @@ rules_optimization_SOURCES = \
         optimization/optimization.cc
 
 rules_optimization_LDADD = \
-	$(top_builddir)/src/.libs/libmodsecurity.a \
 	$(CURL_LDADD) \
 	$(GEOIP_LDADD) \
 	$(MAXMIND_LDADD) \
@@ -150,11 +161,17 @@ rules_optimization_LDADD = \
 	$(LMDB_LDADD) \
 	$(LUA_LDADD) \
 	$(PCRE_LDADD) \
+	$(PCRE2_LDADD) \
 	$(SSDEEP_LDADD) \
 	$(YAJL_LDADD)
 
 rules_optimization_LDFLAGS = \
+	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
+	-lmodsecurity \
+	-lpthread \
+	-lm \
+	-lstdc++ \
 	$(MAXMIND_LDFLAGS) \
 	$(LMDB_LDFLAGS) \
 	$(LUA_LDFLAGS) \
@@ -176,6 +193,7 @@ rules_optimization_CPPFLAGS = \
 	$(LUA_CFLAGS) \
 	$(SSDEEP_CFLAGS) \
 	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(YAJL_CFLAGS) \
 	$(LIBXML2_CFLAGS)
 

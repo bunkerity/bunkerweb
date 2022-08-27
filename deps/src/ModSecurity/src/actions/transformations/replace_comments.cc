@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -31,12 +31,12 @@ namespace modsecurity {
 namespace actions {
 namespace transformations {
 
-ReplaceComments::ReplaceComments(std::string action)
+ReplaceComments::ReplaceComments(const std::string &action) 
     : Transformation(action) {
     this->action_kind = 1;
 }
 
-std::string ReplaceComments::evaluate(std::string value,
+std::string ReplaceComments::evaluate(const std::string &value,
     Transaction *transaction) {
     uint64_t i, j, incomment;
 

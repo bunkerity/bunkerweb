@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -190,7 +190,7 @@ namespace modsecurity {
 
 #define MODSECURITY_MAJOR "3"
 #define MODSECURITY_MINOR "0"
-#define MODSECURITY_PATCHLEVEL "4"
+#define MODSECURITY_PATCHLEVEL "8"
 #define MODSECURITY_TAG ""
 #define MODSECURITY_TAG_NUM "100"
 
@@ -198,9 +198,9 @@ namespace modsecurity {
     MODSECURITY_MINOR "." MODSECURITY_PATCHLEVEL \
     MODSECURITY_TAG
 
-#define MODSECURITY_VERSION_NUM MODSECURITY_MAJOR \
-    MODSECURITY_MINOR MODSECURITY_PATCHLEVEL MODSECURITY_TAG_NUM
+#define MODSECURITY_VERSION_NUM 3080100
 
+#define MODSECURITY_CHECK_VERSION(a) (MODSECURITY_VERSION_NUM <= a)
 
 /*
  * @name    ModSecLogCb
@@ -229,7 +229,7 @@ namespace modsecurity {
 namespace actions {
 class Action;
 }
-class Rule;
+class RuleWithOperator;
 
 #ifdef __cplusplus
 extern "C" {
@@ -278,8 +278,11 @@ class ModSecurity {
     ModSecurity();
     ~ModSecurity();
 
+    ModSecurity(const ModSecurity &m) = delete;
+    ModSecurity& operator= (const ModSecurity &m) = delete;
+
     const std::string& whoAmI();
-    void setConnectorInformation(std::string connector);
+    void setConnectorInformation(const std::string &connector);
     void setServerLogCb(ModSecLogCb cb);
     /**
      *
@@ -291,9 +294,9 @@ class ModSecurity {
 
     void serverLog(void *data, std::shared_ptr<RuleMessage> rm);
 
-    const std::string& getConnectorInformation();
+    const std::string& getConnectorInformation() const;
 
-    int processContentOffset(const char *content, size_t len,
+    static int processContentOffset(const char *content, size_t len,
         const char *matchString, std::string *json, const char **err);
 
     collection::Collection *m_global_collection;

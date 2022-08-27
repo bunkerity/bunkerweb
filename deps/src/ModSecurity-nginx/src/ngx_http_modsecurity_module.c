@@ -38,6 +38,7 @@ static void ngx_http_modsecurity_cleanup_rules(void *data);
  * https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_pcrefix.c
  */
 
+#if !(NGX_PCRE2)
 static void *(*old_pcre_malloc)(size_t);
 static void (*old_pcre_free)(void *ptr);
 static ngx_pool_t *ngx_http_modsec_pcre_pool = NULL;
@@ -103,6 +104,7 @@ ngx_http_modsecurity_pcre_malloc_done(ngx_pool_t *old_pool)
         pcre_free = old_pcre_free;
     }
 }
+#endif
 
 /*
  * ngx_string's are not null-terminated in common case, so we need to convert

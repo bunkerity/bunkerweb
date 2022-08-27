@@ -9,11 +9,6 @@ dnl  GEOIP_VERSION
 
 AC_DEFUN([PROG_GEOIP], [
 
-
-# Needed if pkg-config will be used.
-AC_REQUIRE([PKG_PROG_PKG_CONFIG])
-
-
 # Possible names for the geoip library/package (pkg-config)
 GEOIP_POSSIBLE_LIB_NAMES="geoip2 geoip GeoIP"
 

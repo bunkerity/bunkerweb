@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -28,12 +28,12 @@ namespace modsecurity {
 
 
 AnchoredVariable::AnchoredVariable(Transaction *t,
-    std::string name)
+    const std::string &name)
     : m_transaction(t),
-    m_var(NULL),
     m_offset(0),
     m_name(""),
-    m_value("") {
+    m_value(""),
+    m_var(NULL) {
         m_name.append(name);
         m_var = new VariableValue(&m_name);
 }

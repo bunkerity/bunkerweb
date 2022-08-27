@@ -6,7 +6,6 @@ simple_request_SOURCES = \
 	simple_request.cc
 
 simple_request_LDADD = \
-	$(top_builddir)/src/.libs/libmodsecurity.a \
 	$(CURL_LDADD) \
 	$(GEOIP_LDADD) \
 	$(MAXMIND_LDADD) \
@@ -19,7 +18,12 @@ simple_request_LDADD = \
 	$(YAJL_LDADD)
 
 simple_request_LDFLAGS = \
+	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
+	-lmodsecurity \
+	-lpthread \
+	-lm \
+	-lstdc++ \
 	$(MAXMIND_LDFLAGS) \
 	$(LMDB_LDFLAGS) \
 	-lpthread \
@@ -37,6 +41,7 @@ simple_request_CPPFLAGS = \
 	-fPIC \
 	-O3 \
 	$(GEOIP_CFLAGS) \
+	$(CURL_CFLAGS) \
 	$(MAXMIND_CFLAGS) \
 	$(GLOBAL_CPPFLAGS) \
 	$(MODSEC_NO_LOGS) \

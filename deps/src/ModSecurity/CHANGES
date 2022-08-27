@@ -1,3 +1,113 @@
+v3.0.8 - 2022-Sep-07
+--------------------
+
+  - Adjust parser activation rules in modsecurity.conf-recommended
+    [Issue #2796 - @terjanq, @martinhsv]
+  - Multipart parsing fixes and new MULTIPART_PART_HEADERS collection
+    [Issue #2795 - @terjanq, @martinhsv]
+  - Prevent LMDB related segfault
+    [Issue #2755, #2761 - @dvershinin]
+  - Fix msc_transaction_cleanup function comment typo
+    [Issue #2788 - @lookat23]
+  - Fix: MULTIPART_INVALID_PART connected to wrong internal variable
+    [Issue #2785 - @martinhsv]
+  - Restore Unique_id to include random portion after timestamp
+    [Issue #2752, #2758 - @datkps11, @martinhsv]
+
+v3.0.7 - 2022-May-30
+--------------------
+
+  - Move PCRE2 match block from member variable
+    [@martinhsv]
+  - Add SecArgumentsLimit, 200007 to modsecurity.conf-recommended
+    [Issue #2738 - @jleproust, @martinhsv]
+  - Fix memory leak when concurrent log includes REMOTE_USER
+    [Issue #2727 - @liudongmiao]
+  - Fix LMDB initialization issues
+    [Issue #2688 - @ziollek, @martinhsv]
+  - Fix initcol error message wording
+    [Issue #2732 - @877509395, @martinhsv]
+  - Tolerate other parameters after boundary in multipart C-T
+    [Issue #1900 - @martinhsv]
+  - Add DebugLog message for bad pattern in rx operator
+    [Issue #2723 - @martinhsv]
+  - Support PCRE2
+    [Issue #2668 - @martinhsv]
+  - Support SecRequestBodyNoFilesLimit
+    [Issue #2670 - @airween, @martinhsv]
+  - Fix misuses of LMDB API
+    [Issue #2601, #2602 - @hyc]
+  - Fix duplication typo in code comment
+    [Issue #2677 - @gleydsonsoares]
+  - Add ctl:auditEngine action support
+    [Issue #2606 - @alekravch, @martinhsv]
+  - Fix multiMatch msg, etc, population in audit log
+    [Issue #2573 - @Sachin-M-Desai, @martinhsv]
+  - Fix some name handling for ARGS_*NAMES: regex SecRuleUpdateTargetById, etc.
+    [Issue #2627, #2648 - @lontchianicet, @victorserbu2709, @martinhsv]
+  - Adjust confusing variable name in setRequestBody method
+    [Issue #2635 - @Mesar-Ali, @martinhsv]
+  - Multipart names/filenames may include single quote if double-quote enclosed
+    [Issue #2352 - @martinhsv]
+  - Add SecRequestBodyJsonDepthLimit to modsecurity.conf-recommended
+    [Issue #2647 - @theMiddleBlue, @airween, @877509395 ,@martinhsv]
+
+
+v3.0.6 - 2021-Nov-19
+-------------------------------------
+
+  - Support configurable limit on depth of JSON parsing
+    [@theMiddleBlue, @martinhsv]
+
+v3.0.5 - 2021-Jul-07
+--------------------
+
+  - Handle URI received with uri-fragment
+    [@martinhsv]
+  - Having ARGS_NAMES, variables proxied
+    [@zimmerle, @martinhsv, @KaNikita]
+  - Use explicit path for cross-compile environments.
+    [Issue #2485 - @dtoubelis]
+  - Fix: FILES variable does not use multipart part name for key
+    [Issue #2377 - @martinhsv]
+  - Replaces put with setenv in SetEnv action
+    [Issue #2469 - @martinhsv, @WGH-, @zimmerle]
+  - Regression: Mark the test as failed in case of segfault.
+    [@zimmerle]
+  - Regex key selection should not be case-sensitive
+    [Issue #2296, #2107, #2297 - @michaelgranzow-avi, @victorhora,
+                                 @airween, @martinhsv, @zimmerle]
+  - Fix: Only delete Multipart tmp files after rules have run
+    [Issue #2427 - @martinhsv]
+  - Fixed MatchedVar on chained rules
+    [Issue #2423, #2435, #2436 - @michaelgranzow-avi]
+  - Add support for new operator rxGlobal
+    [@martinhsv]
+  - Fix maxminddb link on FreeBSD
+    [Issue #2131 - @granalberto, @zimmerle]
+  - Fix IP address logging in Section A
+    [Issue #2300 - @inaratech, @zavazingo, @martinhsv]
+  - Adds support to lua 5.4
+    [@zimmerle]
+  - GeoIP: switch to GEOIP_MEMORY_CACHE from GEOIP_INDEX_CACHE
+    [Issues #2378, #2186 - @defanator]
+  - rx: exit after full match (remove /g emulation); ensure capture
+    groups occuring after unused groups still populate TX vars
+    [Issue #2336 - @martinhsv]
+  - Correct CHANGES file entry for #2234
+  - Add support to test framework for audit log content verification
+    and add regression tests for issues #2000, #2196
+  - Support configurable limit on number of arguments processed
+    [Issue #2234 - @jleproust, @martinhsv]
+  - Multipart Content-Dispostion should allow field: filename*=
+    [@martinhsv]
+  - Fix rule-update-target for non-regex
+    [Issue 2251 - @martinhsv]
+  - Fix configure script when packaging for Buildroot
+    [Issue 2235 - @frankvanbever]
+  - modsecurity.pc.in: add Libs.private
+    [Issue #1918, #2253 - @ffontaine, @Dridi, @victorhora]  
+
 v3.0.4 - 2020-Jan-13
 --------------------
 

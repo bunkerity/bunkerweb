@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -41,7 +41,7 @@ namespace transformations {
 #define ISODIGIT(X) ((X >= '0') && (X <= '7'))
 #endif
 
-std::string SqlHexDecode::evaluate(std::string value,
+std::string SqlHexDecode::evaluate(const std::string &value,
     Transaction *transaction) {
     std::string ret;
     unsigned char *input;

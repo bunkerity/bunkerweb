@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include <string>
 
+#include "modsecurity/rules_set_properties.h"
 #include "modsecurity/actions/action.h"
-#include "modsecurity/rules_properties.h"
 #include "src/actions/transformations/transformation.h"
 
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_URL_DECODE_UNI_H_
@@ -31,9 +31,9 @@ namespace transformations {
 
 class UrlDecodeUni : public Transformation {
  public:
-    explicit UrlDecodeUni(std::string action) : Transformation(action) { }
+    explicit UrlDecodeUni(const std::string &action)  : Transformation(action) { }
 
-    std::string evaluate(std::string exp, Transaction *transaction) override;
+    std::string evaluate(const std::string &exp, Transaction *transaction) override;
     static int inplace(unsigned char *input, uint64_t input_len,
         Transaction *transaction);
 };

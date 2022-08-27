@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -46,7 +46,7 @@ bool InitCol::init(std::string *error) {
         m_collection_key != "global" &&
         m_collection_key != "resource") {
         error->assign("Something wrong with initcol: collection must be " \
-            "`ip' or `global'");
+            "`ip', `global' or `resource'");
         return false;
     }
 
@@ -54,7 +54,7 @@ bool InitCol::init(std::string *error) {
 }
 
 
-bool InitCol::evaluate(Rule *rule, Transaction *t) {
+bool InitCol::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string collectionName(m_string->evaluate(t));
 
     if (m_collection_key == "ip") {

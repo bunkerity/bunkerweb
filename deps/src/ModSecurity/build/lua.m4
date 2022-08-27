@@ -6,13 +6,13 @@ AC_DEFUN([CHECK_LUA],
 [dnl
 
 # Possible names for the lua library/package (pkg-config)
-LUA_POSSIBLE_LIB_NAMES="luajit luajit-5.1 lua53 lua5.3 lua-5.3 lua52 lua5.2 lua-5.2 lua51 lua5.1 lua-5.1 lua"
+LUA_POSSIBLE_LIB_NAMES="lua54 lua5.4 lua-5.4 lua53 lua5.3 lua-5.3 lua52 lua5.2 lua-5.2 lua51 lua5.1 lua-5.1 lua"
 
 # Possible extensions for the library
-LUA_POSSIBLE_EXTENSIONS="so so0 la sl dll dylib so.0.0.0"
+LUA_POSSIBLE_EXTENSIONS="so la sl dll dylib"
 
 # Possible paths (if pkg-config was not found, proceed with the file lookup)
-LUA_POSSIBLE_PATHS="/usr/lib /usr/local/lib /usr/local/lib64 /usr/local/lua /usr/local/liblua /usr/local /opt /usr /usr/lib64 /opt/local"
+LUA_POSSIBLE_PATHS="/usr/lib /usr/local/lib /usr/local/lib64 /usr/local/lua /usr/local/liblua /usr/local /opt /usr /usr/lib64 /opt/local /usr/lib/lua5.3/liblua /usr/lib/lua5.2/liblua"
 
 # Variables to be set by this very own script.
 LUA_CFLAGS=""
@@ -68,6 +68,8 @@ else
         case $LUA_PKG_VERSION in
            (5.1*) LUA_CFLAGS="-DWITH_LUA_5_1 ${LUA_CFLAGS}" ; lua_5_1=1 ;;
            (5.2*) LUA_CFLAGS="-DWITH_LUA_5_2 ${LUA_CFLAGS}" ; lua_5_2=1 ;;
+           (5.3*) LUA_CFLAGS="-DWITH_LUA_5_3 ${LUA_CFLAGS}" ; lua_5_3=1 ;;
+           (5.4*) LUA_CFLAGS="-DWITH_LUA_5_4 ${LUA_CFLAGS}" ; lua_5_4=1 ;;
            (2.0*) LUA_CFLAGS="-DWITH_LUA_5_1 ${LUA_CFLAGS}" ; lua_5_1=1 ;;
            (2.1*) LUA_CFLAGS="-DWITH_LUA_5_1 -DWITH_LUA_JIT_2_1 ${LUA_CFLAGS}" ; lua_5_1=1 ;;
         esac
@@ -162,6 +164,9 @@ AC_DEFUN([CHECK_FOR_LUA_AT], [
        lua_inc_path="${path}"
     elif test -e "${path}/include/lua/lua.h"; then
         lua_inc_path="${path}/include/lua"
+    elif test -e "${path}/include/lua5.4/lua.h"; then
+        lua_inc_path="${path}/include/lua5.4"
+	LUA_VERSION=504
     elif test -e "${path}/include/lua5.3/lua.h"; then
         lua_inc_path="${path}/include/lua5.3"
 	LUA_VERSION=503
@@ -207,6 +212,14 @@ AC_DEFUN([CHECK_FOR_LUA_AT], [
                            #endif ],
                              [ LUA_VERSION=502 ], [ lua_5_2=0 ]
                       )
+        AC_TRY_COMPILE([ #include <lua.h> ],
+                         [ #if (LUA_VERSION_NUM == 504)
+                           return 0;
+                           #else
+                           #error Lua 5.4 not detected
+                           #endif ],
+                             [ LUA_VERSION=504 ], [ lua_5_4=0 ]
+                      )
 
         if test -z "${LUA_VERSION}" ; then
         # As a last resort, try to find LUA version from $lua_inc_path
@@ -214,8 +227,9 @@ AC_DEFUN([CHECK_FOR_LUA_AT], [
             do
             case "$line" in
                 (\#define\ LUA_VERSION_NUM*501*) LUA_VERSION=501 ;;
-                (\#define\ LUA_VERSION_NUM*502*) LUA_VERSION=501 ;;
-                (\#define\ LUA_VERSION_NUM*503*) LUA_VERSION=503
+                (\#define\ LUA_VERSION_NUM*502*) LUA_VERSION=502 ;;
+                (\#define\ LUA_VERSION_NUM*503*) LUA_VERSION=503 ;;
+                (\#define\ LUA_VERSION_NUM*504*) LUA_VERSION=504
             esac
             done <"${lua_inc_path}/lua.h"
             AC_MSG_NOTICE([LUA_VERSION is ${LUA_VERSION} found at: ${lua_inc_path}])
@@ -226,6 +240,8 @@ AC_DEFUN([CHECK_FOR_LUA_AT], [
         case $LUA_VERSION in
            (501) LUA_CFLAGS="-DWITH_LUA_5_1 ${LUA_CFLAGS}" ; lua_5_1=1 ;;
            (502) LUA_CFLAGS="-DWITH_LUA_5_2 ${LUA_CFLAGS}" ; lua_5_2=1 ;;
+           (503) LUA_CFLAGS="-DWITH_LUA_5_3 ${LUA_CFLAGS}" ; lua_5_3=1 ;;
+           (504) LUA_CFLAGS="-DWITH_LUA_5_4 ${LUA_CFLAGS}" ; lua_5_4=1 ;;
         esac
     fi
 

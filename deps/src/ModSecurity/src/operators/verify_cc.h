@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -16,7 +16,14 @@
 #ifndef SRC_OPERATORS_VERIFY_CC_H_
 #define SRC_OPERATORS_VERIFY_CC_H_
 
+#if WITH_PCRE2
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+#else
 #include <pcre.h>
+#endif
+
+
 #include <string>
 #include <memory>
 #include <utility>
@@ -31,18 +38,26 @@ class VerifyCC : public Operator {
     /** @ingroup ModSecurity_Operator */
     explicit VerifyCC(std::unique_ptr<RunTimeString> param)
         : Operator("VerifyCC", std::move(param)),
+#if WITH_PCRE2
+        m_pc(NULL) { }
+#else
         m_pc(NULL),
         m_pce(NULL) { }
+#endif
     ~VerifyCC();
 
-    int luhnVerify(const char *ccnumber, int len);
-    bool evaluate(Transaction *t, Rule *rule,
+    bool evaluate(Transaction *t, RuleWithActions *rule,
         const std::string& input,
         std::shared_ptr<RuleMessage> ruleMessage)  override;
     bool init(const std::string &param, std::string *error) override;
  private:
+#if WITH_PCRE2
+    pcre2_code *m_pc;
+#else
     pcre *m_pc;
     pcre_extra *m_pce;
+#endif
+    static int luhnVerify(const char *ccnumber, int len);
 };
 
 }  // namespace operators
