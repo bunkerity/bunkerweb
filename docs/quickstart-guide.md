@@ -372,7 +372,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -p 80:8080 \
     	   -p 443:8443 \
     	   -v bw-data:/data \
-    	   -e MULTISITE=yes
+    	   -e MULTISITE=yes \
     	   -e "SERVER_NAME=app1.example.com app2.example.com app3.example.com" \
     	   -e USE_REVERSE_PROXY=yes \
     	   -e REVERSE_PROXY_URL=/ \

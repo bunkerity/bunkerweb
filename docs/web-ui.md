@@ -60,7 +60,7 @@ Because the web UI is a web application, the recommended installation procedure 
     You can now create the BunkerWeb container with specific settings and volumes related to the web UI, please note the special `bunkerweb.UI` label which is mandatory :
     ```shell
     docker run -d \
-       --name mybunker
+       --name mybunker \
        --network bw-services \
        -p 80:8080 \
        -p 443:8443 \
@@ -114,7 +114,7 @@ Because the web UI is a web application, the recommended installation procedure 
            -e DOCKER_HOST=tcp://mydocker:2375 \
            -e ADMIN_USERNAME=admin \
            -e ADMIN_PASSWORD=changeme \
-           -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
+           -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/ \
            bunkerity/bunkerweb-ui:1.4.3 && \
     docker network connect bw-docker myui
     ```
