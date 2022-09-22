@@ -210,7 +210,7 @@ class Config(ApiCaller, ConfigCaller) :
             log("CONFIG", "❌", "reload failed, configuration will not work as expected...")
 
         # remove autoconf configs
-        if configs != None :
+        if configs == None :
             ret = self.__remove_configs()
             if not ret :
                 success = False
