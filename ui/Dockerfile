@@ -52,7 +52,7 @@ RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "n
 
 VOLUME /data /etc/nginx
 
-EXPOSE 5000
+EXPOSE 7000
 
 WORKDIR /opt/bunkerweb/ui
 USER nginx:nginx
