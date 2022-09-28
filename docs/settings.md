@@ -2,11 +2,11 @@
 
 !!! info "Settings generator tool"
 
-    To help you tuning BunkerWeb we have made an easy to use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io).
+    To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io).
 
-This section contains the full list of settings supported by BunkerWeb. If you are not familiar with BunkerWeb, you should first read the [concepts](/1.4/concepts) section of the documentation. Please follow the instructions for your own [integration](/1.4/integrations) on how to apply the settings.
+This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](/1.4/concepts) section of the documentation. Please follow the instructions for your own [integration](/1.4/integrations) on how to apply the settings.
 
-As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server you will need to add the primary (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.
+As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.
 
 When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`, `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.
 
@@ -42,7 +42,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 |          Setting          |  Default   | Context |Multiple|                                   Description                                   |
 |---------------------------|------------|---------|--------|---------------------------------------------------------------------------------|
 |`USE_ANTIBOT`              |`no`        |multisite|no      |Activate antibot feature.                                                        |
-|`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to solve the challenge.               |
+|`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.               |
 |`ANTIBOT_SESSION_SECRET`   |`random`    |global   |no      |Secret used to encrypt sessions variables for storing data related to challenges.|
 |`ANTIBOT_SESSION_NAME`     |`random`    |global   |no      |Name of the cookie used by the antibot feature.                                  |
 |`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                  |
@@ -69,7 +69,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`BAD_BEHAVIOR_STATUS_CODES`|`400 401 403 404 405 429 444`|multisite|no      |List of HTTP status codes considered as 'bad'.                                              |
 |`BAD_BEHAVIOR_BAN_TIME`    |`86400`                      |multisite|no      |The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.|
 |`BAD_BEHAVIOR_THRESHOLD`   |`10`                         |multisite|no      |Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.    |
-|`BAD_BEHAVIOR_COUNT_TIME`  |`60`                         |multisite|no      |Period of time where we count 'bad' HTTP status codes.                                      |
+|`BAD_BEHAVIOR_COUNT_TIME`  |`60`                         |multisite|no      |Period of time during which we count 'bad' HTTP status codes.                                      |
 
 ### Blacklist
 
@@ -275,16 +275,16 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`REVERSE_PROXY_BUFFERING`              |`yes`                             |multisite|yes     |Enable or disable buffering of responses from proxied resource.                                                     |
 |`REVERSE_PROXY_KEEPALIVE`              |`no`                              |multisite|yes     |Enable or disable keepalive connections with the proxied resource.                                                  |
 |`REVERSE_PROXY_AUTH_REQUEST`           |                                  |multisite|yes     |Enable authentication using an external provider (value of auth_request directive).                                 |
-|`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
+|`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
 |`REVERSE_PROXY_AUTH_REQUEST_SET`       |                                  |multisite|yes     |List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).|
 |`USE_PROXY_CACHE`                      |`no`                              |multisite|no      |Enable or disable caching of the proxied resources.                                                                 |
 |`PROXY_CACHE_PATH_LEVELS`              |`1:2`                             |global   |no      |Hierarchy levels of the cache.                                                                                      |
 |`PROXY_CACHE_PATH_ZONE_SIZE`           |`10m`                             |global   |no      |Maximum size of cached metadata when caching proxied resources.                                                     |
 |`PROXY_CACHE_PATH_PARAMS`              |`max_size=100m`                   |global   |no      |Additional parameters to add to the proxy_cache directive.                                                          |
 |`PROXY_CACHE_METHODS`                  |`GET HEAD`                        |multisite|no      |HTTP methods that should trigger a cache operation.                                                                 |
-|`PROXY_CACHE_MIN_USES`                 |`2`                               |multisite|no      |The minimimum number of requests before a response is cached.                                                       |
+|`PROXY_CACHE_MIN_USES`                 |`2`                               |multisite|no      |The minimum number of requests before a response is cached.                                                       |
 |`PROXY_CACHE_KEY`                      |`$scheme$host$request_uri`        |multisite|no      |The key used to uniquely identify a cached response.                                                                |
-|`PROXY_CACHE_VALID`                    |`200=24h 301=1h 302=24h`          |multisite|no      |Define the caching time dependending on the HTTP status code (list of status=time).                                 |
+|`PROXY_CACHE_VALID`                    |`200=24h 301=1h 302=24h`          |multisite|no      |Define the caching time depending on the HTTP status code (list of status=time).                                 |
 |`PROXY_NO_CACHE`                       |`$http_pragma $http_authorization`|multisite|no      |Conditions to disable caching of responses.                                                                         |
 |`PROXY_CACHE_BYPASS`                   |`0`                               |multisite|no      |Conditions to bypass caching of responses.                                                                          |
 |`REVERSE_PROXY_CONNECT_TIMEOUT`        |`60s`                             |multisite|yes     |Timeout when connecting to the proxied resource.                                                                    |

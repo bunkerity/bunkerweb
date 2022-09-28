@@ -1,6 +1,6 @@
 # Plugins
 
-BunkerWeb comes with a plugin system to make it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.
+BunkerWeb comes with a plugin system making it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.
 
 ## Official plugins
 
@@ -35,7 +35,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     mkdir -p ./bw-data/plugins
     ```
 
-    Then you can drop the plugins of your choice into that folder :
+    Then, you can drop the plugins of your choice into that folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
@@ -90,7 +90,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     docker exec -it myautoconf /bin/bash
     ```
 
-    Once you have a shell inside the container, you can drop the plugins of your choice inside the `/data/plugins` folder :
+    Once you have a shell inside the container, you will be able to drop the plugins of your choice inside the `/data/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins
@@ -105,7 +105,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     kubectl exec -it myautoconf -- /bin/bash
     ```
 
-    Once you have a shell inside the container, you can drop the plugins of your choice inside the `/data/plugins` folder :
+    Once you have a shell inside the container, you will be able to drop the plugins of your choice inside the `/data/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins
@@ -152,7 +152,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/master/core) (already included in BunkerWeb but they are plugins technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/master/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 The first step is to create a folder that will contain the plugin :
 
@@ -291,10 +291,10 @@ The declared functions are automatically called during specific contexts. Here a
 
 | Function |                                   Context                                    | Description                                                                                                                                               | Return value                                                                                                                                                                                                                                                                                                                            |
 | :------: | :--------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  `init`  |   [init_by_lua](https://github.com/openresty/lua-nginx-module#init_by_lua)   | Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.                  | `ret`, `err`<ul><li>`ret` (boolean) : true if no error else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
-| `access` | [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua) | Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.                     | `ret`, `err`, `return`, `status`<ul><li>`ret` (boolean) : true if no error else false</li><li>`err` (string) : success or error message</li><li>`return` (boolean) : true if you want to stop the access phase and send a status to the client</li><li>`status` (number) : the return value to set if `return` is set to true</li></ul> |
-|  `log`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example. | `ret`, `err`<ul><li>`ret` (boolean) : true if no error else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
-|  `log_default`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Same as `log` but only called on the default server. | `ret`, `err`<ul><li>`ret` (boolean) : true if no error else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
+|  `init`  |   [init_by_lua](https://github.com/openresty/lua-nginx-module#init_by_lua)   | Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.                  | `ret`, `err`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
+| `access` | [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua) | Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.                     | `ret`, `err`, `return`, `status`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li><li>`return` (boolean) : true if you want to stop the access phase and send a status to the client</li><li>`status` (number) : the return value to set if `return` is set to true</li></ul> |
+|  `log`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example. | `ret`, `err`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
+|  `log_default`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Same as `log` but only called on the default server. | `ret`, `err`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
 
 #### Libraries
 
@@ -412,12 +412,12 @@ Content of foo is : {{ foo }}.
 {% endif %}
 ```
 
-Please note that every form submission is protected via a CSRF token, you will need to include the follow snippet into your forms :
+Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
 ```html
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 ```
 
-Retrieving user submitted data is pretty simple thanks to the request module provided by Flask :
+Retrieving user submitted data is pretty simple, thank to the request module provided by Flask :
 
 ```python
 from flask import request

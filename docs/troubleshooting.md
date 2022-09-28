@@ -2,16 +2,16 @@
 
 ## Logs
 
-When troubleshooting, the logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
+When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
 
 Please note that you can set `LOG_LEVEL` setting to `info` (default : `notice`) to increase the verbosity of BunkerWeb.
 
-Here is how you can access the logs depending on your integration :
+Here is how you can access the logs, depending on your integration :
 
 === "Docker"
 
     !!! tip "List containers"
-    	To list the running containers you can use the following command :
+    	To list the running containers, you can use the following command :
     	```shell
     	docker ps
     	```
@@ -29,7 +29,7 @@ Here is how you can access the logs depending on your integration :
 === "Docker autoconf"
 
     !!! tip "List containers"
-    	To list the running containers you can use the following command :
+    	To list the running containers, you can use the following command :
     	```shell
     	docker ps
     	```
@@ -49,12 +49,12 @@ Here is how you can access the logs depending on your integration :
 === "Swarm"
 
     !!! tip "List services"
-    	To list the services you can use the following command :
+    	To list the services, you can use the following command :
     	```shell
     	docker service ls
     	```
 
-    You can use the `docker service logs` command (replace `mybunker` and `myautoconf` my with the name of your services) :
+    You can use the `docker service logs` command (replace `mybunker` and `myautoconf` with the name of your services) :
     ```shell
     docker service logs mybunker
     docker service logs myautoconf
@@ -63,11 +63,11 @@ Here is how you can access the logs depending on your integration :
 === "Kubernetes"
 
     !!! tip "List pods"
-    	To list the pods you can use the following command :
+    	To list the pods, you can use the following command :
     	```shell
     	kubectl get pods
     	```
-    You can use the `kubectl logs` command (replace `mybunker` and `myautoconf` my with the name of your pods) :
+    You can use the `kubectl logs` command (replace `mybunker` and `myautoconf` with the name of your pods) :
     ```shell
     kubectl logs mybunker
     kubectl logs myautoconf
@@ -101,14 +101,14 @@ Here is how you can access the logs depending on your integration :
 
 ## Permissions
 
-Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb especially if you use custom configurations (more info [here](/1.4/quickstart-guide/#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
+Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](/1.4/quickstart-guide/#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
 
 ## ModSecurity
 
 The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :
 
 - Each matched rule will increase an anomaly score (so many rules can match a single request)
-- PL1 include rules with fewer chances of false positives (but less security than PL4)
+- PL1 includes rules with fewer chances of false positives (but less security than PL4)
 - the default threshold for anomaly score is 5 for requests and 4 for responses
 
 Let's take the following logs as an example of ModSecurity detection using default configuration (formatted for better readability) :
@@ -184,7 +184,7 @@ Let's take the following logs as an example of ModSecurity detection using defau
 	client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"
 ```
 
-As we can see there are 3 different logs :
+As we can see, there are 3 different logs :
 
 1. Rule **930120** matched
 2. Rule **932160** matched
@@ -192,11 +192,11 @@ As we can see there are 3 different logs :
 
 One important thing to understand is that rule **949110** is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is **10** in this example). You should never remove the **949110** rule !
 
-If it's a false-positive you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](/1.4/quickstart-guide/#custom-configurations)).
+If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](/1.4/quickstart-guide/#custom-configurations)).
 
 ## Bad Behavior
 
-A common false-positive case is that the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](/1.4/security-tuning/#bad-behavior)). You should start by reviewing the settings and edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
+A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](/1.4/security-tuning/#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
 ## IP unban
 
@@ -256,7 +256,7 @@ You can manually unban an IP which can be useful when doing some tests but it ne
 
 ## Whitelisting
 
-If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist it using the [whitelisting feature](/1.4/security-tuning/#blacklisting-and-whitelisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](/1.4/security-tuning/#blacklisting-and-whitelisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook

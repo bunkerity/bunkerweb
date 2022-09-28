@@ -29,7 +29,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     docker network create bw-net
     ```
 
-    Then instantiate your app :
+    Then, instantiate your app :
     ```shell
     docker run -d \
            --name myapp \
@@ -263,7 +263,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     systemctl status bunkerweb
     ```
 
-    If it's already running we can restart it :
+    If it's already running, we can restart it :
     ```shell
     systemctl restart bunkerweb
     ```
@@ -275,7 +275,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 
 === "Ansible"
 
-    We will assume that you already have a service running and you want to use bunkerweb as a reverse-proxy.
+    We will assume that you already have a service running and you want to use Bunkerweb as a reverse-proxy.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
     ```shell
@@ -871,7 +871,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     systemctl status bunkerweb
     ```
 
-    If it's already running we can restart it :
+    If it's already running, we can restart it :
     ```shell
     systemctl restart bunkerweb
     ```
@@ -940,7 +940,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 
 ## Behind load balancer or reverse proxy
 
-When BunkerWeb is itself behind a load balancer or a reverse proxy, you will need to configure it so it can get the real IP address of the clients. If you don't do it, the security features will block the IP address of the load balancer or reverse proxy instead of the client one.
+When BunkerWeb is itself behind a load balancer or a reverse proxy, you need to configure it so it can get the real IP address of the clients. If you don't, the security features will block the IP address of the load balancer or reverse proxy instead of the client's one.
 
 BunkerWeb actually supports two methods to retrieve the real IP address of the client :
 
@@ -1048,7 +1048,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Kubernetes"
 
-    You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+    You will need to add the settings to the environment variables of the Bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
     ```yaml
 	apiVersion: apps/v1
 	kind: DaemonSet
@@ -1085,7 +1085,7 @@ REAL_IP_HEADER=X-Forwarded-For
 	...
 	```
 
-    Don't forget to restart the bunkerweb service once it's done.
+    Don't forget to restart the Bunkerweb service once it's done.
 
 === "Ansible"
 
@@ -1218,7 +1218,7 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Kubernetes"
 
-    You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+    You will need to add the settings to the environment variables of the Bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
     ```yaml
 	apiVersion: apps/v1
 	kind: DaemonSet
@@ -1258,7 +1258,7 @@ REAL_IP_HEADER=proxy_protocol
 	...
 	```
 
-    Don't forget to restart the bunkerweb service once it's done.
+    Don't forget to restart the Bunkerweb service once it's done.
 
 === "Ansible"
 
@@ -1303,15 +1303,15 @@ Because BunkerWeb is based on the NGINX web server, you can add custom NGINX con
 - **modsec-crs** : before the OWASP Core Rule Set is loaded
 - **modsec** : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
 
-Custom configurations can be applied globally or only for a specific server when applicable and if multisite mode is enabled.
+Custom configurations can be applied globally or only for a specific server when applicable and if the multisite mode is enabled.
 
 The howto depends on the integration used but under the hood, applying custom configurations is done by adding files ending with the .conf suffix in their name to specific folders. To apply a custom configuration for a specific server, the file is written to a subfolder which is named as the primary server name.
 
-Some integrations offer a more convenient way of applying configurations for example using [Configs](https://docs.docker.com/engine/swarm/configs/) with Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with Kubernetes.
+Some integrations offer a more convenient way of applying configurations such as using [Configs](https://docs.docker.com/engine/swarm/configs/) with Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with Kubernetes.
 
 === "Docker"
 
-    When using the [Docker integration](/1.4/integrations/#docker), you have two choices for adding custom configurations :
+    When using the [Docker integration](/1.4/integrations/#docker), you have two choices for the addition of custom configurations :
     
     - Using specific settings `*_CUSTOM_CONF_*` as environment variables (easiest)
     - Writing .conf files to the volume mounted on /data
@@ -1454,7 +1454,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
     To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
 
-    When creating a Config you will need to add special labels :
+    When creating a Config, you will need to add special labels :
 
     * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)
     * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
@@ -1477,7 +1477,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 
     To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
 
-    When creating a ConfigMap you will need to add special labels :
+    When creating a ConfigMap, you will need to add special labels :
 
     * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)
     * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
@@ -1520,7 +1520,7 @@ Some integrations offer a more convenient way of applying configurations for exa
     chmod -R 770 /opt/bunkerweb/configs
     ```
 
-    Don't forget to restart the bunkerweb service once it's done.
+    Don't forget to restart the Bunkerweb service once it's done.
 
 === "Ansible"
 
@@ -1562,7 +1562,7 @@ Some integrations offer a more convenient way of applying configurations for exa
 ## PHP
 
 !!! warning "Support is in beta"
-	At the moment, PHP support with BunkerWeb is still in beta and we recommend you to use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
+	At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
 
 BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) instances. We will assume that you are already familiar with managing that kind of services.
 
@@ -1580,7 +1580,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     When using the [Docker integration](/1.4/integrations/#docker), to support PHP applications, you will need to :
     
 	- Copy your application files into the `www` subfolder of the `bw-data` volume of BunkerWeb
-	- Setup a PHP-FPM container for your application and mount the `bw-data/www` folder
+	- Set up a PHP-FPM container for your application and mount the `bw-data/www` folder
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
 	Create the `bw-data/www` folder :
@@ -1661,7 +1661,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     When using the [Docker autoconf integration](/integrations/#docker-autoconf), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP application and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM container.
 
-    First of all create the application folder (e.g. `myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+    First of all, create the application folder (e.g. `myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
 	chown -R 33:101 ./myapp && \
     find ./myapp -type f -exec chmod 0640 {} \; && \
@@ -1677,7 +1677,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   bunkerity/bunkerweb:1.4.3
 	```
 	
-	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
+	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
 	```shell
 	docker run -d \
 	       --name myphp \
@@ -1725,7 +1725,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     When using the [Docker Swarm integration](/integrations/#swarm), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP application and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM container. As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
 
-    First of all create the application folder (e.g. `/shared/myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+    First of all, create the application folder (e.g. `/shared/myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
 	chown -R 33:101 /shared/myapp && \
     find /shared/myapp -type f -exec chmod 0640 {} \; && \
@@ -1741,7 +1741,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   bunkerity/bunkerweb:1.4.3
 	```
 
-	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
+	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
 	```shell
 	docker service create \
 	       --name myphp \
@@ -1793,7 +1793,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
@@ -1847,7 +1847,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Ansible"
 
-	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
@@ -1863,7 +1863,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	```
 
 	!!! info "PHP-FPM with Ansible"
-		The PHP-FPM configuration part using Ansible is out-of-scope of this documentation.
+		The PHP-FPM configuration part using Ansible is out of the scope of this documentation.
 	
 	Content of the `my_variables.env` configuration file :
 	```env
@@ -1876,7 +1876,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
 	```
 	
-	The `custom_site` variable can be used to specificy a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+	The `custom_site` variable can be used to specify a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
 	```ini
 	[mybunkers]
 	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
@@ -2040,7 +2040,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/integrations/#docker-autoconf), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folders containing your PHP applications and mount them both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM containers.
+    When using the [Docker autoconf integration](/integrations/#docker-autoconf), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP applications and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM containers.
 
     First of all create the applications folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your web files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
@@ -2058,7 +2058,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   bunkerity/bunkerweb:1.4.3
 	```
 	
-	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :
+	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :
 	
 	=== "App #1"
 		```shell
@@ -2166,7 +2166,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     When using the [Docker Swarm integration](/integrations/#swarm), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP applications and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM containers. As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
 
-    FFirst of all create the applications folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+    First of all, create the applications folder (e.g. `myapp`), the subfolders for each application (e.g, `app1`, `app2` and `app3`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
 	chown -R 33:101 /shared/myapps && \
     find /shared/myapps -type f -exec chmod 0640 {} \; && \
@@ -2182,7 +2182,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   bunkerity/bunkerweb:1.4.3
 	```
 
-	Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
+	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
 	
 	=== "App #1"
 		```shell
@@ -2298,7 +2298,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
@@ -2357,7 +2357,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Ansible"
 
-	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it for storing your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
 	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
@@ -2373,7 +2373,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	```
 
 	!!! info "PHP-FPM with Ansible"
-		The PHP-FPM configuration part using Ansible is out-of-scope of this documentation.
+		The PHP-FPM configuration part using Ansible is out of the scope of this documentation.
 
 	Content of the `my_variables.env` configuration file :
 	```env
@@ -2391,7 +2391,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
 	```
 
-	The `custom_site` variable can be used to specificy a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+	The `custom_site` variable can be used to specify a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
 	```ini
 	[mybunkers]
 	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
