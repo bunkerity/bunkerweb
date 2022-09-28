@@ -1,4 +1,3 @@
-from email import message
 import os
 from shutil import rmtree, copytree, chown
 from logging import getLogger, INFO, ERROR, StreamHandler, Formatter
@@ -38,11 +37,11 @@ from time import time
 import tarfile
 import zipfile
 
-from ui.src.ConfigFiles import ConfigFiles
-from ui.src.Config import Config
-from ui.src.ReverseProxied import ReverseProxied
-from ui.src.User import User
-from ui.utils import (
+from src.ConfigFiles import ConfigFiles
+from src.Config import Config
+from src.ReverseProxied import ReverseProxied
+from src.User import User
+from utils import (
     check_settings,
     env_to_summary_class,
     form_plugin_gen,
@@ -55,10 +54,11 @@ from ui.utils import (
 )
 
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/api")
 
-from ui.src.Instances import Instances
-from api.API import API
-from utils.ApiCaller import ApiCaller
+from src.Instances import Instances
+from API import API
+from ApiCaller import ApiCaller
 
 # Set up logger
 logger = getLogger("flask_app")

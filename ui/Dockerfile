@@ -56,7 +56,5 @@ EXPOSE 5000
 
 WORKDIR /opt/bunkerweb/ui
 USER nginx:nginx
-ENV PYTHONUNBUFFERED 1
-ENV FLASK_APP "main.py"
-ENV FLASK_ENV production
-CMD ["flask", "run", "--host=0.0.0.0", "--port=7000"]
+
+CMD ["gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "main:app"]
