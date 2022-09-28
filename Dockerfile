@@ -77,8 +77,6 @@ RUN apk add "freetype>=2.10.4-r3" "curl>=7.79.1-r2" "libcurl>=7.79.1-r2" "openss
 
 VOLUME /data
 
-EXPOSE 8080/tcp 8443/tcp
-
 USER nginx:nginx
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /opt/bunkerweb/helpers/healthcheck.sh
