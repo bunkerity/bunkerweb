@@ -204,11 +204,11 @@ Here is the list of related settings :
 |  `ANTIBOT_HCAPTCHA_SECRET` and `ANTIBOT_RECAPTCHA_SECRET`  |              | The Secret value to use when `USE_ANTIBOT` is set to `hcaptcha` or `recaptcha`.                                                                                                 |
 |                 `ANTIBOT_RECAPTCHA_SCORE`                  |    `0.7`     | The minimum score that clients must have when `USE_ANTIBOT` is set to `recaptcha`.                                                                                              |
 
-## Blacklisting and whitelisting
+## Blacklisting, whitelisting and greylisting
 
-The blacklisting security feature is very easy to understand : if a specific criteria is met, the client will be banned. As for the whitelisting, it's the exact opposite : if a specific criteria is met, the client will be allowed and no additional security check will be done.
+The blacklisting security feature is very easy to understand : if a specific criteria is met, the client will be banned. As for the whitelisting, it's the exact opposite : if a specific criteria is met, the client will be allowed and no additional security check will be done. Whereas for the greylisting :  if a specific criteria is met, the client will be allowed but additional security checks will be done.
 
-You can configure blacklisting and whitelisting at the same time. If that's the case, note that whitelisting is executed before blacklisting : if a criteria is true for both, the client will be whitelisted.
+You can configure blacklisting, whitelisting and greylisting at the same time. If that's the case, note that whitelisting is executed before blacklisting and greylisting : even if a criteria is true for all of them, the client will be whitelisted.
 
 ### Blacklisting
 
@@ -228,13 +228,31 @@ You can use the following settings to setup blacklisting :
 |       `BLACKLIST_URI`       |                                                                                                                                | List of requests URI to blacklist.                                                            |
 |    `BLACKLIST_URI_URLS`     |                                                                                                                                | List of URLs containing request URI to blacklist.                                             |
 
+### Greylisting
+
+You can use the following settings to setup greylisting :
+
+|           Setting           |                                                            Default                                                             | Description                                                                                   |
+| :-------------------------: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------- |
+|       `USE_GREYLIST`       |                                                             `no`                                                              | When set to `yes`, will enable greylisting based on various criteria.                        |
+|       `GREYLIST_IP`        |                                                                                                                                | List of IPs and networks to greylist.                                                        |
+|     `GREYLIST_IP_URLS`     |                                                                                           | List of URL containing IP and network to greylist. |
+|      `GREYLIST_RDNS`       |                                                                                                         | List of reverse DNS to greylist.                                                             |
+|    `GREYLIST_RDNS_URLS`    |                                                                                                                                | List of URLs containing reverse DNS to greylist.                                             |
+|       `GREYLIST_ASN`       |                                                                                                                                | List of ASN to greylist.                                                                     |
+|    `GREYLIST_ASN_URLS`     |                                                                                                                                | List of URLs containing ASN to greylist.                                                     |
+|   `GREYLIST_USER_AGENT`    |                                                                                                                                | List of User-Agents to greylist.                                                             |
+| `GREYLIST_USER_AGENT_URLS` |  | List of URLs containing User-Agent(s) to greylist.                                           |
+|       `GREYLIST_URI`       |                                                                                                                                | List of requests URI to greylist.                                                            |
+|    `GREYLIST_URI_URLS`     |                                                                                                                                | List of URLs containing request URI to greylist.                                             |
+
 ### Whitelisting
 
 You can use the following settings to setup whitelisting :
 
 |           Setting           |                                                                                           Default                                                                                            | Description                                                                                                              |
 | :-------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------- |
-|       `USE_WHITELIST`       |                                                                                            `yes`                                                                                             | When set to `yes`, will enable blacklisting based on various criteria.                                                   |
+|       `USE_WHITELIST`       |                                                                                            `yes`                                                                                             | When set to `yes`, will enable whitelisting based on various criteria.                                                   |
 |       `WHITELIST_IP`        | `20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247 54.208.102.37 107.21.1.8` | List of IP and network to whitelist. The default list contains IP from DuckDuckGo crawler.                               |
 |     `WHITELIST_IP_URLS`     |                                                                                              ``                                                                                              | List of URLs containing IP and network to whitelist.                                                                     |
 |      `WHITELIST_RDNS`       |         `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`         | List of reverse DNS to whitelist. Default list contains various reverse DNS of search engines and social media crawlers. |
