@@ -6,6 +6,7 @@ from os import getcwd, _exit
 from os.path import isfile
 from traceback import format_exc
 from json import loads
+from subprocess import run
 path.append(getcwd() + "/utils")
 path.append(getcwd() + "/tests")
 
@@ -25,6 +26,8 @@ test_type = argv[1]
 if not test_type in ["linux", "docker", "autoconf", "swarm", "kubernetes", "ansible"] :
     log("TESTS", "❌", "Wrong type argument " + test_type)
     exit(1)
+
+run("docker system prune", shell=True)
 
 log("TESTS", "ℹ️", "Starting tests for " + test_type + " ...")
 ret = False
@@ -98,3 +101,5 @@ if not ret :
     exit(1)
 
 log("TESTS", "ℹ️", "All tests finished for " + test_type + " !")
+
+run("docker system prune", shell=True)

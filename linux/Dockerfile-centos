@@ -6,6 +6,7 @@ ENV NGINX_VERSION 1.20.2
 # Install fpm
 RUN dnf install -y epel-release && \
     dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
+    dnf module -y reset ruby && dnf module -y enable ruby:2.6 && dnf module -y install ruby:2.6/common && \
     gem install fpm
 
 # Copy dependencies sources folder

@@ -124,9 +124,8 @@ class Config:
                     if key_without_server_name in self.__plugins_settings
                     else True
                 ):
-                    server_key = f"{server_name}_{k}"
                     if not k.startswith(server_name) or k in self.__plugins_settings:
-                        conf[server_key] = service[k]
+                        conf[f"{server_name}_{k}"] = service[k]
                     else:
                         conf[k] = service[k]
 
@@ -269,7 +268,7 @@ class Config:
         self.__gen_conf(self.get_config(), services)
         return f"Configuration for {variables['SERVER_NAME']} has been generated.", 0
 
-    def edit_service(self, old_server_name: str, variables: dict) -> str:
+    def edit_service(self, old_server_name: str, variables: dict) -> Tuple[str, int]:
         """Edits a service
 
         Parameters
@@ -284,9 +283,13 @@ class Config:
         str
             the confirmation message
         """
-        self.delete_service(old_server_name)
-        self.new_service(variables)
-        return f"Configuration for {old_server_name} has been edited."
+        message, error = self.delete_service(old_server_name)
+
+        if error:
+            return message, error
+
+        message, error = self.new_service(variables)
+        return f"Configuration for {old_server_name} has been edited.", error
 
     def edit_global_conf(self, variables: dict) -> str:
         """Edits the global conf
@@ -345,6 +348,10 @@ class Config:
         for k in full_env:
             if k.startswith(service_name):
                 del new_env[k]
+
+                for service in new_services:
+                    if k in service:
+                        del service[k]
 
         self.__gen_conf(new_env, new_services)
         return f"Configuration for {service_name} has been deleted.", 0

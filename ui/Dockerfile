@@ -52,11 +52,9 @@ RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "n
 
 VOLUME /data /etc/nginx
 
-EXPOSE 5000
+EXPOSE 7000
 
 WORKDIR /opt/bunkerweb/ui
 USER nginx:nginx
-ENV PYTHONUNBUFFERED 1
-ENV FLASK_APP "main.py"
-ENV FLASK_ENV production
-CMD ["flask", "run", "--host=0.0.0.0", "--port=7000"]
+
+CMD ["gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "main:app"]

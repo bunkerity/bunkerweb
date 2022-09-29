@@ -106,7 +106,7 @@
         "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
 			"context": "multisite",
 			"default": "",
-			"help": "Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+			"help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
 			"id": "reverse-proxy-auth-request-signin-url",
 			"label": "Auth request signin URL",
 			"regex": "^.*$",
@@ -171,7 +171,7 @@
 		"PROXY_CACHE_MIN_USES": {
 			"context": "multisite",
 			"default": "2",
-			"help": "The minimimum number of requests before a response is cached.",
+			"help": "The minimum number of requests before a response is cached.",
 			"id": "proxy-cache-min-uses",
 			"label": "Reverse proxy cache minimum uses",
 			"regex": "^.*$",
@@ -189,7 +189,7 @@
 		"PROXY_CACHE_VALID": {
 			"context": "multisite",
 			"default": "200=24h 301=1h 302=24h",
-			"help": "Define the caching time dependending on the HTTP status code (list of status=time).",
+			"help": "Define the caching time depending on the HTTP status code (list of status=time).",
 			"id": "proxy-cache-valid",
 			"label": "Reverse proxy cache valid",
 			"regex": "^.*$",

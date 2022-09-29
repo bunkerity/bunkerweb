@@ -3,7 +3,7 @@ from re import compile as re_compile
 from shutil import rmtree, move as shutil_move
 from typing import Tuple
 
-from ui.utils import path_to_dict
+from utils import path_to_dict
 
 
 class ConfigFiles:

@@ -25,7 +25,7 @@
 		"ANTIBOT_URI": {
 			"context": "multisite",
 			"default": "/challenge",
-			"help": "Unused URI that clients will be redirected to solve the challenge.",
+			"help": "Unused URI that clients will be redirected to to solve the challenge.",
 			"id": "antibot-uri",
 			"label": "Antibot URL",
 			"regex": "^.*$",
