@@ -417,7 +417,7 @@ Please note that every form submission is protected via a CSRF token, you will n
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 ```
 
-Retrieving user submitted data is pretty simple, thank to the request module provided by Flask :
+Retrieving user submitted data is pretty simple, thanks to the request module provided by Flask :
 
 ```python
 from flask import request
