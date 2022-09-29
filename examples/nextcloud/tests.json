@@ -3,8 +3,7 @@
 	"kinds": [
 		"docker",
 		"autoconf",
-		"swarm",
-        "kubernetes",
+	        "kubernetes",
 		"linux"
 	],
 	"timeout": 120,

@@ -347,15 +347,21 @@ jobs:
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
 
+      # Prepare tests
+      - name: Install tests dependencies
+        run: pip3 install -r ./tests/requirements.txt
+      - name: Set variables
+        run: cat /opt/.runner_env >> $GITHUB_ENV
+
       # Run tests
-      - name: Run Docker tests
-        run: ./tests/main.py "docker"
-      - name: Run Autoconf tests
-        run: ./tests/main.py "autoconf"
-      - name: Run Swarm tests
-        run: ./tests/main.py "swarm"
-      - name: Run Kubernetes tests
-        run: ./tests/main.py "kubernetes"
+      #- name: Run Docker tests
+        #run: ./tests/main.py "docker"
+      #- name: Run Autoconf tests
+        #run: ./tests/main.py "autoconf"
+      #- name: Run Swarm tests
+        #run: ./tests/main.py "swarm"
+      #- name: Run Kubernetes tests
+        #run: ./tests/main.py "kubernetes"
       - name: Generate Linux packages and build test images
         run: ./tests/linux.sh ${{ env.BUILD_MODE }}
       - name: Run Linux Ubuntu tests
