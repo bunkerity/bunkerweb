@@ -176,7 +176,7 @@ def manage_bunkerweb(method: str, operation: str = "reloads", *args):
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0])
         elif operation == "edit":
-            operation = app.config["CONFIG"].edit_service(args[1], args[0])
+            operation, error = app.config["CONFIG"].edit_service(args[1], args[0])
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2])
 

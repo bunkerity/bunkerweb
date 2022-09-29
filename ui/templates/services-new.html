@@ -107,10 +107,11 @@
                       </div>
                       {% endif %} {% endfor %}
                     </div>
-                    {% for plugin in config["CONFIG"].get_plugins() %} {% if
+                    {% with global_config = config["CONFIG"].get_config() %}{%
+                    for plugin in config["CONFIG"].get_plugins() %} {% if
                     plugin["settings"] and check_settings(plugin["settings"],
-                    "multisite") %} {{ form_plugin_gen({}, plugin, "new")|safe
-                    }} {% endif %} {% endfor %}
+                    "multisite") %} {{ form_plugin_gen(global_config, plugin,
+                    "new")|safe }} {% endif %} {% endfor %} {% endwith %}
                   </div>
                 </div>
               </main>
