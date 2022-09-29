@@ -275,7 +275,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 
 === "Ansible"
 
-    We will assume that you already have a service running and you want to use Bunkerweb as a reverse-proxy.
+    We will assume that you already have a service running and you want to use BunkerWeb as a reverse-proxy.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
     ```shell
@@ -1048,7 +1048,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Kubernetes"
 
-    You will need to add the settings to the environment variables of the Bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+    You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
     ```yaml
 	apiVersion: apps/v1
 	kind: DaemonSet
@@ -1085,7 +1085,7 @@ REAL_IP_HEADER=X-Forwarded-For
 	...
 	```
 
-    Don't forget to restart the Bunkerweb service once it's done.
+    Don't forget to restart the BunkerWeb service once it's done.
 
 === "Ansible"
 
@@ -1218,7 +1218,7 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Kubernetes"
 
-    You will need to add the settings to the environment variables of the Bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+    You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
     ```yaml
 	apiVersion: apps/v1
 	kind: DaemonSet
@@ -1258,7 +1258,7 @@ REAL_IP_HEADER=proxy_protocol
 	...
 	```
 
-    Don't forget to restart the Bunkerweb service once it's done.
+    Don't forget to restart the BunkerWeb service once it's done.
 
 === "Ansible"
 
@@ -1520,7 +1520,7 @@ Some integrations offer a more convenient way of applying configurations such as
     chmod -R 770 /opt/bunkerweb/configs
     ```
 
-    Don't forget to restart the Bunkerweb service once it's done.
+    Don't forget to restart the BunkerWeb service once it's done.
 
 === "Ansible"
 

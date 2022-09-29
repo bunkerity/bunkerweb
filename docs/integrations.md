@@ -849,7 +849,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	chown -R root:nginx /opt/bunkerweb
 	```
 	
-	Last but not least, you will need to set up system unit files :
+	Last but not least, you will need to set up systemd unit files :
 	```shell
 	cp /tmp/bunkerweb/linux/*.service /etc/systemd/system && \
 	systemctl daemon-reload && \

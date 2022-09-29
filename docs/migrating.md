@@ -21,7 +21,7 @@ Instead of supporting only Authelia, we decided to support generic auth request 
 
 ## Replaced BLOCK_\*, WHITELIST_\* and BLACKLIST_\* settings
 
-The blocking mechanisms have been completely redesigned. We have detected that a lot of false positives came from the default blacklists hardcoded into bunkerized. That's why we now give users the possibility of choosing their own blacklists (and also whitelists). For IP address, reverse DNS, user-agent, URI and ASN, see the [Blacklisting and whitelisting](/1.4/security-tuning/#blacklisting-and-whitelisting) section of the [security tuning](/1.4/security-tuning).
+The blocking mechanisms have been completely redesigned. We have detected that a lot of false positives came from the default blacklists hardcoded into bunkerized. That's why we now give users the possibility of choosing their own blacklists (and also whitelists) for IP address, reverse DNS, user-agent, URI and ASN, see the [Blacklisting and whitelisting](/1.4/security-tuning/#blacklisting-and-whitelisting) section of the [security tuning](/1.4/security-tuning).
 
 ## Changed WHITELIST_USER_AGENT setting behavior
 
