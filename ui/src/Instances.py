@@ -2,8 +2,8 @@ import os
 from typing import Any, Union
 from subprocess import run
 
-from api.API import API
-from utils.ApiCaller import ApiCaller
+from API import API
+from ApiCaller import ApiCaller
 
 
 class Instance:
