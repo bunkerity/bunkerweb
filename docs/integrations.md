@@ -241,7 +241,7 @@ docker run \
 Here is the docker-compose equivalent for the BunkerWeb autoconf stack :
 
 ```yaml
-version: '3'
+version: '3.5'
 
 services:
 
