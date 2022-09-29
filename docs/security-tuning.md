@@ -1,6 +1,6 @@
 # Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](/1.4/settings). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [settings](/1.4/settings). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
 !!! tip "Other settings"
     This section only focuses on security tuning, see the [settings section](/1.4/settings) of the documentation for other settings.
@@ -14,7 +14,7 @@ The first thing to define is the kind of action to do when a client access is de
 - `403` : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)
 - `444` : close the connection (no web page or custom content will be displayed)
 
-The default value is `403` and we suggest you to set it to `444` only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.
+The default value is `403` and we suggest you set it to `444` only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.
 
 ### Default server
 
@@ -36,7 +36,7 @@ To disable serving files from the www folder, you can set `SERVE_FILES` to `no` 
 
 ### Headers
 
-Headers are very important when it comes to HTTP security. Not only some of them are too verbose but others can add some security, especially on the client-side.
+Headers are very important when it comes to HTTP security. While some of them might be too verbose, others' verbosity will need to be increased, especially on the client-side.
 
 #### Remove headers
 
@@ -121,7 +121,7 @@ When `USE_CUSTOM_HTTPS` is set to `yes`, BunkerWeb will check every day if the c
 
 ### Self-signed
 
-If you want to quickly test HTTPS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related
+If you want to quickly test HTTPS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related settings :
 
 |          Setting           |        Default         | Description                                                                                                                |
 | :------------------------: | :--------------------: | :------------------------------------------------------------------------------------------------------------------------- |
@@ -177,13 +177,13 @@ That kind of security measure is implemented and enabled by default in BunkerWeb
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | List of HTTP status codes considered as "suspicious".                        |
 |   `BAD_BEHAVIOR_BAN_TIME`   |            `86400`            | The duration time (in seconds) of a ban when a client reached the threshold. |
 |  `BAD_BEHAVIOR_THRESHOLD`   |             `10`              | Maximum number of "suspicious" HTTP status codes within the time period.     |
-|  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time where we count "suspicious" HTTP status codes.                |
+|  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time during which we count "suspicious" HTTP status codes.                |
 
-In other words, with the default values, if a client generates more than `10` status codes from the list `400 401 403 404 405 429 444` within `60` seconds his IP address will be banned for `86400` seconds.
+In other words, with the default values, if a client generates more than `10` status codes from the list `400 401 403 404 405 429 444` within `60` seconds their IP address will be banned for `86400` seconds.
 
 ## Antibot
 
-Attackers will certainly use automated tools to exploit/find some vulnerabilities in your web applications. One countermeasure is to challenge the users to detect if they look like a bot. If the challenge is solved, we consider the client as "legitimate" and he can access the web application.
+Attackers will certainly use automated tools to exploit/find some vulnerabilities in your web applications. One countermeasure is to challenge the users to detect if they look like a bot. If the challenge is solved, we consider the client as "legitimate" and they can access the web application.
 
 That kind of security is implemented but not enabled by default in BunkerWeb and is called "Antibot". Here is the list of supported challenges :
 
@@ -204,15 +204,15 @@ Here is the list of related settings :
 |  `ANTIBOT_HCAPTCHA_SECRET` and `ANTIBOT_RECAPTCHA_SECRET`  |              | The Secret value to use when `USE_ANTIBOT` is set to `hcaptcha` or `recaptcha`.                                                                                                 |
 |                 `ANTIBOT_RECAPTCHA_SCORE`                  |    `0.7`     | The minimum score that clients must have when `USE_ANTIBOT` is set to `recaptcha`.                                                                                              |
 
-## Blacklisting and whitelisting
+## Blacklisting, whitelisting and greylisting
 
-The blacklisting security feature is very easy to understand : if a specific criteria is met, the client will be banned. As for the whitelisting, it's the exact opposite : if a specific criteria is met, the client will be allowed and no additional security check will be done.
+The blacklisting security feature is very easy to understand : if a specific criteria is met, the client will be banned. As for the whitelisting, it's the exact opposite : if a specific criteria is met, the client will be allowed and no additional security check will be done. Whereas for the greylisting :  if a specific criteria is met, the client will be allowed but additional security checks will be done.
 
-You can configure blacklisting and whitelisting at the same time. If that's the case, note that whitelisting is executed before blacklisting : if a criteria is true for both, the client will be whitelisted.
+You can configure blacklisting, whitelisting and greylisting at the same time. If that's the case, note that whitelisting is executed before blacklisting and greylisting : even if a criteria is true for all of them, the client will be whitelisted.
 
 ### Blacklisting
 
-You can use the following settings to setup blacklisting :
+You can use the following settings to set up blacklisting :
 
 |           Setting           |                                                            Default                                                             | Description                                                                                   |
 | :-------------------------: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------- |
@@ -228,13 +228,31 @@ You can use the following settings to setup blacklisting :
 |       `BLACKLIST_URI`       |                                                                                                                                | List of requests URI to blacklist.                                                            |
 |    `BLACKLIST_URI_URLS`     |                                                                                                                                | List of URLs containing request URI to blacklist.                                             |
 
+### Greylisting
+
+You can use the following settings to set up greylisting :
+
+|           Setting           |                                                            Default                                                             | Description                                                                                   |
+| :-------------------------: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------- |
+|       `USE_GREYLIST`       |                                                             `no`                                                              | When set to `yes`, will enable greylisting based on various criteria.                        |
+|       `GREYLIST_IP`        |                                                                                                                                | List of IPs and networks to greylist.                                                        |
+|     `GREYLIST_IP_URLS`     |                                                                                           | List of URL containing IP and network to greylist. |
+|      `GREYLIST_RDNS`       |                                                                                                         | List of reverse DNS to greylist.                                                             |
+|    `GREYLIST_RDNS_URLS`    |                                                                                                                                | List of URLs containing reverse DNS to greylist.                                             |
+|       `GREYLIST_ASN`       |                                                                                                                                | List of ASN to greylist.                                                                     |
+|    `GREYLIST_ASN_URLS`     |                                                                                                                                | List of URLs containing ASN to greylist.                                                     |
+|   `GREYLIST_USER_AGENT`    |                                                                                                                                | List of User-Agents to greylist.                                                             |
+| `GREYLIST_USER_AGENT_URLS` |  | List of URLs containing User-Agent(s) to greylist.                                           |
+|       `GREYLIST_URI`       |                                                                                                                                | List of requests URI to greylist.                                                            |
+|    `GREYLIST_URI_URLS`     |                                                                                                                                | List of URLs containing request URI to greylist.                                             |
+
 ### Whitelisting
 
-You can use the following settings to setup whitelisting :
+You can use the following settings to set up whitelisting :
 
 |           Setting           |                                                                                           Default                                                                                            | Description                                                                                                              |
 | :-------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------- |
-|       `USE_WHITELIST`       |                                                                                            `yes`                                                                                             | When set to `yes`, will enable blacklisting based on various criteria.                                                   |
+|       `USE_WHITELIST`       |                                                                                            `yes`                                                                                             | When set to `yes`, will enable whitelisting based on various criteria.                                                   |
 |       `WHITELIST_IP`        | `20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247 54.208.102.37 107.21.1.8` | List of IP and network to whitelist. The default list contains IP from DuckDuckGo crawler.                               |
 |     `WHITELIST_IP_URLS`     |                                                                                              ``                                                                                              | List of URLs containing IP and network to whitelist.                                                                     |
 |      `WHITELIST_RDNS`       |         `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`         | List of reverse DNS to whitelist. Default list contains various reverse DNS of search engines and social media crawlers. |
@@ -274,7 +292,7 @@ BunkerWeb supports applying a limit policy to :
 - Number of connections per IP
 - Number of requests per IP and URL within a time period
 
-Please note that it should not be considered as an effective solution against DoS or DDoS but rather an anti-bruteforce measure or rate limit policy for API.
+Please note that it should not be considered as an effective solution against DoS or DDoS but rather as an anti-bruteforce measure or rate limit policy for API.
 
 In both cases (connections or requests) if the limit is reached, the client will receive the HTTP status "429 - Too Many Requests".
 
@@ -294,11 +312,11 @@ The following settings are related to the Limiting requests feature :
 
 |     Setting      | Default | Description                                                                                                                                                                                |
 | :--------------: | :-----: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_REQ`  |  `yes`  | When set to `yes`, will limit the number of requests for a given IP on each URL with a period of time.                                                                                     |
+| `USE_LIMIT_REQ`  |  `yes`  | When set to `yes`, will limit the number of requests for a given IP on each URL within a period of time.                                                                                     |
 | `LIMIT_REQ_URL`  |   `/`   | The URL that will be limited. The special URL `/` will define a default limit for all URLs.                                                                                                |
 | `LIMIT_REQ_RATE` | `2r/s`  | The limit to apply to the corresponding URL. Syntax is `Xr/Y` where **X** is the number of request(s) and **Y** the period of time (s for second, m for minute, h for hour and d for day). |
 
-Please note that you can add different rate for different URLs by adding a number to suffix to the settings for example : `LIMIT_REQ_URL_1=/url1`, `LIMIT_REQ_RATE_1=5r/d`, `LIMIT_REQ_URL_2=/url2`, `LIMIT_REQ_RATE_2=1r/m`, ...
+Please note that you can add different rates for different URLs by adding a number as a suffix to the settings for example : `LIMIT_REQ_URL_1=/url1`, `LIMIT_REQ_RATE_1=5r/d`, `LIMIT_REQ_URL_2=/url2`, `LIMIT_REQ_RATE_2=1r/m`, ...
 
 Another important thing to note is that `LIMIT_REQ_URL` accepts LUA patterns.
 
@@ -316,12 +334,12 @@ Here is the list of related settings :
 | `BLACKLIST_COUNTRY` |         | List of 2 letters country code to blacklist. |
 | `WHITELIST_COUNTRY` |         | List of 2 letters country code to whitelist. |
 
-Using both country blacklist and whitelist at the same time makes no sense. If you do please note that only the whitelist will be executed.
+Using both country blacklist and whitelist at the same time makes no sense. If you do, please note that only the whitelist will be executed.
 
 ## Authentication
 
 ### Auth basic
-You can quickly protect sensitive resources like the admin area for example by requiring HTTP basic authentication. Here is the list of related settings :
+You can quickly protect sensitive resources like the admin area for example, by requiring HTTP basic authentication. Here is the list of related settings :
 
 |          Setting          |      Default      | Description                                                                                  |
 | :-----------------------: | :---------------: | :------------------------------------------------------------------------------------------- |
@@ -332,12 +350,12 @@ You can quickly protect sensitive resources like the admin area for example by r
 |   `AUTH_BASIC_TEXT`   | `Restricted area` | Text to display in the auth prompt.                                                          |
 
 ### Auth request
-You can deploy complex authentification (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/master/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/master/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 
 |                Setting                |             Default              | Context |Multiple|                                                    Description                                                     |
 |---------------------------------------|----------------------------------|---------|--------|--------------------------------------------------------------------------------------------------------------------|
 |`REVERSE_PROXY_AUTH_REQUEST`           |                                  |multisite|yes     |Enable authentication using an external provider (value of auth_request directive).                                 |
-|`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
+|`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
 |`REVERSE_PROXY_AUTH_REQUEST_SET`       |                                  |multisite|yes     |List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).|

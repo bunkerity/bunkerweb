@@ -2,11 +2,11 @@
 
 ## Who maintains BunkerWeb ?
 
-BunkerWeb is maintained by [Bunkerity](https://www.bunkerity.com), a French 🇫🇷 company specialised in Cybersecurity 🛡️.
+BunkerWeb is maintained by [Bunkerity](https://www.bunkerity.com), a French 🇫🇷 company specialized in Cybersecurity 🛡️.
 
 ## Do you offer professional services ?
 
-Yes, we offer professional services related to BunkerWeb like :
+Yes, we offer professional services related to BunkerWeb such as :
 
 - Consulting
 - Support
@@ -17,7 +17,7 @@ Please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) if yo
 
 ## Where to get community support ?
 
-To get free community support you can use the following medias :
+To get free community support, you can use the following medias :
 
 - The #help channel of BunkerWeb in the [Discord server](https://discord.com/invite/fTf46FmtyD)
 - The help category of [GitHub dicussions](https://github.com/bunkerity/bunkerweb/discussions)

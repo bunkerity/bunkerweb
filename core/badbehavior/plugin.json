@@ -44,7 +44,7 @@
 		"BAD_BEHAVIOR_COUNT_TIME": {
 			"context": "multisite",
 			"default": "60",
-			"help": "Period of time where we count 'bad' HTTP status codes.",
+			"help": "Period of time during which we count 'bad' HTTP status codes.",
 			"id": "bad-behavior-period",
 			"label": "Period (in seconds)",
 			"regex": "^.*$",

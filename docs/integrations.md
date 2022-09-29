@@ -9,13 +9,13 @@
 
 Using BunkerWeb as a [Docker](https://www.docker.com/) container is a quick and easy way to test and use it as long as you are familiar with the Docker technology.
 
-We provide ready to use prebuilt images for x64, x86 armv8 and armv7 architectures on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
+We provide ready-to-use prebuilt images for x64, x86 armv8 and armv7 architectures on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
 
 ```shell
 docker pull bunkerity/bunkerweb:1.4.3
 ```
 
-Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and take a coffee ☕ because it may be long depending on your hardware) :
+Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and get a coffee ☕ because it may take a long time depending on your hardware) :
 
 ```shell
 git clone https://github.com/bunkerity/bunkerweb.git && \
@@ -23,7 +23,7 @@ cd bunkerweb && \
 docker build -t my-bunkerweb .
 ```
 
-Usage and configuration of the BunkerWeb container are based on :
+BunkerWeb container's usage and configuration are based on :
 
 - **Environment variables** to configure BunkerWeb and meet your use cases
 - **Volume** to cache important data and mount custom configuration files
@@ -66,7 +66,7 @@ The easiest way of managing the volume is by using a named one. You will first n
 docker volume create bw_data
 ```
 
-Once it's created, you can mount it on `/data` when running the container :
+Once it's created, you will be able to mount it on `/data` when running the container :
 
 ```shell
 docker run \
@@ -92,7 +92,7 @@ volumes:
 
 !!! warning "Using local folder for persistent data"
 
-    BunkerWeb runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is the security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+    BunkerWeb runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
     But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
     ```shell
     mkdir bw-data && \
@@ -282,7 +282,7 @@ networks:
     name: bw-services
 ```
 
-Once the stack is setup, you can now create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically setup BunkerWeb :
+Once the stack is set up, you will be able to create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically set up BunkerWeb :
 
 ```shell
 docker run \
@@ -330,11 +330,11 @@ networks:
 </figure>
 
 !!! info "Docker autoconf"
-    The Docker autoconf integration is similar of the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
+    The Docker autoconf integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
 
-To automatically configure BunkerWeb instances, a special service, called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
+To automatically configure BunkerWeb instances, a special service called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
 
-Like the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels starting with the special **bunkerweb.** prefix.
+Like the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined by using labels starting with the special **bunkerweb.** prefix.
 
 The recommended setup is to schedule the **BunkerWeb service** as a **global service** on all worker nodes and the **autoconf service** as a **single replicated service** on a manager node.
 
@@ -447,7 +447,7 @@ volumes:
   bw-data:
 ```
 
-Once the BunkerWeb Swarm stack is set up and running (see autoconf logs for more information), you can now deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
+Once the BunkerWeb Swarm stack is set up and running (see autoconf logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
 
 ```shell
 docker service \
@@ -655,7 +655,7 @@ spec:
           mountPath: /data
 ```
 
-Once the BunkerWeb Kubernetes stack is setup and running (see autoconf logs for more information), you can now deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/1.4/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
+Once the BunkerWeb Kubernetes stack is set up and running (see autoconf logs for more information), you will be able to deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/1.4/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -684,9 +684,9 @@ List of supported Linux distros :
 - Fedora 36
 - CentOS Stream 8
 
-Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuild packages of BunkerWeb but you can build it from source.
+Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
 
-Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
+Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script to add and trust the repository automatically (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
 === "Debian"
 
@@ -769,7 +769,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 === "CentOS Stream"
 
-    The first step is to add NGINX official repository, create the following file at `/etc/yum.repos.d/nginx.repo` :
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
     ```conf
     [nginx-stable]
     name=nginx stable repo
@@ -813,7 +813,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	https://github.com/bunkerity/bunkerweb.git /tmp/bunkerweb
 	```
 	
-	BunkerWeb needs some dependencies to be compiled and install to `/opt/bunkerweb/deps`, the easiest way to it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
+	BunkerWeb needs some dependencies to be compiled and installed to `/opt/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
 	```
 	mkdir /opt/bunkerweb/deps && \
 	/tmp/bunkerweb/deps/install.sh
@@ -826,7 +826,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
 	```
 	
-	Once dependencies had been installed, you can now copy the BunkerWeb sources to the target `/opt/bunkerweb` folder :
+	Once dependencies are installed, you will be able to copy the BunkerWeb sources to the target `/opt/bunkerweb` folder :
 	```shell
 	for src in api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/ui.env linux/scripts ; do
 		cp -r /tmp/bunkerweb/${src} /opt/bunkerweb
@@ -849,7 +849,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	chown -R root:nginx /opt/bunkerweb
 	```
 	
-	Last but not least, you will need to setup systemd unit files :
+	Last but not least, you will need to set up systemd unit files :
 	```shell
 	cp /tmp/bunkerweb/linux/*.service /etc/systemd/system && \
 	systemctl daemon-reload && \
@@ -859,7 +859,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	systemctl enable bunkerweb-ui
 	```
 
-Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
+The configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
 
 ```conf
 MY_SETTING_1=value1
@@ -892,12 +892,12 @@ List of supported Linux distros :
 
 A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/fl0ppy_d1sk/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
 
-First of all download the role from ansible-galaxy :
+First of all, download the role from ansible-galaxy :
 ```shell
 ansible-galaxy install fl0ppy_d1sk.bunkerweb
 ```
 
-Next create an inventory by adding the IP adress or FQDN of one or more remote systems, either in `/etc/ansible/hosts` or in your own playbook `inventory.yml` :
+Next, create an inventory by adding the IP adress or FQDN of one or more remote systems, either in `/etc/ansible/hosts` or in your own playbook `inventory.yml` :
 ```toml
 [mybunkers]
 192.0.2.50
