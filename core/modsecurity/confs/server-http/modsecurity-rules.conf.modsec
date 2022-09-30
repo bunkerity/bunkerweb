@@ -13,7 +13,15 @@ SecRule REQUEST_HEADERS:Content-Type "application/json" \
      "id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
 
 # maximum data size
+{% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") %}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
+{% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") %}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
+{% elif MAX_CLIENT_SIZE.isdigit() %}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
+{% else %}
 SecRequestBodyLimit 13107200
+{% endif %}
 SecRequestBodyNoFilesLimit 131072
 
 # reject requests if bigger than max data size
