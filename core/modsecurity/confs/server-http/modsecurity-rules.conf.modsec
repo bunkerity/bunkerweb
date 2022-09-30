@@ -17,6 +17,8 @@ SecRule REQUEST_HEADERS:Content-Type "application/json" \
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
 {% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") %}
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
+{% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") %}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 * 1024 }}
 {% elif MAX_CLIENT_SIZE.isdigit() %}
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
 {% else %}
