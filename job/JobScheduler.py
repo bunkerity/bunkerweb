@@ -50,12 +50,12 @@ class JobScheduler(ApiCaller) :
         reload = True
         if os.path.isfile("/usr/sbin/nginx") and os.path.isfile("/opt/bunkerweb/tmp/nginx.pid") :
             log("SCHEDULER", "ℹ️", "Reloading nginx ...")
-            proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, env=self.__env)
-            reload = proc.returncode != 0
+            proc = subprocess.run(["/usr/sbin/nginx", "-s", "reload"], stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, env=self.__env)
+            reload = proc.returncode == 0
             if reload :
                 log("SCHEDULER", "ℹ️", "Successfuly reloaded nginx")
             else :
-                log("SCHEDULER", "❌", "Error while reloading nginx")
+                log("SCHEDULER", "❌", "Error while reloading nginx - returncode: " + str(proc.returncode) + " - error: " + proc.stderr.decode("utf-8"))
         else :
             log("SCHEDULER", "ℹ️", "Reloading nginx ...")
             reload = self._send_to_apis("POST", "/reload")
