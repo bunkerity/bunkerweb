@@ -1,6 +1,6 @@
 {
 	"id": "badbehavior",
-	"order": 2,
+	"order": 999,
 	"name": "Bad behavior",
 	"description": "Ban IP generating too much 'bad' HTTP status code in a period of time.",
 	"version": "0.1",

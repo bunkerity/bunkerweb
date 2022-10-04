@@ -8,7 +8,7 @@ class Configurator :
 
     def __init__(self, settings, core, plugins, variables) :
         self.__settings = self.__load_settings(settings)
-        self.__core = self.__load_plugins(core)
+        self.__core = core
         self.__plugins = self.__load_plugins(plugins)
         self.__variables = self.__load_variables(variables)
         self.__multisite = False
