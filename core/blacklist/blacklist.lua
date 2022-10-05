@@ -69,14 +69,14 @@ function _M:access()
 	if cached_ignored_ip then
 		logger.log(ngx.NOTICE, "BLACKLIST", "IP is in cached ignore blacklist (info: " .. cached_ignored_ip .. ")")
 	elseif cached_ip and cached_ip ~= "ok" then
-			return true, "IP is in blacklist cache (info = " .. cached_ip .. ")", true, utils.get_deny_status()
+		return true, "IP is in blacklist cache (info = " .. cached_ip .. ")", true, utils.get_deny_status()
 	end
 	local cached_uri, err = self:is_in_cache("uri" .. ngx.var.uri)
 	local cached_ignored_uri, err = self:is_in_cache("ignore_uri" .. ngx.var.uri)
 	if cached_ignored_uri then
 		logger.log(ngx.NOTICE, "BLACKLIST", "URI is in cached ignore blacklist (info: " .. cached_ignored_uri .. ")")
 	elseif cached_uri and cached_uri ~= "ok" then
-			return true, "URI is in blacklist cache (info = " .. cached_uri .. ")", true, utils.get_deny_status()
+		return true, "URI is in blacklist cache (info = " .. cached_uri .. ")", true, utils.get_deny_status()
 	end
 	local cached_ua = true
 	local cached_ignored_ua = false
@@ -86,13 +86,13 @@ function _M:access()
 		if cached_ignored_ua then
 			logger.log(ngx.NOTICE, "BLACKLIST", "User-Agent is in cached ignore blacklist (info: " .. cached_ignored_ua .. ")")
 		elseif cached_ua and cached_ua ~= "ok" then
-				return true, "User-Agent is in blacklist cache (info = " .. cached_ua .. ")", true, utils.get_deny_status()
+			return true, "User-Agent is in blacklist cache (info = " .. cached_ua .. ")", true, utils.get_deny_status()
 		end
 	end
 	if cached_ignored_ip and cached_ignored_uri and cached_ignored_ua then
 		logger.log(ngx.NOTICE, "BLACKLIST", "full request is in cached ignore blacklist")
 	elseif cached_ip and cached_uri and cached_ua then
-			return true, "full request is in blacklist cache (not blacklisted)", false, nil
+		return true, "full request is in blacklist cache (not blacklisted)", false, nil
 	end
 
 	-- Get list
