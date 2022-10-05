@@ -143,6 +143,13 @@ class Config(ApiCaller, ConfigCaller) :
 
         # stop scheduler just in case caller didn't do it
         self.stop_scheduler()
+        
+        # remove old autoconf configs if it exists
+        if self.__configs:
+            ret = self.__remove_configs()
+            if not ret :
+                success = False
+                log("CONFIG", "❌", "removing custom configs failed, configuration will not work as expected...")
 
         # update values
         self.__instances = instances
@@ -208,13 +215,6 @@ class Config(ApiCaller, ConfigCaller) :
         if not ret :
             success = False
             log("CONFIG", "❌", "reload failed, configuration will not work as expected...")
-
-        # remove autoconf configs
-        if configs != None :
-            ret = self.__remove_configs()
-            if not ret :
-                success = False
-                log("CONFIG", "❌", "removing custom configs failed, configuration will not work as expected...")
 
         return success
 
