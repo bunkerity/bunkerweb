@@ -1,0 +1,161 @@
+# yamllint disable rule:comments-indentation
+---
+theme: auto
+
+jwt_secret: changeme
+
+default_redirection_url: https://example.com
+
+##
+## Server Configuration
+##
+server:
+  host: 0.0.0.0
+  port: 9091
+
+##
+## Log Configuration
+##
+log:
+  ## Level of verbosity for logs: info, debug, trace.
+  level: debug
+
+##
+## TOTP Configuration
+##
+## Parameters used for TOTP generation.
+totp:
+  disable: false
+  issuer: authelia.com
+  algorithm: sha1
+  digits: 6
+  period: 30
+  skew: 1
+  secret_size: 32
+
+##
+## WebAuthn Configuration
+##
+## Parameters used for WebAuthn.
+webauthn:
+  disable: false
+  timeout: 60s
+  display_name: Authelia
+  attestation_conveyance_preference: indirect
+  user_verification: preferred
+
+##
+## NTP Configuration
+##
+## This is used to validate the servers time is accurate enough to validate TOTP.
+ntp:
+  address: "time.cloudflare.com:123"
+  version: 4
+  max_desync: 3s
+  disable_startup_check: false
+  disable_failure: false
+
+##
+## Authentication Backend Provider Configuration
+##
+## Used for verifying user passwords and retrieve information such as email address and groups users belong to.
+##
+## The available providers are: `file`, `ldap`. You must use only one of these providers.
+authentication_backend:
+  ## Password Reset Options.
+  password_reset:
+    disable: true
+  refresh_interval: disable
+
+  file:
+    path: /config/users_database.yml
+
+##
+## Password Policy Configuration.
+##
+password_policy:
+  standard:
+    enabled: false
+    min_length: 12
+    max_length: 0
+    require_uppercase: true
+    require_lowercase: true
+    require_number: true
+    require_special: true
+  zxcvbn:
+    enabled: true
+    min_score: 3
+
+##
+## Access Control Configuration
+##
+## Access control is a list of rules defining the authorizations applied for one resource to users or group of users.
+access_control:
+  default_policy: deny
+  networks:
+    - name: internal
+      networks:
+        - 10.20.30.0/24
+        - 192.168.1.0/24
+  rules:
+    - domain: "example.com"
+      networks:
+        - internal
+      policy: bypass
+    - domain: "*.example.com"
+      networks:
+        - internal
+      policy: bypass
+    - domain: "radarr.example.com"
+      subject: "group:admins"
+      policy: one_factor
+    - domain: "sonarr.example.com"
+      subject: "group:admins"
+      policy: one_factor
+    - domain: "prowlarr.example.com"
+      subject: "group:admins"
+      policy: one_factor
+    - domain: "transmission.example.com"
+      subject: "group:admins"
+      policy: one_factor
+    - domain: "example.com"
+      policy: one_factor
+
+##
+## Session Provider Configuration
+##
+## The session cookies identify the user once logged in.
+## The available providers are: `memory`, `redis`. Memory is the provider unless redis is defined.
+session:
+  name: authelia_session
+  domain: example.com
+  same_site: lax
+  secret: insecure_session_secret
+  expiration: 1h
+  inactivity: 1h
+  remember_me_duration: 1M
+
+##
+## Regulation Configuration
+##
+## This mechanism prevents attackers from brute forcing the first factor. It bans the user if too many attempts are made
+## in a short period of time.
+regulation:
+  max_retries: 5
+  find_time: 2m
+  ban_time: 1d
+
+storage:
+  encryption_key: 8EUfpC7aWuxoJVmmHsAonoAQt38Hxq3H3rYWjNMUdSpMVz6Y6jGzFCrtrFHqBYnUHZN4JF
+  local:
+    path: /config/db.sqlite3
+
+##
+## Notification Provider
+##
+## Notifications are sent to users when they require a password reset, a Webauthn registration or a TOTP registration.
+## The available providers are: filesystem, smtp. You must use only one of these providers.
+notifier:
+  disable_startup_check: true
+  filesystem:
+    filename: /config/notification.txt

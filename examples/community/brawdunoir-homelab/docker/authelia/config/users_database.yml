@@ -1,0 +1,8 @@
+users:
+  John:
+    displayname: "John Doe"
+    # password is "whynot123"
+    password: "$argon2id$v=19$m=65536,t=3,p=4$ZjVaWjlOQ2tZOCttdTArZQ$3fpj/Mc1XQgX17NuDcS0BKVXXVfMEIZ7knf2yT+L77M"
+    email: john.doe@example.com
+    groups:
+      - admins

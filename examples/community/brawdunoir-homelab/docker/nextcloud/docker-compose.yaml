@@ -1,0 +1,81 @@
+version: '3.5'
+
+services:
+  nextcloud:
+    image: nextcloud:23-apache
+    container_name: nextcloud
+    restart: unless-stopped
+    volumes:
+      - path/to/app:/var/www/html
+      - path/to/data:/var/www/html/data
+    networks:
+      bw-services:
+        aliases:
+          - nextcloud
+      nextcloud:
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - MYSQL_HOST=mydb
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=changeme # should be same as mariadb password
+      - REDIS_HOST=redis
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.example.com
+      - TRUSTED_PROXIES=192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
+      - APACHE_DISABLE_REWRITE_IP=1
+    labels:
+      - "bunkerweb.SERVER_NAME=nextcloud.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://nextcloud"
+      - "bunkerweb.MAX_CLIENT_SIZE=10G"
+      - "bunkerweb.USE_CLIENT_CACHE=yes"
+      - "bunkerweb.SERVE_FILES=no"
+      - "bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS|SEARCH"
+      - "bunkerweb.X_FRAME_OPTIONS=SAMEORIGIN"
+      - "bunkerweb.USE_GZIP=yes"
+      - "bunkerweb.BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444"
+      - "bunkerweb.WHITELIST_USER_AGENT=WebDAV"
+      - "bunkerweb.LIMIT_REQ_URL_1=/apps"
+      - "bunkerweb.LIMIT_REQ_RATE_1=15r/s"
+      - "bunkerweb.LIMIT_REQ_URL_2=/apps/text/session/sync"
+      - "bunkerweb.LIMIT_REQ_RATE_2=8r/s"
+      - "bunkerweb.LIMIT_REQ_URL_3=/core/preview"
+      - "bunkerweb.LIMIT_REQ_RATE_3=50r/s"
+
+  mydb:
+    image: mariadb:10.8
+    container_name: mariadb
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    networks:
+      nextcloud:
+    volumes:
+      - $HOMEDIR/nextcloud/db:/var/lib/mysql
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - MYSQL_ROOT_PASSWORD=changeme
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=changeme # should be same as nextcloud database password
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      nextcloud:
+
+
+networks:
+  nextcloud:
+  bw-services:
+    name: bw-services

@@ -1,0 +1,30 @@
+version: '3.5'
+
+services:
+  jellyfin:
+    container_name: jellyfin
+    image: cr.hotio.dev/hotio/jellyfin
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    restart: unless-stopped
+    networks:
+      bw-services:
+        aliases:
+          - jellyfin
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - path/to/config:/config
+      - path/to/data:/media # should be the same as radarr/sonarr
+    labels:
+      - "bunkerweb.SERVER_NAME=jellyfin.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://jellyfin:8096"
+
+networks:
+  bw-services:
+    name: bw-services
