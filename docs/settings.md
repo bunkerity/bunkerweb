@@ -233,8 +233,6 @@ When settings are considered as "multiple", it means that you can have multiple 
 | `USE_MODSECURITY`                 | `yes`          |multisite|no      | Enable ModSecurity WAF.                          |
 | `USE_MODSECURITY_CRS`             | `yes`          |multisite|no      | Enable OWASP Core Rule Set.                      |
 | `MODSECURITY_SEC_AUDIT_ENGINE`    | `RelevantOnly` |multisite|no      | SecAuditEngine directive of ModSecurity.         |
-| `MODSECURITY_SEC_RULE_ENGINE`     | `On`           |multisite|no      | SecRuleEngine directive of ModSecurity.          |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS` | `ABCFHZ`       |multisite|no      | SecAuditLogParts directive of ModSecurity. |
 
 ### PHP
 
