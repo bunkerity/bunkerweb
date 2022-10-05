@@ -75,7 +75,12 @@ try :
         "RDNS": True,
         "ASN" : True,
         "USER_AGENT": True,
-        "URI": True
+        "URI": True,
+        "IGNORE_IP": True,
+        "IGNORE_RDNS": True,
+        "IGNORE_ASN" : True,
+        "IGNORE_USER_AGENT": True,
+        "IGNORE_URI": True
     }
     all_fresh = True
     for kind in kinds_fresh :
@@ -94,7 +99,12 @@ try :
         "RDNS": [],
         "ASN" : [],
         "USER_AGENT": [],
-        "URI": []
+        "URI": [],
+        "IGNORE_IP": [],
+        "IGNORE_RDNS": [],
+        "IGNORE_ASN" : [],
+        "IGNORE_USER_AGENT": [],
+        "IGNORE_URI": []
     }
     for kind in urls :
         for url in os.getenv("BLACKLIST_" + kind + "_URLS", "").split(" ") :
