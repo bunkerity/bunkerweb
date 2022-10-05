@@ -228,11 +228,11 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### ModSecurity
 
-|           Setting            |   Default    | Context |Multiple|              Description               |
-|------------------------------|--------------|---------|--------|----------------------------------------|
-|`USE_MODSECURITY`             |`yes`         |multisite|no      |Enable ModSecurity WAF.                 |
-|`USE_MODSECURITY_CRS`         |`yes`         |multisite|no      |Enable OWASP Core Rule Set.             |
-|`MODSECURITY_SEC_AUDIT_ENGINE`|`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.|
+| Setting                           | Default        | Context |Multiple| Description                                      |
+|-----------------------------------|----------------|---------|--------|--------------------------------------------------|
+| `USE_MODSECURITY`                 | `yes`          |multisite|no      | Enable ModSecurity WAF.                          |
+| `USE_MODSECURITY_CRS`             | `yes`          |multisite|no      | Enable OWASP Core Rule Set.                      |
+| `MODSECURITY_SEC_AUDIT_ENGINE`    | `RelevantOnly` |multisite|no      | SecAuditEngine directive of ModSecurity.         |
 
 ### PHP
 

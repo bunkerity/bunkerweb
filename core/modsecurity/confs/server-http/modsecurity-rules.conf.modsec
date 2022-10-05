@@ -1,5 +1,5 @@
 # process rules with disruptive actions
-SecRuleEngine On
+SecRuleEngine {{ MODSECURITY_SEC_RULE_ENGINE }}
 
 # allow body checks
 SecRequestBodyAccess On
@@ -50,6 +50,7 @@ SecResponseBodyLimitAction ProcessPartial
 
 # log usefull stuff
 SecAuditEngine {{ MODSECURITY_SEC_AUDIT_ENGINE }}
+SecAuditLogParts {{ MODSECURITY_SEC_AUDIT_LOG_PARTS }}
 SecAuditLogType Serial
 SecAuditLog /var/log/nginx/modsec_audit.log
 

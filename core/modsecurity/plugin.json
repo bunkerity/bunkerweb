@@ -31,6 +31,24 @@
 			"label": "SecAuditEngine",
 			"regex": "^.*$",
 			"type": "text"
+		},
+		"MODSECURITY_SEC_RULE_ENGINE": {
+			"context": "multisite",
+			"default": "On",
+			"help": "SecRuleEngine directive of ModSecurity.",
+			"id": "modsecurity-sec-rule-engine",
+			"label": "SecRuleEngine",
+			"regex": "^(On|DetectionOnly|Off)$",
+			"type": "text"
+		},
+		"MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+			"context": "multisite",
+			"default": "ABCFHZ",
+			"help": "SecAuditLogParts directive of ModSecurity.",
+			"id": "modsecurity-sec-audit-log-parts",
+			"label": "SecAuditLogParts",
+			"regex": "^([A-Z]*)$",
+			"type": "text"
 		}
 	}
 }
