@@ -1,6 +1,6 @@
 {
 	"id": "limit",
-	"order": 3,
+	"order": 7,
 	"name": "Limit",
 	"description": "Limit maximum number of requests and connections.",
 	"version": "0.1",

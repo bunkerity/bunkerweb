@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import argparse, os, sys, shutil, glob, traceback
+import argparse, os, sys, shutil, glob, traceback, json
 
-import sys
 sys.path.append("/opt/bunkerweb/deps/python")
 sys.path.append("/opt/bunkerweb/gen")
 sys.path.append("/opt/bunkerweb/utils")
@@ -60,9 +59,34 @@ if __name__ == "__main__" :
                 log("GENERATOR", "❌", "Missing W rights on directory : " + path)
                 sys.exit(1)
 
+        # Check core plugins orders
+        log("GENERATOR", "ℹ️", "Checking core plugins orders ...")
+        core_plugins = {}
+        files = glob.glob(args.core + "/*/plugin.json")
+        for file in files :
+            try :
+                with open(file) as f :
+                    core_plugin = json.loads(f.read())
+                    
+                    if core_plugin["order"] not in core_plugins :
+                        core_plugins[core_plugin["order"]] = []
+                    
+                    core_plugins[core_plugin["order"]].append({"id": core_plugin["id"], "settings": core_plugin["settings"]})
+            except :
+                log("GENERATOR", "❌", "Exception while loading JSON from " + file + " :")
+                print(traceback.format_exc())
+
+        core_settings = {}
+        for order in core_plugins :
+            if len(core_plugins[order]) > 1 and order != 999 :
+                log("GENERATOR", "⚠️", "Multiple plugins have the same order (" + str(order) + ") : " + ", ".join(plugin["id"] for plugin in core_plugins[order]) + ". Therefor, the execution order will be random.")
+            
+            for plugin in core_plugins[order] :
+                core_settings.update(plugin["settings"])
+
         # Compute the config
         log("GENERATOR", "ℹ️", "Computing config ...")
-        configurator = Configurator(args.settings, args.core, args.plugins, args.variables)
+        configurator = Configurator(args.settings, core_settings, args.plugins, args.variables)
         config = configurator.get_config()
 
         # Remove old files

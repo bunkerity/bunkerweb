@@ -1,6 +1,6 @@
 {
 	"id": "greylist",
-	"order": 2,
+	"order": 3,
 	"name": "Greylist",
 	"description": "Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.",
 	"version": "0.1",

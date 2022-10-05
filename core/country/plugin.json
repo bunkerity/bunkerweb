@@ -1,6 +1,6 @@
 {
 	"id": "country",
-	"order": 2,
+	"order": 4,
 	"name": "Country",
 	"description": "Deny access based on the country of the client IP.",
 	"version": "0.1",
