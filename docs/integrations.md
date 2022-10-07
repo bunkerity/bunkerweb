@@ -703,7 +703,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     You should now be able to install NGINX 1.20.2 :
 	```shell
 	sudo apt update && \
-	sudo apt install -y nginx=1.20.2-1~bullseye
+	sudo apt install -y nginx=1.20.2-1~$(lsb_release -cs)
 	```
 
 	And finally install BunkerWeb 1.4.3 :
