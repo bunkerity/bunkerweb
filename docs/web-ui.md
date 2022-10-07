@@ -1,7 +1,7 @@
 # Web UI
 
 !!! note "Supported integrations"
-    At the moment, the web UI is only supported with the [Docker](/1.4/integrations/#docker), [Linux](/1.4/integrations/#linux) and [Ansible](/1.4/integrations/#ansible) integrations. Please note that we plan to support more integrations as the project evolves.
+    At the moment, the web UI is only supported with the [Docker](/1.4/integrations/#docker), [Linux](/1.4/integrations/#linux) and [Ansible](/1.4/integrations/#ansible) integrations. It's not possible to use the web UI with other integrations like [Docker autoconf](/1.4/integrations/#docker-autoconf), [Swarm](/1.4/integrations/#swarm) or [Kubernetes](/1.4/integrations/#kubernetes). Please note that we plan to support more integrations as the project evolves.
 
 ## Overview
 
