@@ -17,21 +17,28 @@ if __name__ == "__main__" :
         # Global parser
         parser = argparse.ArgumentParser(description="BunkerWeb Command Line Interface")
         subparsers = parser.add_subparsers(help="command", dest="command")
-        
+
         # Unban subparser
         parser_unban = subparsers.add_parser("unban", help="remove a ban from the cache")
         parser_unban.add_argument("ip", type=str, help="IP address to unban")
+
+        # Ban subparser
+        parser_unban = subparsers.add_parser("ban", help="add a ban to the cache")
+        parser_unban.add_argument("ip", type=str, help="IP address to ban")
+        parser_unban.add_argument("exp", type=int, help="banning time in seconds (default : 86400)", default=86400)
 
         # Parse args
         args = parser.parse_args()
 
         # Instantiate CLI
         cli = CLI()
-        
+
         # Execute command
         ret, err = False, "unknown command"
         if args.command == "unban" :
             ret, err = cli.unban(args.ip)
+        elif args.command == "ban" :
+            ret, err = cli.ban(args.ip, args.exp)
 
         if not ret :
             print("CLI command status : ❌ (fail)")
@@ -48,5 +55,5 @@ if __name__ == "__main__" :
         print("❌ Error while executing bwcli : ")
         print(traceback.format_exc())
         sys.exit(1)
-        
+
     sys.exit(0)

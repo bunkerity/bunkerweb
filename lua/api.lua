@@ -1,6 +1,6 @@
 local datastore	= require "datastore"
-local utils		= require "utils"
-local cjson		= require "cjson"
+local utils	= require "utils"
+local cjson	= require "cjson"
 local plugins	= require "plugins"
 local upload	= require "resty.upload"
 local logger	= require "logger"
@@ -120,6 +120,25 @@ api.global.POST["^/unban$"] = function(api)
 	end
 	datastore:delete("bans_ip_" .. ip["ip"])
 	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
+end
+
+api.global.POST["^/ban$"] = function(api)
+	ngx.req.read_body()
+	local data = ngx.req.get_body_data()
+	if not data then
+		local data_file = ngx.req.get_body_file()
+		if data_file then
+			local file = io.open(data_file)
+			data = file:read("*a")
+			file:close()
+		end
+	end
+	local ok, ip = pcall(cjson.decode, data)
+	if not ok then
+		return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+	end
+	datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
+	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
 end
 
 api.is_allowed_ip = function(self)

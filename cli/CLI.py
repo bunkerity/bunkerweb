@@ -37,7 +37,7 @@ class CLI(ApiCaller) :
         # Autoconf case
         if distrib == "alpine" :
             return "autoconf"
-        
+
         raise Exception("can't detect integration")
 
     def __get_apis(self) :
@@ -75,7 +75,7 @@ class CLI(ApiCaller) :
                 for task in service.tasks() :
                     apis.append(API("http://" + service.name + "." + task["NodeID"] + "." + task["ID"] + ":" + port, host=host))
             return apis
-        
+
         # Kubernetes case
         if self.__integration == "kubernetes" :
             config.load_incluster_config()
@@ -92,8 +92,14 @@ class CLI(ApiCaller) :
                             host = env.value
                     apis.append(API("http://" + pod.status.pod_ip + ":" + port, host=host))
             return apis
-        
+
     def unban(self, ip) :
         if self._send_to_apis("POST", "/unban", data={"ip": ip}) :
             return True, "IP " + ip + " has been unbanned"
         return False, "error"
+
+    def ban(self, ip, exp) :
+        if self._send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}) :
+            return True, "IP " + ip + " has been banned"
+        return False, "error"
+
