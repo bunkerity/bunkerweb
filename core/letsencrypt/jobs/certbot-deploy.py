@@ -20,6 +20,8 @@ try :
     is_autoconf_mode = os.getenv("AUTOCONF_MODE") == "yes"
     token = os.getenv("CERTBOT_TOKEN")
 
+    logger.log("LETS-ENCRYPT", "ℹ️", "Certificates renewal for " + os.getenv("RENEWED_DOMAINS") + " successful")
+
     # Cluster case
     if is_kubernetes_mode or is_swarm_mode or is_autoconf_mode :
 

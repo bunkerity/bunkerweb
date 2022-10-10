@@ -28,19 +28,15 @@ try :
             ret = renew(first_server)
             if ret != 0 :
                 status = 2
-                logger.log("LETS-ENCRYPT", "❌", "Certificates renewal for " + first_server + " failed")
-            else :
-                logger.log("LETS-ENCRYPT", "ℹ️", "Certificates renewal for " + first_server + " successful")            
-            
+                logger.log("LETS-ENCRYPT", "❌", "certbot renew for " + first_server + " failed")      
+
     elif os.getenv("AUTO_LETS_ENCRYPT") == "yes" and os.getenv("SERVER_NAME") != "" :
         first_server = os.getenv("SERVER_NAME").split(" ")[0]
         if os.path.exists("/etc/letsencrypt/live/" + first_server + "/cert.pem") :
             ret = renew(first_server)
             if ret != 0 :
                 status = 2
-                logger.log("LETS-ENCRYPT", "❌", "Certificates renewal for " + first_server + " failed")
-            else :
-                logger.log("LETS-ENCRYPT", "ℹ️", "Certificates renewal for " + first_server + " successful")
+                logger.log("LETS-ENCRYPT", "❌", "certbot renew for " + first_server + " failed")
 
 except :
     status = 2
