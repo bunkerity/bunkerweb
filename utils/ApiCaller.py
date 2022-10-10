@@ -14,7 +14,7 @@ class ApiCaller :
     def _get_apis(self) :
         return self.__apis
 
-    def _send_to_apis(self, method, url, files=None, data=None) :
+    def _send_to_apis(self, method, url, files=None, data=None, response=False) :
         ret = True
         for api in self.__apis :
             if files is not None :
@@ -30,6 +30,8 @@ class ApiCaller :
                     log("API", "❌", "Error while sending API request to " + api.get_endpoint() + url + " : status = " + resp["status"] + ", msg = " + resp["msg"])
                 else :
                     log("API", "ℹ️", "Successfully sent API request to " + api.get_endpoint() + url)
+        if response :
+            return ret, resp.json()
         return ret
 
     def _send_files(self, path, url) :

@@ -22,6 +22,14 @@ datastore.delete = function(self, key)
 	return true, "success"
 end
 
+datastore.exp = function(self, key)
+	local ttl, err = self.dict:ttl(key)
+	if not ttl then
+		return false, err
+	end
+	return true, ttl
+end
+
 datastore.delete_all = function(self, pattern)
 	local keys = self.dict:get_keys(0)
 	for i, key in ipairs(keys) do

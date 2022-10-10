@@ -141,6 +141,24 @@ api.global.POST["^/ban$"] = function(api)
 	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
 end
 
+api.global.GET["^/bans$"] = function(api)
+	data = {}
+	for i, k in ipairs(datastore:keys()) do
+		if k:find("^bans_ip_") then
+			local ret, reason = datastore:get(k)
+			if not ret then
+				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access " .. k .. " from datastore : " + reason)
+			end
+			local ret, exp = datastore:exp(k)
+			if not ret then
+				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access exp " .. k .. " from datastore : " + exp)
+			end
+			table.insert(data, {ip = k:sub(9, #k), reason = reason, exp = exp}}
+		end
+	end
+	return api:response(ngx.HTTP_OK, "success", data)
+end
+
 api.is_allowed_ip = function(self)
 	local data, err = datastore:get("api_whitelist_ip")
 	if not data then
