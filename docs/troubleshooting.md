@@ -99,6 +99,19 @@ Here is how you can access the logs, depending on your integration :
     ansible -i inventory.yml all -a "cat /var/log/nginx/access.log" --become
     ```
 
+=== "Vagrant"
+
+    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
+    ```shell
+    journalctl -u bunkerweb --no-pager
+    ```
+
+    Common logs are located inside the `/var/log/nginx` directory :
+    ```shell
+    cat /var/log/nginx/error.log
+    cat /var/log/nginx/access.log
+    ```
+
 ## Permissions
 
 Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](/1.4/quickstart-guide/#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
@@ -252,6 +265,13 @@ You can manually unban an IP which can be useful when doing some tests but it ne
     You can use the `bwcli` command :
     ```shell
 	ansible -i inventory.yml all -a "bwcli unban 1.2.3.4" --become
+    ```
+
+=== "Vagrant"
+
+    You can use the `bwcli` command (as root) :
+    ```shell
+    sudo bwcli unban 1.2.3.4
     ```
 
 ## Whitelisting

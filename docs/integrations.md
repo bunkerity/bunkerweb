@@ -936,3 +936,56 @@ Configuration of BunkerWeb is done by using specific role variables :
 | `custom_plugins` | string | Path of the plugins directory to upload. | empty value |
 | `custom_www_owner` | string | Default owner for www files and folders. | `nginx` |
 | `custom_www_group` | string | Default group for www files and folders. | `nginx` |
+
+## Vagrant
+
+<figure markdown>
+  ![Overwiew](assets/img/integration-ansible.svg){ align=center }
+  <figcaption>Vagrant integration</figcaption>
+</figure>
+
+List of supported Linux distros :
+
+- Ubuntu 22.04 "Jammy"
+
+[Vagrant](https://www.vagrantup.com/docs) is a tool for building and managing virtual machine environments in a single workflow. With an easy-to-use workflow and focus on automation, Vagrant lowers development environment setup time, increases production parity, and makes the "works on my machine" excuse a relic of the past.
+
+A specific BunkerWeb box is available on vagrantup.
+
+First of all download the box from vagrantup : ```shell vagrant box add bunkertest/bunkertest```
+
+Then an list of boxes should appear, select the one whith your provider (virtualbox, vmware, libvirt).
+
+This will download the box named bunkertest/bunkertest from [HashiCorp's Vagrant Cloud box catalog](https://vagrantcloud.com/boxes/search), where you can find and host boxes.
+
+Now you've added a box to Vagrant either by initializing or adding it explicitly, you need to configure your project to use it as a base. 
+For initializing a new Vagrant project, you can use the `vagrant init bunkertest/bunkertest` command. This will create a Vagrantfile in the current directory.
+
+Open the Vagrantfile and replace the contents with the following.
+
+  ```shell
+  Vagrant.configure("2") do |config|
+    config.vm.box = "bunkertest/bunkertest"
+  end
+  ```
+
+Vagrant will automatically download the box in his latest version and add it to your Vagrant environment. If you want to use a specific version of the box, you can use the `config.vm.box_version` option.
+
+For exemple:
+
+  ```shell
+  Vagrant.configure("2") do |config|
+    config.vm.box = "bunkertest/bunkertest"
+    config.vm.box_version = "1.4.2"
+  end
+  ```
+
+Now you can start the box :
+```shell
+vagrant up
+```
+
+And then connect to it :
+```shell
+vagrant ssh
+```

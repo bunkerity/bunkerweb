@@ -304,3 +304,53 @@ Because the web UI is a web application, the recommended installation procedure 
     ```shell
     ansible-playbook -i inventory.yml playbook.yml
     ```
+
+=== "Vagrant"
+
+    The installation of the web UI using the [Vagrant integration](/1.4/integrations/#vagrant) is pretty straightforward because it is installed with BunkerWeb.
+
+    The first thing to do is to edit the BunkerWeb configuration located at **/opt/bunkerweb/variables.env** to add settings related to the web UI :
+    ```conf
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    ...
+    SERVER_NAME=bwadm.example.com
+    MULTISITE=yes
+    USE_API=yes
+    API_WHITELIST_IP=127.0.0.0/8
+    bwadm.example.com_USE_UI=yes
+    bwadm.example.com_USE_REVERSE_PROXY=yes
+    bwadm.example.com_REVERSE_PROXY_URL=/changeme/
+    bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+    bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
+    ...
+    ```
+
+    Important things to note :
+
+    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
+    * replace the `/changeme` URLs with a custom one of your choice
+
+    Once the configuration file is edited, you will need to restart BunkerWeb :
+    ```shell
+    systemctl restart bunkerweb
+    ```
+
+    You can edit the **/opt/bunkerweb/ui.env** file containing the settings of the web UI :
+    ```conf
+    ADMIN_USERNAME=admin
+    ADMIN_PASSWORD=changeme
+    ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
+    ```
+
+    Important things to note :
+
+    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/opt/bunkerweb/variables.env**)
+    * replace the username `admin` and password `changeme` with strong ones
+
+    Restart the BunkerWeb UI service and you are now ready to access it :
+	```shell
+	systemctl restart bunkerweb-ui
+	```
