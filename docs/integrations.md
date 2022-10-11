@@ -952,20 +952,20 @@ List of supported Linux distros :
 
 A specific BunkerWeb box is available on vagrantup.
 
-First of all download the box from vagrantup : ```shell vagrant box add bunkertest/bunkertest```
+First of all download the box from vagrantup : ```shell vagrant box add bunkerity/bunkerity```
 
 Then an list of boxes should appear, select the one whith your provider (virtualbox, vmware, libvirt).
 
-This will download the box named bunkertest/bunkertest from [HashiCorp's Vagrant Cloud box catalog](https://vagrantcloud.com/boxes/search), where you can find and host boxes.
+This will download the box named bunkerity/bunkerity from [HashiCorp's Vagrant Cloud box catalog](https://vagrantcloud.com/boxes/search), where you can find and host boxes.
 
 Now you've added a box to Vagrant either by initializing or adding it explicitly, you need to configure your project to use it as a base. 
-For initializing a new Vagrant project, you can use the `vagrant init bunkertest/bunkertest` command. This will create a Vagrantfile in the current directory.
+For initializing a new Vagrant project, you can use the `vagrant init bunkerity/bunkerity` command. This will create a Vagrantfile in the current directory.
 
 Open the Vagrantfile and replace the contents with the following.
 
   ```shell
   Vagrant.configure("2") do |config|
-    config.vm.box = "bunkertest/bunkertest"
+    config.vm.box = "bunkerity/bunkerity"
   end
   ```
 
@@ -975,7 +975,7 @@ For exemple:
 
   ```shell
   Vagrant.configure("2") do |config|
-    config.vm.box = "bunkertest/bunkertest"
+    config.vm.box = "bunkerity/bunkerity"
     config.vm.box_version = "1.4.2"
   end
   ```
