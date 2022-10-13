@@ -683,6 +683,7 @@ List of supported Linux distros :
 - Ubuntu 22.04 "Jammy"
 - Fedora 36
 - CentOS Stream 8
+- Rheal 8.6
 
 Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
 
@@ -788,6 +789,39 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	And finally install BunkerWeb 1.4.3 :
     ```shell
 	dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    sudo dnf check-update && \
+    sudo dnf install -y bunkerweb-1.4.3
+    ```
+
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+	```shell
+	sudo dnf versionlock add nginx && \
+	sudo dnf versionlock add bunkerweb
+	```
+
+=== "RHEL"
+
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+	```
+
+    You should now be able to install NGINX 1.20.2 :
+	```shell
+	sudo dnf install nginx-1.20.2
+	```
+
+	And finally install BunkerWeb 1.4.3 :
+    ```shell
+	wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    rpm -Uvh epel-release*rpm && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
     sudo dnf install -y bunkerweb-1.4.3
@@ -936,3 +970,56 @@ Configuration of BunkerWeb is done by using specific role variables :
 | `custom_plugins` | string | Path of the plugins directory to upload. | empty value |
 | `custom_www_owner` | string | Default owner for www files and folders. | `nginx` |
 | `custom_www_group` | string | Default group for www files and folders. | `nginx` |
+
+## Vagrant
+
+<figure markdown>
+  ![Overwiew](assets/img/integration-ansible.svg){ align=center }
+  <figcaption>Vagrant integration</figcaption>
+</figure>
+
+List of supported Linux distros :
+
+- Ubuntu 22.04 "Jammy"
+
+[Vagrant](https://www.vagrantup.com/docs) is a tool for building and managing virtual machine environments in a single workflow. With an easy-to-use workflow and focus on automation, Vagrant lowers development environment setup time, increases production parity, and makes the "works on my machine" excuse a relic of the past.
+
+A specific BunkerWeb box is available on vagrantup.
+
+First of all download the box from vagrantup : ```shell vagrant box add bunkerity/bunkerity```
+
+Then an list of boxes should appear, select the one whith your provider (virtualbox, vmware, libvirt).
+
+This will download the box named bunkerity/bunkerity from [HashiCorp's Vagrant Cloud box catalog](https://vagrantcloud.com/boxes/search), where you can find and host boxes.
+
+Now you've added a box to Vagrant either by initializing or adding it explicitly, you need to configure your project to use it as a base. 
+For initializing a new Vagrant project, you can use the `vagrant init bunkerity/bunkerity` command. This will create a Vagrantfile in the current directory.
+
+Open the Vagrantfile and replace the contents with the following.
+
+  ```shell
+  Vagrant.configure("2") do |config|
+    config.vm.box = "bunkerity/bunkerity"
+  end
+  ```
+
+Vagrant will automatically download the box in his latest version and add it to your Vagrant environment. If you want to use a specific version of the box, you can use the `config.vm.box_version` option.
+
+For exemple:
+
+  ```shell
+  Vagrant.configure("2") do |config|
+    config.vm.box = "bunkerity/bunkerity"
+    config.vm.box_version = "1.4.2"
+  end
+  ```
+
+Now you can start the box :
+```shell
+vagrant up
+```
+
+And then connect to it :
+```shell
+vagrant ssh
+```
