@@ -1,0 +1,13 @@
+-s dir
+--name bunkerweb
+--license agpl3
+--version %VERSION%
+--architecture x86_64
+--depends bash --depends epel-release --depends python39 --depends 'nginx = 1:1.20.2-1.el8.ngx' --depends libcurl-devel --depends libxml2 --depends lmdb-libs --depends GeoIP-devel --depends file-libs --depends net-tools --depends gd --depends sudo
+--description "BunkerWeb %VERSION% for Rhel 8"
+--url "https://www.bunkerweb.io"
+--maintainer "Bunkerity <contact at bunkerity dot com>"
+--after-install /opt/bunkerweb/scripts/postinstall.sh
+--before-remove /opt/bunkerweb/scripts/beforeRemove.sh
+--after-remove /opt/bunkerweb/scripts/afterRemove.sh
+/opt/bunkerweb/=/opt/bunkerweb/ bunkerweb.service=/etc/systemd/system/bunkerweb.service bunkerweb-ui.service=/etc/systemd/system/bunkerweb-ui.service /usr/local/bin/bwcli=/usr/local/bin/bwcli

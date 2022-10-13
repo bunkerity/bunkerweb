@@ -683,6 +683,7 @@ List of supported Linux distros :
 - Ubuntu 22.04 "Jammy"
 - Fedora 36
 - CentOS Stream 8
+- Rheal 8.6
 
 Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
 
@@ -788,6 +789,39 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	And finally install BunkerWeb 1.4.3 :
     ```shell
 	dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    sudo dnf check-update && \
+    sudo dnf install -y bunkerweb-1.4.3
+    ```
+
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+	```shell
+	sudo dnf versionlock add nginx && \
+	sudo dnf versionlock add bunkerweb
+	```
+
+=== "RHEL"
+
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+	```
+
+    You should now be able to install NGINX 1.20.2 :
+	```shell
+	sudo dnf install nginx-1.20.2
+	```
+
+	And finally install BunkerWeb 1.4.3 :
+    ```shell
+	wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    rpm -Uvh epel-release*rpm && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
     sudo dnf install -y bunkerweb-1.4.3
