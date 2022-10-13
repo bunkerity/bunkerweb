@@ -5,6 +5,11 @@ BunkerWeb offers many security features that you can configure with [settings](/
 !!! tip "Other settings"
     This section only focuses on security tuning, see the [settings section](/1.4/settings) of the documentation for other settings.
 
+<figure markdown>
+  ![Overview](assets/img/core-order.svg){ align=center }
+  <figcaption>Overview and order of the core security plugins</figcaption>
+</figure>
+
 ## HTTP protocol
 
 ### Deny status code

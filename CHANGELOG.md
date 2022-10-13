@@ -1,6 +1,25 @@
 # Changelog
 
-## v1.4.3 -
+## v1.4.4 -
+
+- Fix incorrect log when reloading nginx using Linux integration
+- Fix UI dev mode, production mode is now the default
+- Fix wrong exposed port in the UI container
+- Fix endless loading in the UI
+- Fix \*_CUSTOM_CONF_\* dissapear when jobs are executed
+- Fix various typos in documentation
+- Fix warning about StartLimitIntervalSec directive when using Linux
+- Fix incorrect log when issuing certbot renew
+- Add greylist core feature
+- Add BLACKLIST_IGNORE_\* settings
+- Add automatic change of SecRequestBodyLimit modsec directive based on MAX_CLIENT_SIZE setting
+- Add MODSECURITY_SEC_RULE_ENGINE and MODSECURITY_SEC_AUDIT_LOG_PARTS settings
+- Add manual ban and get bands to the API/CLI
+- Add Brawdunoir community example
+- Improve core plugins order and add documentation about it
+- Improve overall documentation
+
+## v1.4.3 - 2022/08/26
 
 - Fix various documentation errors/typos and add various enhancements
 - Fix ui.env not read when using Linux integration
