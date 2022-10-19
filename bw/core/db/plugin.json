@@ -1,0 +1,18 @@
+{
+  "id": "db",
+  "order": 999,
+  "name": "DB",
+  "description": "Integrate easily the Database.",
+  "version": "0.1",
+  "settings": {
+    "DATABASE_URI": {
+      "context": "global",
+      "default": "sqlite:\/\/\/\/data/db.sqlite3",
+      "help": "The database URI, following the sqlalchemy format.",
+      "id": "database-uri",
+      "label": "The database URI",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  }
+}

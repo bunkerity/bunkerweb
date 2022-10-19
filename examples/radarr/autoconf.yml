@@ -1,7 +1,6 @@
-version: '3.5'
+version: "3.5"
 
 services:
-
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     networks:

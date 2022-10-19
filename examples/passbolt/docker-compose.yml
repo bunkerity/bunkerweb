@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mybunker:
     image: bunkerity/bunkerweb:1.4.3
     ports:
@@ -16,7 +15,7 @@ services:
     volumes:
       - bw_data:/data
     environment:
-      - SERVER_NAME=www.example.com                  # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
       - DISABLE_DEFAULT_SERVER=yes
       - ALLOWED_METHODS=GET|POST|HEAD|PUT|DELETE
@@ -32,23 +31,31 @@ services:
   # more info at https://github.com/passbolt/passbolt_docker
   mypassbolt:
     image: passbolt/passbolt
-    command: ["/usr/bin/wait-for.sh", "-t", "0", "mydb:3306", "--", "/docker-entrypoint.sh"]
+    command:
+      [
+        "/usr/bin/wait-for.sh",
+        "-t",
+        "0",
+        "mydb:3306",
+        "--",
+        "/docker-entrypoint.sh",
+      ]
     environment:
       - DATASOURCES_DEFAULT_HOST=mydb
-      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd     # replace with a stronger password (must match MYSQL_PASSWORD)
+      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
       - DATASOURCES_DEFAULT_USERNAME=user
       - DATASOURCES_DEFAULT_DATABASE=passbolt
-      - APP_FULL_BASE_URL=https://www.example.com    # replace with your URL
+      - APP_FULL_BASE_URL=https://www.example.com # replace with your URL
 
   mydb:
     image: mariadb
     volumes:
       - ./db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd              # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=passbolt
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd                   # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)
 
 volumes:
   bw_data:

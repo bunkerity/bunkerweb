@@ -1,0 +1,17 @@
+[project]
+name = "BunkerWeb"
+description = "Make your web services secure by default !"
+version = "1.4.3"
+authors = [
+    { name = "Bunkerity", email = "contact@bunkerity.com" }
+]
+
+[tool.black]
+exclude = '''
+/(
+  | \.git
+  | bw/deps/src
+  | bw/core/modsecurity
+  | env
+)/
+'''

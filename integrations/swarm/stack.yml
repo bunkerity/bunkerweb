@@ -1,7 +1,6 @@
-version: '3.5'
+version: "3.5"
 
 services:
-
   mybunker:
     image: bunkerity/bunkerweb:1.4.3
     ports:
@@ -25,10 +24,10 @@ services:
     deploy:
       mode: global
       # placement:
-        # constraints:
-          # - "node.role==worker"
+      # constraints:
+      # - "node.role==worker"
       labels:
-        - "bunkerweb.AUTOCONF"
+        - "bunkerweb.INSTANCE"
 
   myautoconf:
     image: bunkerity/bunkerweb-autoconf:1.4.3

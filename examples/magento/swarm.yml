@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mymagento:
     image: bitnami/magento:2
     networks:
@@ -9,10 +8,10 @@ services:
     volumes:
       - magento_data:/bitnami/magento
     environment:
-      - MAGENTO_USERNAME=admin                # replace with admin username
-      - MAGENTO_PASSWORD=changeme42           # replace with a stronger password
-      - MAGENTO_EMAIL=contact@example.com     # replace with admin email
-      - MAGENTO_HOST=www.example.com          # replace with your domain
+      - MAGENTO_USERNAME=admin # replace with admin username
+      - MAGENTO_PASSWORD=changeme42 # replace with a stronger password
+      - MAGENTO_EMAIL=contact@example.com # replace with admin email
+      - MAGENTO_HOST=www.example.com # replace with your domain
       - MAGENTO_ENABLE_HTTPS=yes
       - MAGENTO_ENABLE_ADMIN_HTTPS=yes
       - MAGENTO_DATABASE_HOST=mydb
@@ -51,7 +50,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=magentodb
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
     deploy:
       placement:
         constraints:
@@ -66,4 +65,3 @@ volumes:
   db_data:
   elasticsearch_data:
   magento_data:
-  

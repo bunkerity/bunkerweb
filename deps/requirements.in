@@ -1,8 +1,0 @@
-docker==5.0.3
-kubernetes==23.3.0
-jinja2==3.0.3
-schedule==1.1.0
-python-dotenv==0.19.2
-requests==2.27.1
-maxminddb==2.2.0
-certbot==1.25.0

@@ -223,7 +223,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     metadata:
       name: ingress
       annotations:
-    	bunkerweb.io/AUTOCONF: "yes"
+    	bunkerweb.io/INSTANCE: "yes"
     spec:
       rules:
       - host: www.example.com
@@ -793,7 +793,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     metadata:
       name: ingress
       annotations:
-    	bunkerweb.io/AUTOCONF: "yes"
+    	bunkerweb.io/INSTANCE: "yes"
     spec:
       rules:
       - host: app1.example.com

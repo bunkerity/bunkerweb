@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   myapp1:
     image: php:fpm
     networks:

@@ -3,12 +3,12 @@ kind: ClusterRole
 metadata:
   name: cr-bunkerweb
 rules:
-- apiGroups: [""]
-  resources: ["services", "pods", "configmaps"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["ingresses"]
-  verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["services", "pods", "configmaps"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -20,10 +20,10 @@ kind: ClusterRoleBinding
 metadata:
   name: crb-bunkerweb
 subjects:
-- kind: ServiceAccount
-  name: sa-bunkerweb
-  namespace: default
-  apiGroup: ""
+  - kind: ServiceAccount
+    name: sa-bunkerweb
+    namespace: default
+    apiGroup: ""
 roleRef:
   kind: ClusterRole
   name: cr-bunkerweb

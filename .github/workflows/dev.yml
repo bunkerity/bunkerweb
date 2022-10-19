@@ -5,7 +5,6 @@ on:
     branches: [dev]
 
 jobs:
-
   # Build for amd64
   build-bw-amd64:
     runs-on: ubuntu-latest
@@ -62,7 +61,6 @@ jobs:
   build-bw-386:
     runs-on: ubuntu-latest
     steps:
-
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -292,10 +290,16 @@ jobs:
 
   # Run tests
   tests:
-    needs: [build-bw-amd64, build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
+    needs:
+      [
+        build-bw-amd64,
+        build-bw-ubuntu,
+        build-bw-debian,
+        build-bw-centos,
+        build-bw-fedora,
+      ]
     runs-on: [self-hosted, X64]
     steps:
-
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -318,7 +322,7 @@ jobs:
           else
             echo "BUILD_MODE=dev" >> $GITHUB_ENV
           fi
-    
+
       # Import images to local registry
       - name: Import BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
@@ -398,7 +402,6 @@ jobs:
     needs: [tests, build-bw-386, build-bw-arm]
     runs-on: ubuntu-latest
     steps:
-
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -471,7 +474,6 @@ jobs:
     needs: tests
     runs-on: [self-hosted, X64]
     steps:
-
       - name: Check out repository code
         uses: actions/checkout@v3
 
@@ -545,7 +547,6 @@ jobs:
     needs: push-docker
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout source code
         uses: actions/checkout@v3
 

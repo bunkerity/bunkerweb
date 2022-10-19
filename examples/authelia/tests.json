@@ -1,24 +1,18 @@
 {
-	"name": "authelia",
-	"kinds": [
-		"docker",
-		"autoconf",
-		"swarm",
-		"kubernetes",
-		"linux"
-	],
-	"timeout": 60,
-	"delay": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://app1.example.com",
-			"string": "authelia"
-		},
-		{
-			"type": "string",
-			"url": "https://app2.example.com",
-			"string": "authelia"
-		}
-	]
+  "name": "authelia",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
+  "timeout": 60,
+  "delay": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com",
+      "string": "authelia"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com",
+      "string": "authelia"
+    }
+  ]
 }

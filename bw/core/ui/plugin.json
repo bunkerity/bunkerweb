@@ -1,0 +1,18 @@
+{
+  "id": "ui",
+  "order": 999,
+  "name": "UI",
+  "description": "Integrate easily the BunkerWeb UI.",
+  "version": "0.1",
+  "settings": {
+    "USE_UI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use UI",
+      "id": "use-ui",
+      "label": "Use UI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    }
+  }
+}

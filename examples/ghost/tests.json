@@ -1,18 +1,13 @@
 {
-	"name": "ghost",
-	"kinds": [
-		"docker",
-		"autoconf",
-		"swarm",
-		"kubernetes"
-	],
-	"timeout": 60,
-	"delay": 30,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://www.example.com",
-			"string": "ghost"
-		}
-	]
+  "name": "ghost",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 60,
+  "delay": 30,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "ghost"
+    }
+  ]
 }

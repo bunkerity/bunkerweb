@@ -1,0 +1,12 @@
+docs/
+env/
+*/env/
+*.min*
+bw/core/modsecurity/
+bw/deps/src/
+mkdocs.yml
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE.md
+README.md
+SECURITY.md

@@ -1,20 +1,14 @@
 {
-	"name": "drupal",
-	"kinds": [
-		"docker",
-		"autoconf",
-		"swarm",
-		"kubernetes",
-		"linux"
-	],
-	"no_copy_container": true,
-	"timeout": 60,
-	"delay": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://www.example.com",
-			"string": "drupal"
-		}
-	]
+  "name": "drupal",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
+  "no_copy_container": true,
+  "timeout": 60,
+  "delay": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "drupal"
+    }
+  ]
 }

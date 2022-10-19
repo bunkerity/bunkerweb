@@ -1,16 +1,12 @@
 {
-	"name": "radarr",
-	"kinds": [
-		"docker",
-        "autoconf",
-        "swarm"
-	],
-	"timeout": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://www.example.com",
-			"string": "radarr"
-		}
-	]
+  "name": "radarr",
+  "kinds": ["docker", "autoconf", "swarm"],
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "radarr"
+    }
+  ]
 }

@@ -5,7 +5,6 @@ on:
     branches: [master]
 
 jobs:
-
   # Build for amd64
   build-bw-amd64:
     runs-on: ubuntu-latest
@@ -59,7 +58,6 @@ jobs:
   build-bw-386:
     runs-on: ubuntu-latest
     steps:
-
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -275,10 +273,16 @@ jobs:
 
   # Run tests
   tests:
-    needs: [build-bw-amd64, build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
+    needs:
+      [
+        build-bw-amd64,
+        build-bw-ubuntu,
+        build-bw-debian,
+        build-bw-centos,
+        build-bw-fedora,
+      ]
     runs-on: [self-hosted, X64]
     steps:
-
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -301,7 +305,7 @@ jobs:
           else
             echo "BUILD_MODE=dev" >> $GITHUB_ENV
           fi
-    
+
       # Import images to local registry
       - name: Import BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 10.20.1.1:5000/bw-tests:latest && docker push 10.20.1.1:5000/bw-tests:latest
@@ -355,13 +359,13 @@ jobs:
 
       # Run tests
       #- name: Run Docker tests
-        #run: ./tests/main.py "docker"
+      #run: ./tests/main.py "docker"
       #- name: Run Autoconf tests
-        #run: ./tests/main.py "autoconf"
+      #run: ./tests/main.py "autoconf"
       #- name: Run Swarm tests
-        #run: ./tests/main.py "swarm"
+      #run: ./tests/main.py "swarm"
       #- name: Run Kubernetes tests
-        #run: ./tests/main.py "kubernetes"
+      #run: ./tests/main.py "kubernetes"
       - name: Generate Linux packages and build test images
         run: ./tests/linux.sh ${{ env.BUILD_MODE }}
       - name: Run Linux Ubuntu tests
@@ -378,7 +382,6 @@ jobs:
     needs: [tests, build-bw-386, build-bw-arm]
     runs-on: ubuntu-latest
     steps:
-
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -455,7 +458,6 @@ jobs:
     needs: tests
     runs-on: [self-hosted, X64]
     steps:
-
       - name: Check out repository code
         uses: actions/checkout@v3
 
@@ -526,18 +528,18 @@ jobs:
 
   # Deploy to staging infrastructure
   # deploy:
-    # needs: push-docker
-    # runs-on: ubuntu-latest
-    # steps:
+  # needs: push-docker
+  # runs-on: ubuntu-latest
+  # steps:
 
-      # - name: Checkout source code
-        # uses: actions/checkout@v3
+  # - name: Checkout source code
+  # uses: actions/checkout@v3
 
-      # - name: k8s login (staging)
-        # uses: azure/k8s-set-context@v2
-        # with:
-          # method: kubeconfig
-          # kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+  # - name: k8s login (staging)
+  # uses: azure/k8s-set-context@v2
+  # with:
+  # method: kubeconfig
+  # kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
 
-      # - name: k8s deploy (staging)
-        # run: kubectl rollout restart deployment bunkerweb-controller && kubectl rollout restart daemonset bunkerweb
+  # - name: k8s deploy (staging)
+  # run: kubectl rollout restart deployment bunkerweb-controller && kubectl rollout restart daemonset bunkerweb

@@ -1,14 +1,12 @@
 {
-	"name": "proxy-protocol",
-	"kinds": [
-		"docker"
-	],
-	"timeout": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "http://www.example.com",
-			"string": "hello"
-		}
-	]
+  "name": "proxy-protocol",
+  "kinds": ["docker"],
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "http://www.example.com",
+      "string": "hello"
+    }
+  ]
 }

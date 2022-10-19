@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mydrupal:
     image: drupal:9-apache
     networks:
@@ -43,7 +42,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=drupaldb
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password
 
 networks:
   bw-services:

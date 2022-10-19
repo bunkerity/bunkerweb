@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mybunker:
     image: bunkerity/bunkerweb:1.4.3
     ports:
@@ -47,7 +46,7 @@ services:
       - certs:/etc/letsencrypt
       - ./digitalocean.ini:/opt/digitalocean.ini
       - ./entrypoint.sh:/opt/entrypoint.sh
-    entrypoint: /bin/sh /opt/entrypoint.sh    
+    entrypoint: /bin/sh /opt/entrypoint.sh
 
   app1:
     image: tutum/hello-world

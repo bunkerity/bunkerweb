@@ -24,13 +24,13 @@ metadata:
     bunkerweb.io/www.example.com_LIMIT_REQ_RATE_3: "10r/s"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: mattermost-team-edition
-            port:
-              number: 8065
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mattermost-team-edition
+                port:
+                  number: 8065

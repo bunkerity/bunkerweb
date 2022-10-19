@@ -21,36 +21,36 @@ metadata:
     bunkerweb.io/auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
 spec:
   rules:
-  - host: app1.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-app1
-            port:
-              number: 80
-  - host: app2.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-app2
-            port:
-              number: 80
-  - host: auth.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-authelia
-            port:
-              number: 9091
+    - host: app1.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app1
+                port:
+                  number: 80
+    - host: app2.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app2
+                port:
+                  number: 80
+    - host: auth.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-authelia
+                port:
+                  number: 9091
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -69,8 +69,8 @@ spec:
         app: app1
     spec:
       containers:
-      - name: app1
-        image: tutum/hello-world
+        - name: app1
+          image: tutum/hello-world
 ---
 apiVersion: v1
 kind: Service
@@ -101,8 +101,8 @@ spec:
         app: app2
     spec:
       containers:
-      - name: app2
-        image: tutum/hello-world
+        - name: app2
+          image: tutum/hello-world
 ---
 apiVersion: v1
 kind: Service
@@ -238,22 +238,22 @@ spec:
         app: authelia
     spec:
       containers:
-      - name: authelia
-        image: authelia/authelia
-        env:
-        - name: TZ
-          value: "Europe/Paris"
-        volumeMounts:
-        - name: config
-          mountPath: /config/configuration.yml
-          subPath: configuration.yml
-        - name: config
-          mountPath: /config/users_database.yml
-          subPath: users_database.yml
+        - name: authelia
+          image: authelia/authelia
+          env:
+            - name: TZ
+              value: "Europe/Paris"
+          volumeMounts:
+            - name: config
+              mountPath: /config/configuration.yml
+              subPath: configuration.yml
+            - name: config
+              mountPath: /config/users_database.yml
+              subPath: users_database.yml
       volumes:
-      - name: config
-        configMap:
-          name: cfg-authelia
+        - name: config
+          configMap:
+            name: cfg-authelia
 ---
 apiVersion: v1
 kind: Service
@@ -284,11 +284,11 @@ spec:
         app: redis
     spec:
       containers:
-      - name: redis
-        image: redis:alpine
-        env:
-        - name: TZ
-          value: "Europe/Paris"
+        - name: redis
+          image: redis:alpine
+          env:
+            - name: TZ
+              value: "Europe/Paris"
 ---
 apiVersion: v1
 kind: Service
