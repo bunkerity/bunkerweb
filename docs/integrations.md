@@ -204,7 +204,7 @@ docker network create bw-services
 - One for communication between **BunkerWeb** and **autoconf**
 - Another one for communication between **BunkerWeb** and **web applications**
 
-You can now create the BunkerWeb container with the `AUTOCONF_MODE=yes` setting and the `bunkerweb.AUTOCONF` label (replace 10.20.30.0/24 with the subnet specified before) :
+You can now create the BunkerWeb container with the `AUTOCONF_MODE=yes` setting and the `bunkerweb.INSTANCE` label (replace 10.20.30.0/24 with the subnet specified before) :
 
 ```shell
 docker run \
@@ -217,7 +217,7 @@ docker run \
 	   -e MULTISITE=yes \
 	   -e SERVER_NAME= \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-	   -l bunkerweb.AUTOCONF \
+	   -l bunkerweb.INSTANCE \
 	   bunkerity/bunkerweb:1.4.3 && \
 
 docker network connect bw-services mybunker
@@ -256,7 +256,7 @@ services:
       - SERVER_NAME=
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     labels:
-      - "bunkerweb.AUTOCONF"
+      - "bunkerweb.INSTANCE"
     networks:
       - bw-autoconf
 	  - bw-services
@@ -363,7 +363,7 @@ docker service create \
 	   -e SERVER_NAME= \
 	   -e MULTISITE=yes \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-	   -l bunkerweb.AUTOCONF \
+	   -l bunkerweb.INSTANCE \
 	   bunkerity/bunkerweb:1.4.3
 ```
 
@@ -413,7 +413,7 @@ services:
         constraints:
           - "node.role==worker"
       labels:
-        - "bunkerweb.AUTOCONF"
+        - "bunkerweb.INSTANCE"
 
   myautoconf:
     image: bunkerity/bunkerweb-autoconf:1.4.3
@@ -544,7 +544,7 @@ spec:
         app: bunkerweb
       # mandatory annotation
       annotations:
-        bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/INSTANCE: "yes"
     spec:
       containers:
       - name: bunkerweb

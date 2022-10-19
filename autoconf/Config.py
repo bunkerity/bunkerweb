@@ -1,246 +1,240 @@
+from logging import Logger
 from traceback import format_exc
-from threading import Thread, Lock
-from time import sleep
 from subprocess import run, DEVNULL, STDOUT
 from glob import glob
 from shutil import rmtree
-from os import makedirs, remove, listdir
+from os import getenv, makedirs, remove, listdir
 from os.path import dirname, isdir
-from json import loads
+from typing import Tuple
 
 from API import API
-from JobScheduler import JobScheduler
 from ApiCaller import ApiCaller
 from ConfigCaller import ConfigCaller
-from logger import log
+from Database import Database
+from logger import setup_logger
 
-class Config(ApiCaller, ConfigCaller) :
 
-    def __init__(self, ctrl_type, lock=None) :
+class Config(ApiCaller, ConfigCaller):
+    def __init__(self, ctrl_type, lock=None):
         ApiCaller.__init__(self)
         ConfigCaller.__init__(self)
         self.__ctrl_type = ctrl_type
         self.__lock = lock
+        self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
+        self.__db = None
         self.__instances = []
         self.__services = []
         self.__configs = []
         self.__config = {}
-        self.__scheduler = None
-        self.__scheduler_thread = None
-        self.__schedule = False
-        self.__schedule_lock = Lock()
 
-    def __get_full_env(self) :
+    def __get_full_env(self) -> dict:
         env_instances = {}
-        for instance in self.__instances :
-            for variable, value in instance["env"].items() :
+        for instance in self.__instances:
+            for variable, value in instance["env"].items():
                 env_instances[variable] = value
         env_services = {}
-        if not "SERVER_NAME" in env_instances :
+        if not "SERVER_NAME" in env_instances:
             env_instances["SERVER_NAME"] = ""
-        for service in self.__services :
-            for variable, value in service.items() :
-                env_services[service["SERVER_NAME"].split(" ")[0] + "_" + variable] = value
-            if env_instances["SERVER_NAME"] != "" :
+        for service in self.__services:
+            for variable, value in service.items():
+                env_services[
+                    f"{service['SERVER_NAME'].split(' ')[0]}_{variable}"
+                ] = value
+            if env_instances["SERVER_NAME"] != "":
                 env_instances["SERVER_NAME"] += " "
             env_instances["SERVER_NAME"] += service["SERVER_NAME"].split(" ")[0]
         return self._full_env(env_instances, env_services)
 
-    def __scheduler_run_pending(self) :
-        schedule = True
-        while schedule :
-            self.__scheduler.run_pending()
-            sleep(1)
-            self.__schedule_lock.acquire()
-            schedule = self.__schedule
-            self.__schedule_lock.release()
-
-    def update_needed(self, instances, services, configs=None) :
-        if instances != self.__instances :
+    def update_needed(self, instances, services, configs=None) -> bool:
+        if instances != self.__instances:
             return True
-        if services != self.__services :
+        if services != self.__services:
             return True
-        if not configs is None and configs != self.__configs :
+        if not configs is None and configs != self.__configs:
             return True
         return False
 
-    def __get_config(self) :
+    def __get_config(self) -> dict:
         config = {}
         # extract instances variables
-        for instance in self.__instances :
-            for variable, value in instance["env"].items() :
+        for instance in self.__instances:
+            for variable, value in instance["env"].items():
                 config[variable] = value
         # extract services variables
         server_names = []
-        for service in self.__services :
+        for service in self.__services:
             first_server = service["SERVER_NAME"].split(" ")[0]
-            if not first_server in server_names :
+            if not first_server in server_names:
                 server_names.append(first_server)
-            for variable, value in service.items() :
-                config[first_server + "_" + variable] = value
+            for variable, value in service.items():
+                config[f"{first_server}_{variable}"] = value
         config["SERVER_NAME"] = " ".join(server_names)
         return config
 
-    def __get_apis(self) :
+    def __get_apis(self) -> list:
         apis = []
-        for instance in self.__instances :
-            endpoint = "http://" + instance["hostname"] + ":5000"
-            host = "bwapi"
-            if "API_SERVER_NAME" in instance["env"] :
-                host = instance["env"]["API_SERVER_NAME"]
+        for instance in self.__instances:
+            endpoint = f"http://{instance['hostname']}:{instance['env'].get('API_HTTP_PORT', '5000')}"
+            host = instance["env"].get("API_SERVER_NAME", "bwapi")
             apis.append(API(endpoint, host=host))
         return apis
 
-    def __write_configs(self) :
+    def __write_configs(self) -> Tuple[bool, list]:
         ret = True
-        for config_type in self.__configs :
-            for file, data in self.__configs[config_type].items() :
-                path = "/data/configs/" + config_type + "/" + file
-                if not path.endswith(".conf") :
+        custom_configs = []
+        for config_type in self.__configs:
+            for file, data in self.__configs[config_type].items():
+                path = f"/data/configs/{config_type}/{file}"
+                if not path.endswith(".conf"):
                     path += ".conf"
                 makedirs(dirname(path), exist_ok=True)
-                try :
+                try:
                     mode = "w"
-                    if type(data) is bytes :
+                    if type(data) is bytes:
                         mode = "wb"
-                    with open(path, mode) as f :
-                        f.write(data)
-                except :
-                    print(format_exc())
-                    log("CONFIG", "❌", "Can't save file " + path)
-                    ret = False
-        return ret
 
-    def __remove_configs(self) :
-        ret = True
-        for config_type in self.__configs :
-            for file, data in self.__configs[config_type].items() :
-                path = "/data/configs/" + config_type + "/" + file
-                if not path.endswith(".conf") :
-                    path += ".conf"
-                try :
-                    remove(path)
-                except :
+                    with open(path, mode) as f:
+                        f.write(data)
+
+                    exploded = file.split("/")
+                    custom_configs.append(
+                        {
+                            "value": data if mode == "w" else data.decode("utf-8"),
+                            "exploded": [exploded[0], config_type, exploded[1]],
+                        }
+                    )
+                except:
                     print(format_exc())
-                    log("CONFIG", "❌", "Can't remove file " + path)
+                    self.__logger.error(f"Can't save file {path}")
+                    ret = False
+        return ret, custom_configs
+
+    def __remove_configs(self) -> bool:
+        ret = True
+        for config_type in self.__configs:
+            for file, _ in self.__configs[config_type].items():
+                path = f"/data/configs/{config_type}/{file}"
+                if not path.endswith(".conf"):
+                    path += ".conf"
+                try:
+                    remove(path)
+                except:
+                    print(format_exc())
+                    self.__logger.error(f"Can't remove file {path}")
                     ret = False
         check_empty_dirs = []
-        for type in ["server-http", "modsec", "modsec-crs"] :
-            check_empty_dirs.extend(glob("/data/configs/" + type + "/*"))
-        for check_empty_dir in check_empty_dirs :
-            if isdir(check_empty_dir) and len(listdir(check_empty_dir)) == 0 :
-                try :
+        for _type in ["server-http", "modsec", "modsec-crs"]:
+            check_empty_dirs.extend(glob(f"/data/configs/{type}/*"))
+        for check_empty_dir in check_empty_dirs:
+            if isdir(check_empty_dir) and len(listdir(check_empty_dir)) == 0:
+                try:
                     rmtree(check_empty_dir)
-                except :
+                except:
                     print(format_exc())
-                    log("CONFIG", "❌", "Can't remove directory " + check_empty_dir)
+                    self.__logger.error(f"Can't remove directory {check_empty_dir}")
                     ret = False
         return ret
 
-    def apply(self, instances, services, configs=None) :
+    def apply(self, instances, services, configs=None) -> bool:
 
         success = True
 
-        # stop scheduler just in case caller didn't do it
-        self.stop_scheduler()
-        
         # remove old autoconf configs if it exists
         if self.__configs:
             ret = self.__remove_configs()
-            if not ret :
+            if not ret:
                 success = False
-                log("CONFIG", "❌", "removing custom configs failed, configuration will not work as expected...")
+                self.__logger.error(
+                    "removing custom configs failed, configuration will not work as expected...",
+                )
 
         # update values
         self.__instances = instances
         self.__services = services
         self.__configs = configs
         self.__config = self.__get_full_env()
+        if self.__db is None:
+            self.__db = Database(
+                self.__logger, sqlalchemy_string=self.__config.get("DATABASE_URI", None)
+            )
         self._set_apis(self.__get_apis())
 
         # write configs
-        if configs != None :
-            ret = self.__write_configs()
-            if not ret :
+        if configs != None:
+            ret = self.__db.save_config(self.__config, "autoconf")
+            if ret:
+                self.__logger.error(
+                    f"Can't save autoconf config in database: {ret}",
+                )
+
+            ret, custom_configs = self.__write_configs()
+            if not ret:
                 success = False
-                log("CONFIG", "❌", "saving custom configs failed, configuration will not work as expected...")
+                self.__logger.error(
+                    "saving custom configs failed, configuration will not work as expected...",
+                )
+
+            ret = self.__db.save_custom_configs(custom_configs, "autoconf")
+            if ret:
+                self.__logger.error(
+                    f"Can't save autoconf custom configs in database: {ret}",
+                )
+        else:
+            ret = self.__db.save_config({}, "autoconf")
+            if ret:
+                self.__logger.error(
+                    f"Can't remove autoconf config from the database: {ret}",
+                )
 
         # get env
         env = self.__get_full_env()
 
         # run jobs once
         i = 1
-        for instance in self.__instances :
-            endpoint = "http://" + instance["hostname"] + ":5000"
-            host = "bwapi"
-            if "API_SERVER_NAME" in instance["env"] :
-                host = instance["env"]["API_SERVER_NAME"]
-            env["CLUSTER_INSTANCE_" + str(i)] = endpoint + " " + host
+        for instance in self.__instances:
+            endpoint = f"http://{instance['hostname']}:{instance['env'].get('API_HTTP_PORT', '5000')}"
+            host = instance["env"].get("API_SERVER_NAME", "bwapi")
+            env[f"CLUSTER_INSTANCE_{i}"] = f"{endpoint} {host}"
             i += 1
-        if self.__scheduler is None :
-            self.__scheduler = JobScheduler(env=env, lock=self.__lock, apis=self._get_apis())
-        ret = self.__scheduler.reload(env, apis=self._get_apis())
-        if not ret :
-            success = False
-            log("CONFIG", "❌", "scheduler.reload() failed, configuration will not work as expected...")
-        
+
         # write config to /tmp/variables.env
-        with open("/tmp/variables.env", "w") as f :
-            for variable, value in self.__config.items() :
-                f.write(variable + "=" + value + "\n")
+        with open("/tmp/variables.env", "w") as f:
+            for variable, value in self.__config.items():
+                f.write(f"{variable}={value}\n")
 
         # run the generator
-        cmd = "python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env"
+        cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/variables.env --method autoconf"
         proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
-        if proc.returncode != 0 :
+        if proc.returncode != 0:
             success = False
-            log("CONFIG", "❌", "config generator failed, configuration will not work as expected...")
+            self.__logger.error(
+                "config generator failed, configuration will not work as expected...",
+            )
         # cmd = "chown -R root:101 /etc/nginx"
         # run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
-        # cmd = "chmod -R 770 /etc/nginx" 
+        # cmd = "chmod -R 770 /etc/nginx"
         # run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
 
         # send nginx configs
         # send data folder
         # reload nginx
         ret = self._send_files("/etc/nginx", "/confs")
-        if not ret :
+        if not ret:
             success = False
-            log("CONFIG", "❌", "sending nginx configs failed, configuration will not work as expected...")
-        ret = self._send_files("/data", "/data")
-        if not ret :
+            self.__logger.error(
+                "sending nginx configs failed, configuration will not work as expected...",
+            )
+        ret = self._send_files("/data/configs", "/custom_configs")
+        if not ret:
             success = False
-            log("CONFIG", "❌", "sending custom configs failed, configuration will not work as expected...")   
+            self.__logger.error(
+                "sending custom configs failed, configuration will not work as expected...",
+            )
         ret = self._send_to_apis("POST", "/reload")
-        if not ret :
+        if not ret:
             success = False
-            log("CONFIG", "❌", "reload failed, configuration will not work as expected...")
+            self.__logger.error(
+                "reload failed, configuration will not work as expected...",
+            )
 
         return success
-
-    def start_scheduler(self) :
-        if self.__scheduler_thread is not None and self.__scheduler_thread.is_alive() :
-            raise Exception("scheduler is already running, can't run it twice")
-        self.__schedule = True
-        self.__scheduler_thread = Thread(target=self.__scheduler_run_pending)
-        self.__scheduler_thread.start()
-
-    def stop_scheduler(self) :
-        if self.__scheduler_thread is not None and self.__scheduler_thread.is_alive() :
-            self.__schedule_lock.acquire()
-            self.__schedule = False
-            self.__schedule_lock.release()
-            self.__scheduler_thread.join()
-            self.__scheduler_thread = None
-
-    def reload_scheduler(self, env) :
-        if self.__scheduler_thread is None :
-            return self.__scheduler.reload(env=env, apis=self._get_apis())
-
-    def __get_scheduler(self, env) :
-        self.__schedule_lock.acquire()
-        if self.__schedule :
-            self.__schedule_lock.release()
-            raise Exception("can't create new scheduler, old one is still running...")
-        self.__schedule_lock.release()
-        return JobScheduler(env=env, lock=self.__lock, apis=self._get_apis())

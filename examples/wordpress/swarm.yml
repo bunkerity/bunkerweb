@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mywp:
     image: wordpress:5-apache
     volumes:
@@ -13,7 +12,7 @@ services:
       - WORDPRESS_DB_NAME=wp
       - WORDPRESS_DB_USER=user
       - WORDPRESS_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
-      - WORDPRESS_TABLE_PREFIX=prefix_    # best practice : replace with a random prefix
+      - WORDPRESS_TABLE_PREFIX=prefix_ # best practice : replace with a random prefix
     deploy:
       placement:
         constraints:
@@ -35,7 +34,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=wp
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
     deploy:
       placement:
         constraints:

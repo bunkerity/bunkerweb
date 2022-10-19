@@ -16,13 +16,13 @@ metadata:
     bunkerweb.io/www.example.com_LIMIT_REQ_RATE_3: "5r/s"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nextcloud
-            port:
-              number: 8080
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  number: 8080

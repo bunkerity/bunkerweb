@@ -1,0 +1,44 @@
+{
+  "id": "selfsigned",
+  "order": 999,
+  "name": "Self-signed certificate",
+  "description": "Generate self-signed certificate.",
+  "version": "0.1",
+  "settings": {
+    "GENERATE_SELF_SIGNED_SSL": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Generate and use self-signed certificate.",
+      "id": "generate-self-signed-ssl",
+      "label": "Activate self-signed certificate",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "SELF_SIGNED_SSL_EXPIRY": {
+      "context": "multisite",
+      "default": "365",
+      "help": "Self-signed certificate expiry.",
+      "id": "self-signed-ssl-expiry",
+      "label": "Certificate expiry",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "SELF_SIGNED_SSL_SUBJ": {
+      "context": "multisite",
+      "default": "/CN=www.example.com/",
+      "help": "Self-signed certificate subject.",
+      "id": "self-signed-ssl-subj",
+      "label": "Certificate subject",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "self-signed",
+      "file": "self-signed.py",
+      "every": "day",
+      "reload": true
+    }
+  ]
+}

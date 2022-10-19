@@ -77,7 +77,7 @@ class Instances:
         # Docker instances (containers or services)
         if self.__docker is not None:
             for instance in self.__docker.containers.list(
-                all=True, filters={"label": "bunkerweb.UI"}
+                all=True, filters={"label": "bunkerweb.INSTANCE"}
             ):
                 env_variables = {
                     x[0]: x[1]

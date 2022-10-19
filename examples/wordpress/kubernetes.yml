@@ -7,13 +7,13 @@ metadata:
     bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "50m"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: wordpress
-            port:
-              number: 80
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wordpress
+                port:
+                  number: 80

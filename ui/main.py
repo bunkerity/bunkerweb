@@ -1,10 +1,13 @@
-import os
-from shutil import rmtree, copytree, chown
-from logging import getLogger, INFO, ERROR, StreamHandler, Formatter
-from traceback import format_exc
-from typing import Optional
-from jinja2 import Template
-from threading import Thread
+from bs4 import BeautifulSoup
+from copy import deepcopy
+from datetime import datetime, timezone
+from dateutil.parser import parse as dateutil_parse
+from docker import DockerClient
+from docker.errors import (
+    NotFound as docker_NotFound,
+    APIError as docker_APIError,
+    DockerException,
+)
 from flask import (
     Flask,
     flash,
@@ -18,25 +21,27 @@ from flask import (
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, load as json_load
-from bs4 import BeautifulSoup
-from datetime import datetime, timezone
-from dateutil.parser import parse as dateutil_parse
+from jinja2 import Template
+from logging import getLogger, INFO, ERROR, StreamHandler, Formatter
+from os import chmod, getpid, listdir, mkdir, walk
+from os.path import exists, isdir, isfile, join
+from re import match as re_match
 from requests import get
 from requests.utils import default_headers
+from shutil import rmtree, copytree, chown
 from sys import path as sys_path, exit as sys_exit, modules as sys_modules
-from copy import deepcopy
-from re import match as re_match
-from docker import DockerClient
-from docker.errors import (
-    NotFound as docker_NotFound,
-    APIError as docker_APIError,
-    DockerException,
-)
-from uuid import uuid4
+from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
+from threading import Thread
 from time import time
-import tarfile
-import zipfile
+from traceback import format_exc
+from typing import Optional
+from uuid import uuid4
+from zipfile import BadZipFile, ZipFile
 
+sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/api")
+
+from src.Instances import Instances
 from src.ConfigFiles import ConfigFiles
 from src.Config import Config
 from src.ReverseProxied import ReverseProxied
@@ -52,11 +57,6 @@ from utils import (
     get_variables,
     path_to_dict,
 )
-
-sys_path.append("/opt/bunkerweb/utils")
-sys_path.append("/opt/bunkerweb/api")
-
-from src.Instances import Instances
 from API import API
 from ApiCaller import ApiCaller
 
@@ -96,7 +96,7 @@ if not vars["FLASK_ENV"] == "development" and (
     sys_exit(1)
 
 with open("/opt/bunkerweb/tmp/ui.pid", "w") as f:
-    f.write(str(os.getpid()))
+    f.write(str(getpid()))
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -120,7 +120,9 @@ except (docker_APIError, DockerException):
 
 if docker_client:
     apis: list[API] = []
-    for container in docker_client.containers.list(filters={"label": "bunkerweb.UI"}):
+    for container in docker_client.containers.list(
+        filters={"label": "bunkerweb.INSTANCE"}
+    ):
         env_variables = {
             x[0]: x[1]
             for x in [env.split("=") for env in container.attrs["Config"]["Env"]]
@@ -649,14 +651,14 @@ def plugins():
                 flash(operation, "error")
                 return redirect(url_for("loading", next=url_for("plugins")))
         else:
-            if not os.path.exists("/opt/bunkerweb/tmp/ui") or not os.listdir(
+            if not exists("/opt/bunkerweb/tmp/ui") or not listdir(
                 "/opt/bunkerweb/tmp/ui"
             ):
                 flash("Please upload new plugins to reload plugins", "error")
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            for file in os.listdir("/opt/bunkerweb/tmp/ui"):
-                if not os.path.isfile(f"/opt/bunkerweb/tmp/ui/{file}"):
+            for file in listdir("/opt/bunkerweb/tmp/ui"):
+                if not isfile(f"/opt/bunkerweb/tmp/ui/{file}"):
                     continue
 
                 folder_name = ""
@@ -665,9 +667,7 @@ def plugins():
                 try:
                     if file.endswith(".zip"):
                         try:
-                            with zipfile.ZipFile(
-                                f"/opt/bunkerweb/tmp/ui/{file}"
-                            ) as zip_file:
+                            with ZipFile(f"/opt/bunkerweb/tmp/ui/{file}") as zip_file:
                                 try:
                                     zip_file.getinfo("plugin.json")
                                     zip_file.extractall(
@@ -696,9 +696,7 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if os.path.exists(
-                                        f"/opt/bunkerweb/plugins/{folder_name}"
-                                    ):
+                                    if exists(f"/opt/bunkerweb/plugins/{folder_name}"):
                                         raise FileExistsError
 
                                     copytree(
@@ -711,10 +709,10 @@ def plugins():
                                     )
                                     dirs = [
                                         d
-                                        for d in os.listdir(
+                                        for d in listdir(
                                             f"/opt/bunkerweb/tmp/ui/{temp_folder_name}"
                                         )
-                                        if os.path.isdir(
+                                        if isdir(
                                             f"/opt/bunkerweb/tmp/ui/{temp_folder_name}/{d}"
                                         )
                                     ]
@@ -722,7 +720,7 @@ def plugins():
                                     if (
                                         not dirs
                                         or len(dirs) > 1
-                                        or not os.path.exists(
+                                        or not exists(
                                             f"/opt/bunkerweb/tmp/ui/{temp_folder_name}/{dirs[0]}/plugin.json"
                                         )
                                     ):
@@ -751,16 +749,14 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if os.path.exists(
-                                        f"/opt/bunkerweb/plugins/{folder_name}"
-                                    ):
+                                    if exists(f"/opt/bunkerweb/plugins/{folder_name}"):
                                         raise FileExistsError
 
                                     copytree(
                                         f"/opt/bunkerweb/tmp/ui/{temp_folder_name}/{dirs[0]}",
                                         f"/opt/bunkerweb/plugins/{folder_name}",
                                     )
-                        except zipfile.BadZipFile:
+                        except BadZipFile:
                             error = 1
                             flash(
                                 f"{file} is not a valid zip file. ({folder_name if folder_name else temp_folder_name})",
@@ -768,7 +764,7 @@ def plugins():
                             )
                     else:
                         try:
-                            with tarfile.open(
+                            with tar_open(
                                 f"/opt/bunkerweb/tmp/ui/{file}",
                                 errorlevel=2,
                             ) as tar_file:
@@ -800,9 +796,7 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if os.path.exists(
-                                        f"/opt/bunkerweb/plugins/{folder_name}"
-                                    ):
+                                    if exists(f"/opt/bunkerweb/plugins/{folder_name}"):
                                         raise FileExistsError
 
                                     copytree(
@@ -815,10 +809,10 @@ def plugins():
                                     )
                                     dirs = [
                                         d
-                                        for d in os.listdir(
+                                        for d in listdir(
                                             f"/opt/bunkerweb/tmp/ui/{temp_folder_name}"
                                         )
-                                        if os.path.isdir(
+                                        if isdir(
                                             f"/opt/bunkerweb/tmp/ui/{temp_folder_name}/{d}"
                                         )
                                     ]
@@ -826,7 +820,7 @@ def plugins():
                                     if (
                                         not dirs
                                         or len(dirs) > 1
-                                        or not os.path.exists(
+                                        or not exists(
                                             f"/opt/bunkerweb/tmp/ui/{temp_folder_name}/{dirs[0]}/plugin.json"
                                         )
                                     ):
@@ -855,28 +849,26 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if os.path.exists(
-                                        f"/opt/bunkerweb/plugins/{folder_name}"
-                                    ):
+                                    if exists(f"/opt/bunkerweb/plugins/{folder_name}"):
                                         raise FileExistsError
 
                                     copytree(
                                         f"/opt/bunkerweb/tmp/ui/{temp_folder_name}/{dirs[0]}",
                                         f"/opt/bunkerweb/plugins/{folder_name}",
                                     )
-                        except tarfile.ReadError:
+                        except ReadError:
                             error = 1
                             flash(
                                 f"Couldn't read file {file} ({folder_name if folder_name else temp_folder_name})",
                                 "error",
                             )
-                        except tarfile.CompressionError:
+                        except CompressionError:
                             error = 1
                             flash(
                                 f"{file} is not a valid tar file ({folder_name if folder_name else temp_folder_name})",
                                 "error",
                             )
-                        except tarfile.HeaderError:
+                        except HeaderError:
                             error = 1
                             flash(
                                 f"The file plugin.json in {file} is not valid ({folder_name if folder_name else temp_folder_name})",
@@ -906,11 +898,12 @@ def plugins():
                         f"A plugin named {folder_name} already exists",
                         "error",
                     )
-                except (tarfile.TarError, OSError) as e:
+                except (TarError, OSError) as e:
                     error = 1
                     flash(f"{e}", "error")
-                except Exception:
-                    pass
+                except Exception as e:
+                    error = 1
+                    flash(f"{e}", "error")
                 finally:
                     if error != 1:
                         flash(
@@ -920,10 +913,10 @@ def plugins():
                     error = 0
 
             # Fix permissions for plugins folders
-            for root, dirs, files in os.walk("/opt/bunkerweb/plugins", topdown=False):
+            for root, dirs, files in walk("/opt/bunkerweb/plugins", topdown=False):
                 for name in files + dirs:
-                    chown(os.path.join(root, name), "nginx", "nginx")
-                    os.chmod(os.path.join(root, name), 0o770)
+                    chown(join(root, name), "nginx", "nginx")
+                    chmod(join(root, name), 0o770)
 
         if operation:
             flash(operation)
@@ -937,7 +930,7 @@ def plugins():
         ).start()
 
         # Remove tmp folder
-        if os.path.exists("/opt/bunkerweb/tmp/ui"):
+        if exists("/opt/bunkerweb/tmp/ui"):
             try:
                 rmtree("/opt/bunkerweb/tmp/ui")
             except OSError:
@@ -968,7 +961,7 @@ def plugins():
                     "can_edit": False,
                     "can_delete": True,
                 }
-                for _dir in os.listdir("/opt/bunkerweb/plugins")
+                for _dir in listdir("/opt/bunkerweb/plugins")
             ],
         }
     ]
@@ -982,9 +975,7 @@ def plugins():
             f"/opt/bunkerweb/"
             + (
                 "plugins"
-                if os.path.exists(
-                    f"/opt/bunkerweb/plugins/{page.lower()}/ui/template.html"
-                )
+                if exists(f"/opt/bunkerweb/plugins/{page.lower()}/ui/template.html")
                 else "core"
             )
             + f"/{page.lower()}/ui/template.html",
@@ -1023,8 +1014,8 @@ def upload_plugin():
     if not request.files:
         return {"status": "ko"}, 400
 
-    if not os.path.exists("/opt/bunkerweb/tmp/ui"):
-        os.mkdir("/opt/bunkerweb/tmp/ui")
+    if not exists("/opt/bunkerweb/tmp/ui"):
+        mkdir("/opt/bunkerweb/tmp/ui")
 
     for file in request.files.values():
         if not file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
@@ -1049,9 +1040,9 @@ def custom_plugin(plugin):
         )
         return redirect(url_for("loading", next=url_for("plugins")))
 
-    if not os.path.exists(
-        f"/opt/bunkerweb/plugins/{plugin}/ui/actions.py"
-    ) and not os.path.exists(f"/opt/bunkerweb/core/{plugin}/ui/actions.py"):
+    if not exists(f"/opt/bunkerweb/plugins/{plugin}/ui/actions.py") and not exists(
+        f"/opt/bunkerweb/core/{plugin}/ui/actions.py"
+    ):
         flash(
             f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
             "error",
@@ -1063,7 +1054,7 @@ def custom_plugin(plugin):
         f"/opt/bunkerweb/"
         + (
             "plugins"
-            if os.path.exists(f"/opt/bunkerweb/plugins/{plugin}/ui/actions.py")
+            if exists(f"/opt/bunkerweb/plugins/{plugin}/ui/actions.py")
             else "core"
         )
         + f"/{plugin}/ui/"
@@ -1157,7 +1148,7 @@ def logs():
 @app.route("/logs/local", methods=["GET"])
 @login_required
 def logs_linux():
-    if not os.path.exists("/usr/sbin/nginx"):
+    if not exists("/usr/sbin/nginx"):
         return (
             jsonify(
                 {
@@ -1173,22 +1164,22 @@ def logs_linux():
     raw_logs_error = []
 
     if last_update:
-        if os.path.exists("/var/log/nginx/error.log"):
+        if exists("/var/log/nginx/error.log"):
             with open("/var/log/nginx/error.log", "r") as f:
                 raw_logs_error = f.read().splitlines()[int(last_update.split(".")[0]) :]
 
-        if os.path.exists("/var/log/nginx/access.log"):
+        if exists("/var/log/nginx/access.log"):
             with open("/var/log/nginx/access.log", "r") as f:
                 raw_logs_access = f.read().splitlines()[
                     int(last_update.split(".")[1]) :
                 ]
 
     else:
-        if os.path.exists("/var/log/nginx/error.log"):
+        if exists("/var/log/nginx/error.log"):
             with open("/var/log/nginx/error.log", "r") as f:
                 raw_logs_error = f.read().splitlines()
 
-        if os.path.exists("/var/log/nginx/access.log"):
+        if exists("/var/log/nginx/access.log"):
             with open("/var/log/nginx/access.log", "r") as f:
                 raw_logs_access = f.read().splitlines()
 

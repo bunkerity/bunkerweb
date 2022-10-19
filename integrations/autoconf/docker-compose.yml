@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mybunker:
     image: bunkerity/bunkerweb:1.4.3
     ports:
@@ -14,7 +13,7 @@ services:
       - AUTOCONF_MODE=yes
       - AUTO_LETS_ENCRYPT=yes # will be applied to all the services
     labels:
-      - "bunkerweb.AUTOCONF"
+      - "bunkerweb.INSTANCE"
     networks:
       - bw-autoconf
       - bw-services
@@ -29,6 +28,7 @@ services:
 
 volumes:
   bw-data:
+
 
 networks:
   bw-autoconf:

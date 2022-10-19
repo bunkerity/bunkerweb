@@ -1,4 +1,4 @@
-version: '3.5'
+version: "3.5"
 
 services:
   radarr:
@@ -34,7 +34,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
       - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
       - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
-      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+      - 'bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""'
 
   sonarr:
     image: linuxserver/sonarr
@@ -69,7 +69,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
       - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
       - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
-      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+      - 'bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""'
 
   prowlarr:
     container_name: prowlarr
@@ -101,7 +101,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
       - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
       - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
-      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+      - 'bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""'
 
   flaresolverr:
     container_name: flaresolverr
@@ -147,7 +147,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
       - "bunkerweb.REVERSE_PROXY_URL_999=/authelia"
       - "bunkerweb.REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify"
-      - "bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+      - 'bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""'
 
 networks:
   bw-services:

@@ -1,14 +1,12 @@
 {
-	"name": "hardened",
-	"kinds": [
-		"docker"
-	],
-	"timeout": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://www.example.com",
-			"string": "hello"
-		}
-	]
+  "name": "hardened",
+  "kinds": ["docker"],
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "hello"
+    }
+  ]
 }

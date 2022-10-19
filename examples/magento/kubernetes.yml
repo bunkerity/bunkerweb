@@ -6,16 +6,16 @@ metadata:
     bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: magento
-            port:
-              number: 8080
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: magento
+                port:
+                  number: 8080
 ---
 apiVersion: v1
 kind: ConfigMap

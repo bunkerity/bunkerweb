@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   mybunker:
     image: bunkerity/bunkerweb:1.4.3
     logging:
@@ -50,7 +49,6 @@ services:
 
 volumes:
   bw_data:
-
 
 networks:
   mynet:

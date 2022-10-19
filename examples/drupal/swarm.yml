@@ -1,7 +1,6 @@
-version: '3.3'
+version: "3.3"
 
 services:
-
   mydrupal:
     image: drupal:9-apache
     networks:
@@ -22,7 +21,7 @@ services:
         - bunkerweb.REVERSE_PROXY_URL=/
         - bunkerweb.REVERSE_PROXY_HOST=http://mydrupal
         - bunkerweb.LIMIT_REQ_URL_1=/core/install.php
-        - bunkerweb.LIMIT_REQ_RATE_1=5r/s    
+        - bunkerweb.LIMIT_REQ_RATE_1=5r/s
 
   mydb:
     image: mariadb
@@ -34,7 +33,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=drupaldb
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password
     deploy:
       placement:
         constraints:

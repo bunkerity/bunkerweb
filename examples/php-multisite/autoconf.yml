@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   myapp1:
     image: php:fpm
     # ⚠️ UID and GID of mywww (101:101) and php:fpm (33:33) are not the same ⚠️
@@ -35,7 +34,6 @@ services:
       - bunkerweb.SERVER_NAME=app2.example.com
       - bunkerweb.REMOTE_PHP=myapp2
       - bunkerweb.REMOTE_PHP_PATH=/app
-      
 
 networks:
   bw-services:

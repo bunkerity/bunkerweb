@@ -8,13 +8,13 @@ metadata:
     bunkerweb.io/LIMIT_REQ_RATE_1: "5r/s"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: drupal
-            port:
-              number: 80
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: drupal
+                port:
+                  number: 80

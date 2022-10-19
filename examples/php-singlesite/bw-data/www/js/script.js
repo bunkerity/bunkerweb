@@ -1,1 +1,1 @@
-alert('JavaScript is working!');
+alert("JavaScript is working!");

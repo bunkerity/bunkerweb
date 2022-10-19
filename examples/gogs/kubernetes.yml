@@ -7,16 +7,16 @@ metadata:
     bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "1G"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-gogs
-            port:
-              number: 3000
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-gogs
+                port:
+                  number: 3000
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -52,16 +52,16 @@ spec:
         app: gogs
     spec:
       containers:
-      - name: gogs
-        image: gogs/gogs
-        volumeMounts:
-        - name: config
-          mountPath: /data/gogs/conf/app.ini
-          subPath: app.ini
+        - name: gogs
+          image: gogs/gogs
+          volumeMounts:
+            - name: config
+              mountPath: /data/gogs/conf/app.ini
+              subPath: app.ini
       volumes:
-      - name: config
-        configMap:
-          name: cfg-gogs
+        - name: config
+          configMap:
+            name: cfg-gogs
 ---
 apiVersion: v1
 kind: Service

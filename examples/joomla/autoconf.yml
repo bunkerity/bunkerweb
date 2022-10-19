@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   myjoomla:
     image: joomla:4-apache
     networks:
@@ -37,7 +36,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=joomla_db
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
 
 networks:
   bw-services:

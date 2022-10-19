@@ -10,13 +10,13 @@ metadata:
     bunkerweb.io/www.example.com_LIMIT_REQ_RATE_2: "8r/s"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: joomla
-            port:
-              number: 80
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: joomla
+                port:
+                  number: 80

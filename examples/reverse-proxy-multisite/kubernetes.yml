@@ -6,26 +6,26 @@ metadata:
     bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
 spec:
   rules:
-  - host: app1.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-app1
-            port:
-              number: 80
-  - host: app2.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-app2
-            port:
-              number: 80
+    - host: app1.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app1
+                port:
+                  number: 80
+    - host: app2.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app2
+                port:
+                  number: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -44,8 +44,8 @@ spec:
         app: app1
     spec:
       containers:
-      - name: app1
-        image: tutum/hello-world
+        - name: app1
+          image: tutum/hello-world
 ---
 apiVersion: v1
 kind: Service
@@ -76,8 +76,8 @@ spec:
         app: app2
     spec:
       containers:
-      - name: app2
-        image: tutum/hello-world
+        - name: app2
+          image: tutum/hello-world
 ---
 apiVersion: v1
 kind: Service

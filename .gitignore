@@ -3,3 +3,5 @@ site/
 .vscode/
 **/__pycache__/
 ui/env/
+docs/env/
+env/

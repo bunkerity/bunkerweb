@@ -1,18 +1,13 @@
 {
-	"name": "prestashop",
-	"kinds": [
-		"docker",
-        "autoconf",
-        "swarm",
-        "kubernetes"
-	],
-	"timeout": 180,
-	"delay": 120,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://www.example.com/administration",
-			"string": "prestashop"
-		}
-	]
+  "name": "prestashop",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 180,
+  "delay": 120,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com/administration",
+      "string": "prestashop"
+    }
+  ]
 }

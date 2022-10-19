@@ -1,10 +1,10 @@
 FROM python:3-alpine AS builder
 
 # Copy python requirements
-COPY deps/requirements.txt /opt/bunkerweb/deps/requirements.txt
+COPY bw/deps/requirements.txt /opt/bunkerweb/deps/requirements.txt
 
 # Install python requirements
-RUN apk add --no-cache --virtual build gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
+RUN apk add --no-cache --virtual build g++ gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
     mkdir /opt/bunkerweb/deps/python && \
     pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/deps/requirements.txt && \
     apk del build
@@ -15,12 +15,12 @@ COPY --from=builder /opt/bunkerweb/deps/python /opt/bunkerweb/deps/python
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
-COPY api /opt/bunkerweb/api
-COPY confs /opt/bunkerweb/confs
-COPY core /opt/bunkerweb/core
-COPY gen /opt/bunkerweb/gen
+COPY bw/api /opt/bunkerweb/api
+COPY bw/confs /opt/bunkerweb/confs
+COPY bw/core /opt/bunkerweb/core
+COPY bw/gen /opt/bunkerweb/gen
 COPY utils /opt/bunkerweb/utils
-COPY settings.json /opt/bunkerweb/settings.json
+COPY bw/settings.json /opt/bunkerweb/settings.json
 COPY VERSION /opt/bunkerweb/VERSION
 COPY ui/requirements.txt /opt/bunkerweb/ui/requirements.txt
 
@@ -31,19 +31,20 @@ RUN apk add --no-cache --virtual build gcc python3-dev musl-dev libffi-dev opens
 
 COPY ui /opt/bunkerweb/ui
 
-# Add nginx user
-RUN addgroup -g 101 nginx && \
-    adduser -h /var/cache/nginx -g nginx -s /bin/sh -G nginx -D -H -u 101 nginx && \
-    apk add --no-cache bash file && \
-    for dir in $(echo "cache configs letsencrypt plugins www") ; do ln -s "/data/${dir}" "/opt/bunkerweb/${dir}" ; done && \
+# Add ui user
+RUN apk add --no-cache bash file && \
+    addgroup -g 101 ui && \
+    adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
+    for dir in $(echo "cache configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/opt/bunkerweb/${dir}" ; done && \
     mkdir /opt/bunkerweb/tmp && \
-    chown -R root:nginx /opt/bunkerweb && \
+    chown -R root:ui /opt/bunkerweb && \
     find /opt/bunkerweb -type f -exec chmod 0740 {} \; && \
     find /opt/bunkerweb -type d -exec chmod 0750 {} \; && \
+    chown -R ui:ui /data && \
     chmod 770 /opt/bunkerweb/tmp && \
     chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/deps/python/bin/* && \  
     mkdir /etc/nginx && \
-    chown -R nginx:nginx /etc/nginx && \
+    chown -R ui:ui /etc/nginx && \
     chmod -R 770 /etc/nginx && \
     ln -s /usr/local/bin/python /usr/bin/python3
 
@@ -55,6 +56,7 @@ VOLUME /data /etc/nginx
 EXPOSE 7000
 
 WORKDIR /opt/bunkerweb/ui
-USER nginx:nginx
+
+USER ui:ui
 
 CMD ["gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "main:app"]

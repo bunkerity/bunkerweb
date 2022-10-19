@@ -1,17 +1,13 @@
 {
-	"name": "mattermost",
-	"kinds": [
-		"docker",
-		"autoconf",
-		"kubernetes"
-	],
-	"timeout": 60,
-	"delay": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://www.example.com",
-			"string": "mattermost"
-		}
-	]
+  "name": "mattermost",
+  "kinds": ["docker", "autoconf", "kubernetes"],
+  "timeout": 60,
+  "delay": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "mattermost"
+    }
+  ]
 }

@@ -1,29 +1,27 @@
 {
-	"name": "docker-configs",
-	"kinds": [
-		"docker"
-	],
-	"timeout": 60,
-	"tests": [
-		{
-			"type": "string",
-			"url": "https://app1.example.com/hello",
-			"string": "world"
-		},
-		{
-			"type": "string",
-			"url": "https://app2.example.com/hello",
-			"string": "world"
-		},
-		{
-			"type": "string",
-			"url": "https://app1.example.com/app1",
-			"string": "app1"
-		},
-		{
-			"type": "string",
-			"url": "https://app2.example.com/app2",
-			"string": "app2"
-		}
-	]
+  "name": "docker-configs",
+  "kinds": ["docker"],
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com/hello",
+      "string": "world"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com/hello",
+      "string": "world"
+    },
+    {
+      "type": "string",
+      "url": "https://app1.example.com/app1",
+      "string": "app1"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com/app2",
+      "string": "app2"
+    }
+  ]
 }

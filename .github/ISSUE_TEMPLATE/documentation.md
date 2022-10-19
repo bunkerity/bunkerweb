@@ -3,8 +3,7 @@ name: Documentation enhancement
 about: Error in the documentation or something is missing
 title: "[DOC]"
 labels: documentation
-assignees: ''
-
+assignees: ""
 ---
 
 **Description**
