@@ -361,16 +361,10 @@ class Database:
                 if global_value is None and suffix:
                     return None
                 elif suffix:
-                    if tmp_config[f"{setting.id}_{suffix}"] == setting.default:
-                        return tmp_config
-
                     tmp_config[f"{service.id}_{setting.id}_{suffix}"] = tmp_config[
                         f"{setting.id}_{suffix}"
                     ]
                 else:
-                    if tmp_config[setting.id] == setting.default:
-                        return tmp_config
-
                     tmp_config[f"{service.id}_{setting.id}"] = tmp_config[setting.id]
 
         return tmp_config
