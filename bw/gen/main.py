@@ -186,7 +186,7 @@ if __name__ == "__main__":
                     bw_integration = f.read().strip()
 
             db = None
-            if "DATABASE_URI" in config_files or bw_integration == "Linux":
+            if bw_integration == "Linux":
                 db = Database(logger, config_files["DATABASE_URI"])
             elif bw_integration in ("Docker", "Swarm", "Autoconf"):
                 try:
