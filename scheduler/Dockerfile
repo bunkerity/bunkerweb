@@ -51,6 +51,6 @@ VOLUME /data /etc/nginx
 
 WORKDIR /opt/bunkerweb/scheduler
 
-USER scheduler:scheduler
+USER root:scheduler
 
 ENTRYPOINT ["/opt/bunkerweb/scheduler/entrypoint.sh"]
