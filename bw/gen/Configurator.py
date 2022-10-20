@@ -135,9 +135,7 @@ class Configurator:
                         if key not in config:
                             if setting == "SERVER_NAME":
                                 config[key] = server_name
-                            elif (
-                                setting in config and config[setting] != data["default"]
-                            ):
+                            elif setting in config:
                                 config[key] = config[setting]
         return config
 

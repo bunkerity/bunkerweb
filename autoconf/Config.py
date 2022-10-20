@@ -1,4 +1,3 @@
-from logging import Logger
 from traceback import format_exc
 from subprocess import run, DEVNULL, STDOUT
 from glob import glob
@@ -53,23 +52,6 @@ class Config(ApiCaller, ConfigCaller):
         if not configs is None and configs != self.__configs:
             return True
         return False
-
-    def __get_config(self) -> dict:
-        config = {}
-        # extract instances variables
-        for instance in self.__instances:
-            for variable, value in instance["env"].items():
-                config[variable] = value
-        # extract services variables
-        server_names = []
-        for service in self.__services:
-            first_server = service["SERVER_NAME"].split(" ")[0]
-            if not first_server in server_names:
-                server_names.append(first_server)
-            for variable, value in service.items():
-                config[f"{first_server}_{variable}"] = value
-        config["SERVER_NAME"] = " ".join(server_names)
-        return config
 
     def __get_apis(self) -> list:
         apis = []
