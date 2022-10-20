@@ -1,11 +1,12 @@
 {
-	"TEMP_NGINX": {
+	"IS_LOADING": {
 		"context": "global",
 		"default": "no",
-		"help": "internal-use",
+		"help": "Internal use : set to yes when BW is loading.",
 		"id": "internal-use",
-		"regex": ".*",
-		"type": "text"
+		"label": "internal use",
+		"regex": "^(yes|no)$",
+		"type": "check"
 	},
 	"NGINX_PREFIX": {
 		"context": "global",
