@@ -151,21 +151,19 @@ if __name__ == "__main__":
                 logger.error("No database found, exiting ...")
                 stop(1)
 
-            if not db.is_initialized():
-                logger.info(
-                    "Database is not initialized, waiting ...",
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
                 )
-                while not db.is_initialized():
-                    sleep(3)
+                sleep(3)
 
             env = db.get_config()
-            if not db.is_first_config_saved() or not env:
+            while not db.is_first_config_saved() or not env:
                 logger.info(
-                    "Database doesn't have any config saved yet, waiting ...",
+                    "Database doesn't have any config saved yet, retrying in 5s ...",
                 )
-                while not db.is_first_config_saved() or not env:
-                    sleep(3)
-                    env = db.get_config()
+                sleep(3)
+                env = db.get_config()
 
         if args.run:
             # write config to /tmp/variables.env
