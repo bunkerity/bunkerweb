@@ -4,20 +4,31 @@ from logging import Logger
 from re import search as re_search
 from sys import path as sys_path
 from traceback import format_exc
+from typing import Union
 
 sys_path.append("/opt/bunkerweb/utils")
 
 
 class Configurator:
     def __init__(
-        self, settings: str, core: str, plugins: str, variables: str, logger: Logger
+        self,
+        settings: str,
+        core: str,
+        plugins: str,
+        variables: Union[str, dict],
+        logger: Logger,
     ):
         self.__logger = logger
         self.__settings = self.__load_settings(settings)
         self.__core = core
         self.__plugins_settings = []
         self.__plugins = self.__load_plugins(plugins, "plugins")
-        self.__variables = self.__load_variables(variables)
+
+        if isinstance(variables, str):
+            self.__variables = self.__load_variables(variables)
+        else:
+            self.__variables = variables
+
         self.__multisite = (
             "MULTISITE" in self.__variables and self.__variables["MULTISITE"] == "yes"
         )
@@ -89,23 +100,26 @@ class Configurator:
                 variables[var] = value
         return variables
 
-    def get_config(self, default: bool = False):
+    def get_config(self):
         config = {}
         # Extract default settings
         default_settings = [self.__settings, self.__core, self.__plugins]
-
-        if default:
-            return default_settings
+        for settings in default_settings:
+            for setting, data in settings.items():
+                config[setting] = data["default"]
 
         # Override with variables
         for variable, value in self.__variables.items():
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
-            elif (
-                not variable.startswith("PYTHON")
-                and variable != "GPG_KEY"
-                and variable != "LANG"
+            elif not variable.startswith("PYTHON") and variable not in (
+                "GPG_KEY",
+                "LANG",
+                "PATH",
+                "NGINX_VERSION",
+                "NJS_VERSION",
+                "PKG_RELEASE",
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
         # Expand variables to each sites if MULTISITE=yes and if not present

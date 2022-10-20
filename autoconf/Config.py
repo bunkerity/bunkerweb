@@ -216,20 +216,20 @@ class Config(ApiCaller, ConfigCaller):
         # run(cmd.split(" "), stdin=DEVNULL, stdout=DEVNULL, stderr=STDOUT)
 
         # send nginx configs
-        # send data folder
-        # reload nginx
         ret = self._send_files("/etc/nginx", "/confs")
         if not ret:
             success = False
             self.__logger.error(
                 "sending nginx configs failed, configuration will not work as expected...",
             )
+        # send data/configs folder
         ret = self._send_files("/data/configs", "/custom_configs")
         if not ret:
             success = False
             self.__logger.error(
                 "sending custom configs failed, configuration will not work as expected...",
             )
+        # reload nginx
         ret = self._send_to_apis("POST", "/reload")
         if not ret:
             success = False

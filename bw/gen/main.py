@@ -103,63 +103,67 @@ if __name__ == "__main__":
         logger.info(f"Method : {args.method}")
         logger.info(f"Init : {args.init}")
 
+        custom_confs_rx = re_compile(
+            r"^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$"
+        )
+
+        # Check existences and permissions
+        logger.info("Checking arguments ...")
+        files = [args.settings] + ([args.variables] if args.variables else [])
+        paths_rx = [args.core, args.plugins, args.templates]
+        paths_rwx = [args.output]
+        for file in files:
+            if not path.exists(file):
+                logger.error(f"Missing file : {file}")
+                sys_exit(1)
+            if not access(file, R_OK):
+                logger.error(f"Can't read file : {file}")
+                sys_exit(1)
+        for _path in paths_rx + paths_rwx:
+            if not path.isdir(_path):
+                logger.error(f"Missing directory : {_path}")
+                sys_exit(1)
+            if not access(_path, R_OK | X_OK):
+                logger.error(
+                    f"Missing RX rights on directory : {_path}",
+                )
+                sys_exit(1)
+        for _path in paths_rwx:
+            if not access(_path, W_OK):
+                logger.error(
+                    f"Missing W rights on directory : {_path}",
+                )
+                sys_exit(1)
+
+        # Check core plugins orders
+        logger.info("Checking core plugins orders ...")
+        core_plugins = {}
+        files = glob(f"{args.core}/*/plugin.json")
+        for file in files:
+            try:
+                with open(file) as f:
+                    core_plugin = loads(f.read())
+
+                    if core_plugin["order"] not in core_plugins:
+                        core_plugins[core_plugin["order"]] = []
+
+                    core_plugins[core_plugin["order"]].append(core_plugin)
+            except:
+                logger.error(
+                    f"Exception while loading JSON from {file} : {format_exc()}",
+                )
+
+        core_settings = {}
+        for order in core_plugins:
+            if len(core_plugins[order]) > 1 and order != 999:
+                logger.warning(
+                    f"Multiple plugins have the same order ({order}) : {', '.join(plugin['id'] for plugin in core_plugins[order])}. Therefor, the execution order will be random.",
+                )
+
+            for plugin in core_plugins[order]:
+                core_settings.update(plugin["settings"])
+
         if args.variables or args.init:
-            # Check existences and permissions
-            logger.info("Checking arguments ...")
-            files = [args.settings, args.variables]
-            paths_rx = [args.core, args.plugins, args.templates]
-            paths_rwx = [args.output]
-            for file in files:
-                if not path.exists(file):
-                    logger.error(f"Missing file : {file}")
-                    sys_exit(1)
-                if not access(file, R_OK):
-                    logger.error(f"Can't read file : {file}")
-                    sys_exit(1)
-            for _path in paths_rx + paths_rwx:
-                if not path.isdir(_path):
-                    logger.error(f"Missing directory : {_path}")
-                    sys_exit(1)
-                if not access(_path, R_OK | X_OK):
-                    logger.error(
-                        f"Missing RX rights on directory : {_path}",
-                    )
-                    sys_exit(1)
-            for _path in paths_rwx:
-                if not access(_path, W_OK):
-                    logger.error(
-                        f"Missing W rights on directory : {_path}",
-                    )
-                    sys_exit(1)
-
-            # Check core plugins orders
-            logger.info("Checking core plugins orders ...")
-            core_plugins = {}
-            files = glob(f"{args.core}/*/plugin.json")
-            for file in files:
-                try:
-                    with open(file) as f:
-                        core_plugin = loads(f.read())
-
-                        if core_plugin["order"] not in core_plugins:
-                            core_plugins[core_plugin["order"]] = []
-
-                        core_plugins[core_plugin["order"]].append(core_plugin)
-                except:
-                    logger.error(
-                        f"Exception while loading JSON from {file} : {format_exc()}",
-                    )
-
-            core_settings = {}
-            for order in core_plugins:
-                if len(core_plugins[order]) > 1 and order != 999:
-                    logger.warning(
-                        f"Multiple plugins have the same order ({order}) : {', '.join(plugin['id'] for plugin in core_plugins[order])}. Therefor, the execution order will be random.",
-                    )
-
-                for plugin in core_plugins[order]:
-                    core_settings.update(plugin["settings"])
-
             # Compute the config
             logger.info("Computing config ...")
             config = Configurator(
@@ -167,10 +171,8 @@ if __name__ == "__main__":
             )
             config_files = config.get_config()
 
-            if config_files.get("LOG_LEVEL", "INFO") != logger.level:
-                logger = setup_logger(
-                    "Generator", config_files.get("LOG_LEVEL", "INFO")
-                )
+            if config_files.get("LOG_LEVEL", logger.level) != logger.level:
+                logger = setup_logger("Generator", config_files["LOG_LEVEL"])
 
             bw_integration = None
             if config_files.get("SWARM_MODE", "no") == "yes":
@@ -263,9 +265,6 @@ if __name__ == "__main__":
                         "Database not initialized, initializing ...",
                     )
 
-                    custom_confs_rx = re_compile(
-                        r"^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$"
-                    )
                     custom_confs = [
                         {"value": v, "exploded": custom_confs_rx.search(k).groups()}
                         for k, v in environ.items()
@@ -297,7 +296,7 @@ if __name__ == "__main__":
                         with open("/opt/bunkerweb/INTEGRATION", "r") as f:
                             bw_integration = f.read().strip()
 
-                    if bw_integration in ("Docker", "Linux"):
+                    if bw_integration == "Linux":
                         err = db.save_config(config_files, args.method)
 
                         if not err:
@@ -325,6 +324,88 @@ if __name__ == "__main__":
                 sys_exit(0)
 
             config = config_files
+        elif args.method != "autoconf":
+            bw_integration = "Docker"
+
+            try:
+                docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
+            except DockerException:
+                docker_client = DockerClient(
+                    base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+                )
+
+            tmp_config = {}
+            custom_confs = []
+            apis = []
+            db = None
+            for instance in docker_client.containers.list(
+                filters={"label": "bunkerweb.INSTANCE"}
+            ):
+                api = None
+
+                for var in instance.attrs["Config"]["Env"]:
+                    if custom_confs_rx.match(var.split("=", 1)[0]):
+                        splitted = var.split("=", 1)
+                        custom_confs.append(
+                            {
+                                "value": var.pop(0),
+                                "exploded": custom_confs_rx.search(
+                                    "=".join(var)
+                                ).groups(),
+                            }
+                        )
+                    else:
+                        tmp_config[var.split("=", 1)[0]] = var.split("=", 1)[1]
+
+                    if var.startswith("DATABASE_URI="):
+                        db = Database(logger, var.replace("DATABASE_URI=", "", 1))
+                    elif var.startswith("API_HTTP_PORT="):
+                        api = API(
+                            f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
+                        )
+
+                if api:
+                    apis.append(api)
+                else:
+                    apis.append(
+                        API(f"http://{instance.name}:{getenv('API_HTTP_PORT', '5000')}")
+                    )
+
+            if db is None:
+                db = Database(logger)
+
+            api_caller = ApiCaller(apis=apis)
+
+            # Compute the config
+            logger.info("Computing config ...")
+            config = Configurator(
+                args.settings, core_settings, args.plugins, tmp_config, logger
+            )
+            config_files = config.get_config()
+
+            if config_files.get("LOG_LEVEL", logger.level) != logger.level:
+                logger = setup_logger("Generator", config_files["LOG_LEVEL"])
+
+            err = db.save_config(config_files, args.method)
+
+            if not err:
+                err1 = db.save_custom_configs(custom_confs, args.method)
+            else:
+                err = None
+                err1 = None
+
+            with open("/opt/bunkerweb/VERSION", "r") as f:
+                bw_version = f.read().strip()
+
+            if err or err1:
+                logger.error(
+                    f"Can't save config to database : {err or err1}",
+                )
+                sys_exit(1)
+            else:
+                logger.info("Config successfully saved to database")
+
+            config = config_files
         else:
             db = None
             if getenv("KUBERNETES_MODE", "no") == "yes":
@@ -347,33 +428,16 @@ if __name__ == "__main__":
                         base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
                     )
 
-                apis = []
                 for instance in docker_client.containers.list(
                     filters={"label": "bunkerweb.INSTANCE"}
                 ):
-                    api = None
+                    for var in instance.attrs["Config"]["Env"]:
+                        if var.startswith("DATABASE_URI="):
+                            db = Database(logger, var.replace("DATABASE_URI=", "", 1))
+                            break
 
-                    if db is None:
-                        for var in instance.attrs["Config"]["Env"]:
-                            if var.startswith("DATABASE_URI="):
-                                db = Database(
-                                    logger, var.replace("DATABASE_URI=", "", 1)
-                                )
-                            elif var.startswith("API_HTTP_PORT="):
-                                api = API(
-                                    f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
-                                )
-
-                    if api:
-                        apis.append(api)
-                    else:
-                        apis.append(
-                            API(
-                                f"http://{instance.name}:{getenv('API_HTTP_PORT', '5000')}"
-                            )
-                        )
-
-                api_caller = ApiCaller(apis=apis)
+                    if db:
+                        break
 
             if db is None:
                 db = Database(logger)

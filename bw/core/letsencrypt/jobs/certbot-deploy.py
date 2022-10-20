@@ -13,6 +13,9 @@ sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
 sys_path.append("/opt/bunkerweb/api")
 
+from docker import DockerClient
+from docker.errors import DockerException
+
 from logger import setup_logger
 from API import API
 
@@ -85,23 +88,50 @@ try:
 
     # Docker or Linux case
     elif bw_integration == "Docker":
-        api = API(f"{getenv('BW_API_URL')}:5000")
-        sent, err, status, resp = api.request("POST", "/reload")
-        if not sent:
-            status = 1
-            logger.error(
-                f"Can't send API request to {api.get_endpoint()}/reload : {err}"
+        try:
+            docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
+        except DockerException:
+            docker_client = DockerClient(
+                base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
             )
-        else:
-            if status != 200:
+
+        apis = []
+        for instance in docker_client.containers.list(
+            filters={"label": "bunkerweb.INSTANCE"}
+        ):
+            api = None
+
+            for var in instance.attrs["Config"]["Env"]:
+                if var.startswith("API_HTTP_PORT="):
+                    api = API(
+                        f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
+                    )
+                    break
+
+            if api:
+                apis.append(api)
+            else:
+                apis.append(
+                    API(f"http://{instance.name}:{getenv('API_HTTP_PORT', '5000')}")
+                )
+
+        for api in apis:
+            sent, err, status, resp = api.request("POST", "/reload")
+            if not sent:
                 status = 1
                 logger.error(
-                    f"Error while sending API request to {api.get_endpoint()}/reload : status = {resp['status']}, msg = {resp['msg']}"
+                    f"Can't send API request to {api.get_endpoint()}/reload : {err}"
                 )
             else:
-                logger.info(
-                    f"Successfully sent API request to {api.get_endpoint()}/reload"
-                )
+                if status != 200:
+                    status = 1
+                    logger.error(
+                        f"Error while sending API request to {api.get_endpoint()}/reload : status = {resp['status']}, msg = {resp['msg']}"
+                    )
+                else:
+                    logger.info(
+                        f"Successfully sent API request to {api.get_endpoint()}/reload"
+                    )
     elif bw_integration == "Linux":
         cmd = "/usr/sbin/nginx -s reload"
         proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)

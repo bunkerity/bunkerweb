@@ -5,7 +5,7 @@
 log "$1" "ℹ️" "Setup and check /data folder ..."
 
 # Create folders if missing and check permissions
-rwx_folders=("cache" "letsencrypt")
+rwx_folders=("cache" "cache/letsencrypt")
 rx_folders=("configs" "configs/http" "configs/stream" "configs/server-http" "configs/server-stream" "configs/default-server-http" "configs/default-server-stream" "configs/modsec" "configs/modsec-crs" "plugins" "www")
 for folder in "${rwx_folders[@]}" ; do
 	if [ ! -d "/data/${folder}" ] ; then

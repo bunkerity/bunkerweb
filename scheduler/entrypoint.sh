@@ -8,9 +8,9 @@ fi
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
-	log "ENTRYPOINT" "ℹ️" "Catched stop operation"
+	log "ENTRYPOINT" "ℹ️ " "Catched stop operation"
 	if [ -f "/opt/bunkerweb/tmp/scheduler.pid" ] ; then
-		log "ENTRYPOINT" "ℹ️" "Stopping job scheduler ..."
+		log "ENTRYPOINT" "ℹ️ " "Stopping job scheduler ..."
 		kill -s TERM "$(cat /opt/bunkerweb/tmp/scheduler.pid)"
 	fi
 }
@@ -18,10 +18,10 @@ trap "trap_exit" TERM INT QUIT
 
 # trap SIGHUP
 function trap_reload() {
-	log "ENTRYPOINT" "ℹ️" "Catched reload operation"
+	log "ENTRYPOINT" "ℹ️ " "Catched reload operation"
 	/opt/bunkerweb/helpers/scheduler-restart.sh
 	if [ $? -ne 0 ] ; then
-		log "ENTRYPOINT" "ℹ️" "Error while restarting scheduler"
+		log "ENTRYPOINT" "ℹ️ " "Error while restarting scheduler"
 	fi
 }
 trap "trap_reload" HUP
@@ -44,10 +44,21 @@ if [ "$?" -ne 0 ] ; then
 	exit 1
 fi
 
+if [ -v VARIABLES_PATH ] && [ -f "/etc/nginx/variables.env" ] && grep -q "^TEMP_NGINX=no$" /etc/nginx/variables.env ; then
+	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb configuration is already generated, will not generate it again"
+elif [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
+	# Generate configuration and send config to bunkerweb
+	/opt/bunkerweb/gen/main.py --method scheduler
+	if [ "$?" -ne 0 ] ; then
+		log "ENTRYPOINT" "❌" "Scheduler generator failed"
+		exit 1
+	fi
+fi
+
 # execute jobs
-log "ENTRYPOINT" "ℹ️" "Executing jobs ..."
+log "ENTRYPOINT" "ℹ️ " "Executing jobs ..."
 if [ -v VARIABLES_PATH ] ; then
-	/opt/bunkerweb/scheduler/main.py --variables /tmp/variables.env --run
+	/opt/bunkerweb/scheduler/main.py --variables $VARIABLES_PATH --run
 else
 	/opt/bunkerweb/scheduler/main.py --run
 fi
@@ -56,23 +67,13 @@ if [ "$?" -ne 0 ] ; then
   exit 1
 fi
 
-if [ -v VARIABLES_PATH ] && [ -f "/etc/nginx/variables.env" ] && grep -q "^TEMP_NGINX=no$" /etc/nginx/variables.env ; then
-	log "ENTRYPOINT" "⚠️" "Looks like BunkerWeb configuration is already generated, will not generate it again"
-elif [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
-	# Generate configuration and send config to bunkerweb
-	/opt/bunkerweb/gen/main.py --variables /tmp/variables.env --method scheduler
-	if [ "$?" -ne 0 ] ; then
-		log "ENTRYPOINT" "❌" "Scheduler generator failed"
-		exit 1
-	fi
-fi
 
-log "ENTRYPOINT" "ℹ️" "Executing job scheduler ..."
+log "ENTRYPOINT" "ℹ️ " "Executing job scheduler ..."
 if [ -v VARIABLES_PATH ] ; then
 	/opt/bunkerweb/scheduler/main.py --variables $VARIABLES_PATH
 else
 	/opt/bunkerweb/scheduler/main.py
 fi
 
-log "ENTRYPOINT" "ℹ️" "Scheduler stopped"
+log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
 exit 0
