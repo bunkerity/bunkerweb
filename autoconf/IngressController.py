@@ -4,6 +4,7 @@ from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
 from logger import log
 from sys import exit
+from time import sleep
 
 from Controller import Controller
 from ConfigCaller import ConfigCaller
@@ -199,13 +200,14 @@ class IngressController(Controller, ConfigCaller) :
                 if e.status != 410 :
                     log("INGRESS-CONTROLLER", "❌", "Exception while reading k8s event (type = " + watch_type + ") : ")
                     print(format_exc())
-                    exit(1)
-                if locked :
-                    self.__internal_lock.release()
             except :
                 log("INGRESS-CONTROLLER", "❌", "Unknown exception while reading k8s event (type = " + watch_type + ") : ")
                 print(format_exc())
-                exit(2)
+            finally :
+                if locked :
+                    self.__internal_lock.release()
+                log("INGRESS-CONTROLLER", "⚠️", "Got exception, retrying in 10 seconds ...")
+                sleep(10)
 
     def apply_config(self) :
         self._config.stop_scheduler()
