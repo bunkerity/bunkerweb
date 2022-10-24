@@ -2,6 +2,7 @@
 
 ## v1.4.4 -
 
+- Fix k8s controller not watching the events when there is an exception
 - Fix incorrect log when reloading nginx using Linux integration
 - Fix UI dev mode, production mode is now the default
 - Fix wrong exposed port in the UI container
@@ -14,7 +15,7 @@
 - Add BLACKLIST_IGNORE_\* settings
 - Add automatic change of SecRequestBodyLimit modsec directive based on MAX_CLIENT_SIZE setting
 - Add MODSECURITY_SEC_RULE_ENGINE and MODSECURITY_SEC_AUDIT_LOG_PARTS settings
-- Add manual ban and get bands to the API/CLI
+- Add manual ban and get bans to the API/CLI
 - Add Brawdunoir community example
 - Improve core plugins order and add documentation about it
 - Improve overall documentation
