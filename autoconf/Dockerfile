@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM python:3.11-rc-alpine
 
 # Copy python requirements
 COPY bw/deps/requirements.txt /opt/bunkerweb/deps/requirements.txt
