@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from copy import deepcopy
 from logging import INFO, WARNING, Logger, getLogger
-from os import _exit, environ, path
+from os import _exit, environ, getenv, path
 from re import search
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import create_engine, inspect
@@ -14,12 +14,51 @@ from model import *
 
 
 class Database:
-    def __init__(self, logger: Logger, sqlalchemy_string: str = None) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        sqlalchemy_string: str = None,
+        bw_integration: str = "Local",
+    ) -> None:
         """Initialize the database"""
         self.__logger = logger
         getLogger("sqlalchemy.engine").setLevel(
             logger.level if logger.level != INFO else WARNING
         )
+
+        if sqlalchemy_string is None and bw_integration != "Local":
+            if bw_integration == "Kubernetes":
+                from kubernetes import client as kube_client
+
+                corev1 = kube_client.CoreV1Api()
+                for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
+                    if (
+                        pod.metadata.annotations != None
+                        and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
+                    ):
+                        for pod_env in pod.spec.containers[0].env:
+                            if pod_env.name == "DATABASE_URI":
+                                sqlalchemy_string = pod_env.value
+                                break
+
+                    if sqlalchemy_string:
+                        break
+            else:
+                from docker import DockerClient
+
+                docker_client = DockerClient(
+                    base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+                )
+                for instance in docker_client.containers.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                ):
+                    for var in instance.attrs["Config"]["Env"]:
+                        if var.startswith("DATABASE_URI="):
+                            sqlalchemy_string = var.replace("DATABASE_URI=", "", 1)
+                            break
+
+                    if sqlalchemy_string:
+                        break
 
         if not sqlalchemy_string:
             sqlalchemy_string = environ.get(
