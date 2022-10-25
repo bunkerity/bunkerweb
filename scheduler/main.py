@@ -13,10 +13,7 @@ sys_path.append("/opt/bunkerweb/utils")
 sys_path.append("/opt/bunkerweb/api")
 sys_path.append("/opt/bunkerweb/db")
 
-from docker import DockerClient
-from docker.errors import DockerException
 from dotenv import dotenv_values
-from kubernetes import client as kube_client
 
 from logger import setup_logger
 from Database import Database
@@ -26,7 +23,7 @@ from API import API
 run = True
 scheduler = None
 reloading = False
-logger = setup_logger("Scheduler", environ.get("LOG_LEVEL", "INFO"))
+logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
 
 def handle_stop(signum, frame):
@@ -105,8 +102,6 @@ if __name__ == "__main__":
 
         logger.info("Scheduler started ...")
 
-        bw_integration = "Linux"
-
         if args.variables:
             logger.info(f"Variables : {args.variables}")
 
@@ -114,42 +109,13 @@ if __name__ == "__main__":
             env = dotenv_values(args.variables)
         else:
             # Read from database
-            db = None
-            if "DATABASE_URI" in environ:
-                db = Database(logger)
-            elif getenv("KUBERNETES_MODE", "no") == "yes":
-                bw_integration = "Kubernetes"
-                corev1 = kube_client.CoreV1Api()
-                for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                    if (
-                        pod.metadata.annotations != None
-                        and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                        and "DATABASE_URI" in pod.spec.containers[0].env
-                    ):
-                        db = Database(
-                            logger, pod.spec.containers[0].env["DATABASE_URI"]
-                        )
-                        break
-            else:
-                bw_integration = "Docker"
-                try:
-                    docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
-                except DockerException:
-                    docker_client = DockerClient(
-                        base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-                    )
-
-                for instance in docker_client.containers.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
-                    for var in instance.attrs["Config"]["Env"]:
-                        if var.startswith("DATABASE_URI="):
-                            db = Database(logger, var.replace("DATABASE_URI=", "", 1))
-                            break
-
-            if db is None:
-                logger.error("No database found, exiting ...")
-                stop(1)
+            db = Database(
+                logger,
+                sqlalchemy_string=getenv("DATABASE_URI", None),
+                bw_integration="Kubernetes"
+                if getenv("KUBERNETES_MODE", "no") == "yes"
+                else "Cluster",
+            )
 
             while not db.is_initialized():
                 logger.warning(
@@ -180,67 +146,12 @@ if __name__ == "__main__":
 
         logger.info("Executing job scheduler ...")
         while True:
-            apis = []
-            if not args.variables:
-                if bw_integration == "Docker":
-                    try:
-                        docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
-                    except DockerException:
-                        docker_client = DockerClient(
-                            base_url=getenv(
-                                "DOCKER_HOST", "unix:///var/run/docker.sock"
-                            )
-                        )
-
-                    for instance in docker_client.containers.list(
-                        filters={"label": "bunkerweb.INSTANCE"}
-                    ):
-                        api = None
-
-                        for var in instance.attrs["Config"]["Env"]:
-                            if var.startswith("API_HTTP_PORT="):
-                                api = API(
-                                    f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
-                                )
-                                break
-
-                        if api:
-                            apis.append(api)
-                        else:
-                            apis.append(
-                                API(
-                                    f"http://{instance.name}:{getenv('API_HTTP_PORT', '5000')}"
-                                )
-                            )
-                elif bw_integration == "Kubernetes":
-                    corev1 = kube_client.CoreV1Api()
-                    for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                        api = None
-                        if (
-                            pod.metadata.annotations != None
-                            and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                        ):
-                            for pod_env in instance.spec.containers[0].env:
-                                if pod_env.name == "API_HTTP_PORT":
-                                    api = API(
-                                        f"http://{pod.status.pod_ip}:{pod_env.value or getenv('API_HTTP_PORT', '5000')}"
-                                    )
-                                    break
-
-                            if api:
-                                apis.append(api)
-                            else:
-                                apis.append(
-                                    API(
-                                        f"http://{pod.status.pod_ip}:{env.get('API_HTTP_PORT', getenv('API_HTTP_PORT', '5000'))}"
-                                    )
-                                )
-
             # Instantiate scheduler
             scheduler = JobScheduler(
                 env=env,
-                apis=apis,
+                apis=[],
                 logger=logger,
+                auto=not args.variables,
             )
 
             # Only run jobs once

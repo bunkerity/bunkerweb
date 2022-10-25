@@ -1,3 +1,4 @@
+from time import sleep
 from traceback import format_exc
 from subprocess import run, DEVNULL, STDOUT
 from glob import glob
@@ -135,10 +136,18 @@ class Config(ApiCaller, ConfigCaller):
         self.__services = services
         self.__configs = configs
         self.__config = self.__get_full_env()
+
         if self.__db is None:
             self.__db = Database(
                 self.__logger, sqlalchemy_string=self.__config.get("DATABASE_URI", None)
             )
+
+            while not self.__db.is_initialized():
+                self.__logger.warning(
+                    "Database is not initialized, retrying in 5 seconds ...",
+                )
+                sleep(5)
+
         self._set_apis(self.__get_apis())
 
         # write configs

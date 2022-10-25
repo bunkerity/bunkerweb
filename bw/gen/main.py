@@ -20,8 +20,6 @@ sys_path.append("/opt/bunkerweb/api")
 sys_path.append("/opt/bunkerweb/db")
 
 from docker import DockerClient
-from docker.errors import DockerException
-from kubernetes import client as kube_client
 
 from logger import setup_logger
 from Database import Database
@@ -174,69 +172,20 @@ if __name__ == "__main__":
             if config_files.get("LOG_LEVEL", logger.level) != logger.level:
                 logger = setup_logger("Generator", config_files["LOG_LEVEL"])
 
-            bw_integration = None
-            if config_files.get("SWARM_MODE", "no") == "yes":
-                bw_integration = "Swarm"
-            elif config_files.get("KUBERNETES_MODE", "no") == "yes":
+            bw_integration = "Local"
+            if config_files.get("KUBERNETES_MODE", "no") == "yes":
                 bw_integration = "Kubernetes"
-            elif config_files.get("AUTOCONF_MODE", "no") == "yes":
-                bw_integration = "Autoconf"
-            elif args.method != "autoconf" and exists("/opt/bunkerweb/INTEGRATION"):
-                with open("/opt/bunkerweb/INTEGRATION", "r") as f:
-                    bw_integration = f.read().strip()
+            elif (
+                config_files.get("SWARM_MODE", "no") == "yes"
+                or config_files.get("AUTOCONF_MODE", "no") == "yes"
+            ):
+                bw_integration = "Cluster"
 
-            db = None
-            if bw_integration == "Linux":
-                db = Database(logger, config_files["DATABASE_URI"])
-            elif bw_integration in ("Docker", "Swarm", "Autoconf"):
-                try:
-                    docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
-                except DockerException:
-                    docker_client = DockerClient(
-                        base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-                    )
-
-                apis = []
-                for instance in docker_client.containers.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
-                    api = None
-
-                    for var in instance.attrs["Config"]["Env"]:
-                        if db is None and var.startswith("DATABASE_URI="):
-                            db = Database(logger, var.replace("DATABASE_URI=", "", 1))
-                        elif var.startswith("API_HTTP_PORT="):
-                            api = API(
-                                f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
-                            )
-
-                    if api:
-                        apis.append(api)
-                    else:
-                        apis.append(
-                            API(
-                                f"http://{instance.name}:{getenv('API_HTTP_PORT', '5000')}"
-                            )
-                        )
-
-                api_caller = ApiCaller(apis=apis)
-            elif bw_integration == "Kubernetes":
-                corev1 = kube_client.CoreV1Api()
-                for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                    if (
-                        pod.metadata.annotations != None
-                        and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                    ):
-                        for pod_env in pod.spec.containers[0].env:
-                            if pod_env.name == "DATABASE_URI":
-                                db = Database(
-                                    logger,
-                                    pod_env.value or getenv("DATABASE_URI", "5000"),
-                                )
-                                break
-
-            if db is None:
-                db = Database(logger)
+            db = Database(
+                logger,
+                sqlalchemy_string=getenv("DATABASE_URI", None),
+                bw_integration=bw_integration,
+            )
 
             if args.init:
                 ret, err = db.init_tables(
@@ -274,29 +223,7 @@ if __name__ == "__main__":
                     with open("/opt/bunkerweb/VERSION", "r") as f:
                         bw_version = f.read().strip()
 
-                    bw_integration = None
-                    if (
-                        getenv("SWARM_MODE", config_files.get("SWARM_MODE", "no"))
-                        == "yes"
-                    ):
-                        bw_integration = "Swarm"
-                    elif (
-                        getenv(
-                            "KUBERNETES_MODE", config_files.get("KUBERNETES_MODE", "no")
-                        )
-                        == "yes"
-                    ):
-                        bw_integration = "Kubernetes"
-                    elif (
-                        getenv("AUTOCONF_MODE", config_files.get("AUTOCONF_MODE", "no"))
-                        == "yes"
-                    ):
-                        bw_integration = "Autoconf"
-                    elif exists("/opt/bunkerweb/INTEGRATION"):
-                        with open("/opt/bunkerweb/INTEGRATION", "r") as f:
-                            bw_integration = f.read().strip()
-
-                    if bw_integration == "Linux":
+                    if bw_integration == "Local":
                         err = db.save_config(config_files, args.method)
 
                         if not err:
@@ -305,9 +232,18 @@ if __name__ == "__main__":
                         err = None
                         err1 = None
 
-                    err2 = db.initialize_db(
-                        version=bw_version, integration=bw_integration
-                    )
+                    integration = "Linux"
+                    if config_files.get("KUBERNETES_MODE", "no") == "yes":
+                        integration = "Kubernetes"
+                    elif config_files.get("SWARM_MODE", "no") == "yes":
+                        integration = "Swarm"
+                    elif config_files.get("AUTOCONF_MODE", "no") == "yes":
+                        integration = "Autoconf"
+                    elif exists("/opt/bunkerweb/INTEGRATION"):
+                        with open("/opt/bunkerweb/INTEGRATION", "r") as f:
+                            integration = f.read().strip()
+
+                    err2 = db.initialize_db(version=bw_version, integration=integration)
 
                     if err or err1 or err2:
                         logger.error(
@@ -325,44 +261,41 @@ if __name__ == "__main__":
 
             config = config_files
         elif args.method != "autoconf":
-            bw_integration = "Docker"
-
-            try:
-                docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
-            except DockerException:
-                docker_client = DockerClient(
-                    base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-                )
-
+            bw_integration = "Cluster"
+            docker_client = DockerClient(
+                base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+            )
             tmp_config = {}
             custom_confs = []
             apis = []
             db = None
+
             for instance in docker_client.containers.list(
                 filters={"label": "bunkerweb.INSTANCE"}
             ):
                 api = None
 
                 for var in instance.attrs["Config"]["Env"]:
-                    if custom_confs_rx.match(var.split("=", 1)[0]):
-                        splitted = var.split("=", 1)
+                    splitted = var.split("=", 1)
+                    if custom_confs_rx.match(splitted[0]):
                         custom_confs.append(
                             {
-                                "value": var.pop(0),
+                                "value": splitted[1],
                                 "exploded": custom_confs_rx.search(
-                                    "=".join(var)
+                                    splitted[0]
                                 ).groups(),
                             }
                         )
                     else:
-                        tmp_config[var.split("=", 1)[0]] = var.split("=", 1)[1]
+                        tmp_config[splitted[0]] = splitted[1]
 
-                    if var.startswith("DATABASE_URI="):
-                        db = Database(logger, var.replace("DATABASE_URI=", "", 1))
-                    elif var.startswith("API_HTTP_PORT="):
-                        api = API(
-                            f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
-                        )
+                        if splitted[0] == "DATABASE_URI":
+                            db = Database(
+                                logger,
+                                sqlalchemy_string=splitted[1],
+                            )
+                        elif splitted[0] == "API_HTTP_PORT":
+                            api = API(f"http://{instance.name}:{splitted[1]}")
 
                 if api:
                     apis.append(api)
@@ -407,63 +340,33 @@ if __name__ == "__main__":
 
             config = config_files
         else:
-            db = None
-            if getenv("KUBERNETES_MODE", "no") == "yes":
-                corev1 = kube_client.CoreV1Api()
-                for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                    if (
-                        pod.metadata.annotations != None
-                        and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                        and "DATABASE_URI" in pod.spec.containers[0].env
-                    ):
-                        db = Database(
-                            logger, pod.spec.containers[0].env["DATABASE_URI"]
-                        )
-                        break
-            elif getenv("AUTOCONF_MODE", getenv("SWARM_MODE", "no")) == "yes":
-                try:
-                    docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
-                except DockerException:
-                    docker_client = DockerClient(
-                        base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-                    )
-
-                for instance in docker_client.containers.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
-                    for var in instance.attrs["Config"]["Env"]:
-                        if var.startswith("DATABASE_URI="):
-                            db = Database(logger, var.replace("DATABASE_URI=", "", 1))
-                            break
-
-                    if db:
-                        break
-
-            if db is None:
-                db = Database(logger)
+            db = Database(
+                logger,
+                bw_integration="Kubernetes"
+                if getenv("KUBERNETES_MODE", "no") == "yes"
+                else "Cluster",
+            )
 
             config = db.get_config()
 
-            bw_integration = None
-            if config.get("SWARM_MODE", "no") == "yes":
-                bw_integration = "Swarm"
-            elif config.get("KUBERNETES_MODE", "no") == "yes":
+            bw_integration = "Local"
+            if config.get("KUBERNETES_MODE", "no") == "yes":
                 bw_integration = "Kubernetes"
-            elif config.get("AUTOCONF_MODE", "no") == "yes":
-                bw_integration = "Autoconf"
-            elif args.method != "autoconf" and exists("/opt/bunkerweb/INTEGRATION"):
-                with open("/opt/bunkerweb/INTEGRATION", "r") as f:
-                    bw_integration = f.read().strip()
+            elif (
+                config.get("SWARM_MODE", "no") == "yes"
+                or config.get("AUTOCONF_MODE", "no") == "yes"
+            ):
+                bw_integration = "Cluster"
 
         logger = setup_logger("Generator", config.get("LOG_LEVEL", "INFO"))
 
-        if bw_integration == "Docker":
+        if args.method != "autoconf" and bw_integration == "Cluster":
             while not api_caller._send_to_apis("GET", "/ping"):
                 logger.warning(
                     "Waiting for BunkerWeb's temporary nginx to start, retrying in 5 seconds ...",
                 )
                 sleep(5)
-        elif bw_integration == "Linux":
+        elif bw_integration == "Local":
             retries = 0
             while not exists("/opt/bunkerweb/tmp/nginx.pid"):
                 if retries == 5:
@@ -489,7 +392,7 @@ if __name__ == "__main__":
             elif isdir(file):
                 rmtree(file, ignore_errors=False)
 
-        if bw_integration in ("Docker", "Linux"):
+        if args.method != "autoconf":
             logger.info(
                 "Generating custom configs from Database ...",
             )
@@ -517,14 +420,14 @@ if __name__ == "__main__":
         )
         templator.render()
 
-        if bw_integration == "Docker":
+        if args.method != "autoconf" and bw_integration == "Cluster":
             ret = api_caller._send_to_apis("POST", "/reload")
             if not ret:
                 logger.error(
                     "reload failed",
                 )
                 sys_exit(1)
-        elif bw_integration == "Linux":
+        elif bw_integration == "Local":
             cmd = "/usr/sbin/nginx -s reload"
             proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
             if proc.returncode != 0:

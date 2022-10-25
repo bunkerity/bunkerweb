@@ -25,8 +25,13 @@ class JobScheduler(ApiCaller):
         lock=None,
         apis=[],
         logger: Logger = setup_logger("Scheduler", environ.get("LOG_LEVEL", "INFO")),
+        auto: bool = False,
     ):
         super().__init__(apis)
+
+        if auto is True:
+            self.auto_setup()
+
         self.__logger = logger
         self.__env = env
         with open("/tmp/autoconf.env", "w") as f:

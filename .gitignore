@@ -1,7 +1,5 @@
 site/
 .idea/
 .vscode/
-**/__pycache__/
-ui/env/
-docs/env/
-env/
+__pycache__
+env
