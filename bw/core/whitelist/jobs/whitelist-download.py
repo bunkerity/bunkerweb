@@ -8,8 +8,11 @@ from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 
 from requests import get
+
+from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, is_cached_file, file_hash
 
@@ -48,6 +51,13 @@ def check_line(kind, line):
 
 
 logger = setup_logger("WHITELIST", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 status = 0
 
 try:
@@ -115,12 +125,12 @@ try:
         for url in urls_list:
             try:
                 logger.info(f"Downloading whitelist data from {url} ...")
-                resp = get(url, stream=True)
+                resp = get(url)
                 if resp.status_code != 200:
                     continue
                 i = 0
                 with open(f"/opt/bunkerweb/tmp/whitelist/{kind}.list", "w") as f:
-                    for line in resp.iter_lines(decode_unicode=True):
+                    for line in resp.content.decode("utf-8").splitlines():
                         line = line.strip()
                         if kind != "USER_AGENT":
                             line = line.strip().split(" ")[0]
@@ -152,6 +162,16 @@ try:
                         logger.error(f"Error while caching whitelist : {err}")
                         status = 2
                     if status != 2:
+                        # Update db
+                        err = db.update_job_cache(
+                            "whitelist-download",
+                            None,
+                            f"{kind}.list",
+                            resp.content,
+                            checksum=new_hash,
+                        )
+                        if err:
+                            logger.warning(f"Couldn't update db cache: {err}")
                         status = 1
             except:
                 status = 2

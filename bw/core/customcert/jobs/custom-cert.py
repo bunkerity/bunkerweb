@@ -7,17 +7,26 @@ from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 
+from Database import Database
 from jobs import file_hash
 from logger import setup_logger
 
 logger = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 
 
-def check_cert(cert_path):
+def check_cert(cert_path, first_server: str = None):
     try:
         cache_path = (
-            "/opt/bunkerweb/cache/customcert/" + cert_path.replace("/", "_") + ".hash"
+            f"/opt/bunkerweb/cache/customcert/{cert_path.replace('/', '_')}.hash"
         )
         current_hash = file_hash(cert_path)
         if not isfile(cache_path):
@@ -28,6 +37,15 @@ def check_cert(cert_path):
             return False
         with open(cache_path, "w") as f:
             f.write(current_hash)
+        err = db.update_job_cache(
+            "custom-cert",
+            first_server,
+            f"{cert_path.replace('/', '_')}.hash",
+            current_hash.encode("utf-8"),
+            checksum=current_hash,
+        )
+        if err:
+            logger.warning(f"Couldn't update db cache: {err}")
         return True
     except:
         logger.error(
@@ -56,7 +74,7 @@ try:
             logger.info(
                 f"Checking if certificate {cert_path} changed ...",
             )
-            need_reload = check_cert(cert_path)
+            need_reload = check_cert(cert_path, first_server)
             if need_reload:
                 logger.info(
                     f"Detected change for certificate {cert_path}",

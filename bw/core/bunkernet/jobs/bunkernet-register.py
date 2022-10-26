@@ -8,12 +8,21 @@ from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 sys_path.append("/opt/bunkerweb/core/bunkernet/jobs")
 
-from logger import setup_logger
 from bunkernet import register, ping, get_id
+from Database import Database
+from logger import setup_logger
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 status = 0
 
 try:
@@ -110,6 +119,16 @@ try:
         if not isfile("/opt/bunkerweb/cache/bunkernet/instance.id"):
             with open("/opt/bunkerweb/cache/bunkernet/instance.id", "w") as f:
                 f.write(bunkernet_id)
+
+        # Update db
+        err = db.update_job_cache(
+            "bunkernet-register",
+            None,
+            "instance.id",
+            f"{bunkernet_id}".encode("utf-8"),
+        )
+        if err:
+            logger.warning(f"Couldn't update db cache: {err}")
     else:
         logger.error("Connectivity with BunkerWeb failed ...")
         status = 2

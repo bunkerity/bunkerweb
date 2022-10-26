@@ -7,8 +7,11 @@ from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 
 from requests import get
+
+from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
@@ -30,6 +33,13 @@ def check_line(line):
 
 
 logger = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 status = 0
 
 try:
@@ -39,11 +49,11 @@ try:
     # Multisite case
     if getenv("MULTISITE") == "yes":
         for first_server in getenv("SERVER_NAME").split(" "):
-            if getenv(first_server + "_USE_REALIP", getenv("USE_REALIP")) == "yes":
+            if getenv(first_server + "_USE_REAL_IP", getenv("USE_REAL_IP")) == "yes":
                 blacklist_activated = True
                 break
     # Singlesite case
-    elif getenv("USE_REALIP") == "yes":
+    elif getenv("USE_REAL_IP") == "yes":
         blacklist_activated = True
     if not blacklist_activated:
         logger.info("RealIP is not activated, skipping download...")
@@ -65,7 +75,7 @@ try:
 
     # Download and write data to temp file
     i = 0
-    f = open("/opt/bunkerweb/tmp/realip-combined.list", "w")
+    content = ""
     for url in urls:
         try:
             logger.info(f"Downloading RealIP list from {url} ...")
@@ -78,14 +88,16 @@ try:
                     continue
                 ok, data = check_line(line)
                 if ok:
-                    f.write(data + "\n")
+                    content += f"{data}\n"
                     i += 1
         except:
             status = 2
             logger.error(
                 f"Exception while getting RealIP list from {url} :\n{format_exc()}"
             )
-    f.close()
+
+    with open("/opt/bunkerweb/tmp/realip-combined.list", "w") as f:
+        f.write(content)
 
     # Check if file has changed
     new_hash = file_hash("/opt/bunkerweb/tmp/realip-combined.list")
@@ -103,6 +115,17 @@ try:
     if not cached:
         logger.error(f"Error while caching list : {err}")
         _exit(2)
+
+    # Update db
+    err = db.update_job_cache(
+        "realip-download",
+        None,
+        "combined.list",
+        content.encode("utf-8"),
+        checksum=new_hash,
+    )
+    if err:
+        logger.warning(f"Couldn't update db cache: {err}")
 
     logger.info(f"Downloaded {i} trusted IP/net")
 

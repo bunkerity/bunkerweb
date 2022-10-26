@@ -120,6 +120,7 @@ class Configurator:
                 "NGINX_VERSION",
                 "NJS_VERSION",
                 "PKG_RELEASE",
+                "DOCKER_HOST",
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
         # Expand variables to each sites if MULTISITE=yes and if not present

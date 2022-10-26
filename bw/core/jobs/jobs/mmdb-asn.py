@@ -8,13 +8,23 @@ from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 
 from maxminddb import open_database
 from requests import get
+
+from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("JOBS", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 status = 0
 
 try:
@@ -58,6 +68,13 @@ try:
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)
+
+    # Update db
+    err = db.update_job_cache(
+        "mmdb-asn", None, "asn.mmdb", resp.content, checksum=new_hash
+    )
+    if err:
+        logger.warning(f"Couldn't update db cache: {err}")
 
     # Success
     logger.info(f"Downloaded new mmdb from {mmdb_url}")

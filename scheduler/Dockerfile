@@ -24,7 +24,7 @@ COPY utils /opt/bunkerweb/utils
 COPY VERSION /opt/bunkerweb/VERSION
 
 # Add scheduler user, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash git && \
+RUN apk add --no-cache bash libgcc libstdc++ openssl git && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
