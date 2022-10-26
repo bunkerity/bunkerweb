@@ -12,8 +12,10 @@ from schedule import (
 from sys import path as sys_path
 from traceback import format_exc
 
-
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
+
+from Database import Database
 from logger import setup_logger
 from ApiCaller import ApiCaller
 
@@ -26,6 +28,7 @@ class JobScheduler(ApiCaller):
         apis=[],
         logger: Logger = setup_logger("Scheduler", environ.get("LOG_LEVEL", "INFO")),
         auto: bool = False,
+        bw_integration: str = "Local",
     ):
         super().__init__(apis)
 
@@ -33,11 +36,16 @@ class JobScheduler(ApiCaller):
             self.auto_setup()
 
         self.__logger = logger
+        self.__db = Database(
+            self.__logger,
+            sqlalchemy_string=env.get("DATABASE_URI", None),
+            bw_integration=bw_integration,
+        )
         self.__env = env
         with open("/tmp/autoconf.env", "w") as f:
             for k, v in self.__env.items():
                 f.write(f"{k}={v}\n")
-        # self.__env.update(environ)
+        self.__env.update(environ)
         self.__jobs = self.__get_jobs()
         self.__lock = lock
 
@@ -130,9 +138,17 @@ class JobScheduler(ApiCaller):
             )
             success = False
         elif success and proc.returncode < 2:
-            self.__logger.info(
-                f"Successfuly executed job {name} from plugin {plugin}",
-            )
+            err = self.__db.update_job(plugin, name)
+
+            if not err:
+                self.__logger.info(
+                    f"Successfuly executed job {name} from plugin {plugin} and updated database",
+                )
+            else:
+                self.__logger.warning(
+                    f"Successfuly executed job {name} from plugin {plugin} but failed to update database: {err}",
+                )
+
         return success
 
     def setup(self):

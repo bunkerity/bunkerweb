@@ -1,10 +1,12 @@
 from contextlib import contextmanager
 from copy import deepcopy
+from datetime import datetime
 from logging import INFO, WARNING, Logger, getLogger
-from os import _exit, environ, getenv, path
+from os import _exit, getenv, listdir, path
+from os.path import exists
 from re import search
 from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.exc import OperationalError, ProgrammingError, SQLAlchemyError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from time import sleep
@@ -22,6 +24,9 @@ class Database:
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
+        self.__sql_session = None
+        self.__sql_engine = None
+
         getLogger("sqlalchemy.engine").setLevel(
             logger.level if logger.level != INFO else WARNING
         )
@@ -61,9 +66,7 @@ class Database:
                         break
 
         if not sqlalchemy_string:
-            sqlalchemy_string = environ.get(
-                "DATABASE_URI", "sqlite:////data/db.sqlite3"
-            )
+            sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////data/db.sqlite3")
 
         if sqlalchemy_string.startswith("sqlite"):
             if not path.exists(sqlalchemy_string.split("///")[1]):
@@ -104,8 +107,11 @@ class Database:
 
     def __del__(self) -> None:
         """Close the database"""
-        self.__sql_session.remove()
-        self.__sql_engine.dispose()
+        if self.__sql_session:
+            self.__sql_session.remove()
+
+        if self.__sql_engine:
+            self.__sql_engine.dispose()
 
     @contextmanager
     def __db_session(self):
@@ -173,8 +179,8 @@ class Database:
 
         Base.metadata.create_all(self.__sql_engine, checkfirst=True)
 
+        to_put = []
         with self.__db_session() as session:
-            to_put = []
             for plugins in default_settings:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
@@ -217,6 +223,28 @@ class Database:
 
                     for job in jobs:
                         to_put.append(Jobs(plugin_id=plugin["id"], **job))
+
+                    if exists(f"/opt/bunkerweb/core/{plugin['id']}/ui"):
+                        if {"template.html", "actions.py"}.issubset(
+                            listdir(f"/opt/bunkerweb/core/{plugin['id']}/ui")
+                        ):
+                            with open(
+                                f"/opt/bunkerweb/core/{plugin['id']}/ui/template.html",
+                                "r",
+                            ) as file:
+                                template = file.read().encode("utf-8")
+                            with open(
+                                f"/opt/bunkerweb/core/{plugin['id']}/ui/actions.py", "r"
+                            ) as file:
+                                actions = file.read().encode("utf-8")
+
+                            to_put.append(
+                                Plugin_pages(
+                                    plugin_id=plugin["id"],
+                                    template_file=template,
+                                    actions_file=actions,
+                                )
+                            )
 
             try:
                 session.add_all(to_put)
@@ -446,3 +474,118 @@ class Database:
                 }
                 for custom_config in session.query(Custom_configs).all()
             ]
+
+    def update_job(self, plugin_id: str, job_name: str) -> str:
+        """Update the job last_run in the database"""
+        with self.__db_session() as session:
+            job = (
+                session.query(Jobs)
+                .filter_by(plugin_id=plugin_id, name=job_name)
+                .first()
+            )
+
+            if job is None:
+                return "Job not found"
+
+            job.last_run = datetime.now()
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def update_job_cache(
+        self,
+        job_name: str,
+        service_id: Optional[str],
+        file_name: str,
+        data: bytes,
+        *,
+        checksum: str = None,
+    ) -> str:
+        """Update the plugin cache in the database"""
+        with self.__db_session() as session:
+            cache = (
+                session.query(Job_cache)
+                .filter_by(
+                    job_name=job_name, service_id=service_id, file_name=file_name
+                )
+                .first()
+            )
+
+            if cache is None:
+                session.add(
+                    Job_cache(
+                        job_name=job_name,
+                        service_id=service_id,
+                        file_name=file_name,
+                        data=data,
+                        last_update=datetime.now(),
+                        checksum=checksum,
+                    )
+                )
+            else:
+                cache.data = data
+                cache.last_update = datetime.now()
+                cache.checksum = checksum
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def update_plugins(self, plugins: List[Dict[str, Any]]) -> str:
+        """Add a new plugin to the database"""
+        to_put = []
+        with self.__db_session() as session:
+            # Delete all old plugins
+            session.execute(Plugins.__table__.delete().where(Plugins.id != "default"))
+
+            for plugin in plugins:
+                settings = plugin.pop("settings", {})
+                jobs = plugin.pop("jobs", [])
+                pages = plugin.pop("pages", [])
+
+                to_put.append(Plugins(**plugin))
+
+                for setting, value in settings.items():
+                    value.update(
+                        {
+                            "plugin_id": plugin["id"],
+                            "name": value["id"],
+                            "id": setting,
+                        }
+                    )
+
+                    for select in value.pop("select", []):
+                        to_put.append(Selects(setting_id=value["id"], value=select))
+
+                    to_put.append(
+                        Settings(
+                            **value,
+                        )
+                    )
+
+                for job in jobs:
+                    to_put.append(Jobs(plugin_id=plugin["id"], **job))
+
+                for page in pages:
+                    to_put.append(
+                        Plugin_pages(
+                            plugin_id=plugin["id"],
+                            template_file=page["template_file"],
+                            actions_file=page["actions_file"],
+                        )
+                    )
+
+            try:
+                session.add_all(to_put)
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""

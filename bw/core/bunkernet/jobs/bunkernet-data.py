@@ -7,13 +7,22 @@ from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 sys_path.append("/opt/bunkerweb/core/bunkernet/jobs")
 
+from bunkernet import data
+from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
-from bunkernet import data
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 status = 0
 
 try:
@@ -97,6 +106,18 @@ try:
     if not cached:
         logger.error(f"Error while caching BunkerNet data : {err}")
         _exit(2)
+
+    # Update db
+    err = db.update_job_cache(
+        "bunkernet-data",
+        None,
+        "ip.list",
+        "\n".join(data["data"]).encode("utf-8"),
+        checksum=new_hash,
+    )
+    if err:
+        logger.warning(f"Couldn't update db cache: {err}")
+
     logger.info("Successfully saved BunkerNet data")
 
     status = 1

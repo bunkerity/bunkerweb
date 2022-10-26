@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
+from copy import deepcopy
 from os import _exit, environ, getenv, getpid, path, remove
 from os.path import exists
 from signal import SIGINT, SIGTERM, SIGUSR1, SIGUSR2, signal
@@ -102,6 +103,8 @@ if __name__ == "__main__":
 
         logger.info("Scheduler started ...")
 
+        bw_integration = "Local"
+
         if args.variables:
             logger.info(f"Variables : {args.variables}")
 
@@ -109,12 +112,14 @@ if __name__ == "__main__":
             env = dotenv_values(args.variables)
         else:
             # Read from database
+            bw_integration = (
+                "Kubernetes" if getenv("KUBERNETES_MODE", "no") == "yes" else "Cluster"
+            )
+
             db = Database(
                 logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),
-                bw_integration="Kubernetes"
-                if getenv("KUBERNETES_MODE", "no") == "yes"
-                else "Cluster",
+                bw_integration=bw_integration,
             )
 
             while not db.is_initialized():
@@ -125,7 +130,7 @@ if __name__ == "__main__":
 
             env = db.get_config()
             while not db.is_first_config_saved() or not env:
-                logger.info(
+                logger.warning(
                     "Database doesn't have any config saved yet, retrying in 5s ...",
                 )
                 sleep(3)
@@ -148,10 +153,11 @@ if __name__ == "__main__":
         while True:
             # Instantiate scheduler
             scheduler = JobScheduler(
-                env=env,
+                env=deepcopy(env),
                 apis=[],
                 logger=logger,
                 auto=not args.variables,
+                bw_integration=bw_integration,
             )
 
             # Only run jobs once
@@ -178,6 +184,8 @@ if __name__ == "__main__":
                 )
                 if env != tmp_env:
                     logger.info("Config changed, reloading ...")
+                    logger.debug(f"{tmp_env=}")
+                    logger.debug(f"{env=}")
                     env = tmp_env
                     run_once = True
                     break

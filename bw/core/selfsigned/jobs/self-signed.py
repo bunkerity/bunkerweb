@@ -4,14 +4,25 @@ from os import getenv, makedirs
 from os.path import isfile
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
+from tarfile import open as taropen, TarInfo
+from io import BytesIO
 from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")
 sys_path.append("/opt/bunkerweb/utils")
+sys_path.append("/opt/bunkerweb/db")
 
+from Database import Database
 from logger import setup_logger
 
 logger = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+    bw_integration="Kubernetes"
+    if getenv("KUBERNETES_MODE", "no") == "yes"
+    else "Cluster",
+)
 
 
 def generate_cert(first_server, days, subj):
@@ -31,6 +42,28 @@ def generate_cert(first_server, days, subj):
     if proc.returncode != 0:
         logger.error(f"Self-signed certificate generation failed for {first_server}")
         return False, 2
+
+    # Update db
+    with open(f"/opt/bunkerweb/cache/selfsigned/{first_server}.key", "r") as f:
+        key_data = f.read().encode("utf-8")
+
+    err = db.update_job_cache(
+        "self-signed", first_server, f"{first_server}.key", key_data
+    )
+
+    if err:
+        logger.warning(f"Couldn't update db cache for {first_server}.key file: {err}")
+
+    with open(f"/opt/bunkerweb/cache/selfsigned/{first_server}.pem", "r") as f:
+        pem_data = f.read().encode("utf-8")
+
+    err = db.update_job_cache(
+        "self-signed", first_server, f"{first_server}.pem", pem_data
+    )
+
+    if err:
+        logger.warning(f"Couldn't update db cache for {first_server}.pem file: {err}")
+
     logger.info(f"Successfully generated self-signed certificate for {first_server}")
     return True, 1
 
