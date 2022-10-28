@@ -76,12 +76,18 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      - name: Import BW image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bw-tests:latest
+      - name: Import BW autoconf image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest bw-autoconf-tests:latest
+      - name: Import BW UI image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest bw-ui-tests:latest
       # CVE check on OS
       - name: Check security vulnerabilities for BW
         uses: aquasecurity/trivy-action@master
         with:
           vuln-type: os
-          image-ref: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest
+          image-ref: bunkerweb-tests-amd64:latest
           format: table
           exit-code: 1
           ignore-unfixed: false
@@ -91,7 +97,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           vuln-type: os
-          image-ref: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest
+          image-ref: bunkerweb-autoconf-tests-amd64:latest
           format: table
           exit-code: 1
           ignore-unfixed: false
@@ -101,7 +107,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           vuln-type: os
-          image-ref: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest
+          image-ref: bunkerweb-ui-tests-amd64:latest
           format: table
           exit-code: 1
           ignore-unfixed: false
