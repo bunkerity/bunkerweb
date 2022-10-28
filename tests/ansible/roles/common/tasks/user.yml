@@ -2,3 +2,10 @@
   user:
     name: user
     shell: /bin/bash
+- name: Configuring sudoer access
+  community.general.sudoers:
+    name: allow-all-sudo
+    state: present
+    user: "user"
+    commands: ALL
+    nopassword: true

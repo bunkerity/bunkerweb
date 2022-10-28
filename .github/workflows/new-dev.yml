@@ -133,8 +133,8 @@ jobs:
           cache: 'pip'
       - name: Install ansible
         run: pip install ansible
-      - name: Install ansible roles
-        run: ansible-galaxy install monolithprojects.github_actions_runner
+      - name: Install ansible libs
+        run: ansible-galaxy install monolithprojects.github_actions_runner && ansible-galaxy collection install community.general
       # Create Docker infra
       - run: ./tests/create.sh docker
         env:
@@ -183,8 +183,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: tf-docker
-          path: terraform.tar
-      - run: tar -xvf terraform.tar -C /
+          path: /tmp/docker
       # Remove Docker infra
       - run: ./tests/rm.sh docker
         env:
