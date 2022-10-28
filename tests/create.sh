@@ -29,14 +29,16 @@ if [ $? -ne 0 ] ; then
 fi
 
 # run ansible playbook
-cd "${old_dir}/tests/ansible"
-export HOST_KEY_CHECKING=False
-ansible-playbook -i "/tmp/${1}_inventory" "${1}_playbook"
-if [ $? -ne 0 ] ; then
-	echo "ansible-playbook failed"
-	cd "/tmp/$1"
-	terraform destroy -auto-approve
-	exit 3
+if [ -f "/tmp/${1}_inventory" ] ; then
+	cd "${old_dir}/tests/ansible"
+	export ANSIBLE_HOST_KEY_CHECKING=False
+	ansible-playbook -i "/tmp/${1}_inventory" "${1}_playbook"
+	if [ $? -ne 0 ] ; then
+		echo "ansible-playbook failed"
+		cd "/tmp/$1"
+		terraform destroy -auto-approve
+		exit 3
+	fi
 fi
 
 # done
