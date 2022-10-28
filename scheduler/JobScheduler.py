@@ -2,7 +2,6 @@ from glob import glob
 from json import loads
 from logging import Logger
 from os import environ
-from os.path import isfile
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from schedule import (
     clear as schedule_clear,
@@ -27,24 +26,17 @@ class JobScheduler(ApiCaller):
         lock=None,
         apis=[],
         logger: Logger = setup_logger("Scheduler", environ.get("LOG_LEVEL", "INFO")),
-        auto: bool = False,
         bw_integration: str = "Local",
     ):
         super().__init__(apis)
-
-        if auto is True:
-            self.auto_setup()
-
         self.__logger = logger
+        self.__bw_integration = bw_integration
         self.__db = Database(
             self.__logger,
             sqlalchemy_string=env.get("DATABASE_URI", None),
-            bw_integration=bw_integration,
+            bw_integration=self.__bw_integration,
         )
         self.__env = env
-        with open("/tmp/autoconf.env", "w") as f:
-            for k, v in self.__env.items():
-                f.write(f"{k}={v}\n")
         self.__env.update(environ)
         self.__jobs = self.__get_jobs()
         self.__lock = lock
@@ -83,7 +75,7 @@ class JobScheduler(ApiCaller):
 
     def __reload(self):
         reload = True
-        if isfile("/usr/sbin/nginx") and isfile("/opt/bunkerweb/tmp/nginx.pid"):
+        if self.__bw_integration == "Local":
             self.__logger.info("Reloading nginx ...")
             proc = run(
                 ["/usr/sbin/nginx", "-s", "reload"],
@@ -106,14 +98,6 @@ class JobScheduler(ApiCaller):
             else:
                 self.__logger.error("Error while reloading nginx")
         return reload
-
-    def __gen_conf(self):
-        success = True
-        cmd = "/opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx --variables /tmp/autoconf.env --method autoconf"
-        proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
-        if proc.returncode != 0:
-            success = False
-        return success
 
     def __job_wrapper(self, path, plugin, name, file):
         self.__logger.info(
@@ -215,24 +199,6 @@ class JobScheduler(ApiCaller):
                         f"Exception while running jobs once for plugin {plugin} : {format_exc()}",
                     )
 
-        if ret is False:
-            return False
-
-        try:
-            if len(self._get_apis()) > 0:
-                self.__logger.info("Sending /data/cache folder ...")
-                if not self._send_files("/data/cache", "/cache"):
-                    ret = False
-                    self.__logger.error("Error while sending /data/cache folder")
-                else:
-                    self.__logger.info("Successfuly sent /data/cache folder")
-            if not self.__reload():
-                self.__logger.error("Can't reload BunkerWeb")
-        except:
-            ret = False
-            self.__logger.error(
-                f"Exception while reloading after running jobs once scheduling : {format_exc()}",
-            )
         return ret
 
     def clear(self):
@@ -243,9 +209,6 @@ class JobScheduler(ApiCaller):
         try:
             self.__env = env
             super().__init__(apis)
-            with open("/tmp/autoconf.env", "w") as f:
-                for k, v in self.__env.items():
-                    f.write(f"{k}={v}\n")
             self.clear()
             self.__jobs = self.__get_jobs()
             if not self.run_once():

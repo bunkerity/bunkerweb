@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
-from os import _exit, environ, getenv
+from os import _exit, getenv
 from signal import SIGINT, SIGTERM, signal
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
 from traceback import format_exc
 
 sys_path.append("/opt/bunkerweb/deps/python")

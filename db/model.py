@@ -16,7 +16,7 @@ from sqlalchemy.schema import UniqueConstraint
 Base = declarative_base()
 CONTEXTS_ENUM = Enum("global", "multisite")
 SETTINGS_TYPES_ENUM = Enum("text", "check", "select")
-METHODS_ENUM = Enum("ui", "scheduler", "autoconf")
+METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week")
 CUSTOM_CONFIGS_TYPES = Enum(
     "http",

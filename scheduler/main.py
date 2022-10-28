@@ -2,9 +2,12 @@
 
 from argparse import ArgumentParser
 from copy import deepcopy
-from os import _exit, environ, getenv, getpid, path, remove
-from os.path import exists
+from glob import glob
+from os import _exit, getenv, getpid, makedirs, path, remove, unlink
+from os.path import dirname, isdir, isfile, islink
+from shutil import rmtree
 from signal import SIGINT, SIGTERM, SIGUSR1, SIGUSR2, signal
+from subprocess import PIPE, run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -19,7 +22,7 @@ from dotenv import dotenv_values
 from logger import setup_logger
 from Database import Database
 from JobScheduler import JobScheduler
-from API import API
+from ApiCaller import ApiCaller
 
 run = True
 scheduler = None
@@ -92,18 +95,26 @@ if __name__ == "__main__":
         # Parse arguments
         parser = ArgumentParser(description="Job scheduler for BunkerWeb")
         parser.add_argument(
-            "--run", action="store_true", help="only run jobs one time in foreground"
-        )
-        parser.add_argument(
             "--variables",
             type=str,
             help="path to the file containing environment variables",
+        )
+        parser.add_argument(
+            "--generate",
+            default="no",
+            type=str,
+            help="Precise if the configuration needs to be generated directly or not",
         )
         args = parser.parse_args()
 
         logger.info("Scheduler started ...")
 
-        bw_integration = "Local"
+        bw_integration = (
+            "Local"
+            if not isfile("/usr/sbin/nginx")
+            and not isfile("/opt/bunkerweb/tmp/nginx.pid")
+            else "Cluster"
+        )
 
         if args.variables:
             logger.info(f"Variables : {args.variables}")
@@ -115,6 +126,9 @@ if __name__ == "__main__":
             bw_integration = (
                 "Kubernetes" if getenv("KUBERNETES_MODE", "no") == "yes" else "Cluster"
             )
+
+            api_caller = ApiCaller()
+            api_caller.auto_setup(bw_integration=bw_integration)
 
             db = Database(
                 logger,
@@ -136,65 +150,157 @@ if __name__ == "__main__":
                 sleep(3)
                 env = db.get_config()
 
-        if args.run:
-            # write config to /tmp/variables.env
-            with open("/tmp/variables.env", "w") as f:
-                for variable, value in env.items():
-                    f.write(f"{variable}={value}\n")
-            run_once = True
-        else:
-            # Check if config as changed since last run
-            run_once = dotenv_values("/tmp/variables.env") != env
+            custom_configs = db.get_custom_configs()
 
-            if run_once:
-                logger.info("Config changed since last run, reloading ...")
+            original_path = "/data/configs"
+            makedirs(original_path, exist_ok=True)
+            for custom_config in custom_configs:
+                tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
+                if custom_config["service_id"]:
+                    tmp_path += f"/{custom_config['service_id']}"
+                tmp_path += f"/{custom_config['name']}.conf"
+                makedirs(dirname(tmp_path), exist_ok=True)
+                with open(tmp_path, "w") as f:
+                    f.write(custom_config["data"])
 
-        logger.info("Executing job scheduler ...")
+            if bw_integration != "Local":
+                logger.info("Sending custom configs to BunkerWeb")
+                ret = api_caller._send_files("/data/configs", "/custom_configs")
+
+                if not ret:
+                    logger.error(
+                        "Sending custom configs failed, configuration will not work as expected...",
+                    )
+
+        logger.info("Executing scheduler ...")
         while True:
             # Instantiate scheduler
             scheduler = JobScheduler(
                 env=deepcopy(env),
-                apis=[],
+                apis=api_caller._get_apis(),
                 logger=logger,
-                auto=not args.variables,
                 bw_integration=bw_integration,
             )
 
             # Only run jobs once
-            if run_once:
-                if not scheduler.run_once():
-                    logger.error("At least one job in run_once() failed")
-                    if args.run:
-                        stop(1)
+            if not scheduler.run_once():
+                logger.error("At least one job in run_once() failed")
+            else:
+                logger.info("All jobs in run_once() were successful")
+
+            # run the generator
+            cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''} --method scheduler"
+            proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+            if proc.returncode != 0:
+                logger.error(
+                    "Config generator failed, configuration will not work as expected...",
+                )
+
+            if len(api_caller._get_apis()) > 0:
+                # send nginx configs
+                logger.info("Sending /etc/nginx folder ...")
+                ret = api_caller._send_files("/etc/nginx", "/confs")
+                if not ret:
+                    logger.error(
+                        "Sending nginx configs failed, configuration will not work as expected...",
+                    )
+
+            try:
+                if len(api_caller._get_apis()) > 0:
+                    # send cache
+                    logger.info("Sending /data/cache folder ...")
+                    if not api_caller._send_files("/data/cache", "/cache"):
+                        logger.error("Error while sending /data/cache folder")
+                    else:
+                        logger.info("Successfuly sent /data/cache folder")
+
+                # reload nginx
+                if bw_integration == "Local":
+                    logger.info("Reloading nginx ...")
+                    proc = run(
+                        ["/usr/sbin/nginx", "-s", "reload"],
+                        stdin=DEVNULL,
+                        stderr=PIPE,
+                        env=deepcopy(env),
+                    )
+                    if proc.returncode == 0:
+                        logger.info("Successfuly reloaded nginx")
+                    else:
+                        logger.error(
+                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                        )
                 else:
-                    logger.info("All jobs in run_once() were successful")
-                    if args.run:
-                        break
+                    logger.info("Reloading nginx ...")
+                    if api_caller._send_to_apis("POST", "/reload"):
+                        logger.info("Successfuly reloaded nginx")
+                    else:
+                        logger.error("Error while reloading nginx")
+            except:
+                logger.error(
+                    f"Exception while reloading after running jobs once scheduling : {format_exc()}",
+                )
 
-                run_once = False
-
-            # Or infinite schedule
+            # infinite schedule for the jobs
             scheduler.setup()
+            logger.info("Executing job scheduler ...")
             while run:
                 scheduler.run_pending()
                 sleep(1)
 
+                # check if the custom configs have changed since last time
+                tmp_custom_configs = db.get_custom_configs()
+                if custom_configs != tmp_custom_configs:
+                    logger.info("Custom configs changed, generating ...")
+                    logger.debug(f"{tmp_custom_configs}")
+                    logger.debug(f"{custom_configs}")
+                    custom_configs = tmp_custom_configs
+                    original_path = "/data/configs"
+
+                    # Remove old custom configs files
+                    logger.info("Removing old custom configs files ...")
+                    files = glob(f"{original_path}/*")
+                    for file in files:
+                        if islink(file):
+                            unlink(file)
+                        elif isfile(file):
+                            remove(file)
+                        elif isdir(file):
+                            rmtree(file, ignore_errors=False)
+
+                    logger.info("Generating new custom configs ...")
+                    makedirs(original_path, exist_ok=True)
+                    for custom_config in custom_configs:
+                        tmp_path = (
+                            f"{original_path}/{custom_config['type'].replace('_', '-')}"
+                        )
+                        if custom_config["service_id"]:
+                            tmp_path += f"/{custom_config['service_id']}"
+                        tmp_path += f"/{custom_config['name']}.conf"
+                        makedirs(dirname(tmp_path), exist_ok=True)
+                        with open(tmp_path, "w") as f:
+                            f.write(custom_config["data"])
+
+                    if bw_integration != "Local":
+                        logger.info("Sending custom configs to BunkerWeb")
+                        ret = api_caller._send_files("/data/configs", "/custom_configs")
+
+                        if not ret:
+                            logger.error(
+                                "Sending custom configs failed, configuration will not work as expected...",
+                            )
+
+                # check if the config have changed since last time
                 tmp_env = (
                     dotenv_values(args.variables) if args.variables else db.get_config()
                 )
                 if env != tmp_env:
-                    logger.info("Config changed, reloading ...")
+                    logger.info("Config changed, generating ...")
                     logger.debug(f"{tmp_env=}")
                     logger.debug(f"{env=}")
-                    env = tmp_env
-                    run_once = True
+                    env = deepcopy(tmp_env)
                     break
-
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",
         )
         stop(1)
-
-    logger.info("Job scheduler stopped")
-    stop(0)

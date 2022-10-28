@@ -65,6 +65,26 @@ class Database:
                     if sqlalchemy_string:
                         break
 
+                is_swarm = True
+                try:
+                    docker_client.swarm.version
+                except:
+                    is_swarm = False
+
+                if not sqlalchemy_string and is_swarm:
+                    for instance in docker_client.services.list(
+                        filters={"label": "bunkerweb.INSTANCE"}
+                    ):
+                        for var in instance.attrs["Spec"]["TaskTemplate"][
+                            "ContainerSpec"
+                        ]["Env"]:
+                            if var.startswith("DATABASE_URI="):
+                                sqlalchemy_string = var.replace("DATABASE_URI=", "", 1)
+                                break
+
+                        if sqlalchemy_string:
+                            break
+
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////data/db.sqlite3")
 
@@ -131,7 +151,12 @@ class Database:
         """Check if the first configuration has been saved"""
         with self.__db_session() as session:
             try:
-                metadata = session.query(Metadata).get(1)
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(Metadata.first_config_saved)
+                    .filter_by(id=1)
+                    .first()
+                )
                 return metadata is not None and metadata.first_config_saved
             except (ProgrammingError, OperationalError):
                 return False
@@ -140,7 +165,12 @@ class Database:
         """Check if the database is initialized"""
         with self.__db_session() as session:
             try:
-                metadata = session.query(Metadata).get(1)
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(Metadata.is_initialized)
+                    .filter_by(id=1)
+                    .first()
+                )
                 return metadata is not None and metadata.is_initialized
             except (ProgrammingError, OperationalError):
                 return False
@@ -268,6 +298,14 @@ class Database:
                 if config["MULTISITE"] == "yes":
                     global_values = []
                     for server_name in config["SERVER_NAME"].split(" "):
+                        if (
+                            session.query(Services)
+                            .with_entities(Services.id)
+                            .filter_by(id=server_name)
+                            .first()
+                        ):
+                            continue
+
                         if server_name:
                             to_put.append(Services(id=server_name, method=method))
 
@@ -290,7 +328,10 @@ class Database:
                                 )
                             elif key not in global_values:
                                 setting = (
-                                    session.query(Settings).filter_by(id=key).first()
+                                    session.query(Settings)
+                                    .with_entities(Settings.default)
+                                    .filter_by(id=key)
+                                    .first()
                                 )
 
                                 if setting and value != setting.default:
@@ -347,14 +388,15 @@ class Database:
             to_put = []
             for custom_config in custom_configs:
                 config = {
-                    "data": custom_config["value"]
-                    .replace("\\\n", "\n")
-                    .encode("utf-8"),
+                    "data": custom_config["value"].replace("\\\n", "\n").encode("utf-8")
+                    if isinstance(custom_config["value"], str)
+                    else custom_config["value"].replace(b"\\\n", b"\n"),
                     "method": method,
                 }
                 if custom_config["exploded"][0]:
                     if (
                         not session.query(Services)
+                        .with_entities(Services.id)
                         .filter_by(id=custom_config["exploded"][0])
                         .first()
                     ):
@@ -388,77 +430,77 @@ class Database:
 
         return ""
 
-    def __get_setting_value(
-        self,
-        session: scoped_session,
-        service: Any,
-        setting: Any,
-        suffix: int,
-    ) -> Optional[dict]:
-        tmp_config = {}
-        global_value = (
-            session.query(Global_values)
-            .filter_by(setting_id=setting.id, suffix=suffix)
-            .first()
-        )
-
-        if global_value is None:
-            if suffix:
-                if setting.context != "multisite":
-                    return None
-
-                tmp_config[f"{setting.id}_{suffix}"] = setting.default
-            else:
-                tmp_config[setting.id] = setting.default
-        else:
-            tmp_config[
-                setting.id + (f"_{suffix}" if suffix else "")
-            ] = global_value.value
-
-        if setting.context == "multisite":
-            try:
-                tmp_config[
-                    f"{service.id}_{setting.id}" + (f"_{suffix}" if suffix else "")
-                ] = next(
-                    s
-                    for s in service.settings
-                    if s.setting_id == setting.id and s.suffix == suffix
-                ).value
-            except StopIteration:
-                if global_value is None and suffix:
-                    return None
-                elif suffix:
-                    tmp_config[f"{service.id}_{setting.id}_{suffix}"] = tmp_config[
-                        f"{setting.id}_{suffix}"
-                    ]
-                else:
-                    tmp_config[f"{service.id}_{setting.id}"] = tmp_config[setting.id]
-
-        return tmp_config
-
     def get_config(self) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
-            settings = session.query(Settings).all()
-            for service in session.query(Services).all():
-                for setting in settings:
-                    if setting.multiple:
-                        i = 0
-                        while True:
-                            tmp_config = self.__get_setting_value(
-                                session, service, setting, i
-                            )
+            settings = (
+                session.query(Settings)
+                .with_entities(
+                    Settings.id, Settings.context, Settings.default, Settings.multiple
+                )
+                .all()
+            )
 
-                            if tmp_config is None:
-                                break
+            for setting in settings:
+                suffix = 0
+                while True:
+                    global_value = (
+                        session.query(Global_values)
+                        .with_entities(Global_values.value)
+                        .filter_by(setting_id=setting.id, suffix=suffix)
+                        .first()
+                    )
 
-                            config.update(tmp_config)
-                            i += 1
+                    if global_value is None:
+                        if suffix > 0:
+                            break
+                        else:
+                            config[setting.id] = setting.default
                     else:
-                        config.update(
-                            self.__get_setting_value(session, service, setting, 0)
+                        config[
+                            setting.id + (f"_{suffix}" if suffix > 0 else "")
+                        ] = global_value.value
+
+                    if not setting.multiple:
+                        break
+
+                    suffix += 1
+
+            for service in session.query(Services).with_entities(Services.id).all():
+                for setting in settings:
+                    if setting.context != "multisite":
+                        continue
+
+                    suffix = 0
+                    while True:
+                        if suffix == 0:
+                            config[f"{service.id}_{setting.id}"] = config[setting.id]
+                        elif f"{setting.id}_{suffix}" in config:
+                            config[f"{service.id}_{setting.id}_{suffix}"] = config[
+                                f"{setting.id}_{suffix}"
+                            ]
+
+                        service_setting = (
+                            session.query(Services_settings)
+                            .with_entities(Services_settings.value)
+                            .filter_by(
+                                service_id=service.id,
+                                setting_id=setting.id,
+                                suffix=suffix,
+                            )
+                            .first()
                         )
+
+                        if service_setting is not None:
+                            config[
+                                f"{service.id}_{setting.id}"
+                                + (f"_{suffix}" if suffix > 0 else "")
+                            ] = service_setting.value
+                        elif suffix > 0:
+                            break
+
+                        suffix += 1
 
             return config
 
@@ -471,9 +513,29 @@ class Database:
                     "type": custom_config.type,
                     "name": custom_config.name,
                     "data": custom_config.data.decode("utf-8"),
+                    "method": custom_config.method,
                 }
-                for custom_config in session.query(Custom_configs).all()
+                for custom_config in session.query(Custom_configs)
+                .with_entities(
+                    Custom_configs.service_id,
+                    Custom_configs.type,
+                    Custom_configs.name,
+                    Custom_configs.data,
+                    Custom_configs.method,
+                )
+                .all()
             ]
+
+    def get_services(self) -> List[Dict[str, Any]]:
+        """Get the services' configs from the database"""
+        services = []
+        with self.__db_session() as session:
+            for service in (
+                session.query(Services).with_entities(Services.settings).all()
+            ):
+                services.append(service.settings)
+
+        return services
 
     def update_job(self, plugin_id: str, job_name: str) -> str:
         """Update the job last_run in the database"""
