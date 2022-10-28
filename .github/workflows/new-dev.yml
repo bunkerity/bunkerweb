@@ -133,6 +133,8 @@ jobs:
           cache: 'pip'
       - name: Install ansible
         run: pip install ansible
+      - name: Install ansible roles
+        run: ansible-galaxy install monolithprojects.github_actions_runner
       # Create Docker infra
       - run: ./tests/create.sh docker
         env:
