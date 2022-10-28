@@ -21,10 +21,10 @@ if [ $? -ne 0 ] ; then
 fi
 
 # terraform apply
-terraform apply
+terraform apply -auto-approve
 if [ $? -ne 0 ] ; then
 	echo "terraform apply failed"
-	terraform destroy
+	terraform destroy -auto-approve
 	exit 2
 fi
 
@@ -34,7 +34,7 @@ ansible-playbook -i "/tmp/${1}_inventory" "${1}_playbook"
 if [ $? -ne 0 ] ; then
 	echo "ansible-playbook failed"
 	cd "/tmp/$1"
-	terraform destroy
+	terraform destroy -auto-approve
 	exit 3
 fi
 

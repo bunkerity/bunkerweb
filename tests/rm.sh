@@ -13,7 +13,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # terraform destroy
-terraform destroy
+terraform destroy -auto-approve
 
 # done
 exit $?
