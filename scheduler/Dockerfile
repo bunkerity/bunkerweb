@@ -5,6 +5,7 @@ COPY bw/deps/requirements.txt /opt/bunkerweb/deps/requirements.txt
 
 # Install python requirements
 RUN apk add --no-cache --virtual build py3-pip g++ gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
+  pip install --no-cache-dir --upgrade pip && \
   pip install wheel && \
   mkdir /opt/bunkerweb/deps/python && \
   pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/deps/requirements.txt && \
