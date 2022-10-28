@@ -8,6 +8,7 @@
 
 - hosts: all
   name: Install GH runner
+  vars:
     - runner_user: debian
     - access_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
     - runner_extra_config_args: "--ephemeral"
