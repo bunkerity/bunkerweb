@@ -139,10 +139,11 @@ jobs:
       - run: ./tests/create.sh docker
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      - run: tar -cvf terraform.tar /tmp/docker
       - uses: actions/upload-artifact@v3
         with:
           name: tf-docker
-          path: /tmp/docker
+          path: terraform.tar
 
   # Perform tests
   tests-docker:
@@ -182,7 +183,8 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: tf-docker
-          path: /tmp/docker
+          path: terraform.tar
+      - run: tar -xvf terraform.tar -C /
       # Remove Docker infra
       - run: ./tests/rm.sh docker
         env:

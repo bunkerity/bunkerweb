@@ -26,5 +26,7 @@
     - github_account: "{{ lookup('env', 'GITHUB_ACCOUNT') }}"
     - github_owner: bunkerity
     - github_repo: bunkerweb
+    - runner_labels:
+        - bw-docker
   roles:
     - monolithprojects.github_actions_runner
