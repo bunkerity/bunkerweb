@@ -22,7 +22,7 @@
     - runner_user: user
     - access_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
     - runner_extra_config_args: "--ephemeral"
-    - runner_name: bw-docker
+    - runner_name: "bw-docker-{{ ansible_date_time.iso8601_micro | to_uuid }}"
     - github_account: "{{ lookup('env', 'GITHUB_ACCOUNT') }}"
     - github_owner: bunkerity
     - github_repo: bunkerweb
