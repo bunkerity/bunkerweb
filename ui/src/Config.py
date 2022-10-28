@@ -1,7 +1,8 @@
 from copy import deepcopy
 from os import listdir
+from time import sleep
 from flask import flash
-from os.path import isfile
+from os.path import exists, isfile
 from typing import List, Tuple
 from json import load as json_load
 from uuid import uuid4
@@ -11,9 +12,27 @@ from subprocess import run, DEVNULL, STDOUT
 
 
 class Config:
-    def __init__(self):
+    def __init__(self, logger, db) -> None:
         with open("/opt/bunkerweb/settings.json", "r") as f:
             self.__settings: dict = json_load(f)
+
+        self.__logger = logger
+        self.__db = db
+
+        if not exists("/usr/sbin/nginx"):
+            while not self.__db.is_initialized():
+                self.__logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(3)
+
+            env = self.__db.get_config()
+            while not self.__db.is_first_config_saved() or not env:
+                self.__logger.warning(
+                    "Database doesn't have any config saved yet, retrying in 5s ...",
+                )
+                sleep(3)
+                env = self.__db.get_config()
 
         self.reload_plugins()
 
@@ -145,6 +164,8 @@ class Config:
                 "/etc/nginx",
                 "--variables",
                 env_file,
+                "--method",
+                "ui",
             ],
             stdin=DEVNULL,
             stderr=STDOUT,
@@ -152,6 +173,12 @@ class Config:
 
         if proc.returncode != 0:
             raise Exception(f"Error from generator (return code = {proc.returncode})")
+
+        ret = self.__db.save_config(conf, "ui")
+        if ret:
+            self.__logger.error(
+                f"Can't save config in database: {ret}",
+            )
 
     def get_plugins_settings(self) -> dict:
         return self.__plugins_settings
@@ -173,7 +200,13 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__env_to_dict("/etc/nginx/variables.env")
+        if exists("/usr/sbin/nginx"):
+            return {
+                k: {"value": v, "method": "ui"}
+                for k, v in self.__env_to_dict("/etc/nginx/variables.env").items()
+            }
+
+        return self.__db.get_config(methods=True)
 
     def get_services(self) -> list[dict]:
         """Get nginx's services
@@ -183,12 +216,18 @@ class Config:
         list
             The services
         """
-        services = []
-        for filename in iglob("/etc/nginx/**/variables.env"):
-            env = self.__env_to_dict(filename)
-            services.append(env)
+        if exists("/usr/sbin/nginx"):
+            services = []
+            for filename in iglob("/etc/nginx/**/variables.env"):
+                env = {
+                    k: {"value": v, "method": "ui"}
+                    for k, v in self.__env_to_dict(filename).items()
+                }
+                services.append(env)
 
-        return services
+            return services
+
+        return self.__db.get_services_settings(methods=True)
 
     def check_variables(self, variables: dict, _global: bool = False) -> int:
         """Testify that the variables passed are valid

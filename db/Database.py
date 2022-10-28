@@ -86,7 +86,9 @@ class Database:
                             break
 
         if not sqlalchemy_string:
-            sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////data/db.sqlite3")
+            sqlalchemy_string = getenv(
+                "DATABASE_URI", "sqlite:////opt/bunkerweb/cache/db.sqlite3"
+            )
 
         if sqlalchemy_string.startswith("sqlite"):
             if not path.exists(sqlalchemy_string.split("///")[1]):
@@ -290,24 +292,26 @@ class Database:
         with self.__db_session() as session:
             # Delete all the old config
             session.execute(
-                Services.__table__.delete().where(Services.method == method)
+                Global_values.__table__.delete().where(Global_values.method == method)
             )
-            session.execute(Global_values.__table__.delete())
+            session.execute(
+                Services_settings.__table__.delete().where(
+                    Services_settings.method == method
+                )
+            )
 
             if config:
                 if config["MULTISITE"] == "yes":
                     global_values = []
                     for server_name in config["SERVER_NAME"].split(" "):
                         if (
-                            session.query(Services)
-                            .with_entities(Services.id)
+                            server_name
+                            and session.query(Services)
                             .filter_by(id=server_name)
                             .first()
+                            is None
                         ):
-                            continue
-
-                        if server_name:
-                            to_put.append(Services(id=server_name, method=method))
+                            to_put.append(Services(id=server_name))
 
                         for key, value in deepcopy(config).items():
                             suffix = None
@@ -315,35 +319,73 @@ class Database:
                                 suffix = int(key.split("_")[-1])
                                 key = key[: -len(str(suffix)) - 1]
 
+                            setting = (
+                                session.query(Settings)
+                                .with_entities(Settings.default)
+                                .filter_by(id=key.replace(f"{server_name}_", ""))
+                                .first()
+                            )
+
                             if server_name and key.startswith(server_name):
                                 key = key.replace(f"{server_name}_", "")
-
-                                to_put.append(
-                                    Services_settings(
+                                service_setting = (
+                                    session.query(Services_settings)
+                                    .filter_by(
                                         service_id=server_name,
                                         setting_id=key,
-                                        value=value,
                                         suffix=suffix,
                                     )
-                                )
-                            elif key not in global_values:
-                                setting = (
-                                    session.query(Settings)
-                                    .with_entities(Settings.default)
-                                    .filter_by(id=key)
                                     .first()
                                 )
 
-                                if setting and value != setting.default:
-                                    global_values.append(key)
+                                if not setting or (
+                                    value == setting.default and service_setting is None
+                                ):
+                                    continue
+
+                                if service_setting is None:
                                     to_put.append(
-                                        Global_values(
-                                            setting_id=key, value=value, suffix=suffix
+                                        Services_settings(
+                                            service_id=server_name,
+                                            setting_id=key,
+                                            value=value,
+                                            suffix=suffix,
+                                            method=method,
                                         )
                                     )
+                                elif method == "autoconf":
+                                    service_setting.value = value
+                                    service_setting.method = method
+                                    to_put.append(service_setting)
+                            elif key not in global_values:
+                                global_values.append(key)
+                                global_value = (
+                                    session.query(Global_values)
+                                    .filter_by(setting_id=key, suffix=suffix)
+                                    .first()
+                                )
+
+                                if not setting or (
+                                    value == setting.default and global_value is None
+                                ):
+                                    continue
+
+                                if global_value is None:
+                                    to_put.append(
+                                        Global_values(
+                                            setting_id=key,
+                                            value=value,
+                                            suffix=suffix,
+                                            method=method,
+                                        )
+                                    )
+                                elif method == "autoconf":
+                                    global_value.value = value
+                                    global_value.method = method
+                                    to_put.append(global_value)
                 else:
                     primary_server_name = config["SERVER_NAME"].split(" ")[0]
-                    to_put.append(Services(id=primary_server_name, method=method))
+                    to_put.append(Services(id=primary_server_name))
 
                     for key, value in config.items():
                         suffix = None
@@ -351,12 +393,22 @@ class Database:
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
+                        setting = (
+                            session.query(Settings)
+                            .with_entities(Settings.default)
+                            .filter_by(id=key)
+                            .first()
+                        )
+
+                        if setting and value == setting.default:
+                            continue
+
                         to_put.append(
-                            Services_settings(
-                                service_id=primary_server_name,
+                            Global_values(
                                 setting_id=key,
                                 value=value,
                                 suffix=suffix,
+                                method=method,
                             )
                         )
 
@@ -420,8 +472,20 @@ class Database:
                             "name": custom_config["exploded"][2],
                         }
                     )
-                to_put.append(Custom_configs(**config))
 
+                if (
+                    method == "autoconf"
+                    or session.query(Custom_configs)
+                    .with_entities(Custom_configs.id)
+                    .filter_by(
+                        service_id=config.get("service_id", None),
+                        type=config["type"],
+                        name=config["name"],
+                    )
+                    .first()
+                    is None
+                ):
+                    to_put.append(Custom_configs(**config))
             try:
                 session.add_all(to_put)
                 session.commit()
@@ -430,60 +494,76 @@ class Database:
 
         return ""
 
-    def get_config(self) -> Dict[str, Any]:
+    def get_config(self, methods: bool = False) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
-            settings = (
-                session.query(Settings)
-                .with_entities(
-                    Settings.id, Settings.context, Settings.default, Settings.multiple
-                )
-                .all()
-            )
-
-            for setting in settings:
-                suffix = 0
-                while True:
-                    global_value = (
-                        session.query(Global_values)
-                        .with_entities(Global_values.value)
-                        .filter_by(setting_id=setting.id, suffix=suffix)
-                        .first()
-                    )
-
-                    if global_value is None:
-                        if suffix > 0:
-                            break
-                        else:
-                            config[setting.id] = setting.default
-                    else:
-                        config[
-                            setting.id + (f"_{suffix}" if suffix > 0 else "")
-                        ] = global_value.value
-
-                    if not setting.multiple:
-                        break
-
-                    suffix += 1
-
             for service in session.query(Services).with_entities(Services.id).all():
-                for setting in settings:
-                    if setting.context != "multisite":
-                        continue
-
+                for setting in (
+                    session.query(Settings)
+                    .with_entities(
+                        Settings.id,
+                        Settings.context,
+                        Settings.default,
+                        Settings.multiple,
+                    )
+                    .all()
+                ):
                     suffix = 0
                     while True:
+                        global_value = (
+                            session.query(Global_values)
+                            .with_entities(Global_values.value, Global_values.method)
+                            .filter_by(setting_id=setting.id, suffix=suffix)
+                            .first()
+                        )
+
+                        if global_value is None:
+                            if suffix == 0:
+                                config[setting.id] = (
+                                    setting.default
+                                    if methods is False
+                                    else {"value": setting.default, "method": "default"}
+                                )
+                        else:
+                            config[
+                                setting.id + (f"_{suffix}" if suffix > 0 else "")
+                            ] = (
+                                global_value.value
+                                if methods is False
+                                else {
+                                    "value": global_value.value,
+                                    "method": global_value.method,
+                                }
+                            )
+
+                        if setting.context != "multisite":
+                            break
+
                         if suffix == 0:
-                            config[f"{service.id}_{setting.id}"] = config[setting.id]
+                            config[f"{service.id}_{setting.id}"] = (
+                                config[setting.id]
+                                if methods is False
+                                else {
+                                    "value": config[setting.id]["value"],
+                                    "method": "default",
+                                }
+                            )
                         elif f"{setting.id}_{suffix}" in config:
-                            config[f"{service.id}_{setting.id}_{suffix}"] = config[
-                                f"{setting.id}_{suffix}"
-                            ]
+                            config[f"{service.id}_{setting.id}_{suffix}"] = (
+                                config[f"{setting.id}_{suffix}"]
+                                if methods is False
+                                else {
+                                    "value": config[f"{setting.id}_{suffix}"]["value"],
+                                    "method": "default",
+                                }
+                            )
 
                         service_setting = (
                             session.query(Services_settings)
-                            .with_entities(Services_settings.value)
+                            .with_entities(
+                                Services_settings.value, Services_settings.method
+                            )
                             .filter_by(
                                 service_id=service.id,
                                 setting_id=setting.id,
@@ -496,8 +576,18 @@ class Database:
                             config[
                                 f"{service.id}_{setting.id}"
                                 + (f"_{suffix}" if suffix > 0 else "")
-                            ] = service_setting.value
+                            ] = (
+                                service_setting.value
+                                if methods is False
+                                else {
+                                    "value": service_setting.value,
+                                    "method": service_setting.method,
+                                }
+                            )
                         elif suffix > 0:
+                            break
+
+                        if not setting.multiple:
                             break
 
                         suffix += 1
@@ -512,28 +602,35 @@ class Database:
                     "service_id": custom_config.service_id,
                     "type": custom_config.type,
                     "name": custom_config.name,
-                    "data": custom_config.data.decode("utf-8"),
+                    "data": custom_config.data,
                     "method": custom_config.method,
                 }
-                for custom_config in session.query(Custom_configs)
-                .with_entities(
-                    Custom_configs.service_id,
-                    Custom_configs.type,
-                    Custom_configs.name,
-                    Custom_configs.data,
-                    Custom_configs.method,
+                for custom_config in (
+                    session.query(Custom_configs)
+                    .with_entities(
+                        Custom_configs.service_id,
+                        Custom_configs.type,
+                        Custom_configs.name,
+                        Custom_configs.data,
+                        Custom_configs.method,
+                    )
+                    .all()
                 )
-                .all()
             ]
 
-    def get_services(self) -> List[Dict[str, Any]]:
+    def get_services_settings(self, methods: bool = False) -> List[Dict[str, Any]]:
         """Get the services' configs from the database"""
         services = []
+        config = self.get_config(methods=methods)
         with self.__db_session() as session:
-            for service in (
-                session.query(Services).with_entities(Services.settings).all()
-            ):
-                services.append(service.settings)
+            for service in session.query(Services).with_entities(Services.id).all():
+                tmp_config = deepcopy(config)
+
+                for key, value in tmp_config.items():
+                    if key.startswith(f"{service.id}_"):
+                        tmp_config[key.replace(f"{service.id}_", "")] = value
+
+                services.append(tmp_config)
 
         return services
 

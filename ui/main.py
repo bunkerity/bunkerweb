@@ -1,3 +1,7 @@
+from sys import path as sys_path, exit as sys_exit, modules as sys_modules
+
+sys_path.append("/opt/bunkerweb/ui/deps/python")
+
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -23,16 +27,15 @@ from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, load as json_load
 from jinja2 import Template
 from logging import getLogger, INFO, ERROR, StreamHandler, Formatter
-from os import chmod, getpid, listdir, mkdir, walk
+from os import chmod, getenv, getpid, listdir, mkdir, walk
 from os.path import exists, isdir, isfile, join
 from re import match as re_match
 from requests import get
 from requests.utils import default_headers
 from shutil import rmtree, copytree, chown
-from sys import path as sys_path, exit as sys_exit, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
-from time import time
+from time import sleep, time
 from traceback import format_exc
 from typing import Optional
 from uuid import uuid4
@@ -40,12 +43,14 @@ from zipfile import BadZipFile, ZipFile
 
 sys_path.append("/opt/bunkerweb/utils")
 sys_path.append("/opt/bunkerweb/api")
+sys_path.append("/opt/bunkerweb/db")
 
 from src.Instances import Instances
 from src.ConfigFiles import ConfigFiles
 from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import User
+
 from utils import (
     check_settings,
     env_to_summary_class,
@@ -57,20 +62,10 @@ from utils import (
     get_variables,
     path_to_dict,
 )
-from API import API
-from ApiCaller import ApiCaller
+from logger import setup_logger
+from Database import Database
 
-# Set up logger
-logger = getLogger("flask_app")
-logger.setLevel(INFO)
-# create console handler with a higher log level
-ch = StreamHandler()
-ch.setLevel(ERROR)
-# create formatter and add it to the handlers
-formatter = Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-# add the handlers to logger
-logger.addHandler(ch)
+logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
 # Flask app
 app = Flask(
@@ -84,13 +79,25 @@ app.wsgi_app = ReverseProxied(app.wsgi_app)
 # Set variables and instantiate objects
 vars = get_variables()
 
+if "ABSOLUTE_URI" not in vars:
+    logger.error("ABSOLUTE_URI is not set")
+    sys_exit(1)
+elif "ADMIN_USERNAME" not in vars:
+    logger.error("ADMIN_USERNAME is not set")
+    sys_exit(1)
+elif "ADMIN_PASSWORD" not in vars:
+    logger.error("ADMIN_PASSWORD is not set")
+    sys_exit(1)
+
 if not vars["FLASK_ENV"] == "development" and vars["ADMIN_PASSWORD"] == "changeme":
     logger.error("Please change the default admin password.")
     sys_exit(1)
 
-if not vars["FLASK_ENV"] == "development" and (
-    vars["ABSOLUTE_URI"].endswith("/changeme/")
-    or vars["ABSOLUTE_URI"].endswith("/changeme")
+if not vars["ABSOLUTE_URI"].endswith("/"):
+    vars["ABSOLUTE_URI"] += "/"
+
+if not vars["FLASK_ENV"] == "development" and vars["ABSOLUTE_URI"].endswith(
+    "/changeme/"
 ):
     logger.error("Please change the default URL.")
     sys_exit(1)
@@ -102,7 +109,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWORD"])
-api_caller = ApiCaller()
 PLUGIN_KEYS = [
     "id",
     "order",
@@ -112,39 +118,31 @@ PLUGIN_KEYS = [
     "settings",
 ]
 
+bw_integration = "Local"
+if getenv("KUBERNETES_MODE", "no") == "yes":
+    bw_integration = "Kubernetes"
+elif getenv("SWARM_MODE", "no") == "yes" or getenv("AUTOCONF_MODE", "no") == "yes":
+    bw_integration = "Cluster"
+
 try:
-    docker_client: DockerClient = DockerClient(base_url=vars["DOCKER_HOST"])
+    docker_client: DockerClient = DockerClient(
+        base_url=vars.get("DOCKER_HOST", "unix:///var/run/docker.sock")
+    )
+    bw_integration = "Cluster"
 except (docker_APIError, DockerException):
+    logger.warning("No docker host found")
     docker_client = None
 
-
-if docker_client:
-    apis: list[API] = []
-    for container in docker_client.containers.list(
-        filters={"label": "bunkerweb.INSTANCE"}
-    ):
-        env_variables = {
-            x[0]: x[1]
-            for x in [env.split("=") for env in container.attrs["Config"]["Env"]]
-        }
-
-        apis.append(
-            API(
-                f"http://{container.name}:{env_variables.get('API_HTTP_PORT', '5000')}",
-                env_variables.get("API_SERVER_NAME", "bwapi"),
-            )
-        )
-
-    api_caller._set_apis(apis)
+db = Database(logger, bw_integration=bw_integration)
 
 try:
     app.config.update(
         DEBUG=True,
         SECRET_KEY=vars["FLASK_SECRET"],
         ABSOLUTE_URI=vars["ABSOLUTE_URI"],
-        INSTANCES=Instances(docker_client),
-        CONFIG=Config(),
-        CONFIGFILES=ConfigFiles(),
+        INSTANCES=Instances(docker_client, bw_integration),
+        CONFIG=Config(logger, db),
+        CONFIGFILES=ConfigFiles(db),
         SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]
         .replace("http://", "")
         .replace("https://", "")
@@ -609,6 +607,10 @@ def configs():
                 return redirect(url_for("loading", next=url_for("configs")))
 
         flash(operation)
+
+        error = app.config["CONFIGFILES"].save_configs()
+        if error:
+            flash("Couldn't save custom configs to database", "error")
 
         # Reload instances
         app.config["RELOADING"] = True

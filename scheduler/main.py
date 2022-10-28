@@ -160,7 +160,7 @@ if __name__ == "__main__":
                     tmp_path += f"/{custom_config['service_id']}"
                 tmp_path += f"/{custom_config['name']}.conf"
                 makedirs(dirname(tmp_path), exist_ok=True)
-                with open(tmp_path, "w") as f:
+                with open(tmp_path, "wb") as f:
                     f.write(custom_config["data"])
 
             if bw_integration != "Local":
@@ -277,7 +277,7 @@ if __name__ == "__main__":
                             tmp_path += f"/{custom_config['service_id']}"
                         tmp_path += f"/{custom_config['name']}.conf"
                         makedirs(dirname(tmp_path), exist_ok=True)
-                        with open(tmp_path, "w") as f:
+                        with open(tmp_path, "wb") as f:
                             f.write(custom_config["data"])
 
                     if bw_integration != "Local":

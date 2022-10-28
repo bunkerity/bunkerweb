@@ -1,6 +1,8 @@
-import os
+from os import getenv
+from os.path import exists
 from typing import Any, Union
 from subprocess import run
+from kubernetes import client as kube_client
 
 from API import API
 from ApiCaller import ApiCaller
@@ -35,7 +37,7 @@ class Instance:
                 if "Health" in data.attrs["State"]
                 else False
             )
-            if data
+            if _type == "container" and data
             else True
         )
         self.env = data
@@ -44,8 +46,8 @@ class Instance:
     def get_id(self) -> str:
         return self._id
 
-    def run_jobs(self) -> bool:
-        return self.apiCaller._send_to_apis("POST", "/jobs")
+    # def run_jobs(self) -> bool:
+    #     return self.apiCaller._send_to_apis("POST", "/jobs")
 
     def reload(self) -> bool:
         return self.apiCaller._send_to_apis("POST", "/reload")
@@ -59,10 +61,14 @@ class Instance:
     def restart(self) -> bool:
         return self.apiCaller._send_to_apis("POST", "/restart")
 
+    def send_custom_configs(self) -> bool:
+        return self.apiCaller._send_files("/opt/bunkerweb/configs", "/custom_configs")
+
 
 class Instances:
-    def __init__(self, docker_client):
+    def __init__(self, docker_client, bw_integration: str):
         self.__docker = docker_client
+        self.__bw_integration = bw_integration
 
     def __instance_from_id(self, _id) -> Instance:
         instances: list[Instance] = self.get_instances()
@@ -106,13 +112,80 @@ class Instances:
                     )
                 )
 
+            is_swarm = True
+            try:
+                self.__docker.swarm.version
+            except:
+                is_swarm = False
+
+            if is_swarm:
+                for instance in self.__docker.services.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                ):
+                    status = "down"
+                    desired_tasks = instance.attrs["ServiceStatus"]["DesiredTasks"]
+                    running_tasks = instance.attrs["ServiceStatus"]["RunningTasks"]
+                    if desired_tasks > 0 and (desired_tasks == running_tasks):
+                        status = "up"
+
+                    instances.append(
+                        Instance(
+                            instance.id,
+                            instance.name,
+                            instance.name,
+                            "service",
+                            status,
+                            instance,
+                            apiCaller,
+                        )
+                    )
+        elif self.__bw_integration == "Kubernetes":
+            corev1 = kube_client.CoreV1Api()
+            for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
+                if (
+                    pod.metadata.annotations != None
+                    and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
+                ):
+                    env_variables = {
+                        e.name: e.value for e in pod.spec.containers[0].env
+                    }
+
+                    apiCaller = ApiCaller()
+                    apiCaller._set_apis(
+                        [
+                            API(
+                                f"http://{pod.status.pod_ip}:{env_variables.get('API_HTTP_PORT', '5000')}",
+                                env_variables.get("API_SERVER_NAME", "bwapi"),
+                            )
+                        ]
+                    )
+
+                    status = "up"
+                    if pod.status.conditions is not None:
+                        for condition in pod.status.conditions:
+                            if condition.type == "Ready" and condition.status == "True":
+                                status = "down"
+                                break
+
+                    instances.append(
+                        Instance(
+                            pod.metadata.uid,
+                            pod.metadata.name,
+                            pod.status.pod_ip,
+                            "container",
+                            status,
+                            pod,
+                            apiCaller,
+                        )
+                    )
+
         instances = sorted(
             instances,
             key=lambda x: x.name,
         )
 
         # Local instance
-        if os.path.exists("/usr/sbin/nginx"):
+        if exists("/usr/sbin/nginx"):
             instances.insert(
                 0,
                 Instance(
@@ -120,11 +193,23 @@ class Instances:
                     "local",
                     "127.0.0.1",
                     "local",
-                    "up" if os.path.exists("/opt/bunkerweb/tmp/nginx.pid") else "down",
+                    "up" if exists("/opt/bunkerweb/tmp/nginx.pid") else "down",
                 ),
             )
 
         return instances
+
+    def send_custom_configs_to_instances(self) -> Union[list[str], str]:
+        failed_to_send: list[str] = []
+        for instance in self.get_instances():
+            if instance.health is False:
+                failed_to_send.append(instance.name)
+                continue
+
+            if not instance.send_custom_configs():
+                failed_to_send.append(instance.name)
+
+        return failed_to_send or "Successfully sent custom configs to instances"
 
     def reload_instances(self) -> Union[list[str], str]:
         not_reloaded: list[str] = []
@@ -151,7 +236,7 @@ class Instances:
                 != 0
             )
         elif instance._type == "container":
-            result = instance.run_jobs()
+            # result = instance.run_jobs()
             result = result & instance.reload()
 
         if result:

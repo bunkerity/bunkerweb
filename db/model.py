@@ -96,6 +96,7 @@ class Global_values(Base):
     )
     value = Column(String(1023), nullable=False)
     suffix = Column(SmallInteger, primary_key=True, nullable=True, default=0)
+    method = Column(METHODS_ENUM, nullable=False)
 
     setting = relationship("Settings", back_populates="global_value")
 
@@ -104,7 +105,6 @@ class Services(Base):
     __tablename__ = "services"
 
     id = Column(String(64), primary_key=True)
-    method = Column(METHODS_ENUM, nullable=False)
 
     settings = relationship(
         "Services_settings", back_populates="service", cascade="all, delete"
@@ -132,6 +132,7 @@ class Services_settings(Base):
     )
     value = Column(String(1023), nullable=False)
     suffix = Column(SmallInteger, primary_key=True, nullable=True, default=0)
+    method = Column(METHODS_ENUM, nullable=False)
 
     service = relationship("Services", back_populates="settings")
     setting = relationship("Settings", back_populates="services")
