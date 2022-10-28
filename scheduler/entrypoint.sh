@@ -44,35 +44,18 @@ if [ "$?" -ne 0 ] ; then
 	exit 1
 fi
 
+generate=yes
 if [ -v VARIABLES_PATH ] && [ -f "/etc/nginx/variables.env" ] && grep -q "^TEMP_NGINX=no$" /etc/nginx/variables.env ; then
 	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb configuration is already generated, will not generate it again"
-elif [ "$SWARM_MODE" != "yes" ] && [ "$KUBERNETES_MODE" != "yes" ] && [ "$AUTOCONF_MODE" != "yes" ] ; then
-	# Generate configuration and send config to bunkerweb
-	/opt/bunkerweb/gen/main.py --method scheduler
-	if [ "$?" -ne 0 ] ; then
-		log "ENTRYPOINT" "❌" "Scheduler generator failed"
-		exit 1
-	fi
+	generate=no
 fi
 
 # execute jobs
-log "ENTRYPOINT" "ℹ️ " "Executing jobs ..."
+log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
 if [ -v VARIABLES_PATH ] ; then
-	/opt/bunkerweb/scheduler/main.py --variables $VARIABLES_PATH --run
+	/opt/bunkerweb/scheduler/main.py --variables $VARIABLES_PATH --generate $generate
 else
-	/opt/bunkerweb/scheduler/main.py --run
-fi
-if [ "$?" -ne 0 ] ; then
-  log "ENTRYPOINT" "❌" "Scheduler failed"
-  exit 1
-fi
-
-
-log "ENTRYPOINT" "ℹ️ " "Executing job scheduler ..."
-if [ -v VARIABLES_PATH ] ; then
-	/opt/bunkerweb/scheduler/main.py --variables $VARIABLES_PATH
-else
-	/opt/bunkerweb/scheduler/main.py
+	/opt/bunkerweb/scheduler/main.py --generate $generate
 fi
 
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"

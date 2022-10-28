@@ -63,7 +63,7 @@ class ConfigCaller:
                 and env_instances.get("SERVER_NAME", "") != ""
             ):
                 for server_name in env_instances["SERVER_NAME"].split(" "):
-                    full_env[f"{server_name}_" + k] = v
+                    full_env[f"{server_name}_{k}"] = v
         # Replace with services values
         for k, v in env_services.items():
             full_env[k] = v

@@ -1,6 +1,5 @@
 from io import BytesIO
 from os import environ, getenv
-from os.path import exists
 from tarfile import open as taropen
 
 from logger import setup_logger
@@ -25,22 +24,21 @@ class ApiCaller:
                     pod.metadata.annotations != None
                     and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
                 ):
-                    api = None
+                    api_http_port = None
+                    api_server_name = None
+
                     for pod_env in pod.spec.containers[0].env:
                         if pod_env.name == "API_HTTP_PORT":
-                            api = API(
-                                f"http://{pod.status.pod_ip}:{pod_env.value or '5000'}"
-                            )
-                            break
+                            api_http_port = pod_env.value or "5000"
+                        elif pod_env.name == "API_SERVER_NAME":
+                            api_server_name = pod_env.value or "bwapi"
 
-                    if api:
-                        self.__apis.append(api)
-                    else:
-                        self.__apis.append(
-                            API(
-                                f"http://{pod.status.pod_ip}:{getenv('API_HTTP_PORT', '5000')}"
-                            )
+                    self.__apis.append(
+                        API(
+                            f"http://{pod.status.pod_ip}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                         )
+                    )
         else:
             from docker import DockerClient
 
@@ -50,19 +48,48 @@ class ApiCaller:
             for instance in docker_client.containers.list(
                 filters={"label": "bunkerweb.INSTANCE"}
             ):
-                api = None
+                api_http_port = None
+                api_server_name = None
+
                 for var in instance.attrs["Config"]["Env"]:
                     if var.startswith("API_HTTP_PORT="):
-                        api = API(
-                            f"http://{instance.name}:{var.replace('API_HTTP_PORT=', '', 1)}"
-                        )
-                        break
+                        api_http_port = var.replace("API_HTTP_PORT=", "", 1)
+                    elif var.startswith("API_SERVER_NAME="):
+                        api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
-                if api:
-                    self.__apis.append(api)
-                else:
+                self.__apis.append(
+                    API(
+                        f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                        host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                    )
+                )
+
+            is_swarm = True
+            try:
+                docker_client.swarm.version
+            except:
+                is_swarm = False
+
+            if is_swarm:
+                for instance in docker_client.services.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                ):
+                    api_http_port = None
+                    api_server_name = None
+
+                    for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
+                        "Env"
+                    ]:
+                        if var.startswith("API_HTTP_PORT="):
+                            api_http_port = var.replace("API_HTTP_PORT=", "", 1)
+                        elif var.startswith("API_SERVER_NAME="):
+                            api_server_name = var.replace("API_SERVER_NAME=", "", 1)
+
                     self.__apis.append(
-                        API(f"http://{instance.name}:{getenv('API_HTTP_PORT', '5000')}")
+                        API(
+                            f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                        )
                     )
 
     def _set_apis(self, apis):
