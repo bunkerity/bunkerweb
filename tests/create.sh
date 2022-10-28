@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# drop and export secrets
+echo "${CICD_SECRETS}" > /opt/.env
+chmod +x /opt/.env
+. /opt/.env
+
+# create terraform env
+mkdir "/tmp/$1"
+cp ./tests/terraform/providers.tf "/tmp/$1"
+cp -r ./tests/terraform/templates "/tmp/$1"
+cp "./tests/terraform/${1}.tf" "/tmp/$1"
+old_dir="$(pwd)"
+cd "/tmp/$1"
+
+# terraform init
+terraform init
+if [ $? -ne 0 ] ; then
+	echo "terraform init failed"
+	exit 1
+fi
+
+# terraform apply
+terraform apply
+if [ $? -ne 0 ] ; then
+	echo "terraform apply failed"
+	terraform destroy
+	exit 2
+fi
+
+# run ansible playbook
+cd "${old_dir}/ansible"
+ansible-playbook -i "/tmp/${1}_inventory" "${1}_playbook"
+if [ $? -ne 0 ] ; then
+	echo "ansible-playbook failed"
+	cd "/tmp/$1"
+	terraform destroy
+	exit 3
+fi
+
+# done
+exit 0

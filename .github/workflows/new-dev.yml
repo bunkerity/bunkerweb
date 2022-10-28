@@ -1,0 +1,181 @@
+name: Automatic test, build, push and deploy (DEV)
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+
+  # Build for amd64
+  build-bw-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      # Build images
+      - name: Build BW for amd64
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-amd64-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-amd64-cache,mode=min
+      - name: Build BW autoconf for amd64
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: autoconf/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache,mode=min
+      - name: Build BW UI for amd64
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ui/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache,mode=min
+
+  # Perform security checks
+  security:
+    needs: [build-bw-amd64]
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      # CVE check on OS
+      - name: Check security vulnerabilities for BW
+        uses: aquasecurity/trivy-action@master
+        with:
+          vuln-type: os
+          image-ref: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
+      - name: Check security vulnerabilities for autoconf
+        uses: aquasecurity/trivy-action@master
+        with:
+          vuln-type: os
+          image-ref: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
+      - name: Check security vulnerabilities for UI
+        uses: aquasecurity/trivy-action@master
+        with:
+          vuln-type: os
+          image-ref: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
+
+  # Create infra
+  infra-create-docker:
+    needs: [security]
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Generate SSH keypair
+        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: Install ansible
+        run: pip install ansible
+      # Create Docker infra
+      - run: ./tests/create.sh docker
+        env:
+          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: tf-docker
+          path: /tmp/docker
+
+  # Perform tests
+  tests-docker:
+    needs: [infra-create-docker]
+    runs-on: [self-hosted, bw-docker]
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      - name: 
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bw-tests
+      - name: Install test dependencies
+        run: pip3 install -r tests/requirements.txt
+      # Do tests
+      - name: Run Docker tests
+        run: ./tests/main.py "docker"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
+
+  # Remove infra
+  infra-rm-docker:
+    if: ${{ always() }}
+    needs: [test-docker]
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@v2
+      - uses: actions/download-artifact@v3
+        with:
+          name: tf-docker
+          path: /tmp/docker
+      # Remove Docker infra
+      - run: ./tests/rm.sh docker
+        env:
+          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}

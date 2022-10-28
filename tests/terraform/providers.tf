@@ -1,22 +1,12 @@
-terraform {
-  required_version = ">= 0.14.0"
+terraform {  
   required_providers {
-    openstack = {
-      source = "terraform-provider-openstack/openstack"
-      version = "~> 1.48.0"
-    }
-    ovh = {
-      source = "ovh/ovh"
-      version = ">= 0.13.0"
+    scaleway = {
+      source = "scaleway/scaleway"
+      version = "2.5.0"
     }
   }
 }
 
-provider "openstack" {
-  alias = "openstack"
+provider "scaleway" {
+  alias = "scaleway"
 }
-
-provider "ovh" {
-  alias = "ovh"
-}
-

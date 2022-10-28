@@ -35,7 +35,7 @@ resource "openstack_compute_instance_v2" "instances" {
   count = 3
   name = "cicd_bw_swarm_${count.index}"
   image_name = "Debian 11"
-  flavor_name = "d2-8"
+  flavor_name = "d2-4"
   region = "SBG5"
   key_pair = openstack_compute_keypair_v2.ssh_key.name
   network {

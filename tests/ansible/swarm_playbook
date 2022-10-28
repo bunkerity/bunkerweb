@@ -1,0 +1,20 @@
+---
+- hosts: all
+  name: Provisioning tasks
+  roles:
+    - common
+    - docker
+    - private_net
+    - swarm
+
+- hosts: managers[0]
+  name: Install GH runner
+    - runner_user: debian
+    - access_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+    - runner_extra_config_args: "--ephemeral"
+    - runner_name: bw-swarm
+    - github_account: "{{ lookup('env', 'GITHUB_ACCOUNT') }}"
+    - github_owner: bunkerity
+    - github_repo: bunkerweb
+  roles:
+    - monolithprojects.github_actions_runner

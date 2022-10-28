@@ -2,7 +2,7 @@
 
 from sys import path, argv, exit
 from glob import glob
-from os import getcwd, _exit
+from os import getcwd, _exit, getenv, environ
 from os.path import isfile
 from traceback import format_exc
 from json import loads
@@ -27,7 +27,10 @@ if not test_type in ["linux", "docker", "autoconf", "swarm", "kubernetes", "ansi
     log("TESTS", "❌", "Wrong type argument " + test_type)
     exit(1)
 
-run("docker system prune", shell=True)
+for env in getenv("TEST_DOMAINS").splitlines() :
+    k = env.split("=")[0]
+    v = env.split("=")[1]
+    environ[k] = v
 
 log("TESTS", "ℹ️", "Starting tests for " + test_type + " ...")
 ret = False
