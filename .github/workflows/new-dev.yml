@@ -79,9 +79,9 @@ jobs:
       - name: Import BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bunkerweb-tests-amd64:latest
       - name: Import BW autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest bw-autoconf-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest bunkerweb-autoconf-tests-amd64:latest
       - name: Import BW UI image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest bw-ui-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest bunkerweb-ui-tests-amd64:latest
       # CVE check on OS
       - name: Check security vulnerabilities for BW
         uses: aquasecurity/trivy-action@master
@@ -156,7 +156,7 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      - name: 
+      - name: Pull BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bw-tests
       - name: Install test dependencies
         run: pip3 install -r tests/requirements.txt
