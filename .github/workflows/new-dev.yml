@@ -77,7 +77,7 @@ jobs:
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       - name: Import BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bw-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bunkerweb-tests-amd64:latest
       - name: Import BW autoconf image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest bw-autoconf-tests:latest
       - name: Import BW UI image
