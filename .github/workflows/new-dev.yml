@@ -140,7 +140,9 @@ jobs:
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
       - run: tar -cvf terraform.tar /tmp/docker
+        if: always()
       - uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: tf-docker
           path: terraform.tar
