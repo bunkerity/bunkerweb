@@ -128,7 +128,7 @@ class Test(ABC) :
             with open(path, "w") as f :
                 f.write(content)
         except :
-            log("TEST", "⚠️", "can't replace file " + path)
+            log("TEST", "⚠️", "can't replace file " + path + " : " + format_exc())
 
     def replace_in_files(path, old, new) :
         for root, dirs, files in walk(path) :

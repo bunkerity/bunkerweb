@@ -36,7 +36,7 @@ class DockerTest(Test) :
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/docker-compose.yml"
             example_data = "/tmp/tests/" + self._name + "/bw-data"
-            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "bw-tests:latest")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "bw-tests")
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items() :
@@ -79,4 +79,4 @@ class DockerTest(Test) :
     def _debug_fail(self) :
         test = "/tmp/tests/" + self._name
         proc = run("docker-compose logs", shell=True, cwd=test)
-        
+

@@ -104,5 +104,3 @@ if not ret :
     exit(1)
 
 log("TESTS", "ℹ️", "All tests finished for " + test_type + " !")
-
-run("docker system prune", shell=True)
