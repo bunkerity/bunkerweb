@@ -53,7 +53,7 @@ class DockerTest(Test) :
                 proc = run("sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'", shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("cp bw-data failed"))
-            proc = run("docker-compose pull", shell=True, cwd=test)
+            proc = run("docker-compose pull --ignore-pull-failures", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose pull failed"))
             proc = run("docker-compose up -d", shell=True, cwd=test)
