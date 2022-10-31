@@ -17,6 +17,7 @@ class DockerTest(Test) :
             r"app2\.example\.com": getenv("TEST_DOMAIN1_2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN1_3")
         }
+        self._check_domains()
 
     def init() :
         try :

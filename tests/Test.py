@@ -45,6 +45,12 @@ class Test(ABC) :
     def end() :
         return True
 
+    # helper to check domains
+    def _check_domains(self) :
+        for k, v in self._domains.items() :
+            if v is None :
+                log("TEST", "⚠️", "env " + k + " is None")
+
     # called before starting the tests
     # must be override if specific actions needs to be done
     def _setup_test(self) :
