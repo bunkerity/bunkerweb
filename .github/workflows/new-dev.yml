@@ -162,7 +162,7 @@ jobs:
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest bw-tests
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest local/bw-tests:latest
       - name: Install test dependencies
         run: pip3 install -r tests/requirements.txt
       # Do tests
