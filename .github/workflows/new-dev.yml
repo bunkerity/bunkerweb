@@ -170,6 +170,7 @@ jobs:
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "docker"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
   # Remove infra
   infra-rm-docker:
