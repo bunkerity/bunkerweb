@@ -27,11 +27,6 @@ if not test_type in ["linux", "docker", "autoconf", "swarm", "kubernetes", "ansi
     log("TESTS", "❌", "Wrong type argument " + test_type)
     exit(1)
 
-for env in getenv("TEST_DOMAINS").splitlines() :
-    k = env.split("=")[0]
-    v = env.split("=")[1]
-    environ[k] = v
-
 log("TESTS", "ℹ️", "Starting tests for " + test_type + " ...")
 ret = False
 end_fun = None

@@ -167,7 +167,7 @@ jobs:
         run: pip3 install -r tests/requirements.txt
       # Do tests
       - name: Run Docker tests
-        run: ./tests/main.py "docker"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "docker"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
 
@@ -186,7 +186,7 @@ jobs:
         with:
           name: tf-docker
           path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C /
+      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
       # Remove Docker infra
       - run: ./tests/rm.sh docker
         env:
