@@ -185,7 +185,8 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: tf-docker
-          path: /tmp/docker
+          path: /tmp
+      - run: tar xvf /tmp/terraform.tar -C /
       # Remove Docker infra
       - run: ./tests/rm.sh docker
         env:
