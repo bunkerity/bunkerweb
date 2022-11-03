@@ -22,7 +22,7 @@ resource "scaleway_vpc_private_network" "pn" {
 # Create cicd_bw_swarm_[1-3] instances
 resource "scaleway_instance_server" "instance" {
   count = 3
-  depends_on = [scaleway_account_ssh_key.ssh_key, scaleway_vpc_private_network.pn]
+  depends_on = [scaleway_account_ssh_key.ssh_key]
   name = "cicd_bw_swarm_${count.index}"
   type = "DEV1-M"
   image = "debian_bullseye"

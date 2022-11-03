@@ -1,8 +1,8 @@
 ---
-- name: Update /etc/network/interfaces.d/ens4
+- name: Update /etc/network/interfaces.d/60-ens4-vpc
   template:
-    src: ens4
-    dest: /etc/network/interfaces.d/ens4
+    src: 60-ens4-vpc
+    dest: /etc/network/interfaces.d/60-ens4-vpc
     owner: root
     group: root
     mode: '0644'
