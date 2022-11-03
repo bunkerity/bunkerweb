@@ -142,7 +142,7 @@ api.global.POST["^/ban$"] = function(api)
 end
 
 api.global.GET["^/bans$"] = function(api)
-	data = {}
+	local data = {}
 	for i, k in ipairs(datastore:keys()) do
 		if k:find("^bans_ip_") then
 			local ret, reason = datastore:get(k)
@@ -153,7 +153,8 @@ api.global.GET["^/bans$"] = function(api)
 			if not ret then
 				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access exp " .. k .. " from datastore : " + exp)
 			end
-			table.insert(data, {ip = k:sub(9, #k), reason = reason, exp = exp})
+			local ban = {ip = k:sub(9, #k), reason = reason, exp = exp}
+			table.insert(data, ban)
 		end
 	end
 	return api:response(ngx.HTTP_OK, "success", data)
