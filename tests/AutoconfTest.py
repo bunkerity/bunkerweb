@@ -18,6 +18,7 @@ class AutoconfTest(Test) :
             r"app2\.example\.com": getenv("TEST_DOMAIN1_2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN1_3")
         }
+        self._check_domains()
 
     def init() :
         try :
@@ -30,10 +31,10 @@ class AutoconfTest(Test) :
                 rmtree("/tmp/autoconf")
             copytree("./integrations/autoconf", "/tmp/autoconf")
             compose = "/tmp/autoconf/docker-compose.yml"
-            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
-            Test.replace_in_file(compose, r"bunkerity/bunkerweb-autoconf:.*$", "10.20.1.1:5000/bw-autoconf-tests:latest")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bw-tests:latest")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb-autoconf:.*$", "local/bw-autoconf-tests:latest")
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
-            proc = run("docker-compose pull", cwd="/tmp/autoconf", shell=True)
+            proc = run("docker-compose pull --ignore-pull-failures", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose pull failed (autoconf stack)"))
             proc = run("docker-compose up -d", cwd="/tmp/autoconf", shell=True)
@@ -77,7 +78,7 @@ class AutoconfTest(Test) :
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/autoconf.yml"
             example_data = "/tmp/tests/" + self._name + "/bw-data"
-            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bw-tests:latest")
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items() :
@@ -93,7 +94,7 @@ class AutoconfTest(Test) :
                 proc = run("sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'", shell=True)
                 if proc.returncode != 0 :
                     raise(Exception("cp bw-data failed"))
-            proc = run("docker-compose -f autoconf.yml pull", shell=True, cwd=test)
+            proc = run("docker-compose -f autoconf.yml pull --ignore-pull-failures", shell=True, cwd=test)
             if proc.returncode != 0 :
                 raise(Exception("docker-compose pull failed"))
             proc = run("docker-compose -f autoconf.yml up -d", shell=True, cwd=test)
