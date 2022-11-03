@@ -153,7 +153,7 @@ api.global.GET["^/bans$"] = function(api)
 			if not ret then
 				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access exp " .. k .. " from datastore : " + exp)
 			end
-			table.insert(data, {ip = k:sub(9, #k), reason = reason, exp = exp}}
+			table.insert(data, {ip = k:sub(9, #k), reason = reason, exp = exp})
 		end
 	end
 	return api:response(ngx.HTTP_OK, "success", data)
