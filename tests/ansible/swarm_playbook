@@ -5,6 +5,10 @@
     - common
     - docker
     - private_net
+
+- hosts: all
+  name: Setup swarm
+  roles:
     - swarm
 
 - hosts: managers[0]
