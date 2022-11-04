@@ -38,7 +38,7 @@ class SwarmTest(Test) :
                 raise(Exception("docker stack deploy failed (swarm stack)"))
             i = 0
             healthy = False
-            while i < 45 :
+            while i < 90 :
                 proc = run('docker stack ps --no-trunc --format "{{ .CurrentState }}" bunkerweb | grep -v "Running"', cwd="/tmp/swarm", shell=True, capture_output=True)
                 if "" == proc.stdout.decode() :
                     healthy = True
