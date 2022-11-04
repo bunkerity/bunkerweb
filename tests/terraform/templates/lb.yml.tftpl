@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: bw-lb
+spec:
+  selector:
+    app: bunkerweb
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+  loadBalancerIP: ${lb_ip}
