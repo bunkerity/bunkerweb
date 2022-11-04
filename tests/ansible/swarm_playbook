@@ -8,6 +8,11 @@
     - swarm
 
 - hosts: managers[0]
+  name: Setup local registry
+  roles:
+    - registry
+
+- hosts: managers[0]
   name: Install GH runner
   vars:
     - runner_user: debian
