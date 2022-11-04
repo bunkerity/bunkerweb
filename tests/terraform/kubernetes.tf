@@ -24,7 +24,7 @@ resource "scaleway_k8s_pool" "pool" {
 # Get kubeconfig file
 resource "local_file" "kubeconfig" {
   content = scaleway_k8s_pool.pool.kubeconfig.config_file
-  filename = "/tmp/kubernetes/kubeconfig"
+  filename = "/tmp/k8s/kubeconfig"
 }
 
 # Create lb.yml file
@@ -32,5 +32,5 @@ resource "local_file" "lb_yml" {
   content = templatefile("templates/lb.yml.tftpl", {
     lb_ip = var.k8s_ip
   })
-  filename = "/tmp/kubernetes/lb.yml"
+  filename = "/tmp/k8s/lb.yml"
 }

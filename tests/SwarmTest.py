@@ -46,6 +46,9 @@ class SwarmTest(Test) :
                 sleep(1)
                 i += 1
             if not healthy :
+                proc = run('docker service logs bunkerweb_mybunker ; docker service logs bunkerweb_myautoconf', cwd="/tmp/swarm", shell=True, capture_output=True)
+                log("SWARM", "❌", "stdout logs = " + proc.stdout.decode())
+                log("SWARM", "❌", "stderr logs = " + proc.stderr.decode())
                 raise(Exception("swarm stack is not healthy"))
             sleep(60)
         except :
