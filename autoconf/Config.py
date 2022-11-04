@@ -12,7 +12,7 @@ class Config(ConfigCaller):
         self.__ctrl_type = ctrl_type
         self.__lock = lock
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
-        self.__db = None
+        self._db = None
         self.__instances = []
         self.__services = []
         self.__configs = []
@@ -55,8 +55,8 @@ class Config(ConfigCaller):
         self.__configs = configs
         self.__config = self.__get_full_env()
 
-        if self.__db is None:
-            self.__db = Database(
+        if self._db is None:
+            self._db = Database(
                 self.__logger,
                 sqlalchemy_string=self.__config.get("DATABASE_URI", None),
                 bw_integration="Kubernetes"
@@ -64,18 +64,11 @@ class Config(ConfigCaller):
                 else "Cluster",
             )
 
-            while not self.__db.is_initialized():
+            while not self._db.is_initialized():
                 self.__logger.warning(
                     "Database is not initialized, retrying in 5 seconds ...",
                 )
                 sleep(5)
-
-        # save config to database
-        ret = self.__db.save_config(self.__config, "autoconf")
-        if ret:
-            self.__logger.error(
-                f"Can't save autoconf config in database: {ret}",
-            )
 
         custom_configs = []
         for config_type in self.__configs:
@@ -92,9 +85,18 @@ class Config(ConfigCaller):
                     }
                 )
 
-        # save custom configs to database
-        ret = self.__db.save_custom_configs(custom_configs, "autoconf")
+        # save config to database
+        ret = self._db.save_config(self.__config, "autoconf")
         if ret:
+            success = False
+            self.__logger.error(
+                f"Can't save autoconf config in database: {ret}",
+            )
+
+        # save custom configs to database
+        ret = self._db.save_custom_configs(custom_configs, "autoconf")
+        if ret:
+            success = False
             self.__logger.error(
                 f"Can't save autoconf custom configs in database: {ret}",
             )

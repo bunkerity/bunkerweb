@@ -132,6 +132,13 @@ class DockerController(Controller, ConfigCaller):
                     self.__logger.info(
                         "Successfully deployed new configuration 🚀",
                     )
+
+                    if not self._config._db.is_autoconf_loaded():
+                        ret = self._config._db.set_autoconf_load(True)
+                        if ret:
+                            self.__logger.error(
+                                f"Can't set autoconf loaded metadata to true in database: {ret}",
+                            )
             except:
                 self.__logger.error(
                     f"Exception while deploying new configuration :\n{format_exc()}",

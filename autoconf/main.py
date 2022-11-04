@@ -33,16 +33,6 @@ signal(SIGINT, exit_handler)
 signal(SIGTERM, exit_handler)
 
 try:
-
-    # Setup /data folder if needed
-    proc = run(
-        ["/opt/bunkerweb/helpers/data.sh", "AUTOCONF"],
-        stdin=DEVNULL,
-        stderr=STDOUT,
-    )
-    if proc.returncode != 0:
-        _exit(1)
-
     # Instantiate the controller
     if swarm:
         logger.info("Swarm mode detected")

@@ -4,8 +4,8 @@ from argparse import ArgumentParser
 from glob import glob
 from itertools import chain
 from json import loads
-from os import R_OK, W_OK, X_OK, access, environ, getenv, makedirs, path, remove, unlink
-from os.path import dirname, exists, isdir, isfile, islink
+from os import R_OK, W_OK, X_OK, access, environ, getenv, path, remove, unlink
+from os.path import exists, isdir, isfile, islink
 from re import compile as re_compile
 from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, run
@@ -28,7 +28,6 @@ from Database import Database
 from Configurator import Configurator
 from Templator import Templator
 from API import API
-from ApiCaller import ApiCaller
 
 
 if __name__ == "__main__":
@@ -163,6 +162,7 @@ if __name__ == "__main__":
             for plugin in core_plugins[order]:
                 core_settings.update(plugin["settings"])
 
+        integration = "Linux"
         if exists("/opt/bunkerweb/INTEGRATION"):
             with open("/opt/bunkerweb/INTEGRATION", "r") as f:
                 integration = f.read().strip()
@@ -182,8 +182,11 @@ if __name__ == "__main__":
             if config_files.get("KUBERNETES_MODE", "no") == "yes":
                 bw_integration = "Kubernetes"
             elif (
-                config_files.get("SWARM_MODE", "no") == "yes"
-                or config_files.get("AUTOCONF_MODE", "no") == "yes"
+                integration == "Docker"
+                or config_files.get(
+                    "SWARM_MODE", config_files.get("AUTOCONF_MODE", "no")
+                )
+                == "yes"
             ):
                 bw_integration = "Cluster"
 
@@ -192,8 +195,9 @@ if __name__ == "__main__":
                 sqlalchemy_string=getenv("DATABASE_URI", None),
                 bw_integration=bw_integration,
             )
+            is_initialized = db.is_initialized()
 
-            if args.init:
+            if not is_initialized:
                 ret, err = db.init_tables(
                     [
                         config.get_settings(),
@@ -215,55 +219,55 @@ if __name__ == "__main__":
                 else:
                     logger.info("Database tables initialized")
 
-                if not db.is_initialized():
-                    logger.info(
-                        "Database not initialized, initializing ...",
-                    )
+                logger.info(
+                    "Database not initialized, initializing ...",
+                )
 
-                    custom_confs = [
-                        {"value": v, "exploded": custom_confs_rx.search(k).groups()}
-                        for k, v in environ.items()
-                        if custom_confs_rx.match(k)
-                    ]
+                custom_confs = [
+                    {"value": v, "exploded": custom_confs_rx.search(k).groups()}
+                    for k, v in environ.items()
+                    if custom_confs_rx.match(k)
+                ]
 
-                    with open("/opt/bunkerweb/VERSION", "r") as f:
-                        bw_version = f.read().strip()
+                with open("/opt/bunkerweb/VERSION", "r") as f:
+                    bw_version = f.read().strip()
 
-                    if bw_integration == "Local":
-                        err = db.save_config(config_files, args.method)
+                if bw_integration == "Local":
+                    err = db.save_config(config_files, args.method)
 
-                        if not err:
-                            err1 = db.save_custom_configs(custom_confs, args.method)
-                    else:
-                        err = None
-                        err1 = None
-
-                    integration = "Linux"
-                    if config_files.get("KUBERNETES_MODE", "no") == "yes":
-                        integration = "Kubernetes"
-                    elif config_files.get("SWARM_MODE", "no") == "yes":
-                        integration = "Swarm"
-                    elif config_files.get("AUTOCONF_MODE", "no") == "yes":
-                        integration = "Autoconf"
-                    elif exists("/opt/bunkerweb/INTEGRATION"):
-                        with open("/opt/bunkerweb/INTEGRATION", "r") as f:
-                            integration = f.read().strip()
-
-                    err2 = db.initialize_db(version=bw_version, integration=integration)
-
-                    if err or err1 or err2:
-                        logger.error(
-                            f"Can't Initialize database : {err or err1 or err2}",
-                        )
-                        sys_exit(1)
-                    else:
-                        logger.info("Database initialized")
+                    if not err:
+                        err1 = db.save_custom_configs(custom_confs, args.method)
                 else:
-                    logger.info(
-                        "Database is already initialized, skipping ...",
-                    )
+                    err = None
+                    err1 = None
 
-                sys_exit(0)
+                integration = "Linux"
+                if config_files.get("KUBERNETES_MODE", "no") == "yes":
+                    integration = "Kubernetes"
+                elif config_files.get("SWARM_MODE", "no") == "yes":
+                    integration = "Swarm"
+                elif config_files.get("AUTOCONF_MODE", "no") == "yes":
+                    integration = "Autoconf"
+                elif exists("/opt/bunkerweb/INTEGRATION"):
+                    with open("/opt/bunkerweb/INTEGRATION", "r") as f:
+                        integration = f.read().strip()
+
+                err2 = db.initialize_db(version=bw_version, integration=integration)
+
+                if err or err1 or err2:
+                    logger.error(
+                        f"Can't Initialize database : {err or err1 or err2}",
+                    )
+                    sys_exit(1)
+                else:
+                    logger.info("Database initialized")
+
+                if args.init:
+                    sys_exit(0)
+            elif is_initialized:
+                logger.info(
+                    "Database is already initialized, skipping ...",
+                )
 
             config = db.get_config()
         elif integration == "Docker":
@@ -355,8 +359,6 @@ if __name__ == "__main__":
             if db is None:
                 db = Database(logger)
 
-            api_caller = ApiCaller(apis=apis)
-
             # Compute the config
             logger.info("Computing config ...")
             config = Configurator(
@@ -374,9 +376,6 @@ if __name__ == "__main__":
             else:
                 err = None
                 err1 = None
-
-            with open("/opt/bunkerweb/VERSION", "r") as f:
-                bw_version = f.read().strip()
 
             if err or err1:
                 logger.error(
@@ -424,8 +423,6 @@ if __name__ == "__main__":
 
             if db is None:
                 db = Database(logger)
-
-            api_caller = ApiCaller(apis=apis)
 
             # Compute the config
             logger.info("Computing config ...")
@@ -493,9 +490,6 @@ if __name__ == "__main__":
                 err = None
                 err1 = None
 
-            with open("/opt/bunkerweb/VERSION", "r") as f:
-                bw_version = f.read().strip()
-
             if err or err1:
                 logger.error(
                     f"Can't save config to database : {err or err1}",
@@ -526,23 +520,17 @@ if __name__ == "__main__":
 
         logger = setup_logger("Generator", config.get("LOG_LEVEL", "INFO"))
 
-        if integration == "Docker":
-            while not api_caller._send_to_apis("GET", "/ping"):
-                logger.warning(
-                    "Waiting for BunkerWeb's temporary nginx to start, retrying in 5 seconds ...",
-                )
-                sleep(5)
-        elif bw_integration == "Local":
+        if bw_integration == "Local":
             retries = 0
             while not exists("/opt/bunkerweb/tmp/nginx.pid"):
                 if retries == 5:
                     logger.error(
-                        "BunkerWeb's temporary nginx didn't start in time.",
+                        "BunkerWeb's nginx didn't start in time.",
                     )
                     sys_exit(1)
 
                 logger.warning(
-                    "Waiting for BunkerWeb's temporary nginx to start, retrying in 5 seconds ...",
+                    "Waiting for BunkerWeb's nginx to start, retrying in 5 seconds ...",
                 )
                 retries += 1
                 sleep(5)
@@ -570,14 +558,7 @@ if __name__ == "__main__":
         )
         templator.render()
 
-        if integration == "Docker":
-            ret = api_caller._send_to_apis("POST", "/reload")
-            if not ret:
-                logger.error(
-                    "reload failed",
-                )
-                sys_exit(1)
-        elif bw_integration == "Local":
+        if bw_integration == "Local":
             cmd = "/usr/sbin/nginx -s reload"
             proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
             if proc.returncode != 0:
