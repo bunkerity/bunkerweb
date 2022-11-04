@@ -142,7 +142,7 @@ try:
         ABSOLUTE_URI=vars["ABSOLUTE_URI"],
         INSTANCES=Instances(docker_client, bw_integration),
         CONFIG=Config(logger, db),
-        CONFIGFILES=ConfigFiles(db),
+        CONFIGFILES=ConfigFiles(logger, db),
         SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]
         .replace("http://", "")
         .replace("https://", "")

@@ -3,9 +3,20 @@
 from argparse import ArgumentParser
 from copy import deepcopy
 from glob import glob
-from os import _exit, getenv, getpid, makedirs, path, remove, unlink
-from os.path import dirname, isdir, isfile, islink
-from shutil import rmtree
+from os import (
+    _exit,
+    chmod,
+    getenv,
+    getpid,
+    listdir,
+    makedirs,
+    path,
+    remove,
+    unlink,
+    walk,
+)
+from os.path import dirname, exists, isdir, isfile, islink, join
+from shutil import chown, rmtree
 from signal import SIGINT, SIGTERM, SIGUSR1, SIGUSR2, signal
 from subprocess import PIPE, run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
@@ -106,6 +117,7 @@ if __name__ == "__main__":
             help="Precise if the configuration needs to be generated directly or not",
         )
         args = parser.parse_args()
+        generate = args.generate == "yes"
 
         logger.info("Scheduler started ...")
 
@@ -115,6 +127,8 @@ if __name__ == "__main__":
             and not isfile("/opt/bunkerweb/tmp/nginx.pid")
             else "Cluster"
         )
+
+        api_caller = ApiCaller()
 
         if args.variables:
             logger.info(f"Variables : {args.variables}")
@@ -127,8 +141,36 @@ if __name__ == "__main__":
                 "Kubernetes" if getenv("KUBERNETES_MODE", "no") == "yes" else "Cluster"
             )
 
-            api_caller = ApiCaller()
+            integration = "Docker"
+            if exists("/opt/bunkerweb/INTEGRATION"):
+                with open("/opt/bunkerweb/INTEGRATION", "r") as f:
+                    integration = f.read().strip()
+
             api_caller.auto_setup(bw_integration=bw_integration)
+
+            if integration == "Docker" and generate is True:
+                # run the generator
+                cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''} --method scheduler"
+                proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+                if proc.returncode != 0:
+                    logger.error(
+                        "Config generator failed, configuration will not work as expected...",
+                    )
+
+                # Fix permissions for the nginx folder
+                for root, dirs, files in walk("/etc/nginx", topdown=False):
+                    for name in files + dirs:
+                        chown(join(root, name), "scheduler", "scheduler")
+                        chmod(join(root, name), 0o770)
+
+                if len(api_caller._get_apis()) > 0:
+                    # send nginx configs
+                    logger.info("Sending /etc/nginx folder ...")
+                    ret = api_caller._send_files("/etc/nginx", "/confs")
+                    if not ret:
+                        logger.error(
+                            "Sending nginx configs failed, configuration will not work as expected...",
+                        )
 
             db = Database(
                 logger,
@@ -140,15 +182,64 @@ if __name__ == "__main__":
                 logger.warning(
                     "Database is not initialized, retrying in 5s ...",
                 )
-                sleep(3)
+                sleep(5)
+
+            if bw_integration == "Kubernetes" or integration in (
+                "Swarm",
+                "Kubernetes",
+                "Autoconf",
+            ):
+                ret = db.set_autoconf_load(False)
+                if ret:
+                    success = False
+                    logger.error(
+                        f"Can't set autoconf loaded metadata to false in database: {ret}",
+                    )
+
+                while not db.is_autoconf_loaded():
+                    logger.warning(
+                        "Autoconf is not loaded yet in the database, retrying in 5s ...",
+                    )
+                    sleep(5)
 
             env = db.get_config()
             while not db.is_first_config_saved() or not env:
                 logger.warning(
                     "Database doesn't have any config saved yet, retrying in 5s ...",
                 )
-                sleep(3)
+                sleep(5)
                 env = db.get_config()
+
+            # Checking if any custom config has been created by the user
+            custom_configs = []
+            root_dirs = listdir("/opt/bunkerweb/configs")
+            for (root, dirs, files) in walk("/opt/bunkerweb/configs", topdown=True):
+                if (
+                    root != "configs"
+                    and (dirs and not root.split("/")[-1] in root_dirs)
+                    or files
+                ):
+                    path_exploded = root.split("/")
+                    for file in files:
+                        with open(join(root, file), "r") as f:
+                            custom_configs.append(
+                                {
+                                    "value": f.read(),
+                                    "exploded": (
+                                        f"{path_exploded.pop()}"
+                                        if path_exploded[-1] not in root_dirs
+                                        else "",
+                                        path_exploded[-1],
+                                        file.replace(".conf", ""),
+                                    ),
+                                }
+                            )
+
+            ret = db.save_custom_configs(custom_configs, "manual")
+            if ret:
+                logger.error(
+                    f"Couldn't save manually created custom configs to database: {ret}",
+                )
 
             custom_configs = db.get_custom_configs()
 
@@ -162,6 +253,16 @@ if __name__ == "__main__":
                 makedirs(dirname(tmp_path), exist_ok=True)
                 with open(tmp_path, "wb") as f:
                     f.write(custom_config["data"])
+
+            # Fix permissions for the custom configs folder
+            for root, dirs, files in walk("/data/configs", topdown=False):
+                for name in files + dirs:
+                    chown(join(root, name), "scheduler", "scheduler")
+
+                    if isdir(join(root, name)):
+                        chmod(join(root, name), 0o750)
+                    if isfile(join(root, name)):
+                        chmod(join(root, name), 0o740)
 
             if bw_integration != "Local":
                 logger.info("Sending custom configs to BunkerWeb")
@@ -188,22 +289,39 @@ if __name__ == "__main__":
             else:
                 logger.info("All jobs in run_once() were successful")
 
-            # run the generator
-            cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''} --method scheduler"
-            proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
-            if proc.returncode != 0:
-                logger.error(
-                    "Config generator failed, configuration will not work as expected...",
-                )
-
-            if len(api_caller._get_apis()) > 0:
-                # send nginx configs
-                logger.info("Sending /etc/nginx folder ...")
-                ret = api_caller._send_files("/etc/nginx", "/confs")
-                if not ret:
+            if generate is True:
+                # run the generator
+                cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''} --method scheduler"
+                proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+                if proc.returncode != 0:
                     logger.error(
-                        "Sending nginx configs failed, configuration will not work as expected...",
+                        "Config generator failed, configuration will not work as expected...",
                     )
+
+                # Fix permissions for the nginx folder
+                for root, dirs, files in walk("/etc/nginx", topdown=False):
+                    for name in files + dirs:
+                        chown(join(root, name), "scheduler", "scheduler")
+                        chmod(join(root, name), 0o770)
+
+                if len(api_caller._get_apis()) > 0:
+                    # send nginx configs
+                    logger.info("Sending /etc/nginx folder ...")
+                    ret = api_caller._send_files("/etc/nginx", "/confs")
+                    if not ret:
+                        logger.error(
+                            "Sending nginx configs failed, configuration will not work as expected...",
+                        )
+
+            # Fix permissions for the cache folder
+            for root, dirs, files in walk("/data/cache", topdown=False):
+                for name in files + dirs:
+                    chown(join(root, name), "scheduler", "scheduler")
+
+                    if isdir(join(root, name)):
+                        chmod(join(root, name), 0o750)
+                    if isfile(join(root, name)):
+                        chmod(join(root, name), 0o740)
 
             try:
                 if len(api_caller._get_apis()) > 0:
@@ -241,6 +359,7 @@ if __name__ == "__main__":
                 )
 
             # infinite schedule for the jobs
+            generate = True
             scheduler.setup()
             logger.info("Executing job scheduler ...")
             while run:
@@ -279,6 +398,16 @@ if __name__ == "__main__":
                         makedirs(dirname(tmp_path), exist_ok=True)
                         with open(tmp_path, "wb") as f:
                             f.write(custom_config["data"])
+
+                    # Fix permissions for the custom configs folder
+                    for root, dirs, files in walk("/data/configs", topdown=False):
+                        for name in files + dirs:
+                            chown(join(root, name), "scheduler", "scheduler")
+
+                            if isdir(join(root, name)):
+                                chmod(join(root, name), 0o750)
+                            if isfile(join(root, name)):
+                                chmod(join(root, name), 0o740)
 
                     if bw_integration != "Local":
                         logger.info("Sending custom configs to BunkerWeb")

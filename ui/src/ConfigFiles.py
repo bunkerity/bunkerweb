@@ -8,17 +8,18 @@ from utils import path_to_dict
 
 
 class ConfigFiles:
-    def __init__(self, db):
+    def __init__(self, logger, db):
         self.__name_regex = re_compile(r"^[a-zA-Z0-9_-]{1,64}$")
         self.__root_dirs = [
             child["name"]
             for child in path_to_dict("/opt/bunkerweb/configs")["children"]
         ]
         self.__file_creation_blacklist = ["http", "stream"]
+        self.__logger = logger
         self.__db = db
 
     def save_configs(self) -> str:
-        custom_configs = {}
+        custom_configs = []
         root_dirs = listdir("/opt/bunkerweb/configs")
         for (root, dirs, files) in walk("/opt/bunkerweb/configs", topdown=True):
             if (
@@ -29,17 +30,22 @@ class ConfigFiles:
                 path_exploded = root.split("/")
                 for file in files:
                     with open(join(root, file), "r") as f:
-                        custom_configs[
-                            (
-                                f"{path_exploded.pop()}"
-                                if path_exploded[-1] not in root_dirs
-                                else ""
-                            )
-                            + f"CUSTOM_CONF_{path_exploded[-1].replace('-', '_').upper()}_{file.replace('.conf', '')}"
-                        ] = f.read()
+                        custom_configs.append(
+                            {
+                                "value": f.read(),
+                                "exploded": (
+                                    f"{path_exploded.pop()}"
+                                    if path_exploded[-1] not in root_dirs
+                                    else "",
+                                    path_exploded[-1],
+                                    file.replace(".conf", ""),
+                                ),
+                            }
+                        )
 
         ret = self.__db.save_custom_configs(custom_configs, "ui")
         if ret:
+            self.__logger.error(f"Could not save custom configs: {ret}")
             return "Couldn't save custom configs to database"
 
         return ""

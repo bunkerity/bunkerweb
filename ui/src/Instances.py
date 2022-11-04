@@ -1,8 +1,8 @@
-from os import getenv
-from os.path import exists
-from typing import Any, Union
-from subprocess import run
+from docker.errors import APIError
 from kubernetes import client as kube_client
+from os.path import exists
+from subprocess import run
+from typing import Any, Union
 
 from API import API
 from ApiCaller import ApiCaller
@@ -46,9 +46,6 @@ class Instance:
     def get_id(self) -> str:
         return self._id
 
-    # def run_jobs(self) -> bool:
-    #     return self.apiCaller._send_to_apis("POST", "/jobs")
-
     def reload(self) -> bool:
         return self.apiCaller._send_to_apis("POST", "/reload")
 
@@ -60,9 +57,6 @@ class Instance:
 
     def restart(self) -> bool:
         return self.apiCaller._send_to_apis("POST", "/restart")
-
-    def send_custom_configs(self) -> bool:
-        return self.apiCaller._send_files("/opt/bunkerweb/configs", "/custom_configs")
 
 
 class Instances:
@@ -115,7 +109,7 @@ class Instances:
             is_swarm = True
             try:
                 self.__docker.swarm.version
-            except:
+            except APIError:
                 is_swarm = False
 
             if is_swarm:

@@ -32,8 +32,6 @@ elif [ "$KUBERNETES_MODE" == "yes" ] ; then
 	echo "Kubernetes" > /opt/bunkerweb/INTEGRATION
 elif [ "$AUTOCONF_MODE" == "yes" ] ; then
 	echo "Autoconf" > /opt/bunkerweb/INTEGRATION
-else
-	VARIABLES_PATH="/etc/nginx/variables.env"
 fi
 
 # Init database
@@ -45,18 +43,14 @@ if [ "$?" -ne 0 ] ; then
 fi
 
 generate=yes
-if [ -v VARIABLES_PATH ] && [ -f "/etc/nginx/variables.env" ] && grep -q "^TEMP_NGINX=no$" /etc/nginx/variables.env ; then
+if [ -f "/etc/nginx/variables.env" ] && grep -q "^TEMP_NGINX=no$" /etc/nginx/variables.env ; then
 	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb configuration is already generated, will not generate it again"
 	generate=no
 fi
 
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
-if [ -v VARIABLES_PATH ] ; then
-	/opt/bunkerweb/scheduler/main.py --variables $VARIABLES_PATH --generate $generate
-else
-	/opt/bunkerweb/scheduler/main.py --generate $generate
-fi
+/opt/bunkerweb/scheduler/main.py --generate $generate
 
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
 exit 0

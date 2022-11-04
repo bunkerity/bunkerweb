@@ -48,6 +48,7 @@ class Plugins(Base):
     name = Column(String(128), nullable=False)
     description = Column(String(255), nullable=False)
     version = Column(String(32), nullable=False)
+    external = Column(Boolean, default=False, nullable=False)
 
     settings = relationship(
         "Settings", back_populates="plugin", cascade="all, delete, delete-orphan"
@@ -166,7 +167,9 @@ class Plugin_pages(Base):
         nullable=False,
     )
     template_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
+    template_checksum = Column(String(128), nullable=False)
     actions_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
+    actions_checksum = Column(String(128), nullable=False)
 
     plugin = relationship("Plugins", back_populates="pages")
 
@@ -191,7 +194,7 @@ class Job_cache(Base):
     )
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     last_update = Column(DateTime, nullable=True)
-    checksum = Column(String(255), nullable=True)
+    checksum = Column(String(128), nullable=True)
 
     job = relationship("Jobs", back_populates="cache")
     service = relationship("Services", back_populates="jobs_cache")
@@ -215,6 +218,7 @@ class Custom_configs(Base):
     type = Column(CUSTOM_CONFIGS_TYPES, nullable=False)
     name = Column(String(255), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
+    checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
 
     service = relationship("Services", back_populates="custom_configs")
@@ -254,5 +258,6 @@ class Metadata(Base):
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
     first_config_saved = Column(Boolean, nullable=False)
-    integration = Column(INTEGRATIONS_ENUM, nullable=False)
-    version = Column(String(5), nullable=False)
+    autoconf_loaded = Column(Boolean, default=False, nullable=True)
+    integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
+    version = Column(String(5), default="1.5.0", nullable=False)
