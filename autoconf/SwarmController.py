@@ -96,21 +96,21 @@ class SwarmController(Controller, ConfigCaller) :
     def __event(self, event_type) :
         for event in self.__client.events(decode=True, filters={"type": event_type}) :
             self.__internal_lock.acquire()
-            self._instances = self.get_instances()
-            self._services = self.get_services()
-            self._configs = self.get_configs()
-            if not self._config.update_needed(self._instances, self._services, configs=self._configs) :
-                self.__internal_lock.release()
-                continue
-            log("SWARM-CONTROLLER", "ℹ️", "Catched Swarm event, deploying new configuration ...")
             try :
+                self._instances = self.get_instances()
+                self._services = self.get_services()
+                self._configs = self.get_configs()
+                if not self._config.update_needed(self._instances, self._services, configs=self._configs) :
+                    self.__internal_lock.release()
+                    continue
+                log("SWARM-CONTROLLER", "ℹ️", "Catched Swarm event, deploying new configuration ...")
                 ret = self.apply_config()
                 if not ret :
                     log("SWARM-CONTROLLER", "❌", "Error while deploying new configuration ...")
                 else :
                     log("SWARM-CONTROLLER", "ℹ️", "Successfully deployed new configuration 🚀")
             except :
-                log("SWARM-CONTROLLER", "❌", "Exception while deploying new configuration :")
+                log("SWARM-CONTROLLER", "❌", "Exception while processing events :")
                 print(format_exc())
             self.__internal_lock.release()
     
