@@ -2,6 +2,8 @@ kind: Service
 apiVersion: v1
 metadata:
   name: bw-lb
+  annotations:
+    service.beta.kubernetes.io/scw-loadbalancer-proxy-protocol-v2: "true"
 spec:
   selector:
     app: bunkerweb

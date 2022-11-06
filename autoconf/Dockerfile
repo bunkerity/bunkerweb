@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM python:3.10-alpine
 
 # Install dependencies
 COPY deps/requirements.txt /opt/bunkerweb/deps/requirements.txt

@@ -8,7 +8,7 @@ sys.path.append("/opt/bunkerweb/utils")
 import logger
 
 def certbot_new(first_domain, domains, email) :
-    cmd = "/opt/bunkerweb/deps/python/bin/certbot certonly --manual --preferred-challenges=http --manual-auth-hook /opt/bunkerweb/core/letsencrypt/jobs/certbot-auth.py --manual-cleanup-hook /opt/bunkerweb/core/letsencrypt/jobs/certbot-cleanup.py -n -d " + domains + " --email " + email + " --agree-tos -vvv"
+    cmd = "/opt/bunkerweb/deps/python/bin/certbot certonly --manual --preferred-challenges=http --manual-auth-hook /opt/bunkerweb/core/letsencrypt/jobs/certbot-auth.py --manual-cleanup-hook /opt/bunkerweb/core/letsencrypt/jobs/certbot-cleanup.py -n -d " + domains + " --email " + email + " --agree-tos"
     if os.getenv("USE_LETS_ENCRYPT_STAGING") == "yes" :
         cmd += " --staging"
     os.environ["PYTHONPATH"] = "/opt/bunkerweb/deps/python"

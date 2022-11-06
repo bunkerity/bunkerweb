@@ -1,4 +1,4 @@
-FROM python:3-alpine AS builder
+FROM python:3.10-alpine AS builder
 
 # Copy python requirements
 COPY deps/requirements.txt /opt/bunkerweb/deps/requirements.txt
@@ -9,7 +9,7 @@ RUN apk add --no-cache --virtual build gcc python3-dev musl-dev libffi-dev opens
     pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/deps/requirements.txt && \
     apk del build
 
-FROM python:3-alpine
+FROM python:3.10-alpine
 
 COPY --from=builder /opt/bunkerweb/deps/python /opt/bunkerweb/deps/python
 
