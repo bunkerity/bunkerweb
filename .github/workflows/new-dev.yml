@@ -325,6 +325,7 @@ jobs:
           path: /tmp
       - run: tar xvf /tmp/terraform.tar -C /
       - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-helm@v3
       # Do tests
       - name: Run Kubernetes tests
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
