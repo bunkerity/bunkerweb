@@ -62,3 +62,11 @@
     join_token: "{{ join_token_worker }}"
     remote_addrs: ["{{ hostvars[groups['managers'][0]].local_ip }}:2377"]
   when: inventory_hostname in groups['workers']
+
+- name: Update daemon.json
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'

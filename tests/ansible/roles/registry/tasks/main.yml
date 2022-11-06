@@ -1,12 +1,4 @@
 ---
-- name: Update daemon.json
-  copy:
-    src: daemon.json
-    dest: /etc/docker/daemon.json
-    owner: root
-    group: root
-    mode: '0644'
-
 - name: Reload docker
   service:
     name: docker
