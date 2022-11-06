@@ -68,7 +68,7 @@ spec:
         - name: USE_API
           value: "yes"
         - name: API_WHITELIST_IP
-          value: "10.0.0.0/8 192.168.0.0/16 172.16.0.0/12"
+          value: "10.0.0.0/8 192.168.0.0/16 172.16.0.0/12 100.64.0.0/10"
         - name: SERVER_NAME
           value: ""
         - name: MULTISITE

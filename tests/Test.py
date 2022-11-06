@@ -112,10 +112,10 @@ class Test(ABC) :
                     ex_url = sub(ex_domain, test_domain, ex_url)
                     break
             if test["type"] == "string" :
-                r = get(ex_url, timeout=10)
+                r = get(ex_url, timeout=10, verify=False)
                 return test["string"].casefold() in r.text.casefold()
             elif test["type"] == "status" :
-                r = get(ex_url, timeout=10)
+                r = get(ex_url, timeout=10, verify=False)
                 return test["status"] == r.status_code
         except :
             #log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + ex_url + "\n" + format_exc())
