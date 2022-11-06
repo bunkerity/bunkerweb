@@ -221,7 +221,7 @@ jobs:
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
       # Create k8s infra
-      - run: ./tests/create.sh kubernetes
+      - run: ./tests/create.sh k8s
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
       - run: tar -cvf terraform.tar /tmp/k8s
@@ -416,6 +416,6 @@ jobs:
           path: /tmp
       - run: tar xvf /tmp/terraform.tar -C /
       # Remove k8s infra
-      - run: ./tests/rm.sh kubernetes
+      - run: ./tests/rm.sh k8s
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}

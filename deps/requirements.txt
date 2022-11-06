@@ -4,17 +4,17 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes
 #
-acme==1.25.0 \
-    --hash=sha256:1dfa3c0ba17a49334be4072bfd77ed520bf0d2eafa2f38d2657a2b7015d75268 \
-    --hash=sha256:e3fbe36fcfa27ec46f450369498f3486370ab53a0fd7db91557a23d58b3969fa
+acme==1.31.0 \
+    --hash=sha256:15134d4e404937d8464ee63a16eaf11adbe2f184960e99aa60410648a53f13ac \
+    --hash=sha256:f5e13262fa1101c38dd865378ac8b4639f819120eb66c5538fc6c09b7576fc53
     # via certbot
 cachetools==5.0.0 \
     --hash=sha256:486471dfa8799eb7ec503a8059e263db000cdda20075ce5e48903087f79d5fd6 \
     --hash=sha256:8fecd4203a38af17928be7b90689d8083603073622229ca7077b72d8e5a976e4
     # via google-auth
-certbot==1.25.0 \
-    --hash=sha256:9633d21051fe7fd076d64cb41963de61d300d7c30f4b491c8d18cb8306357509 \
-    --hash=sha256:f070c91753f66c37f6ec961cc0061fc27c6881bb073c5b9116b52081ccde5281
+certbot==1.31.0 \
+    --hash=sha256:29af531d33aaa87c8104864cd31ac2af541f0ec973a7252d7f7f5b15e10479db \
+    --hash=sha256:dc8c86d1b56dd3ca35139967f05ed6a9264fda8107d2783f24f42868e8ae54af
     # via -r requirements.in
 certifi==2021.10.8 \
     --hash=sha256:78884e7c1d4b00ce3cea67b44566851c4343c120abd683433ce934a68ea58872 \
