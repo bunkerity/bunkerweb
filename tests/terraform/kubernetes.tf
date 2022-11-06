@@ -23,7 +23,7 @@ resource "scaleway_k8s_pool" "pool" {
 
 # Get kubeconfig file
 resource "local_file" "kubeconfig" {
-  content = scaleway_k8s_cluster.cluster.kubeconfig.config_file
+  content = scaleway_k8s_cluster.cluster.kubeconfig[0].config_file
   filename = "/tmp/k8s/kubeconfig"
 }
 

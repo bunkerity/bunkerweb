@@ -1,10 +1,4 @@
 ---
-- name: Reload docker
-  service:
-    name: docker
-    enabled: true
-    state: restarted
-
 - name: Create Docker Registry
   docker_container:
     name: registry

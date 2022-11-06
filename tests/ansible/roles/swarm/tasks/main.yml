@@ -70,3 +70,9 @@
     owner: root
     group: root
     mode: '0644'
+
+- name: Reload docker
+  service:
+    name: docker
+    enabled: true
+    state: restarted
