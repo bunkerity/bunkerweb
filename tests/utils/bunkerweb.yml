@@ -81,6 +81,8 @@ spec:
           value: "proxy_protocol"
         - name: REAL_IP_FROM
           value: "10.0.0.0/8 192.168.0.0/16 172.16.0.0/12 100.64.0.0/10"
+        - name: USE_LETS_ENCRYPT_STAGING
+          value: "yes"
         livenessProbe:
           exec:
             command:
