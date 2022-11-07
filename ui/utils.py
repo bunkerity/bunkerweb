@@ -324,7 +324,9 @@ def form_plugin_gen(
     return soup.prettify()
 
 
-def path_to_dict(path, *, level: int = 0, is_cache: bool = False) -> dict:
+def path_to_dict(
+    path, *, level: int = 0, is_cache: bool = False, db_configs: dict = None
+) -> dict:
     d = {"name": os.path.basename(path)}
 
     if os.path.isdir(path):
@@ -335,24 +337,42 @@ def path_to_dict(path, *, level: int = 0, is_cache: bool = False) -> dict:
                 "can_create_files": level > 0 and not is_cache,
                 "can_create_folders": level > 0 and not is_cache,
                 "can_edit": level > 1 and not is_cache,
-                "can_delete": level > 1 and not is_cache,
+                "can_delete": False,
                 "children": [
                     path_to_dict(
-                        os.path.join(path, x), level=level + 1, is_cache=is_cache
+                        os.path.join(path, x),
+                        level=level + 1,
+                        is_cache=is_cache,
+                        db_configs=db_configs,
                     )
                     for x in sorted(os.listdir(path))
                 ],
             }
         )
+
+        if level > 1 and not is_cache and not d["children"]:
+            d["can_delete"] = True
     else:
         d.update(
             {
                 "type": "file",
                 "path": path,
-                "can_edit": level > 1 and not is_cache,
                 "can_download": is_cache,
             }
         )
+
+        can_edit = False
+        if level > 1 and not is_cache:
+            exploded_path = path.split("/")
+            for conf in db_configs:
+                if exploded_path[-1].replace(".conf", "") == conf["name"]:
+                    if level > 2 and exploded_path[-2] != conf["service_id"]:
+                        continue
+
+                    can_edit = True
+                    break
+
+        d["can_edit"] = can_edit
 
         magic_file = magic.from_file(path, mime=True)
 

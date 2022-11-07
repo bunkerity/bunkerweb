@@ -44,9 +44,6 @@ COPY VERSION /opt/bunkerweb/VERSION
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
-	chown root:nginx /opt/bunkerweb/modules && \
-	chmod 750 /opt/bunkerweb/modules && \
-	chmod 740 /opt/bunkerweb/modules/*.so && \
 	cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
 	for dir in $(echo "cache configs configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs cache/letsencrypt plugins www") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/opt/bunkerweb/${dir}" ; done && \
 	chown -R root:nginx /data && \

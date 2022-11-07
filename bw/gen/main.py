@@ -179,14 +179,11 @@ if __name__ == "__main__":
                 logger = setup_logger("Generator", config_files["LOG_LEVEL"])
 
             bw_integration = "Local"
-            if config_files.get("KUBERNETES_MODE", "no") == "yes":
+            if getenv("KUBERNETES_MODE", "no") == "yes":
                 bw_integration = "Kubernetes"
             elif (
                 integration == "Docker"
-                or config_files.get(
-                    "SWARM_MODE", config_files.get("AUTOCONF_MODE", "no")
-                )
-                == "yes"
+                or getenv("SWARM_MODE", getenv("AUTOCONF_MODE", "no")) == "yes"
             ):
                 bw_integration = "Cluster"
 

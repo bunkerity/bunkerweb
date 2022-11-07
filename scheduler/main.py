@@ -211,7 +211,7 @@ if __name__ == "__main__":
                 env = db.get_config()
 
             # Checking if any custom config has been created by the user
-            custom_configs = []
+            custom_confs = []
             root_dirs = listdir("/opt/bunkerweb/configs")
             for (root, dirs, files) in walk("/opt/bunkerweb/configs", topdown=True):
                 if (
@@ -222,7 +222,7 @@ if __name__ == "__main__":
                     path_exploded = root.split("/")
                     for file in files:
                         with open(join(root, file), "r") as f:
-                            custom_configs.append(
+                            custom_confs.append(
                                 {
                                     "value": f.read(),
                                     "exploded": (
@@ -235,11 +235,12 @@ if __name__ == "__main__":
                                 }
                             )
 
-            ret = db.save_custom_configs(custom_configs, "manual")
-            if ret:
-                logger.error(
-                    f"Couldn't save manually created custom configs to database: {ret}",
-                )
+            if custom_confs:
+                ret = db.save_custom_configs(custom_confs, "manual")
+                if ret:
+                    logger.error(
+                        f"Couldn't save some manually created custom configs to database: {ret}",
+                    )
 
             custom_configs = db.get_custom_configs()
 

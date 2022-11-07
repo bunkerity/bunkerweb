@@ -1,3 +1,4 @@
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path, exit as sys_exit, modules as sys_modules
 
 sys_path.append("/opt/bunkerweb/ui/deps/python")
@@ -26,7 +27,6 @@ from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, load as json_load
 from jinja2 import Template
-from logging import getLogger, INFO, ERROR, StreamHandler, Formatter
 from os import chmod, getenv, getpid, listdir, mkdir, walk
 from os.path import exists, isdir, isfile, join
 from re import match as re_match
@@ -35,7 +35,7 @@ from requests.utils import default_headers
 from shutil import rmtree, copytree, chown
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
-from time import sleep, time
+from time import time
 from traceback import format_exc
 from typing import Optional
 from uuid import uuid4
@@ -622,8 +622,10 @@ def configs():
 
         return redirect(url_for("loading", next=url_for("configs")))
 
+    db_configs = db.get_custom_configs()
     return render_template(
-        "configs.html", folders=[path_to_dict("/opt/bunkerweb/configs")]
+        "configs.html",
+        folders=[path_to_dict("/opt/bunkerweb/configs", db_configs=db_configs)],
     )
 
 
