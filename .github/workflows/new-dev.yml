@@ -410,7 +410,7 @@ jobs:
           path: /tmp
       - run: tar xvf /tmp/terraform.tar -C /
       # Remove k8s infra
-      - run: kubectl delete -f ./tests/utils/bunkerweb.yml ; kubectl delete pvc --all ; kubectl delete pv --all
+      - run: kubectl delete pvc --all ; kubectl delete pv --all
         env:
           KUBECONFIG: /tmp/k8s/kubeconfig
       - run: ./tests/rm.sh k8s
