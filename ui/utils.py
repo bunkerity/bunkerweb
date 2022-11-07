@@ -1,6 +1,6 @@
 from base64 import b64encode
 from datetime import datetime
-from typing import Union
+from typing import List, Union
 from bs4 import BeautifulSoup, Tag
 import magic
 import json
@@ -325,7 +325,7 @@ def form_plugin_gen(
 
 
 def path_to_dict(
-    path, *, level: int = 0, is_cache: bool = False, db_configs: dict = None
+    path, *, level: int = 0, is_cache: bool = False, db_configs: List[dict] = []
 ) -> dict:
     d = {"name": os.path.basename(path)}
 
