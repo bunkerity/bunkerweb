@@ -1,4 +1,3 @@
-from docker.errors import APIError
 from kubernetes import client as kube_client
 from os.path import exists
 from subprocess import run
@@ -109,7 +108,7 @@ class Instances:
             is_swarm = True
             try:
                 self.__docker.swarm.version
-            except APIError:
+            except:
                 is_swarm = False
 
             if is_swarm:

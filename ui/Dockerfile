@@ -29,7 +29,7 @@ COPY ui /opt/bunkerweb/ui
 RUN apk add --no-cache bash file && \
     addgroup -g 101 ui && \
     adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
-    for dir in $(echo "cache configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/opt/bunkerweb/${dir}" ; done && \
+    for dir in $(echo "cache configs configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/opt/bunkerweb/${dir}" ; done && \
     mkdir /opt/bunkerweb/tmp && \
     chown -R root:ui /opt/bunkerweb && \
     find /opt/bunkerweb -type f -exec chmod 0740 {} \; && \
@@ -50,4 +50,4 @@ WORKDIR /opt/bunkerweb/ui
 
 USER ui:ui
 
-CMD ["python", "-m", "gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "main:app"]
+CMD ["python3", "-m", "gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]

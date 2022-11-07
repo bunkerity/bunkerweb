@@ -6,6 +6,9 @@ if [ -f /opt/bunkerweb/tmp/scheduler.pid ] ; then
 	rm -f /opt/bunkerweb/tmp/scheduler.pid
 fi
 
+# setup and check /data folder
+/opt/bunkerweb/helpers/data.sh "ENTRYPOINT"
+
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	log "ENTRYPOINT" "ℹ️ " "Catched stop operation"

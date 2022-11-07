@@ -511,6 +511,7 @@ class Database:
         self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str
     ) -> str:
         """Save the custom configs in the database"""
+        message = ""
         with self.__db_session() as session:
             # Delete all the old config
             session.query(Custom_configs).filter(
@@ -537,7 +538,7 @@ class Database:
                             .filter_by(id=custom_config["exploded"][0])
                             .first()
                         ):
-                            return f"Service {custom_config['exploded'][0]} not found, please check your config"
+                            message += f"{'\n' if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
 
                         config.update(
                             {
@@ -594,9 +595,9 @@ class Database:
                 session.add_all(to_put)
                 session.commit()
             except BaseException:
-                return format_exc()
+                return f"{f'{message}\n' if message else ''}{format_exc()}"
 
-        return ""
+        return message
 
     def get_config(self, methods: bool = False) -> Dict[str, Any]:
         """Get the config from the database"""
