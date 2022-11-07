@@ -519,6 +519,7 @@ class Database:
             ).delete()
 
             to_put = []
+            endl = "\n"
             if custom_configs:
                 for custom_config in custom_configs:
                     config = {
@@ -538,7 +539,7 @@ class Database:
                             .filter_by(id=custom_config["exploded"][0])
                             .first()
                         ):
-                            message += f"{'\n' if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
+                            message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
 
                         config.update(
                             {
@@ -595,7 +596,7 @@ class Database:
                 session.add_all(to_put)
                 session.commit()
             except BaseException:
-                return f"{f'{message}\n' if message else ''}{format_exc()}"
+                return f"{f'{message}{endl}' if message else ''}{format_exc()}"
 
         return message
 

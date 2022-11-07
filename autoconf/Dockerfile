@@ -17,6 +17,7 @@ COPY autoconf /opt/bunkerweb/autoconf
 COPY bw/api /opt/bunkerweb/api
 COPY bw/cli /opt/bunkerweb/cli
 COPY bw/core /opt/bunkerweb/core
+COPY bw/helpers /opt/bunkerweb/helpers
 COPY bw/settings.json /opt/bunkerweb/settings.json
 COPY db /opt/bunkerweb/db
 COPY utils /opt/bunkerweb/utils
@@ -29,7 +30,7 @@ RUN apk add --no-cache bash && \
     chown -R nginx:nginx /opt/bunkerweb && \
     find /opt/bunkerweb -type f -exec chmod 0740 {} \; && \
     find /opt/bunkerweb -type d -exec chmod 0750 {} \; && \
-    chmod 750 /opt/bunkerweb/cli/main.py /usr/local/bin/bwcli /opt/bunkerweb/autoconf/main.py /opt/bunkerweb/deps/python/bin/* && \
+    chmod 750 /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /usr/local/bin/bwcli /opt/bunkerweb/autoconf/main.py /opt/bunkerweb/deps/python/bin/* && \
     chown root:nginx /usr/local/bin/bwcli
 
 # Fix CVEs
