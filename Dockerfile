@@ -34,7 +34,11 @@ COPY bw/cli /opt/bunkerweb/cli
 COPY bw/helpers /opt/bunkerweb/helpers
 COPY bw/lua /opt/bunkerweb/lua
 COPY bw/misc /opt/bunkerweb/misc
-COPY bw/temp_nginx /etc/nginx
+COPY bw/gen /opt/bunkerweb/gen
+COPY bw/settings.json /opt/bunkerweb/settings.json
+COPY db /opt/bunkerweb/db
+COPY bw/confs /opt/bunkerweb/confs
+COPY bw/loading /opt/bunkerweb/loading
 COPY utils /opt/bunkerweb/utils
 COPY VERSION /opt/bunkerweb/VERSION
 
