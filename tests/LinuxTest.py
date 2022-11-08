@@ -27,14 +27,14 @@ class LinuxTest(Test) :
             if not Test.init() :
                 return False
             # TODO : find the nginx uid/gid on Docker images
-            proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
-            if proc.returncode != 0 :
-                raise(Exception("chown failed (autoconf stack)"))
-            if isdir("/tmp/linux") :
-                rmtree("/tmp/linux")
-            mkdir("/tmp/linux")
-            chmod("/tmp/linux", 0o0777)
-            cmd = "docker run -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-" + distro
+            # proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
+            # if proc.returncode != 0 :
+            #     raise(Exception("chown failed (autoconf stack)"))
+            # if isdir("/tmp/linux") :
+            #     rmtree("/tmp/linux")
+            # mkdir("/tmp/linux")
+            # chmod("/tmp/linux", 0o0777)
+            cmd = "docker run -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro local/bw-" + distro + ":latest"
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker run failed (linux stack)"))
@@ -48,17 +48,17 @@ class LinuxTest(Test) :
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec systemctl start failed (linux stack)"))
-            cp_dirs = {
-                "/tmp/bw-data/letsencrypt": "/etc/letsencrypt",
-                "/tmp/bw-data/cache": "/opt/bunkerweb/cache"
-            }
-            for src, dst in cp_dirs.items() :
-                proc = LinuxTest.docker_cp(distro, src, dst)
-                if proc.returncode != 0 :
-                    raise(Exception("docker cp failed for " + src + " (linux stack)"))
-                proc = LinuxTest.docker_exec(distro, "chown -R nginx:nginx " + dst + "/*")
-                if proc.returncode != 0 :
-                    raise(Exception("docker exec failed for directory " + src + " (linux stack)"))
+            # cp_dirs = {
+            #     "/tmp/bw-data/letsencrypt": "/etc/letsencrypt",
+            #     "/tmp/bw-data/cache": "/opt/bunkerweb/cache"
+            # }
+            # for src, dst in cp_dirs.items() :
+            #     proc = LinuxTest.docker_cp(distro, src, dst)
+            #     if proc.returncode != 0 :
+            #         raise(Exception("docker cp failed for " + src + " (linux stack)"))
+            #     proc = LinuxTest.docker_exec(distro, "chown -R nginx:nginx " + dst + "/*")
+            #     if proc.returncode != 0 :
+            #         raise(Exception("docker exec failed for directory " + src + " (linux stack)"))
             if distro in ["ubuntu", "debian"] :
                 LinuxTest.docker_exec(distro, "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip")
                 if distro == "ubuntu" :

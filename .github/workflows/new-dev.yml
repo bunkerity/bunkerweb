@@ -6,8 +6,59 @@ on:
 
 jobs:
 
-  # Build for amd64
-  build-bw-amd64:
+  # # Build for amd64
+  # build-bw-amd64:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Setup Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_TOKEN }}
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     # Build images
+  #     - name: Build BW for amd64
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         platforms: linux/amd64
+  #         push: true
+  #         tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest
+  #         cache-from: type=registry,ref=bunkerity/cache:bw-amd64-cache
+  #         cache-to: type=registry,ref=bunkerity/cache:bw-amd64-cache,mode=min
+  #     - name: Build BW autoconf for amd64
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         file: autoconf/Dockerfile
+  #         platforms: linux/amd64
+  #         push: true
+  #         tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest
+  #         cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
+  #         cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache,mode=min
+  #     - name: Build BW UI for amd64
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         file: ui/Dockerfile
+  #         platforms: linux/amd64
+  #         push: true
+  #         tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest
+  #         cache-from: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
+  #         cache-to: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache,mode=min
+
+  # Build linux ubuntu
+  build-bw-ubuntu:
     runs-on: ubuntu-latest
     steps:
       # Prepare
@@ -26,36 +77,173 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # Build images
-      - name: Build BW for amd64
+      # Build package image
+      - name: Build ubuntu package image
         uses: docker/build-push-action@v3
         with:
           context: .
+          file: linux/Dockerfile-ubuntu
           platforms: linux/amd64
-          push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-amd64-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-amd64-cache,mode=min
-      - name: Build BW autoconf for amd64
+          tags: local/bunkerweb-ubuntu:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-ubuntu-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-ubuntu-cache,mode=min
+      # Generate package
+      - name: Generate ubuntu deb
+        run: ./linux/package.sh ubuntu
+      - uses: actions/upload-artifact@v3
+        with:
+          name: package-ubuntu
+          path: package-ubuntu/*.deb
+      # Build test image
+      - name: Build BW ubuntu test image
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: autoconf/Dockerfile
+          file: tests/linux/Dockerfile-ubuntu
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-autoconf-amd64-cache,mode=min
-      - name: Build BW UI for amd64
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest
+
+  # Build linux debian
+  build-bw-debian:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      # Build package image
+      - name: Build debian package image
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ui/Dockerfile
+          file: linux/Dockerfile-debian
+          platforms: linux/amd64
+          tags: local/bunkerweb-debian:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-debian-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-debian-cache,mode=min
+      # Generate package
+      - name: Generate debian deb
+        run: ./linux/package.sh debian
+      - uses: actions/upload-artifact@v3
+        with:
+          name: package-debian
+          path: package-debian/*.deb
+      # Build test image
+      - name: Build BW debian test image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/linux/Dockerfile-debian
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache,mode=min
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest
+
+  # Build linux centos
+  build-bw-centos:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      # Build package image
+      - name: Build centos package image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: linux/Dockerfile-centos
+          platforms: linux/amd64
+          tags: local/bunkerweb-centos:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-centos-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-centos-cache,mode=min
+      # Generate package
+      - name: Generate centos rpm
+        run: ./linux/package.sh centos
+      - uses: actions/upload-artifact@v3
+        with:
+          name: package-centos
+          path: package-centos/*.rpm
+      # Build test image
+      - name: Build BW centos test image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/linux/Dockerfile-centos
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest
+
+  # Build linux fedora
+  build-bw-fedora:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      # Build package image
+      - name: Build fedora package image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: linux/Dockerfile-fedora
+          platforms: linux/amd64
+          tags: local/bunkerweb-fedora:latest
+          cache-from: type=registry,ref=bunkerity/cache:bw-fedora-cache
+          cache-to: type=registry,ref=bunkerity/cache:bw-fedora-cache,mode=min
+      # Generate package
+      - name: Generate fedora rpm
+        run: ./linux/package.sh fedora
+      - uses: actions/upload-artifact@v3
+        with:
+          name: package-fedora
+          path: package-fedora/*.rpm
+      # Build test image
+      - name: Build BW fedora test image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/linux/Dockerfile-fedora
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest
 
   # Perform security checks
   # security:
@@ -210,28 +398,59 @@ jobs:
   #       with:
   #         name: tf-swarm
   #         path: terraform.tar
-  infra-create-k8s:
-    #needs: [security]
-    needs: [build-bw-amd64]
+  # infra-create-k8s:
+  #   #needs: [security]
+  #   needs: [build-bw-amd64]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Install kubectl
+  #       uses: azure/setup-kubectl@v3
+  #     # Create k8s infra
+  #     - run: ./tests/create.sh k8s
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     - run: tar -cvf terraform.tar /tmp/k8s
+  #       if: always()
+  #     - uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: tf-k8s
+  #         path: terraform.tar
+  infra-create-linux:
+    needs: [build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
     runs-on: ubuntu-latest
     steps:
       # Prepare
+      - name: Generate SSH keypair
+        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
       - name: Checkout source code
         uses: actions/checkout@v3
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-      # Create k8s infra
-      - run: ./tests/create.sh k8s
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: Install ansible
+        run: pip install ansible
+      - name: Install ansible libs
+        run: ansible-galaxy install monolithprojects.github_actions_runner && ansible-galaxy collection install community.general
+      # Create Linux infra
+      - run: ./tests/create.sh linux
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/k8s
+      - run: tar -cvf terraform.tar /tmp/linux
         if: always()
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: tf-k8s
+          name: tf-linux
           path: terraform.tar
 
   # Perform tests
@@ -283,7 +502,6 @@ jobs:
   #       env:
   #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
   #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-
   # tests-swarm:
   #   needs: [infra-create-swarm]
   #   runs-on: [self-hosted, bw-swarm]
@@ -309,31 +527,74 @@ jobs:
   #       env:
   #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
   #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-
-  tests-k8s:
-    needs: [infra-create-k8s]
-    runs-on: [ubuntu-latest]
+  # tests-k8s:
+  #   needs: [infra-create-k8s]
+  #   runs-on: [ubuntu-latest]
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install test dependencies
+  #       run: pip3 install -r tests/requirements.txt
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-k8s
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C /
+  #     - uses: azure/setup-kubectl@v3
+  #     - uses: azure/setup-helm@v3
+  #     # Do tests
+  #     - name: Run Kubernetes tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  #         KUBECONFIG: "/tmp/k8s/kubeconfig"
+  #         PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  tests-linux:
+    needs: [infra-create-linux]
+    runs-on: [self-hosted, bw-linux]
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      - name: Pull BW linux ubuntu test image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest local/bw-ubuntu:latest
+      - name: Pull BW linux debian test image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest local/bw-debian:latest
+      - name: Pull BW linux centos test image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest local/bw-centos:latest
+      - name: Pull BW linux fedora test image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest local/bw-fedora:latest
       - name: Install test dependencies
         run: pip3 install -r tests/requirements.txt
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-k8s
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C /
-      - uses: azure/setup-kubectl@v3
-      - uses: azure/setup-helm@v3
       # Do tests
-      - name: Run Kubernetes tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
+      - name: Run Linux ubuntu tests
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-          KUBECONFIG: "/tmp/k8s/kubeconfig"
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      - name: Run Linux debian tests
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux centos tests
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux fedora tests
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
   # Remove infra
   # infra-rm-docker:
@@ -393,26 +654,45 @@ jobs:
   #     - run: ./tests/rm.sh swarm
   #       env:
   #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  infra-rm-k8s:
+  # infra-rm-k8s:
+  #   if: ${{ always() }}
+  #   needs: [tests-k8s]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - uses: azure/setup-kubectl@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-k8s
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C /
+  #     # Remove k8s infra
+  #     - run: kubectl delete pvc --all ; kubectl delete pv --all
+  #       env:
+  #         KUBECONFIG: /tmp/k8s/kubeconfig
+  #     - run: ./tests/rm.sh k8s
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  infra-rm-linux:
     if: ${{ always() }}
-    needs: [tests-k8s]
+    needs: [tests-linux]
     runs-on: ubuntu-latest
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
-      - uses: azure/setup-kubectl@v3
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
       - uses: actions/download-artifact@v3
         with:
-          name: tf-k8s
+          name: tf-linux
           path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C /
-      # Remove k8s infra
-      - run: kubectl delete pvc --all ; kubectl delete pv --all
-        env:
-          KUBECONFIG: /tmp/k8s/kubeconfig
-      - run: ./tests/rm.sh k8s
+      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+      # Remove Linux infra
+      - run: ./tests/rm.sh linux
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
