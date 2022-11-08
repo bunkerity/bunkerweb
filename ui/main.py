@@ -118,29 +118,31 @@ PLUGIN_KEYS = [
     "settings",
 ]
 
-bw_integration = "Local"
+integration = "Linux"
 if getenv("KUBERNETES_MODE", "no") == "yes":
-    bw_integration = "Kubernetes"
-elif getenv("SWARM_MODE", "no") == "yes" or getenv("AUTOCONF_MODE", "no") == "yes":
-    bw_integration = "Cluster"
+    integration = "Kubernetes"
+elif getenv("SWARM_MODE", "no") == "yes":
+    integration = "Swarm"
+elif getenv("AUTOCONF_MODE", "no") == "yes":
+    integration = "Autoconf"
 
 try:
     docker_client: DockerClient = DockerClient(
         base_url=vars.get("DOCKER_HOST", "unix:///var/run/docker.sock")
     )
-    bw_integration = "Cluster"
+    integration = "Cluster"
 except (docker_APIError, DockerException):
     logger.warning("No docker host found")
     docker_client = None
 
-db = Database(logger, bw_integration=bw_integration)
+db = Database(logger)
 
 try:
     app.config.update(
         DEBUG=True,
         SECRET_KEY=vars["FLASK_SECRET"],
         ABSOLUTE_URI=vars["ABSOLUTE_URI"],
-        INSTANCES=Instances(docker_client, bw_integration),
+        INSTANCES=Instances(docker_client, integration),
         CONFIG=Config(logger, db),
         CONFIGFILES=ConfigFiles(logger, db),
         SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]

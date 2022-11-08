@@ -13,14 +13,19 @@ class Configurator:
     def __init__(
         self,
         settings: str,
-        core: str,
+        core: Union[str, dict],
         plugins: str,
         variables: Union[str, dict],
         logger: Logger,
     ):
         self.__logger = logger
         self.__settings = self.__load_settings(settings)
-        self.__core = core
+
+        if isinstance(core, str):
+            self.__core = self.__load_plugins(core)
+        else:
+            self.__core = core
+
         self.__plugins_settings = []
         self.__plugins = self.__load_plugins(plugins, "plugins")
 

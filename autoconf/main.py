@@ -2,7 +2,6 @@
 
 from os import _exit, getenv
 from signal import SIGINT, SIGTERM, signal
-from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 

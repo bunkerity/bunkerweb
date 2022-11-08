@@ -38,7 +38,7 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl git && \
   find /opt/bunkerweb -type f -exec chmod 0740 {} \; && \
   find /opt/bunkerweb -type d -exec chmod 0750 {} \; && \
   chmod 770 /opt/bunkerweb/tmp && \
-  chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/scheduler/main.py /opt/bunkerweb/scheduler/entrypoint.sh /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/deps/python/bin/* && \
+  chmod 750 /opt/bunkerweb/gen/*.py /opt/bunkerweb/scheduler/main.py /opt/bunkerweb/scheduler/entrypoint.sh /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/deps/python/bin/* && \
   find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
   mkdir /etc/nginx && \
   chown -R scheduler:scheduler /etc/nginx && \

@@ -29,13 +29,12 @@ CUSTOM_CONFIGS_TYPES = Enum(
 )
 LOG_LEVELS_ENUM = Enum("DEBUG", "INFO", "WARNING", "ERROR")
 INTEGRATIONS_ENUM = Enum(
-    "Docker",
     "Linux",
+    "Docker",
     "Swarm",
     "Kubernetes",
     "Autoconf",
-    "Ansible",
-    "Vagrant",
+    "Windows",
     "Unknown",
 )
 

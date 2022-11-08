@@ -14,7 +14,6 @@ sys_path.append("/opt/bunkerweb/utils")
 sys_path.append("/opt/bunkerweb/api")
 
 from docker import DockerClient
-from docker.errors import DockerException
 
 from logger import setup_logger
 from API import API
@@ -88,12 +87,9 @@ try:
 
     # Docker or Linux case
     elif bw_integration == "Docker":
-        try:
-            docker_client = DockerClient(base_url="tcp://docker-proxy:2375")
-        except DockerException:
-            docker_client = DockerClient(
-                base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-            )
+        docker_client = DockerClient(
+            base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+        )
 
         apis = []
         for instance in docker_client.containers.list(

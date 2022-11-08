@@ -59,9 +59,9 @@ class Instance:
 
 
 class Instances:
-    def __init__(self, docker_client, bw_integration: str):
+    def __init__(self, docker_client, integration: str):
         self.__docker = docker_client
-        self.__bw_integration = bw_integration
+        self.__integration = integration
 
     def __instance_from_id(self, _id) -> Instance:
         instances: list[Instance] = self.get_instances()
@@ -104,35 +104,28 @@ class Instances:
                         apiCaller,
                     )
                 )
+        elif self.__integration == "Swarm":
+            for instance in self.__docker.services.list(
+                filters={"label": "bunkerweb.INSTANCE"}
+            ):
+                status = "down"
+                desired_tasks = instance.attrs["ServiceStatus"]["DesiredTasks"]
+                running_tasks = instance.attrs["ServiceStatus"]["RunningTasks"]
+                if desired_tasks > 0 and (desired_tasks == running_tasks):
+                    status = "up"
 
-            is_swarm = True
-            try:
-                self.__docker.swarm.version
-            except:
-                is_swarm = False
-
-            if is_swarm:
-                for instance in self.__docker.services.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
-                    status = "down"
-                    desired_tasks = instance.attrs["ServiceStatus"]["DesiredTasks"]
-                    running_tasks = instance.attrs["ServiceStatus"]["RunningTasks"]
-                    if desired_tasks > 0 and (desired_tasks == running_tasks):
-                        status = "up"
-
-                    instances.append(
-                        Instance(
-                            instance.id,
-                            instance.name,
-                            instance.name,
-                            "service",
-                            status,
-                            instance,
-                            apiCaller,
-                        )
+                instances.append(
+                    Instance(
+                        instance.id,
+                        instance.name,
+                        instance.name,
+                        "service",
+                        status,
+                        instance,
+                        apiCaller,
                     )
-        elif self.__bw_integration == "Kubernetes":
+                )
+        elif self.__integration == "Kubernetes":
             corev1 = kube_client.CoreV1Api()
             for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
                 if (
