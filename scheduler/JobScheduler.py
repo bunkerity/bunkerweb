@@ -1,7 +1,7 @@
 from glob import glob
 from json import loads
 from logging import Logger
-from os import environ
+from os import environ, getenv
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from schedule import (
     clear as schedule_clear,
@@ -25,17 +25,13 @@ class JobScheduler(ApiCaller):
         env={},
         lock=None,
         apis=[],
-        logger: Logger = setup_logger("Scheduler", environ.get("LOG_LEVEL", "INFO")),
-        bw_integration: str = "Local",
+        logger: Logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO")),
+        integration: str = "Linux",
     ):
         super().__init__(apis)
         self.__logger = logger
-        self.__bw_integration = bw_integration
-        self.__db = Database(
-            self.__logger,
-            sqlalchemy_string=env.get("DATABASE_URI", None),
-            bw_integration=self.__bw_integration,
-        )
+        self.__integration = integration
+        self.__db = Database(self.__logger)
         self.__env = env
         self.__env.update(environ)
         self.__jobs = self.__get_jobs()
@@ -75,7 +71,7 @@ class JobScheduler(ApiCaller):
 
     def __reload(self):
         reload = True
-        if self.__bw_integration == "Local":
+        if self.__integration == "Linux":
             self.__logger.info("Reloading nginx ...")
             proc = run(
                 ["/usr/sbin/nginx", "-s", "reload"],

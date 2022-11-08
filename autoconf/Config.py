@@ -12,11 +12,17 @@ class Config(ConfigCaller):
         self.__ctrl_type = ctrl_type
         self.__lock = lock
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
-        self._db = None
         self.__instances = []
         self.__services = []
         self.__configs = []
         self.__config = {}
+
+        self._db = Database(self.__logger)
+        while not self._db.is_initialized():
+            self.__logger.warning(
+                "Database is not initialized, retrying in 5 seconds ...",
+            )
+            sleep(5)
 
     def __get_full_env(self) -> dict:
         env_instances = {}
@@ -54,21 +60,6 @@ class Config(ConfigCaller):
         self.__services = services
         self.__configs = configs
         self.__config = self.__get_full_env()
-
-        if self._db is None:
-            self._db = Database(
-                self.__logger,
-                sqlalchemy_string=self.__config.get("DATABASE_URI", None),
-                bw_integration="Kubernetes"
-                if self.__config.get("KUBERNETES_MODE", "no") == "yes"
-                else "Cluster",
-            )
-
-            while not self._db.is_initialized():
-                self.__logger.warning(
-                    "Database is not initialized, retrying in 5 seconds ...",
-                )
-                sleep(5)
 
         custom_configs = []
         for config_type in self.__configs:

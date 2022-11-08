@@ -39,7 +39,7 @@ fi
 
 # Init database
 get_env > "/tmp/variables.env"
-/opt/bunkerweb/gen/main.py --variables /tmp/variables.env --method scheduler --init
+/opt/bunkerweb/gen/save_config.py --variables /tmp/variables.env --init
 if [ "$?" -ne 0 ] ; then
 	log "ENTRYPOINT" "❌" "Scheduler generator failed"
 	exit 1

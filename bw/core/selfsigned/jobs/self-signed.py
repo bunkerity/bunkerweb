@@ -19,9 +19,6 @@ logger = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
 db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
-    bw_integration="Kubernetes"
-    if getenv("KUBERNETES_MODE", "no") == "yes"
-    else "Cluster",
 )
 
 

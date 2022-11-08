@@ -23,12 +23,7 @@ from jobs import file_hash
 
 
 class Database:
-    def __init__(
-        self,
-        logger: Logger,
-        sqlalchemy_string: str = None,
-        bw_integration: str = "Local",
-    ) -> None:
+    def __init__(self, logger: Logger, sqlalchemy_string: str = None) -> None:
         """Initialize the database"""
         self.__logger = logger
         self.__sql_session = None
@@ -37,60 +32,6 @@ class Database:
         getLogger("sqlalchemy.engine").setLevel(
             logger.level if logger.level != INFO else WARNING
         )
-
-        if sqlalchemy_string is None and bw_integration != "Local":
-            if bw_integration == "Kubernetes":
-                from kubernetes import client as kube_client
-
-                corev1 = kube_client.CoreV1Api()
-                for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                    if (
-                        pod.metadata.annotations != None
-                        and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                    ):
-                        for pod_env in pod.spec.containers[0].env:
-                            if pod_env.name == "DATABASE_URI":
-                                sqlalchemy_string = pod_env.value
-                                break
-
-                    if sqlalchemy_string:
-                        break
-            else:
-                from docker import DockerClient
-
-                docker_client = DockerClient(
-                    base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-                )
-                for instance in docker_client.containers.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
-                    for var in instance.attrs["Config"]["Env"]:
-                        if var.startswith("DATABASE_URI="):
-                            sqlalchemy_string = var.replace("DATABASE_URI=", "", 1)
-                            break
-
-                    if sqlalchemy_string:
-                        break
-
-                is_swarm = True
-                try:
-                    docker_client.swarm.version
-                except:
-                    is_swarm = False
-
-                if not sqlalchemy_string and is_swarm:
-                    for instance in docker_client.services.list(
-                        filters={"label": "bunkerweb.INSTANCE"}
-                    ):
-                        for var in instance.attrs["Spec"]["TaskTemplate"][
-                            "ContainerSpec"
-                        ]["Env"]:
-                            if var.startswith("DATABASE_URI="):
-                                sqlalchemy_string = var.replace("DATABASE_URI=", "", 1)
-                                break
-
-                        if sqlalchemy_string:
-                            break
 
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////data/db.sqlite3")
@@ -376,8 +317,9 @@ class Database:
                                 )
 
                                 if service_setting is None:
-                                    if value == setting.default or (
-                                        key in config and value == config[key]
+                                    if key != "SERVER_NAME" and (
+                                        value == setting.default
+                                        or (key in config and value == config[key])
                                     ):
                                         continue
 
@@ -391,8 +333,9 @@ class Database:
                                         )
                                     )
                                 elif method == "autoconf":
-                                    if value == setting.default or (
-                                        key in config and value == config[key]
+                                    if key != "SERVER_NAME" and (
+                                        value == setting.default
+                                        or (key in config and value == config[key])
                                     ):
                                         session.query(Services_settings).filter(
                                             Services_settings.service_id == server_name,

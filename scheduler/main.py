@@ -118,17 +118,10 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()
         generate = args.generate == "yes"
+        integration = "Linux"
+        api_caller = ApiCaller()
 
         logger.info("Scheduler started ...")
-
-        bw_integration = (
-            "Local"
-            if not isfile("/usr/sbin/nginx")
-            and not isfile("/opt/bunkerweb/tmp/nginx.pid")
-            else "Cluster"
-        )
-
-        api_caller = ApiCaller()
 
         if args.variables:
             logger.info(f"Variables : {args.variables}")
@@ -137,45 +130,25 @@ if __name__ == "__main__":
             env = dotenv_values(args.variables)
         else:
             # Read from database
-            bw_integration = (
-                "Kubernetes" if getenv("KUBERNETES_MODE", "no") == "yes" else "Cluster"
-            )
-
             integration = "Docker"
             if exists("/opt/bunkerweb/INTEGRATION"):
                 with open("/opt/bunkerweb/INTEGRATION", "r") as f:
                     integration = f.read().strip()
 
-            api_caller.auto_setup(bw_integration=bw_integration)
+            api_caller.auto_setup(bw_integration=integration)
 
             if integration == "Docker" and generate is True:
-                # run the generator
-                cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''} --method scheduler"
+                # run the config saver
+                cmd = f"python /opt/bunkerweb/gen/save_config.py --settings /opt/bunkerweb/settings.json"
                 proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
                 if proc.returncode != 0:
                     logger.error(
-                        "Config generator failed, configuration will not work as expected...",
+                        "Config saver failed, configuration will not work as expected...",
                     )
-
-                # Fix permissions for the nginx folder
-                for root, dirs, files in walk("/etc/nginx", topdown=False):
-                    for name in files + dirs:
-                        chown(join(root, name), "scheduler", "scheduler")
-                        chmod(join(root, name), 0o770)
-
-                if len(api_caller._get_apis()) > 0:
-                    # send nginx configs
-                    logger.info("Sending /etc/nginx folder ...")
-                    ret = api_caller._send_files("/etc/nginx", "/confs")
-                    if not ret:
-                        logger.error(
-                            "Sending nginx configs failed, configuration will not work as expected...",
-                        )
 
             db = Database(
                 logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),
-                bw_integration=bw_integration,
             )
 
             while not db.is_initialized():
@@ -184,7 +157,7 @@ if __name__ == "__main__":
                 )
                 sleep(5)
 
-            if bw_integration == "Kubernetes" or integration in (
+            if integration in (
                 "Swarm",
                 "Kubernetes",
                 "Autoconf",
@@ -265,7 +238,7 @@ if __name__ == "__main__":
                     if isfile(join(root, name)):
                         chmod(join(root, name), 0o740)
 
-            if bw_integration != "Local":
+            if integration != "Linux":
                 logger.info("Sending custom configs to BunkerWeb")
                 ret = api_caller._send_files("/data/configs", "/custom_configs")
 
@@ -281,7 +254,7 @@ if __name__ == "__main__":
                 env=deepcopy(env),
                 apis=api_caller._get_apis(),
                 logger=logger,
-                bw_integration=bw_integration,
+                integration=integration,
             )
 
             # Only run jobs once
@@ -292,7 +265,7 @@ if __name__ == "__main__":
 
             if generate is True:
                 # run the generator
-                cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''} --method scheduler"
+                cmd = f"python /opt/bunkerweb/gen/main.py --settings /opt/bunkerweb/settings.json --templates /opt/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''}"
                 proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
                 if proc.returncode != 0:
                     logger.error(
@@ -334,7 +307,7 @@ if __name__ == "__main__":
                         logger.info("Successfuly sent /data/cache folder")
 
                 # reload nginx
-                if bw_integration == "Local":
+                if integration == "Linux":
                     logger.info("Reloading nginx ...")
                     proc = run(
                         ["/usr/sbin/nginx", "-s", "reload"],
@@ -410,7 +383,7 @@ if __name__ == "__main__":
                             if isfile(join(root, name)):
                                 chmod(join(root, name), 0o740)
 
-                    if bw_integration != "Local":
+                    if integration != "Linux":
                         logger.info("Sending custom configs to BunkerWeb")
                         ret = api_caller._send_files("/data/configs", "/custom_configs")
 
