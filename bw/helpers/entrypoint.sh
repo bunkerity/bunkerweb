@@ -32,6 +32,14 @@ function trap_reload() {
 }
 trap "trap_reload" HUP
 
+if [ "$SWARM_MODE" == "yes" ] ; then
+	echo "Swarm" > /opt/bunkerweb/INTEGRATION
+elif [ "$KUBERNETES_MODE" == "yes" ] ; then
+	echo "Kubernetes" > /opt/bunkerweb/INTEGRATION
+elif [ "$AUTOCONF_MODE" == "yes" ] ; then
+	echo "Autoconf" > /opt/bunkerweb/INTEGRATION
+fi
+
 # start nginx
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &

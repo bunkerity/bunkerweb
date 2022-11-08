@@ -41,6 +41,7 @@ COPY VERSION /opt/bunkerweb/VERSION
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 	cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
+	echo "Docker" > /opt/bunkerweb/INTEGRATION && \
 	for dir in $(echo "cache configs plugins www") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/opt/bunkerweb/${dir}" ; done && \
 	for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs cache/letsencrypt") ; do mkdir -p "/data/${dir}" ; done && \
 	chown -R root:nginx /data && \
@@ -63,7 +64,8 @@ RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 	ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log && \
 	ln -s /proc/1/fd/1 /var/log/nginx/access.log && \
 	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log && \
-	ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
+	ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log && \
+	chmod 660 /opt/bunkerweb/INTEGRATION
 
 # Fix CVEs
 RUN apk add "freetype>=2.10.4-r3" "curl>=7.79.1-r2" "libcurl>=7.79.1-r2" "openssl>=1.1.1q-r0" "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1" "zlib>=1.2.12-r2" "libxml2>=2.9.14-r1"
