@@ -32,9 +32,13 @@ function trap_reload() {
 }
 trap "trap_reload" HUP
 
-# generate "temp" config
-echo -e "IS_LOADING=yes\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}" > /tmp/variables.env
-python3 /opt/bunkerweb/gen/main.py --variables /tmp/variables.env
+if [ "$SWARM_MODE" == "yes" ] ; then
+	echo "Swarm" > /opt/bunkerweb/INTEGRATION
+elif [ "$KUBERNETES_MODE" == "yes" ] ; then
+	echo "Kubernetes" > /opt/bunkerweb/INTEGRATION
+elif [ "$AUTOCONF_MODE" == "yes" ] ; then
+	echo "Autoconf" > /opt/bunkerweb/INTEGRATION
+fi
 
 # start nginx
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."

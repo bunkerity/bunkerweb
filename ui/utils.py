@@ -325,64 +325,157 @@ def form_plugin_gen(
 
 
 def path_to_dict(
-    path, *, level: int = 0, is_cache: bool = False, db_configs: List[dict] = []
+    path,
+    *,
+    level: int = 0,
+    is_cache: bool = False,
+    db_configs: List[dict] = [],
+    integration: str = "Linux",
 ) -> dict:
-    d = {"name": os.path.basename(path)}
+    if integration == "Linux":
+        d = {"name": os.path.basename(path)}
 
-    if os.path.isdir(path):
-        d.update(
-            {
-                "type": "folder",
-                "path": path,
-                "can_create_files": level > 0 and not is_cache,
-                "can_create_folders": level > 0 and not is_cache,
-                "can_edit": level > 1 and not is_cache,
-                "can_delete": False,
-                "children": [
-                    path_to_dict(
-                        os.path.join(path, x),
-                        level=level + 1,
-                        is_cache=is_cache,
-                        db_configs=db_configs,
-                    )
-                    for x in sorted(os.listdir(path))
-                ],
-            }
-        )
+        if os.path.isdir(path):
+            d.update(
+                {
+                    "type": "folder",
+                    "path": path,
+                    "can_create_files": level > 0 and not is_cache,
+                    "can_create_folders": level > 0 and not is_cache,
+                    "can_edit": level > 1 and not is_cache,
+                    "can_delete": False,
+                    "children": [
+                        path_to_dict(
+                            os.path.join(path, x),
+                            level=level + 1,
+                            is_cache=is_cache,
+                            db_configs=db_configs,
+                        )
+                        for x in sorted(os.listdir(path))
+                    ],
+                }
+            )
 
-        if level > 1 and not is_cache and not d["children"]:
-            d["can_delete"] = True
+            if level > 1 and not is_cache and not d["children"]:
+                d["can_delete"] = True
+        else:
+            d.update(
+                {
+                    "type": "file",
+                    "path": path,
+                    "can_download": is_cache,
+                }
+            )
+
+            can_edit = False
+            if level > 1 and not is_cache:
+                exploded_path = path.split("/")
+                for conf in db_configs:
+                    if exploded_path[-1].replace(".conf", "") == conf["name"]:
+                        if level > 2 and exploded_path[-2] != conf["service_id"]:
+                            continue
+
+                        can_edit = True
+                        break
+
+            d["can_edit"] = can_edit
+
+            magic_file = magic.from_file(path, mime=True)
+
+            if (
+                not is_cache
+                or magic_file.startswith("text/")
+                or magic_file.startswith("application/json")
+            ):
+                with open(path, "rb") as f:
+                    d["content"] = b64encode(f.read()).decode("utf-8")
     else:
-        d.update(
-            {
+        config_types = [
+            "http",
+            "stream",
+            "server-http",
+            "server-stream",
+            "default-server-http",
+            "modsec",
+            "modsec-crs",
+        ]
+        d = {
+            "name": "configs",
+            "type": "folder",
+            "path": path,
+            "can_create_files": False,
+            "can_create_folders": False,
+            "can_edit": False,
+            "can_delete": False,
+            "children": [
+                {
+                    "name": config,
+                    "type": "folder",
+                    "path": f"{path}/{config}",
+                    "can_create_files": True,
+                    "can_create_folders": True,
+                    "can_edit": False,
+                    "can_delete": False,
+                    "children": [],
+                }
+                for config in config_types
+            ],
+        }
+
+        for conf in db_configs:
+            file_info = {
+                "name": conf["name"],
                 "type": "file",
-                "path": path,
+                "path": f"{path}/{conf['type'].replace('_', '-')}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['name']}.conf",
+                "can_edit": conf["method"] == "ui",
                 "can_download": is_cache,
+                "content": b64encode(conf["data"]).decode("utf-8"),
             }
-        )
 
-        can_edit = False
-        if level > 1 and not is_cache:
-            exploded_path = path.split("/")
-            for conf in db_configs:
-                if exploded_path[-1].replace(".conf", "") == conf["name"]:
-                    if level > 2 and exploded_path[-2] != conf["service_id"]:
-                        continue
-
-                    can_edit = True
-                    break
-
-        d["can_edit"] = can_edit
-
-        magic_file = magic.from_file(path, mime=True)
-
-        if (
-            not is_cache
-            or magic_file.startswith("text/")
-            or magic_file.startswith("application/json")
-        ):
-            with open(path, "rb") as f:
-                d["content"] = b64encode(f.read()).decode("utf-8")
+            if (
+                d["children"][config_types.index(conf["type"].replace("_", "-"))][
+                    "children"
+                ]
+                and conf["service_id"]
+                and conf["service_id"]
+                in [
+                    x["name"]
+                    for x in d["children"][
+                        config_types.index(conf["type"].replace("_", "-"))
+                    ]["children"]
+                ]
+            ):
+                d["children"][config_types.index(conf["type"].replace("_", "-"))][
+                    "children"
+                ][
+                    [
+                        x["name"]
+                        for x in d["children"][
+                            config_types.index(conf["type"].replace("_", "-"))
+                        ]["children"]
+                    ].index(conf["service_id"])
+                ][
+                    "children"
+                ].append(
+                    file_info
+                )
+            else:
+                d["children"][config_types.index(conf["type"].replace("_", "-"))][
+                    "children"
+                ].append(
+                    {
+                        "name": conf["service_id"],
+                        "type": "folder",
+                        "path": f"{path}/{conf['type']}/{conf['service_id']}",
+                        "can_create_files": True,
+                        "can_create_folders": False,
+                        "can_edit": True,
+                        "can_delete": True,
+                        "children": [file_info],
+                    }
+                    if conf["service_id"]
+                    else file_info
+                )
 
     return d
 
