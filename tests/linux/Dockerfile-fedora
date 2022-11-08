@@ -1,71 +1,29 @@
-FROM fedora:36
+FROM fedora:latest
 
-ENV OS=fedora
-ENV NGINX_VERSION 1.20.2
+ENV container docker
 
-# Install fpm
-RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
-    gem install fpm
+RUN dnf -y update \
+    && dnf -y install systemd \
+    && dnf clean all
+
+RUN cd /lib/systemd/system/sysinit.target.wants/; \
+    for i in *; do [ $i = systemd-tmpfiles-setup.service ] || rm -f $i; done
+
+RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/*
 
 # Nginx
 RUN dnf update -y && \
-    dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
+    dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
     dnf install nginx-1.20.2 -y
 
-# Copy dependencies sources folder
-COPY deps /tmp/bunkerweb/deps
+COPY ./package-fedora/*.rpm /opt
 
-# Compile and install dependencies
-RUN dnf install -y python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
-    mkdir -p /opt/bunkerweb/deps && \
-    chmod +x /tmp/bunkerweb/deps/install.sh && \
-    bash /tmp/bunkerweb/deps/install.sh && \
-    mkdir /opt/bunkerweb/deps/python && \
-    pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+VOLUME ["/sys/fs/cgroup"]
 
-# Copy BW files
-# can't exclude deps from . so we are copying everything by hand
-COPY api /opt/bunkerweb/api
-COPY cli /opt/bunkerweb/cli
-COPY confs /opt/bunkerweb/confs
-COPY core /opt/bunkerweb/core
-COPY gen /opt/bunkerweb/gen
-COPY helpers /opt/bunkerweb/helpers
-COPY job /opt/bunkerweb/job
-COPY lua /opt/bunkerweb/lua
-COPY misc /opt/bunkerweb/misc
-COPY utils /opt/bunkerweb/utils
-COPY ui /opt/bunkerweb/ui
-COPY settings.json /opt/bunkerweb/settings.json
-COPY VERSION /opt/bunkerweb/VERSION
-
-# Setup BW
-RUN cp /opt/bunkerweb/helpers/bwcli /usr/local/bin && \
-    chmod 755 /usr/local/bin/bwcli && \
-    mkdir /opt/bunkerweb/configs && \
-    mkdir /opt/bunkerweb/cache && \
-    mkdir /opt/bunkerweb/plugins && \
-    mkdir /opt/bunkerweb/tmp && \
-    mkdir /opt/bunkerweb/www && \
-    find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
-    find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
-    chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
-    chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/ui/main.py /opt/bunkerweb/www && \
-    find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-    pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/ui/requirements.txt && \
-	chmod 755 /opt/bunkerweb
-
-# Copy Linux files
-COPY linux/variables.env /opt/bunkerweb/variables.env
-COPY linux/ui.env /opt/bunkerweb/ui.env
-COPY linux/scripts /opt/bunkerweb/scripts
-COPY linux/fpm.sh /opt/fpm.sh
-RUN chmod +x /opt/bunkerweb/scripts/*.sh /opt/fpm.sh
-COPY linux/fpm-fedora /opt/.fpm
-COPY linux/bunkerweb.service /opt/bunkerweb.service
-COPY linux/bunkerweb-ui.service /opt/bunkerweb-ui.service
-
-# Generate RPM at startup
-VOLUME /data
-WORKDIR /opt
-ENTRYPOINT ["/opt/fpm.sh", "rpm"]
+CMD ["/usr/sbin/init"]
