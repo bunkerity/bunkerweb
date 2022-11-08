@@ -6,7 +6,7 @@
 		"kubernetes"
 	],
 	"timeout": 60,
-	"delay": 180,
+	"delay": 240,
 	"tests": [
 		{
 			"type": "string",
