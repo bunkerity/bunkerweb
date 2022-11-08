@@ -82,6 +82,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          load: true
           file: linux/Dockerfile-ubuntu
           platforms: linux/amd64
           tags: local/bunkerweb-ubuntu:latest
@@ -129,6 +130,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          load: true
           file: linux/Dockerfile-debian
           platforms: linux/amd64
           tags: local/bunkerweb-debian:latest
@@ -176,6 +178,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          load: true
           file: linux/Dockerfile-centos
           platforms: linux/amd64
           tags: local/bunkerweb-centos:latest
@@ -223,6 +226,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          load: true
           file: linux/Dockerfile-fedora
           platforms: linux/amd64
           tags: local/bunkerweb-fedora:latest
