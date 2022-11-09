@@ -1,4 +1,4 @@
-FROM python:3.11-rc-alpine
+FROM python:3.11-alpine
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
