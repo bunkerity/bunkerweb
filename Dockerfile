@@ -29,16 +29,16 @@ COPY --from=builder /opt/bunkerweb /opt/bunkerweb
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY bw/api /opt/bunkerweb/api
+COPY bw/confs /opt/bunkerweb/confs
 COPY bw/core /opt/bunkerweb/core
 COPY bw/cli /opt/bunkerweb/cli
+COPY bw/gen /opt/bunkerweb/gen
 COPY bw/helpers /opt/bunkerweb/helpers
+COPY bw/loading /opt/bunkerweb/loading
 COPY bw/lua /opt/bunkerweb/lua
 COPY bw/misc /opt/bunkerweb/misc
-COPY bw/gen /opt/bunkerweb/gen
 COPY bw/settings.json /opt/bunkerweb/settings.json
 COPY db /opt/bunkerweb/db
-COPY bw/confs /opt/bunkerweb/confs
-COPY bw/loading /opt/bunkerweb/loading
 COPY utils /opt/bunkerweb/utils
 COPY VERSION /opt/bunkerweb/VERSION
 
@@ -55,7 +55,7 @@ RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
 	find /opt/bunkerweb -type f -exec chmod 0740 {} \; && \
 	find /opt/bunkerweb -type d -exec chmod 0750 {} \; && \
 	chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
-	chmod 750 /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /usr/local/bin/bwcli /opt/bunkerweb/deps/python/bin/* && \
+	chmod 750 /opt/bunkerweb/cli/main.py /opt/bunkerweb/gen/main.py /opt/bunkerweb/helpers/*.sh /usr/local/bin/bwcli /opt/bunkerweb/deps/python/bin/* && \
 	chown root:nginx /usr/local/bin/bwcli && \
 	chown -R nginx:nginx /etc/nginx && \
 	mkdir /var/log/letsencrypt /var/lib/letsencrypt && \

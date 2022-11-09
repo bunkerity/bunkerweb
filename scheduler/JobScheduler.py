@@ -117,17 +117,17 @@ class JobScheduler(ApiCaller):
                 f"Error while executing job {name} from plugin {plugin}",
             )
             success = False
-        elif success and proc.returncode < 2:
-            err = self.__db.update_job(plugin, name)
 
-            if not err:
-                self.__logger.info(
-                    f"Successfuly executed job {name} from plugin {plugin} and updated database",
-                )
-            else:
-                self.__logger.warning(
-                    f"Successfuly executed job {name} from plugin {plugin} but failed to update database: {err}",
-                )
+        err = self.__db.update_job(plugin, name, success)
+
+        if not err:
+            self.__logger.info(
+                f"Successfuly executed job {name} from plugin {plugin} and updated database",
+            )
+        else:
+            self.__logger.warning(
+                f"Successfuly executed job {name} from plugin {plugin} but failed to update database: {err}",
+            )
 
         return success
 

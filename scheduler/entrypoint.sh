@@ -37,23 +37,19 @@ elif [ "$AUTOCONF_MODE" == "yes" ] ; then
 	echo "Autoconf" > /opt/bunkerweb/INTEGRATION
 fi
 
-# Init database
-get_env > "/tmp/variables.env"
-/opt/bunkerweb/gen/save_config.py --variables /tmp/variables.env --init
-if [ "$?" -ne 0 ] ; then
-	log "ENTRYPOINT" "❌" "Scheduler generator failed"
-	exit 1
-fi
-
-generate=yes
-if [ -f "/etc/nginx/variables.env" ] && grep -q "^TEMP_NGINX=no$" /etc/nginx/variables.env ; then
-	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb configuration is already generated, will not generate it again"
-	generate=no
+if ! grep -q "Docker" /opt/bunkerweb/INTEGRATION ; then
+	# Init database
+	get_env > "/tmp/variables.env"
+	/opt/bunkerweb/gen/save_config.py --variables /tmp/variables.env --init
+	if [ "$?" -ne 0 ] ; then
+		log "ENTRYPOINT" "❌" "Scheduler generator failed"
+		exit 1
+	fi
 fi
 
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
-/opt/bunkerweb/scheduler/main.py --generate $generate
+/opt/bunkerweb/scheduler/main.py
 
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
 exit 0

@@ -16,7 +16,7 @@ from os import (
     walk,
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
-from shutil import chown, rmtree
+from shutil import chown, copy, rmtree
 from signal import SIGINT, SIGTERM, SIGUSR1, SIGUSR2, signal
 from subprocess import PIPE, run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
@@ -110,14 +110,8 @@ if __name__ == "__main__":
             type=str,
             help="path to the file containing environment variables",
         )
-        parser.add_argument(
-            "--generate",
-            default="no",
-            type=str,
-            help="Precise if the configuration needs to be generated directly or not",
-        )
         args = parser.parse_args()
-        generate = args.generate == "yes"
+        generate = False
         integration = "Linux"
         api_caller = ApiCaller()
 
@@ -136,26 +130,10 @@ if __name__ == "__main__":
                     integration = f.read().strip()
 
             api_caller.auto_setup(bw_integration=integration)
-
-            if integration == "Docker" and generate is True:
-                # run the config saver
-                cmd = f"python /opt/bunkerweb/gen/save_config.py --settings /opt/bunkerweb/settings.json"
-                proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
-                if proc.returncode != 0:
-                    logger.error(
-                        "Config saver failed, configuration will not work as expected...",
-                    )
-
             db = Database(
                 logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),
             )
-
-            while not db.is_initialized():
-                logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
-                sleep(5)
 
             if integration in (
                 "Swarm",
@@ -174,6 +152,23 @@ if __name__ == "__main__":
                         "Autoconf is not loaded yet in the database, retrying in 5s ...",
                     )
                     sleep(5)
+            elif integration == "Docker" and (
+                not exists("/opt/bunkerweb/tmp/variables.env")
+                or db.get_config() != dotenv_values("/opt/bunkerweb/tmp/variables.env")
+            ):
+                # run the config saver
+                cmd = f"python /opt/bunkerweb/gen/save_config.py --settings /opt/bunkerweb/settings.json"
+                proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+                if proc.returncode != 0:
+                    logger.error(
+                        "Config saver failed, configuration will not work as expected...",
+                    )
+
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
 
             env = db.get_config()
             while not db.is_first_config_saved() or not env:
@@ -208,7 +203,10 @@ if __name__ == "__main__":
                                 }
                             )
 
+            old_configs = None
             if custom_confs:
+                old_configs = db.get_custom_configs()
+
                 ret = db.save_custom_configs(custom_confs, "manual")
                 if ret:
                     logger.error(
@@ -217,16 +215,19 @@ if __name__ == "__main__":
 
             custom_configs = db.get_custom_configs()
 
-            original_path = "/data/configs"
-            makedirs(original_path, exist_ok=True)
-            for custom_config in custom_configs:
-                tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
-                if custom_config["service_id"]:
-                    tmp_path += f"/{custom_config['service_id']}"
-                tmp_path += f"/{custom_config['name']}.conf"
-                makedirs(dirname(tmp_path), exist_ok=True)
-                with open(tmp_path, "wb") as f:
-                    f.write(custom_config["data"])
+            if old_configs != custom_configs:
+                original_path = "/data/configs"
+                makedirs(original_path, exist_ok=True)
+                for custom_config in custom_configs:
+                    tmp_path = (
+                        f"{original_path}/{custom_config['type'].replace('_', '-')}"
+                    )
+                    if custom_config["service_id"]:
+                        tmp_path += f"/{custom_config['service_id']}"
+                    tmp_path += f"/{custom_config['name']}.conf"
+                    makedirs(dirname(tmp_path), exist_ok=True)
+                    with open(tmp_path, "wb") as f:
+                        f.write(custom_config["data"])
 
             # Fix permissions for the custom configs folder
             for root, dirs, files in walk("/data/configs", topdown=False):
@@ -248,6 +249,15 @@ if __name__ == "__main__":
                     )
 
         logger.info("Executing scheduler ...")
+        generate = not exists(
+            "/opt/bunkerweb/tmp/variables.env"
+        ) or env != dotenv_values("/opt/bunkerweb/tmp/variables.env")
+
+        if generate is False:
+            logger.warning(
+                "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
+            )
+
         while True:
             # Instantiate scheduler
             scheduler = JobScheduler(
@@ -277,6 +287,8 @@ if __name__ == "__main__":
                     for name in files + dirs:
                         chown(join(root, name), "scheduler", "scheduler")
                         chmod(join(root, name), 0o770)
+
+                copy("/etc/nginx/variables.env", "/opt/bunkerweb/tmp/variables.env")
 
                 if len(api_caller._get_apis()) > 0:
                     # send nginx configs

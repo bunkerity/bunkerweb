@@ -8,7 +8,7 @@ from os.path import exists
 from re import search
 from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import OperationalError, ProgrammingError, SQLAlchemyError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from time import sleep
@@ -683,7 +683,7 @@ class Database:
 
         return services
 
-    def update_job(self, plugin_id: str, job_name: str) -> str:
+    def update_job(self, plugin_id: str, job_name: str, success: bool) -> str:
         """Update the job last_run in the database"""
         with self.__db_session() as session:
             job = (
@@ -696,6 +696,7 @@ class Database:
                 return "Job not found"
 
             job.last_run = datetime.now()
+            job.success = success
 
             try:
                 session.commit()
