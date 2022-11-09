@@ -683,7 +683,7 @@ class Database:
 
         return services
 
-    def update_job(self, plugin_id: str, job_name: str) -> str:
+    def update_job(self, plugin_id: str, job_name: str, success: bool) -> str:
         """Update the job last_run in the database"""
         with self.__db_session() as session:
             job = (
@@ -696,6 +696,7 @@ class Database:
                 return "Job not found"
 
             job.last_run = datetime.now()
+            job.success = success
 
             try:
                 session.commit()
