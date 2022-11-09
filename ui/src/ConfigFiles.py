@@ -103,55 +103,65 @@ class ConfigFiles:
 
     def create_file(self, path: str, name: str, content: str) -> Tuple[str, int]:
         file_path = join(path, name)
+        mkdir(path, exist_ok=True)
+
         with open(file_path, "w") as f:
             f.write(content)
 
         return f"The file {file_path} was successfully created", 0
 
-    def edit_folder(self, path: str, name: str) -> Tuple[str, int]:
+    def edit_folder(self, path: str, name: str, old_name: str) -> Tuple[str, int]:
         new_folder_path = dirname(join(path, name))
+        old_folder_path = dirname(join(path, old_name))
 
-        if path == new_folder_path:
+        if old_folder_path == new_folder_path:
             return (
-                f"{path} was not renamed because the name didn't change",
+                f"{old_folder_path} was not renamed because the name didn't change",
                 0,
             )
 
         try:
-            shutil_move(path, new_folder_path)
+            shutil_move(old_folder_path, new_folder_path)
         except OSError:
-            return f"Could not move {path}", 1
+            return f"Could not move {old_folder_path}", 1
 
-        return f"The folder {path} was successfully renamed to {new_folder_path}", 0
+        return (
+            f"The folder {old_folder_path} was successfully renamed to {new_folder_path}",
+            0,
+        )
 
-    def edit_file(self, path: str, name: str, content: str) -> Tuple[str, int]:
+    def edit_file(
+        self, path: str, name: str, old_name: str, content: str
+    ) -> Tuple[str, int]:
         new_path = dirname(join(path, name))
+        old_path = dirname(join(path, old_name))
+
         try:
-            with open(path, "r") as f:
+            with open(old_path, "r") as f:
                 file_content = f.read()
         except FileNotFoundError:
-            return f"Could not find {path}", 1
+            return f"Could not find {old_path}", 1
 
-        if path == new_path and file_content == content:
+        if old_path == new_path and file_content == content:
             return (
-                f"{path} was not edited because the content and the name didn't change",
+                f"{old_path} was not edited because the content and the name didn't change",
                 0,
             )
         elif file_content == content:
             try:
                 replace(path, new_path)
-                return f"{path} was successfully renamed to {new_path}", 0
+                return f"{old_path} was successfully renamed to {new_path}", 0
             except OSError:
-                return f"Could not rename {path} into {new_path}", 1
-        elif path == new_path:
-            new_path = path
+                return f"Could not rename {old_path} into {new_path}", 1
+        elif old_path == new_path:
+            new_path = old_path
         else:
             try:
-                remove(path)
+                remove(old_path)
             except OSError:
-                return f"Could not remove {path}", 1
+                return f"Could not remove {old_path}", 1
 
         with open(new_path, "w") as f:
             f.write(content)
 
-        return f"The file {path} was successfully edited", 0
+        return f"The file {old_path} was successfully edited", 0

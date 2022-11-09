@@ -575,6 +575,10 @@ def configs():
 
             if variables["type"] == "file":
                 variables["name"] = f"{variables['name']}.conf"
+
+                if "old_name" in variables:
+                    variables["old_name"] = f"{variables['old_name']}.conf"
+
                 variables["content"] = BeautifulSoup(
                     variables["content"], "html.parser"
                 ).get_text()
@@ -591,11 +595,16 @@ def configs():
             elif request.form["operation"] == "edit":
                 if variables["type"] == "folder":
                     operation, error = app.config["CONFIGFILES"].edit_folder(
-                        variables["path"], variables["name"]
+                        variables["path"],
+                        variables["name"],
+                        variables.get("old_name", variables["name"]),
                     )
                 elif variables["type"] == "file":
                     operation, error = app.config["CONFIGFILES"].edit_file(
-                        variables["path"], variables["name"], variables["content"]
+                        variables["path"],
+                        variables["name"],
+                        variables.get("old_name", variables["name"]),
+                        variables["content"],
                     )
 
             if error:
@@ -979,7 +988,6 @@ def plugins():
     plugins_pages = app.config["CONFIG"].get_plugins_pages()
 
     pages = []
-    active = True
     for page in plugins_pages:
         with open(
             f"/opt/bunkerweb/"
@@ -1007,11 +1015,8 @@ def plugins():
                     url_for=url_for,
                     **app.config["PLUGIN_ARGS"]["args"],
                 ),
-                # Only the first plugin page is active
-                "active": active,
             }
         )
-        active = False
 
     app.config["PLUGIN_ARGS"] = None
 
