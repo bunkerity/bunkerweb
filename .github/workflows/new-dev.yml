@@ -274,7 +274,7 @@ jobs:
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:dev && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:dev bunkerweb-autoconf-tests-amd64:latest
       - name: Import BW UI image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:dev && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ui-tests-amd64:dev bunkerweb-ui-tests-amd64:latest
-      CVE check on OS
+      # CVE check on OS
       - name: Check security vulnerabilities for BW
         uses: aquasecurity/trivy-action@master
         with:
