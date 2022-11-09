@@ -34,7 +34,7 @@ class LinuxTest(Test) :
             #     rmtree("/tmp/linux")
             # mkdir("/tmp/linux")
             # chmod("/tmp/linux", 0o0777)
-            cmd = "docker run -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro local/bw-" + distro + ":latest"
+            cmd = "docker run -p 80:80 -p 443:443 --rm --name linux-" + distro + " -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host --tty local/bw-" + distro + ":latest"
             proc = run(cmd, shell=True)
             if proc.returncode != 0 :
                 raise(Exception("docker run failed (linux stack)"))
@@ -137,4 +137,4 @@ class LinuxTest(Test) :
         return run("docker exec linux-" + distro + " /bin/bash -c \"" + cmd_linux + "\"", shell=True)
 
     def docker_cp(distro, src, dst) :
-        return run("sudo docker cp " + src + " linux-" + distro + ":" + dst, shell=True)
+        return run("docker cp " + src + " linux-" + distro + ":" + dst, shell=True)
