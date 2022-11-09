@@ -45,8 +45,8 @@ class KubernetesTest(Test) :
             mkdir("/tmp/kubernetes")
             copy("./tests/utils/bunkerweb.yml", "/tmp/kubernetes")
             deploy = "/tmp/kubernetes/bunkerweb.yml"
-            Test.replace_in_file(deploy, r"bunkerity/bunkerweb:.*$", getenv("PRIVATE_REGISTRY") + "/infra/bunkerweb-tests-amd64:latest")
-            Test.replace_in_file(deploy, r"bunkerity/bunkerweb-autoconf:.*$", getenv("PRIVATE_REGISTRY") + "/infra/bunkerweb-autoconf-tests-amd64:latest")
+            Test.replace_in_file(deploy, r"bunkerity/bunkerweb:.*$", getenv("PRIVATE_REGISTRY") + "/infra/bunkerweb-tests-amd64:" + getenv("IMAGE_TAG"))
+            Test.replace_in_file(deploy, r"bunkerity/bunkerweb-autoconf:.*$", getenv("PRIVATE_REGISTRY") + "/infra/bunkerweb-autoconf-tests-amd64:" + getenv("IMAGE_TAG"))
             proc = run("kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("kubectl apply bunkerweb failed (k8s stack)"))

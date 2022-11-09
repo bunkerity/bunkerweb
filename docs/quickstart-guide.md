@@ -54,7 +54,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e USE_REVERSE_PROXY=yes \
     	   -e REVERSE_PROXY_URL=/ \
     	   -e REVERSE_PROXY_HOST=http://myapp \
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
@@ -64,7 +64,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.3
+    	image: bunkerity/bunkerweb:1.4.4
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -306,56 +306,13 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - fl0ppy_d1sk.bunkerweb
+        - bunkerity.bunkerweb
     ```
 
 	You can now run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
-
-=== "Vagrant"
-
-    We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
-
-    The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
-		```shell
-		python3 -m http.server -b 127.0.0.1
-		```
-
-    Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file.
-
-	Connect to your vagrant machine :
-	```shell
-	vagrant ssh
-	```
-
-	And then you can edit the `variables.env` file in your host machine like this :
-
-	```conf
-	SERVER_NAME=www.example.com
-	HTTP_PORT=80
-	HTTPS_PORT=443
-	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	USE_REVERSE_PROXY=yes
-	REVERSE_PROXY_URL=/
-	REVERSE_PROXY_HOST=http://127.0.0.1:8000
-	```
-
-    If it's already running we can restart it :
-    ```shell
-    systemctl restart bunkerweb
-    ```
-
-    Otherwise, we will need to start it :
-    ```shell
-    systemctl start bunkerweb
-    ```
-
-    Let's check the status of BunkerWeb :
-    ```shell
-    systemctl status bunkerweb
-    ```
 
 ### Multiple applications
 
@@ -422,7 +379,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
     	   -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
     	   -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
@@ -432,7 +389,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.3
+    	image: bunkerity/bunkerweb:1.4.4
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -923,64 +880,6 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     ```shell
     systemctl start bunkerweb
     ```
-
-=== "Vagrant"
-
-    We will assume that you already have the [Vagrant integration](/1.4/integrations/#Vagrant) stack running on your machine with some web applications running on the same machine as BunkerWeb.
-
-	Let's assume that you have some web applications running on the same machine as BunkerWeb :
-
-    === "App #1"
-    	The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
-		```shell
-		python3 -m http.server -b 127.0.0.1 8001
-		```
-
-    === "App #2"
-    	The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8002
-    	```
-
-    === "App #3"
-    	The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8003
-    	```
-
-	Connect to your vagrant machine :
-	```shell
-	vagrant ssh
-	```
-
-    Configuration of BunkerWeb is done by editing the /opt/bunkerweb/variables.env file :
-	```conf
-	SERVER_NAME=app1.example.com app2.example.com app3.example.com
-	HTTP_PORT=80
-	HTTPS_PORT=443
-	MULTISITE=yes
-	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	USE_REVERSE_PROXY=yes
-	REVERSE_PROXY_URL=/
-	app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
-	app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
-	app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
-	```
-
-    If it's already running we can restart it :
-    ```shell
-    systemctl restart bunkerweb
-    ```
-
-    Otherwise, we will need to start it :
-    ```shell
-    systemctl start bunkerweb
-    ```
-
-    Let's check the status of BunkerWeb :
-    ```shell
-    systemctl status bunkerweb
-    ```
 	
 === "Ansible"
 
@@ -1031,7 +930,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - fl0ppy_d1sk.bunkerweb
+        - bunkerity.bunkerweb
 	```
 	[]()
 	Run the playbook :
@@ -1082,13 +981,13 @@ REAL_IP_HEADER=X-Forwarded-For
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=X-Forwarded-For \
     	   ...
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1107,13 +1006,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.3
+           bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1132,13 +1031,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.3
+           bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1163,7 +1062,7 @@ REAL_IP_HEADER=X-Forwarded-For
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.3
+			image: bunkerity/bunkerweb:1.4.4
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1212,27 +1111,13 @@ REAL_IP_HEADER=X-Forwarded-For
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - fl0ppy_d1sk.bunkerweb
+        - bunkerity.bunkerweb
 	```
 
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
-
-=== "Vagrant"
-
-    You will need to add the settings to the `/opt/bunkerweb/variables.env` file :
-
-	```conf
-	...
-	USE_REAL_IP=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=X-Forwarded-For
-	...
-	```
-
-    Don't forget to restart the BunkerWeb service once it's done.
 
 ### Proxy protocol
 
@@ -1261,13 +1146,13 @@ REAL_IP_HEADER=proxy_protocol
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=proxy_protocol \
     	   ...
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1288,13 +1173,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.3
+           bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1315,13 +1200,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.3
+           bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1347,7 +1232,7 @@ REAL_IP_HEADER=proxy_protocol
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.3
+			image: bunkerity/bunkerweb:1.4.4
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1400,28 +1285,13 @@ REAL_IP_HEADER=proxy_protocol
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
-        - fl0ppy_d1sk.bunkerweb
+        - bunkerity.bunkerweb
 	```
 
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
-
-=== "Vagrant"
-
-    You will need to add the settings to the `/opt/bunkerweb/variables.env` file :
-
-	```conf
-	...
-	USE_REAL_IP=yes
-	USE_PROXY_PROTOCOL=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=proxy_protocol
-	...
-	```
-
-    Don't forget to restart the BunkerWeb service once it's done.
 
 ## Custom configurations
 
@@ -1457,7 +1327,7 @@ Some integrations offer a more convenient way of applying configurations such as
     Here is a dummy example using a docker-compose file :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1499,13 +1369,13 @@ Some integrations offer a more convenient way of applying configurations such as
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       volumes:
         - ./bw-data:/data
       ...
@@ -1566,13 +1436,13 @@ Some integrations offer a more convenient way of applying configurations such as
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb-autoconf:1.4.3
+    	   bunkerity/bunkerweb-autoconf:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     myautoconf:
-      image: bunkerity/bunkerweb-autoconf:1.4.3
+      image: bunkerity/bunkerweb-autoconf:1.4.4
       volumes:
         - ./bw-data:/data
       ...
@@ -1681,35 +1551,13 @@ Some integrations offer a more convenient way of applying configurations such as
             server-http: "{{ playbook_dir }}/server-http"
           }
       roles:
-        - fl0ppy_d1sk.bunkerweb
+        - bunkerity.bunkerweb
 	```
 
 	Run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
-
-=== "Vagrant"
-
-    When using the [Vagrant integration](/1.4/integrations/#vagrant), custom configurations must be written to the `/opt/bunkerweb/configs` folder.
-
-    Here is an example for server-http/hello-world.conf :
-    ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
-
-    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
-    ```shell
-    chown -R root:nginx /opt/bunkerweb/configs && \
-    chmod -R 770 /opt/bunkerweb/configs
-    ```
-
-    Don't forget to restart the BunkerWeb service once it's done.
 
 ## PHP
 
@@ -1774,7 +1622,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   -e AUTO_LETS_ENCRYPT=yes \
 		   -e REMOTE_PHP=myphp \
 		   -e REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
 	Here is the docker-compose equivalent :
@@ -1784,7 +1632,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.3
+    	image: bunkerity/bunkerweb:1.4.4
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -1826,7 +1674,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "${PWD}/myapp:/app" \
 		   ...
-		   bunkerity/bunkerweb:1.4.3
+		   bunkerity/bunkerweb:1.4.4
 	```
 	
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
@@ -1890,7 +1738,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "/shared/myapp:/app" \
 		   ...
-		   bunkerity/bunkerweb:1.4.3
+		   bunkerity/bunkerweb:1.4.4
 	```
 
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
@@ -2043,69 +1891,13 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		- custom_www: "{{ playbook_dir }}/my_app"
 		- custom_www_owner: "www-data"
 	  roles:
-		- fl0ppy_d1sk.bunkerweb
+		- bunkerity.bunkerweb
 	```
 
 	You can now run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
-
-=== "Vagrant"
-
-    We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
-
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
-
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
-	```ini
-	...
-	[www]
-	user = www-data
-	group = www-data
-	listen = /run/php/php-fpm.sock
-	listen.owner = www-data
-	listen.group = nginx
-	listen.mode = 0660
-	...
-	```
-
-	Don't forget to restart your PHP-FPM service :
-	```shell
-	systemctl restart php8.1-fpm
-	```
-
-	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
-	```shell
-	chown -R www-data:nginx /opt/bunkerweb/www && \
-	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
-	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
-	```
-
-	You can now edit the `/opt/bunkerweb/variable.env` file :
-	```env
-	HTTP_PORT=80
-	HTTPS_PORT=443
-	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	SERVER_NAME=www.example.com
-	AUTO_LETS_ENCRYPT=yes
-	LOCAL_PHP=/run/php/php-fpm.sock
-	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
-	```
-
-    Let's check the status of BunkerWeb :
-    ```shell
-    systemctl status bunkerweb
-    ```
-    If it's already running we can restart it :
-    ```shell
-    systemctl restart bunkerweb
-    ```
-
-	Otherwise, we will need to start it : 
-    ```shell
-    systemctl start bunkerweb
-    ```
 
 ### Multiple applications
 
@@ -2192,7 +1984,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       -e app2.example.com_REMOTE_PHP_PATH=/app \
 	       -e app3.example.com_REMOTE_PHP=myphp3 \
 	       -e app3.example.com_REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
 	Here is the docker-compose equivalent :
@@ -2202,7 +1994,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.3
+    	image: bunkerity/bunkerweb:1.4.4
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -2263,7 +2055,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "${PWD}/myapps:/apps" \
 		   ...
-		   bunkerity/bunkerweb:1.4.3
+		   bunkerity/bunkerweb:1.4.4
 	```
 	
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :
@@ -2387,7 +2179,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "/shared/myapps:/apps" \
 		   ...
-		   bunkerity/bunkerweb:1.4.3
+		   bunkerity/bunkerweb:1.4.4
 	```
 
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
@@ -2614,71 +2406,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		- custom_www: "{{ playbook_dir }}/my_app"
 		- custom_www_owner: "www-data"
 	  roles:
-		- fl0ppy_d1sk.bunkerweb
+		- bunkerity.bunkerweb
 	```
 
 	You can now run the playbook :
 	```shell
 	ansible-playbook -i inventory.yml playbook.yml
 	```
-
-=== "Vagrant"
-
-	We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
-
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
-
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
-	```ini
-	...
-	[www]
-	user = www-data
-	group = www-data
-	listen = /run/php/php-fpm.sock
-	listen.owner = www-data
-	listen.group = nginx
-	listen.mode = 0660
-	...
-	```
-
-	Don't forget to restart your PHP-FPM service :
-	```shell
-	systemctl restart php8.1-fpm
-	```
-
-	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
-	```shell
-	chown -R www-data:nginx /opt/bunkerweb/www && \
-	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
-	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
-	```
-
-	You can now edit the `/opt/bunkerweb/variable.env` file :
-	```env
-	HTTP_PORT=80
-	HTTPS_PORT=443
-	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	SERVER_NAME=app1.example.com app2.example.com app3.example.com
-	MULTISITE=yes
-	AUTO_LETS_ENCRYPT=yes
-	app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
-	app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
-	app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
-	```
-
-    Let's check the status of BunkerWeb :
-    ```shell
-    systemctl status bunkerweb
-    ```
-    If it's already running we can restart it :
-    ```shell
-    systemctl restart bunkerweb
-    ```
-
-	Otherwise, we will need to start it : 
-    ```shell
-    systemctl start bunkerweb
-    ```

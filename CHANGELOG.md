@@ -1,8 +1,9 @@
 # Changelog
 
-## v1.4.4 -
+## v1.4.4 - 2022/11/10
 
 - Fix k8s controller not watching the events when there is an exception
+- Fix python dependencies bug in CentOS and Fedora
 - Fix incorrect log when reloading nginx using Linux integration
 - Fix UI dev mode, production mode is now the default
 - Fix wrong exposed port in the UI container

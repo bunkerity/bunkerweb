@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/bunkerweb-1.4.3-blue" />
+	<img src="https://img.shields.io/badge/bunkerweb-1.4.4-blue" />
 	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28DEV%29?label=CI%2FCD%20dev" />
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28PROD%29?label=CI%2FCD%20prod" />
@@ -190,7 +190,7 @@ List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 36
+- Fedora 38
 - CentOS Stream 8
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
@@ -207,7 +207,7 @@ List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 36
+- Fedora 38
 - CentOS Stream 8
 
 [Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
