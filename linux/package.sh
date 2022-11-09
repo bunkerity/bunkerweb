@@ -23,7 +23,7 @@ fi
 linux="$1"
 
 # Create empty directory
-package_dir="./package-$linux"
+package_dir="${PWD}/package-$linux"
 if [ -d "$package_dir" ] ; then
 	do_and_check_cmd rm -rf "$package_dir"
 fi
