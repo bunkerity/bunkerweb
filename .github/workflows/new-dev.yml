@@ -426,7 +426,8 @@ jobs:
   #         name: tf-k8s
   #         path: terraform.tar
   infra-create-linux:
-    needs: [build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
+    #needs: [build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
+    needs: [build-bw-centos, build-bw-fedora]
     runs-on: ubuntu-latest
     steps:
       # Prepare
