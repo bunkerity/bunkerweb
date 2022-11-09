@@ -8,7 +8,7 @@ from os.path import exists
 from re import search
 from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import OperationalError, ProgrammingError, SQLAlchemyError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from time import sleep

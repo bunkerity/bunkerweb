@@ -423,50 +423,39 @@ def path_to_dict(
         }
 
         for conf in db_configs:
+            type_lower = conf["type"].replace("_", "-")
             file_info = {
-                "name": conf["name"],
+                "name": f"{conf['name']}.conf",
                 "type": "file",
-                "path": f"{path}/{conf['type'].replace('_', '-')}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['name']}.conf",
+                "path": f"{path}/{type_lower}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['name']}.conf",
                 "can_edit": conf["method"] == "ui",
                 "can_download": is_cache,
                 "content": b64encode(conf["data"]).decode("utf-8"),
             }
 
             if (
-                d["children"][config_types.index(conf["type"].replace("_", "-"))][
-                    "children"
-                ]
+                d["children"][config_types.index(type_lower)]["children"]
                 and conf["service_id"]
                 and conf["service_id"]
                 in [
                     x["name"]
-                    for x in d["children"][
-                        config_types.index(conf["type"].replace("_", "-"))
-                    ]["children"]
+                    for x in d["children"][config_types.index(type_lower)]["children"]
                 ]
             ):
-                d["children"][config_types.index(conf["type"].replace("_", "-"))][
-                    "children"
-                ][
+                d["children"][config_types.index(type_lower)]["children"][
                     [
                         x["name"]
-                        for x in d["children"][
-                            config_types.index(conf["type"].replace("_", "-"))
-                        ]["children"]
+                        for x in d["children"][config_types.index(type_lower)][
+                            "children"
+                        ]
                     ].index(conf["service_id"])
-                ][
-                    "children"
-                ].append(
-                    file_info
-                )
+                ]["children"].append(file_info)
             else:
-                d["children"][config_types.index(conf["type"].replace("_", "-"))][
-                    "children"
-                ].append(
+                d["children"][config_types.index(type_lower)]["children"].append(
                     {
                         "name": conf["service_id"],
                         "type": "folder",
-                        "path": f"{path}/{conf['type']}/{conf['service_id']}",
+                        "path": f"{path}/{type_lower}/{conf['service_id']}",
                         "can_create_files": True,
                         "can_create_folders": False,
                         "can_edit": True,

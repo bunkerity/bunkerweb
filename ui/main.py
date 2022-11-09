@@ -627,7 +627,11 @@ def configs():
     db_configs = db.get_custom_configs()
     return render_template(
         "configs.html",
-        folders=[path_to_dict("/opt/bunkerweb/configs", db_configs=db_configs)],
+        folders=[
+            path_to_dict(
+                "/opt/bunkerweb/configs", db_configs=db_configs, integration=integration
+            )
+        ],
     )
 
 
@@ -1147,7 +1151,11 @@ def logs():
     first_instance = instances[0] if instances else None
 
     return render_template(
-        "logs.html", first_instance=first_instance, instances=instances
+        "logs.html",
+        first_instance=first_instance,
+        instances=instances,
+        is_swarm=getenv("SWARM_MODE", "no") == "yes",
+        is_kubernetes=getenv("KUBERNETES_MODE", "no") == "yes",
     )
 
 
@@ -1204,7 +1212,11 @@ def logs_linux():
     for line in raw_logs_error:
         line_lower = line.lower()
 
-        if "[info]" in line.lower() and line.endswith(":") or "[error]" in line.lower():
+        if (
+            ("[info]" in line_lower or "ℹ️" in line_lower)
+            and line.endswith(":")
+            or ("[error]" in line_lower or "❌" in line_lower)
+        ):
             if temp_multiple_lines:
                 logs_error.append("\n".join(temp_multiple_lines))
 
@@ -1244,37 +1256,19 @@ def logs_linux():
             or "❌" in log_lower
             else (
                 "warn"
-                if "[warn]" in log_lower
-                else ("info" if "[info]" in log_lower else "message")
+                if "[warn]" in log_lower or "⚠️" in log_lower
+                else (
+                    "info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"
+                )
             )
         )
 
-        if "\n" in log:
-            splitted_one_line = log.split("\n")
-            logs.append(
-                {
-                    "content": " ".join(
-                        splitted_one_line.pop(0).strip().split(" ")[1:]
-                    ),
-                    "type": error_type,
-                    "separator": True,
-                }
-            )
-
-            for splitted_log in splitted_one_line:
-                logs.append(
-                    {
-                        "content": splitted_log,
-                        "type": error_type,
-                    }
-                )
-        else:
-            logs.append(
-                {
-                    "content": " ".join(log.strip().split(" ")[1:]),
-                    "type": error_type,
-                }
-            )
+        logs.append(
+            {
+                "content": " ".join(log.strip().split(" ")[1:]),
+                "type": error_type,
+            }
+        )
 
     count_error_logs = 0
     for log in logs_error:
@@ -1336,8 +1330,12 @@ def logs_container(container_id):
                         or "❌" in log_lower
                         else (
                             "warn"
-                            if "[warn]" in log_lower
-                            else ("info" if "[info]" in log_lower else "message")
+                            if "[warn]" in log_lower or "⚠️" in log_lower
+                            else (
+                                "info"
+                                if "[info]" in log_lower or "ℹ️" in log_lower
+                                else "message"
+                            )
                         ),
                     }
                 )

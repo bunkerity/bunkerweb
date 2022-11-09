@@ -110,7 +110,7 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()
 
-        logger.info("First gen started ...")
+        logger.info("Save config started ...")
         logger.info(f"Settings : {args.settings}")
         logger.info(f"Core : {args.core}")
         logger.info(f"Plugins : {args.plugins}")
@@ -128,58 +128,60 @@ if __name__ == "__main__":
                 integration = f.read().strip()
 
         logger.info(f"Detected {integration} integration")
+        config_files = None
+        db = None
+
+        # Check existences and permissions
+        logger.info("Checking arguments ...")
+        files = [args.settings] + ([args.variables] if args.variables else [])
+        paths_rx = [args.core, args.plugins]
+        for file in files:
+            if not path.exists(file):
+                logger.error(f"Missing file : {file}")
+                sys_exit(1)
+            if not access(file, R_OK):
+                logger.error(f"Can't read file : {file}")
+                sys_exit(1)
+        for _path in paths_rx:
+            if not path.isdir(_path):
+                logger.error(f"Missing directory : {_path}")
+                sys_exit(1)
+            if not access(_path, R_OK | X_OK):
+                logger.error(
+                    f"Missing RX rights on directory : {_path}",
+                )
+                sys_exit(1)
+
+        # Check core plugins orders
+        logger.info("Checking core plugins orders ...")
+        core_plugins = {}
+        files = glob(f"{args.core}/*/plugin.json")
+        for file in files:
+            try:
+                with open(file) as f:
+                    core_plugin = loads(f.read())
+
+                    if core_plugin["order"] not in core_plugins:
+                        core_plugins[core_plugin["order"]] = []
+
+                    core_plugins[core_plugin["order"]].append(core_plugin)
+            except:
+                logger.error(
+                    f"Exception while loading JSON from {file} : {format_exc()}",
+                )
+
+        core_settings = {}
+        for order in core_plugins:
+            if len(core_plugins[order]) > 1 and order != 999:
+                logger.warning(
+                    f"Multiple plugins have the same order ({order}) : {', '.join(plugin['id'] for plugin in core_plugins[order])}. Therefor, the execution order will be random.",
+                )
+
+            for plugin in core_plugins[order]:
+                core_settings.update(plugin["settings"])
 
         if args.variables:
             logger.info(f"Variables : {args.variables}")
-
-            # Check existences and permissions
-            logger.info("Checking arguments ...")
-            files = [args.settings, args.variables]
-            paths_rx = [args.core, args.plugins]
-            for file in files:
-                if not path.exists(file):
-                    logger.error(f"Missing file : {file}")
-                    sys_exit(1)
-                if not access(file, R_OK):
-                    logger.error(f"Can't read file : {file}")
-                    sys_exit(1)
-            for _path in paths_rx:
-                if not path.isdir(_path):
-                    logger.error(f"Missing directory : {_path}")
-                    sys_exit(1)
-                if not access(_path, R_OK | X_OK):
-                    logger.error(
-                        f"Missing RX rights on directory : {_path}",
-                    )
-                    sys_exit(1)
-
-            # Check core plugins orders
-            logger.info("Checking core plugins orders ...")
-            core_plugins = {}
-            files = glob(f"{args.core}/*/plugin.json")
-            for file in files:
-                try:
-                    with open(file) as f:
-                        core_plugin = loads(f.read())
-
-                        if core_plugin["order"] not in core_plugins:
-                            core_plugins[core_plugin["order"]] = []
-
-                        core_plugins[core_plugin["order"]].append(core_plugin)
-                except:
-                    logger.error(
-                        f"Exception while loading JSON from {file} : {format_exc()}",
-                    )
-
-            core_settings = {}
-            for order in core_plugins:
-                if len(core_plugins[order]) > 1 and order != 999:
-                    logger.warning(
-                        f"Multiple plugins have the same order ({order}) : {', '.join(plugin['id'] for plugin in core_plugins[order])}. Therefor, the execution order will be random.",
-                    )
-
-                for plugin in core_plugins[order]:
-                    core_settings.update(plugin["settings"])
 
             # Compute the config
             logger.info("Computing config ...")
@@ -187,79 +189,15 @@ if __name__ == "__main__":
                 args.settings, core_settings, args.plugins, args.variables, logger
             )
             config_files = config.get_config()
-
-            db = Database(
-                logger,
-                sqlalchemy_string=getenv("DATABASE_URI", None),
-            )
-            is_initialized = db.is_initialized()
-
-            if not is_initialized:
-                ret, err = db.init_tables(
-                    [
-                        config.get_settings(),
-                        list(chain.from_iterable(core_plugins.values())),
-                        config.get_plugins_settings(),
-                    ]
-                )
-
-                # Initialize database tables
-                if err:
-                    logger.error(
-                        f"Exception while initializing database : {err}",
-                    )
-                    sys_exit(1)
-                elif ret is False:
-                    logger.info(
-                        "Database tables are already initialized, skipping creation ...",
-                    )
-                else:
-                    logger.info("Database tables initialized")
-
-                logger.info(
-                    "Database not initialized, initializing ...",
-                )
-
-                custom_confs = [
-                    {"value": v, "exploded": custom_confs_rx.search(k).groups()}
-                    for k, v in environ.items()
-                    if custom_confs_rx.match(k)
-                ]
-
-                with open("/opt/bunkerweb/VERSION", "r") as f:
-                    bw_version = f.read().strip()
-
-                err = db.save_config(config_files, "scheduler")
-
-                if not err:
-                    err1 = db.save_custom_configs(custom_confs, "scheduler")
-
-                    if not err1:
-                        err2 = db.initialize_db(
-                            version=bw_version, integration=integration
-                        )
-
-                if err or err1 or err2:
-                    logger.error(
-                        f"Can't Initialize database : {err or err1 or err2}",
-                    )
-                    sys_exit(1)
-                else:
-                    logger.info("Database initialized")
-
-                if args.init:
-                    sys_exit(0)
-            elif is_initialized:
-                logger.info(
-                    "Database is already initialized, skipping ...",
-                )
-
-            sys_exit(0)
+            custom_confs = [
+                {"value": v, "exploded": custom_confs_rx.search(k).groups()}
+                for k, v in environ.items()
+                if custom_confs_rx.match(k)
+            ]
         elif integration == "Kubernetes":
             corev1 = kube_client.CoreV1Api()
             tmp_config = {}
             apis = []
-            db = None
 
             for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
                 if (
@@ -343,7 +281,6 @@ if __name__ == "__main__":
             tmp_config = {}
             custom_confs = []
             apis = []
-            db = None
 
             for instance in (
                 docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
@@ -365,11 +302,57 @@ if __name__ == "__main__":
             db = Database(logger)
 
         # Compute the config
-        logger.info("Computing config ...")
-        config = Configurator(
-            args.settings, args.core, args.plugins, tmp_config, logger
-        )
-        config_files = config.get_config()
+        if config_files is None:
+            logger.info("Computing config ...")
+            config = Configurator(
+                args.settings, core_settings, args.plugins, tmp_config, logger
+            )
+            config_files = config.get_config()
+
+        if not db.is_initialized():
+            logger.info(
+                "Database not initialized, initializing ...",
+            )
+            ret, err = db.init_tables(
+                [
+                    config.get_settings(),
+                    list(chain.from_iterable(core_plugins.values())),
+                    config.get_plugins_settings(),
+                ]
+            )
+
+            # Initialize database tables
+            if err:
+                logger.error(
+                    f"Exception while initializing database : {err}",
+                )
+                sys_exit(1)
+            elif ret is False:
+                logger.info(
+                    "Database tables are already initialized, skipping creation ...",
+                )
+            else:
+                logger.info("Database tables initialized")
+
+            with open("/opt/bunkerweb/VERSION", "r") as f:
+                version = f.read().strip()
+
+            err = db.initialize_db(version=version, integration=integration)
+
+            if err:
+                logger.error(
+                    f"Can't Initialize database : {err}",
+                )
+                sys_exit(1)
+            else:
+                logger.info("Database initialized")
+        else:
+            logger.info(
+                "Database is already initialized, skipping ...",
+            )
+
+        if args.init:
+            sys_exit(0)
 
         err = db.save_config(config_files, "scheduler")
 

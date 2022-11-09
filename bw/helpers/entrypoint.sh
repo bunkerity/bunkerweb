@@ -40,9 +40,13 @@ elif [ "$AUTOCONF_MODE" == "yes" ] ; then
 	echo "Autoconf" > /opt/bunkerweb/INTEGRATION
 fi
 
-# generate "temp" config
-echo -e "IS_LOADING=yes\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}" > /tmp/variables.env
-python3 /opt/bunkerweb/gen/main.py --variables /tmp/variables.env
+if [ -f "/etc/nginx/variables.env" ] ; then
+	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb has already been loaded, will not generate temp config"
+else
+	# generate "temp" config
+	echo -e "IS_LOADING=yes\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}" > /tmp/variables.env
+	python3 /opt/bunkerweb/gen/main.py --variables /tmp/variables.env
+fi
 
 # start nginx
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."

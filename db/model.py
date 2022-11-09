@@ -150,7 +150,7 @@ class Jobs(Base):
     file = Column(String(255), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, nullable=False)
-    success = Column(Boolean, nullable=False)
+    success = Column(Boolean, nullable=True)
     last_run = Column(DateTime, nullable=True)
 
     plugin = relationship("Plugins", back_populates="jobs")
