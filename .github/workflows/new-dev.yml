@@ -57,101 +57,101 @@ jobs:
   #         cache-from: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache
   #         cache-to: type=registry,ref=bunkerity/cache:bw-ui-amd64-cache,mode=min
 
-  # Build linux ubuntu
-  build-bw-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Login to private repository
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # Build package image
-      - name: Build ubuntu package image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          load: true
-          file: linux/Dockerfile-ubuntu
-          platforms: linux/amd64
-          tags: local/bunkerweb-ubuntu:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-ubuntu-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-ubuntu-cache,mode=min
-      # Generate package
-      - name: Generate ubuntu deb
-        run: ./linux/package.sh ubuntu
-      - uses: actions/upload-artifact@v3
-        with:
-          name: package-ubuntu
-          path: package-ubuntu/*.deb
-      # Build test image
-      - name: Build BW ubuntu test image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: tests/linux/Dockerfile-ubuntu
-          platforms: linux/amd64
-          push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest
+  # # Build linux ubuntu
+  # build-bw-ubuntu:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Setup Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_TOKEN }}
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     # Build package image
+  #     - name: Build ubuntu package image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         load: true
+  #         file: linux/Dockerfile-ubuntu
+  #         platforms: linux/amd64
+  #         tags: local/bunkerweb-ubuntu:latest
+  #         cache-from: type=registry,ref=bunkerity/cache:bw-ubuntu-cache
+  #         cache-to: type=registry,ref=bunkerity/cache:bw-ubuntu-cache,mode=min
+  #     # Generate package
+  #     - name: Generate ubuntu deb
+  #       run: ./linux/package.sh ubuntu
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: package-ubuntu
+  #         path: package-ubuntu/*.deb
+  #     # Build test image
+  #     - name: Build BW ubuntu test image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         file: tests/linux/Dockerfile-ubuntu
+  #         platforms: linux/amd64
+  #         push: true
+  #         tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest
 
-  # Build linux debian
-  build-bw-debian:
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Login to private repository
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # Build package image
-      - name: Build debian package image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          load: true
-          file: linux/Dockerfile-debian
-          platforms: linux/amd64
-          tags: local/bunkerweb-debian:latest
-          cache-from: type=registry,ref=bunkerity/cache:bw-debian-cache
-          cache-to: type=registry,ref=bunkerity/cache:bw-debian-cache,mode=min
-      # Generate package
-      - name: Generate debian deb
-        run: ./linux/package.sh debian
-      - uses: actions/upload-artifact@v3
-        with:
-          name: package-debian
-          path: package-debian/*.deb
-      # Build test image
-      - name: Build BW debian test image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: tests/linux/Dockerfile-debian
-          platforms: linux/amd64
-          push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest
+  # # Build linux debian
+  # build-bw-debian:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Setup Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_TOKEN }}
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     # Build package image
+  #     - name: Build debian package image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         load: true
+  #         file: linux/Dockerfile-debian
+  #         platforms: linux/amd64
+  #         tags: local/bunkerweb-debian:latest
+  #         cache-from: type=registry,ref=bunkerity/cache:bw-debian-cache
+  #         cache-to: type=registry,ref=bunkerity/cache:bw-debian-cache,mode=min
+  #     # Generate package
+  #     - name: Generate debian deb
+  #       run: ./linux/package.sh debian
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: package-debian
+  #         path: package-debian/*.deb
+  #     # Build test image
+  #     - name: Build BW debian test image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: .
+  #         file: tests/linux/Dockerfile-debian
+  #         platforms: linux/amd64
+  #         push: true
+  #         tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest
 
   # Build linux centos
   build-bw-centos:
@@ -568,10 +568,10 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      - name: Pull BW linux ubuntu test image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest local/bw-ubuntu:latest
-      - name: Pull BW linux debian test image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest local/bw-debian:latest
+      # - name: Pull BW linux ubuntu test image
+      #   run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest local/bw-ubuntu:latest
+      # - name: Pull BW linux debian test image
+      #   run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest local/bw-debian:latest
       - name: Pull BW linux centos test image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest local/bw-centos:latest
       - name: Pull BW linux fedora test image
@@ -579,16 +579,16 @@ jobs:
       - name: Install test dependencies
         run: pip3 install -r tests/requirements.txt
       # Do tests
-      - name: Run Linux ubuntu tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux debian tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      # - name: Run Linux ubuntu tests
+      #   run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
+      #   env:
+      #     TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+      #     ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      # - name: Run Linux debian tests
+      #   run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
+      #   env:
+      #     TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+      #     ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux centos tests
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
         env:
