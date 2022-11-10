@@ -12,6 +12,7 @@
 - Fix various typos in documentation
 - Fix warning about StartLimitIntervalSec directive when using Linux
 - Fix incorrect log when issuing certbot renew
+- Fix certbot renew error when using Linux or Docker integration
 - Add greylist core feature
 - Add BLACKLIST_IGNORE_\* settings
 - Add automatic change of SecRequestBodyLimit modsec directive based on MAX_CLIENT_SIZE setting
