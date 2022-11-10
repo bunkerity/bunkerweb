@@ -19,6 +19,7 @@ services:
       - MULTISITE=yes
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - AUTO_LETS_ENCRYPT=yes # will be applied to all the services
+      - USE_LETS_ENCRYPT_STAGING=yes
     networks:
       - bw-autoconf
       - bw-services
