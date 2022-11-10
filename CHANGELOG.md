@@ -21,6 +21,7 @@
 - Add Brawdunoir community example
 - Improve core plugins order and add documentation about it
 - Improve overall documentation
+- Improve CI/CD
 
 ## v1.4.3 - 2022/08/26
 

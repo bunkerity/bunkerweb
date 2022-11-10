@@ -784,7 +784,7 @@ jobs:
           path: /tmp
       - run: tar xvf /tmp/terraform.tar -C /
       # Remove k8s infra
-      - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60 ; kubectl delete pvc --all --timeout=60 ; kubectl delete pv --all --timeout=60
+      - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
         continue-on-error: true
         env:
           KUBECONFIG: /tmp/k8s/kubeconfig

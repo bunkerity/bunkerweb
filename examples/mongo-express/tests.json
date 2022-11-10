@@ -5,6 +5,7 @@
 		"autoconf"
 	],
 	"timeout": 60,
+	"delay": 60,
 	"no_copy_container": true,
 	"tests": [
 		{
