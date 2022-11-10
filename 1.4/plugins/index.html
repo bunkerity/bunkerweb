@@ -701,7 +701,7 @@ documentation for the current version.
 
 
 <h1 id="plugins">Plugins</h1>
-<p>BunkerWeb comes with a plugin system to make it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.</p>
+<p>BunkerWeb comes with a plugin system making it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.</p>
 <h2 id="official-plugins">Official plugins</h2>
 <p>Here is the list of "official" plugins that we maintain (see the <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a> repository for more information) :</p>
 <table>
@@ -759,7 +759,7 @@ documentation for the current version.
 <p>The first thing to do is to create the plugins folder :
 <div class="highlight"><pre><span></span><code>mkdir -p ./bw-data/plugins
 </code></pre></div></p>
-<p>Then you can drop the plugins of your choice into that folder :
+<p>Then, you can drop the plugins of your choice into that folder :
 <div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
 cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
 </code></pre></div></p>
@@ -772,11 +772,11 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
@@ -798,7 +798,7 @@ chmod -R <span class="m">770</span> bw-data
 <p>Execute a shell inside the autoconf container (use <code>docker ps</code> to get the name) :
 <div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> -it myautoconf /bin/bash
 </code></pre></div></p>
-<p>Once you have a shell inside the container, you can drop the plugins of your choice inside the <code>/data/plugins</code> folder :
+<p>Once you have a shell inside the container, you will be able to drop the plugins of your choice inside the <code>/data/plugins</code> folder :
 <div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
 cp -rp ./bunkerweb-plugins/* /data/plugins
 </code></pre></div></p>
@@ -808,7 +808,7 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <p>Execute a shell inside the autoconf container (use <code>kubectl get pods</code> to get the name) :
 <div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -it myautoconf -- /bin/bash
 </code></pre></div></p>
-<p>Once you have a shell inside the container, you can drop the plugins of your choice inside the <code>/data/plugins</code> folder :
+<p>Once you have a shell inside the container, you will be able to drop the plugins of your choice inside the <code>/data/plugins</code> folder :
 <div class="highlight"><pre><span></span><code>git clone https://github.com/bunkerity/bunkerweb-plugins <span class="o">&amp;&amp;</span> <span class="se">\</span>
 cp -rp ./bunkerweb-plugins/* /data/plugins
 </code></pre></div></p>
@@ -834,7 +834,7 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <span class="w">  </span><span class="nt">vars</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_plugins</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/bunkerweb-plugins&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>Run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
@@ -845,7 +845,7 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <h2 id="writing-a-plugin">Writing a plugin</h2>
 <div class="admonition tip">
 <p class="admonition-title">Existing plugins</p>
-<p>If the documentation is not enough you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/core">core plugins</a> (already included in BunkerWeb but they are plugins technically speaking).</p>
+<p>If the documentation is not enough, you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/master/core">core plugins</a> (already included in BunkerWeb but they are plugins, technically speaking).</p>
 </div>
 <p>The first step is to create a folder that will contain the plugin :</p>
 <div class="highlight"><pre><span></span><code>mkdir myplugin <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -1096,25 +1096,25 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 <td align="center"><code>init</code></td>
 <td align="center"><a href="https://github.com/openresty/lua-nginx-module#init_by_lua">init_by_lua</a></td>
 <td align="left">Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.</td>
-<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
+<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error or else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
 </tr>
 <tr>
 <td align="center"><code>access</code></td>
 <td align="center"><a href="https://github.com/openresty/lua-nginx-module#access_by_lua">access_by_lua</a></td>
 <td align="left">Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.</td>
-<td align="left"><code>ret</code>, <code>err</code>, <code>return</code>, <code>status</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li><li><code>return</code> (boolean) : true if you want to stop the access phase and send a status to the client</li><li><code>status</code> (number) : the return value to set if <code>return</code> is set to true</li></ul></td>
+<td align="left"><code>ret</code>, <code>err</code>, <code>return</code>, <code>status</code><ul><li><code>ret</code> (boolean) : true if no error or else false</li><li><code>err</code> (string) : success or error message</li><li><code>return</code> (boolean) : true if you want to stop the access phase and send a status to the client</li><li><code>status</code> (number) : the return value to set if <code>return</code> is set to true</li></ul></td>
 </tr>
 <tr>
 <td align="center"><code>log</code></td>
 <td align="center"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
 <td align="left">Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example.</td>
-<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
+<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error or else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
 </tr>
 <tr>
 <td align="center"><code>log_default</code></td>
 <td align="center"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
 <td align="left">Same as <code>log</code> but only called on the default server.</td>
-<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
+<td align="left"><code>ret</code>, <code>err</code><ul><li><code>ret</code> (boolean) : true if no error or else false</li><li><code>err</code> (string) : success or error message</li></ul></td>
 </tr>
 </tbody>
 </table>
@@ -1203,10 +1203,10 @@ cp -rp ./bunkerweb-plugins/* /data/plugins
 Content of foo is : {{ foo }}.
 {% endif %}
 </code></pre></div></p>
-<p>Please note that every form submission is protected via a CSRF token, you will need to include the follow snippet into your forms :
+<p>Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;csrf_token&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;{{ csrf_token() }}&quot;</span> <span class="p">/&gt;</span>
 </code></pre></div></p>
-<p>Retrieving user submitted data is pretty simple thanks to the request module provided by Flask :</p>
+<p>Retrieving user submitted data is pretty simple, thanks to the request module provided by Flask :</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
 
 <span class="k">def</span> <span class="nf">myplugin</span><span class="p">()</span> <span class="p">:</span>

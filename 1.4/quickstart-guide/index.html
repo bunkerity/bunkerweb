@@ -705,7 +705,7 @@ documentation for the current version.
 <p>Create the Docker network if it's not already created :
 <div class="highlight"><pre><span></span><code>docker network create bw-net
 </code></pre></div></p>
-<p>Then instantiate your app :
+<p>Then, instantiate your app :
 <div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
        --name myapp <span class="se">\</span>
        --network bw-net <span class="se">\</span>
@@ -725,7 +725,7 @@ documentation for the current version.
        -e <span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_URL</span><span class="o">=</span>/ <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_HOST</span><span class="o">=</span>http://myapp <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -733,7 +733,7 @@ documentation for the current version.
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -909,7 +909,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <p>Let's check the status of BunkerWeb :
 <div class="highlight"><pre><span></span><code>systemctl status bunkerweb
 </code></pre></div></p>
-<p>If it's already running we can restart it :
+<p>If it's already running, we can restart it :
 <div class="highlight"><pre><span></span><code>systemctl restart bunkerweb
 </code></pre></div></p>
 <p>Otherwise, we will need to start it :
@@ -917,7 +917,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>We will assume that you already have a service running and you want to use bunkerweb as a reverse-proxy.</p>
+<p>We will assume that you already have a service running and you want to use BunkerWeb as a reverse-proxy.</p>
 <p>The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
 <div class="highlight"><pre><span></span><code>python3 -m http.server -b <span class="m">127</span>.0.0.1
 </code></pre></div></p>
@@ -940,7 +940,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">  </span><span class="nt">vars</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">variables_env</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/my_variables.env&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>You can now run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
@@ -1001,14 +1001,14 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
        -p <span class="m">80</span>:8080 <span class="se">\</span>
        -p <span class="m">443</span>:8443 <span class="se">\</span>
        -v bw-data:/data <span class="se">\</span>
-       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes
+       -e <span class="nv">MULTISITE</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="s2">&quot;SERVER_NAME=app1.example.com app2.example.com app3.example.com&quot;</span> <span class="se">\</span>
        -e <span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="nv">REVERSE_PROXY_URL</span><span class="o">=</span>/ <span class="se">\</span>
        -e app1.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp1 <span class="se">\</span>
        -e app2.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp2 <span class="se">\</span>
        -e app3.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp3 <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -1016,7 +1016,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -1478,7 +1478,7 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <p>Let's check the status of BunkerWeb :
 <div class="highlight"><pre><span></span><code>systemctl status bunkerweb
 </code></pre></div></p>
-<p>If it's already running we can restart it :
+<p>If it's already running, we can restart it :
 <div class="highlight"><pre><span></span><code>systemctl restart bunkerweb
 </code></pre></div></p>
 <p>Otherwise, we will need to start it :
@@ -1533,14 +1533,14 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <span class="w">  </span><span class="nt">vars</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">variables_env</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/my_variables.env&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div>
     <a href=""></a>
     Run the playbook :
     <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
 </code></pre></div></p>
 <h2 id="behind-load-balancer-or-reverse-proxy">Behind load balancer or reverse proxy</h2>
-<p>When BunkerWeb is itself behind a load balancer or a reverse proxy, you will need to configure it so it can get the real IP address of the clients. If you don't do it, the security features will block the IP address of the load balancer or reverse proxy instead of the client one.</p>
+<p>When BunkerWeb is itself behind a load balancer or a reverse proxy, you need to configure it so it can get the real IP address of the clients. If you don't, the security features will block the IP address of the load balancer or reverse proxy instead of the client's one.</p>
 <p>BunkerWeb actually supports two methods to retrieve the real IP address of the client :</p>
 <ul>
 <li>Using the PROXY protocol</li>
@@ -1575,11 +1575,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1596,11 +1596,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1617,11 +1617,11 @@ REAL_IP_HEADER=X-Forwarded-For
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>X-Forwarded-For <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1631,7 +1631,7 @@ REAL_IP_HEADER=X-Forwarded-For
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+<p>You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -1644,7 +1644,7 @@ REAL_IP_HEADER=X-Forwarded-For
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
@@ -1664,7 +1664,7 @@ REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
 REAL_IP_HEADER=X-Forwarded-For
 ...
 </code></pre></div></p>
-<p>Don't forget to restart the bunkerweb service once it's done.</p>
+<p>Don't forget to restart the BunkerWeb service once it's done.</p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to your <code>my_variables.env</code> configuration file :
@@ -1684,7 +1684,7 @@ REAL_IP_HEADER=X-Forwarded-For
 <span class="w">  </span><span class="nt">vars</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">variables_env</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/my_variables.env&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>Run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
@@ -1715,11 +1715,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1738,11 +1738,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1761,11 +1761,11 @@ REAL_IP_HEADER=proxy_protocol
        -e <span class="s2">&quot;REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16&quot;</span> <span class="se">\</span>
        -e <span class="nv">REAL_IP_HEADER</span><span class="o">=</span>proxy_protocol <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (using <code>docker stack deploy</code>) :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP=yes</span><span class="w"></span>
@@ -1776,7 +1776,7 @@ REAL_IP_HEADER=proxy_protocol
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>You will need to add the settings to the environment variables of the bunkerweb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+<p>You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -1789,7 +1789,7 @@ REAL_IP_HEADER=proxy_protocol
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span><span class="w"></span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span><span class="w"></span>
@@ -1812,7 +1812,7 @@ REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
 REAL_IP_HEADER=proxy_protocol
 ...
 </code></pre></div></p>
-<p>Don't forget to restart the bunkerweb service once it's done.</p>
+<p>Don't forget to restart the BunkerWeb service once it's done.</p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to your <code>my_variables.env</code> configuration file :
@@ -1833,7 +1833,7 @@ REAL_IP_HEADER=proxy_protocol
 <span class="w">  </span><span class="nt">vars</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">variables_env</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/my_variables.env&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>Run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
@@ -1850,13 +1850,13 @@ REAL_IP_HEADER=proxy_protocol
 <li><strong>modsec-crs</strong> : before the OWASP Core Rule Set is loaded</li>
 <li><strong>modsec</strong> : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)</li>
 </ul>
-<p>Custom configurations can be applied globally or only for a specific server when applicable and if multisite mode is enabled.</p>
+<p>Custom configurations can be applied globally or only for a specific server when applicable and if the multisite mode is enabled.</p>
 <p>The howto depends on the integration used but under the hood, applying custom configurations is done by adding files ending with the .conf suffix in their name to specific folders. To apply a custom configuration for a specific server, the file is written to a subfolder which is named as the primary server name.</p>
-<p>Some integrations offer a more convenient way of applying configurations for example using <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> with Swarm or <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> with Kubernetes.</p>
+<p>Some integrations offer a more convenient way of applying configurations such as using <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> with Swarm or <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> with Kubernetes.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:6"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><input id="__tabbed_11_4" name="__tabbed_11" type="radio" /><input id="__tabbed_11_5" name="__tabbed_11" type="radio" /><input id="__tabbed_11_6" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Docker</label><label for="__tabbed_11_2">Docker autoconf</label><label for="__tabbed_11_3">Swarm</label><label for="__tabbed_11_4">Kubernetes</label><label for="__tabbed_11_5">Linux</label><label for="__tabbed_11_6">Ansible</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, you have two choices for adding custom configurations :</p>
+<p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, you have two choices for the addition of custom configurations :</p>
 <ul>
 <li>Using specific settings <code>*_CUSTOM_CONF_*</code> as environment variables (easiest)</li>
 <li>Writing .conf files to the volume mounted on /data</li>
@@ -1870,7 +1870,7 @@ REAL_IP_HEADER=proxy_protocol
 </ul>
 <p>Here is a dummy example using a docker-compose file :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
 <span class="w">      </span><span class="no">CUSTOM_CONF_SERVER_HTTP_hello-world=</span><span class="w"></span>
@@ -1903,11 +1903,11 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
@@ -1959,11 +1959,11 @@ chmod -R <span class="m">770</span> bw-data
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/bw-data:/data&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb-autoconf:1.4.3
+       bunkerity/bunkerweb-autoconf:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">myautoconf</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.4.4</span><span class="w"></span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span><span class="w"></span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"></span>
@@ -1972,7 +1972,7 @@ chmod -R <span class="m">770</span> bw-data
 <div class="tabbed-block">
 <p>When using the <a href="/1.4/integrations/#swarm">Swarm integration</a>, custom configurations are managed using <a href="https://docs.docker.com/engine/swarm/configs/">Docker Configs</a>.</p>
 <p>To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.</p>
-<p>When creating a Config you will need to add special labels :</p>
+<p>When creating a Config, you will need to add special labels :</p>
 <ul>
 <li><strong>bunkerweb.CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)</li>
 <li><strong>bunkerweb.CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
@@ -1990,7 +1990,7 @@ chmod -R <span class="m">770</span> bw-data
 <div class="tabbed-block">
 <p>When using the <a href="/1.4/integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
 <p>To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.</p>
-<p>When creating a ConfigMap you will need to add special labels :</p>
+<p>When creating a ConfigMap, you will need to add special labels :</p>
 <ul>
 <li><strong>bunkerweb.io/CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)</li>
 <li><strong>bunkerweb.io/CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
@@ -2026,7 +2026,7 @@ chmod -R <span class="m">770</span> bw-data
 <div class="highlight"><pre><span></span><code>chown -R root:nginx /opt/bunkerweb/configs <span class="o">&amp;&amp;</span> <span class="se">\</span>
 chmod -R <span class="m">770</span> /opt/bunkerweb/configs
 </code></pre></div></p>
-<p>Don't forget to restart the bunkerweb service once it's done.</p>
+<p>Don't forget to restart the BunkerWeb service once it's done.</p>
 </div>
 <div class="tabbed-block">
 <p>The <code>custom_configs_path[]</code> variable is a dictionary with configuration types (<code>http</code>, <code>server-http</code>, <code>modsec</code>, <code>modsec-crs</code>) as keys and the corresponding values are path containing the configuration files.</p>
@@ -2050,7 +2050,7 @@ chmod -R <span class="m">770</span> /opt/bunkerweb/configs
 <span class="nt">        server-http</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/server-http&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">}</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>Run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
@@ -2061,7 +2061,7 @@ chmod -R <span class="m">770</span> /opt/bunkerweb/configs
 <h2 id="php">PHP</h2>
 <div class="admonition warning">
 <p class="admonition-title">Support is in beta</p>
-<p>At the moment, PHP support with BunkerWeb is still in beta and we recommend you to use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.</p>
+<p>At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.</p>
 </div>
 <p>BunkerWeb supports PHP using external or remote <a href="https://www.php.net/manual/en/install.fpm.php">PHP-FPM</a> instances. We will assume that you are already familiar with managing that kind of services.</p>
 <p>The following settings can be used :</p>
@@ -2078,7 +2078,7 @@ chmod -R <span class="m">770</span> /opt/bunkerweb/configs
 <p>When using the <a href="/1.4/integrations/#docker">Docker integration</a>, to support PHP applications, you will need to :</p>
 <ul>
 <li>Copy your application files into the <code>www</code> subfolder of the <code>bw-data</code> volume of BunkerWeb</li>
-<li>Setup a PHP-FPM container for your application and mount the <code>bw-data/www</code> folder</li>
+<li>Set up a PHP-FPM container for your application and mount the <code>bw-data/www</code> folder</li>
 <li>Use the specific settings <code>REMOTE_PHP</code> and <code>REMOTE_PHP_PATH</code> as environment variables when starting BunkerWeb</li>
 </ul>
 <p>Create the <code>bw-data/www</code> folder :
@@ -2111,7 +2111,7 @@ find ./bw-data/www -type d -exec chmod <span class="m">0750</span> <span class="
        -e <span class="nv">AUTO_LETS_ENCRYPT</span><span class="o">=</span>yes <span class="se">\</span>
        -e <span class="nv">REMOTE_PHP</span><span class="o">=</span>myphp <span class="se">\</span>
        -e <span class="nv">REMOTE_PHP_PATH</span><span class="o">=</span>/app <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -2119,7 +2119,7 @@ find ./bw-data/www -type d -exec chmod <span class="m">0750</span> <span class="
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -2146,7 +2146,7 @@ find ./bw-data/www -type d -exec chmod <span class="m">0750</span> <span class="
 </div>
 <div class="tabbed-block">
 <p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, your PHP files must not be mounted into the <code>bw-data/www</code> folder. Instead, you will need to create a specific folder containing your PHP application and mount it both on the BunkerWeb container (outside the <code>/data</code> endpoint) and your PHP-FPM container.</p>
-<p>First of all create the application folder (e.g. <code>myapp</code>), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+<p>First of all, create the application folder (e.g. <code>myapp</code>), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
 <div class="highlight"><pre><span></span><code>chown -R <span class="m">33</span>:101 ./myapp <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find ./myapp -type f -exec chmod <span class="m">0640</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find ./myapp -type d -exec chmod <span class="m">0750</span> <span class="o">{}</span> <span class="se">\;</span>
@@ -2156,9 +2156,9 @@ find ./myapp -type d -exec chmod <span class="m">0750</span> <span class="o">{}<
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/myapp:/app&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
-<p>Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
+<p>Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
 <div class="highlight"><pre><span></span><code>docker run -d <span class="se">\</span>
        --name myphp <span class="se">\</span>
        --network bw-services <span class="se">\</span>
@@ -2202,7 +2202,7 @@ find ./myapp -type d -exec chmod <span class="m">0750</span> <span class="o">{}<
 <p>Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances.</p>
 </div>
 <p>When using the <a href="/integrations/#swarm">Docker Swarm integration</a>, your PHP files must not be mounted into the <code>bw-data/www</code> folder. Instead, you will need to create a specific folder containing your PHP application and mount it both on the BunkerWeb container (outside the <code>/data</code> endpoint) and your PHP-FPM container. As an example, we will consider that you have a shared folder mounted on your worker nodes on the <code>/shared</code> endpoint.</p>
-<p>First of all create the application folder (e.g. <code>/shared/myapp</code>), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+<p>First of all, create the application folder (e.g. <code>/shared/myapp</code>), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
 <div class="highlight"><pre><span></span><code>chown -R <span class="m">33</span>:101 /shared/myapp <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find /shared/myapp -type f -exec chmod <span class="m">0640</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find /shared/myapp -type d -exec chmod <span class="m">0750</span> <span class="o">{}</span> <span class="se">\;</span>
@@ -2212,9 +2212,9 @@ find /shared/myapp -type d -exec chmod <span class="m">0750</span> <span class="
        ...
        -v <span class="s2">&quot;/shared/myapp:/app&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
-<p>Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
+<p>Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
 <div class="highlight"><pre><span></span><code>docker service create <span class="se">\</span>
        --name myphp <span class="se">\</span>
        --network bw-services <span class="se">\</span>
@@ -2262,7 +2262,7 @@ find /shared/myapp -type d -exec chmod <span class="m">0750</span> <span class="
 </div>
 <div class="tabbed-block">
 <p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
-<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
+<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
 <p>First of all, you will need to make sure that your PHP-FPM instance can access the files inside the <code>/opt/bunkerweb/www</code> folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like <code>www-data</code> for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 <div class="highlight"><pre><span></span><code><span class="na">...</span><span class="w"></span>
 <span class="k">[www]</span><span class="w"></span>
@@ -2302,7 +2302,7 @@ If it's already running we can restart it :
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it for storing your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
+<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
 <p>First of all, you will need to make sure that your PHP-FPM instance can access the files inside the <code>/opt/bunkerweb/www</code> folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like <code>www-data</code> for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 <div class="highlight"><pre><span></span><code><span class="na">...</span><span class="w"></span>
 <span class="k">[www]</span><span class="w"></span>
@@ -2316,7 +2316,7 @@ If it's already running we can restart it :
 </code></pre></div></p>
 <div class="admonition info">
 <p class="admonition-title">PHP-FPM with Ansible</p>
-<p>The PHP-FPM configuration part using Ansible is out-of-scope of this documentation.</p>
+<p>The PHP-FPM configuration part using Ansible is out of the scope of this documentation.</p>
 </div>
 <p>Content of the <code>my_variables.env</code> configuration file :
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
@@ -2327,7 +2327,7 @@ AUTO_LETS_ENCRYPT=yes
 LOCAL_PHP=/run/php/php-fpm.sock
 LOCAL_PHP_PATH=/opt/bunkerweb/www/  
 </code></pre></div></p>
-<p>The <code>custom_site</code> variable can be used to specificy a directory containing your application files (e.g : <code>my_app</code>) that will be copied to <code>/opt/bunkerweb/www</code> and the <code>custom_www_owner</code> variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+<p>The <code>custom_site</code> variable can be used to specify a directory containing your application files (e.g : <code>my_app</code>) that will be copied to <code>/opt/bunkerweb/www</code> and the <code>custom_www_owner</code> variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
 <div class="highlight"><pre><span></span><code><span class="k">[mybunkers]</span><span class="w"></span>
 <span class="na">192.168.0.42 variables_env</span><span class="o">=</span><span class="s">&quot;{{ playbook_dir }}/my_variables.env&quot; custom_www=&quot;{{ playbook_dir }}/my_app&quot; custom_www_owner=&quot;www-data&quot;</span><span class="w"></span>
 </code></pre></div></p>
@@ -2339,7 +2339,7 @@ LOCAL_PHP_PATH=/opt/bunkerweb/www/
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_www</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/my_app&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_www_owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www-data&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>You can now run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml
@@ -2423,7 +2423,7 @@ find ./bw-data/www -type d -exec chmod <span class="m">0750</span> <span class="
        -e app2.example.com_REMOTE_PHP_PATH<span class="o">=</span>/app <span class="se">\</span>
        -e app3.example.com_REMOTE_PHP<span class="o">=</span>myphp3 <span class="se">\</span>
        -e app3.example.com_REMOTE_PHP_PATH<span class="o">=</span>/app <span class="se">\</span>
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent :
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3&#39;</span><span class="w"></span>
@@ -2431,7 +2431,7 @@ find ./bw-data/www -type d -exec chmod <span class="m">0750</span> <span class="
 <span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">mybunker</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.3</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.4.4</span><span class="w"></span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span><span class="w"></span>
@@ -2476,7 +2476,7 @@ find ./bw-data/www -type d -exec chmod <span class="m">0750</span> <span class="
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, your PHP files must not be mounted into the <code>bw-data/www</code> folder. Instead, you will need to create a specific folders containing your PHP applications and mount them both on the BunkerWeb container (outside the <code>/data</code> endpoint) and your PHP-FPM containers.</p>
+<p>When using the <a href="/integrations/#docker-autoconf">Docker autoconf integration</a>, your PHP files must not be mounted into the <code>bw-data/www</code> folder. Instead, you will need to create a specific folder containing your PHP applications and mount it both on the BunkerWeb container (outside the <code>/data</code> endpoint) and your PHP-FPM containers.</p>
 <p>First of all create the applications folder (e.g. <code>myapp</code>), the subfolders for each application (e.g, <code>app1</code>, <code>app2</code> and <code>app3</code>), copy your web files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
 <div class="highlight"><pre><span></span><code>chown -R <span class="m">33</span>:101 ./myapps <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find ./myapps -type f -exec chmod <span class="m">0640</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -2487,9 +2487,9 @@ find ./myapps -type d -exec chmod <span class="m">0750</span> <span class="o">{}
        ...
        -v <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">/myapps:/apps&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
-<p>Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :</p>
+<p>Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">App #1</label><label for="__tabbed_15_2">App #2</label><label for="__tabbed_15_3">App #3</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2595,7 +2595,7 @@ find ./myapps -type d -exec chmod <span class="m">0750</span> <span class="o">{}
 <p>Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances.</p>
 </div>
 <p>When using the <a href="/integrations/#swarm">Docker Swarm integration</a>, your PHP files must not be mounted into the <code>bw-data/www</code> folder. Instead, you will need to create a specific folder containing your PHP applications and mount it both on the BunkerWeb container (outside the <code>/data</code> endpoint) and your PHP-FPM containers. As an example, we will consider that you have a shared folder mounted on your worker nodes on the <code>/shared</code> endpoint.</p>
-<p>FFirst of all create the applications folder (e.g. <code>myapp</code>), the subfolders for each application (e.g, <code>app1</code>, <code>app2</code> and <code>app3</code>), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+<p>First of all, create the applications folder (e.g. <code>myapp</code>), the subfolders for each application (e.g, <code>app1</code>, <code>app2</code> and <code>app3</code>), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
 <div class="highlight"><pre><span></span><code>chown -R <span class="m">33</span>:101 /shared/myapps <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find /shared/myapps -type f -exec chmod <span class="m">0640</span> <span class="o">{}</span> <span class="se">\;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
 find /shared/myapps -type d -exec chmod <span class="m">0750</span> <span class="o">{}</span> <span class="se">\;</span>
@@ -2605,9 +2605,9 @@ find /shared/myapps -type d -exec chmod <span class="m">0750</span> <span class=
        ...
        -v <span class="s2">&quot;/shared/myapps:/apps&quot;</span> <span class="se">\</span>
        ...
-       bunkerity/bunkerweb:1.4.3
+       bunkerity/bunkerweb:1.4.4
 </code></pre></div></p>
-<p>Once BunkerWeb and autoconf are ready, you can now create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :</p>
+<p>Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">App #1</label><label for="__tabbed_16_2">App #2</label><label for="__tabbed_16_3">App #2</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2721,7 +2721,7 @@ find /shared/myapps -type d -exec chmod <span class="m">0750</span> <span class=
 </div>
 <div class="tabbed-block">
 <p>We will assume that you already have the <a href="/1.4/integrations/#linux">Linux integration</a> stack running on your machine.</p>
-<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it for storing your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
+<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
 <p>First of all, you will need to make sure that your PHP-FPM instance can access the files inside the <code>/opt/bunkerweb/www</code> folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like <code>www-data</code> for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 <div class="highlight"><pre><span></span><code><span class="na">...</span><span class="w"></span>
 <span class="k">[www]</span><span class="w"></span>
@@ -2766,7 +2766,7 @@ If it's already running we can restart it :
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it for storing your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
+<p>By default, BunkerWeb will search for web files inside the <code>/opt/bunkerweb/www</code> folder. You can use it to store your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.</p>
 <p>First of all, you will need to make sure that your PHP-FPM instance can access the files inside the <code>/opt/bunkerweb/www</code> folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like <code>www-data</code> for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 <div class="highlight"><pre><span></span><code><span class="na">...</span><span class="w"></span>
 <span class="k">[www]</span><span class="w"></span>
@@ -2780,7 +2780,7 @@ If it's already running we can restart it :
 </code></pre></div></p>
 <div class="admonition info">
 <p class="admonition-title">PHP-FPM with Ansible</p>
-<p>The PHP-FPM configuration part using Ansible is out-of-scope of this documentation.</p>
+<p>The PHP-FPM configuration part using Ansible is out of the scope of this documentation.</p>
 </div>
 <p>Content of the <code>my_variables.env</code> configuration file :
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
@@ -2796,7 +2796,7 @@ app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
 app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
 app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
 </code></pre></div></p>
-<p>The <code>custom_site</code> variable can be used to specificy a directory containing your application files (e.g : <code>my_app</code>) that will be copied to <code>/opt/bunkerweb/www</code> and the <code>custom_www_owner</code> variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+<p>The <code>custom_site</code> variable can be used to specify a directory containing your application files (e.g : <code>my_app</code>) that will be copied to <code>/opt/bunkerweb/www</code> and the <code>custom_www_owner</code> variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
 <div class="highlight"><pre><span></span><code><span class="k">[mybunkers]</span><span class="w"></span>
 <span class="na">192.168.0.42 variables_env</span><span class="o">=</span><span class="s">&quot;{{ playbook_dir }}/my_variables.env&quot; custom_www=&quot;{{ playbook_dir }}/my_app&quot; custom_www_owner=&quot;www-data&quot;</span><span class="w"></span>
 </code></pre></div></p>
@@ -2808,7 +2808,7 @@ app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_www</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/my_app&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_www_owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www-data&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">roles</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fl0ppy_d1sk.bunkerweb</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span><span class="w"></span>
 </code></pre></div></p>
 <p>You can now run the playbook :
 <div class="highlight"><pre><span></span><code>ansible-playbook -i inventory.yml playbook.yml

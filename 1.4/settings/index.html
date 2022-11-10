@@ -605,6 +605,13 @@ documentation for the current version.
 </li>
         
           <li class="md-nav__item">
+  <a href="#greylist" class="md-nav__link">
+    Greylist
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#gzip" class="md-nav__link">
     Gzip
   </a>
@@ -796,10 +803,10 @@ documentation for the current version.
 <h1 id="settings">Settings</h1>
 <div class="admonition info">
 <p class="admonition-title">Settings generator tool</p>
-<p>To help you tuning BunkerWeb we have made an easy to use settings generator tool available at <a href="https://config.bunkerweb.io">config.bunkerweb.io</a>.</p>
+<p>To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at <a href="https://config.bunkerweb.io">config.bunkerweb.io</a>.</p>
 </div>
-<p>This section contains the full list of settings supported by BunkerWeb. If you are not familiar with BunkerWeb, you should first read the <a href="/1.4/concepts">concepts</a> section of the documentation. Please follow the instructions for your own <a href="/1.4/integrations">integration</a> on how to apply the settings.</p>
-<p>As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server you will need to add the primary (first) server name as a prefix like <code>www.example.com_USE_ANTIBOT=captcha</code> or <code>myapp.example.com_USE_GZIP=yes</code> for example.</p>
+<p>This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the <a href="/1.4/concepts">concepts</a> section of the documentation. Please follow the instructions for your own <a href="/1.4/integrations">integration</a> on how to apply the settings.</p>
+<p>As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary (first) server name as a prefix like <code>www.example.com_USE_ANTIBOT=captcha</code> or <code>myapp.example.com_USE_GZIP=yes</code> for example.</p>
 <p>When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like <code>REVERSE_PROXY_URL_1=/subdir</code>, <code>REVERSE_PROXY_HOST_1=http://myhost1</code>, <code>REVERSE_PROXY_URL_2=/anotherdir</code>, <code>REVERSE_PROXY_HOST_2=http://myhost2</code>, ... for example.</p>
 <h2 id="global-settings">Global settings</h2>
 <table>
@@ -980,7 +987,7 @@ documentation for the current version.
 <td><code>/challenge</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Unused URI that clients will be redirected to solve the challenge.</td>
+<td>Unused URI that clients will be redirected to to solve the challenge.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_SESSION_SECRET</code></td>
@@ -1127,7 +1134,7 @@ documentation for the current version.
 <td><code>60</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Period of time where we count 'bad' HTTP status codes.</td>
+<td>Period of time during which we count 'bad' HTTP status codes.</td>
 </tr>
 </tbody>
 </table>
@@ -1226,6 +1233,76 @@ documentation for the current version.
 <td>global</td>
 <td>no</td>
 <td>List of URLs, separated with spaces, containing bad URI to block.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_IP_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_IP</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of IP/network, separated with spaces, to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_RDNS</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_RDNS_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_ASN</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of ASN numbers, separated with spaces, to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_ASN_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing ASN to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_USER_AGENT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of User-Agent, separated with spaces, to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_USER_AGENT_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of URI, separated with spaces, to ignore in the blacklist.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_URI_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing URI to ignore in the blacklist.</td>
 </tr>
 </tbody>
 </table>
@@ -1513,6 +1590,104 @@ documentation for the current version.
 <td>multisite</td>
 <td>no</td>
 <td>List of HTTP error code and corresponding error pages (404=/my404.html 403=/errors/403.html ...).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="greylist">Greylist</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_GREYLIST</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Activate greylist feature.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_IP_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing good IP/network to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_IP</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of IP/network, separated with spaces, to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_RDNS</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of reverse DNS suffixes, separated with spaces, to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_RDNS_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_RDNS_GLOBAL</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Only perform RDNS greylist checks on global IP addresses.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_ASN</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of ASN numbers, separated with spaces, to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_ASN_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing ASN to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_USER_AGENT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of User-Agent, separated with spaces, to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_USER_AGENT_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing good User-Agent to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of URI, separated with spaces, to put into the greylist.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_URI_URLS</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>List of URLs, separated with spaces, containing bad URI to put into the greylist.</td>
 </tr>
 </tbody>
 </table>
@@ -1934,6 +2109,20 @@ documentation for the current version.
 <td>no</td>
 <td>SecAuditEngine directive of ModSecurity.</td>
 </tr>
+<tr>
+<td><code>MODSECURITY_SEC_RULE_ENGINE</code></td>
+<td><code>On</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SecRuleEngine directive of ModSecurity.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code></td>
+<td><code>ABCFHZ</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SecAuditLogParts directive of ModSecurity.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="php">PHP</h3>
@@ -2149,7 +2338,7 @@ documentation for the current version.
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td>Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).</td>
+<td>Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_AUTH_REQUEST_SET</code></td>
@@ -2198,7 +2387,7 @@ documentation for the current version.
 <td><code>2</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>The minimimum number of requests before a response is cached.</td>
+<td>The minimum number of requests before a response is cached.</td>
 </tr>
 <tr>
 <td><code>PROXY_CACHE_KEY</code></td>
@@ -2212,7 +2401,7 @@ documentation for the current version.
 <td><code>200=24h 301=1h 302=24h</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Define the caching time dependending on the HTTP status code (list of status=time).</td>
+<td>Define the caching time depending on the HTTP status code (list of status=time).</td>
 </tr>
 <tr>
 <td><code>PROXY_NO_CACHE</code></td>

@@ -635,16 +635,23 @@ documentation for the current version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#blacklisting-and-whitelisting" class="md-nav__link">
-    Blacklisting and whitelisting
+  <a href="#blacklisting-whitelisting-and-greylisting" class="md-nav__link">
+    Blacklisting, whitelisting and greylisting
   </a>
   
-    <nav class="md-nav" aria-label="Blacklisting and whitelisting">
+    <nav class="md-nav" aria-label="Blacklisting, whitelisting and greylisting">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#blacklisting" class="md-nav__link">
     Blacklisting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#greylisting" class="md-nav__link">
+    Greylisting
   </a>
   
 </li>
@@ -838,11 +845,16 @@ documentation for the current version.
 
 
 <h1 id="security-tuning">Security tuning</h1>
-<p>BunkerWeb offers many security features that you can configure with <a href="/1.4/settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.</p>
+<p>BunkerWeb offers many security features that you can configure with <a href="/1.4/settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.</p>
 <div class="admonition tip">
 <p class="admonition-title">Other settings</p>
 <p>This section only focuses on security tuning, see the <a href="/1.4/settings">settings section</a> of the documentation for other settings.</p>
 </div>
+<figure>
+<p><img align="center" alt="Overview" src="../assets/img/core-order.svg" />
+  </p>
+<figcaption>Overview and order of the core security plugins</figcaption>
+</figure>
 <h2 id="http-protocol">HTTP protocol</h2>
 <h3 id="deny-status-code">Deny status code</h3>
 <p>The first thing to define is the kind of action to do when a client access is denied. You can control the action with the <code>DENY_HTTP_STATUS</code> setting which allows the following values :</p>
@@ -850,7 +862,7 @@ documentation for the current version.
 <li><code>403</code> : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)</li>
 <li><code>444</code> : close the connection (no web page or custom content will be displayed)</li>
 </ul>
-<p>The default value is <code>403</code> and we suggest you to set it to <code>444</code> only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.</p>
+<p>The default value is <code>403</code> and we suggest you set it to <code>444</code> only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.</p>
 <h3 id="default-server">Default server</h3>
 <p>In the HTTP protocol, the Host header is used to determine which server the client wants to send the request to. That header is facultative and may be missing from the request or can be set as an unknown value. This is a common case, a lot of bots are scanning the Internet and are trying to exploit services or simply doing some fingerprinting.</p>
 <p>You can disable any request containing undefined or unknown Host value by setting <code>DISABLE_DEFAULT_SERVER</code> to <code>yes</code> (default : <code>no</code>). Please note that clients won't even receive a response, the TCP connection will be closed (using the special 444 status code of NGINX).</p>
@@ -861,7 +873,7 @@ documentation for the current version.
 <h3 id="serve-files">Serve files</h3>
 <p>To disable serving files from the www folder, you can set <code>SERVE_FILES</code> to <code>no</code> (default : <code>yes</code>). The value <code>no</code> is recommended if you use BunkerWeb as a reverse proxy.</p>
 <h3 id="headers">Headers</h3>
-<p>Headers are very important when it comes to HTTP security. Not only some of them are too verbose but others can add some security, especially on the client-side.</p>
+<p>Headers are very important when it comes to HTTP security. While some of them might be too verbose, others' verbosity will need to be increased, especially on the client-side.</p>
 <h4 id="remove-headers">Remove headers</h4>
 <p>You can automatically remove verbose headers in the HTTP responses by using the <code>REMOVE_HEADERS</code> setting (default : <code>Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version</code>).</p>
 <h4 id="cookies">Cookies</h4>
@@ -1087,7 +1099,7 @@ documentation for the current version.
 </table>
 <p>When <code>USE_CUSTOM_HTTPS</code> is set to <code>yes</code>, BunkerWeb will check every day if the custom certificate specified in <code>CUSTOM_HTTPS_CERT</code> is modified and will reload NGINX if that's the case.</p>
 <h3 id="self-signed">Self-signed</h3>
-<p>If you want to quickly test HTTPS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related</p>
+<p>If you want to quickly test HTTPS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related settings :</p>
 <table>
 <thead>
 <tr>
@@ -1192,13 +1204,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <tr>
 <td align="center"><code>BAD_BEHAVIOR_COUNT_TIME</code></td>
 <td align="center"><code>60</code></td>
-<td align="left">Period of time where we count "suspicious" HTTP status codes.</td>
+<td align="left">Period of time during which we count "suspicious" HTTP status codes.</td>
 </tr>
 </tbody>
 </table>
-<p>In other words, with the default values, if a client generates more than <code>10</code> status codes from the list <code>400 401 403 404 405 429 444</code> within <code>60</code> seconds his IP address will be banned for <code>86400</code> seconds.</p>
+<p>In other words, with the default values, if a client generates more than <code>10</code> status codes from the list <code>400 401 403 404 405 429 444</code> within <code>60</code> seconds their IP address will be banned for <code>86400</code> seconds.</p>
 <h2 id="antibot">Antibot</h2>
-<p>Attackers will certainly use automated tools to exploit/find some vulnerabilities in your web applications. One countermeasure is to challenge the users to detect if they look like a bot. If the challenge is solved, we consider the client as "legitimate" and he can access the web application.</p>
+<p>Attackers will certainly use automated tools to exploit/find some vulnerabilities in your web applications. One countermeasure is to challenge the users to detect if they look like a bot. If the challenge is solved, we consider the client as "legitimate" and they can access the web application.</p>
 <p>That kind of security is implemented but not enabled by default in BunkerWeb and is called "Antibot". Here is the list of supported challenges :</p>
 <ul>
 <li><strong>Cookie</strong> : send a cookie to the client, we expect to get the cookie back on other requests</li>
@@ -1249,11 +1261,11 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<h2 id="blacklisting-and-whitelisting">Blacklisting and whitelisting</h2>
-<p>The blacklisting security feature is very easy to understand : if a specific criteria is met, the client will be banned. As for the whitelisting, it's the exact opposite : if a specific criteria is met, the client will be allowed and no additional security check will be done.</p>
-<p>You can configure blacklisting and whitelisting at the same time. If that's the case, note that whitelisting is executed before blacklisting : if a criteria is true for both, the client will be whitelisted.</p>
+<h2 id="blacklisting-whitelisting-and-greylisting">Blacklisting, whitelisting and greylisting</h2>
+<p>The blacklisting security feature is very easy to understand : if a specific criteria is met, the client will be banned. As for the whitelisting, it's the exact opposite : if a specific criteria is met, the client will be allowed and no additional security check will be done. Whereas for the greylisting :  if a specific criteria is met, the client will be allowed but additional security checks will be done.</p>
+<p>You can configure blacklisting, whitelisting and greylisting at the same time. If that's the case, note that whitelisting is executed before blacklisting and greylisting : even if a criteria is true for all of them, the client will be whitelisted.</p>
 <h3 id="blacklisting">Blacklisting</h3>
-<p>You can use the following settings to setup blacklisting :</p>
+<p>You can use the following settings to set up blacklisting :</p>
 <table>
 <thead>
 <tr>
@@ -1320,8 +1332,76 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
+<h3 id="greylisting">Greylisting</h3>
+<p>You can use the following settings to set up greylisting :</p>
+<table>
+<thead>
+<tr>
+<th align="center">Setting</th>
+<th align="center">Default</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>USE_GREYLIST</code></td>
+<td align="center"><code>no</code></td>
+<td align="left">When set to <code>yes</code>, will enable greylisting based on various criteria.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_IP</code></td>
+<td align="center"></td>
+<td align="left">List of IPs and networks to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_IP_URLS</code></td>
+<td align="center"></td>
+<td align="left">List of URL containing IP and network to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_RDNS</code></td>
+<td align="center"></td>
+<td align="left">List of reverse DNS to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_RDNS_URLS</code></td>
+<td align="center"></td>
+<td align="left">List of URLs containing reverse DNS to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_ASN</code></td>
+<td align="center"></td>
+<td align="left">List of ASN to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_ASN_URLS</code></td>
+<td align="center"></td>
+<td align="left">List of URLs containing ASN to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_USER_AGENT</code></td>
+<td align="center"></td>
+<td align="left">List of User-Agents to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_USER_AGENT_URLS</code></td>
+<td align="center"></td>
+<td align="left">List of URLs containing User-Agent(s) to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_URI</code></td>
+<td align="center"></td>
+<td align="left">List of requests URI to greylist.</td>
+</tr>
+<tr>
+<td align="center"><code>GREYLIST_URI_URLS</code></td>
+<td align="center"></td>
+<td align="left">List of URLs containing request URI to greylist.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="whitelisting">Whitelisting</h3>
-<p>You can use the following settings to setup whitelisting :</p>
+<p>You can use the following settings to set up whitelisting :</p>
 <table>
 <thead>
 <tr>
@@ -1334,7 +1414,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <tr>
 <td align="center"><code>USE_WHITELIST</code></td>
 <td align="center"><code>yes</code></td>
-<td align="left">When set to <code>yes</code>, will enable blacklisting based on various criteria.</td>
+<td align="left">When set to <code>yes</code>, will enable whitelisting based on various criteria.</td>
 </tr>
 <tr>
 <td align="center"><code>WHITELIST_IP</code></td>
@@ -1423,7 +1503,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Number of connections per IP</li>
 <li>Number of requests per IP and URL within a time period</li>
 </ul>
-<p>Please note that it should not be considered as an effective solution against DoS or DDoS but rather an anti-bruteforce measure or rate limit policy for API.</p>
+<p>Please note that it should not be considered as an effective solution against DoS or DDoS but rather as an anti-bruteforce measure or rate limit policy for API.</p>
 <p>In both cases (connections or requests) if the limit is reached, the client will receive the HTTP status "429 - Too Many Requests".</p>
 <h3 id="connections">Connections</h3>
 <p>The following settings are related to the Limiting connections feature :</p>
@@ -1467,7 +1547,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <tr>
 <td align="center"><code>USE_LIMIT_REQ</code></td>
 <td align="center"><code>yes</code></td>
-<td align="left">When set to <code>yes</code>, will limit the number of requests for a given IP on each URL with a period of time.</td>
+<td align="left">When set to <code>yes</code>, will limit the number of requests for a given IP on each URL within a period of time.</td>
 </tr>
 <tr>
 <td align="center"><code>LIMIT_REQ_URL</code></td>
@@ -1481,7 +1561,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<p>Please note that you can add different rate for different URLs by adding a number to suffix to the settings for example : <code>LIMIT_REQ_URL_1=/url1</code>, <code>LIMIT_REQ_RATE_1=5r/d</code>, <code>LIMIT_REQ_URL_2=/url2</code>, <code>LIMIT_REQ_RATE_2=1r/m</code>, ...</p>
+<p>Please note that you can add different rates for different URLs by adding a number as a suffix to the settings for example : <code>LIMIT_REQ_URL_1=/url1</code>, <code>LIMIT_REQ_RATE_1=5r/d</code>, <code>LIMIT_REQ_URL_2=/url2</code>, <code>LIMIT_REQ_RATE_2=1r/m</code>, ...</p>
 <p>Another important thing to note is that <code>LIMIT_REQ_URL</code> accepts LUA patterns.</p>
 <h2 id="country">Country</h2>
 <p>The country security feature allows you to apply policy based on the country of the IP address of clients :</p>
@@ -1511,10 +1591,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<p>Using both country blacklist and whitelist at the same time makes no sense. If you do please note that only the whitelist will be executed.</p>
+<p>Using both country blacklist and whitelist at the same time makes no sense. If you do, please note that only the whitelist will be executed.</p>
 <h2 id="authentication">Authentication</h2>
 <h3 id="auth-basic">Auth basic</h3>
-<p>You can quickly protect sensitive resources like the admin area for example by requiring HTTP basic authentication. Here is the list of related settings :</p>
+<p>You can quickly protect sensitive resources like the admin area for example, by requiring HTTP basic authentication. Here is the list of related settings :</p>
 <table>
 <thead>
 <tr>
@@ -1552,7 +1632,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h3 id="auth-request">Auth request</h3>
-<p>You can deploy complex authentification (e.g. SSO), by using the auth request settings (see <a href="https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/">here</a> for more information on the feature). Please note that you will find <a href="https://www.authelia.com/">Authelia</a> and <a href="https://goauthentik.io/">Authentik</a> examples in the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">repository</a>.</p>
+<p>You can deploy complex authentication (e.g. SSO), by using the auth request settings (see <a href="https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/">here</a> for more information on the feature). Please note that you will find <a href="https://www.authelia.com/">Authelia</a> and <a href="https://goauthentik.io/">Authentik</a> examples in the <a href="https://github.com/bunkerity/bunkerweb/tree/master/examples">repository</a>.</p>
 <p><strong>Auth request settings are related to reverse proxy rules.</strong></p>
 <table>
 <thead>
@@ -1577,7 +1657,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td>Redirect clients to signin URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).</td>
+<td>Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_AUTH_REQUEST_SET</code></td>
