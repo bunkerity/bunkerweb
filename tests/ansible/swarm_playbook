@@ -41,3 +41,14 @@
         - bw-swarm
   roles:
     - monolithprojects.github_actions_runner
+
+- hosts: all
+  name: Restart GH runner (dirty hack because sometimes the runner is in inactive state)
+  tasks:
+    - name: Wait 60 seconds just in case
+      ansible.builtin.pause:
+        seconds: 60
+    - name: Restart GH runner
+      ansible.builtin.systemd:
+        name: "actions.runner*"
+        state: restarted
