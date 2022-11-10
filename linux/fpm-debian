@@ -7,7 +7,7 @@
 --description "BunkerWeb %VERSION% for Debian 11"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
---after-install /opt/bunkerweb/scripts/postinstall.sh
---before-remove /opt/bunkerweb/scripts/beforeRemove.sh
---after-remove /opt/bunkerweb/scripts/afterRemove.sh
-/opt/bunkerweb/=/opt/bunkerweb/ bunkerweb.service=/etc/systemd/system/bunkerweb.service bunkerweb-ui.service=/etc/systemd/system/bunkerweb-ui.service /usr/local/bin/bwcli=/usr/local/bin/bwcli
+--after-install /usr/share/bunkerweb/scripts/postinstall.sh
+--before-remove /usr/share/bunkerweb/scripts/beforeRemove.sh
+--after-remove /usr/share/bunkerweb/scripts/afterRemove.sh
+/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb bunkerweb.service=/etc/systemd/system/bunkerweb.service bunkerweb-ui.service=/etc/systemd/system/bunkerweb-ui.service

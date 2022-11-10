@@ -2,12 +2,12 @@
 
 # function to start the UI
 start_ui() {
-  export PYTHONPATH=/opt/bunkerweb/deps/python/
+  export PYTHONPATH=/usr/share/bunkerweb/deps/python/
   echo "Starting UI"
   set -a
-  . /opt/bunkerweb/ui.env
+  . /etc/bunkerweb/ui.env
   set +a
-  export FLASK_APP=/opt/bunkerweb/ui/main.py
+  export FLASK_APP=/usr/share/bunkerweb/ui/main.py
   python3 -m flask run --host=127.0.0.1 --port=7000
 }
 
@@ -15,7 +15,7 @@ start_ui() {
 stop_ui(){
     echo "Stoping ui service ..."
     # Check if pid file exist and remove it if so
-    PID_FILE_PATH="/opt/bunkerweb/tmp/ui.pid"
+    PID_FILE_PATH="/var/tmp/bunkerweb/ui.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
         var=$( cat $PID_FILE_PATH )

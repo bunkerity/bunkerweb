@@ -10,7 +10,7 @@ if [ "$1" = "purge" ]; then
     # purge bunkerweb 
     sudo systemctl stop bunkerweb
     sudo systemctl disable bunkerweb
-    sudo rm -rf /opt/bunkerweb/
+    sudo rm -rf /usr/bin/bunkerweb/
     sudo rm -rf /etc/systemd/system/bunkerweb.service
     sudo rm -rf /etc/systemd/system/bunkerweb-ui.service
 
