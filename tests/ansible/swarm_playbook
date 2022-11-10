@@ -49,6 +49,4 @@
       ansible.builtin.pause:
         seconds: 60
     - name: Restart GH runner
-      ansible.builtin.systemd:
-        name: "actions.runner*"
-        state: restarted
+      shell: systemctl restart actions.runner.*
