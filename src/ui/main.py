@@ -25,7 +25,7 @@ from flask import (
 )
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
-from json import JSONDecodeError, load as json_load
+from json import JSONDecodeError, dumps, load as json_load
 from jinja2 import Template
 from os import chmod, getenv, getpid, listdir, mkdir, walk
 from os.path import exists, isdir, isfile, join
@@ -478,7 +478,7 @@ def services():
 
     # Display services
     services = app.config["CONFIG"].get_services()
-    return render_template("services.html", services=services)
+    return render_template("services.html", services=[dumps(service) for service in services])
 
 
 @app.route("/global_config", methods=["GET", "POST"])
@@ -535,9 +535,8 @@ def global_config():
             )
         )
 
-    # Display services
-    services = app.config["CONFIG"].get_services()
-    return render_template("global_config.html", services=services)
+    # Display global config
+    return render_template("global_config.html")
 
 
 @app.route("/configs", methods=["GET", "POST"])
