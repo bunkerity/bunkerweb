@@ -1,15 +1,19 @@
 FROM python:3.11-alpine
 
 # Copy python requirements
-COPY src/common/deps/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
+
+RUN mkdir -p /usr/share/bunkerweb/deps && \
+  cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 > /usr/share/bunkerweb/deps/requirements.txt && \
+  rm -rf /tmp/req
 
 # Install python requirements
-RUN apk add --no-cache --virtual build py3-pip g++ gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
-  pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip && \
   pip install wheel && \
   mkdir /usr/share/bunkerweb/deps/python && \
-  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
-  apk del build
+  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -25,7 +29,7 @@ COPY src/scheduler /usr/share/bunkerweb/scheduler
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
 # Add scheduler user, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash libgcc libstdc++ openssl git libpq-dev g++ gcc unixodbc-dev freetds-dev && \
+RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \

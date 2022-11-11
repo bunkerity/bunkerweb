@@ -10,6 +10,14 @@ RUN apt update && \
 
 # Copy dependencies sources folder
 COPY src/common/deps /tmp/bunkerweb/deps
+COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
+COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
+
+RUN mkdir -p /usr/share/bunkerweb/deps && \
+    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 /tmp/req/requirements.txt.3 > /tmp/bunkerweb/deps/requirements.txt && \
+    rm -rf /tmp/req
 
 # Nginx
 RUN apt update && \

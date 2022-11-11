@@ -1,7 +1,7 @@
 FROM nginx:1.20.2-alpine AS builder
 
 # Copy dependencies sources folder
-COPY src/common/deps /tmp/bunkerweb/deps
+COPY src/deps /tmp/bunkerweb/deps
 
 # Compile and install dependencies
 RUN apk add --no-cache --virtual build bash build autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
@@ -11,13 +11,13 @@ RUN apk add --no-cache --virtual build bash build autoconf libtool automake geoi
 	apk del build
 
 # Copy python requirements
-COPY src/common/deps/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
+COPY src/common/gen/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
 
 # Install python requirements
-RUN apk add --no-cache --virtual build py3-pip g++ gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
+RUN apk add --no-cache --virtual build py3-pip && \
 	pip install --no-cache-dir --upgrade pip && \
 	pip install wheel && \
-	mkdir /usr/share/bunkerweb/deps/python && \
+	mkdir -p /usr/share/bunkerweb/deps/python && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del build
 

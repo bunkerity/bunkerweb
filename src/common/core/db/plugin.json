@@ -7,7 +7,7 @@
   "settings": {
     "DATABASE_URI": {
       "context": "global",
-      "default": "sqlite:\/\/\/\/data/db.sqlite3",
+      "default": "sqlite:////data/db.sqlite3",
       "help": "The database URI, following the sqlalchemy format.",
       "id": "database-uri",
       "label": "The database URI",

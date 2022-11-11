@@ -10,8 +10,8 @@ authors = [
 exclude = '''
 /(
   | \.git
-  | bw/deps/src
-  | bw/core/modsecurity
+  | src/deps/src
+  | src/common/core/modsecurity
   | env
 )/
 '''

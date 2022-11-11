@@ -2,8 +2,8 @@ docs/
 env/
 */env/
 *.min*
-bw/core/modsecurity/
-bw/deps/src/
+src/common/core/modsecurity/
+src/deps/src/
 mkdocs.yml
 CHANGELOG.md
 CONTRIBUTING.md
