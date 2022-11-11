@@ -52,10 +52,12 @@ def handle_stop(signum, frame):
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
+
 def imerge(a, b):
-    for i, j in zip(a,b):
+    for i, j in zip(a, b):
         yield i
         yield j
+
 
 def handle_reload(env):
     global run, scheduler, reloading
@@ -73,6 +75,7 @@ def handle_reload(env):
         logger.error(
             f"Exception while reloading scheduler : {format_exc()}",
         )
+
 
 def stop(status):
     remove("/var/tmp/bunkerweb/scheduler.pid")
@@ -289,7 +292,9 @@ if __name__ == "__main__":
                         )
 
             # Fix permissions for the cache and the custom configs folders
-            for root, dirs, files in imerge(walk("/data/cache", topdown=False), walk("/data/configs", topdown=False)):
+            for root, dirs, files in imerge(
+                walk("/data/cache", topdown=False), walk("/data/configs", topdown=False)
+            ):
                 for name in files + dirs:
                     chown(join(root, name), "scheduler", "scheduler")
 

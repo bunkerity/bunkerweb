@@ -1,0 +1,2 @@
+sqlalchemy==1.4.43
+pymysql==1.0.2

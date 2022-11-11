@@ -478,7 +478,9 @@ def services():
 
     # Display services
     services = app.config["CONFIG"].get_services()
-    return render_template("services.html", services=[dumps(service) for service in services])
+    return render_template(
+        "services.html", services=[dumps(service) for service in services]
+    )
 
 
 @app.route("/global_config", methods=["GET", "POST"])

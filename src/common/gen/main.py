@@ -14,10 +14,8 @@ from traceback import format_exc
 sys_path.append("/usr/share/bunkerweb/deps/python")
 sys_path.append("/usr/share/bunkerweb/utils")
 sys_path.append("/usr/share/bunkerweb/api")
-sys_path.append("/usr/share/bunkerweb/db")
 
 from logger import setup_logger
-from Database import Database
 from Configurator import Configurator
 from Templator import Templator
 
@@ -128,6 +126,9 @@ if __name__ == "__main__":
             )
             config = config.get_config()
         else:
+            sys_path.append("/usr/share/bunkerweb/db")
+            from Database import Database
+
             db = Database(
                 logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),

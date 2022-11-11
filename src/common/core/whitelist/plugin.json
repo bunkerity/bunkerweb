@@ -114,10 +114,12 @@
       "type": "text"
     }
   },
-  "jobs": [{
-    "name": "whitelist-download",
-    "file": "whitelist-download.py",
-    "every": "hour",
-    "reload": true
-  }]
+  "jobs": [
+    {
+      "name": "whitelist-download",
+      "file": "whitelist-download.py",
+      "every": "hour",
+      "reload": true
+    }
+  ]
 }

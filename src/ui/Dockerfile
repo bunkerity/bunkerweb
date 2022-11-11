@@ -12,16 +12,20 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
 # Copy python requirements
-COPY src/ui/deps/requirements.txt /usr/share/bunkerweb/ui/deps/requirements.txt
+COPY src/ui/requirements.txt /tmp/req/requirements.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
+
+RUN mkdir -p /usr/share/bunkerweb/ui/deps && \
+    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 > /usr/share/bunkerweb/ui/deps/requirements.txt && \
+    rm -rf /tmp/req
 
 # Install python requirements
-RUN apk add --no-cache --virtual build py3-pip g++ gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
-    pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
-    mkdir /usr/share/bunkerweb/ui/deps/python && \
+    mkdir -p /usr/share/bunkerweb/ui/deps/python && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/ui/deps/python -r /usr/share/bunkerweb/ui/deps/requirements.txt && \
-    pip install --no-cache-dir gunicorn && \
-    apk del build
+    pip install --no-cache-dir gunicorn
 
 COPY src/ui /usr/share/bunkerweb/ui
 

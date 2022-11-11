@@ -1,15 +1,18 @@
 FROM python:3.11-alpine
 
 # Copy python requirements
-COPY src/common/deps/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.1
+
+RUN mkdir -p /usr/share/bunkerweb/deps && \
+    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 > /usr/share/bunkerweb/deps/requirements.txt && \
+    rm -rf /tmp/req
 
 # Install dependencies
-RUN apk add --no-cache --virtual build g++ gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
-    pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
-    mkdir /usr/share/bunkerweb/deps/python && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
-    apk del build
+    mkdir -p /usr/share/bunkerweb/deps/python && \
+    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand

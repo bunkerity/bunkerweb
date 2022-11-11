@@ -242,7 +242,8 @@ class Database:
                             ) as file:
                                 template = file.read().encode("utf-8")
                             with open(
-                                f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py", "r"
+                                f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py",
+                                "r",
                             ) as file:
                                 actions = file.read().encode("utf-8")
 

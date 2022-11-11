@@ -60,10 +60,12 @@
       "type": "check"
     }
   },
-  "jobs": [{
-    "name": "realip-download",
-    "file": "realip-download.py",
-    "every": "hour",
-    "reload": true
-  }]
+  "jobs": [
+    {
+      "name": "realip-download",
+      "file": "realip-download.py",
+      "every": "hour",
+      "reload": true
+    }
+  ]
 }
