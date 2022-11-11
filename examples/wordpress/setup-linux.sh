@@ -15,11 +15,11 @@ else
 fi
 curl https://wordpress.org/latest.zip -Lo /tmp/wordpress.zip
 unzip -qq /tmp/wordpress.zip -d /tmp
-cp -r /tmp/wordpress/* /opt/bunkerweb/www
-chown -R $user:nginx /opt/bunkerweb/www
-find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
-find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
-cp -r ./bw-data/configs/* /opt/bunkerweb/configs
-chown -R nginx:nginx /opt/bunkerweb/configs
-find /opt/bunkerweb/configs -type f -exec chmod 0644 {} \;
-find /opt/bunkerweb/configs -type d -exec chmod 0755 {} \;
+cp -r /tmp/wordpress/* /var/www/html
+chown -R $user:nginx /var/www/html
+find /var/www/html -type f -exec chmod 0640 {} \;
+find /var/www/html -type d -exec chmod 0750 {} \;
+cp -r ./bw-data/configs/* /etc/bunkerweb/configs
+chown -R nginx:nginx /etc/bunkerweb/configs
+find /etc/bunkerweb/configs -type f -exec chmod 0644 {} \;
+find /etc/bunkerweb/configs -type d -exec chmod 0755 {} \;

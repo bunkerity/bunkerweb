@@ -5,6 +5,6 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 1
 fi
 
-mkdir /opt/bunkerweb/www/{app1.example.com,app2.example.com}
-echo "hello" > /opt/bunkerweb/www/app1.example.com/index.html
-echo "hello" > /opt/bunkerweb/www/app2.example.com/index.html
+mkdir /var/www/html/{app1.example.com,app2.example.com}
+echo "hello" > /var/www/html/app1.example.com/index.html
+echo "hello" > /var/www/html/app2.example.com/index.html

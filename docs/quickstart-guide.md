@@ -247,7 +247,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     python3 -m http.server -b 127.0.0.1
     ```
 
-    Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
+    Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
     ```conf
     SERVER_NAME=www.example.com
     HTTP_PORT=80
@@ -852,7 +852,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	python3 -m http.server -b 127.0.0.1 8003
     	```
 
-    Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
+    Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
     ```conf
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     HTTP_PORT=80
@@ -1076,7 +1076,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Linux"
 
-    You will need to add the settings to the `/opt/bunkerweb/variables.env` file :
+    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
     ```conf
 	...
 	USE_REAL_IP=yes
@@ -1248,7 +1248,7 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Linux"
 
-    You will need to add the settings to the `/opt/bunkerweb/variables.env` file :
+    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
     ```conf
 	...
 	USE_REAL_IP=yes
@@ -1502,7 +1502,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Linux"
 
-    When using the [Linux integration](/1.4/integrations/#linux), custom configurations must be written to the /opt/bunkerweb/configs folder.
+    When using the [Linux integration](/1.4/integrations/#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
 
     Here is an example for server-http/hello-world.conf :
     ```conf
@@ -1516,8 +1516,8 @@ Some integrations offer a more convenient way of applying configurations such as
 
     Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
     ```shell
-    chown -R root:nginx /opt/bunkerweb/configs && \
-    chmod -R 770 /opt/bunkerweb/configs
+    chown -R root:nginx /etc/bunkerweb/configs && \
+    chmod -R 770 /etc/bunkerweb/configs
     ```
 
     Don't forget to restart the BunkerWeb service once it's done.
@@ -1793,9 +1793,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+    By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/var/www/html` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
 	...
 	[www]
@@ -1813,14 +1813,14 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	systemctl restart php-fpm
 	```
 
-	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
+	Once your application is copied to the `/var/www/html` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
 	```shell
-	chown -R www-data:nginx /opt/bunkerweb/www && \
-	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
-	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+	chown -R www-data:nginx /var/www/html && \
+	find /var/www/html -type f -exec chmod 0640 {} \; && \
+	find /var/www/html -type d -exec chmod 0750 {} \;
 	```
 
-	You can now edit the `/opt/bunkerweb/variable.env` file :
+	You can now edit the `/etc/bunkerweb/variable.env` file :
 	```env
 	HTTP_PORT=80
 	HTTPS_PORT=443
@@ -1828,7 +1828,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	SERVER_NAME=www.example.com
 	AUTO_LETS_ENCRYPT=yes
 	LOCAL_PHP=/run/php/php-fpm.sock
-	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+	LOCAL_PHP_PATH=/var/www/html/	
 	```
 
     Let's check the status of BunkerWeb :
@@ -1847,9 +1847,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Ansible"
 
-	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+	By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/var/www/html` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
 	...
 	[www]
@@ -1873,10 +1873,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	SERVER_NAME=www.example.com
 	AUTO_LETS_ENCRYPT=yes
 	LOCAL_PHP=/run/php/php-fpm.sock
-	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
+	LOCAL_PHP_PATH=/var/www/html/	
 	```
 	
-	The `custom_site` variable can be used to specify a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+	The `custom_site` variable can be used to specify a directory containing your application files (e.g : `my_app`) that will be copied to `/var/www/html` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
 	```ini
 	[mybunkers]
 	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
@@ -2298,9 +2298,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 	We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+    By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/var/www/html` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
 	...
 	[www]
@@ -2318,14 +2318,14 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	systemctl restart php-fpm
 	```
 
-	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
+	Once your application is copied to the `/var/www/html` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
 	```shell
-	chown -R www-data:nginx /opt/bunkerweb/www && \
-	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
-	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+	chown -R www-data:nginx /var/www/html && \
+	find /var/www/html -type f -exec chmod 0640 {} \; && \
+	find /var/www/html -type d -exec chmod 0750 {} \;
 	```
 
-	You can now edit the `/opt/bunkerweb/variable.env` file :
+	You can now edit the `/etc/bunkerweb/variable.env` file :
 	```env
 	HTTP_PORT=80
 	HTTPS_PORT=443
@@ -2334,11 +2334,11 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	MULTISITE=yes
 	AUTO_LETS_ENCRYPT=yes
 	app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+	app1.example.com_LOCAL_PHP_PATH=/var/www/html/app1.example.com
 	app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+	app2.example.com_LOCAL_PHP_PATH=/var/www/html/app2.example.com
 	app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
+	app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 	```
 
     Let's check the status of BunkerWeb :
@@ -2357,9 +2357,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Ansible"
 
-	By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+	By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP application : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/var/www/html` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
 	...
 	[www]
@@ -2384,14 +2384,14 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	MULTISITE=yes
 	AUTO_LETS_ENCRYPT=yes
 	app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
+	app1.example.com_LOCAL_PHP_PATH=/var/www/html/app1.example.com
 	app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
+	app2.example.com_LOCAL_PHP_PATH=/var/www/html/app2.example.com
 	app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
+	app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 	```
 
-	The `custom_site` variable can be used to specify a directory containing your application files (e.g : `my_app`) that will be copied to `/opt/bunkerweb/www` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
+	The `custom_site` variable can be used to specify a directory containing your application files (e.g : `my_app`) that will be copied to `/var/www/html` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory :
 	```ini
 	[mybunkers]
 	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"

@@ -196,7 +196,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     The installation of the web UI using the [Linux integration](/1.4/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
 
-    The first thing to do is to edit the BunkerWeb configuration located at **/opt/bunkerweb/variables.env** to add settings related to the web UI :
+    The first thing to do is to edit the BunkerWeb configuration located at **/etc/bunkerweb/variables.env** to add settings related to the web UI :
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
@@ -225,7 +225,7 @@ Because the web UI is a web application, the recommended installation procedure 
     systemctl restart bunkerweb
     ```
 
-    You can edit the **/opt/bunkerweb/ui.env** file containing the settings of the web UI :
+    You can edit the **/etc/bunkerweb/ui.env** file containing the settings of the web UI :
     ```conf
     ADMIN_USERNAME=admin
     ADMIN_PASSWORD=changeme
@@ -234,7 +234,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     Important things to note :
 
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/opt/bunkerweb/variables.env**)
+    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/etc/bunkerweb/variables.env**)
     * replace the username `admin` and password `changeme` with strong ones
 
     Restart the BunkerWeb UI service and you are now ready to access it :

@@ -22,4 +22,4 @@ systemctl stop bunkerweb
 systemctl stop haproxy
 systemctl start haproxy
 
-echo "hello" > /opt/bunkerweb/www/index.html
+echo "hello" > /var/www/html/index.html
