@@ -1,4 +1,3 @@
-from base64 import b64encode
 from datetime import datetime
 from typing import List, Union
 from bs4 import BeautifulSoup, Tag
@@ -388,7 +387,7 @@ def path_to_dict(
                 or magic_file.startswith("application/json")
             ):
                 with open(path, "rb") as f:
-                    d["content"] = b64encode(f.read()).decode("utf-8")
+                    d["content"] = f.read().decode("utf-8")
     else:
         config_types = [
             "http",
@@ -430,7 +429,7 @@ def path_to_dict(
                 "path": f"{path}/{type_lower}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['name']}.conf",
                 "can_edit": conf["method"] == "ui",
                 "can_download": True,
-                "content": b64encode(conf["data"]).decode("utf-8"),
+                "content": conf["data"].decode("utf-8"),
             }
 
             if (
