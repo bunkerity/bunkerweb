@@ -15,8 +15,8 @@ else
 fi
 curl https://download.nextcloud.com/server/releases/latest.zip -Lo /tmp/nextcloud.zip
 unzip -qq /tmp/nextcloud.zip -d /tmp
-cp -r /tmp/nextcloud/* /opt/bunkerweb/www
-chown -R $user:nginx /opt/bunkerweb/www
-find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
-find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
-cp -r bw-data/configs/* /opt/bunkerweb/configs
+cp -r /tmp/nextcloud/* /var/www/html
+chown -R $user:nginx /var/www/html
+find /var/www/html -type f -exec chmod 0640 {} \;
+find /var/www/html -type d -exec chmod 0750 {} \;
+cp -r bw-data/configs/* /etc/bunkerweb/configs

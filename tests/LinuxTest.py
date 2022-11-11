@@ -52,7 +52,7 @@ class LinuxTest(Test):
                 raise Exception("docker exec systemctl start failed (linux stack)")
             cp_dirs = {
                 "/tmp/bw-data/letsencrypt": "/etc/letsencrypt",
-                "/tmp/bw-data/cache": "/opt/bunkerweb/cache",
+                "/tmp/bw-data/cache": "/var/cache/bunkerweb",
             }
             for src, dst in cp_dirs.items():
                 proc = LinuxTest.docker_cp(distro, src, dst)
@@ -139,7 +139,7 @@ class LinuxTest(Test):
                 if proc.returncode != 0:
                     raise Exception("docker exec setup failed (test)")
             proc = LinuxTest.docker_exec(
-                self.__distro, f"cp /opt/{self._name}/variables.env /opt/bunkerweb"
+                self.__distro, f"cp /opt/{self._name}/variables.env /etc/bunkerweb/"
             )
             if proc.returncode != 0:
                 raise Exception("docker exec cp variables.env failed (test)")
@@ -161,7 +161,7 @@ class LinuxTest(Test):
         try:
             proc = LinuxTest.docker_exec(
                 self.__distro,
-                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /opt/bunkerweb/www/* ; rm -rf /opt/bunkerweb/configs/* ; rm -rf /opt/bunkerweb/plugins/*",
+                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/*",
             )
             if proc.returncode != 0:
                 raise Exception("docker exec rm failed (cleanup)")

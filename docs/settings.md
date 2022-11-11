@@ -14,7 +14,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 |        Setting        |                                                        Default                                                         | Context |Multiple|                   Description                    |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
-|`TEMP_NGINX`           |`no`                                                                                                                    |global   |no      |internal-use                                      |
+|`IS_LOADING`           |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.     |
 |`NGINX_PREFIX`         |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.       |
 |`HTTP_PORT`            |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.        |
 |`HTTPS_PORT`           |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.       |
@@ -73,20 +73,30 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Blacklist
 
-|          Setting          |                                                           Default                                                            | Context |Multiple|                                 Description                                  |
-|---------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------------------------|
-|`USE_BLACKLIST`            |`yes`                                                                                                                         |multisite|no      |Activate blacklist feature.                                                   |
-|`BLACKLIST_IP_URLS`        |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block.      |
-|`BLACKLIST_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to block.                          |
-|`BLACKLIST_RDNS`           |`.shodan.io .censys.io`                                                                                                       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to block.                |
-|`BLACKLIST_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.|
-|`BLACKLIST_RDNS_GLOBAL`    |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                    |
-|`BLACKLIST_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                         |
-|`BLACKLIST_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                 |
-|`BLACKLIST_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent, separated with spaces, to block.                          |
-|`BLACKLIST_USER_AGENT_URLS`|`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.      |
-|`BLACKLIST_URI`            |                                                                                                                              |multisite|no      |List of URI, separated with spaces, to block.                                 |
-|`BLACKLIST_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.             |
+|             Setting              |                                                           Default                                                            | Context |Multiple|                                          Description                                           |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------|
+|`USE_BLACKLIST`                   |`yes`                                                                                                                         |multisite|no      |Activate blacklist feature.                                                                     |
+|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block.                        |
+|`BLACKLIST_IP`                    |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to block.                                            |
+|`BLACKLIST_RDNS`                  |`.shodan.io .censys.io`                                                                                                       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to block.                                  |
+|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
+|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                                      |
+|`BLACKLIST_ASN`                   |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                                           |
+|`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                                   |
+|`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent, separated with spaces, to block.                                            |
+|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.                        |
+|`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI, separated with spaces, to block.                                                   |
+|`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.                               |
+|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
+|`BLACKLIST_IGNORE_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to ignore in the blacklist.                          |
+|`BLACKLIST_IGNORE_RDNS`           |                                                                                                                              |multisite|no      |List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.                |
+|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
+|`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to ignore in the blacklist.                         |
+|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
+|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent, separated with spaces, to ignore in the blacklist.                          |
+|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
+|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI, separated with spaces, to ignore in the blacklist.                                 |
+|`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
 ### Brotli
 
@@ -140,6 +150,12 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`CUSTOM_HTTPS_CERT`|       |multisite|no      |Full path of the certificate or bundle file.|
 |`CUSTOM_HTTPS_KEY` |       |multisite|no      |Full path of the key file.                  |
 
+### DB
+
+|   Setting    |          Default           |Context|Multiple|                   Description                    |
+|--------------|----------------------------|-------|--------|--------------------------------------------------|
+|`DATABASE_URI`|`sqlite:////data/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
+
 ### DNSBL
 
 |  Setting   |                                  Default                                   | Context |Multiple|      Description      |
@@ -152,6 +168,23 @@ When settings are considered as "multiple", it means that you can have multiple 
 |Setting |Default| Context |Multiple|                                           Description                                           |
 |--------|-------|---------|--------|-------------------------------------------------------------------------------------------------|
 |`ERRORS`|       |multisite|no      |List of HTTP error code and corresponding error pages (404=/my404.html 403=/errors/403.html ...).|
+
+### Greylist
+
+|         Setting          |Default| Context |Multiple|                                         Description                                          |
+|--------------------------|-------|---------|--------|----------------------------------------------------------------------------------------------|
+|`USE_GREYLIST`            |`no`   |multisite|no      |Activate greylist feature.                                                                    |
+|`GREYLIST_IP_URLS`        |       |global   |no      |List of URLs, separated with spaces, containing good IP/network to put into the greylist.     |
+|`GREYLIST_IP`             |       |multisite|no      |List of IP/network, separated with spaces, to put into the greylist.                          |
+|`GREYLIST_RDNS`           |       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to put into the greylist.                |
+|`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.|
+|`GREYLIST_RDNS_GLOBAL`    |`yes`  |multisite|no      |Only perform RDNS greylist checks on global IP addresses.                                     |
+|`GREYLIST_ASN`            |       |multisite|no      |List of ASN numbers, separated with spaces, to put into the greylist.                         |
+|`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist.                 |
+|`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent, separated with spaces, to put into the greylist.                          |
+|`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist.     |
+|`GREYLIST_URI`            |       |multisite|no      |List of URI, separated with spaces, to put into the greylist.                                 |
+|`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
 
 ### Gzip
 
@@ -214,7 +247,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`ALLOWED_METHODS`            |`GET\|POST\|HEAD`        |multisite|no      |Allowed HTTP methods to be sent by clients.                                                                           |
 |`MAX_CLIENT_SIZE`            |`10m`                  |multisite|no      |Maximum body size (0 for infinite).                                                                                   |
 |`SERVE_FILES`                |`yes`                  |multisite|no      |Serve files from the local folder.                                                                                    |
-|`ROOT_FOLDER`                |                       |multisite|no      |Root folder containing files to serve (/opt/bunkerweb/www/{server_name} if unset).                                    |
+|`ROOT_FOLDER`                |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                         |
 |`HTTPS_PROTOCOLS`            |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.               |
 |`HTTP2`                      |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                         |
 |`LISTEN_HTTP`                |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                  |
@@ -228,11 +261,13 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### ModSecurity
 
-| Setting                           | Default        | Context |Multiple| Description                                      |
-|-----------------------------------|----------------|---------|--------|--------------------------------------------------|
-| `USE_MODSECURITY`                 | `yes`          |multisite|no      | Enable ModSecurity WAF.                          |
-| `USE_MODSECURITY_CRS`             | `yes`          |multisite|no      | Enable OWASP Core Rule Set.                      |
-| `MODSECURITY_SEC_AUDIT_ENGINE`    | `RelevantOnly` |multisite|no      | SecAuditEngine directive of ModSecurity.         |
+|             Setting             |   Default    | Context |Multiple|               Description                |
+|---------------------------------|--------------|---------|--------|------------------------------------------|
+|`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                   |
+|`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.               |
+|`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.  |
+|`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
+|`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
 
 ### PHP
 

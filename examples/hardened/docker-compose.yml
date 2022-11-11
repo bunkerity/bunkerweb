@@ -14,7 +14,7 @@ services:
     # folders that need write access
     tmpfs:
       - /tmp:mode=0770,uid=0,gid=101
-      - /opt/bunkerweb/tmp:mode=0770,uid=0,gid=101
+      - /var/tmp/bunkerweb:mode=0770,uid=0,gid=101
       - /etc/nginx:mode=0770,uid=0,gid=101
     ports:
       - 80:8080

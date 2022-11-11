@@ -41,13 +41,13 @@ print(
 
 # Print global settings
 print("## Global settings\n")
-with open("settings.json", "r") as f:
+with open("src/common/settings.json", "r") as f:
     print_md_table(loads(f.read()))
 
 # Print core settings
 print("## Core settings\n")
 core_settings = {}
-for core in glob("./core/*/plugin.json"):
+for core in glob("src/common/core/*/plugin.json"):
     with open(core, "r") as f:
         core_plugin = loads(f.read())
         if len(core_plugin["settings"]) > 0:

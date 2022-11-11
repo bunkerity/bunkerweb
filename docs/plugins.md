@@ -113,7 +113,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Linux"
 
-    When using the [Linux integration](/1.4/integrations/#linux), plugins must be written to the `/opt/bunkerweb/plugins` folder :
+    When using the [Linux integration](/1.4/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins

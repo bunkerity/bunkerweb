@@ -580,7 +580,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /opt/bunkerweb/helpers/healthcheck.sh
+            - /usr/share/bunkerweb/helpers/healthcheck.sh
           initialDelaySeconds: 30
           periodSeconds: 5
           timeoutSeconds: 1
@@ -588,7 +588,7 @@ spec:
         readinessProbe:
           exec:
             command:
-            - /opt/bunkerweb/helpers/healthcheck.sh
+            - /usr/share/bunkerweb/helpers/healthcheck.sh
           initialDelaySeconds: 30
           periodSeconds: 1
           timeoutSeconds: 1
@@ -803,9 +803,9 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
     The first step is to install NGINX 1.20.2 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
 	
-	The target installation folder of BunkerWeb is located at `/opt/bunkerweb`, let's create it :
+	The target installation folder of BunkerWeb is located at `/usr/share/bunkerweb`, let's create it :
 	```shell
-	mkdir /opt/bunkerweb
+	mkdir /usr/share/bunkerweb
 	```
 	
 	You can now clone the BunkerWeb project to the `/tmp` folder :
@@ -813,40 +813,44 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	https://github.com/bunkerity/bunkerweb.git /tmp/bunkerweb
 	```
 	
-	BunkerWeb needs some dependencies to be compiled and installed to `/opt/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
+	BunkerWeb needs some dependencies to be compiled and installed to `/usr/share/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
 	```
-	mkdir /opt/bunkerweb/deps && \
+	mkdir /usr/share/bunkerweb/deps && \
 	/tmp/bunkerweb/deps/install.sh
 	```
 	
-	Additional Python dependencies needs to be installed into the `/opt/bunkerweb/deps/python` folder :
+	Additional Python dependencies needs to be installed into the `/usr/share/bunkerweb/deps/python` folder :
 	```shell
-	mkdir /opt/bunkerweb/deps/python && \
-	pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
-	pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
+	mkdir /usr/share/bunkerweb/deps/python && \
+	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+	pip install --no-cache-dir --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt && \
+  pip install --no-cache-dir gunicorn
 	```
 	
-	Once dependencies are installed, you will be able to copy the BunkerWeb sources to the target `/opt/bunkerweb` folder :
+	Once dependencies are installed, you will be able to copy the BunkerWeb sources to the target `/usr/share/bunkerweb` folder :
 	```shell
 	for src in api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/ui.env linux/scripts ; do
-		cp -r /tmp/bunkerweb/${src} /opt/bunkerweb
+		cp -r /tmp/bunkerweb/${src} /usr/share/bunkerweb
 	done
-	cp /opt/bunkerweb/helpers/bwcli /usr/local/bin
+	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin
 	```
 	
 	Additional folders also need to be created :
 	```shell
-	mkdir /opt/bunkerweb/{configs,cache,plugins,tmp}
+  mkdir -p /etc/bunkerweb/configs && \
+	mkdir -p /var/cache/bunkerweb && \
+  mkdir -p /etc/bunkerweb/plugins && \
+	mkdir -p /var/tmp/bunkerweb
 	```
 	
 	Permissions needs to be fixed :
 	```shell
-	find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
-	find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
-	find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-	chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
-	chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/scripts/*.sh /usr/local/bin/bwcli /opt/bunkerweb/ui/main.py && \
-	chown -R root:nginx /opt/bunkerweb
+	find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
+	find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
+	find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
+	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
+	chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/scripts/*.sh /usr/bin/bwcli /usr/share/bunkerweb/ui/main.py && \
+	chown -R root:nginx /usr/share/bunkerweb
 	```
 	
 	Last but not least, you will need to set up systemd unit files :
@@ -859,7 +863,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	systemctl enable bunkerweb-ui
 	```
 
-The configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
+The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
 
 ```conf
 MY_SETTING_1=value1
@@ -923,16 +927,16 @@ ansible-playbook -i inventory.yml playbook.yml
 
 Configuration of BunkerWeb is done by using specific role variables :
 
-| Name  | Type  | Description  | Default value  |
-|:-----:|:-----:|--------------|----------------|
-| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.3` |
-| `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
-| `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
-| `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |
-| `enable_ui` | boolean | Activate the web UI. | `false` |
-| `custom_ui` | string | Path of the ui.env file to configure the web UI. | `files/ui.env` |
-| `custom_configs_path` | Dictionary | Each entry is a path of the folder containing custom configurations. Keys are the type of custom configs : `http`, `server-http`, `modsec`, `modsec-crs` and `default-server-http` | empty values |
-| `custom_www` | string | Path of the www directory to upload. | empty value |
-| `custom_plugins` | string | Path of the plugins directory to upload. | empty value |
-| `custom_www_owner` | string | Default owner for www files and folders. | `nginx` |
-| `custom_www_group` | string | Default group for www files and folders. | `nginx` |
+|         Name          |    Type    | Description                                                                                                                                                                        | Default value         |
+| :-------------------: | :--------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+|  `bunkerweb_version`  |   string   | Version of BunkerWeb to install.                                                                                                                                                   | `1.4.3`               |
+|    `nginx_version`    |   string   | Version of NGINX to install.                                                                                                                                                       | `1.20.2`              |
+|   `freeze_versions`   |  boolean   | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades.                                                                                                          | `true`                |
+|    `variables_env`    |   string   | Path of the variables.env file to configure BunkerWeb.                                                                                                                             | `files/variables.env` |
+|      `enable_ui`      |  boolean   | Activate the web UI.                                                                                                                                                               | `false`               |
+|      `custom_ui`      |   string   | Path of the ui.env file to configure the web UI.                                                                                                                                   | `files/ui.env`        |
+| `custom_configs_path` | Dictionary | Each entry is a path of the folder containing custom configurations. Keys are the type of custom configs : `http`, `server-http`, `modsec`, `modsec-crs` and `default-server-http` | empty values          |
+|     `custom_www`      |   string   | Path of the www directory to upload.                                                                                                                                               | empty value           |
+|   `custom_plugins`    |   string   | Path of the plugins directory to upload.                                                                                                                                           | empty value           |
+|  `custom_www_owner`   |   string   | Default owner for www files and folders.                                                                                                                                           | `nginx`               |
+|  `custom_www_group`   |   string   | Default group for www files and folders.                                                                                                                                           | `nginx`               |

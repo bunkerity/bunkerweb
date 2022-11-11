@@ -13,7 +13,7 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-cp -r ./bw-data/www/* /opt/bunkerweb/www
-chown -R $user:nginx /opt/bunkerweb/www
-find /opt/bunkerweb/www -type f -exec chmod 0640 {} \;
-find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
+cp -r ./bw-data/www/* /var/www/html
+chown -R $user:nginx /var/www/html
+find /var/www/html -type f -exec chmod 0640 {} \;
+find /var/www/html -type d -exec chmod 0750 {} \;
