@@ -57,4 +57,5 @@ WORKDIR /usr/share/bunkerweb/ui
 
 USER ui:ui
 
+ENV PYTHONPATH /usr/share/bunkerweb/ui/deps/python
 CMD ["python3", "-m", "gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]
