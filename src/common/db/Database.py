@@ -727,12 +727,19 @@ class Database:
         services = []
         config = self.get_config(methods=methods)
         with self.__db_session() as session:
-            for service in session.query(Services).with_entities(Services.id).all():
+            service_names = [
+                service.id
+                for service in session.query(Services).with_entities(Services.id).all()
+            ]
+            for service in service_names:
                 tmp_config = deepcopy(config)
 
                 for key, value in deepcopy(tmp_config).items():
-                    if key.startswith(f"{service.id}_"):
-                        tmp_config[key.replace(f"{service.id}_", "")] = value
+                    if key.startswith(f"{service}_"):
+                        tmp_config[key.replace(f"{service}_", "")] = value
+                        del tmp_config[key]
+                    elif any(key.startswith(f"{s}_") for s in service_names):
+                        del tmp_config[key]
 
                 services.append(tmp_config)
 
