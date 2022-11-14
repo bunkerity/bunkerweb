@@ -22,7 +22,7 @@ from ApiCaller import ApiCaller
 class JobScheduler(ApiCaller):
     def __init__(
         self,
-        env={},
+        env=None,
         lock=None,
         apis=[],
         logger: Logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO")),
@@ -32,7 +32,7 @@ class JobScheduler(ApiCaller):
         self.__logger = logger
         self.__integration = integration
         self.__db = Database(self.__logger)
-        self.__env = env
+        self.__env = env or {}
         self.__env.update(environ)
         self.__jobs = self.__get_jobs()
         self.__lock = lock
@@ -83,7 +83,7 @@ class JobScheduler(ApiCaller):
             )
             reload = proc.returncode == 0
             if reload:
-                self.__logger.info("Successfuly reloaded nginx")
+                self.__logger.info("Successfully reloaded nginx")
             else:
                 self.__logger.error(
                     f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
@@ -92,7 +92,7 @@ class JobScheduler(ApiCaller):
             self.__logger.info("Reloading nginx ...")
             reload = self._send_to_apis("POST", "/reload")
             if reload:
-                self.__logger.info("Successfuly reloaded nginx")
+                self.__logger.info("Successfully reloaded nginx")
             else:
                 self.__logger.error("Error while reloading nginx")
         return reload
@@ -124,11 +124,11 @@ class JobScheduler(ApiCaller):
 
         if not err:
             self.__logger.info(
-                f"Successfuly executed job {name} from plugin {plugin} and updated database",
+                f"Successfully updated database for the job {name} from plugin {plugin}",
             )
         else:
             self.__logger.warning(
-                f"Successfuly executed job {name} from plugin {plugin} but failed to update database: {err}",
+                f"Failed to update database for the job {name} from plugin {plugin}: {err}",
             )
 
         return success
@@ -170,7 +170,7 @@ class JobScheduler(ApiCaller):
                         success = False
                         self.__logger.error("Error while sending /data/cache folder")
                     else:
-                        self.__logger.info("Successfuly sent /data/cache folder")
+                        self.__logger.info("Successfully sent /data/cache folder")
                 if not self.__reload():
                     success = False
             except:

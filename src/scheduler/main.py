@@ -269,27 +269,28 @@ if __name__ == "__main__":
                 # run the generator
                 cmd = f"python /usr/share/bunkerweb/gen/main.py --settings /usr/share/bunkerweb/settings.json --templates /usr/share/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''}"
                 proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+
                 if proc.returncode != 0:
                     logger.error(
                         "Config generator failed, configuration will not work as expected...",
                     )
+                else:
+                    # Fix permissions for the nginx folder
+                    for root, dirs, files in walk("/etc/nginx", topdown=False):
+                        for name in files + dirs:
+                            chown(join(root, name), "scheduler", "scheduler")
+                            chmod(join(root, name), 0o770)
 
-                # Fix permissions for the nginx folder
-                for root, dirs, files in walk("/etc/nginx", topdown=False):
-                    for name in files + dirs:
-                        chown(join(root, name), "scheduler", "scheduler")
-                        chmod(join(root, name), 0o770)
+                    copy("/etc/nginx/variables.env", "/var/tmp/bunkerweb/variables.env")
 
-                copy("/etc/nginx/variables.env", "/var/tmp/bunkerweb/variables.env")
-
-                if len(api_caller._get_apis()) > 0:
-                    # send nginx configs
-                    logger.info("Sending /etc/nginx folder ...")
-                    ret = api_caller._send_files("/etc/nginx", "/confs")
-                    if not ret:
-                        logger.error(
-                            "Sending nginx configs failed, configuration will not work as expected...",
-                        )
+                    if len(api_caller._get_apis()) > 0:
+                        # send nginx configs
+                        logger.info("Sending /etc/nginx folder ...")
+                        ret = api_caller._send_files("/etc/nginx", "/confs")
+                        if not ret:
+                            logger.error(
+                                "Sending nginx configs failed, configuration will not work as expected...",
+                            )
 
             # Fix permissions for the cache and the custom configs folders
             for root, dirs, files in imerge(

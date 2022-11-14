@@ -16,16 +16,17 @@ COPY src/ui/requirements.txt /tmp/req/requirements.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 
-RUN mkdir -p /usr/share/bunkerweb/ui/deps && \
-    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 > /usr/share/bunkerweb/ui/deps/requirements.txt && \
+RUN mkdir -p /usr/share/bunkerweb/deps && \
+    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 > /usr/share/bunkerweb/deps/requirements.txt && \
     rm -rf /tmp/req
 
 # Install python requirements
-RUN pip install --no-cache-dir --upgrade pip && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc && \
+    pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
-    mkdir -p /usr/share/bunkerweb/ui/deps/python && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/ui/deps/python -r /usr/share/bunkerweb/ui/deps/requirements.txt && \
-    pip install --no-cache-dir gunicorn
+    mkdir -p /usr/share/bunkerweb/deps/python && \
+    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+    apk del .build-deps
 
 COPY src/ui /usr/share/bunkerweb/ui
 
@@ -44,12 +45,12 @@ RUN apk add --no-cache bash file && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
     chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
-    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/ui/deps/python/bin/*
+    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
 RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1" "libtirpc>=1.3.2-r1" "libtirpc-conf>=1.3.2-r1" "zlib>=1.2.12-r2" "libxml2>=2.9.14-r1"
 
-VOLUME /data
+VOLUME /data /etc/nginx
 
 EXPOSE 7000
 
@@ -57,5 +58,5 @@ WORKDIR /usr/share/bunkerweb/ui
 
 USER ui:ui
 
-ENV PYTHONPATH /usr/share/bunkerweb/ui/deps/python
+ENV PYTHONPATH /usr/share/bunkerweb/deps/python
 CMD ["python3", "-m", "gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]

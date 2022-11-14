@@ -10,10 +10,13 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Install python requirements
-RUN pip install --no-cache-dir --upgrade pip && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc && \
+  pip install --no-cache-dir --upgrade pip && \
   pip install wheel && \
-  mkdir /usr/share/bunkerweb/deps/python && \
-  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+  mkdir -p /usr/share/bunkerweb/deps/python && \
+  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+  pip install --no-cache-dir gunicorn && \
+  apk del .build-deps
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
