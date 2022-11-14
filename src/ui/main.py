@@ -1,8 +1,3 @@
-from subprocess import DEVNULL, STDOUT, run
-from sys import path as sys_path, exit as sys_exit, modules as sys_modules
-
-sys_path.append("/usr/share/bunkerweb/deps/python")
-
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -33,6 +28,7 @@ from re import match as re_match
 from requests import get
 from requests.utils import default_headers
 from shutil import rmtree, copytree, chown
+from sys import path as sys_path, exit as sys_exit, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from time import time
@@ -479,7 +475,11 @@ def services():
     # Display services
     services = app.config["CONFIG"].get_services()
     return render_template(
-        "services.html", services=[dumps(service) for service in services]
+        "services.html",
+        services=[
+            {"SERVER_NAME": service.pop("SERVER_NAME"), "settings": dumps(service)}
+            for service in services
+        ],
     )
 
 
