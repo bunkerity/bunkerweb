@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
-from asyncio import run
 from io import BytesIO
 from os import environ, getenv
 from os.path import exists
-from subprocess import DEVNULL, STDOUT
+from subprocess import run, DEVNULL, STDOUT
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -34,6 +33,8 @@ try:
         with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
             bw_integration = f.read().strip()
     token = getenv("CERTBOT_TOKEN")
+    
+    logger.info(f"Certificates renewal for {getenv('RENEWED_DOMAINS')} successful")
 
     # Cluster case
     if bw_integration in ("Swarm", "Kubernetes", "Autoconf"):

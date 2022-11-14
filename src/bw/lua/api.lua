@@ -103,6 +103,44 @@ api.global.POST["^/unban$"] = function(api)
 	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
 end
 
+api.global.POST["^/ban$"] = function(api)
+	ngx.req.read_body()
+	local data = ngx.req.get_body_data()
+	if not data then
+		local data_file = ngx.req.get_body_file()
+		if data_file then
+			local file = io.open(data_file)
+			data = file:read("*a")
+			file:close()
+		end
+	end
+	local ok, ip = pcall(cjson.decode, data)
+	if not ok then
+		return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+	end
+	datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
+	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
+end
+
+api.global.GET["^/bans$"] = function(api)
+	local data = {}
+	for i, k in ipairs(datastore:keys()) do
+		if k:find("^bans_ip_") then
+			local ret, reason = datastore:get(k)
+			if not ret then
+				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access " .. k .. " from datastore : " + reason)
+			end
+			local ret, exp = datastore:exp(k)
+			if not ret then
+				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access exp " .. k .. " from datastore : " + exp)
+			end
+			local ban = { ip = k:sub(9, #k), reason = reason, exp = exp }
+			table.insert(data, ban)
+		end
+	end
+	return api:response(ngx.HTTP_OK, "success", data)
+end
+
 api.is_allowed_ip = function(self)
 	local data, err = datastore:get("api_whitelist_ip")
 	if not data then

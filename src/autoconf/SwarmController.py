@@ -110,23 +110,20 @@ class SwarmController(Controller, ConfigCaller):
     def __event(self, event_type):
         for event in self.__client.events(decode=True, filters={"type": event_type}):
             self.__internal_lock.acquire()
-            self._instances = self.get_instances()
-            self._services = self.get_services()
-            self._configs = self.get_configs()
-            if not self._config.update_needed(
-                self._instances, self._services, configs=self._configs
-            ):
-                self.__internal_lock.release()
-                continue
-            self.__logger.info(
-                "Catched Swarm event, deploying new configuration ...",
-            )
             try:
+                self._instances = self.get_instances()
+                self._services = self.get_services()
+                self._configs = self.get_configs()
+                if not self._config.update_needed(
+                    self._instances, self._services, configs=self._configs
+                ):
+                    continue
+                self.__logger.info(
+                    "Catched Swarm event, deploying new configuration ..."
+                )
                 ret = self.apply_config()
                 if not ret:
-                    self.__logger.error(
-                        "Error while deploying new configuration ...",
-                    )
+                    self.__logger.error("Error while deploying new configuration")
                 else:
                     self.__logger.info(
                         "Successfully deployed new configuration 🚀",
@@ -135,12 +132,12 @@ class SwarmController(Controller, ConfigCaller):
                     if not self._config._db.is_autoconf_loaded():
                         ret = self._config._db.set_autoconf_load(True)
                         if ret:
-                            self.__logger.error(
+                            self.__logger.warning(
                                 f"Can't set autoconf loaded metadata to true in database: {ret}",
                             )
             except:
                 self.__logger.error(
-                    f"Exception while deploying new configuration :\n{format_exc()}",
+                    f"Exception while processing events :\n{format_exc()}"
                 )
             self.__internal_lock.release()
 

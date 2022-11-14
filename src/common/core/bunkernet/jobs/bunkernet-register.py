@@ -117,15 +117,15 @@ try:
             with open("/var/cache/bunkerweb/bunkernet/instance.id", "w") as f:
                 f.write(bunkernet_id)
 
-        # Update db
-        err = db.update_job_cache(
-            "bunkernet-register",
-            None,
-            "instance.id",
-            f"{bunkernet_id}".encode("utf-8"),
-        )
-        if err:
-            logger.warning(f"Couldn't update db cache: {err}")
+            # Update db
+            err = db.update_job_cache(
+                "bunkernet-register",
+                None,
+                "instance.id",
+                f"{bunkernet_id}".encode("utf-8"),
+            )
+            if err:
+                logger.warning(f"Couldn't update db cache: {err}")
     else:
         logger.error("Connectivity with BunkerWeb failed ...")
         status = 2

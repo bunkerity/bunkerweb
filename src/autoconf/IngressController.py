@@ -1,4 +1,5 @@
 from os import getenv
+from time import sleep
 from traceback import format_exc
 from kubernetes import client, config, watch
 from kubernetes.client.exceptions import ApiException
@@ -224,8 +225,9 @@ class IngressController(Controller, ConfigCaller):
             raise Exception(f"unsupported watch_type {watch_type}")
         while True:
             locked = False
+            error = False
             try:
-                for event in w.stream(what):
+                for _ in w.stream(what):
                     self.__internal_lock.acquire()
                     locked = True
                     self._instances = self.get_instances()
@@ -246,6 +248,7 @@ class IngressController(Controller, ConfigCaller):
                             self.__logger.error(
                                 "Error while deploying new configuration ...",
                             )
+                            error = True
                         else:
                             self.__logger.info(
                                 "Successfully deployed new configuration 🚀",
@@ -254,28 +257,33 @@ class IngressController(Controller, ConfigCaller):
                             if not self._config._db.is_autoconf_loaded():
                                 ret = self._config._db.set_autoconf_load(True)
                                 if ret:
-                                    self.__logger.error(
+                                    self.__logger.warning(
                                         f"Can't set autoconf loaded metadata to true in database: {ret}",
                                     )
                     except:
                         self.__logger.error(
                             f"Exception while deploying new configuration :\n{format_exc()}",
                         )
-                    self.__internal_lock.release()
-                    locked = False
+                        error = True
             except ApiException as e:
                 if e.status != 410:
                     self.__logger.error(
                         f"Exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                     )
                     sys_exit(1)
-                if locked:
-                    self.__internal_lock.release()
             except:
                 self.__logger.error(
                     f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                 )
                 sys_exit(2)
+            finally :
+                if locked:
+                    self.__internal_lock.release()
+                    locked = False
+
+                if error is True:
+                    self.__logger.warning("Got exception, retrying in 10 seconds ...")
+                    sleep(10)
 
     def apply_config(self):
         ret = self._config.apply(self._instances, self._services, configs=self._configs)
