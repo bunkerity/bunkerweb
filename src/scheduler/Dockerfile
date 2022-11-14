@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.10-alpine
 
 # Copy python requirements
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
@@ -10,7 +10,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Install python requirements
-RUN apk add --no-cache --virtual .build-deps g++ gcc && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc libffi-dev && \
   pip install --no-cache-dir --upgrade pip && \
   pip install wheel && \
   mkdir -p /usr/share/bunkerweb/deps/python && \

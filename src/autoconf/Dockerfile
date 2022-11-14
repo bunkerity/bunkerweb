@@ -9,7 +9,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     rm -rf /tmp/req
 
 # Install dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc libffi-dev && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
     mkdir -p /usr/share/bunkerweb/deps/python && \
