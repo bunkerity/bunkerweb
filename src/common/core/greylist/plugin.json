@@ -72,7 +72,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
-      "id": "greylist-rdns-urls",
+      "id": "greylist-asn-urls",
       "label": "Greylist ASN URLs",
       "regex": "^.*$",
       "type": "text"

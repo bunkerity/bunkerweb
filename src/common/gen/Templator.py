@@ -1,7 +1,6 @@
 from copy import deepcopy
 from glob import glob
 from importlib import import_module
-from os import environ
 from os.path import basename, dirname, isdir
 from pathlib import Path
 from random import choice
@@ -25,7 +24,6 @@ class Templator:
             self.__target += "/"
         self.__config = config
         self.__jinja_env = self.__load_jinja_env()
-        environ.update(config)
 
     def render(self):
         self.__render_global()

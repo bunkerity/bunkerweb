@@ -72,7 +72,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing ASN to block.",
-      "id": "blacklist-rdns-urls",
+      "id": "blacklist-asn-urls",
       "label": "Blacklist ASN URLs",
       "regex": "^.*$",
       "type": "text"
@@ -117,7 +117,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.",
-      "id": "blacklist-ip-urls",
+      "id": "blacklist-ignore-ip-urls",
       "label": "Blacklist IP/network URLs",
       "regex": "^.*$",
       "type": "text"
@@ -126,7 +126,7 @@
       "context": "multisite",
       "default": "",
       "help": "List of IP/network, separated with spaces, to ignore in the blacklist.",
-      "id": "blacklist-ip",
+      "id": "blacklist-ignore-ip",
       "label": "Blacklist IP/network",
       "regex": "^.*$",
       "type": "text"
@@ -135,7 +135,7 @@
       "context": "multisite",
       "default": "",
       "help": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
-      "id": "blacklist-rdns",
+      "id": "blacklist-ignore-rdns",
       "label": "Blacklist reverse DNS",
       "regex": "^.*$",
       "type": "text"
@@ -144,7 +144,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.",
-      "id": "blacklist-rdns-urls",
+      "id": "blacklist-ignore-rdns-urls",
       "label": "Blacklist reverse DNS URLs",
       "regex": "^.*$",
       "type": "text"
@@ -153,7 +153,7 @@
       "context": "multisite",
       "default": "",
       "help": "List of ASN numbers, separated with spaces, to ignore in the blacklist.",
-      "id": "blacklist-asn",
+      "id": "blacklist-ignore-asn",
       "label": "Blacklist ASN",
       "regex": "^.*$",
       "type": "text"
@@ -162,7 +162,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist.",
-      "id": "blacklist-rdns-urls",
+      "id": "blacklist-ignore-asn-urls",
       "label": "Blacklist ASN URLs",
       "regex": "^.*$",
       "type": "text"
@@ -171,7 +171,7 @@
       "context": "multisite",
       "default": "",
       "help": "List of User-Agent, separated with spaces, to ignore in the blacklist.",
-      "id": "blacklist-user-agent",
+      "id": "blacklist-ignore-user-agent",
       "label": "Blacklist User-Agent",
       "regex": "^.*$",
       "type": "text"
@@ -180,7 +180,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.",
-      "id": "blacklist-user-agent-urls",
+      "id": "blacklist-ignore-user-agent-urls",
       "label": "Blacklist User-Agent URLs",
       "regex": "^.*$",
       "type": "text"
@@ -189,7 +189,7 @@
       "context": "multisite",
       "default": "",
       "help": "List of URI, separated with spaces, to ignore in the blacklist.",
-      "id": "blacklist-uri",
+      "id": "blacklist-ignore-uri",
       "label": "Blacklist URI",
       "regex": "^.*$",
       "type": "text"
@@ -198,7 +198,7 @@
       "context": "global",
       "default": "",
       "help": "List of URLs, separated with spaces, containing URI to ignore in the blacklist.",
-      "id": "blacklist-uri-urls",
+      "id": "blacklist-ignore-uri-urls",
       "label": "Blacklist URI URLs",
       "regex": "^.*$",
       "type": "text"

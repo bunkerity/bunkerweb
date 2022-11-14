@@ -1,7 +1,7 @@
 from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path, exit as sys_exit, modules as sys_modules
 
-sys_path.append("/usr/share/bunkerweb/ui/deps/python")
+sys_path.append("/usr/share/bunkerweb/deps/python")
 
 from bs4 import BeautifulSoup
 from copy import deepcopy

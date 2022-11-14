@@ -3,23 +3,49 @@ from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
 from logging import INFO, WARNING, Logger, getLogger
+import oracledb
 from os import _exit, getenv, listdir, path
 from os.path import exists
+from pymysql import install_as_MySQLdb
 from re import search
-from sys import path as sys_path
+from sys import modules, path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.exc import OperationalError, ProgrammingError, SQLAlchemyError
+from sqlalchemy.exc import (
+    ArgumentError,
+    DatabaseError,
+    OperationalError,
+    ProgrammingError,
+    SQLAlchemyError,
+)
 from sqlalchemy.orm import scoped_session, sessionmaker
 from time import sleep
 from traceback import format_exc
 
-from model import *
+from model import (
+    Base,
+    Plugins,
+    Settings,
+    Global_values,
+    Services,
+    Services_settings,
+    Jobs,
+    Plugin_pages,
+    Jobs_cache,
+    Custom_configs,
+    Selects,
+    Metadata,
+)
 
 if "/usr/share/bunkerweb/utils" not in sys_path:
     sys_path.append("/usr/share/bunkerweb/utils")
 
 from jobs import file_hash
+
+oracledb.version = "8.3.0"
+modules["cx_Oracle"] = oracledb
+
+install_as_MySQLdb()
 
 
 class Database:
@@ -39,13 +65,24 @@ class Database:
         if sqlalchemy_string.startswith("sqlite"):
             if not path.exists(sqlalchemy_string.split("///")[1]):
                 open(sqlalchemy_string.split("///")[1], "w").close()
+        elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
+            splitted = sqlalchemy_string.split("+")
+            sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
 
-        self.__sql_engine = create_engine(
-            sqlalchemy_string,
-            encoding="utf-8",
-            future=True,
-            logging_name="sqlalchemy.engine",
-        )
+        try:
+            self.__sql_engine = create_engine(
+                sqlalchemy_string,
+                encoding="utf-8",
+                future=True,
+                logging_name="sqlalchemy.engine",
+            )
+        except ArgumentError:
+            self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
+        except SQLAlchemyError:
+            self.__logger.error(
+                f"Error when trying to create the engine: {format_exc()}"
+            )
+
         not_connected = True
         retries = 5
 
@@ -53,7 +90,7 @@ class Database:
             try:
                 self.__sql_engine.connect()
                 not_connected = False
-            except SQLAlchemyError:
+            except (OperationalError, DatabaseError):
                 if retries <= 0:
                     self.__logger.error(
                         f"Can't connect to database : {format_exc()}",
@@ -65,6 +102,10 @@ class Database:
                     )
                     retries -= 1
                     sleep(5)
+            except SQLAlchemyError:
+                self.__logger.error(
+                    f"Error when trying to connect to the database: {format_exc()}"
+                )
 
         self.__session = sessionmaker()
         self.__sql_session = scoped_session(self.__session)
@@ -150,7 +191,7 @@ class Database:
                     .first()
                 )
                 return metadata is not None and metadata.is_initialized
-            except (ProgrammingError, OperationalError):
+            except (ProgrammingError, OperationalError, DatabaseError):
                 return False
 
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
@@ -230,6 +271,7 @@ class Database:
                         )
 
                     for job in jobs:
+                        job["file_name"] = job.pop("file")
                         to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
                     if exists(f"/usr/share/bunkerweb/core/{plugin['id']}/ui"):
@@ -282,6 +324,7 @@ class Database:
                         if (
                             server_name
                             and session.query(Services)
+                            .with_entities(Services.id)
                             .filter_by(id=server_name)
                             .first()
                             is None
@@ -320,6 +363,7 @@ class Database:
                                 if service_setting is None:
                                     if key != "SERVER_NAME" and (
                                         value == setting.default
+                                        or (value == "" and setting.default is None)
                                         or (key in config and value == config[key])
                                     ):
                                         continue
@@ -336,6 +380,7 @@ class Database:
                                 elif method == "autoconf":
                                     if key != "SERVER_NAME" and (
                                         value == setting.default
+                                        or (value == "" and setting.default is None)
                                         or (key in config and value == config[key])
                                     ):
                                         session.query(Services_settings).filter(
@@ -367,7 +412,9 @@ class Database:
                                 )
 
                                 if global_value is None:
-                                    if value == setting.default:
+                                    if value == setting.default or (
+                                        value == "" and setting.default is None
+                                    ):
                                         continue
 
                                     to_put.append(
@@ -379,7 +426,9 @@ class Database:
                                         )
                                     )
                                 elif method == "autoconf":
-                                    if value == setting.default:
+                                    if value == setting.default or (
+                                        value == "" and setting.default is None
+                                    ):
                                         session.query(Global_values).filter(
                                             Global_values.setting_id == key,
                                             Global_values.suffix == suffix,
@@ -411,7 +460,11 @@ class Database:
                             .first()
                         )
 
-                        if setting and value == setting.default:
+                        if (
+                            setting
+                            and value == setting.default
+                            or (value == "" and setting.default is None)
+                        ):
                             continue
 
                         global_value = (
@@ -570,10 +623,11 @@ class Database:
 
                         if global_value is None:
                             if suffix == 0:
+                                default = setting.default or ""
                                 config[setting.id] = (
-                                    setting.default
+                                    default
                                     if methods is False
-                                    else {"value": setting.default, "method": "default"}
+                                    else {"value": default, "method": "default"}
                                 )
                         else:
                             config[
@@ -718,7 +772,7 @@ class Database:
         """Update the plugin cache in the database"""
         with self.__db_session() as session:
             cache = (
-                session.query(Job_cache)
+                session.query(Jobs_cache)
                 .filter_by(
                     job_name=job_name, service_id=service_id, file_name=file_name
                 )
@@ -727,7 +781,7 @@ class Database:
 
             if cache is None:
                 session.add(
-                    Job_cache(
+                    Jobs_cache(
                         job_name=job_name,
                         service_id=service_id,
                         file_name=file_name,
@@ -806,6 +860,7 @@ class Database:
 
                         db_settings = (
                             session.query(Settings)
+                            .with_entities(Settings.id)
                             .filter_by(plugin_id=plugin["id"])
                             .all()
                         )
@@ -870,12 +925,13 @@ class Database:
                                     updates[Settings.multiple] = value["multiple"]
 
                                 if updates:
-                                    session.query(Settings).filter_by(
+                                    session.query(Settings).filter(
                                         Settings.id == setting
                                     ).update(updates)
 
                                 db_selects = (
                                     session.query(Selects)
+                                    .with_entities(Selects.value)
                                     .filter_by(setting_id=setting)
                                     .all()
                                 )
@@ -905,7 +961,10 @@ class Database:
                                         )
 
                         db_jobs = (
-                            session.query(Jobs).filter_by(plugin_id=plugin["id"]).all()
+                            session.query(Jobs)
+                            .with_entities(Jobs.name)
+                            .filter_by(plugin_id=plugin["id"])
+                            .all()
                         )
                         job_names = [job["name"] for job in jobs]
                         missing_names = [
@@ -918,9 +977,17 @@ class Database:
                         ).delete()
 
                         for job in jobs:
-                            db_job = session.query(Jobs).get(job["name"])
+                            db_job = (
+                                session.query(Jobs)
+                                .with_entities(
+                                    Jobs.id, Jobs.file_name, Jobs.every, Jobs.reload
+                                )
+                                .filter_by(name=job["name"], plugin_id=plugin["id"])
+                                .first()
+                            )
 
                             if job["name"] not in db_ids or db_job is None:
+                                job["file_name"] = job.pop("file")
                                 to_put.append(
                                     Jobs(
                                         plugin_id=plugin["id"],
@@ -930,8 +997,8 @@ class Database:
                             else:
                                 updates = {}
 
-                                if job["file"] != db_job.file:
-                                    updates[Jobs.file] = job["file"]
+                                if job["file_name"] != db_job.file_name:
+                                    updates[Jobs.file_name] = job["file_name"]
 
                                 if job["every"] != db_job.every:
                                     updates[Jobs.every] = job["every"]
@@ -941,10 +1008,10 @@ class Database:
 
                                 if updates:
                                     updates[Jobs.last_update] = None
-                                    session.query(Job_cache).filter_by(
-                                        job_name=job["name"]
+                                    session.query(Jobs_cache).filter(
+                                        Jobs_cache.job_name == job["name"]
                                     ).delete()
-                                    session.query(Jobs).filter_by(
+                                    session.query(Jobs).filter(
                                         Jobs.name == job["name"]
                                     ).update(updates)
 
@@ -954,6 +1021,10 @@ class Database:
                             ):
                                 db_plugin_page = (
                                     session.query(Plugin_pages)
+                                    .with_entities(
+                                        Plugin_pages.template_checksum,
+                                        Plugin_pages.actions_checksum,
+                                    )
                                     .filter_by(plugin_id=plugin["id"])
                                     .first()
                                 )
@@ -1054,6 +1125,7 @@ class Database:
                     )
 
                 for job in jobs:
+                    job["file_name"] = job.pop("file")
                     to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
                 for page in pages:

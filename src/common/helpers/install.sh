@@ -414,10 +414,11 @@ fi
 # Install Python dependencies
 echo "ℹ️ Install python dependencies"
 do_and_check_cmd pip3 install --upgrade pip
-do_and_check_cmd pip3 install -r /tmp/bunkerweb/gen/requirements.txt
-do_and_check_cmd pip3 install -r /tmp/bunkerweb/job/requirements.txt
+do_and_check_cmd pip3 install --no-cache-dir --require-hashes -r /tmp/bunkerweb/common/gen/requirements.txt
 if [ "$OS" != "alpine" ] ; then
-	do_and_check_cmd pip3 install -r /tmp/bunkerweb/ui/requirements.txt
+	do_and_check_cmd pip3 install --no-cache-dir --require-hashes -r /tmp/bunkerweb/common/db/requirements.txt
+	do_and_check_cmd pip3 install --no-cache-dir --require-hashes -r /tmp/bunkerweb/scheduler/requirements.txt
+	do_and_check_cmd pip3 install --no-cache-dir --require-hashes -r /tmp/bunkerweb/ui/requirements.txt
 fi
 do_and_check_cmd pip3 install cryptography --upgrade
 

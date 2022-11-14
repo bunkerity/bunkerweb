@@ -1,24 +1,26 @@
 from sqlalchemy import (
-    TIMESTAMP,
     Boolean,
     Column,
     DateTime,
     Enum,
     ForeignKey,
+    Identity,
     Integer,
     LargeBinary,
+    PrimaryKeyConstraint,
     SmallInteger,
     String,
+    text,
+    TIMESTAMP,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
-Base = declarative_base()
-CONTEXTS_ENUM = Enum("global", "multisite")
-SETTINGS_TYPES_ENUM = Enum("text", "check", "select")
-METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual")
-SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week")
-CUSTOM_CONFIGS_TYPES = Enum(
+CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
+SETTINGS_TYPES_ENUM = Enum("text", "check", "select", name="settings_types_enum")
+METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", name="methods_enum")
+SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
+CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
     "default_server_http",
     "server_http",
@@ -26,8 +28,9 @@ CUSTOM_CONFIGS_TYPES = Enum(
     "modsec_crs",
     "stream",
     "stream_http",
+    name="custom_configs_types_enum",
 )
-LOG_LEVELS_ENUM = Enum("DEBUG", "INFO", "WARNING", "ERROR")
+LOG_LEVELS_ENUM = Enum("DEBUG", "INFO", "WARNING", "ERROR", name="log_levels_enum")
 INTEGRATIONS_ENUM = Enum(
     "Linux",
     "Docker",
@@ -36,7 +39,9 @@ INTEGRATIONS_ENUM = Enum(
     "Autoconf",
     "Windows",
     "Unknown",
+    name="integrations_enum",
 )
+Base = declarative_base()
 
 
 class Plugins(Base):
@@ -60,6 +65,11 @@ class Plugins(Base):
 
 class Settings(Base):
     __tablename__ = "settings"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "name"),
+        UniqueConstraint("id"),
+        UniqueConstraint("name"),
+    )
 
     id = Column(String(255), primary_key=True)
     name = Column(String(255), primary_key=True)
@@ -69,7 +79,7 @@ class Settings(Base):
         nullable=False,
     )
     context = Column(CONTEXTS_ENUM, nullable=False)
-    default = Column(String(1023), nullable=False)
+    default = Column(String(1023), nullable=True, default="")
     help = Column(String(255), nullable=False)
     label = Column(String(255), nullable=True)
     regex = Column(String(255), nullable=False)
@@ -113,7 +123,7 @@ class Services(Base):
         "Custom_configs", back_populates="service", cascade="all, delete"
     )
     jobs_cache = relationship(
-        "Job_cache", back_populates="service", cascade="all, delete"
+        "Jobs_cache", back_populates="service", cascade="all, delete"
     )
 
 
@@ -140,27 +150,31 @@ class Services_settings(Base):
 
 class Jobs(Base):
     __tablename__ = "jobs"
+    __table_args__ = (UniqueConstraint("name", "plugin_id"),)
 
     name = Column(String(128), primary_key=True)
     plugin_id = Column(
         String(64),
         ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
-        primary_key=True,
     )
-    file = Column(String(255), nullable=False)
+    file_name = Column(String(255), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, nullable=False)
     success = Column(Boolean, nullable=True)
     last_run = Column(DateTime, nullable=True)
 
     plugin = relationship("Plugins", back_populates="jobs")
-    cache = relationship("Job_cache", back_populates="job", cascade="all, delete")
+    cache = relationship("Jobs_cache", back_populates="job", cascade="all, delete")
 
 
 class Plugin_pages(Base):
     __tablename__ = "plugin_pages"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        Identity(start=1, increment=1),
+        primary_key=True,
+    )
     plugin_id = Column(
         String(64),
         ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
@@ -174,10 +188,15 @@ class Plugin_pages(Base):
     plugin = relationship("Plugins", back_populates="pages")
 
 
-class Job_cache(Base):
-    __tablename__ = "job_cache"
+class Jobs_cache(Base):
+    __tablename__ = "jobs_cache"
+    __table_args__ = (UniqueConstraint("job_name", "service_id", "file_name"),)
 
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        Identity(start=1, increment=1),
+        primary_key=True,
+    )
     job_name = Column(
         String(128),
         ForeignKey("jobs.name", onupdate="CASCADE", ondelete="CASCADE"),
@@ -199,35 +218,28 @@ class Job_cache(Base):
     job = relationship("Jobs", back_populates="cache")
     service = relationship("Services", back_populates="jobs_cache")
 
-    __table_args__ = (
-        UniqueConstraint(
-            "job_name", "service_id", "file_name", name="_job_cache_uniqueness"
-        ),
-    )
-
 
 class Custom_configs(Base):
     __tablename__ = "custom_configs"
+    __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        Identity(start=1, increment=1),
+        primary_key=True,
+    )
     service_id = Column(
         String(64),
         ForeignKey("services.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=True,
     )
-    type = Column(CUSTOM_CONFIGS_TYPES, nullable=False)
+    type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(255), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
 
     service = relationship("Services", back_populates="custom_configs")
-
-    __table_args__ = (
-        UniqueConstraint(
-            "service_id", "type", "name", name="_custom_configs_uniqueness"
-        ),
-    )
 
 
 class Selects(Base):
