@@ -18,11 +18,6 @@ class Config(ConfigCaller):
         self.__config = {}
 
         self._db = Database(self.__logger)
-        while not self._db.is_initialized():
-            self.__logger.warning(
-                "Database is not initialized, retrying in 5 seconds ...",
-            )
-            sleep(5)
 
     def __get_full_env(self) -> dict:
         env_instances = {}
@@ -75,6 +70,12 @@ class Config(ConfigCaller):
                         ],
                     }
                 )
+
+        while not self._db.is_initialized():
+            self.__logger.warning(
+                "Database is not initialized, retrying in 5 seconds ...",
+            )
+            sleep(5)
 
         # save config to database
         ret = self._db.save_config(self.__config, "autoconf")

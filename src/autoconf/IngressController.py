@@ -274,7 +274,7 @@ class IngressController(Controller, ConfigCaller):
                 self.__logger.error(
                     f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                 )
-            finally :
+            finally:
                 if locked:
                     self.__internal_lock.release()
                     locked = False
