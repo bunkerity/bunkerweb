@@ -77,7 +77,6 @@ if __name__ == "__main__":
         logger.info(f"Plugins : {args.plugins}")
         logger.info(f"Output : {args.output}")
         logger.info(f"Target : {args.target}")
-        logger.info(f"Variables : {args.variables}")
 
         integration = "Linux"
         if getenv("KUBERNETES_MODE", "no") == "yes":
@@ -91,6 +90,8 @@ if __name__ == "__main__":
                 integration = f.read().strip()
 
         if args.variables:
+            logger.info(f"Variables : {args.variables}")
+
             # Check existences and permissions
             logger.info("Checking arguments ...")
             files = [args.settings, args.variables]

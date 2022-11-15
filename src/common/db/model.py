@@ -115,6 +115,7 @@ class Services(Base):
     __tablename__ = "services"
 
     id = Column(String(64), primary_key=True)
+    method = Column(METHODS_ENUM, nullable=False)
 
     settings = relationship(
         "Services_settings", back_populates="service", cascade="all, delete"

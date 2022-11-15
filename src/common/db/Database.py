@@ -244,7 +244,7 @@ class Database:
                             "order": 999,
                             "name": "Default",
                             "description": "Default settings",
-                            "version": "1.0.0",
+                            "version": "0.1",
                         }
                     else:
                         settings = plugin.pop("settings", {})
@@ -318,134 +318,156 @@ class Database:
             ).delete()
 
             if config:
-                if config["MULTISITE"] == "yes":
+                if config.get("MULTISITE", "no") == "yes":
                     global_values = []
-                    for server_name in config["SERVER_NAME"].split(" "):
-                        if (
-                            server_name
-                            and session.query(Services)
-                            .with_entities(Services.id)
-                            .filter_by(id=server_name)
+                    db_services = (
+                        session.query(Services)
+                        .with_entities(Services.id)
+                        .filter_by(method=method)
+                        .all()
+                    )
+                    services = config.get("SERVER_NAME", "").split(" ")
+
+                    if db_services:
+                        db_services = [service.id for service in db_services]
+                        missing_ids = [
+                            service
+                            for service in db_services
+                            if service not in services
+                        ]
+
+                        # Remove plugins that are no longer in the list
+                        session.query(Services).filter(
+                            Services.id.in_(missing_ids)
+                        ).delete()
+
+                    for key, value in deepcopy(config).items():
+                        suffix = 0
+                        if search(r"_\d+$", key):
+                            suffix = int(key.split("_")[-1])
+                            key = key[: -len(str(suffix)) - 1]
+
+                        setting = (
+                            session.query(Settings)
+                            .with_entities(Settings.default)
+                            .filter_by(id=key)
                             .first()
-                            is None
-                        ):
-                            to_put.append(Services(id=server_name))
+                        )
 
-                        for key, value in deepcopy(config).items():
-                            suffix = 0
-                            if search(r"_\d+$", key):
-                                suffix = int(key.split("_")[-1])
-                                key = key[: -len(str(suffix)) - 1]
+                        if not setting and services:
+                            try:
+                                server_name = next(
+                                    service
+                                    for service in services
+                                    if key.startswith(f"{service}_")
+                                )
+                            except StopIteration:
+                                continue
 
+                            if server_name not in db_services:
+                                to_put.append(Services(id=server_name, method=method))
+                                db_services.append(server_name)
+
+                            key = key.replace(f"{server_name}_", "")
                             setting = (
                                 session.query(Settings)
                                 .with_entities(Settings.default)
-                                .filter_by(id=key.replace(f"{server_name}_", ""))
+                                .filter_by(id=key)
+                                .first()
+                            )
+                            service_setting = (
+                                session.query(Services_settings)
+                                .with_entities(Services_settings.value)
+                                .filter_by(
+                                    service_id=server_name,
+                                    setting_id=key,
+                                    suffix=suffix,
+                                )
                                 .first()
                             )
 
-                            if not setting:
-                                continue
+                            if service_setting is None:
+                                if key != "SERVER_NAME" and (
+                                    value == setting.default
+                                    or (value == "" and setting.default is None)
+                                    or (key in config and value == config[key])
+                                ):
+                                    continue
 
-                            if server_name and key.startswith(server_name):
-                                key = key.replace(f"{server_name}_", "")
-                                service_setting = (
-                                    session.query(Services_settings)
-                                    .with_entities(Services_settings.value)
-                                    .filter_by(
+                                to_put.append(
+                                    Services_settings(
                                         service_id=server_name,
                                         setting_id=key,
+                                        value=value,
                                         suffix=suffix,
+                                        method=method,
                                     )
-                                    .first()
                                 )
+                            elif (
+                                method == "autoconf"
+                                and value != setting.default
+                                and service_setting.value != value
+                            ):
+                                session.query(Services_settings).filter(
+                                    Services_settings.service_id == server_name,
+                                    Services_settings.setting_id == key,
+                                    Services_settings.suffix == suffix,
+                                ).update(
+                                    {
+                                        Services_settings.value: value,
+                                        Services_settings.method: method,
+                                    }
+                                )
+                        elif key not in global_values:
+                            global_values.append(key)
+                            global_value = (
+                                session.query(Global_values)
+                                .with_entities(Global_values.value)
+                                .filter_by(
+                                    setting_id=key,
+                                    suffix=suffix,
+                                )
+                                .first()
+                            )
 
-                                if service_setting is None:
-                                    if key != "SERVER_NAME" and (
-                                        value == setting.default
-                                        or (value == "" and setting.default is None)
-                                        or (key in config and value == config[key])
-                                    ):
-                                        continue
+                            if global_value is None:
+                                if (
+                                    not setting
+                                    or value == setting.default
+                                    or (value == "" and setting.default is None)
+                                ):
+                                    continue
 
-                                    to_put.append(
-                                        Services_settings(
-                                            service_id=server_name,
-                                            setting_id=key,
-                                            value=value,
-                                            suffix=suffix,
-                                            method=method,
-                                        )
-                                    )
-                                elif method == "autoconf":
-                                    if key != "SERVER_NAME" and (
-                                        value == setting.default
-                                        or (value == "" and setting.default is None)
-                                        or (key in config and value == config[key])
-                                    ):
-                                        session.query(Services_settings).filter(
-                                            Services_settings.service_id == server_name,
-                                            Services_settings.setting_id == key,
-                                            Services_settings.suffix == suffix,
-                                        ).delete()
-                                    elif global_value.value != value:
-                                        session.query(Services_settings).filter(
-                                            Services_settings.service_id == server_name,
-                                            Services_settings.setting_id == key,
-                                            Services_settings.suffix == suffix,
-                                        ).update(
-                                            {
-                                                Services_settings.value: value,
-                                                Services_settings.method: method,
-                                            }
-                                        )
-                            elif key not in global_values:
-                                global_values.append(key)
-                                global_value = (
-                                    session.query(Global_values)
-                                    .with_entities(Global_values.value)
-                                    .filter_by(
+                                to_put.append(
+                                    Global_values(
                                         setting_id=key,
+                                        value=value,
                                         suffix=suffix,
+                                        method=method,
                                     )
-                                    .first()
                                 )
-
-                                if global_value is None:
-                                    if value == setting.default or (
-                                        value == "" and setting.default is None
-                                    ):
-                                        continue
-
-                                    to_put.append(
-                                        Global_values(
-                                            setting_id=key,
-                                            value=value,
-                                            suffix=suffix,
-                                            method=method,
-                                        )
-                                    )
-                                elif method == "autoconf":
-                                    if value == setting.default or (
-                                        value == "" and setting.default is None
-                                    ):
-                                        session.query(Global_values).filter(
-                                            Global_values.setting_id == key,
-                                            Global_values.suffix == suffix,
-                                        ).delete()
-                                    elif global_value.value != value:
-                                        session.query(Global_values).filter(
-                                            Global_values.setting_id == key,
-                                            Global_values.suffix == suffix,
-                                        ).update(
-                                            {
-                                                Global_values.value: value,
-                                                Global_values.method: method,
-                                            }
-                                        )
+                            elif (
+                                setting
+                                and method == "autoconf"
+                                and value != setting.default
+                                and global_value.value != value
+                            ):
+                                session.query(Global_values).filter(
+                                    Global_values.setting_id == key,
+                                    Global_values.suffix == suffix,
+                                ).update(
+                                    {
+                                        Global_values.value: value,
+                                        Global_values.method: method,
+                                    }
+                                )
                 else:
-                    primary_server_name = config["SERVER_NAME"].split(" ")[0]
-                    to_put.append(Services(id=primary_server_name))
+                    if "SERVER_NAME" in config and config["SERVER_NAME"] != "":
+                        to_put.append(
+                            Services(
+                                id=config["SERVER_NAME"].split(" ")[0], method=method
+                            )
+                        )
 
                     for key, value in config.items():
                         suffix = 0
@@ -461,8 +483,8 @@ class Database:
                         )
 
                         if (
-                            setting
-                            and value == setting.default
+                            not setting
+                            or value == setting.default
                             or (value == "" and setting.default is None)
                         ):
                             continue
@@ -517,77 +539,74 @@ class Database:
 
             to_put = []
             endl = "\n"
-            if custom_configs:
-                for custom_config in custom_configs:
-                    config = {
-                        "data": custom_config["value"]
-                        .replace("\\\n", "\n")
-                        .encode("utf-8")
-                        if isinstance(custom_config["value"], str)
-                        else custom_config["value"].replace(b"\\\n", b"\n"),
-                        "method": method,
-                    }
-                    config["checksum"] = sha256(config["data"]).hexdigest()
+            for custom_config in custom_configs:
+                config = {
+                    "data": custom_config["value"].replace("\\\n", "\n").encode("utf-8")
+                    if isinstance(custom_config["value"], str)
+                    else custom_config["value"].replace(b"\\\n", b"\n"),
+                    "method": method,
+                }
+                config["checksum"] = sha256(config["data"]).hexdigest()
 
-                    if custom_config["exploded"][0]:
-                        if (
-                            not session.query(Services)
-                            .with_entities(Services.id)
-                            .filter_by(id=custom_config["exploded"][0])
-                            .first()
-                        ):
-                            message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
-
-                        config.update(
-                            {
-                                "service_id": custom_config["exploded"][0],
-                                "type": custom_config["exploded"][1]
-                                .replace("-", "_")
-                                .lower(),
-                                "name": custom_config["exploded"][2],
-                            }
-                        )
-                    else:
-                        config.update(
-                            {
-                                "type": custom_config["exploded"][1]
-                                .replace("-", "_")
-                                .lower(),
-                                "name": custom_config["exploded"][2],
-                            }
-                        )
-
-                    custom_conf = (
-                        session.query(Custom_configs)
-                        .with_entities(Custom_configs.checksum, Custom_configs.method)
-                        .filter_by(
-                            service_id=config.get("service_id", None),
-                            type=config["type"],
-                            name=config["name"],
-                        )
+                if custom_config["exploded"][0]:
+                    if (
+                        not session.query(Services)
+                        .with_entities(Services.id)
+                        .filter_by(id=custom_config["exploded"][0])
                         .first()
+                    ):
+                        message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
+
+                    config.update(
+                        {
+                            "service_id": custom_config["exploded"][0],
+                            "type": custom_config["exploded"][1]
+                            .replace("-", "_")
+                            .lower(),
+                            "name": custom_config["exploded"][2],
+                        }
+                    )
+                else:
+                    config.update(
+                        {
+                            "type": custom_config["exploded"][1]
+                            .replace("-", "_")
+                            .lower(),
+                            "name": custom_config["exploded"][2],
+                        }
                     )
 
-                    if custom_conf is None:
-                        to_put.append(Custom_configs(**config))
-                    elif config["checksum"] != custom_conf.checksum and (
-                        method == custom_conf.method or method == "autoconf"
-                    ):
-                        session.query(Custom_configs).filter(
-                            Custom_configs.service_id == config.get("service_id", None),
-                            Custom_configs.type == config["type"],
-                            Custom_configs.name == config["name"],
-                        ).update(
-                            {
-                                Custom_configs.data: config["data"],
-                                Custom_configs.checksum: config["checksum"],
-                            }
-                            | (
-                                {Custom_configs.method: "autoconf"}
-                                if method == "autoconf"
-                                else {}
-                            )
+                custom_conf = (
+                    session.query(Custom_configs)
+                    .with_entities(Custom_configs.checksum, Custom_configs.method)
+                    .filter_by(
+                        service_id=config.get("service_id", None),
+                        type=config["type"],
+                        name=config["name"],
+                    )
+                    .first()
+                )
+
+                if custom_conf is None:
+                    to_put.append(Custom_configs(**config))
+                elif config["checksum"] != custom_conf.checksum and (
+                    method == custom_conf.method or method == "autoconf"
+                ):
+                    session.query(Custom_configs).filter(
+                        Custom_configs.service_id == config.get("service_id", None),
+                        Custom_configs.type == config["type"],
+                        Custom_configs.name == config["name"],
+                    ).update(
+                        {
+                            Custom_configs.data: config["data"],
+                            Custom_configs.checksum: config["checksum"],
+                        }
+                        | (
+                            {Custom_configs.method: "autoconf"}
+                            if method == "autoconf"
+                            else {}
                         )
+                    )
 
             try:
                 session.add_all(to_put)
@@ -601,100 +620,106 @@ class Database:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
-            for service in session.query(Services).with_entities(Services.id).all():
-                for setting in (
-                    session.query(Settings)
-                    .with_entities(
-                        Settings.id,
-                        Settings.context,
-                        Settings.default,
-                        Settings.multiple,
+            db_services = session.query(Services).with_entities(Services.id).all()
+            for setting in (
+                session.query(Settings)
+                .with_entities(
+                    Settings.id,
+                    Settings.context,
+                    Settings.default,
+                    Settings.multiple,
+                )
+                .all()
+            ):
+                suffix = 0
+                while True:
+                    global_value = (
+                        session.query(Global_values)
+                        .with_entities(Global_values.value, Global_values.method)
+                        .filter_by(setting_id=setting.id, suffix=suffix)
+                        .first()
                     )
-                    .all()
-                ):
-                    suffix = 0
-                    while True:
-                        global_value = (
-                            session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.method)
-                            .filter_by(setting_id=setting.id, suffix=suffix)
-                            .first()
-                        )
 
-                        if global_value is None:
-                            if suffix == 0:
-                                default = setting.default or ""
-                                config[setting.id] = (
-                                    default
-                                    if methods is False
-                                    else {"value": default, "method": "default"}
-                                )
-                        else:
-                            config[
-                                setting.id + (f"_{suffix}" if suffix > 0 else "")
-                            ] = (
-                                global_value.value
-                                if methods is False
-                                else {
-                                    "value": global_value.value,
-                                    "method": global_value.method,
-                                }
-                            )
-
-                        if setting.context != "multisite":
-                            break
-
+                    if global_value is None:
                         if suffix == 0:
-                            config[f"{service.id}_{setting.id}"] = (
-                                config[setting.id]
+                            default = setting.default or ""
+                            config[setting.id] = (
+                                default
                                 if methods is False
-                                else {
-                                    "value": config[setting.id]["value"],
-                                    "method": "default",
-                                }
+                                else {"value": default, "method": "default"}
                             )
-                        elif f"{setting.id}_{suffix}" in config:
-                            config[f"{service.id}_{setting.id}_{suffix}"] = (
-                                config[f"{setting.id}_{suffix}"]
-                                if methods is False
-                                else {
-                                    "value": config[f"{setting.id}_{suffix}"]["value"],
-                                    "method": "default",
-                                }
-                            )
-
-                        service_setting = (
-                            session.query(Services_settings)
-                            .with_entities(
-                                Services_settings.value, Services_settings.method
-                            )
-                            .filter_by(
-                                service_id=service.id,
-                                setting_id=setting.id,
-                                suffix=suffix,
-                            )
-                            .first()
+                        elif setting.context != "multisite":
+                            break
+                    else:
+                        config[setting.id + (f"_{suffix}" if suffix > 0 else "")] = (
+                            global_value.value
+                            if methods is False
+                            else {
+                                "value": global_value.value,
+                                "method": global_value.method,
+                            }
                         )
 
-                        if service_setting is not None:
-                            config[
-                                f"{service.id}_{setting.id}"
-                                + (f"_{suffix}" if suffix > 0 else "")
-                            ] = (
-                                service_setting.value
-                                if methods is False
-                                else {
-                                    "value": service_setting.value,
-                                    "method": service_setting.method,
-                                }
+                    if setting.context == "multisite":
+                        changed = False
+                        for service in db_services:
+                            if suffix == 0:
+                                config[f"{service.id}_{setting.id}"] = (
+                                    config[setting.id]
+                                    if methods is False
+                                    else {
+                                        "value": config[setting.id]["value"],
+                                        "method": "default",
+                                    }
+                                )
+                                changed = True
+                            elif f"{setting.id}_{suffix}" in config:
+                                config[f"{service.id}_{setting.id}_{suffix}"] = (
+                                    config[f"{setting.id}_{suffix}"]
+                                    if methods is False
+                                    else {
+                                        "value": config[f"{setting.id}_{suffix}"][
+                                            "value"
+                                        ],
+                                        "method": "default",
+                                    }
+                                )
+                                changed = True
+
+                            service_setting = (
+                                session.query(Services_settings)
+                                .with_entities(
+                                    Services_settings.value, Services_settings.method
+                                )
+                                .filter_by(
+                                    service_id=service.id,
+                                    setting_id=setting.id,
+                                    suffix=suffix,
+                                )
+                                .first()
                             )
-                        elif suffix > 0:
+
+                            if service_setting is not None:
+                                config[
+                                    f"{service.id}_{setting.id}"
+                                    + (f"_{suffix}" if suffix > 0 else "")
+                                ] = (
+                                    service_setting.value
+                                    if methods is False
+                                    else {
+                                        "value": service_setting.value,
+                                        "method": service_setting.method,
+                                    }
+                                )
+                                changed = True
+
+                        if global_value is None and changed is False:
                             break
 
-                        if not setting.multiple:
-                            break
+                    if not setting.multiple:
+                        break
 
-                        suffix += 1
+                    suffix += 1
 
             return config
 
