@@ -28,7 +28,6 @@ logger = setup_logger("LETS-ENCRYPT", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-
     if getenv("MULTISITE") == "yes":
         for first_server in getenv("SERVER_NAME").split(" "):
             if first_server == "":
@@ -46,11 +45,6 @@ try:
                 logger.error(
                     f"Certificates renewal for {first_server} failed",
                 )
-            else:
-                logger.info(
-                    f"Certificates renewal for {first_server} successful",
-                )
-
     elif getenv("AUTO_LETS_ENCRYPT") == "yes" and getenv("SERVER_NAME") != "":
         first_server = getenv("SERVER_NAME").split(" ")[0]
         if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
@@ -59,10 +53,6 @@ try:
                 status = 2
                 logger.error(
                     f"Certificates renewal for {first_server} failed",
-                )
-            else:
-                logger.info(
-                    f"Certificates renewal for {first_server} successful",
                 )
 
 except:

@@ -27,6 +27,19 @@ if __name__ == "__main__":
         )
         parser_unban.add_argument("ip", type=str, help="IP address to unban")
 
+        # Ban subparser
+        parser_ban = subparsers.add_parser("ban", help="add a ban to the cache")
+        parser_ban.add_argument("ip", type=str, help="IP address to ban")
+        parser_ban.add_argument(
+            "exp",
+            type=int,
+            help="banning time in seconds (default : 86400)",
+            default=86400,
+        )
+
+        # Bans subparser
+        parser_bans = subparsers.add_parser("bans", help="list current bans")
+
         # Parse args
         args = parser.parse_args()
 
@@ -37,6 +50,10 @@ if __name__ == "__main__":
         ret, err = False, "unknown command"
         if args.command == "unban":
             ret, err = cli.unban(args.ip)
+        elif args.command == "ban":
+            ret, err = cli.ban(args.ip, args.exp)
+        elif args.command == "bans":
+            ret, err = cli.bans()
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")
@@ -50,5 +67,3 @@ if __name__ == "__main__":
     except:
         logger.error(f"Error while executing bwcli :\n{format_exc()}")
         sys_exit(1)
-
-    sys_exit(0)

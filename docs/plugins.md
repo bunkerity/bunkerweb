@@ -53,13 +53,13 @@ The first step is to install the plugin by putting the plugin files inside the c
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.3
+    	   bunkerity/bunkerweb:1.4.4
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.3
+      image: bunkerity/bunkerweb:1.4.4
       volumes:
         - ./bw-data:/data
       ...
@@ -140,7 +140,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 	  vars:
 		- custom_plugins: "{{ playbook_dir }}/bunkerweb-plugins"
 	  roles:
-		- fl0ppy_d1sk.bunkerweb
+		- bunkerity.bunkerweb
 	```
 
 	Run the playbook :

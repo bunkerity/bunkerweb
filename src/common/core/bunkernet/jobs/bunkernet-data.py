@@ -113,7 +113,7 @@ try:
         checksum=new_hash,
     )
     if err:
-        logger.warning(f"Couldn't update db cache: {err}")
+        logger.warning(f"Couldn't update db ip.list cache: {err}")
 
     logger.info("Successfully saved BunkerNet data")
 

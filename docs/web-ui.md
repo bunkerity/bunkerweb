@@ -1,7 +1,7 @@
 # Web UI
 
 !!! note "Supported integrations"
-    At the moment, the web UI is only supported with the [Docker](/1.4/integrations/#docker), [Linux](/1.4/integrations/#linux) and [Ansible](/1.4/integrations/#ansible) integrations. Please note that we plan to support more integrations as the project evolves.
+    At the moment, the web UI is only supported with the [Docker](/1.4/integrations/#docker), [Linux](/1.4/integrations/#linux) and [Ansible](/1.4/integrations/#ansible) integrations. It's not possible to use the web UI with other integrations like [Docker autoconf](/1.4/integrations/#docker-autoconf), [Swarm](/1.4/integrations/#swarm) or [Kubernetes](/1.4/integrations/#kubernetes). Please note that we plan to support more integrations as the project evolves.
 
 ## Overview
 
@@ -76,7 +76,7 @@ Because the web UI is a web application, the recommended installation procedure 
        -e "bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
        -e bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no \
        -l bunkerweb.UI \
-       bunkerity/bunkerweb:1.4.3 && \
+       bunkerity/bunkerweb:1.4.4 && \
     docker network connect bw-ui mybunker
     ```
 
@@ -115,7 +115,7 @@ Because the web UI is a web application, the recommended installation procedure 
            -e ADMIN_USERNAME=admin \
            -e ADMIN_PASSWORD=changeme \
            -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/ \
-           bunkerity/bunkerweb-ui:1.4.3 && \
+           bunkerity/bunkerweb-ui:1.4.4 && \
     docker network connect bw-docker myui
     ```
 
@@ -131,7 +131,7 @@ Because the web UI is a web application, the recommended installation procedure 
     services:
 
       mybunker:
-        image: bunkerity/bunkerweb:1.4.3
+        image: bunkerity/bunkerweb:1.4.4
         networks:
           - bw-services
           - bw-ui
@@ -154,7 +154,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - "bunkerweb.UI"
 
       myui:
-        image: bunkerity/bunkerweb-ui:1.4.3
+        image: bunkerity/bunkerweb-ui:1.4.4
         depends_on:
           - mydocker
         networks:
@@ -297,7 +297,7 @@ Because the web UI is a web application, the recommended installation procedure 
 		- enable_ui: true
 		- custom_ui: "{{ playbook_dir }}/my_ui.env"
 	  roles:
-		- fl0ppy_d1sk.bunkerweb
+		- bunkerity.bunkerweb
 	```
 
     You can now run the playbook and be able to access the web UI :

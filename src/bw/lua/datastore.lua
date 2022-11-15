@@ -1,4 +1,4 @@
-local datastore = {dict = ngx.shared.datastore }
+local datastore = { dict = ngx.shared.datastore }
 
 datastore.get = function(self, key)
 	local value, err = self.dict:get(key)
@@ -20,6 +20,14 @@ end
 datastore.delete = function(self, key)
 	self.dict:delete(key)
 	return true, "success"
+end
+
+datastore.exp = function(self, key)
+	local ttl, err = self.dict:ttl(key)
+	if not ttl then
+		return false, err
+	end
+	return true, ttl
 end
 
 datastore.delete_all = function(self, pattern)
