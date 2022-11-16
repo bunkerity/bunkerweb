@@ -1,1 +1,7 @@
+name: Automatic tests and push (STAGING)
+
+on:
+  push:
+    branches: [staging]
+
 # TODO
