@@ -1161,23 +1161,6 @@ def cache():
     )
 
 
-@app.route("/cache/download", methods=["GET"])
-@login_required
-def cache_download():
-    path = request.args.get("path")
-
-    if not path:
-        return redirect(url_for("loading", next=url_for("cache"))), 400
-
-    operation = app.config["CONFIGFILES"].check_path(path, "/var/cache/bunkerweb/")
-
-    if operation:
-        flash(operation, "error")
-        return redirect(url_for("loading", next=url_for("plugins"))), 500
-
-    return send_file(path, as_attachment=True)
-
-
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
@@ -1188,8 +1171,6 @@ def logs():
         "logs.html",
         first_instance=first_instance,
         instances=instances,
-        is_swarm=getenv("SWARM_MODE", "no") == "yes",
-        is_kubernetes=getenv("KUBERNETES_MODE", "no") == "yes",
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1425,6 +1406,12 @@ def darkmode():
             app.config["DARK_MODE"] = False
 
     return jsonify({"status": "ok"})
+
+
+@app.route("/plugins_errors", methods=["GET"])
+@login_required
+def plugins_errors():
+    return jsonify({"status": "ok", "plugins_errors": db.get_plugins_errors()})
 
 
 @app.route("/check_reloading")

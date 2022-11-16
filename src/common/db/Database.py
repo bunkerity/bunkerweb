@@ -1179,3 +1179,8 @@ class Database:
                 return format_exc()
 
         return ""
+
+    def get_plugins_errors(self) -> int:
+        """Get plugins errors."""
+        with self.__db_session() as session:
+            return session.query(Jobs).filter(Jobs.success == False).count()
