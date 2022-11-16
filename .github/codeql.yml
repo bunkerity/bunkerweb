@@ -5,3 +5,6 @@ paths:
   - src/scheduler
   - src/ui
   - src/common
+paths-ignore:
+  - src/ui/static
+  - src/common/core/modsecurity/files
