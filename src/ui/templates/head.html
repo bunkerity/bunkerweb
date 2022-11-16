@@ -18,7 +18,7 @@
   <!-- tailwind style -->
   <link rel="stylesheet" type="text/css" href="./css/dashboard.css" />
 
-  <script type="module" defer src="./js/dashboard.js"></script>
+  <script type="text/javascript" defer src="./js/dashboard.js"></script>
 
   <script
     type="text/javascript"
@@ -42,6 +42,10 @@
   <script defer type="module" src="./js/cache.js"></script>
   {% elif current_endpoint == "logs" %}
   <script type="module" src="./js/logs.js"></script>
-
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="./css/air-datepicker/air-datepicker.css"
+  />
   {% endif %}
 </head>

@@ -1,5 +1,3 @@
-import AirDatepicker from "./air-datepicker/index.es.js";
-
 class Upload {
   constructor(prefix) {
     this.prefix = prefix;
@@ -11,6 +9,19 @@ class Upload {
   }
 
   init() {
+    this.dragNdrop.addEventListener("dargenter", () => {
+      console.log("enter");
+      this.dragNdrop.classList.add("border", "border-red-500");
+    });
+    this.dragNdrop.addEventListener("dargover", () => {
+      this.dragNdrop.classList.add("border", "border-red-500");
+    });
+    this.dragNdrop.addEventListener("drop", (e) => {
+      let dt = e.dataTransfer;
+      let files = dt.files;
+      console.log(files);
+    });
+
     this.uploadDOM.addEventListener("click", (e) => {
       this.uploadInp.click();
     });
@@ -28,3 +39,5 @@ class Upload {
     });
   }
 }
+
+const setUpload = new Upload("plugins");

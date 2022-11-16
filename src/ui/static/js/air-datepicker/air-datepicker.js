@@ -1,5 +1,3 @@
-const { default: AirDatepicker } = require("air-datepicker");
-
 !(function (e, t) {
   "object" == typeof exports && "object" == typeof module
     ? (module.exports = t())
@@ -2337,7 +2335,6 @@ const { default: AirDatepicker } = require("air-datepicker");
       }
     }
     var U;
-    const datepicker = new AirDatepicker("input[fetchdatetimepicker]");
     return (
       I(j, "defaults", s),
       I(j, "version", "3.3.1"),

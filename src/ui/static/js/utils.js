@@ -795,27 +795,19 @@ class FolderModal {
   //on form submit, check for update values before send request
   setInpt(action, path, type, name) {
     this.modalInpPath.value =
-      type === "file" && this.prefix === "configs"
-        ? path.replace(".conf", "")
-        : path;
+      type === "file" ? path.replace(".conf", "") : path;
     this.modalInpType.value = type;
     this.modalInpOperation.value = action;
     this.modalInpOldName.value =
-      type === "file" && this.prefix === "configs"
-        ? name.replace(".conf", "")
-        : name;
+      type === "file" ? name.replace(".conf", "") : name;
   }
 
   //path is empty if new one, else show current name
   setPath(action, path, type) {
     let [prevPath, name] = this.separatePath(path);
     //remove conf if file type
-    this.modalPathSuffix.textContent =
-      type === "file" && this.prefix === "configs" ? ".conf" : "";
-    name =
-      type === "file" && this.prefix === "configs"
-        ? name.replace(".conf", "")
-        : name;
+    this.modalPathSuffix.textContent = type === "file" ? ".conf" : "";
+    name = type === "file" ? name.replace(".conf", "") : name;
 
     if (action === "new") {
       this.modalPathPrev.textContent = `${path}`;
