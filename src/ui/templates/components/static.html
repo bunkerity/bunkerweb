@@ -1,0 +1,569 @@
+<body class="font-sans z-100 m-0 text-base antialiased font-normal dark:bg-slate-900 leading-default bg-gray-50 text-slate-500" cz-shortcut-listen="true">
+    <noscript>Your browser does not support JavaScript!</noscript>
+
+    <!--fixed background-->
+    <div class="absolute w-full dark:bg-primary/20 bg-primary min-h-75"></div>
+    <!-- end fixed background-->
+
+    
+
+<!-- float button-->
+<button type="button" sidebar-menu-toggle="" class="fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-3 right-4 z-990 rounded-circle text-slate-700">
+  <svg fill="#0D6EFD" class="h-6 w-6 translate-x-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"></path>
+  </svg>
+</button>
+<!-- end float button-->
+
+<!-- left sidebar  -->
+<aside sidebar-menu="" class="fixed flex inset-y-0 flex-wrap justify-between w-full p-0 my-4 overflow-y-auto antialiased transition-transform duration-200 -translate-x-full bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 max-w-64 z-[1000] xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0" aria-expanded="false">
+  <!-- top sidebar -->
+  <div class="w-full">
+    <!-- logo and version -->
+    <div class="h-19">
+      <svg class="svg-inline--fa fa-xmark absolute top-0 right-0 p-4 opacity-50 cursor-pointer dark:text-white text-slate-400 xl:hidden" sidebar-menu-close="" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="xmark" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" data-fa-i2svg=""><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"></path></svg><!-- <i class="absolute top-0 right-0 p-4 opacity-50 cursor-pointer fas fa-times dark:text-white text-slate-400 xl:hidden" sidebar-menu-close=""></i> Font Awesome fontawesome.com -->
+      <a class="block px-8 py-6 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700" href="https://demos.creative-tim.com/argon-dashboard-tailwind/pages/dashboard.html" target="_blank">
+        <img src="images/logo-bw.png" class="scale-125 inline h-full max-w-full transition-all duration-200 max-h-8" alt="main logo">
+        <span class="ml-6 text-base font-semibold transition-all duration-200 ease-nav-brand">BUNKERWEB</span>
+      </a>
+    </div>
+
+    <hr class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent">
+    <!-- end logo version -->
+
+    <!-- list items -->
+    <div class="items-center block w-auto max-h-screen overflow-auto h-sidenav grow basis-full">
+      <!-- default anchor -->
+      <ul class="flex flex-col pl-0 mb-0">
+        <!-- item highlight -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:bg-primary/50 py-1 bg-primary/20 dark:text-white dark:opacity-80 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 font-semibold text-slate-700 transition" href="javascript:void(0)">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-sky-500 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Home</span>
+          </a>
+        </li>
+        <!-- end item highlight -->
+
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/instances">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-red-500 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Instances</span>
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/global_config">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-blue-400 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 456c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Global config</span>
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/services">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-orange-500 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                <path d="M208 80c0-26.5 21.5-48 48-48h64c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-8v40H464c30.9 0 56 25.1 56 56v32h8c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H464c-26.5 0-48-21.5-48-48V368c0-26.5 21.5-48 48-48h8V288c0-4.4-3.6-8-8-8H312v40h8c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H256c-26.5 0-48-21.5-48-48V368c0-26.5 21.5-48 48-48h8V280H112c-4.4 0-8 3.6-8 8v32h8c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V368c0-26.5 21.5-48 48-48h8V288c0-30.9 25.1-56 56-56H264V192h-8c-26.5 0-48-21.5-48-48V80z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Services</span>
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/configs">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-blue-500 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336c44.2 0 80-35.8 80-80s-35.8-80-80-80s-80 35.8-80 80s35.8 80 80 80z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Configs</span>
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/plugins">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-yellow-500 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                <path d="M96 0C78.3 0 64 14.3 64 32v96h64V32c0-17.7-14.3-32-32-32zM288 0c-17.7 0-32 14.3-32 32v96h64V32c0-17.7-14.3-32-32-32zM32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32v32c0 77.4 55 142 128 156.8V480c0 17.7 14.3 32 32 32s32-14.3 32-32V412.8C297 398 352 333.4 352 256V224c17.7 0 32-14.3 32-32s-14.3-32-32-32H32z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Plugins</span>
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/cache">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-pink-600 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M50.7 58.5L0 160H208V32H93.7C75.5 32 58.9 42.3 50.7 58.5zM240 160H448L397.3 58.5C389.1 42.3 372.5 32 354.3 32H240V160zm208 32H0V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Cache</span>
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="loading?next=/admin/logs">
+            <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-2.5">
+              <svg class="fill-gray-600 dark:fill-gray-500 scale-125 relative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"></path>
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">Logs</span>
+          </a>
+        </li>
+        <!-- end item -->
+      </ul>
+      <!-- end default anchor -->
+
+      <!-- plugin list -->
+      <div>
+        <ul>
+          <li class="w-full mt-4">
+            <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">
+              PLUGINS
+            </h6>
+          </li>
+        </ul>
+        <!-- end plugin list -->
+      </div>
+    </div>
+    <!-- end list items -->
+  </div>
+  <!-- end top sidebar -->
+
+  <!-- bottom sidebar  -->
+  <div class="w-full flex flex-col justify-end m-4">
+    <!-- dark/light mode -->
+    <div class="min-h-6 my-4 flex justify-center">
+      <input id="darkMode" dark-toggle="" class="rounded-10 duration-300 ease-in-out after:rounded-circle after:shadow-2xl after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative float-left w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-primary checked:bg-primary checked:bg-none checked:bg-right" type="checkbox">
+      <label for="darkMode" dark-toggle-label="" class="dark:text-white dark:opacity-80 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700">light</label>
+    </div>
+    <!-- end dark/light mode -->
+
+    <!-- social-->
+    <ul class="flex justify-center align-middle w-full mb-4">
+      <li class="mx-2 w-6">
+        <a href="https://twitter.com/bunkerity" target="_blank"><svg class="hover:opacity-80" fill="#1DA1F2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"></path></svg></a>
+      </li>
+      <li class="mx-2.5 w-6">
+        <a href="https://www.linkedin.com/company/bunkerity/" target="_blank"><svg fill="#0A63BC" class="hover:opacity-80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"></path></svg></a>
+      </li>
+      <li class="mx-2.5 w-6">
+        <a href="https://discord.gg/fTf46FmtyD" target="_blank"><svg class="translate-y-1 hover:opacity-80" fill="#5562EA" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+            <path d="M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6,447.848,447.848,0,0,0-134.426,0,309.541,309.541,0,0,0-15.135-30.6,1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588,321.173,321.173,0,0,1-45.868-21.853,1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126,301.407,301.407,0,0,1-45.89,21.83,1.875,1.875,0,0,0-1,2.611,391.055,391.055,0,0,0,30.014,48.815,1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z"></path></svg></a>
+      </li>
+      <li class="mx-2.5 w-6">
+        <a href="https://github.com/bunkerity" target="_blank"><svg class="hover:opacity-80" fill="#171A1F" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512">
+            <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg></a>
+      </li>
+    </ul>
+    <!-- end social-->
+
+    <!-- logout-->
+    <div class="w-full">
+      <button type="button" class="w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+        Logout
+      </button>
+    </div>
+    <!-- end logout-->
+  </div>
+  <!-- end bottom sidebar  -->
+</aside>
+<!-- end left sidebar --> <!-- float button-->
+<button type="button" sidebar-info-open="" class="fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-20 xl:top-3 right-4 z-990 rounded-circle text-slate-700">
+  <svg fill="#0D6EFD" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <path d="M96 96c0-35.3 28.7-64 64-64H448c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H80c-44.2 0-80-35.8-80-80V128c0-17.7 14.3-32 32-32s32 14.3 32 32V400c0 8.8 7.2 16 16 16s16-7.2 16-16V96zm64 24v80c0 13.3 10.7 24 24 24H424c13.3 0 24-10.7 24-24V120c0-13.3-10.7-24-24-24H184c-13.3 0-24 10.7-24 24zm0 184c0 8.8 7.2 16 16 16h96c8.8 0 16-7.2 16-16s-7.2-16-16-16H176c-8.8 0-16 7.2-16 16zm160 0c0 8.8 7.2 16 16 16h96c8.8 0 16-7.2 16-16s-7.2-16-16-16H336c-8.8 0-16 7.2-16 16zM160 400c0 8.8 7.2 16 16 16h96c8.8 0 16-7.2 16-16s-7.2-16-16-16H176c-8.8 0-16 7.2-16 16zm160 0c0 8.8 7.2 16 16 16h96c8.8 0 16-7.2 16-16s-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"></path>
+  </svg>
+</button>
+<!-- end float button-->
+
+<!-- right sidebar -->
+<aside sidebar-info="" class="z-sticky backdrop-blur-2xl backdrop-saturate-200 dark:bg-slate-850/80 shadow-3xl max-w-full w-90 ease -right-90 fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white/80 bg-clip-border px-2.5 duration-200">
+  <!-- header -->
+  <div class="px-6 pt-4 pb-0 mb-0 border-b-0 rounded-t-2xl">
+    <div class="float-left">
+      <h5 class="mt-4 mb-0 dark:text-white font-bold">NEWS</h5>
+      <p class="dark:text-white dark:opacity-80">Learn more about us</p>
+    </div>
+    <!-- close button -->
+    <div class="float-right mt-6">
+      <button sidebar-info-close="" class="inline-block p-0 mb-4 text-sm font-bold leading-normal text-center uppercase align-middle transition-all ease-in bg-transparent border-0 rounded-lg shadow-none cursor-pointer hover:-translate-y-px tracking-tight-rem bg-150 bg-x-25 active:opacity-85 dark:text-white text-slate-700">
+        <svg class="svg-inline--fa fa-xmark" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="xmark" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" data-fa-i2svg=""><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"></path></svg><!-- <i class="fa fa-close"></i> Font Awesome fontawesome.com -->
+      </button>
+    </div>
+    <!-- end close button -->
+  </div>
+  <hr class="h-px mx-0 my-1 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent">
+  <!-- end header -->
+  <!-- news-->
+  <div class="flex-auto p-6 pt-0 overflow-auto sm:pt-4">
+    <!-- card news -->
+    <div class="my-4">
+      <h6 class="mb-0 dark:text-white">NEWS INFO</h6>
+      <p class="text-sm leading-normal dark:text-white dark:opacity-80">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+        aspernatur similique! Iste natus perspiciatis dolores laudantium?
+        Laboriosam, ea dolore. Repudiandae et non eaque totam temporibus,
+        provident in perspiciatis sed soluta!
+      </p>
+    </div>
+    <!-- end card news -->
+    <!-- card news -->
+    <div class="my-4">
+      <h6 class="mb-0 dark:text-white">NEWS INFO</h6>
+      <p class="text-sm leading-normal dark:text-white dark:opacity-80">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+        aspernatur similique! Iste natus perspiciatis dolores laudantium?
+        Laboriosam, ea dolore. Repudiandae et non eaque totam temporibus,
+        provident in perspiciatis sed soluta!
+      </p>
+    </div>
+    <!-- end card news -->
+  </div>
+  <!-- end news-->
+
+  <!-- newsletter -->
+  <hr class="h-px mx-0 my-1 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent">
+
+  <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67" method="POST" class="px-6 pt-4 pb-0 mb-0 border-b-0" id="subscribe-newsletter">
+    <h5 class="mb-4 dark:text-white font-bold">NEWSLETTER</h5>
+    <div class="flex">
+      <input type="text" id="newsletter-email" name="EMAIL" class="disabled:opacity-75 valid:border-green-500 invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500" placeholder="John.doe@example.com" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$" required="">
+    </div>
+    <div class="block pl-7 mt-2">
+      <div class="relative">
+        <input required="" id="newsletter-check" class="absolute w-5 h-5 ease text-base -ml-7 rounded-1.4 checked:bg-primary duration-250 float-left mt-1 cursor-pointer appearance-none border border-solid border-slate-150 bg-white bg-contain bg-center bg-no-repeat align-top transition-all after:absolute after:flex after:h-full after:w-full after:items-center after:justify-center after:text-white after:opacity-0 after:transition-all checked:border-0 checked:border-transparent checked:bg-transparent checked:after:opacity-100" type="checkbox">
+        <svg checkbox-handler="newsletter-check" class="absolute fill-white cursor-pointer -translate-x-6 translate-y-2 h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path checkbox-handler="newsletter-check" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"></path>
+        </svg>
+      </div>
+      <label class="text-sm" for="newsletter-check">
+        I've read and agree to the
+        <a class="italic" href="https://www.bunkerity.com/privacy-policy/" _target="_blank">privacy policy</a>
+      </label>
+    </div>
+    <button type="submit" formtarget="_blank" class="flex w-full justify-center mt-4 mb-4 px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+      Subscribe
+    </button>
+  </form>
+
+  <!-- end newsletter -->
+</aside>
+<!-- end right sidebar -->
+
+    <main class="w-full max-w-screen-sm relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl">
+      <!-- header -->
+<header class="relative flex flex-wrap items-center justify-between px-0 py-2 mx-6 transition-all ease-in shadow-none duration-250 rounded-2xl lg:flex-nowrap lg:justify-start">
+  <div class="flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit">
+    <nav>
+      <!-- breadcrumb -->
+      <h6 class="mb-0 text-lg font-bold text-white capitalize">Dashboard</h6>
+      <ol class="flex flex-wrap pt-1 mr-12 bg-transparent rounded-lg sm:mr-16">
+        <li class="text-sm leading-normal">
+          <a class="text-white opacity-50" href="javascript:;">Pages</a>
+        </li>
+        <li class="text-sm pl-2 capitalize leading-normal text-white before:float-left before:pr-2 before:text-white before:content-['/']" aria-current="page">
+          Dashboard
+        </li>
+      </ol>
+    </nav>
+  </div>
+</header>
+<!-- end header -->
+      <!-- alert-->
+      <div class="position-fixed bottom-0 end-0 p-3 pt-5 toast-container">
+          
+      </div>
+      <!-- end alert-->
+
+      <!-- info -->
+      <div class="flex justify-center align-top w-full px-6 py-6 mx-auto min-h-85-screen">
+        <div class="grid grid-cols-12 w-full max-w-lg">
+          
+<!-- card -->
+<div class="col-span-12 sm:col-span-6 lg:col-span-4 flex p-4 justify-between w-full max-w-[300px] mb-6 mx-2 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+  <!-- text -->
+  <div>
+    <p class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60">
+      Today's Users
+    </p>
+    <h5 class="mb-2 font-bold dark:text-white">2,300</h5>
+  </div>
+  <!-- end text -->
+  <!-- icon -->
+  <div class="inline-block w-12 h-12 text-center rounded-circle bg-gradient-to-tl from-red-600 to-orange-600">
+    <i class="ni leading-none ni-world text-lg relative top-3.5 text-white"></i>
+  </div>
+  <!-- end icon -->
+</div>
+<!-- end card -->
+
+<div class="hidden container-fluid px-3 py-5 p-md-5">
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                BunkerWeb version
+              </div>
+              
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                1.4.3 
+              </div>
+              
+            </div>
+            
+            <div class="col-auto">
+              <svg class="svg-inline--fa fa-code-branch fa-2x text-gray-300" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="code-branch" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M160 80C160 112.8 140.3 140.1 112 153.3V241.1C130.8 230.2 152.7 224 176 224H272C307.3 224 336 195.3 336 160V153.3C307.7 140.1 288 112.8 288 80C288 35.82 323.8 0 368 0C412.2 0 448 35.82 448 80C448 112.8 428.3 140.1 400 153.3V160C400 230.7 342.7 288 272 288H176C140.7 288 112 316.7 112 352V358.7C140.3 371 160 399.2 160 432C160 476.2 124.2 512 80 512C35.82 512 0 476.2 0 432C0 399.2 19.75 371 48 358.7V153.3C19.75 140.1 0 112.8 0 80C0 35.82 35.82 0 80 0C124.2 0 160 35.82 160 80V80zM80 104C93.25 104 104 93.25 104 80C104 66.75 93.25 56 80 56C66.75 56 56 66.75 56 80C56 93.25 66.75 104 80 104zM368 56C354.7 56 344 66.75 344 80C344 93.25 354.7 104 368 104C381.3 104 392 93.25 392 80C392 66.75 381.3 56 368 56zM80 456C93.25 456 104 445.3 104 432C104 418.7 93.25 408 80 408C66.75 408 56 418.7 56 432C56 445.3 66.75 456 80 456z"></path></svg><!-- <i class="fa-solid fa-code-branch fa-2x text-gray-300"></i> Font Awesome fontawesome.com -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Number of instances
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                1
+              </div>
+            </div>
+            <div class="col-auto">
+              <svg class="svg-inline--fa fa-hard-drive fa-2x text-gray-300" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="hard-drive" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M464 288h-416C21.5 288 0 309.5 0 336v96C0 458.5 21.5 480 48 480h416c26.5 0 48-21.5 48-48v-96C512 309.5 490.5 288 464 288zM320 416c-17.62 0-32-14.38-32-32s14.38-32 32-32s32 14.38 32 32S337.6 416 320 416zM416 416c-17.62 0-32-14.38-32-32s14.38-32 32-32s32 14.38 32 32S433.6 416 416 416zM464 32h-416C21.5 32 0 53.5 0 80v192.4C13.41 262.3 29.92 256 48 256h416c18.08 0 34.59 6.254 48 16.41V80C512 53.5 490.5 32 464 32z"></path></svg><!-- <i class="fa-solid fa-hard-drive fa-2x text-gray-300"></i> Font Awesome fontawesome.com -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Number of web services
+              </div>
+              <div class="row no-gutters align-items-center">
+                <div class="col-auto">
+                  <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                    1
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-auto">
+              <svg class="svg-inline--fa fa-globe fa-2x text-gray-300" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="globe" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M352 256C352 278.2 350.8 299.6 348.7 320H163.3C161.2 299.6 159.1 278.2 159.1 256C159.1 233.8 161.2 212.4 163.3 192H348.7C350.8 212.4 352 233.8 352 256zM503.9 192C509.2 212.5 512 233.9 512 256C512 278.1 509.2 299.5 503.9 320H380.8C382.9 299.4 384 277.1 384 256C384 234 382.9 212.6 380.8 192H503.9zM493.4 160H376.7C366.7 96.14 346.9 42.62 321.4 8.442C399.8 29.09 463.4 85.94 493.4 160zM344.3 160H167.7C173.8 123.6 183.2 91.38 194.7 65.35C205.2 41.74 216.9 24.61 228.2 13.81C239.4 3.178 248.7 0 256 0C263.3 0 272.6 3.178 283.8 13.81C295.1 24.61 306.8 41.74 317.3 65.35C328.8 91.38 338.2 123.6 344.3 160H344.3zM18.61 160C48.59 85.94 112.2 29.09 190.6 8.442C165.1 42.62 145.3 96.14 135.3 160H18.61zM131.2 192C129.1 212.6 127.1 234 127.1 256C127.1 277.1 129.1 299.4 131.2 320H8.065C2.8 299.5 0 278.1 0 256C0 233.9 2.8 212.5 8.065 192H131.2zM194.7 446.6C183.2 420.6 173.8 388.4 167.7 352H344.3C338.2 388.4 328.8 420.6 317.3 446.6C306.8 470.3 295.1 487.4 283.8 498.2C272.6 508.8 263.3 512 255.1 512C248.7 512 239.4 508.8 228.2 498.2C216.9 487.4 205.2 470.3 194.7 446.6H194.7zM190.6 503.6C112.2 482.9 48.59 426.1 18.61 352H135.3C145.3 415.9 165.1 469.4 190.6 503.6V503.6zM321.4 503.6C346.9 469.4 366.7 415.9 376.7 352H493.4C463.4 426.1 399.8 482.9 321.4 503.6V503.6z"></path></svg><!-- <i class="fa-solid fa-globe fa-2x text-gray-300"></i> Font Awesome fontawesome.com -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Join the community !
+              </div>
+              <div class="row no-gutters align-items-center">
+                <div class="col-auto">
+                  <a href="https://twitter.com/bunkerity" target="_blank">
+                    <svg class="svg-inline--fa fa-twitter fa-2x text-gray-800" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="twitter" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M459.4 151.7c.325 4.548 .325 9.097 .325 13.65 0 138.7-105.6 298.6-298.6 298.6-59.45 0-114.7-17.22-161.1-47.11 8.447 .974 16.57 1.299 25.34 1.299 49.06 0 94.21-16.57 130.3-44.83-46.13-.975-84.79-31.19-98.11-72.77 6.498 .974 12.99 1.624 19.82 1.624 9.421 0 18.84-1.3 27.61-3.573-48.08-9.747-84.14-51.98-84.14-102.1v-1.299c13.97 7.797 30.21 12.67 47.43 13.32-28.26-18.84-46.78-51.01-46.78-87.39 0-19.49 5.197-37.36 14.29-52.95 51.65 63.67 129.3 105.3 216.4 109.8-1.624-7.797-2.599-15.92-2.599-24.04 0-57.83 46.78-104.9 104.9-104.9 30.21 0 57.5 12.67 76.67 33.14 23.72-4.548 46.46-13.32 66.6-25.34-7.798 24.37-24.37 44.83-46.13 57.83 21.12-2.273 41.58-8.122 60.43-16.24-14.29 20.79-32.16 39.31-52.63 54.25z"></path></svg><!-- <i class="fa-brands fa-twitter fa-2x text-gray-800"></i> Font Awesome fontawesome.com -->
+                  </a>
+                </div>
+                <div class="col-auto">
+                  <a href="https://www.linkedin.com/company/bunkerity/" target="_blank">
+                    <svg class="svg-inline--fa fa-linkedin fa-2x text-gray-800" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="linkedin" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"></path></svg><!-- <i class="fa-brands fa-linkedin fa-2x text-gray-800"></i> Font Awesome fontawesome.com -->
+                  </a>
+                </div>
+                <div class="col-auto">
+                  <a href="https://discord.gg/fTf46FmtyD" target="_blank">
+                    <svg class="svg-inline--fa fa-discord fa-2x text-gray-800" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="discord" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M524.5 69.84a1.5 1.5 0 0 0 -.764-.7A485.1 485.1 0 0 0 404.1 32.03a1.816 1.816 0 0 0 -1.923 .91 337.5 337.5 0 0 0 -14.9 30.6 447.8 447.8 0 0 0 -134.4 0 309.5 309.5 0 0 0 -15.14-30.6 1.89 1.89 0 0 0 -1.924-.91A483.7 483.7 0 0 0 116.1 69.14a1.712 1.712 0 0 0 -.788 .676C39.07 183.7 18.19 294.7 28.43 404.4a2.016 2.016 0 0 0 .765 1.375A487.7 487.7 0 0 0 176 479.9a1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.1 430.4a1.86 1.86 0 0 0 -1.019-2.588 321.2 321.2 0 0 1 -45.87-21.85 1.885 1.885 0 0 1 -.185-3.126c3.082-2.309 6.166-4.711 9.109-7.137a1.819 1.819 0 0 1 1.9-.256c96.23 43.92 200.4 43.92 295.5 0a1.812 1.812 0 0 1 1.924 .233c2.944 2.426 6.027 4.851 9.132 7.16a1.884 1.884 0 0 1 -.162 3.126 301.4 301.4 0 0 1 -45.89 21.83 1.875 1.875 0 0 0 -1 2.611 391.1 391.1 0 0 0 30.01 48.81 1.864 1.864 0 0 0 2.063 .7A486 486 0 0 0 610.7 405.7a1.882 1.882 0 0 0 .765-1.352C623.7 277.6 590.9 167.5 524.5 69.84zM222.5 337.6c-28.97 0-52.84-26.59-52.84-59.24S193.1 219.1 222.5 219.1c29.67 0 53.31 26.82 52.84 59.24C275.3 310.1 251.9 337.6 222.5 337.6zm195.4 0c-28.97 0-52.84-26.59-52.84-59.24S388.4 219.1 417.9 219.1c29.67 0 53.31 26.82 52.84 59.24C470.7 310.1 447.5 337.6 417.9 337.6z"></path></svg><!-- <i class="fa-brands fa-discord fa-2x text-gray-800"></i> Font Awesome fontawesome.com -->
+                  </a>
+                </div>
+                <div class="col-auto">
+                  <a href="https://github.com/bunkerity" target="_blank">
+                    <svg class="svg-inline--fa fa-github fa-2x text-gray-800" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="github" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" data-fa-i2svg=""><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3 .3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5 .3-6.2 2.3zm44.2-1.7c-2.9 .7-4.9 2.6-4.6 4.9 .3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3 .7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3 .3 2.9 2.3 3.9 1.6 1 3.6 .7 4.3-.7 .7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3 .7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3 .7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg><!-- <i class="fa-brands fa-github fa-2x text-gray-800"></i> Font Awesome fontawesome.com -->
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="col-auto">
+              <svg class="svg-inline--fa fa-hashtag fa-2x text-gray-300" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="hashtag" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M416 127.1h-58.23l9.789-58.74c2.906-17.44-8.875-33.92-26.3-36.83c-17.53-2.875-33.92 8.891-36.83 26.3L292.9 127.1H197.8l9.789-58.74c2.906-17.44-8.875-33.92-26.3-36.83c-17.53-2.875-33.92 8.891-36.83 26.3L132.9 127.1H64c-17.67 0-32 14.33-32 32C32 177.7 46.33 191.1 64 191.1h58.23l-21.33 128H32c-17.67 0-32 14.33-32 32c0 17.67 14.33 31.1 32 31.1h58.23l-9.789 58.74c-2.906 17.44 8.875 33.92 26.3 36.83C108.5 479.9 110.3 480 112 480c15.36 0 28.92-11.09 31.53-26.73l11.54-69.27h95.12l-9.789 58.74c-2.906 17.44 8.875 33.92 26.3 36.83C268.5 479.9 270.3 480 272 480c15.36 0 28.92-11.09 31.53-26.73l11.54-69.27H384c17.67 0 32-14.33 32-31.1c0-17.67-14.33-32-32-32h-58.23l21.33-128H416c17.67 0 32-14.32 32-31.1C448 142.3 433.7 127.1 416 127.1zM260.9 319.1H165.8L187.1 191.1h95.12L260.9 319.1z"></path></svg><!-- <i class="fa-solid fa-hashtag fa-2x text-gray-300"></i> Font Awesome fontawesome.com -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<section class="hidden blog-list px-3 py-5 p-md-5">
+  <h1>News ‒</h1>
+  <div class="container single-col-max-width">
+    
+    <div class="item mb-5">
+      <div class="row g-3 g-xl-0">
+        <div class="col-2 col-xl-3">
+          <a href="https://www.bunkerity.com/what-is-a-penetration-test/" target="_blank"><img class="img-fluid post-thumb" src="https://assets.bunkerity.com/www-bunkerity-com/2022/01/bg12-scaled.jpeg" alt="image"></a>
+        </div>
+        <div class="col">
+          <h3 class="title mb-1">
+            <a class="text-link" href="https://www.bunkerity.com/what-is-a-penetration-test/" target="_blank">What is a penetration test ?</a>
+          </h3>
+          <div class="meta mb-1">
+            <span class="date">January 13, 2022</span><span class="time">19 minutes read</span>
+          </div>
+          <div class="intro">Also called “pentest” (short for “penetration test”), the penetration test is a rather particular computer security audit method. This makes it possible to highlight weaknesses in cybersecurity in order to correct them. But what is it exactly?...</div>
+          <a class="text-link" href="https://www.bunkerity.com/what-is-a-penetration-test/" target="_blank">Read more →</a>
+        </div>
+        <!--//col-->
+      </div>
+      <!--//row-->
+    </div>
+    <!--//item-->
+    
+    <div class="item mb-5">
+      <div class="row g-3 g-xl-0">
+        <div class="col-2 col-xl-3">
+          <a href="https://www.bunkerity.com/some-hardening-tips-to-secure-nginx/" target="_blank"><img class="img-fluid post-thumb" src="https://assets.bunkerity.com/www-bunkerity-com/2022/01/nginx-hardening.png" alt="image"></a>
+        </div>
+        <div class="col">
+          <h3 class="title mb-1">
+            <a class="text-link" href="https://www.bunkerity.com/some-hardening-tips-to-secure-nginx/" target="_blank">Some hardening tips to secure nginx</a>
+          </h3>
+          <div class="meta mb-1">
+            <span class="date">January 13, 2022</span><span class="time">39 minutes read</span>
+          </div>
+          <div class="intro">Nginx has become very popular in the last years and is now almost identical to Apache in terms of usage statistics. We won’t discuss the benefits of using one or another because we all already know that Nginx is by far better ! This hardening post is a sho...</div>
+          <a class="text-link" href="https://www.bunkerity.com/some-hardening-tips-to-secure-nginx/" target="_blank">Read more →</a>
+        </div>
+        <!--//col-->
+      </div>
+      <!--//row-->
+    </div>
+    <!--//item-->
+    
+    <div class="item mb-5">
+      <div class="row g-3 g-xl-0">
+        <div class="col-2 col-xl-3">
+          <a href="https://www.bunkerity.com/security-best-practices-when-running-docker-containers/" target="_blank"><img class="img-fluid post-thumb" src="https://assets.bunkerity.com/www-bunkerity-com/2022/01/hardened-docker.jpg" alt="image"></a>
+        </div>
+        <div class="col">
+          <h3 class="title mb-1">
+            <a class="text-link" href="https://www.bunkerity.com/security-best-practices-when-running-docker-containers/" target="_blank">Security best practices when running Docker containers</a>
+          </h3>
+          <div class="meta mb-1">
+            <span class="date">January 13, 2022</span><span class="time">27 minutes read</span>
+          </div>
+          <div class="intro">Containers are an awesome way to package and design complex applications with many dependencies and interconnection. They are also lightweight in contrast of Virtual Machine because they use the kernel of the host instead of their own. The drawback is the ...</div>
+          <a class="text-link" href="https://www.bunkerity.com/security-best-practices-when-running-docker-containers/" target="_blank">Read more →</a>
+        </div>
+        <!--//col-->
+      </div>
+      <!--//row-->
+    </div>
+    <!--//item-->
+    
+    <div class="item mb-5">
+      <div class="row g-3 g-xl-0">
+        <div class="col-2 col-xl-3">
+          <a href="https://www.bunkerity.com/cybersecurity-for-your-business-what-are-the-prerequisites-before-you-start/" target="_blank"><img class="img-fluid post-thumb" src="https://assets.bunkerity.com/www-bunkerity-com/2022/01/cyber-blog.jpg" alt="image"></a>
+        </div>
+        <div class="col">
+          <h3 class="title mb-1">
+            <a class="text-link" href="https://www.bunkerity.com/cybersecurity-for-your-business-what-are-the-prerequisites-before-you-start/" target="_blank">Cybersecurity for your business : what are the prerequisites before you start ?</a>
+          </h3>
+          <div class="meta mb-1">
+            <span class="date">January 13, 2022</span><span class="time">13 minutes read</span>
+          </div>
+          <div class="intro">In the headlines in recent years, IT security has become indispensable in organizations whether public or private. It is complex to navigate among the plethora of solutions available on the market without knowing whether they are suited to the specificitie...</div>
+          <a class="text-link" href="https://www.bunkerity.com/cybersecurity-for-your-business-what-are-the-prerequisites-before-you-start/" target="_blank">Read more →</a>
+        </div>
+        <!--//col-->
+      </div>
+      <!--//row-->
+    </div>
+    <!--//item-->
+    
+
+    <nav class="blog-nav nav nav-justified my-5">
+      <a class="nav-link-next nav-item nav-link rounded" href="https://www.bunkerity.com/blog/" target="_blank">See more posts</a>
+    </nav>
+  </div>
+</section>
+ 
+        </div>
+      </div>
+      <!-- end info -->
+    </main>
+
+    <footer class="fixed bottom-0 w-full xl:pl-68 pt-4 pb-3 bg-secondary/80">
+  <div class="w-full px-6 mx-auto">
+    <div class="flex flex-wrap items-center-mx-3 lg:justify-between">
+      <div class="w-full max-w-full px-3 mt-0 mb-6 shrink-0 lg:mb-0 lg:w-1/2 lg:flex-none">
+        <div class="text-sm leading-normal text-center text-slate-900 dark:text-white lg:text-left">
+          Copyright ©
+          <script>
+            document.write(new Date().getFullYear());
+          </script>2022
+          Bunkerity
+        </div>
+      </div>
+      <div class="w-full max-w-full px-3 mt-0 shrink-0 lg:w-1/2 lg:flex-none">
+        <ul class="flex flex-wrap justify-center pl-0 mb-0 list-none lg:justify-end">
+          <li class="nav-item">
+            <a href="https://www.bunkerweb.io" class="block px-4 text-sm font-normal transition ease-in-out text-slate-900 dark:text-white" target="_blank">Bunkerweb</a>
+          </li>
+          <li class="nav-item">
+            <a href="https://docs.bunkerweb.io" class="block px-4 text-sm font-normal transition ease-in-out text-slate-900 dark:text-white" target="_blank">Docs</a>
+          </li>
+          <li class="nav-item">
+            <a href="https://www.bunkerweb.io/privacy-policy" class="block px-4 text-sm font-normal transition ease-in-out text-slate-900 dark:text-white" target="_blank">Privacy</a>
+          </li>
+          <li class="nav-item">
+            <a href="https://www.bunkerity.com/fr/blog/" class="block px-4 text-sm font-normal transition ease-in-out text-slate-900 dark:text-white" target="_blank">Blog</a>
+          </li>
+          <li class="nav-item">
+            <a href="https://github.com/bunkerity/bunkerweb/blob/master/LICENSE" class="block px-4 pr-0 text-sm font-normal transition ease-in-out text-slate-900 dark:text-white" target="_blank">License</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+  
+</body>

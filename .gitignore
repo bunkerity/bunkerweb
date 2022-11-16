@@ -3,3 +3,5 @@ site/
 .vscode/
 __pycache__
 env
+node_modules
+/src/ui/*.txt

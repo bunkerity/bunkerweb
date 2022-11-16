@@ -1,0 +1,42 @@
+<div class="col-xl-3 col-md-6 mb-4">
+  <div class="card border-left-primary shadow h-100 py-2">
+    <div class="card-body">
+      <div class="row no-gutters align-items-center">
+        <div class="col mr-2">
+          <div
+            class="text-xs font-weight-bold text-primary text-uppercase mb-1"
+          >
+            BunkerWeb version
+          </div>
+          {% if check_version %}
+          <div class="h5 mb-0 font-weight-bold text-gray-800">
+            {{ version }} {% if not remote_version %}
+            <span class="h6 mb-0 text-warning"
+              >(couldn't fetch remote version)</span
+            >
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="h5 mb-0 font-weight-bold">
+            <span class="text-warning">{{ version }} (your version)</span>
+            <i class="fa-solid fa-arrow-right-long"></i>
+            <span class="text-success">{{ remote_version }} (latest)</span>
+          </div>
+          {% endif %}
+        </div>
+        {% if not check_version %}
+        <div class="col-auto">
+          <a
+            href="https://github.com/bunkerity/bunkerweb"
+            class="btn btn-success"
+            >Update</a
+          >
+        </div>
+        {% endif %}
+        <div class="col-auto">
+          <i class="fa-solid fa-code-branch fa-2x text-gray-300"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

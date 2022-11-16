@@ -1,165 +1,424 @@
-var current_container_id = null;
-var last_logs_update = null;
-var filter = "";
-var date_filter1 = "";
-var date_filter2 = "";
+import { Checkbox } from "./utils.js";
+//import AirDatepicker from "./air-datepicker/index.js";
 
-$(document).ready(function () {
-  $("#date-picker").datepicker({ format: "yyyy/mm/dd" });
-  current_container_id = $("#active-nav").data("container-id");
-  const logs_interval = setInterval(load_logs, 1000);
+class Dropdown {
+  constructor(prefix = "logs") {
+    this.prefix = prefix;
+    this.container = document.querySelector("main");
+    this.initDropdown();
+    this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
+  }
 
-  function clear_filters() {
-    filter = "";
-    date_filter1 = "";
-    date_filter2 = "";
-    $("#logs-list li").filter(function () {
-      $(this).toggle(true);
+  initDropdown() {
+    this.container.addEventListener("click", (e) => {
+      //SELECT BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`${this.prefix}-setting-select`) &&
+          !e.target.closest("button").hasAttribute(`disabled`)
+        ) {
+          this.toggleSelectBtn(e);
+        }
+      } catch (err) {}
+      //SELECT DROPDOWN BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`${this.prefix}-setting-select-dropdown-btn`)
+        ) {
+          const btn = e.target.closest("button");
+          const btnValue = btn.getAttribute("value");
+          const btnSetting = btn.getAttribute(
+            `${this.prefix}-setting-select-dropdown-btn`
+          );
+          //stop if same value to avoid new fetching
+          const isSameVal = this.isSameValue(btnSetting, btnValue);
+          if (isSameVal) return this.hideDropdown(btnSetting);
+          //else, add new value to custom
+          this.setSelectNewValue(btnSetting, btnValue);
+          //close dropdown and change style
+          this.hideDropdown(btnSetting);
+          this.changeDropBtnStyle(btnSetting, btn);
+        }
+      } catch (err) {}
     });
   }
 
-  async function get_logs(container_id, last_update) {
+  isSameValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[${this.prefix}-setting-select-text="${btnSetting}"]`
+    );
+    const currVal = selectCustom.textContent;
+    return currVal === value ? true : false;
+  }
+
+  setSelectNewValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[${this.prefix}-setting-select="${btnSetting}"]`
+    );
+    selectCustom.querySelector(
+      `[${this.prefix}-setting-select-text]`
+    ).textContent = value;
+  }
+
+  hideDropdown(btnSetting) {
+    //hide dropdown
+    const dropdownEl = document.querySelector(
+      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+    );
+    dropdownEl.classList.add("hidden");
+    dropdownEl.classList.remove("flex");
+    //svg effect
+    const dropdownChevron = document.querySelector(
+      `svg[${this.prefix}-setting-select="${btnSetting}"]`
+    );
+    dropdownChevron.classList.remove("rotate-180");
+  }
+
+  changeDropBtnStyle(btnSetting, selectedBtn) {
+    const dropdownEl = document.querySelector(
+      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+    );
+    //reset dropdown btns
+    const btnEls = dropdownEl.querySelectorAll("button");
+
+    btnEls.forEach((btn) => {
+      btn.classList.remove(
+        "dark:bg-primary",
+        "bg-primary",
+        "bg-primary",
+        "text-gray-300",
+        "text-gray-300"
+      );
+      btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
+    });
+    //highlight clicked btn
+    selectedBtn.classList.remove(
+      "bg-white",
+      "dark:bg-slate-700",
+      "text-gray-700"
+    );
+    selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
+  }
+
+  toggleSelectBtn(e) {
+    const attribut = e.target
+      .closest("button")
+      .getAttribute(`${this.prefix}-setting-select`);
+    //toggle dropdown
+    const dropdownEl = document.querySelector(
+      `[${this.prefix}-setting-select-dropdown="${attribut}"]`
+    );
+    const dropdownChevron = document.querySelector(
+      `svg[${this.prefix}-setting-select="${attribut}"]`
+    );
+    dropdownEl.classList.toggle("hidden");
+    dropdownEl.classList.toggle("flex");
+    dropdownChevron.classList.toggle("rotate-180");
+  }
+}
+
+class FetchLogs {
+  constructor(prefix = "logs") {
+    this.prefix = prefix;
+    this.updateInp = document.querySelector("input#update-date");
+    //this.lastUpdate = Date.now() - 86400 * 1000; //show logs 1 day ago by default
+    this.lastUpdate = "";
+    this.container = document.querySelector("main");
+    this.initFetch();
+    this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
+  }
+
+  initFetch() {
+    this.container.addEventListener("click", (e) => {
+      //SELECT INSTANCE
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
+          "instances"
+        ) {
+          const btn = e.target.closest("button");
+          const btnValue = btn.getAttribute("value");
+          //fetch data
+          this.getInstanceLogs(btnValue);
+        }
+      } catch (err) {}
+      //SELECT DATE
+      this.updateInp.addEventListener("input", (e) => {
+        this.lastUpdate = this.updateInp.valueAsNumber || "";
+        //check if instance selected
+        const btnInstance = document.querySelector(
+          `[${this.prefix}-setting-select-text]`
+        );
+        if (btnInstance.textContent === "none") return;
+        //fetch data
+        this.getInstanceLogs(btnInstance.textContent);
+      });
+    });
+  }
+
+  async getInstanceLogs(instanceName) {
     const response = await fetch(
-      `${location.href}/${container_id}` +
-        (last_update ? `?last_update=${last_update}` : "")
+      `${location.href}/${instanceName}` +
+        (this.lastUpdate ? `?last_update=${this.lastUpdate}` : "")
     );
 
     if (response.status === 200) {
-      return await response.json();
+      const res = await response.json();
+      //last update
+      this.lastUpdate = res.lastUpdate;
+      return this.showLogs(res.logs);
     } else {
       console.log(`Error: ${response.status}`);
-      clearInterval(logs_interval);
     }
-
     return null;
   }
 
-  async function load_logs() {
-    logs = await get_logs(current_container_id, last_logs_update);
+  showLogs(logs) {
+    logs.forEach((log) => {
+      //container
+      const logContainer = document.createElement("li");
+      logContainer.className =
+        "grid grid-cols-12 border-b border-gray-300 py-2";
+      //type
+      const typeEl = document.createElement("p");
+      typeEl.className =
+        "dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0";
+      typeEl.textContent = log.type;
+      typeEl.setAttribute("logs-type", "");
+      logContainer.appendChild(typeEl);
+      //content
+      const contentEl = document.createElement("p");
+      contentEl.className =
+        "dark:text-gray-400 dark:opacity-80 text-sm col-span-9 m-0";
+      contentEl.textContent = log.content;
+      contentEl.setAttribute("logs-content", "");
+      logContainer.appendChild(contentEl);
+      //show on DOM
+      this.logListContainer.appendChild(logContainer);
+    });
+  }
+}
 
-    if (logs) {
-      last_logs_update = logs.last_update;
-      logs.logs.forEach((log) => {
-        const log_element = document.createElement("li");
-        log_element.className = "list-group-item";
+class FilterLogs {
+  constructor(prefix = "logs") {
+    this.prefix = prefix;
+    this.container = document.querySelector("main");
+    this.keyInp = document.querySelector("input#keyword");
+    this.fromDateInp = document.querySelector("input#from-date");
+    this.toDateInp = document.querySelector("input#to-date");
+    this.lastType = "";
+    this.initHandler();
+  }
 
-        if (log.type === "error") {
-          log_element.classList.add("list-group-item-danger");
-        } else if (log.type === "warning") {
-          log_element.classList.add("list-group-item-warning");
-        } else if (log.type === "info") {
-          log_element.classList.add("list-group-item-info");
-        }
-
-        log_element.innerHTML = log.content;
-
+  initHandler() {
+    //TYPE HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
         if (
-          !(
-            log.content.toLowerCase().indexOf(filter) > -1 &&
-            (log.content.toLowerCase().indexOf(date_filter1) > -1 ||
-              log.content.toLowerCase().indexOf(date_filter2) > -1)
-          )
+          e.target
+            .closest("button")
+            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
+          "types"
         ) {
-          log_element.style = "display: none;";
+          const btn = e.target.closest("button");
+          const btnValue = btn.getAttribute("value");
+          const btnSetting = btn.getAttribute(
+            `${this.prefix}-setting-select-dropdown-btn`
+          );
+          if (this.lastType === btnValue) return;
+          this.lastType = btnValue;
+          //run filter
+          this.filter();
         }
+      } catch (err) {}
+    });
+    //KEYWORD HANDLER
+    this.keyInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+    //FROM DATE
+    this.fromDateInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+    //TO DATE
+    this.toDateInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+  }
 
-        if (log.separator) log_element.classList.add("pt-1");
+  initKeyWord() {}
 
-        document.getElementById("logs-list").appendChild(log_element);
-      });
+  filter() {
+    const logs = document.querySelector(`[${this.prefix}-list]`).children;
+    if (logs.length === 0) return;
+    //reset
+    for (let i = 0; i < logs.length; i++) {
+      const el = logs[i];
+      el.classList.remove("hidden");
+    }
+    //filter type
+    this.setFilterType(logs);
+    this.setFilterKeyword(logs);
+    console.log("start date filtering");
+    this.setFilterDate(logs);
+  }
+
+  setFilterType(logs) {
+    const type = document.querySelector(
+      `[${this.prefix}-setting-select-text="types"]`
+    ).textContent;
+    if (type === "all") return;
+
+    for (let i = 0; i < logs.length; i++) {
+      const el = logs[i];
+      const typeEl = el.querySelector("[logs-type]");
+      if (type !== "misc" && typeEl.textContent !== type)
+        el.classList.add("hidden");
+      if (
+        type === "misc" &&
+        typeEl.textContent !== "info" &&
+        typeEl.textContent !== "message"
+      )
+        el.classList.add("hidden");
     }
   }
 
-  $("#date-picker").on("changeDate", function () {
-    let date = $(this).datepicker("getFormattedDate");
-
-    if (date) {
-      date_filter1 = date;
-      date_filter2 = date.replaceAll("/", "-");
-      $("#date-input").val(date);
-      $("#date-clear").show();
-      $("#logs-list li").filter(function () {
-        $(this).toggle(
-          $(this).text().toLowerCase().indexOf(filter) > -1 &&
-            ($(this).text().toLowerCase().indexOf(date_filter1) > -1 ||
-              $(this).text().toLowerCase().indexOf(date_filter2) > -1)
-        );
-      });
+  setFilterKeyword(logs) {
+    const keyword = this.keyInp.value;
+    if (!keyword) return;
+    for (let i = 0; i < logs.length; i++) {
+      const el = logs[i];
+      const content = el.querySelector("[logs-content]").textContent;
+      if (!content.includes(keyword)) el.classList.add("hidden");
     }
-  });
+  }
 
-  $("#filter-input").on("keyup", function () {
-    var val = $.trim(this.value);
+  setFilterDate(logs) {
+    //get date as timestamp to check if valid
+    const isValidDate = this.isDateIntervalValid(
+      this.fromDateInp.valueAsNumber,
+      this.toDateInp.valueAsNumber
+    );
+    if (!isValidDate) return console.log("date invalid");
+    this.setFromDate(logs);
+    this.setToDate(logs);
+  }
 
-    if (!val) {
-      val = "";
+  setToDate(logs) {
+    //if from date value exist
+    if (this.toDateInp.valueAsNumber) {
+      //get it
+      const toDate = this.toDateInp.value.split("-");
+      const toMonthStr = this.monthNumToStr(toDate[1]);
+      //stop if last log is after to date
+      const isAfter = this.isToDateAfterLastLog();
+      if (isAfter === true) return console.log("after");
+      //else loop from bottom to top list
+      for (let i = 0; i < logs.length; i++) {
+        const el = logs[logs.length - 1 - i];
+        const content = el.querySelector("[logs-content]").textContent;
+        //all date format we can find on logs
+        if (
+          content.includes(`${toDate[0]}/${toDate[1]}/${toDate[2]}`) ||
+          content.includes(`${toDate[0]}-${toDate[1]}-${toDate[2]}`) ||
+          content.includes(`${toDate[0]}/${toMonthStr}/${toDate[2]}`)
+        )
+          break;
 
-      if (!$("#date-picker").datepicker("getFormattedDate")) {
-        $("#date-clear").hide();
+        el.classList.add("hidden");
       }
-    } else {
-      $("#date-clear").show();
     }
+  }
 
-    val = val.toLowerCase();
-    filter = val;
-    $("#logs-list li").filter(function () {
-      $(this).toggle(
-        $(this).text().toLowerCase().indexOf(val) > -1 &&
-          ($(this).text().toLowerCase().indexOf(date_filter1) > -1 ||
-            $(this).text().toLowerCase().indexOf(date_filter2) > -1)
-      );
-    });
-  });
+  isToDateAfterLastLog() {
+    const lastLogContent = document
+      .querySelector(`[${this.prefix}-list]`)
+      .lastElementChild.querySelector("[logs-content]")
+      .textContent.replaceAll(":", " ")
+      .replaceAll("[", "[ ");
 
-  $("#date-clear").click(function () {
-    $("#filter-input").val("");
-    $("#date-input").val("");
-    $(this).hide();
-    clear_filters();
-  });
+    const lastLogDate = lastLogContent.match(
+      /(\d{4}([\/.-])(\d{2}|\D{3})([\/.-])\d{2} | \d{2}([\/])(\d{2}|\D{3})([\/])\d{4})/g
+    );
+    const lastLogStamp = new Date(lastLogDate).getTime();
+    console.log(
+      "last log " + lastLogStamp + " input: " + this.toDateInp.valueAsNumber
+    );
 
-  $("#refresh-logs").click(function () {
-    if ($(this).find("#rotate-icon").hasClass("rotate")) {
-      $(this).find("#rotate-icon").removeClass("rotate");
-      clearInterval(logs_interval);
-    } else if (!$(this).find("#rotate-icon").hasClass("rotate")) {
-      $(this).find("#rotate-icon").addClass("rotate");
-      logs_interval = setInterval(load_logs, 1000);
+    return this.toDateInp.valueAsNumber > lastLogStamp ? true : false;
+  }
+  setFromDate(logs) {
+    //if from date value exist
+    if (this.fromDateInp.valueAsNumber) {
+      //get it
+      const fromDate = this.fromDateInp.value.split("-");
+      const fromMonthStr = this.monthNumToStr(fromDate[1]);
+      //stop if first log is before date
+      const isBefore = this.isFromDateBeforeFirstlog();
+      if (isBefore === true) return;
+      //else loop from top to bottom list
+      for (let i = 0; i < logs.length; i++) {
+        const el = logs[i];
+        const content = el.querySelector("[logs-content]").textContent;
+        //all date format we can find on logs
+        if (
+          content.includes(`${fromDate[0]}/${fromDate[1]}/${fromDate[2]}`) ||
+          content.includes(`${fromDate[0]}-${fromDate[1]}-${fromDate[2]}`) ||
+          content.includes(`${fromDate[0]}/${fromMonthStr}/${fromDate[2]}`)
+        )
+          break;
+
+        el.classList.add("hidden");
+      }
     }
-  });
+  }
 
-  $(".container-selector").click(function () {
-    clearInterval(logs_interval);
-    current_container_id = $(this).data("container-id");
-    $("#logs-list").empty();
-    clear_filters();
-    last_logs_update = null;
-    let old_selector = $("#active-nav");
-    old_selector.removeClass("active");
-    old_selector.removeAttr("aria-current");
-    old_selector.removeAttr("id");
-    $(this).addClass("active");
-    $(this).attr("aria-current", "page");
-    $(this).attr("id", "active-nav");
+  isFromDateBeforeFirstlog() {
+    const firstLogContent = document
+      .querySelector(`[${this.prefix}-list]`)
+      .firstElementChild.querySelector("[logs-content]").textContent;
 
-    if (current_container_id == "linux") {
-      $("#date-picker").prop("disabled", true);
-    } else {
-      $("#date-picker").prop("disabled", false);
-    }
+    const firstLogDate = firstLogContent.match(
+      /(\d{4}([\/.-])(\d{2}|\D{3})([\/.-])\d{2} | \d{2}([\/])(\d{2}|\D{3})([\/])\d{4})/g
+    );
 
-    load_logs();
-    setTimeout(function () {
-      logs_interval = setInterval(load_logs, 1000);
-    }, 1000);
-  });
+    const firstLogStamp = new Date(firstLogDate).getTime();
+    return this.fromDateInp.valueAsNumber <= firstLogStamp ? true : false;
+  }
 
-  $("#filter-input").on("keypress", function (e) {
-    var code = e.keyCode || e.which;
-    if (code == 13) {
-      e.preventDefault();
-      return false;
-    }
-  });
-});
+  isDateIntervalValid(fromDate, toDate) {
+    //case one date
+    if (fromDate === NaN || toDate === NaN) return false;
+    if (fromDate >= toDate) return false;
+    return true;
+  }
+
+  monthNumToStr(month) {
+    const monthStr = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    return monthStr[+month - 1];
+  }
+}
+
+const setCheckbox = new Checkbox("[logs-settings]");
+const dropdown = new Dropdown();
+const setLogs = new FetchLogs();
+const setFilter = new FilterLogs();

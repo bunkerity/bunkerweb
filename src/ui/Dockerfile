@@ -21,7 +21,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     rm -rf /tmp/req
 
 # Install python requirements
-RUN apk add --no-cache --virtual .build-deps g++ gcc libffi-dev && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
     mkdir -p /usr/share/bunkerweb/deps/python && \
@@ -48,7 +48,7 @@ RUN apk add --no-cache bash file && \
     chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1" "libtirpc>=1.3.2-r1" "libtirpc-conf>=1.3.2-r1" "zlib>=1.2.12-r2" "libxml2>=2.9.14-r1" "expat>=2.5.0-r0"
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1" "libtirpc>=1.3.2-r1" "libtirpc-conf>=1.3.2-r1" "zlib>=1.2.12-r2" "libxml2>=2.9.14-r1"
 
 VOLUME /data /etc/nginx
 
