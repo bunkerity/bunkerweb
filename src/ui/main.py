@@ -984,69 +984,36 @@ def plugins():
             url_for("loading", next=url_for("plugins"), message="Reloading plugins")
         )
 
-    # Initialize plugins tree
-    plugins = [
-        {
-            "name": "plugins",
-            "type": "folder",
-            "path": "/etc/bunkerweb/plugins",
-            "can_create_files": False,
-            "can_create_folders": False,
-            "can_edit": False,
-            "can_delete": False,
-            "children": [
-                {
-                    "name": _dir,
-                    "type": "folder",
-                    "path": f"/etc/bunkerweb/plugins/{_dir}",
-                    "can_create_files": False,
-                    "can_create_folders": False,
-                    "can_edit": False,
-                    "can_delete": True,
-                }
-                for _dir in listdir("/etc/bunkerweb/plugins")
-            ],
-        }
-    ]
-    # Populate plugins tree
-    plugins_pages = app.config["CONFIG"].get_plugins_pages()
+    plugin_args = app.config["PLUGIN_ARGS"]
+    app.config["PLUGIN_ARGS"] = {}
 
-    pages = []
-    for page in plugins_pages:
-        with open(
-            (
-                "/etc/bunkerweb/plugins"
-                if exists(f"/etc/bunkerweb/plugins/{page.lower()}/ui/template.html")
-                else "/usr/share/bunkerweb/core"
-            )
-            + f"/{page.lower()}/ui/template.html",
-            "r",
-        ) as f:
-            # Convert the file content to a jinja2 template
-            template = Template(f.read())
+    if request.args.get("plugin_id", False):
+        plugin_id = request.args.get("plugin_id")
+        page_path = ""
 
-        pages.append(
-            {
-                "id": page.lower().replace(" ", "-"),
-                "name": page,
-                # Render the template with the plugin's data if it corresponds to the last submitted form else with the default data
-                "content": template.render(csrf_token=generate_csrf, url_for=url_for)
-                if app.config["PLUGIN_ARGS"] is None
-                or app.config["PLUGIN_ARGS"]["plugin"] != page.lower()
-                else template.render(
-                    csrf_token=generate_csrf,
-                    url_for=url_for,
-                    **app.config["PLUGIN_ARGS"]["args"],
+        if exists(f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"):
+            page_path = f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"
+        elif exists(f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"):
+            page_path = f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"
+        else:
+            flash(f"Plugin {plugin_id} not found", "error")
+
+        if page_path:
+            return render_template(
+                page_path,
+                csrf_token=generate_csrf,
+                url_for=url_for,
+                dark_mode=app.config["DARK_MODE"],
+                **(
+                    plugin_args["args"]
+                    if plugin_args.get("plugin", None) == plugin_id
+                    else {}
                 ),
-            }
-        )
-
-    app.config["PLUGIN_ARGS"] = None
+            )
 
     return render_template(
         "plugins.html",
-        folders=plugins,
-        pages=pages,
+        plugins=app.config["CONFIG"].get_plugins(),
         dark_mode=app.config["DARK_MODE"],
     )
 
