@@ -4,8 +4,8 @@ from datetime import datetime
 from hashlib import sha256
 from logging import INFO, WARNING, Logger, getLogger
 import oracledb
-from os import _exit, getenv, listdir, path
-from os.path import exists
+from os import _exit, getenv, listdir, makedirs
+from os.path import dirname, exists
 from pymysql import install_as_MySQLdb
 from re import search
 from sys import modules, path as sys_path
@@ -60,11 +60,12 @@ class Database:
         )
 
         if not sqlalchemy_string:
-            sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////data/db.sqlite3")
+            sqlalchemy_string = getenv(
+                "DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3"
+            )
 
         if sqlalchemy_string.startswith("sqlite"):
-            if not path.exists(sqlalchemy_string.split("///")[1]):
-                open(sqlalchemy_string.split("///")[1], "w").close()
+            makedirs(dirname(sqlalchemy_string.split("///")[1]), exist_ok=True)
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
