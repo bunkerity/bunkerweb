@@ -1,82 +1,12 @@
 {% extends "base.html" %} {% block content %} {% set current_endpoint =
-url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
-<!-- settings -->
+url_for(request.endpoint)[1:].split("/")[-1].strip() %}
+<!-- filter -->
 <div
-  {{current_endpoint}}-settings
+  {{current_endpoint}}-filter
   class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-2 font-bold dark:text-white">SETTINGS</h5>
+  <h5 class="mb-2 font-bold dark:text-white">FILTER</h5>
   <div class="grid grid-cols-12 gap-x-4 gap-y-2">
-    <!-- select instance -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
-      <h5
-        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-      >
-        Select instance
-      </h5>
-      <button
-        {{current_endpoint}}-setting-select="instances"
-        type="button"
-        class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-      >
-        <span
-          id="logs-instance"
-          name="logs-instance"
-          {{current_endpoint}}-setting-select-text="instances"
-          >none
-        </span>
-        <!-- chevron -->
-        <svg
-          {{current_endpoint}}-setting-select="instances"
-          class="transition-transform h-4 w-4 fill-gray-500"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path
-            d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-          />
-        </svg>
-      </button>
-      <!-- end chevron -->
-      <!-- dropdown-->
-      <div
-        {{current_endpoint}}-setting-select-dropdown="instances"
-        class="hidden z-100 absolute h-full flex-col w-full translate-y-12"
-      >
-        {% for instance in instances %}
-        <button
-          {{current_endpoint}}-setting-select-dropdown-btn="instances"
-          type="button"
-          value="{{instance.name}}"
-          _type="{{instance._type}}"
-          class="{% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
-        >
-          {{instance.name}}
-        </button>
-        {% endfor %}
-      </div>
-      <!-- end dropdown-->
-    </div>
-    <!-- end select instance  -->
-    <!-- from date input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
-      <h5
-        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-      >
-        Fetch (default 1 day)
-      </h5>
-      <input
-        datetimepicker
-        type="date"
-        id="update-date"
-        name="update-date"
-        class="col-span-12 sm:col-span-6 lg:col-span-4 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="update date"
-        pattern="(.*?)"
-        required
-      />
-    </div>
-    <!-- end from date input -->
     <!-- refresh input -->
     <div class="flex flex-col relative col-span-12 sm:col-span-6">
       <h5
@@ -123,17 +53,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       />
     </div>
     <!-- end refresh delay input -->
-  </div>
-</div>
-<!-- end settings -->
-
-<!-- filter -->
-<div
-  {{current_endpoint}}-filter
-  class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
->
-  <h5 class="mb-2 font-bold dark:text-white">FILTERS</h5>
-  <div class="grid grid-cols-12 gap-x-4 gap-y-2">
     <!-- search inpt-->
     <div class="flex flex-col relative col-span-12 sm:col-span-6">
       <h5
@@ -240,44 +159,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       <!-- end dropdown-->
     </div>
     <!-- end select types  -->
-    <!-- from date input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
-      <h5
-        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-      >
-        From date
-      </h5>
-      <input
-        datetimepicker
-        type="date"
-        id="from-date"
-        name="from-date"
-        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="from date"
-        pattern="(.*?)"
-        required
-      />
-    </div>
-    <!-- end from date input -->
-    <!-- to date input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
-      <h5
-        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-      >
-        To date
-      </h5>
-      <input
-        datetimepicker
-        type="date"
-        id="to-date"
-        name="to-date"
-        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="to date"
-        pattern="(.*?)"
-        required
-      />
-    </div>
-    <!-- end to date input -->
   </div>
 </div>
 <!-- end filter -->
@@ -292,19 +173,142 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     <p
       class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
     >
-      Type
+      Name
     </p>
     <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400"
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
-      Description
+      plugin
+    </p>
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
+    >
+      Date
+    </p>
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+    >
+      Reload
+    </p>
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+    >
+      Success
+    </p>
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+    >
+      Files
     </p>
     <!-- end header-->
     <!-- list -->
     <ul
       class="col-span-12 w-full max-h-100 overflow-y-auto"
       {{current_endpoint}}-list
-    ></ul>
+    >
+      {{% for job in jobs %}}
+      <!-- job item-->
+      <li class="grid grid-cols-12 border-b border-gray-300 py-2">
+        <p
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0"
+          {{current_endpoint}}-name
+        >
+          {{job["name"]}}
+        </p>
+        <p
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
+          {{current_endpoint}}-plugin-id
+        >
+          {{job["plugin_id"]}}
+        </p>
+        <p
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
+          {{current_endpoint}}-every
+        >
+          {{job["every"]}}
+        </p>
+        <p
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          {{current_endpoint}}-reload
+        >
+          {% if job["reload"]%}
+          <svg
+            class="fill-green-500 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+            />
+          </svg>
+          {% else %}
+          <svg
+            class="fill-red-500 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
+            />
+          </svg>
+          {% else %}
+          <svg
+            class="fill-sky-500 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z"
+            />
+          </svg>
+          {% endif %}
+        </p>
+        <p
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          {{current_endpoint}}-success
+        >
+          {% if job["success"] %}
+          <svg
+            class="fill-green-500 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+            />
+          </svg>
+          {% elif not job["success"] %}
+          <svg
+            class="fill-red-500 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
+            />
+          </svg>
+          {% else %}
+          <svg
+            class="fill-sky-500 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z"
+            />
+          </svg>
+          {% endif %}
+        </p>
+        <p
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0"
+          {{current_endpoint}}-cache_file
+        >
+          {{job["cache_file"]}}
+        </p>
+      </li>
+      <!-- end job item-->
+      {{% endfor %}}
+    </ul>
     <!-- end list-->
   </div>
   <!-- end list container-->
