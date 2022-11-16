@@ -151,6 +151,7 @@ try:
         PLUGIN_ARGS=None,
         RELOADING=False,
         TO_FLASH=[],
+        DARK_MODE=False,
     )
 except FileNotFoundError as e:
     logger.error(repr(e), e.filename)
@@ -324,6 +325,7 @@ def home():
         instances_number=instances_number,
         services_number=services_number,
         posts=formatted_posts,
+        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -369,7 +371,12 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
-    return render_template("instances.html", title="Instances", instances=instances)
+    return render_template(
+        "instances.html",
+        title="Instances",
+        instances=instances,
+        dark_mode=app.config["DARK_MODE"],
+    )
 
 
 @app.route("/services", methods=["GET", "POST"])
@@ -480,6 +487,7 @@ def services():
             {"SERVER_NAME": service.pop("SERVER_NAME"), "settings": dumps(service)}
             for service in services
         ],
+        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -538,7 +546,10 @@ def global_config():
         )
 
     # Display global config
-    return render_template("global_config.html")
+    return render_template(
+        "global_config.html",
+        dark_mode=app.config["DARK_MODE"],
+    )
 
 
 @app.route("/configs", methods=["GET", "POST"])
@@ -642,6 +653,7 @@ def configs():
                 "/etc/bunkerweb/configs", db_configs=db_configs, integration=integration
             )
         ],
+        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -1020,7 +1032,12 @@ def plugins():
 
     app.config["PLUGIN_ARGS"] = None
 
-    return render_template("plugins.html", folders=plugins, pages=pages)
+    return render_template(
+        "plugins.html",
+        folders=plugins,
+        pages=pages,
+        dark_mode=app.config["DARK_MODE"],
+    )
 
 
 @app.route("/plugins/upload", methods=["POST"])
@@ -1127,7 +1144,9 @@ def custom_plugin(plugin):
 @login_required
 def cache():
     return render_template(
-        "cache.html", folders=[path_to_dict("/var/cache/bunkerweb", is_cache=True)]
+        "cache.html",
+        folders=[path_to_dict("/var/cache/bunkerweb", is_cache=True)],
+        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -1160,6 +1179,7 @@ def logs():
         instances=instances,
         is_swarm=getenv("SWARM_MODE", "no") == "yes",
         is_kubernetes=getenv("KUBERNETES_MODE", "no") == "yes",
+        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -1191,7 +1211,6 @@ def logs_linux():
                 raw_logs_access = f.read().splitlines()[
                     int(last_update.split(".")[1]) :
                 ]
-
     else:
         if exists("/var/log/nginx/error.log"):
             with open("/var/log/nginx/error.log", "r") as f:
@@ -1383,6 +1402,18 @@ def login():
             401,
         )
     return render_template("login.html")
+
+
+@app.route("/darkmode", methods=["POST"])
+@login_required
+def darkmode():
+    if "darkmode" in request.form:
+        if request.form["darkmode"] == "true":
+            app.config["DARK_MODE"] = True
+        else:
+            app.config["DARK_MODE"] = False
+
+    return jsonify({"status": "ok"})
 
 
 @app.route("/check_reloading")
