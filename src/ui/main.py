@@ -484,7 +484,18 @@ def services():
     return render_template(
         "services.html",
         services=[
-            {"SERVER_NAME": service.pop("SERVER_NAME"), "settings": dumps(service)}
+            {
+                "SERVER_NAME": service["SERVER_NAME"],
+                "USE_REVERSE_PROXY": service.get("USE_REVERSE_PROXY", "no"),
+                "SERVE_FILES": service.get("SERVE_FILES", "no"),
+                "REMOTE_PHP": service.get("REMOTE_PHP", "no"),
+                "AUTO_LETS_ENCRYPT": service.get("AUTO_LETS_ENCRYPT", "no"),
+                "USE_MODSECURITY": service.get("USE_MODSECURITY", "no"),
+                "USE_BAD_BEHAVIOR": service.get("USE_BAD_BEHAVIOR", "no"),
+                "USE_LIMIT_REQ": service.get("USE_LIMIT_REQ", "no"),
+                "USE_DNSBL": service.get("USE_DNSBL", "no"),
+                "settings": dumps(service),
+            }
             for service in services
         ],
         dark_mode=app.config["DARK_MODE"],
