@@ -1,0 +1,127 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 mb-3">
+  <div class="p-3">
+    <div class="widget">
+      <div id="folders">{{ gen_folders_tree_html(folders)|safe }}</div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="modal-edit-new-file"
+  tabindex="-1"
+  aria-labelledby="modal-edit-new-file-label"
+  aria-hidden="true"
+>
+  <form id="form-new-file" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" id="file-operation" value="" name="operation" />
+    <input type="hidden" id="file-path" value="" name="path" />
+    <input type="hidden" value="file" name="type" />
+    <div
+      class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-edit-new-file-label"></h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <textarea
+            id="editor"
+            class="form-control"
+            value=""
+            placeholder="Enter your code here"
+            name="content"
+            rows="10"
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div
+  class="modal fade"
+  id="modal-edit-new-folder"
+  tabindex="-1"
+  aria-labelledby="modal-edit-new-folder-label"
+  aria-hidden="true"
+>
+  <form id="form-new-folder" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" id="folder-operation" value="" name="operation" />
+    <input type="hidden" id="folder-path" value="" name="path" />
+    <input type="hidden" value="folder" name="type" />
+    <div
+      class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-edit-new-folder-label"></h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="reset"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-outline-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div
+  class="modal fade"
+  id="modal-delete"
+  tabindex="-1"
+  aria-labelledby="modal-delete-label"
+  aria-hidden="true"
+>
+  <form id="form-delete" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" value="delete" name="operation" />
+    <input type="hidden" id="delete-path" value="" name="path" />
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-delete-label"></h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-delete-body"></div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

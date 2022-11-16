@@ -1,0 +1,35 @@
+body.bg-light {
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  background-position: center;
+  background-repeat: repeat;
+  background-size: 7%;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.main-div {
+  flex: 1 0 auto;
+}
+
+::selection {
+  color: #fff;
+  background-color: #085577;
+}
+
+::-moz-selection {
+  color: #fff;
+  background-color: #085577;
+}
+
+[data-theme="dark"] .toast {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .toast .toast-header {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}

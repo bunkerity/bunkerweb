@@ -1,0 +1,151 @@
+.card {
+  border: none;
+  border-radius: 10px;
+}
+
+.c-details span {
+  font-weight: 300;
+  font-size: 13px;
+}
+
+.icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 39px;
+}
+
+.icon.True {
+  background-color: #00ce6e;
+}
+
+.icon.False {
+  background-color: #f44336;
+}
+
+.icon .fa-power-off {
+  color: #fff;
+}
+
+.badge span {
+  background-color: #fffbec;
+  width: 60px;
+  height: 25px;
+  padding-bottom: 3px;
+  border-radius: 5px;
+  display: flex;
+  color: #fed85d;
+  justify-content: center;
+  align-items: center;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 10px;
+}
+
+.progress div {
+  background-color: red;
+}
+
+.text1 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.text2 {
+  color: #a5aec0;
+}
+
+.dropdown-menu .svg-inline--fa {
+  width: 14px !important;
+  height: 16px !important;
+}
+
+.modal {
+  padding: 0 !important;
+}
+
+.modal-body .flex-grow-1.d-flex {
+  background-clip: content-box;
+}
+
+.modal-body .row .col-form-label,
+.modal-body .row .col-8 {
+  background-color: transparent;
+}
+
+.nav-pills .nav-link.active,
+.modal-body .nav-link:hover {
+  background-color: rgba(64, 187, 107, 0.5) !important;
+  background-clip: border-box !important;
+}
+
+.modal-body .fa-circle-info,
+.modal-body .fa-question-circle,
+.modal-body .fa-circle-question {
+  color: #085577 !important;
+}
+
+.modal-body .nav-link span {
+  color: #000 !important;
+}
+
+.modal-body aside {
+  background: none !important;
+}
+
+.modal-footer .btn-primary {
+  background-color: #085577;
+  border-color: #085577;
+}
+
+.modal-footer .btn-primary:hover {
+  background-color: #247496;
+  border-color: #247496;
+}
+
+button.state-button {
+  border: none;
+  background-color: transparent;
+}
+
+[data-theme="dark"] .card {
+  background-color: #222 !important;
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+[data-theme="dark"] .btn-outline-secondary:hover {
+  color: #000 !important;
+  background-color: #fff !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background-color: #222 !important;
+}
+
+[data-theme="dark"] .modal-content .bg-light {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  border-color: #111 !important;
+  border: 1px solid #343636 !important;
+}
+
+[data-theme="dark"] .modal-body .nav-link span {
+  color: #fff !important;
+}
+
+[data-theme="dark"] .nav-pills .nav-link.active {
+  background-color: #535353 !important;
+}
+
+[data-theme="dark"] .modal-body .fa-circle-info,
+[data-theme="dark"] .modal-body .fa-circle-question {
+  color: #1da1f2 !important;
+}

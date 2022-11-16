@@ -1,0 +1,124 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 mb-3">
+  <div class="uploader">
+    <div class="wrapper">
+      <header>Upload a new plugin</header>
+      <form action="#" class="drop-zone">
+        <input
+          type="hidden"
+          id="csrf_token"
+          name="csrf_token"
+          value="{{ csrf_token() }}"
+        />
+        <input
+          class="file-input drop-zone__input"
+          type="file"
+          name="file"
+          multiple="multiple"
+          hidden
+        />
+        <i class="fa-solid fa-cloud-upload-alt"></i>
+        <p>Browse File to Upload</p>
+      </form>
+      <section class="progress-area"></section>
+      <section class="uploaded-area"></section>
+      <header>
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-outline-primary btn-block mt-2">
+            Reload plugins
+          </button>
+        </form>
+      </header>
+    </div>
+  </div>
+  <div class="p-3 pt-4">
+    <div class="widget">
+      <div id="folders">{{ gen_folders_tree_html(folders)|safe }}</div>
+    </div>
+  </div>
+</div>
+{% if pages %}
+<div class="container-fluid mt-3 mb-3 plugins-pages">
+  <div class="pb-3 flex-grow-1 d-flex flex-column flex-md-row">
+    <div class="row flex-grow-md-1 flex-grow-1">
+      <aside
+        class="col-md-3 flex-grow-md-1 flex-shrink-1 flex-grow-0 sticky-top pb-md-0 pb-3"
+      >
+        <div class="bg-light border rounded-3 p-1 h-100 sticky-top">
+          <ul
+            class="nav nav-pills flex-md-column flex-row mb-auto justify-content-start text-truncate"
+            id="pills-tab"
+            role="tablist"
+          >
+            {% for page in pages %}
+            <li class="nav-item">
+              <a
+                class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate{{' active' if page['active']}}"
+                id="plugins-pages-{{ page['id'] }}-tab"
+                data-bs-toggle="pill"
+                href="#plugins-pages-{{ page['id'] }}"
+                role="tab"
+                aria-controls="plugins-pages-{{ page['id'] }}"
+                aria-selected=""
+              >
+                <span class="d-md-inline">{{ page["name"] }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </aside>
+      <main class="col overflow-auto h-100">
+        <div class="bg-light border rounded-3 p-3">
+          <div class="tab-content" id="plugins-pages-content">
+            {% for page in pages %}
+            <div
+              class="tab-pane fade{{' show active' if page['active']}}"
+              id="plugins-pages-{{ page['id'] }}"
+              role="tabpanel"
+              aria-labelledby="plugins-pages-{{ page['id'] }}-tab"
+            >
+              {{ page["content"]|safe }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div
+  class="modal fade"
+  id="modal-delete"
+  tabindex="-1"
+  aria-labelledby="modal-delete-label"
+  aria-hidden="true"
+>
+  <form id="form-delete" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" value="delete" name="operation" />
+    <input type="hidden" id="delete-path" value="" name="path" />
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-delete-label"></h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-delete-body"></div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
