@@ -1,103 +1,241 @@
-var multiples = {};
-function addMultiple(id, paramsEnc) {
-  var params = JSON.parse(paramsEnc);
-  var div = document.getElementById(id);
+import { Checkbox, Popover, Select, Tabs, FormatValue } from "./utils.js";
 
-  if (!multiples.hasOwnProperty(id)) {
-    multiples[id] = 0;
+class ServiceModal {
+  constructor() {
+    //modal elements
+    this.modal = document.querySelector("[services-modal]");
+    this.modalTitle = this.modal.querySelector("[services-modal-title]");
+    this.modalTabs = this.modal.querySelector(["[services-tabs]"]);
+    this.modalCard = this.modal.querySelector("[services-modal-card]");
+    //modal forms
+    this.formNewEdit = this.modal.querySelector("[services-modal-form]");
+    this.formDelete = this.modal.querySelector("[services-modal-form-delete]");
+    //container
+    this.container = document.querySelector("main");
+    //general inputs
+    this.inputs = this.modal.querySelectorAll("input[default-value]");
+    this.selects = this.modal.querySelectorAll("select[default-value]");
+    this.init();
   }
 
-  multiples[id]++;
-  x = 0;
+  //store default config data on DOM
+  //to update modal data on new button click
 
-  for (const param in params) {
-    var input = "";
-    var input_id =
-      id + "-" + params[param]["id"] + "-" + multiples[id].toString();
-    var input_name =
-      params[param]["env"] +
-      (multiples[id] - 1 > 0 ? "_" + (multiples[id] - 1).toString() : "");
-    var input_label = params[param]["label"] + " #" + multiples[id].toString();
-    var input_value = params[param]["default"];
-    var input_help = params[param]["help"];
-    var input_selects = params[param]["select"];
-    var pt = "";
-    var padding_bottom = "";
-
-    if (params[param]["type"] == "text" || params[param]["type"] == "number") {
-      input = `<input type="${params[param]["type"]}" class="form-control" id="${input_id}" value="${input_value}" name="${input_name}">`;
-    } else if (params[param]["type"] == "check") {
-      if (input_value == "yes") {
-        input_value = "checked";
-      } else {
-        input_value = "";
-      }
-
-      input = `<div class="form-check form-switch"><input type="checkbox" class="form-check-input" role="switch" id="${input_id}" name="${input_name}" ${input_value}><input type="hidden" id="${input_id}-hidden" name="${input_name}" value="off"></div>`;
-      pt = "pt-0";
-    } else if (params[param]["type"] == "select") {
-      input = `<select type="form-select" class="form-control form-select" id="${input_id}" name="${input_name}">`;
-      for (const select in input_selects) {
-        selected = "";
-        if (input_value == select) {
-          selected = "selected";
+  init() {
+    this.modal.addEventListener("click", (e) => {
+      //close
+      try {
+        if (e.target.closest("button").hasAttribute("services-modal-close")) {
+          this.closeModal();
         }
+      } catch (err) {}
+    });
 
-        input += `<option value="${select}" ${selected}>${select}</option>`;
+    this.container.addEventListener("click", (e) => {
+      //delete button
+      try {
+        if (
+          e.target.closest("button").getAttribute("services-action") ===
+          "delete"
+        ) {
+          this.setDeleteForm(
+            "delete",
+            e.target.closest("button").getAttribute("service-name")
+          );
+          this.openModal();
+        }
+      } catch (err) {}
+      //new button
+      try {
+        if (
+          e.target.closest("button").getAttribute("services-action") === "new"
+        ) {
+          this.setNewEditForm("new", "service");
+          this.setDefaultValue();
+          this.openModal();
+        }
+      } catch (err) {}
+      //edit button
+      try {
+        if (
+          e.target.closest("button").getAttribute("services-action") === "edit"
+        ) {
+          this.setNewEditForm(
+            "edit",
+            e.target.closest("button").getAttribute("service-name")
+          );
+          //change this to hidden config on service card later
+          const servicesSettings = e.target
+            .closest("[services-service]")
+            .querySelector("[services-settings]")
+            .getAttribute("value");
+          this.setDefaultValue();
+          const obj = JSON.parse(servicesSettings);
+          this.updateModalData(obj);
+          this.openModal();
+        }
+      } catch (err) {}
+    });
+  }
+
+  setDefaultValue() {
+    this.inputs.forEach((inpt) => {
+      const defaultVal = inpt.getAttribute("default-value");
+      const defaultMethod = inpt.getAttribute("default-method");
+      //SET METHOD
+      this.setDisabled(inpt, defaultMethod);
+
+      //SET VALUE
+      if (inpt.getAttribute("type") === "checkbox") {
+        inpt.checked = defaultVal === "yes" ? true : false;
+        inpt.setAttribute("value", defaultVal);
       }
-      input += `</select>`;
-    }
 
-    if (x === 0 && multiples[id] > 1) {
-      padding_bottom = "pb-3";
-    }
+      if (inpt.getAttribute("type") !== "checkbox") {
+        inpt.setAttribute("value", defaultVal);
+      }
+    });
 
-    div.insertAdjacentHTML(
-      "afterend",
-      `<div class="d-flex flex-row justify-content-between align-items-center mb-3 ${padding_bottom}" id="${input_id}"><div class="px-2 d-sm-inline" data-bs-toggle="tooltip" data-bs-placement="bottom" title="${input_help}"><i class="fas fa-question-circle"></i></div><label for="${input_id}" class="flex-grow-1 d-sm-inline ${pt}" id="${input_id}">${input_label}</label><div class="d-sm-inline" id="${input_id}">${input}</div></div>`
-    );
-    x++;
-  }
-}
-
-function delMultiple(id, paramsEnc) {
-  if (multiples.hasOwnProperty(id) && multiples[id] > 0) {
-    var params = JSON.parse(paramsEnc);
-    for (const param in params) {
-      var input_id =
-        id + "-" + params[param]["id"] + "-" + multiples[id].toString();
-      document.getElementById(input_id).remove();
-    }
-    multiples[id]--;
-  }
-}
-
-$(document).ready(function () {
-  $("form").on("focus", ".form-control", function () {
-    if (
-      ["text", "number"].includes($(this).attr("type")) &&
-      $(this).prop("validity").valid
-    ) {
-      $(this).addClass("is-valid");
-    }
-  });
-
-  $("form").on("focusout", ".form-control", function () {
-    if (["text", "number"].includes($(this).attr("type"))) {
-      $(this).removeClass("is-valid");
-    }
-  });
-
-  $("form").on("change", ".form-control", function () {
-    if (["text", "number"].includes($(this).attr("type"))) {
-      if (!$(this).prop("validity").valid) {
-        $("#pills-tab a").addClass("disabled");
-        $(this).addClass("is-invalid");
+    this.selects.forEach((select) => {
+      const defaultVal = select.getAttribute("default-value");
+      const defaultMethod = select.getAttribute("default-method");
+      if (defaultMethod === "ui" || defaultMethod === "default") {
+        document
+          .querySelector(
+            `[services-setting-select=${select.getAttribute(
+              "services-setting-select-default"
+            )}]`
+          )
+          .removeAttribute("disabled");
       } else {
-        $("#pills-tab a").removeClass("disabled");
-        $(this).removeClass("is-invalid");
-        $(this).addClass("is-valid");
+        document
+          .querySelector(
+            `[services-setting-select=${select.getAttribute(
+              "services-setting-select-default"
+            )}]`
+          )
+          .setAttribute("disabled", "");
       }
+      select.parentElement
+        .querySelector(
+          `button[services-setting-select-dropdown-btn][value='${defaultVal}']`
+        )
+        .click();
+    });
+  }
+
+  setDisabled(inp, method) {
+    if (method === "ui" || method === "default") {
+      inp.removeAttribute("disabled");
+    } else {
+      inp.setAttribute("disabled", "");
     }
-  });
-});
+  }
+
+  setNewEditForm(action, serviceName) {
+    this.showNewEditForm();
+    this.modalTitle.textContent = `${action} ${serviceName}`;
+    this.formNewEdit.setAttribute("id", `form-${action}-${serviceName}`);
+    this.formNewEdit
+      .querySelector(`input[name="operation"]`)
+      .setAttribute("value", action);
+    this.formNewEdit
+      .querySelector(`input[name="OLD_SERVER_NAME"]`)
+      .setAttribute("value", serviceName);
+  }
+
+  setDeleteForm(action, serviceName) {
+    this.showDeleteForm();
+    this.modalTitle.textContent = `${action} ${serviceName}`;
+    this.formDelete.setAttribute("id", `form-${action}-${serviceName}`);
+    this.formDelete
+      .querySelector(`input[name="SERVER_NAME"]`)
+      .setAttribute("value", serviceName);
+    this.formDelete.querySelector(
+      `[services-modal-text]`
+    ).textContent = `Are you sure you want to delete ${serviceName} ?`;
+  }
+
+  showNewEditForm() {
+    this.modalCard.classList.add("h-[90vh]");
+    this.modalCard.classList.add("w-full");
+
+    this.modalTabs.classList.add("grid");
+    this.modalTabs.classList.remove("hidden");
+
+    this.formNewEdit.classList.remove("hidden");
+    this.formDelete.classList.add("hidden");
+  }
+
+  showDeleteForm() {
+    this.modalCard.classList.remove("h-[90vh]");
+    this.modalCard.classList.remove("w-full");
+
+    this.modalTabs.classList.remove("grid");
+    this.modalTabs.classList.add("hidden");
+
+    this.formNewEdit.classList.add("hidden");
+    this.formDelete.classList.remove("hidden");
+  }
+
+  updateModalData(settings) {
+    //use this to select inputEl and change value
+    for (const [key, data] of Object.entries(settings)) {
+      //change format to match id
+      const value = data["value"];
+      const method = data["method"];
+      try {
+        const inpt = this.modal.querySelector(`[id='${key}']`);
+        //SET DISABLED / ENABLED
+        this.setDisabled(inpt, method);
+        //SET VALUE
+        //for regular input
+        if (
+          inpt.tagName === "INPUT" &&
+          inpt.getAttribute("type") !== "checkbox"
+        ) {
+          inpt.setAttribute("value", value);
+        }
+        //for checkbox
+        if (
+          inpt.tagName === "INPUT" &&
+          inpt.getAttribute("type") === "checkbox"
+        ) {
+          inpt.checked = defaultVal === "yes" ? true : false;
+          inpt.setAttribute("value", defaultVal);
+        }
+        //for select
+        if (inpt.tagName === "SELECT") {
+          inpt.parentElement
+            .querySelector(
+              `button[services-setting-select-dropdown-btn][value='${value}']`
+            )
+            .click();
+        }
+      } catch (err) {}
+    }
+  }
+
+  //UTILS
+  toggleModal() {
+    this.modal.classList.toggle("hidden");
+    this.modal.classList.toggle("flex");
+  }
+
+  closeModal() {
+    this.modal.classList.add("hidden");
+    this.modal.classList.remove("flex");
+  }
+
+  openModal() {
+    this.modal.classList.add("flex");
+    this.modal.classList.remove("hidden");
+  }
+}
+
+const setCheckbox = new Checkbox("[services-modal-form]");
+const setSelect = new Select("[services-modal-form]", "services");
+const setPopover = new Popover("main", "services");
+const setTabs = new Tabs("[services-tabs]", "services");
+const setModal = new ServiceModal();
+const format = new FormatValue();

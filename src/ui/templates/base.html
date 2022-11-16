@@ -1,15 +1,27 @@
 {% set template_data = {"javascript": ""} %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html class="{% if dark_mode == True %}dark {% endif %}" lang="en">
   {% include "head.html" %}
 
-  <body class="hero-anime bg-light d-flex flex-column justify-content-between">
-    <noscript>Your browser does not support JavaScript!</noscript>
-    {% include "navbar.html" %}
+  <body
+    class="overflow-x-hidden h-full font-sans z-100 m-0 text-base antialiased font-normal dark:bg-slate-900 leading-default bg-primary text-slate-500"
+  >
+    <noscript class="relative w-full p-4 text-white bg-yellow-500 rounded-lg"
+      >Your browser does not support JavaScript!</noscript
+    >
 
-    <div class="container-fluid h-100 main-div">
-      <div class="position-fixed bottom-0 end-0 p-3 pt-5 toast-container">
+    <!--fixed background-->
+    <div class="absolute w-full dark:hidden bg-primary"></div>
+    <!-- end fixed background-->
+
+    {% include "menu.html" %} {% include "news.html" %}
+
+    <div
+      class="w-full relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl"
+    >
+      {% include "header.html" %}
+      <!-- alert-->
+      <div class="fixed bottom-0 end-0 p-3 pt-5 toast-container">
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %} {% for category, message in messages %}
         <div
@@ -43,9 +55,20 @@
         </div>
         {% endfor %} {% endif %} {% endwith %}
       </div>
-      {% block content %} {% endblock %}
+      <!-- end alert-->
     </div>
-
-    {% include "footer.html" %}
+    <!-- info -->
+    <main
+      class="absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-6 min-h-[91vh] flex flex-col justify-between"
+    >
+      <div
+        style="max-width: 1920px"
+        class="grid gap-y-4 gap-3 sm:gap-4 lg:gap-6 grid-cols-12 w-full"
+      >
+        {% block content %} {% endblock %}
+      </div>
+      {% include "footer.html" %}
+    </main>
+    <!-- end info -->
   </body>
 </html>

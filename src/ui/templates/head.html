@@ -10,60 +10,42 @@
   <meta name="author" content="bunkerity" />
   <title>BunkerWeb UI</title>
   <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="css/base.css" />
-  <link rel="stylesheet" type="text/css" href="css/navbar.css" />
-  <link rel="stylesheet" type="text/css" href="css/footer.css" />
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
-  <link rel="stylesheet" type="text/css" href="css/fa.all.min.css" />
-  <link rel="stylesheet" type="text/css" href="webfonts/bootstrap-icons.css" />
-  <link rel="stylesheet" type="text/css" href="webfonts/poppins.css" />
-  {% if current_endpoint == "home" %}
-  <link rel="stylesheet" type="text/css" href="css/home.css" />
-  {% elif current_endpoint == "instances" or current_endpoint == "services" %}
-  <link rel="stylesheet" type="text/css" href="css/instances&services.css" />
-  {% elif current_endpoint == "global_config" %}
-  <link rel="stylesheet" type="text/css" href="css/global-config.css" />
+  <!--     Fonts and icons     -->
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+    rel="stylesheet"
+  />
+  <!-- tailwind style -->
+  <link rel="stylesheet" type="text/css" href="./css/dashboard.css" />
+
+  <script type="text/javascript" defer src="./js/dashboard.js"></script>
+
+  <script
+    type="text/javascript"
+    charset="utf-8"
+    defer
+    src="./js/editor/ace.js"
+  ></script>
+
+  {% if current_endpoint == "global_config" %}
+  <script defer type="module" src="./js/global_config.js"></script>
   {% elif current_endpoint == "configs" %}
-  <link rel="stylesheet" type="text/css" href="css/configs&plugins&cache.css" />
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="css/jquery.numberedtextarea.css"
-  />
+  <script defer type="module" src="./js/configs.js"></script>
+  {% elif current_endpoint == "services" %}
+  <script defer type="module" src="./js/services.js"></script>
   {% elif current_endpoint == "plugins" %}
-  <link rel="stylesheet" type="text/css" href="css/configs&plugins&cache.css" />
+  <script type="module" defer src="./js/dropzone-min.js"></script>
+  <script type="module" defer src="./js/dropzone-min.js.map"></script>
+  <script type="module" defer src="./js/plugins.js"></script>
+  <link rel="stylesheet" type="text/css" href="./css/dropzone/dropzone.css" />
   {% elif current_endpoint == "cache" %}
-  <link rel="stylesheet" type="text/css" href="css/configs&plugins&cache.css" />
+  <script defer type="module" src="./js/cache.js"></script>
+  {% elif current_endpoint == "logs" %}
+  <script type="module" src="./js/logs.js"></script>
   <link
     rel="stylesheet"
     type="text/css"
-    href="css/jquery.numberedtextarea.css"
+    href="./css/air-datepicker/air-datepicker.css"
   />
-  {% elif current_endpoint == "logs" %}
-  <link rel="stylesheet" type="text/css" href="css/logs.css" />
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="css/bootstrap-datepicker.min.css"
-  />
-  {% endif %}
-  <script type="text/javascript" src="js/jquery.min.js"></script>
-  <script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>
-  <script type="text/javascript" src="js/fa.all.min.js"></script>
-  <script type="text/javascript" src="js/navbar.js"></script>
-  <script type="text/javascript" defer src="js/darkmode.js"></script>
-  {% if current_endpoint == "services" or current_endpoint == "global_config" %}
-  <script type="text/javascript" src="js/services.js"></script>
-  {% elif current_endpoint == "configs" %}
-  <script type="text/javascript" src="js/configs.js"></script>
-  <script type="text/javascript" src="js/jquery.numberedtextarea.js"></script>
-  {% elif current_endpoint == "plugins" %}
-  <script type="text/javascript" defer src="js/plugins.js"></script>
-  {% elif current_endpoint == "cache" %}
-  <script type="text/javascript" src="js/cache.js"></script>
-  <script type="text/javascript" src="js/jquery.numberedtextarea.js"></script>
-  {% elif current_endpoint == "logs" %}
-  <script type="text/javascript" src="js/logs.js"></script>
-  <script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
   {% endif %}
 </head>

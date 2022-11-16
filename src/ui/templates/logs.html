@@ -1,75 +1,292 @@
-{% extends "base.html" %} {% block content %}
-<div class="container mt-5 mb-3">
-  <div class="p-md-2 pt-1 pt-sm-4">
-    <div class="search-area d-sm-flex">
-      <div class="search-bar flex-grow-1">
-        <form>
-          <input type="search" id="filter-input" placeholder="Filter..." required />
-          <i class="fa-solid fa-search"></i>
-        </form>
-      </div>
-      <div class="d-flex align-items-center">
-        <div class="input-group">
-          <input
-            type="text"
-            id="date-input"
-            class="form-control"
-            placeholder="Pick a date"
-            aria-label="Date filter"
-            aria-describedby="date-picker"
-            value=""
-            disabled
+{% extends "base.html" %} {% block content %} {% set current_endpoint =
+url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
+<!-- settings -->
+<div
+  logs-settings
+  class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="mb-2 font-bold dark:text-white">SETTINGS</h5>
+  <div class="grid grid-cols-12 gap-x-4 gap-y-2">
+    <!-- select instance -->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        Select instance
+      </h5>
+      <button
+        {{current_endpoint}}-setting-select="instances"
+        type="button"
+        class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+      >
+        <span
+          id="logs-instance"
+          name="logs-instance"
+          {{current_endpoint}}-setting-select-text="instances"
+          >none
+        </span>
+        <!-- chevron -->
+        <svg
+          {{current_endpoint}}-setting-select="instances"
+          class="transition-transform h-4 w-4 fill-gray-500"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
           />
-          <button
-            type="button"
-            id="date-picker"
-            class="btn btn-outline-primary"
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="Filter from date"
-            {% if first_instance and first_instance.get_id() == 'linux' %} disabled {% endif %}
-          >
-            <i class="fa-solid fa-calendar-alt"></i>
-          </button>
-        </div>
-        <div class="badge px-1">
-          <button
-            type="button"
-            id="date-clear"
-            class="btn btn-outline-danger"
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="Clear filters"
-          >
-            <i class="fa-solid fa-eraser"></i>
-          </button>
-        </div>
-        <div class="badge px-1">
-          <button
-            type="button"
-            id="refresh-logs"
-            class="btn btn-outline-secondary"
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="Enable/Disable auto refresh"
-          >
-            <i id="rotate-icon" class="fa-solid fa-arrows-rotate rotate"></i>
-          </button>
-        </div>
+        </svg>
+      </button>
+      <!-- end chevron -->
+      <!-- dropdown-->
+      <div
+        {{current_endpoint}}-setting-select-dropdown="instances"
+        class="hidden z-100 absolute h-full flex-col w-full translate-y-12"
+      >
+        {% for instance in instances %}
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="instances"
+          type="button"
+          value="{{instance.name}}"
+          class="{% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+          {{instance.name}}
+        </button>
+        {% endfor %}
+      </div>
+      <!-- end dropdown-->
+    </div>
+    <!-- end select instance  -->
+    <!-- from date input -->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        Fetch (default 1 day ago)
+      </h5>
+      <input
+        datetimepicker
+        type="date"
+        id="update-date"
+        name="update-date"
+        class="col-span-12 sm:col-span-6 lg:col-span-4 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="update date"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <!-- end from date input -->
+    <!-- refresh input -->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        Live update
+      </h5>
+      <div checkbox-handler="live-update" class="relative mb-7 md:mb-0">
+        <input
+          id="{{setting}}"
+          class="relative cursor-pointer dark:border-slate-600 dark:bg-slate-700 z-10 checked:z-0 w-5 h-5 ease text-base rounded-1.4 checked:bg-primary checked:border-primary dark:checked:bg-primary dark:checked:border-primary duration-250 float-left mt-1 appearance-none border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition-all disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 disabled:text-gray-700 dark:disabled:text-gray-300"
+          type="checkbox"
+          pattern=""
+          value="no"
+        />
+        <svg
+          checkbox-handler="live-update"
+          class="cursor-pointer absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
+          ></path>
+        </svg>
       </div>
     </div>
-    <div class="pt-4">
-      <div class="widget">
-        <ul class="nav nav-tabs">
-          {% for instance in instances %}
-          <li class="nav-item">
-            <a class="nav-link container-selector {% if instance.get_id() == first_instance.get_id() %}active{% endif %}" href="javascript:void(0)" {% if instance.get_id() == first_instance.get_id() %}aria-current="page"{% endif %} id="active-nav" data-container-id="{{ instance.get_id() }}">{{ instance.name }}</a>
-          </li>
-          {% endfor %}
-        </ul>
-        <ul class="list-group pt-1" id="logs-list"></ul>
-      </div>
-    </div>
+    <!-- end refresh input -->
   </div>
+</div>
+<!-- end settings -->
+
+<!-- filter -->
+<div
+  class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="mb-2 font-bold dark:text-white">FILTERS</h5>
+  <div class="grid grid-cols-12 gap-x-4 gap-y-2">
+    <!-- search inpt-->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        Search
+      </h5>
+      <input
+        type="text"
+        id="keyword"
+        name="keyword"
+        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="key words"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <!-- end search inpt-->
+    <!-- select types -->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        Select types
+      </h5>
+      <button
+        {{current_endpoint}}-setting-select="types"
+        type="button"
+        class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+      >
+        <span
+          id="logs-types"
+          name="logs-types"
+          {{current_endpoint}}-setting-select-text="types"
+          >all</span
+        >
+        <!-- chevron -->
+        <svg
+          {{current_endpoint}}-setting-select="types"
+          class="transition-transform h-4 w-4 fill-gray-500"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+          />
+        </svg>
+      </button>
+      <!-- end chevron -->
+      <!-- dropdown-->
+      <div
+        {{current_endpoint}}-setting-select-dropdown="types"
+        class="hidden z-100 absolute h-full flex-col w-full translate-y-12"
+      >
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="types"
+          type="button"
+          value="all"
+          class="border-t rounded-t border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 dark:bg-primary bg-primary text-gray-300"
+        >
+          all
+        </button>
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="types"
+          type="button"
+          value="message"
+          class="border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+          message
+        </button>
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="types"
+          type="button"
+          value="error"
+          class="border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+          error
+        </button>
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="types"
+          type="button"
+          value="warn"
+          class="border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+          warn
+        </button>
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="types"
+          type="button"
+          value="info"
+          class="border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+          info
+        </button>
+        <button
+          {{current_endpoint}}-setting-select-dropdown-btn="types"
+          type="button"
+          value="misc"
+          class="rounded-b border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+          misc
+        </button>
+      </div>
+      <!-- end dropdown-->
+    </div>
+    <!-- end select types  -->
+    <!-- from date input -->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        From date
+      </h5>
+      <input
+        datetimepicker
+        type="date"
+        id="from-date"
+        name="from-date"
+        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="from date"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <!-- end from date input -->
+    <!-- to date input -->
+    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        To date
+      </h5>
+      <input
+        datetimepicker
+        type="date"
+        id="to-date"
+        name="to-date"
+        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="to date"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <!-- end to date input -->
+  </div>
+</div>
+<!-- end filter -->
+
+<div
+  class="min-h-50-screen col-span-12 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="mb-2 font-bold dark:text-white">LOGS</h5>
+  <!-- list container-->
+  <div class="w-full grid grid-cols-12 rounded p-2">
+    <!-- header-->
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+    >
+      Type
+    </p>
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400"
+    >
+      Description
+    </p>
+    <!-- end header-->
+    <!-- list -->
+    <ul
+      class="col-span-12 w-full max-h-100 overflow-y-auto"
+      {{current_endpoint}}-list
+    ></ul>
+    <!-- end list-->
+  </div>
+  <!-- end list container-->
 </div>
 {% endblock %}

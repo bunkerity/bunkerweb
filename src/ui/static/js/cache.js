@@ -1,27 +1,11 @@
-var editor_path = "";
+import {
+  FolderNav,
+  FolderEditor,
+  FolderModal,
+  FolderDropdown,
+} from "./utils.js";
 
-$(document).ready(function () {
-  $("textarea").numberedtextarea({ allowTabChar: true });
-
-  $("#modal-see-file").on("show.bs.modal", function (event) {
-    var button = $(event.relatedTarget);
-    var path = button.data("path");
-    var content = button.data("content");
-    $("#modal-see-file-label").html(`File: ${path}`);
-
-    if (editor_path != path) {
-      $("#editor").html(atob(content));
-    }
-
-    editor_path = path;
-  });
-
-  $(".download-button").click(function () {
-    var filepath = $(this).attr("data-path");
-    windows.open(`${location.href}/download?path=${filepath}`, "_blank");
-  });
-
-  $(".collapse-div").click(function () {
-    $(this).find(".rotate-icon").toggleClass("down");
-  });
-});
+const setModal = new FolderModal("cache");
+const setEditor = new FolderEditor();
+const setFolderNav = new FolderNav("cache");
+const setDropdown = new FolderDropdown("cache");
