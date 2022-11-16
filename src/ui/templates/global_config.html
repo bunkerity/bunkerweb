@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% block content %} {% set global_config =
+config["CONFIG"].get_config() %}
+<!-- tabs -->
+{% include "settings_tabs.html" %}
+<!-- end tabs-->
+<!-- form global conf -->
+<form
+  global-config-form
+  id="form-edit-global-configs"
+  method="POST"
+  class="flex flex-col justify-between min-h-50-screen dark:brightness-110 col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <!-- general container -->
+  {% include "settings_general.html" %}
+  <!-- end general container -->
+
+  <!-- plugin item -->
+  {% include "settings_plugins.html" %}
+  <!-- end plugin item -->
+
+  <!-- submit -->
+  <div class="flex w-full justify-center mt-8 mb-2">
+    <button
+      type="submit"
+      class="tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+    >
+      SAVE
+    </button>
+  </div>
+  <!-- end submit -->
+</form>
+<!--end form global conf -->
+
+{% endblock %}

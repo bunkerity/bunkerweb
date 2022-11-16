@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% block content %}
+
+<div
+  class="min-h-75-screen p-4 col-span-12 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <!-- upload layout -->
+  <div class="col-span-12 lg:col-span-6">
+    <h5 class="mb-2 font-bold dark:text-white">UPLOAD PLUGIN</h5>
+    <form
+      action="#"
+      class="grid grid-cols-12 w-full justify-items-center lg:justify-items-start"
+    >
+      <input
+        type="hidden"
+        id="csrf_token"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+      />
+      <input class="hidden" type="file" name="file" multiple="multiple" />
+    </form>
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-outline-primary btn-block mt-2">
+        Reload plugins
+      </button>
+    </form>
+  </div>
+  <!-- end upload layout -->
+  <!-- plugin list -->
+  <div class="col-span-12 lg:col-span-6">
+    <h5 class="mb-2 font-bold dark:text-white">LIST PLUGIN</h5>
+    {% if pages %}
+
+    <ul
+      class="nav nav-pills flex-md-column flex-row mb-auto justify-content-start text-truncate"
+      id="pills-tab"
+      role="tablist"
+    >
+      {% for page in pages %}
+      <li class="nav-item">
+        <a
+          class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate{{' active' if page['active']}}"
+          id="plugins-pages-{{ page['id'] }}-tab"
+          data-bs-toggle="pill"
+          href="#plugins-pages-{{ page['id'] }}"
+          role="tab"
+          aria-controls="plugins-pages-{{ page['id'] }}"
+          aria-selected=""
+        >
+          <span class="d-md-inline">{{ page["name"] }}</span>
+        </a>
+      </li>
+    </ul>
+    {% endfor %} {% endif %}
+  </div>
+</div>
+{% endblock %}

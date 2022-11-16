@@ -1,0 +1,4574 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.1",
+        "title": "Twitter REST API This is interesting in so many cases"
+    },
+    "host": "api.twitter.com",
+    "basePath": "/1.1",
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "oauth": {
+            "type": "oauth2",
+            "flow": "implicit",
+            "authorizationUrl": "https://twitter.com/oauth/authorize/?client_id=CLIENT-ID&redirect_uri=REDIRECT-URI&response_type=token",
+            "scopes": {
+                "basic": "to read any and all data related to twitter this is interesting op\n"
+            }
+        }
+    },
+    "security": [
+        {
+            "oauth": [
+                "basic"
+            ]
+        }
+    ],
+    "paths": {
+        "/statuses/mentions_timeline": {
+            "get": {
+                "description": "Returns the 20 most recent mentions for the authenticating kkkkkkk user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "Specifies the number of tweets to try and retrieve",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "description": "Returns result with an ID greater than the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "description": "Returns results with an ID less than or equal to the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "contributor_details",
+                        "in": "query",
+                        "description": "This parameter enhances the contributors element of the status response",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "The entities node will be disincluded when set to false",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tweets"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/statuses/user_timeline": {
+            "get": {
+                "description": "Returns a collection of the most recent Tweets posted by the User",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "Specifies the number of tweets to try and rppetrieve",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "description": "Returns result with an ID greater than the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "description": "Returns results with an ID less than or equal to the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "exclude_replies",
+                        "in": "query",
+                        "description": "This paramters will prevent from appearing in the returned timeline",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "contributor_details",
+                        "in": "query",
+                        "description": "This paramters enhances the contributors element of the status response to include the screen_name of the contributor",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "include_rts",
+                        "in": "query",
+                        "description": "When set to false, the timeline will strip any native retweet",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tweets"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/statuses/home_timeline": {
+            "get": {
+                "description": "Returns a collection of the most recent Tweets",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "description": "Returns result with an ID greater than the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "description": "Returns results with an ID less than or equal to the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "exclude_replies",
+                        "in": "query",
+                        "description": "This paramters will prevent from appearing in the returned timeline",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "contributor_details",
+                        "in": "query",
+                        "description": "This paramters enhances the contributors element of the status response to include the screen_name of the contributor",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tweets"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/statuses/retweets/{id}": {
+            "post": {
+                "description": "Retweens a tweet",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The numerical ID of the desired status",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Tweets"
+                        }
+                    }
+                }
+            }
+        },
+        "/statuses/show/{id}": {
+            "get": {
+                "description": "Retruns a single Tweet",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The numerical ID of the desired status",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_my_retweet",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, any Tweets returned that have been retweeted by the authenticating",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "type": "string",
+                        "in": "query",
+                        "description": "The entities node will be disincluded when set to false",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success if that matters wd sw",
+                        "schema": {
+                            "$ref": "#/definitions/Tweets"
+                        }
+                    }
+                }
+            }
+        },
+        "/statuses/destroy/{id}": {
+            "post": {
+                "description": "Destroys the status specified by the required ID parameter",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The numerical ID of the desired status",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Tweets"
+                        }
+                    }
+                }
+            }
+        },
+        "/statuses/update": {
+            "post": {
+                "description": "Updates the authenticating user's status",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "The text of your status update",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "in_reply_to_status_id",
+                        "in": "query",
+                        "description": "The ID of an existing status",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "The latitude of the location",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "The longitude of the location",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "place_id",
+                        "in": "query",
+                        "description": "A place in the world",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "display_coordinates",
+                        "in": "query",
+                        "description": "Whether or not to put a pin on the exact coordinates a tweet",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trim_user",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, each tweet returned in a timeline will include a user object",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Tweets"
+                        }
+                    },
+                    "403": {
+                        "description": "Error"
+                    }
+                }
+            }
+        },
+        "/statuses/oembed": {
+            "get": {
+                "description": "Returns information allowing the creation of an embedded representation",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "The tweet/status id to return embed code for",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "description": "The encoded URL of the Tweet status to be embedded",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "maxwidth",
+                        "in": "query",
+                        "description": "The maximum width in pixels that the embed should be rendered at",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "hide_media",
+                        "in": "query",
+                        "description": "Specifies whether the embedded tweet should automatically show the original message in the case that the embedded Tweet is a reply",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "hide_thread",
+                        "in": "query",
+                        "description": "Specifies whether the embedded Tweet html should include a 'script' element pointing to widgets.js",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "align",
+                        "in": "query",
+                        "description": "Specifies whether the embedded Tweet should be left aligned",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "related",
+                        "in": "query",
+                        "description": "A value for the TWT related parameters",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "Languages code for the rendered embed",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Tweets"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/list": {
+            "get": {
+                "description": "Return all lists the authenticating or specified user subscribes to, including their own.",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to return results for Hey jeremey ijikjkhj,kb kukj",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The ID of the user for whom to return results for",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Lists"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/statuses": {
+            "get": {
+                "description": "Returns a timeline of tweets authored by memebers of the specified list",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list by its slug instead of its numerical id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "description": "Returns results with an ID greater than the sepcified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "description": "Returns results with an ID less than or equal to the specified ID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "Specifies the number of results to retrieve per page",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "Entities are ON by default",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_rts",
+                        "in": "query",
+                        "description": "When set to either true, t or 1, the list timeline will contain native retweets in addition to the standard stream of tweets",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tweets"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/members/destroy": {
+            "get": {
+                "description": "Returns the list of memebers destroy",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list by its slug instrad of its numerical id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The is of the user who wons the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/lists/memberships": {
+            "get": {
+                "description": "Returns the lists of the specified user has been added to",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to return results for",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to return results for",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Breaks the results into pages",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "filter_to_owned_lists",
+                        "in": "query",
+                        "description": "When set to true, t or 1, will return just lists the authenticating user owns",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/subscribers": {
+            "get": {
+                "description": "Returns the subscribers of the specified list",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list by its slug insted of its numerical id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "the screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Breaks the results into pages",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "Wehn set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "When set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/subscribers/create": {
+            "post": {
+                "description": "Subscribes the authenticated user to the specified list",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "the screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/subscribers/show": {
+            "get": {
+                "description": "Check if the specified user is a subscriber of the specified list",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The is of the user who wons the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "Wehn set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "When set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/subscribers/destroy": {
+            "get": {
+                "description": "Returns list of subscribers destroy",
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "the screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/lists/members/create_all": {
+            "get": {
+                "description": "Returns lists of members create_all",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "the screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/list/members/show": {
+            "get": {
+                "description": "Check if the specified user is a member of the specified list",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "Wehn set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "When set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/list/members": {
+            "get": {
+                "description": "Returns the members of the specified list",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "Wehn set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "When set to either true, t or 1",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Breaks the results into pages",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/list/members/create": {
+            "post": {
+                "description": "Returns list of members create",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/lists/destroy": {
+            "post": {
+                "description": "Returns list of destroy",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/update": {
+            "post": {
+                "description": "Returns lists of updates",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name for the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "description": "Whether your list is public or private",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "The description to give the list",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/lists/create": {
+            "post": {
+                "description": "Returns list of create",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name for the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "description": "Whether your list is public or private",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "The description to give the list",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/show": {
+            "get": {
+                "description": "Returns list of show",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/lists/subscriptions": {
+            "get": {
+                "description": "Returns list of subscriptions",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to return results for",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "The amount of results to return per page",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Breaks the results into pages",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/list/members/destroy_all": {
+            "get": {
+                "description": "Returns lists of destroy all",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "list_id",
+                        "in": "query",
+                        "description": "The numerical id of the list",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "You can identify a list being requested by a slug",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The id of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user for whom to remove from the list",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_screen_name",
+                        "in": "query",
+                        "description": "The screen name of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "description": "The user ID of the user who owns the list being requested by a slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_lists"
+                        }
+                    }
+                }
+            }
+        },
+        "/direct_messages/sent": {
+            "get": {
+                "description": "return 20 most recent direct messages sent",
+                "parameters": [
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Messages"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/direct_messages/show": {
+            "get": {
+                "description": "returns a single direct message specified by an id",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID of direct message",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Messages"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/tweets": {
+            "get": {
+                "description": "returns collection of relevant Tweets matching query",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "URL-encoded search query of 500 characters max",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "geocode",
+                        "in": "query",
+                        "description": "returns tweets by users located within given radius",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "restricts tweets to a given language",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "language of query you are sending",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "result_type",
+                        "in": "query",
+                        "description": "specifies type of search results you prefer",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "number of tweets to return",
+                        "type": "string"
+                    },
+                    {
+                        "name": "until",
+                        "in": "query",
+                        "description": "returns tweets created before given date",
+                        "type": "string"
+                    },
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "description": "return results with ID greater than specified",
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "description": "returns results with an ID less than/equal to specified ID",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "callback",
+                        "in": "query",
+                        "description": "response will use the callback with given name",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tweets"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/saved_searches/list": {
+            "get": {
+                "description": "Returns the authenticated user's saved search queries",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Query"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/saved_searches/show/{id}": {
+            "get": {
+                "description": "Retrieve the information for the saved search represented by the given id",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id of the saved search",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Query"
+                        }
+                    }
+                }
+            }
+        },
+        "/saved_searches/create": {
+            "post": {
+                "description": "Create a new saved search for the authenticated user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "The query of the search the user would like to save",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Query"
+                        }
+                    }
+                }
+            }
+        },
+        "/saved_searches/destroy/{id}": {
+            "post": {
+                "description": "Destroy a saved search for the authenticating user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id of the saved search",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Query"
+                        }
+                    }
+                }
+            }
+        },
+        "/direct_messages": {
+            "get": {
+                "description": "return 20 most recent direct messages sent to user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "since_id",
+                        "in": "query",
+                        "description": "return results with ID greater than specified",
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_id",
+                        "in": "query",
+                        "description": "returns results with an ID less than/equal to specified ID",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to include status",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Messages"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/direct_messages/destroy": {
+            "post": {
+                "description": "destroys direct messages specified in required ID",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID of direct message to delete",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Messages"
+                        }
+                    }
+                }
+            }
+        },
+        "/direct_messages/new": {
+            "post": {
+                "description": "sends a new direct message to specified user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "description",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user receiving message",
+                        "type": "string"
+                    },
+                    {
+                        "name": "text",
+                        "in": "query",
+                        "description": "text of your direct message",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Messages"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/ids": {
+            "get": {
+                "description": "returns a cursored collection of user IDs followed by user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user for whom to return results for",
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user for whom to return results for",
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "causes list of connections to be broken in pages",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stringify_ids",
+                        "in": "query",
+                        "description": "IDs converted to strings",
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "number of IDs to attempt retrieval of",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_ids"
+                        }
+                    }
+                }
+            }
+        },
+        "/followers/ids": {
+            "get": {
+                "description": "returns a cursored collection of user IDs following the user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user for whom to return results for",
+                        "type": "string"
+                    },
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user for whom to return results for",
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "causes list of connections to be broken in pages",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stringify_ids",
+                        "in": "query",
+                        "description": "IDs converted to strings",
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "number of IDs to attempt retrieval of",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_ids"
+                        }
+                    }
+                }
+            }
+        },
+        "/friendships/incoming": {
+            "get": {
+                "description": "returns collection of IDs of users with pending follow request",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "causes list of connections to be broken in pages",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stringify_ids",
+                        "in": "query",
+                        "description": "IDs converted to strings",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_ids"
+                        }
+                    }
+                }
+            }
+        },
+        "/friendships/outgoing": {
+            "get": {
+                "description": "returns collection of IDs of users with pending follow request from the user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "causes list of connections to be broken in pages",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stringify_ids",
+                        "in": "query",
+                        "description": "IDs converted to strings",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_ids"
+                        }
+                    }
+                }
+            }
+        },
+        "/friendships/create": {
+            "post": {
+                "description": "allows users to follow user sepcified by ID",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user for whom to befriend",
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user for whom to befriend",
+                        "type": "string"
+                    },
+                    {
+                        "name": "follow",
+                        "in": "query",
+                        "description": "enable notifications for target user",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/friendships/destroy": {
+            "post": {
+                "description": "allows user to unfollow user psecified by ID",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user for whom to befriend",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user for whom to befriend",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/friendships/update": {
+            "post": {
+                "description": "Allows one to enable or disable settings for specified user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user for whom to befriend",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user for whom to befriend",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "device",
+                        "in": "query",
+                        "description": "enable/disable device notifications for user",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "retweets",
+                        "in": "query",
+                        "description": "enable/disable retweets from target user",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Friendship"
+                        }
+                    }
+                }
+            }
+        },
+        "/friendships/show": {
+            "get": {
+                "description": "returns detailed info about relationship between two users",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "source_id",
+                        "in": "query",
+                        "description": "user id of subject user",
+                        "type": "string"
+                    },
+                    {
+                        "name": "source_screen_name",
+                        "in": "query",
+                        "description": "screen_name of subject user",
+                        "type": "string"
+                    },
+                    {
+                        "name": "target_id",
+                        "in": "query",
+                        "description": "user id of target user",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "target_screen_name",
+                        "in": "query",
+                        "description": "screen name of target user",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Friendship"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/settings": {
+            "get": {
+                "summary": "returns settings for user",
+                "description": "returns settings for user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "updates user's settings",
+                "description": "updates user's settings",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "trend_location_woeid",
+                        "in": "query",
+                        "description": "the Yahoo! Where On Earth ID to user as defaul tend location",
+                        "type": "string"
+                    },
+                    {
+                        "name": "sleep_time_enabled",
+                        "in": "query",
+                        "description": "enables/disables sleep time, silencing notifications",
+                        "type": "string"
+                    },
+                    {
+                        "name": "start_sleep_time",
+                        "in": "query",
+                        "description": "the hour that sleep time should begin if enabled",
+                        "type": "string"
+                    },
+                    {
+                        "name": "end_sleep_time",
+                        "in": "query",
+                        "description": "the hour that sleep time should end if enabled",
+                        "type": "string"
+                    },
+                    {
+                        "name": "time_zone",
+                        "in": "query",
+                        "description": "timezone dates and times should be displayed in",
+                        "type": "string"
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "language which Twitter should render in for the user",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/update_delivery_device": {
+            "post": {
+                "summary": "sets which device Twitter delivers updates to for user",
+                "description": "sets which device Twitter delivers updates to for user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "device",
+                        "in": "query",
+                        "description": "must be one of sms, none",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/update_profile": {
+            "post": {
+                "summary": "sets values that users ar eable to set under Account tab",
+                "description": "sets values that users ar eable to set under Account tab",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "full name of profile",
+                        "type": "string"
+                    },
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "description": "url associated with profile",
+                        "type": "string"
+                    },
+                    {
+                        "name": "location",
+                        "in": "query",
+                        "description": "city or country describing where user of account is.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "a description of user owning account",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to include statuses in response",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/update_profile_background_image": {
+            "post": {
+                "summary": "updates user's profile background image",
+                "description": "updates user's profile background image",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "parameters": [
+                    {
+                        "name": "tile",
+                        "in": "query",
+                        "description": "whether or not to tile background image",
+                        "type": "string"
+                    },
+                    {
+                        "name": "use",
+                        "in": "query",
+                        "description": "display background image or not",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to include status in returned user objects",
+                        "type": "string"
+                    },
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "description": "image to replace background image of profile",
+                        "required": true,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/update_profile_colors": {
+            "post": {
+                "summary": "sets one or more hex values that controls color scheme",
+                "description": "sets one or more hex values that controls color scheme",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "profile_background_color",
+                        "in": "query",
+                        "description": "profile background color",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profile_link_color",
+                        "in": "query",
+                        "description": "profile link color",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profile_sidebar_border_color",
+                        "in": "query",
+                        "description": "profile sidebar's border color",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profile_sidebar_fill_color",
+                        "in": "query",
+                        "description": "profile's sidebar background color",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profile_text_color",
+                        "in": "query",
+                        "description": "profile text color",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to include statuses",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/update_profile_image": {
+            "post": {
+                "summary": "updates user's profile image",
+                "description": "updates user's profile image",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "parameters": [
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to include statuses",
+                        "type": "string"
+                    },
+                    {
+                        "name": "image",
+                        "in": "formData",
+                        "description": "image to be set as profile image",
+                        "type": "file",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            }
+        },
+        "/blocks/list": {
+            "get": {
+                "summary": "disallows retweets and device notifications from a user",
+                "description": "disallows retweets and device notifications from a user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to include statuses in response",
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "breaks block of user to be broken up into pages",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_users"
+                        }
+                    }
+                }
+            }
+        },
+        "/blocks/ids": {
+            "get": {
+                "summary": "returns array of numeric user ids of blocked users",
+                "description": "returns array of numeric user ids of blocked users",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "stringify_ids",
+                        "in": "query",
+                        "description": "returns array of numeric IDs as string IDs",
+                        "type": "string"
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "breaks up block of user IDs into pages",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Cursor_users"
+                        }
+                    }
+                }
+            }
+        },
+        "/blocks/create": {
+            "post": {
+                "summary": "blocks the specified user",
+                "description": "blocks the specified user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user to be blocked",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user to be blocked",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to skip statuses",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/blocks/destroy": {
+            "post": {
+                "summary": "un-blocks the specified user",
+                "description": "un-blocks the specified user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user to be un-blocked",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user to be un-blocked",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to skip statuses",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/lookup": {
+            "get": {
+                "summary": "returns fully-hydrated user objects up to 100",
+                "description": "returns fully-hydrated user objects up to 100",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user to lookup",
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user to lookup",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/show": {
+            "get": {
+                "summary": "returns a variety of info about specified user",
+                "description": "returns a variety of info about specified user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user to be shown",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user to be shown",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/search": {
+            "get": {
+                "summary": "simple relevance-based user search",
+                "description": "simple relevance-based user search",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "the search query to run against people search",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "specifies the page of results to receive",
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "number of people to return per page",
+                        "type": "string"
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/contributees": {
+            "get": {
+                "summary": "collection of users specified user can contribute to",
+                "description": "collection of users specified user can contribute to",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user that is contributed to",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user to that is contributed to",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to skip statuses",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/contributors": {
+            "get": {
+                "summary": "collection of users that can contribute to specified account",
+                "description": "collection of users that can contribute to specified account",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "screen name of user contributing",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID of user contributing",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "include_entities",
+                        "in": "query",
+                        "description": "whether or not to include entities",
+                        "type": "string"
+                    },
+                    {
+                        "name": "skip_status",
+                        "in": "query",
+                        "description": "whether or not to skip statuses",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/id/{place_id}": {
+            "get": {
+                "description": "Returns all the information about a know place",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "place_id",
+                        "in": "path",
+                        "description": "A place in the world",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Places"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/reverse_geoncode": {
+            "get": {
+                "description": "Given a latitude and a longitude, searches for up to 20 places that can be used as a place_id when updatting a status",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "The latitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "The longtitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "accuracy",
+                        "in": "query",
+                        "description": "A hint on region in which to search",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "granularity",
+                        "in": "query",
+                        "description": "This is the minimal granularity of place types to return",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max_results",
+                        "in": "query",
+                        "description": "A hint as to the number of results to return",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "callback",
+                        "in": "query",
+                        "description": "If supplied, the responses will use the JSON format with a callback of the given name",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Places"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/search": {
+            "get": {
+                "description": "Search for places that can be attached to a statuses/updates",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "The latitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "The longtitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "Free-form text to match against while executing a geo-based query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ip",
+                        "in": "query",
+                        "description": "An Ip address",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "accuracy",
+                        "in": "query",
+                        "description": "A hint on region in which to search",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "granularity",
+                        "in": "query",
+                        "description": "This is the minimal granularity of place types to return",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "contained_within",
+                        "in": "query",
+                        "description": "This is the place_id which you would like to restrict the search results to",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "attribute:street_address",
+                        "in": "query",
+                        "description": "This parameter searches for places which have this givven street address",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "callback",
+                        "in": "query",
+                        "description": "If supplied, the responses will use the JSON format with a callback of the given name",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Places"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/similar_places": {
+            "get": {
+                "description": "Locates places near the given coordinates which are similar in name",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "The latitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "The longtitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name a place is known as",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "contained_within",
+                        "in": "query",
+                        "description": "This is the place_id which you would like to restrict the search results to",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "attribute:street_address",
+                        "in": "query",
+                        "description": "This parameter searches for places which have this givven street address",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "callback",
+                        "in": "query",
+                        "description": "If supplied, the responses will use the JSON format with a callback of the given name",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Places"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/places": {
+            "get": {
+                "description": "Create a new place object at the given latitude and logitude",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "The latitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "The longtitude to search around",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name a place is known as",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "description": "The token found in the response from geo/similar_places",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "contained_within",
+                        "in": "query",
+                        "description": "This is the place_id which you would like to restrict the search results to",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "attribute:street_address",
+                        "in": "query",
+                        "description": "This parameter searches for places which have this givven street address",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "callback",
+                        "in": "query",
+                        "description": "If supplied, the responses will use the JSON format with a callback of the given name",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Places"
+                        }
+                    }
+                }
+            }
+        },
+        "/trends/place": {
+            "get": {
+                "description": "Returns the top 10 trending topics for a specific WOEID",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "The yahoo where on earch id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "exclude",
+                        "in": "query",
+                        "description": "Setting this equal to hashtages will remove all hashtages from the trends list",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/TrendInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/trends/available": {
+            "get": {
+                "description": "Returns the availability",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Location"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trends/closest": {
+            "get": {
+                "description": "Returns the location that Twitter has trending topic information for",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "If provided with a long parameter the available trend locations wil be stored by distance",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "If provided with a lat parameters the available trend locations will be sorted by distance",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Location"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/report_spam": {
+            "post": {
+                "description": "Returna users report spam",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "screen_name",
+                        "in": "query",
+                        "description": "The ID or screen_name of the user you want to report as a spammer",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "The ID of the user you want to report as a spammer",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    }
+                }
+            }
+        },
+        "/help/configuration": {
+            "get": {
+                "description": "Returns the current configuration used by Twitter including twitter.com slugs which are not usernames",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Help_Config"
+                        }
+                    }
+                }
+            }
+        },
+        "/help/languages": {
+            "get": {
+                "description": "Returns the list of languages supported by Twitter along with the language code supported by Twitter",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Help_Language"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/help/privacy": {
+            "get": {
+                "description": "Returns Twitter's privacy policy",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Help_Privacy"
+                        }
+                    }
+                }
+            }
+        },
+        "/help/tos": {
+            "get": {
+                "description": "Returns the Twitter Terms of Service",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Help_Tos"
+                        }
+                    }
+                }
+            }
+        },
+        "/application/rate_limit_status": {
+            "get": {
+                "description": "Returns the current rate limits for methods belonging to the specified resource families",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "resources",
+                        "in": "query",
+                        "description": "A comma-separated list of resource families you want to know the current rate limit disposition for",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Tweets": {
+            "type": "object",
+            "properties": {
+                "contributors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Contributors"
+                    }
+                },
+                "coordinates": {
+                    "$ref": "#/definitions/Coordinates"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "current_user_retweet": {
+                    "$ref": "#/definitions/Tweets"
+                },
+                "entities": {
+                    "$ref": "#/definitions/Entities"
+                },
+                "favorite_count": {
+                    "type": "integer"
+                },
+                "favorited": {
+                    "type": "boolean"
+                },
+                "filter_level": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "in_reply_to_screen_name": {
+                    "type": "string"
+                },
+                "in_reply_to_status_id": {
+                    "type": "integer"
+                },
+                "in_reply_to_status_id_str": {
+                    "type": "string"
+                },
+                "in_reply_to_user_id": {
+                    "type": "integer"
+                },
+                "in_reply_to_user_id_str": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "place": {
+                    "$ref": "#/definitions/Places"
+                },
+                "possibly_sensitive": {
+                    "type": "boolean"
+                },
+                "quoted_status_id": {
+                    "type": "integer"
+                },
+                "quoted_status_id_str": {
+                    "type": "string"
+                },
+                "quoted_status": {
+                    "$ref": "#/definitions/Tweets"
+                },
+                "scopes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "retweet_count": {
+                    "type": "integer"
+                },
+                "retweeted": {
+                    "type": "boolean"
+                },
+                "retweeted_status": {
+                    "$ref": "#/definitions/Tweets"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/Users"
+                },
+                "withheld_copyright": {
+                    "type": "boolean"
+                },
+                "withheld_countries": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "withheld_scope": {
+                    "type": "string"
+                }
+            }
+        },
+        "Contributors": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "screen_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Coordinates": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "Users": {
+            "type": "object",
+            "properties": {
+                "contributors_enabled": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "default_profile": {
+                    "type": "boolean"
+                },
+                "default_profile_image": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "entities": {
+                    "$ref": "#/definitions/Entities"
+                },
+                "favorites_count": {
+                    "type": "integer"
+                },
+                "follow_request_sent": {
+                    "type": "boolean"
+                },
+                "following": {
+                    "type": "boolean"
+                },
+                "followers_count": {
+                    "type": "integer"
+                },
+                "friends_count": {
+                    "type": "integer"
+                },
+                "geo_enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "is_translator": {
+                    "type": "boolean"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "listed_count": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notifications": {
+                    "type": "boolean"
+                },
+                "profile_background_color": {
+                    "type": "string"
+                },
+                "profile_background_image_url": {
+                    "type": "string"
+                },
+                "profile_background_image_url_https": {
+                    "type": "string"
+                },
+                "profile_background_tile": {
+                    "type": "string"
+                },
+                "profile_banner_url": {
+                    "type": "string"
+                },
+                "profile_image_url": {
+                    "type": "string"
+                },
+                "profile_image_url_https": {
+                    "type": "string"
+                },
+                "profile_link_color": {
+                    "type": "string"
+                },
+                "profile_sidebar_border_color": {
+                    "type": "string"
+                },
+                "profile_sidebar_fill_color": {
+                    "type": "string"
+                },
+                "profile_text_color": {
+                    "type": "string"
+                },
+                "profile_use_background_image": {
+                    "type": "boolean"
+                },
+                "protected": {
+                    "type": "boolean"
+                },
+                "screen_name": {
+                    "type": "string"
+                },
+                "show_all_inline_media": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/Tweets"
+                },
+                "statuses_count": {
+                    "type": "integer"
+                },
+                "time_zone": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "utc_offset": {
+                    "type": "integer"
+                },
+                "verified": {
+                    "type": "boolean"
+                },
+                "withheld_in_countries": {
+                    "type": "string"
+                },
+                "withheld_scope": {
+                    "type": "string"
+                }
+            }
+        },
+        "Entities": {
+            "type": "object",
+            "properties": {
+                "hashtags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Hashtags"
+                    }
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Media"
+                    }
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/URL"
+                    }
+                },
+                "user_mentions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/User_Mention"
+                    }
+                }
+            }
+        },
+        "Hashtags": {
+            "type": "object",
+            "properties": {
+                "indices": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "Media": {
+            "type": "object",
+            "properties": {
+                "display_url": {
+                    "type": "string"
+                },
+                "expanded_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "indices": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "media_url": {
+                    "type": "string"
+                },
+                "media_url_https": {
+                    "type": "string"
+                },
+                "sizes": {
+                    "$ref": "#/definitions/Sizes"
+                },
+                "source_status_id": {
+                    "type": "integer"
+                },
+                "source_status_id_str": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "Size": {
+            "type": "object",
+            "properties": {
+                "h": {
+                    "type": "integer"
+                },
+                "resize": {
+                    "type": "string"
+                },
+                "w": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Sizes": {
+            "type": "object",
+            "properties": {
+                "thumb": {
+                    "$ref": "#/definitions/Size"
+                },
+                "large": {
+                    "$ref": "#/definitions/Size"
+                },
+                "medium": {
+                    "$ref": "#/definitions/Size"
+                },
+                "small": {
+                    "$ref": "#/definitions/Size"
+                }
+            }
+        },
+        "URL": {
+            "type": "object",
+            "properties": {
+                "display_url": {
+                    "type": "string"
+                },
+                "expanded_url": {
+                    "type": "string"
+                },
+                "indices": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "User_Mention": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "indices": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "screen_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Places": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "bounding_box": {
+                    "$ref": "#/definitions/Bounding_box"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "country_code": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "place_type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "Bounding_box": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "Lists": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "following": {
+                    "type": "boolean"
+                },
+                "user": {
+                    "$ref": "#/definitions/Users"
+                },
+                "member_count": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "subscriber_count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "uri": {
+                    "type": "string"
+                }
+            }
+        },
+        "Cursor_lists": {
+            "type": "object",
+            "properties": {
+                "previous_cursor": {
+                    "type": "integer"
+                },
+                "lists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Lists"
+                    }
+                },
+                "previous_cursor_str": {
+                    "type": "string"
+                },
+                "next_cursor": {
+                    "type": "integer"
+                },
+                "next_cursor_str": {
+                    "type": "string"
+                }
+            }
+        },
+        "Cursor_users": {
+            "type": "object",
+            "properties": {
+                "previous_cursor": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Users"
+                    }
+                },
+                "previous_cursor_str": {
+                    "type": "string"
+                },
+                "next_cursor": {
+                    "type": "integer"
+                },
+                "next_cursor_str": {
+                    "type": "string"
+                }
+            }
+        },
+        "Cursor_ids": {
+            "type": "object",
+            "properties": {
+                "previous_cursor": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "previous_cursor_str": {
+                    "type": "string"
+                },
+                "next_cursor": {
+                    "type": "integer"
+                },
+                "next_cursor_str": {
+                    "type": "string"
+                }
+            }
+        },
+        "Messages": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "entities": {
+                    "$ref": "#/definitions/Entities"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_string": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "$ref": "#/definitions/Users"
+                },
+                "recipient_id": {
+                    "type": "integer"
+                },
+                "recipient_screen_name": {
+                    "type": "string"
+                },
+                "sender": {
+                    "$ref": "#/definitions/Users"
+                },
+                "sender_id": {
+                    "type": "integer"
+                },
+                "sender_screen_name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "Query": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_str": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "string"
+                }
+            }
+        },
+        "Friendship": {
+            "type": "object",
+            "properties": {
+                "relationship": {
+                    "$ref": "#/definitions/Targets"
+                },
+                "source": {
+                    "$ref": "#/definitions/Source"
+                }
+            }
+        },
+        "Targets": {
+            "type": "object",
+            "properties": {
+                "target": {
+                    "$ref": "#/definitions/Target"
+                }
+            }
+        },
+        "Target": {
+            "type": "object",
+            "properties": {
+                "id_str": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "followed_by": {
+                    "type": "boolean"
+                },
+                "screen_name": {
+                    "type": "string"
+                },
+                "following": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Source": {
+            "type": "object",
+            "properties": {
+                "can_dm": {
+                    "type": "boolean"
+                },
+                "blocking": {
+                    "type": "boolean"
+                },
+                "id_str": {
+                    "type": "boolean"
+                },
+                "all_replies": {
+                    "type": "boolean"
+                },
+                "want_retweets": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "marked_spam": {
+                    "type": "boolean"
+                },
+                "followed_by": {
+                    "type": "boolean"
+                },
+                "notifications_enable": {
+                    "type": "boolean"
+                },
+                "screen_name": {
+                    "type": "string"
+                },
+                "following": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Settings": {
+            "type": "object",
+            "properties": {
+                "sleep_time": {
+                    "$ref": "#/definitions/Sleep"
+                },
+                "use_cookie_personalization": {
+                    "type": "boolean"
+                },
+                "trend_location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Location"
+                    }
+                },
+                "language": {
+                    "type": "string"
+                },
+                "discoverable_by_email": {
+                    "type": "boolean"
+                },
+                "always_use_https": {
+                    "type": "boolean"
+                },
+                "protected": {
+                    "type": "boolean"
+                },
+                "geo_enabled": {
+                    "type": "boolean"
+                },
+                "show_all_inline_media": {
+                    "type": "boolean"
+                },
+                "screen_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Sleep": {
+            "type": "object",
+            "properties": {
+                "end_time": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "start_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "Location": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "placeType": {
+                    "$ref": "#/definitions/PlaceType"
+                },
+                "woeid": {
+                    "type": "integer"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "countryCode": {
+                    "type": "string"
+                },
+                "parentid": {
+                    "type": "integer"
+                }
+            }
+        },
+        "PlaceType": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "TrendInfo": {
+            "type": "object",
+            "properties": {
+                "as_of": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "locations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Location"
+                    }
+                },
+                "trends": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Trends"
+                    }
+                }
+            }
+        },
+        "Trends": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "promoted_content": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "Help_Config": {
+            "type": "object",
+            "properties": {
+                "dm_text_character_limit": {
+                    "type": "integer"
+                },
+                "characters_reserved_per_media": {
+                    "type": "integer"
+                },
+                "max_media_per_upload": {
+                    "type": "integer"
+                },
+                "non_username_paths": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "photo_size_limit": {
+                    "type": "integer"
+                },
+                "photo_sizes": {
+                    "$ref": "#/definitions/Sizes"
+                }
+            }
+        },
+        "Help_Language": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Help_Privacy": {
+            "type": "object",
+            "properties": {
+                "privacy": {
+                    "type": "string"
+                }
+            }
+        },
+        "Help_Tos": {
+            "type": "object",
+            "properties": {
+                "Tos": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

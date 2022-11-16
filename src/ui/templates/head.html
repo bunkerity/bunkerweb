@@ -1,0 +1,91 @@
+{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip()
+%}
+
+<head>
+  <base href="{{ config["ABSOLUTE_URI"] }}">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="bunkerweb user interface" />
+  <meta name="author" content="bunkerity" />
+  <title>BunkerWeb UI</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+  <!--     Fonts and icons     -->
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+    rel="stylesheet"
+  />
+  <!-- tailwind style -->
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="http://127.0.0.1:5500/static/css/dashboard.css"
+  />
+
+  <script
+    type="text/javascript"
+    defer
+    src="http://127.0.0.1:5500/static/js/dashboard.js"
+  ></script>
+
+  <script
+    type="text/javascript"
+    charset="utf-8"
+    defer
+    src="http://127.0.0.1:5500/static/js/editor/ace.js"
+  ></script>
+
+  {% if current_endpoint == "global_config" %}
+  <script
+    defer
+    type="module"
+    src="http://127.0.0.1:5500/static/js/global_config.js"
+  ></script>
+  {% elif current_endpoint == "configs" %}
+  <script
+    defer
+    type="module"
+    src="http://127.0.0.1:5500/static/js/configs.js"
+  ></script>
+  {% elif current_endpoint == "services" %}
+  <script
+    defer
+    type="module"
+    src="http://127.0.0.1:5500/static/js/services.js"
+  ></script>
+  {% elif current_endpoint == "plugins" %}
+  <script
+    type="module"
+    defer
+    src="http://127.0.0.1:5500/static/js/dropzone-min.js"
+  ></script>
+  <script
+    type="module"
+    defer
+    src="http://127.0.0.1:5500/static/js/dropzone-min.js.map"
+  ></script>
+  <script
+    type="module"
+    defer
+    src="http://127.0.0.1:5500/static/js/plugins.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="http://127.0.0.1:5500/static/css/dropzone/dropzone.css"
+  />
+  {% elif current_endpoint == "cache" %}
+  <script
+    defer
+    type="module"
+    src="http://127.0.0.1:5500/static/js/cache.js"
+  ></script>
+  {% elif current_endpoint == "logs" %}
+  <script type="module" src="http://127.0.0.1:5500/static/js/logs.js"></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="http://127.0.0.1:5500/static/css/air-datepicker/air-datepicker.css"
+  />
+  {% endif %}
+</head>

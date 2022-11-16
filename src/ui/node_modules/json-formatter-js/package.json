@@ -1,0 +1,57 @@
+{
+  "name": "json-formatter-js",
+  "version": "2.3.4",
+  "description": "JSON Formatter core library ",
+  "main": "dist/json-formatter.cjs.js",
+  "module": "dist/json-formatter.esm.js",
+  "browser": "dist/json-formatter.umd.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c rollup.dev.config.js",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "test/spec.ts",
+    "moduleNameMapper": {
+      ".*\\.less$": "<rootDir>/mocks/less.ts"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohsen1/json-formatter-js.git"
+  },
+  "keywords": [
+    "json"
+  ],
+  "author": "Mohsen Azimi <me@azimi.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mohsen1/json-formatter-js/issues"
+  },
+  "homepage": "https://github.com/mohsen1/json-formatter-js#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.19",
+    "css-loader": "^3.2.0",
+    "jest": "^24.9.0",
+    "less": "^3.10.3",
+    "less-loader": "^5.0.0",
+    "rollup": "^1.25.1",
+    "rollup-plugin-less": "^1.1.2",
+    "rollup-plugin-livereload": "^1.0.4",
+    "rollup-plugin-serve": "^1.0.1",
+    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-typescript2": "^0.24.3",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.4",
+    "webpack-dev-server": "^3.8.2"
+  }
+}
