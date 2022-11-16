@@ -41,16 +41,17 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   mkdir -p /var/www && \
   mkdir -p /etc/bunkerweb && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
+  mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/cache/letsencrypt && ln -s /data/cache/letsencrypt /etc/letsencrypt && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:scheduler /data && \
   chmod -R 770 /data && \
-  chown -R root:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
+  chown -R root:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
   for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
   for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
-  chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
+  chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb && \
   chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* && \
   mkdir /etc/nginx && \
   chown -R scheduler:scheduler /etc/nginx && \

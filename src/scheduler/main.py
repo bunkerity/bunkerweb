@@ -170,6 +170,8 @@ if __name__ == "__main__":
                 sleep(5)
                 env = db.get_config()
 
+            env["DATABASE_URI"] = db.get_database_uri()
+
             # Checking if any custom config has been created by the user
             custom_confs = []
             root_dirs = listdir("/etc/bunkerweb/configs")
