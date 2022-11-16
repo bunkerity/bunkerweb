@@ -201,11 +201,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
-        paths:
-          - src/autoconf
-          - src/scheduler
-          - src/ui
-          - src/common
+        config-file: ./.github/codeql/codeql.yml
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
