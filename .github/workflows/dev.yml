@@ -26,7 +26,6 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # TODO : code scan
       # Build image
       - name: Build image
         uses: docker/build-push-action@v3
@@ -71,7 +70,6 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # TODO : code scan
       # Build image
       - name: Build image
         uses: docker/build-push-action@v3
@@ -116,7 +114,6 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # TODO : code scan
       # Build image
       - name: Build image
         uses: docker/build-push-action@v3
@@ -185,3 +182,31 @@ jobs:
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           #trivyignores: .trivyignore
+
+  # Python code security
+  code-security:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python"]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        paths:
+          - src/autoconf
+          - src/scheduler
+          - src/ui
+          - src/common
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"

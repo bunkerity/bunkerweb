@@ -1,7 +1,0 @@
-name: Automatic tests and push (MASTER)
-
-on:
-  push:
-    branches: [master]
-
-# TODO
