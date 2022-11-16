@@ -27,8 +27,7 @@
   {% else %}{% for services_batched in services|batch(3) %} {% for service in
   services_batched %} {% set id_server_name =
   service["SERVER_NAME"]['value'].replace(".", "-") %}
-
-  <div services-service
+ <div services-service
     class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div services-settings class="hidden" value="{{service['settings']}}"></div>
@@ -50,7 +49,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['USE_REVERSE_PROXY'] == 'yes' %}
+          {% if service['USE_REVERSE_PROXY']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +84,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['SERVE_FILES'] == 'yes' %}
+          {% if service['SERVE_FILES']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +118,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['REMOTE_PHP'] == 'yes' %}
+          {% if service['REMOTE_PHP']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -153,8 +152,8 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['REMOTE_PHP'] == 'yes' or service['USE_CUSTOM_HTTPS'] ==
-          'yes' or service['GENERATE_SELF_SIGNED_SSL'] == 'yes' %}
+          {% if service['REMOTE_PHP']['value'] == 'yes' or service['USE_CUSTOM_HTTPS'] and service['USE_CUSTOM_HTTPS']['value'] ==
+          'yes' or service['GENERATE_SELF_SIGNED_SSL'] and service['GENERATE_SELF_SIGNED_SSL']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -188,7 +187,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['USE_MODSECURITY'] == 'yes' %}
+          {% if service['USE_MODSECURITY']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +221,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['USE_BAD_BEHAVIOR'] == 'yes' %}
+          {% if service['USE_BAD_BEHAVIOR']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -256,7 +255,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['USE_LIMIT_REQ'] == 'yes' %}
+          {% if service['USE_LIMIT_REQ']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -290,7 +289,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['USE_DNSBL'] == 'yes' %}
+          {% if service['USE_DNSBL']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -319,10 +318,8 @@
 
     <!-- button list-->
     <div class="relative w-full flex justify-center sm:justify-end">
-      <button
-        services-action="redirect"
-        type="button"
-        service-name="{{service["SERVER_NAME"]['value']}}"
+      <a href="http://{{service["SERVER_NAME"]['value']}}"
+        target="_blank"
         class="dark:brightness-90 z-20 mx-1 bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         <svg
@@ -334,7 +331,7 @@
             d="M288 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h50.7L169.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L384 141.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H288zM80 64C35.8 64 0 99.8 0 144V400c0 44.2 35.8 80 80 80H336c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v80c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V144c0-8.8 7.2-16 16-16h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"
           />
         </svg>
-      </button>
+      </a>
 
       <button
       services-action="edit"

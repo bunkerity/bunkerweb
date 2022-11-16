@@ -257,7 +257,7 @@
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
             >
               <svg
-                class="fill-gray-600 dark:fill-gray-500 xl:h-6 xl:w-6 h-5 w-5 relative"
+                class="fill-gray-600 dark:fill-gray-500 h-5 w-5 relative"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 512 512"
               >
@@ -268,6 +268,31 @@
             </div>
             <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
               >Logs</span
+            >
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a
+            class="{% if current_endpoint == 'jobs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+            href="{% if current_endpoint == 'jobs' %}javascript:void(0){% else %}loading?next={{ url_for('jobs') }}{% endif %}"
+          >
+            <div
+              class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
+            >
+              <svg
+                class="fill-emerald-700 h-5.5 w-5.5 relative"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+                />
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
+              >Jobs</span
             >
           </a>
         </li>
