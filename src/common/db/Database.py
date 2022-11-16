@@ -70,6 +70,8 @@ class Database:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
 
+        self.database_uri = sqlalchemy_string
+
         try:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
@@ -114,6 +116,9 @@ class Database:
         self.__sql_session.configure(
             bind=self.__sql_engine, autoflush=False, expire_on_commit=False
         )
+
+    def get_database_uri(self) -> str:
+        return self.database_uri
 
     def __del__(self) -> None:
         """Close the database"""
@@ -1184,3 +1189,46 @@ class Database:
         """Get plugins errors."""
         with self.__db_session() as session:
             return session.query(Jobs).filter(Jobs.success == False).count()
+
+    def get_jobs(self) -> Dict[str, Dict[str, Any]]:
+        """Get jobs."""
+        jobs = {}
+        with self.__db_session() as session:
+            for job in (
+                session.query(Jobs)
+                .with_entities(
+                    Jobs.name,
+                    Jobs.every,
+                    Jobs.reload,
+                    Jobs.success,
+                    Jobs.last_run,
+                    Jobs.cache,
+                )
+                .all()
+            ):
+                jobs[job.name] = {
+                    "every": job.every,
+                    "reload": job.reload,
+                }
+
+                if job.success is not None and job.last_run is not None:
+                    jobs[job.name].update(
+                        {
+                            "success": job.success,
+                            "last_run": job.last_run,
+                        }
+                    )
+
+                if job.cache is not None:
+                    job["cache"] = []
+                    for cache in job.cache:
+                        jobs[job.name]["cache"].append(
+                            {
+                                "service_id": cache.service_id,
+                                "file_name": cache.file_name,
+                                "data": cache.data.decode("utf-8"),
+                                "last_update": cache.last_update,
+                            }
+                        )
+
+        return jobs

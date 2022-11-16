@@ -32,9 +32,11 @@ RUN apk add --no-cache bash && \
     addgroup -g 101 nginx && \
     adduser -h /var/cache/nginx -g nginx -s /bin/sh -G nginx -D -H -u 101 nginx && \
     cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
-    chown -R nginx:nginx /usr/share/bunkerweb && \
+    mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
+    chown -R nginx:nginx /usr/share/bunkerweb /var/lib/bunkerweb && \
     find /usr/share/bunkerweb -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -type d -exec chmod 0750 {} \; && \
+    chmod 770 /var/lib/bunkerweb && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/* && \
     chown root:nginx /usr/bin/bwcli
 

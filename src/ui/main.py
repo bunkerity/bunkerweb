@@ -1368,6 +1368,17 @@ def logs_container(container_id):
     return jsonify({"logs": logs, "last_update": int(time())})
 
 
+@app.route("/jobs", methods=["GET"])
+@login_required
+def jobs():
+    jobs = db.get_jobs()
+    return render_template(
+        "jobs.html",
+        jobs=jobs,
+        dark_mode=app.config["DARK_MODE"],
+    )
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     fail = False
