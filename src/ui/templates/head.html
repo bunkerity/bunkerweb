@@ -1,0 +1,69 @@
+{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip()
+%}
+
+<head>
+  <base href="{{ config["ABSOLUTE_URI"] }}">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="bunkerweb user interface" />
+  <meta name="author" content="bunkerity" />
+  <title>BunkerWeb UI</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+  <link rel="stylesheet" type="text/css" href="css/base.css" />
+  <link rel="stylesheet" type="text/css" href="css/navbar.css" />
+  <link rel="stylesheet" type="text/css" href="css/footer.css" />
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="css/fa.all.min.css" />
+  <link rel="stylesheet" type="text/css" href="webfonts/bootstrap-icons.css" />
+  <link rel="stylesheet" type="text/css" href="webfonts/poppins.css" />
+  {% if current_endpoint == "home" %}
+  <link rel="stylesheet" type="text/css" href="css/home.css" />
+  {% elif current_endpoint == "instances" or current_endpoint == "services" %}
+  <link rel="stylesheet" type="text/css" href="css/instances&services.css" />
+  {% elif current_endpoint == "global_config" %}
+  <link rel="stylesheet" type="text/css" href="css/global-config.css" />
+  {% elif current_endpoint == "configs" %}
+  <link rel="stylesheet" type="text/css" href="css/configs&plugins&cache.css" />
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="css/jquery.numberedtextarea.css"
+  />
+  {% elif current_endpoint == "plugins" %}
+  <link rel="stylesheet" type="text/css" href="css/configs&plugins&cache.css" />
+  {% elif current_endpoint == "cache" %}
+  <link rel="stylesheet" type="text/css" href="css/configs&plugins&cache.css" />
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="css/jquery.numberedtextarea.css"
+  />
+  {% elif current_endpoint == "logs" %}
+  <link rel="stylesheet" type="text/css" href="css/logs.css" />
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="css/bootstrap-datepicker.min.css"
+  />
+  {% endif %}
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript" src="js/fa.all.min.js"></script>
+  <script type="text/javascript" src="js/navbar.js"></script>
+  <script type="text/javascript" defer src="js/darkmode.js"></script>
+  {% if current_endpoint == "services" or current_endpoint == "global_config" %}
+  <script type="text/javascript" src="js/services.js"></script>
+  {% elif current_endpoint == "configs" %}
+  <script type="text/javascript" src="js/configs.js"></script>
+  <script type="text/javascript" src="js/jquery.numberedtextarea.js"></script>
+  {% elif current_endpoint == "plugins" %}
+  <script type="text/javascript" defer src="js/plugins.js"></script>
+  {% elif current_endpoint == "cache" %}
+  <script type="text/javascript" src="js/cache.js"></script>
+  <script type="text/javascript" src="js/jquery.numberedtextarea.js"></script>
+  {% elif current_endpoint == "logs" %}
+  <script type="text/javascript" src="js/logs.js"></script>
+  <script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
+  {% endif %}
+</head>

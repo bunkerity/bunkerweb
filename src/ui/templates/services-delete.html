@@ -1,0 +1,38 @@
+<div
+  class="modal fade"
+  id="modal-delete-id-{{ id_server_name }}"
+  tabindex="-1"
+  aria-labelledby="modal-delete-label-{{ id_server_name }}"
+  aria-hidden="true"
+>
+  <form id="form-delete-{{ id_server_name }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" value="{{ service["SERVER_NAME"] }}"
+    name="SERVER_NAME">
+    <input type="hidden" value="delete" name="operation" />
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-delete-label-{{ id_server_name }}">
+            Delete <i>{{ service["SERVER_NAME"] }}</i> configuration
+          </h5>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-close fa-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the configuration of
+          <b>{{ service["SERVER_NAME"] }}</b> ?
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
