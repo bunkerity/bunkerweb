@@ -1,0 +1,23 @@
+GLOBAL :
+- JSON pour le dark mode
+
+FLASH MESSAGES :
+- voir ensemble pour l'affichage et le style
+
+PLUGINS :
+- dans un JSON, indiquer si des erreurs pour des plugins
+- essayer de faire fonctionner la library dropzone pour load
+- JSON avec les plugins ainsi que le lien vers la page personnelle du plugin
+
+LOGS :
+- essayer de faire fonctionner la library air-datepicker
+
+SERVICES :
+- dans le JSON, ajouter le lien de redirection et les settings à montrer sur la card dans une autre key
+
+JOBS:
+- refresh auto
+- trier par last_run
+- filter keyword
+- name + plugin id + every (une date) + reload (reload BW : bool) + success (bool) ou never launch + last_run
+- m'expliquer ce qui est envoyé et les fonctionnalités à implanter + le design pour faire la page

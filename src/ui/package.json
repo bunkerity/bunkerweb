@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "tailwindcss": "^3.1.8"
+  },
+  "dependencies": {
+    "ace-builds": "^1.12.5",
+    "air-datepicker": "^3.3.1",
+    "dropzone": "^6.0.0-beta.2",
+    "flatpickr": "^4.6.13",
+    "json-formatter-js": "^2.3.4"
+  }
+}
