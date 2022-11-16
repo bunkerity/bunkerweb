@@ -1,3 +1,5 @@
+import { Checkbox } from "./utils.js";
+
 class Menu {
   constructor() {
     this.sidebarEl = document.querySelector("[sidebar-menu]");
@@ -61,3 +63,4 @@ class darkMode {
 const setMenu = new Menu();
 const setNews = new News();
 const setDarkM = new darkMode();
+const setCheckbox = new Checkbox("[sidebar-info]");

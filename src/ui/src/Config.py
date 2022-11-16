@@ -38,10 +38,9 @@ class Config:
 
     def reload_plugins(self) -> None:
         self.__plugins = []
+        self.__plugins_pages = []
 
-        for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + list(
-            iglob("/usr/share/bunkerweb/core/*")
-        ):
+        for foldername in iglob("/etc/bunkerweb/plugins/*"):
             content = listdir(foldername)
             if "plugin.json" not in content:
                 continue
@@ -49,19 +48,28 @@ class Config:
             with open(f"{foldername}/plugin.json", "r") as f:
                 plugin = json_load(f)
 
-            plugin.update(
-                {
-                    "page": False,
-                    "external": foldername.startswith("/etc/bunkerweb/plugins"),
-                }
-            )
+            self.__plugins.append(plugin)
+
             if "ui" in content:
                 if "template.html" in listdir(f"{foldername}/ui"):
-                    plugin["page"] = True
+                    self.__plugins_pages.append(plugin["name"])
+
+        for foldername in iglob("/usr/share/bunkerweb/core/*"):
+            content = listdir(foldername)
+            if "plugin.json" not in content:
+                continue
+
+            with open(f"{foldername}/plugin.json", "r") as f:
+                plugin = json_load(f)
 
             self.__plugins.append(plugin)
 
+            if "ui" in content:
+                if "template.html" in listdir(f"{foldername}/ui"):
+                    self.__plugins_pages.append(plugin["name"])
+
         self.__plugins.sort(key=lambda plugin: plugin.get("name"))
+        self.__plugins_pages.sort()
         self.__plugins_settings = {
             **{k: v for x in self.__plugins for k, v in x["settings"].items()},
             **self.__settings,
@@ -177,6 +185,9 @@ class Config:
 
     def get_plugins(self) -> List[dict]:
         return self.__plugins
+
+    def get_plugins_pages(self) -> List[str]:
+        return self.__plugins_pages
 
     def get_settings(self) -> dict:
         return self.__settings

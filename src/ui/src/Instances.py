@@ -158,7 +158,7 @@ class Instances:
                             pod.metadata.uid,
                             pod.metadata.name,
                             pod.status.pod_ip,
-                            "pod",
+                            "container",
                             status,
                             pod,
                             apiCaller,
