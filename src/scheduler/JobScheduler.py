@@ -120,6 +120,17 @@ class JobScheduler(ApiCaller):
             )
             success = False
 
+        err = self.__db.update_job(plugin, name, success)
+
+        if not err:
+            self.__logger.info(
+                f"Successfully updated database for the job {name} from plugin {plugin}",
+            )
+        else:
+            self.__logger.warning(
+                f"Failed to update database for the job {name} from plugin {plugin}: {err}",
+            )
+
         return success
 
     def setup(self):
@@ -181,18 +192,8 @@ class JobScheduler(ApiCaller):
                     file = job["file"]
                     if self.__job_wrapper(path, plugin, name, file) >= 2:
                         ret = False
-
-                    err = self.__db.update_job(plugin, name, ret)
-
-                    if not err:
-                        self.__logger.info(
-                            f"Successfully updated database for the job {name} from plugin {plugin}",
-                        )
-                    else:
-                        self.__logger.warning(
-                            f"Failed to update database for the job {name} from plugin {plugin}: {err}",
-                        )
-                except:
+                except BaseException:
+                    ret = False
                     self.__logger.error(
                         f"Exception while running jobs once for plugin {plugin} : {format_exc()}",
                     )
@@ -209,8 +210,7 @@ class JobScheduler(ApiCaller):
             super().__init__(apis)
             self.clear()
             self.__jobs = self.__get_jobs()
-            if not self.run_once():
-                ret = False
+            ret = self.run_once()
             self.setup()
         except:
             self.__logger.error(
