@@ -192,6 +192,17 @@ class JobScheduler(ApiCaller):
                     file = job["file"]
                     if self.__job_wrapper(path, plugin, name, file) >= 2:
                         ret = False
+
+                    err = self.__db.update_job(plugin, name, ret)
+
+                    if not err:
+                        self.__logger.info(
+                            f"Successfully updated database for the job {name} from plugin {plugin}",
+                        )
+                    else:
+                        self.__logger.warning(
+                            f"Failed to update database for the job {name} from plugin {plugin}: {err}",
+                        )
                 except:
                     self.__logger.error(
                         f"Exception while running jobs once for plugin {plugin} : {format_exc()}",
