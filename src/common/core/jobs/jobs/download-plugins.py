@@ -1,25 +1,32 @@
 #!/usr/bin/python3
 
 from io import BytesIO
-from os import getenv, makedirs, chmod, stat, _exit
+from os import getenv, listdir, makedirs, chmod, stat, _exit
 from os.path import isfile, dirname
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from uuid import uuid4
 from glob import glob
-from json import loads
+from json import load, loads
 from shutil import copytree, rmtree
 from traceback import format_exc
 from zipfile import ZipFile
 
 sys_path.append("/usr/share/bunkerweb/deps/python")
 sys_path.append("/usr/share/bunkerweb/utils")
+sys_path.append("/usr/share/bunkerweb/db")
 
 from requests import get
+
+from Database import Database
 from logger import setup_logger
 
 
 logger = setup_logger("Jobs", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+)
 status = 0
 
 
@@ -89,6 +96,23 @@ try:
             print(format_exc())
             status = 2
             continue
+
+    external_plugins = []
+    for plugin in listdir("/etc/bunkerweb/plugins"):
+        with open(
+            f"/etc/bunkerweb/plugins/{plugin}/plugin.json",
+            "r",
+        ) as f:
+            plugin_file = load(f)
+
+        external_plugins.append(plugin_file)
+
+    if external_plugins:
+        ret = db.update_external_plugins(external_plugins)
+        if ret:
+            logger.error(
+                f"Couldn't update external plugins to database: {ret}",
+            )
 
 except:
     status = 2

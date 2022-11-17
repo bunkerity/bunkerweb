@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
 from docker import DockerClient
 from docker.errors import (
@@ -15,13 +15,13 @@ from flask import (
     redirect,
     render_template,
     request,
-    send_file,
     url_for,
 )
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, dumps, load as json_load
-from jinja2 import Template
+from kubernetes import client as kube_client
+from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import chmod, getenv, getpid, listdir, mkdir, walk
 from os.path import exists, isdir, isfile, join
 from re import match as re_match
@@ -121,15 +121,21 @@ elif getenv("SWARM_MODE", "no") == "yes":
     integration = "Swarm"
 elif getenv("AUTOCONF_MODE", "no") == "yes":
     integration = "Autoconf"
+elif exists("/usr/share/bunkerweb/INTEGRATION"):
+    with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
+        integration = f.read().strip()
 
-try:
-    docker_client: DockerClient = DockerClient(
-        base_url=vars.get("DOCKER_HOST", "unix:///var/run/docker.sock")
-    )
-    integration = "Cluster"
-except (docker_APIError, DockerException):
-    logger.warning("No docker host found")
-    docker_client = None
+docker_client = None
+kubernetes_client = None
+if integration in ("Docker", "Swarm", "Autoconf"):
+    try:
+        docker_client: DockerClient = DockerClient(
+            base_url=vars.get("DOCKER_HOST", "unix:///var/run/docker.sock")
+        )
+    except (docker_APIError, DockerException):
+        logger.warning("No docker host found")
+elif integration == "Kubernetes":
+    kubernetes_client = kube_client.CoreV1Api()
 
 db = Database(logger)
 
@@ -138,7 +144,7 @@ try:
         DEBUG=True,
         SECRET_KEY=vars["FLASK_SECRET"],
         ABSOLUTE_URI=vars["ABSOLUTE_URI"],
-        INSTANCES=Instances(docker_client, integration),
+        INSTANCES=Instances(docker_client, kubernetes_client, integration),
         CONFIG=Config(logger, db),
         CONFIGFILES=ConfigFiles(logger, db),
         SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]
@@ -591,7 +597,7 @@ def configs():
         if request.form["operation"] in ("new", "edit"):
             if not app.config["CONFIGFILES"].check_name(variables["name"]):
                 flash(
-                    f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 32))",
+                    f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
                     "error",
                 )
                 return redirect(url_for("loading", next=url_for("configs")))
@@ -734,7 +740,7 @@ def plugins():
                                     ):
                                         error = 1
                                         flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 32))",
+                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
                                             "error",
                                         )
                                         raise Exception
@@ -787,7 +793,7 @@ def plugins():
                                     ):
                                         error = 1
                                         flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 32))",
+                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
                                             "error",
                                         )
                                         raise Exception
@@ -834,7 +840,7 @@ def plugins():
                                     ):
                                         error = 1
                                         flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 32))",
+                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
                                             "error",
                                         )
                                         raise Exception
@@ -887,7 +893,7 @@ def plugins():
                                     ):
                                         error = 1
                                         flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 32))",
+                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
                                             "error",
                                         )
                                         raise Exception
@@ -1131,13 +1137,9 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    instances = app.config["INSTANCES"].get_instances()
-    first_instance = instances[0] if instances else None
-
     return render_template(
         "logs.html",
-        first_instance=first_instance,
-        instances=instances,
+        instances=app.config["INSTANCES"].get_instances(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1273,54 +1275,40 @@ def logs_linux():
 @app.route("/logs/<container_id>", methods=["GET"])
 @login_required
 def logs_container(container_id):
-    last_update = request.args.get("last_update")
+    last_update = request.args.get(
+        "last_update",
+        str(datetime.now().timestamp() - timedelta(days=1).total_seconds()),
+    )
     logs = []
     if docker_client:
         try:
-            if last_update:
-                if not last_update.isdigit():
-                    return (
-                        jsonify(
-                            {
-                                "status": "ko",
-                                "message": "last_update must be an integer",
-                            }
-                        ),
-                        422,
-                    )
+            if last_update and not last_update.isdigit():
+                return (
+                    jsonify(
+                        {
+                            "status": "ko",
+                            "message": "last_update must be an integer",
+                        }
+                    ),
+                    422,
+                )
 
+            if getenv("SWARM_MODE", "no") == "no":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,
                     since=datetime.fromtimestamp(int(last_update)),
+                    timestamps=True,
                 )
             else:
-                docker_logs = docker_client.containers.get(container_id).logs(
+                docker_logs = docker_client.services.get(container_id).logs(
                     stdout=True,
                     stderr=True,
+                    since=datetime.fromtimestamp(int(last_update)),
+                    timestamps=True,
                 )
 
-            for log in docker_logs.decode("utf-8", errors="replace").split("\n")[0:-1]:
-                log_lower = log.lower()
-                logs.append(
-                    {
-                        "content": log,
-                        "type": "error"
-                        if "[error]" in log_lower
-                        or "[crit]" in log_lower
-                        or "[alert]" in log_lower
-                        or "❌" in log_lower
-                        else (
-                            "warn"
-                            if "[warn]" in log_lower or "⚠️" in log_lower
-                            else (
-                                "info"
-                                if "[info]" in log_lower or "ℹ️" in log_lower
-                                else "message"
-                            )
-                        ),
-                    }
-                )
+            tmp_logs = docker_logs.decode("utf-8", errors="replace").split("\n")[0:-1]
         except docker_NotFound:
             return (
                 jsonify(
@@ -1331,6 +1319,49 @@ def logs_container(container_id):
                 ),
                 404,
             )
+    elif kubernetes_client:
+        try:
+            kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
+                container_id,
+                getenv("KUBERNETES_NAMESPACE", "default"),
+                since_seconds=int(datetime.now().timestamp() - int(last_update)),
+                timestamps=True,
+            )
+            tmp_logs = kubernetes_logs.split("\n")[0:-1]
+        except kube_ApiException:
+            return (
+                jsonify(
+                    {
+                        "status": "ko",
+                        "message": f"Pod with ID {container_id} not found!",
+                    }
+                ),
+                404,
+            )
+
+    logger.warning(tmp_logs)
+
+    for log in tmp_logs:
+        log_lower = log.lower()
+        logs.append(
+            {
+                "content": log,
+                "type": "error"
+                if "[error]" in log_lower
+                or "[crit]" in log_lower
+                or "[alert]" in log_lower
+                or "❌" in log_lower
+                else (
+                    "warn"
+                    if "[warn]" in log_lower or "⚠️" in log_lower
+                    else (
+                        "info"
+                        if "[info]" in log_lower or "ℹ️" in log_lower
+                        else "message"
+                    )
+                ),
+            }
+        )
 
     return jsonify({"logs": logs, "last_update": int(time())})
 
@@ -1338,10 +1369,9 @@ def logs_container(container_id):
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    jobs = db.get_jobs()
     return render_template(
         "jobs.html",
-        jobs=jobs,
+        jobs=db.get_jobs(),
         dark_mode=app.config["DARK_MODE"],
     )
 

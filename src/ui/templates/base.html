@@ -20,42 +20,23 @@
       class="w-full relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl"
     >
       {% include "header.html" %}
-      <!-- alert-->
-      <div class="fixed bottom-0 end-0 p-3 pt-5 toast-container">
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %} {% for category, message in messages %}
-        <div
-          class="toast fade show"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          <div class="toast-header">
-            <img
-              src="images/favicon.ico"
-              class="rounded me-2"
-              alt="BunkerWeb icon"
-              width="14"
-              height="14"
-            />
-            <strong class="me-auto">BunkerWeb</strong>
-            {% if category == 'error' %}
-            <small style="color: rgb(168, 0, 0)">error</small>
-            {% else %}
-            <small style="color: rgb(21, 138, 21)">success</small>
-            {% endif %}
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="toast-body">{{ message|safe }}</div>
-        </div>
-        {% endfor %} {% endif %} {% endwith %}
+      <!-- flash message-->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        flash-message
+        class="hidden p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-screen-sm min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
+      >
+        {% if category == 'error' %}
+        <h5 class="text-lg mb-0 text-red-500">error</h5>
+        <p class="text-red-500 mb-0 text-sm">{{ message|safe }}</p>
+        {% endif %} {% if category == 'success' %}
+        <h5 class="text-lg mb-0 text-green-500">success</h5>
+        <p class="text-green-500 mb-0 text-sm">{{ message|safe }}</p>
+        {% endif %}
       </div>
-      <!-- end alert-->
+      <!-- end flash message-->
+      {% endfor %} {% endif %} {% endwith %}
     </div>
     <!-- info -->
     <main

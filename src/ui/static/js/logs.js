@@ -1,7 +1,7 @@
 import { Checkbox } from "./utils.js";
 //import AirDatepicker from "./air-datepicker/index.js";
 
-class Dropdown {
+class LogsDropdown {
   constructor(prefix = "logs") {
     this.prefix = prefix;
     this.container = document.querySelector("main");
@@ -42,6 +42,8 @@ class Dropdown {
           //close dropdown and change style
           this.hideDropdown(btnSetting);
           this.changeDropBtnStyle(btnSetting, btn);
+          //show / hide filter
+          this.hideFilterOnLocal(btn.getAttribute("_type"));
         }
       } catch (err) {}
     });
@@ -119,17 +121,90 @@ class Dropdown {
     dropdownEl.classList.toggle("flex");
     dropdownChevron.classList.toggle("rotate-180");
   }
+
+  //hide date filter on local
+  hideFilterOnLocal(type) {
+    console.log(type);
+    if (type === "local") {
+      this.hideInp(`input#from-date`);
+      this.hideInp(`input#to-date`);
+    }
+
+    if (type !== "local") {
+      this.showInp(`input#from-date`);
+      this.showInp(`input#to-date`);
+    }
+  }
+
+  showInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("flex");
+    document.querySelector(selector).closest("div").classList.remove("hidden");
+  }
+
+  hideInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("hidden");
+    document.querySelector(selector).closest("div").classList.remove("flex");
+  }
 }
 
 class FetchLogs {
   constructor(prefix = "logs") {
     this.prefix = prefix;
+    this.instanceInp = document.querySelector(
+      `button[${this.prefix}-setting-select='instances']`
+    );
     this.updateInp = document.querySelector("input#update-date");
-    //this.lastUpdate = Date.now() - 86400 * 1000; //show logs 1 day ago by default
-    this.lastUpdate = "";
-    this.container = document.querySelector("main");
-    this.initFetch();
+    this.liveUpdateInp = document.querySelector("input#live-update");
+    this.updateDelayInp = document.querySelector("input#update-delay");
+    this.isLiveUpdate = false;
+    this.updateDelay = 2000;
+    this.lastUpdate = Math.round(Date.now() / 1000 - 86400);
+    this.container = document.querySelector(`[${this.prefix}-settings]`);
     this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
+    this.initFetch();
+    this.initLiveUpdate();
+  }
+
+  initLiveUpdate() {
+    this.liveUpdateInp.addEventListener("click", (e) => {
+      this.isLiveUpdate = this.liveUpdateInp.checked;
+      if (this.isLiveUpdate) {
+        setTimeout(() => {
+          this.setLiveUpdate();
+        }, this.updateDelay);
+      }
+    });
+
+    this.updateDelayInp.addEventListener("input", (e) => {
+      console.log(this.updateDelayInp.valueAsNumber);
+      this.updateDelay = Math.round(this.updateDelayInp.valueAsNumber / 1000);
+      console.log(this.updateDelay + " on change");
+    });
+  }
+
+  setLiveUpdate() {
+    //loop
+    if (this.isLiveUpdate) {
+      setTimeout(() => {
+        this.setLiveUpdate();
+      }, this.updateDelay);
+    }
+    //conditions to live update
+    const btnInstance = document.querySelector(
+      `[${this.prefix}-setting-select-text]`
+    );
+    if (btnInstance.textContent === "none" || this.lastUpdate === "") return;
+    //get data
+    this.getInstanceLogs(btnInstance.textContent);
+  }
+
+  goBottomList() {
+    document
+      .querySelector(`[${this.prefix}-list]`)
+      .scrollTo(
+        0,
+        document.querySelector(`[${this.prefix}-list]`).scrollHeight
+      );
   }
 
   initFetch() {
@@ -150,12 +225,13 @@ class FetchLogs {
       } catch (err) {}
       //SELECT DATE
       this.updateInp.addEventListener("input", (e) => {
-        this.lastUpdate = this.updateInp.valueAsNumber || "";
+        this.lastUpdate = Math.round(this.updateInp.valueAsNumber / 1000);
+        console.log(this.lastUpdate);
         //check if instance selected
         const btnInstance = document.querySelector(
           `[${this.prefix}-setting-select-text]`
         );
-        if (btnInstance.textContent === "none") return;
+        if (btnInstance.textContent.trim() === "none") return;
         //fetch data
         this.getInstanceLogs(btnInstance.textContent);
       });
@@ -171,16 +247,17 @@ class FetchLogs {
     if (response.status === 200) {
       const res = await response.json();
       //last update
-      this.lastUpdate = res.lastUpdate;
-      return this.showLogs(res.logs);
+      return await this.showLogs(res);
     } else {
       console.log(`Error: ${response.status}`);
     }
     return null;
   }
 
-  showLogs(logs) {
-    logs.forEach((log) => {
+  async showLogs(res) {
+    this.lastUpdate = res.last_update;
+    console.log(this.lastUpdate);
+    res.logs.forEach((log) => {
       //container
       const logContainer = document.createElement("li");
       logContainer.className =
@@ -202,13 +279,16 @@ class FetchLogs {
       //show on DOM
       this.logListContainer.appendChild(logContainer);
     });
+    setTimeout(() => {
+      this.goBottomList();
+    }, 100);
   }
 }
 
 class FilterLogs {
   constructor(prefix = "logs") {
     this.prefix = prefix;
-    this.container = document.querySelector("main");
+    this.container = document.querySelector(`[${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
     this.fromDateInp = document.querySelector("input#from-date");
     this.toDateInp = document.querySelector("input#to-date");
@@ -251,8 +331,6 @@ class FilterLogs {
       this.filter();
     });
   }
-
-  initKeyWord() {}
 
   filter() {
     const logs = document.querySelector(`[${this.prefix}-list]`).children;
@@ -419,6 +497,6 @@ class FilterLogs {
 }
 
 const setCheckbox = new Checkbox("[logs-settings]");
-const dropdown = new Dropdown();
+const dropdown = new LogsDropdown();
 const setLogs = new FetchLogs();
 const setFilter = new FilterLogs();

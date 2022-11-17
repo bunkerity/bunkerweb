@@ -1,4 +1,3 @@
-from kubernetes import client as kube_client
 from os.path import exists
 from subprocess import run
 from typing import Any, Union
@@ -59,8 +58,9 @@ class Instance:
 
 
 class Instances:
-    def __init__(self, docker_client, integration: str):
-        self.__docker = docker_client
+    def __init__(self, docker_client, kubernetes_client, integration: str):
+        self.__docker_client = docker_client
+        self.__kubernetes_client = kubernetes_client
         self.__integration = integration
 
     def __instance_from_id(self, _id) -> Instance:
@@ -74,8 +74,8 @@ class Instances:
     def get_instances(self) -> list[Instance]:
         instances = []
         # Docker instances (containers or services)
-        if self.__docker is not None:
-            for instance in self.__docker.containers.list(
+        if self.__docker_client is not None:
+            for instance in self.__docker_client.containers.list(
                 all=True, filters={"label": "bunkerweb.INSTANCE"}
             ):
                 env_variables = {
@@ -105,7 +105,7 @@ class Instances:
                     )
                 )
         elif self.__integration == "Swarm":
-            for instance in self.__docker.services.list(
+            for instance in self.__docker_client.services.list(
                 filters={"label": "bunkerweb.INSTANCE"}
             ):
                 status = "down"
@@ -126,8 +126,9 @@ class Instances:
                     )
                 )
         elif self.__integration == "Kubernetes":
-            corev1 = kube_client.CoreV1Api()
-            for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
+            for pod in self.__kubernetes_client.list_pod_for_all_namespaces(
+                watch=False
+            ).items:
                 if (
                     pod.metadata.annotations != None
                     and "bunkerweb.io/INSTANCE" in pod.metadata.annotations

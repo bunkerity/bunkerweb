@@ -1,3 +1,5 @@
+import { Checkbox } from "./utils.js";
+
 class Menu {
   constructor() {
     this.sidebarEl = document.querySelector("[sidebar-menu]");
@@ -42,22 +44,39 @@ class darkMode {
     this.htmlEl = document.querySelector("html");
     this.darkToggleEl = document.querySelector("[dark-toggle]");
     this.darkToggleLabel = document.querySelector("[dark-toggle-label]");
-    this.setTxt();
-    this.darkToggleEl.addEventListener("change", this.toggle.bind(this));
+    this.init();
   }
 
-  setTxt() {
+  init() {
+    this.darkToggleEl.addEventListener("change", (e) => {
+      this.toggle();
+      this.saveMode();
+    });
+  }
+
+  toggle() {
+    document.querySelector("html").classList.toggle("dark");
     this.darkToggleLabel.textContent = this.darkToggleEl.checked
       ? "dark"
       : "light";
   }
 
-  toggle() {
-    document.querySelector("html").classList.toggle("dark");
-    this.setTxt();
+  async saveMode() {
+    const isDark = this.darkToggleEl.checked ? "true" : "false";
+    console.log(isDark);
+    const data = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ darkmode: isDark }),
+    };
+    const send = await fetch(`${location.href}/darkmode}`, data);
   }
 }
 
 const setMenu = new Menu();
 const setNews = new News();
 const setDarkM = new darkMode();
+const setCheckbox = new Checkbox("[sidebar-info]");

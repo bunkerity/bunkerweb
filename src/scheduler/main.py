@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 from copy import deepcopy
 from glob import glob
+from json import load
 from os import (
     _exit,
     chmod,
@@ -16,12 +17,14 @@ from os import (
     walk,
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
+from re import compile as re_compile
 from shutil import chown, copy, rmtree
-from signal import SIGINT, SIGTERM, SIGUSR1, SIGUSR2, signal
+from signal import SIGINT, SIGTERM, signal
 from subprocess import PIPE, run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from time import sleep
 from traceback import format_exc
+from typing import Any, Dict, List
 
 sys_path.append("/usr/share/bunkerweb/deps/python")
 sys_path.append("/usr/share/bunkerweb/utils")
@@ -82,6 +85,43 @@ def stop(status):
     _exit(status)
 
 
+def generate_custom_configs(
+    custom_configs: List[Dict[str, Any]],
+    integration: str,
+    api_caller: ApiCaller,
+    *,
+    original_path: str = "/data/configs",
+):
+    makedirs(original_path, exist_ok=True)
+    for custom_config in custom_configs:
+        tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
+        if custom_config["service_id"]:
+            tmp_path += f"/{custom_config['service_id']}"
+        tmp_path += f"/{custom_config['name']}.conf"
+        makedirs(dirname(tmp_path), exist_ok=True)
+        with open(tmp_path, "wb") as f:
+            f.write(custom_config["data"])
+
+    # Fix permissions for the custom configs folder
+    for root, dirs, files in walk("/data/configs", topdown=False):
+        for name in files + dirs:
+            chown(join(root, name), "scheduler", "scheduler")
+
+            if isdir(join(root, name)):
+                chmod(join(root, name), 0o750)
+            if isfile(join(root, name)):
+                chmod(join(root, name), 0o740)
+
+    if integration != "Linux":
+        logger.info("Sending custom configs to BunkerWeb")
+        ret = api_caller._send_files("/data/configs", "/custom_configs")
+
+        if not ret:
+            logger.error(
+                "Sending custom configs failed, configuration will not work as expected...",
+            )
+
+
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
@@ -123,6 +163,17 @@ if __name__ == "__main__":
 
             # Read env file
             env = dotenv_values(args.variables)
+
+            db = Database(
+                logger,
+                sqlalchemy_string=env.get("DATABASE_URI", None),
+            )
+
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
         else:
             # Read from database
             integration = "Docker"
@@ -181,75 +232,45 @@ if __name__ == "__main__":
 
             env["DATABASE_URI"] = db.get_database_uri()
 
-            # Checking if any custom config has been created by the user
-            custom_confs = []
-            root_dirs = listdir("/etc/bunkerweb/configs")
-            for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
-                if (
-                    root != "configs"
-                    and (dirs and not root.split("/")[-1] in root_dirs)
-                    or files
-                ):
-                    path_exploded = root.split("/")
-                    for file in files:
-                        with open(join(root, file), "r") as f:
-                            custom_confs.append(
-                                {
-                                    "value": f.read(),
-                                    "exploded": (
-                                        f"{path_exploded.pop()}"
-                                        if path_exploded[-1] not in root_dirs
-                                        else "",
-                                        path_exploded[-1],
-                                        file.replace(".conf", ""),
-                                    ),
-                                }
-                            )
+        # Checking if any custom config has been created by the user
+        custom_confs = []
+        root_dirs = listdir("/etc/bunkerweb/configs")
+        for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
+            if (
+                root != "configs"
+                and (dirs and not root.split("/")[-1] in root_dirs)
+                or files
+            ):
+                path_exploded = root.split("/")
+                for file in files:
+                    with open(join(root, file), "r") as f:
+                        custom_confs.append(
+                            {
+                                "value": f.read(),
+                                "exploded": (
+                                    f"{path_exploded.pop()}"
+                                    if path_exploded[-1] not in root_dirs
+                                    else "",
+                                    path_exploded[-1],
+                                    file.replace(".conf", ""),
+                                ),
+                            }
+                        )
 
-            old_configs = None
-            if custom_confs:
-                old_configs = db.get_custom_configs()
+        old_configs = None
+        if custom_confs:
+            old_configs = db.get_custom_configs()
 
-                ret = db.save_custom_configs(custom_confs, "manual")
-                if ret:
-                    logger.error(
-                        f"Couldn't save some manually created custom configs to database: {ret}",
-                    )
+            ret = db.save_custom_configs(custom_confs, "manual")
+            if ret:
+                logger.error(
+                    f"Couldn't save some manually created custom configs to database: {ret}",
+                )
 
-            custom_configs = db.get_custom_configs()
+        custom_configs = db.get_custom_configs()
 
-            if old_configs != custom_configs:
-                original_path = "/data/configs"
-                makedirs(original_path, exist_ok=True)
-                for custom_config in custom_configs:
-                    tmp_path = (
-                        f"{original_path}/{custom_config['type'].replace('_', '-')}"
-                    )
-                    if custom_config["service_id"]:
-                        tmp_path += f"/{custom_config['service_id']}"
-                    tmp_path += f"/{custom_config['name']}.conf"
-                    makedirs(dirname(tmp_path), exist_ok=True)
-                    with open(tmp_path, "wb") as f:
-                        f.write(custom_config["data"])
-
-            # Fix permissions for the custom configs folder
-            for root, dirs, files in walk("/data/configs", topdown=False):
-                for name in files + dirs:
-                    chown(join(root, name), "scheduler", "scheduler")
-
-                    if isdir(join(root, name)):
-                        chmod(join(root, name), 0o750)
-                    if isfile(join(root, name)):
-                        chmod(join(root, name), 0o740)
-
-            if integration != "Linux":
-                logger.info("Sending custom configs to BunkerWeb")
-                ret = api_caller._send_files("/data/configs", "/custom_configs")
-
-                if not ret:
-                    logger.error(
-                        "Sending custom configs failed, configuration will not work as expected...",
-                    )
+        if old_configs != custom_configs:
+            generate_custom_configs(custom_configs, integration, api_caller)
 
         logger.info("Executing scheduler ...")
         
@@ -383,36 +404,7 @@ if __name__ == "__main__":
                             rmtree(file, ignore_errors=False)
 
                     logger.info("Generating new custom configs ...")
-                    makedirs(original_path, exist_ok=True)
-                    for custom_config in custom_configs:
-                        tmp_path = (
-                            f"{original_path}/{custom_config['type'].replace('_', '-')}"
-                        )
-                        if custom_config["service_id"]:
-                            tmp_path += f"/{custom_config['service_id']}"
-                        tmp_path += f"/{custom_config['name']}.conf"
-                        makedirs(dirname(tmp_path), exist_ok=True)
-                        with open(tmp_path, "wb") as f:
-                            f.write(custom_config["data"])
-
-                    # Fix permissions for the custom configs folder
-                    for root, dirs, files in walk("/data/configs", topdown=False):
-                        for name in files + dirs:
-                            chown(join(root, name), "scheduler", "scheduler")
-
-                            if isdir(join(root, name)):
-                                chmod(join(root, name), 0o750)
-                            if isfile(join(root, name)):
-                                chmod(join(root, name), 0o740)
-
-                    if integration != "Linux":
-                        logger.info("Sending custom configs to BunkerWeb")
-                        ret = api_caller._send_files("/data/configs", "/custom_configs")
-
-                        if not ret:
-                            logger.error(
-                                "Sending custom configs failed, configuration will not work as expected...",
-                            )
+                    generate_custom_configs(custom_configs, integration, api_caller)
 
                 # check if the config have changed since last time
                 tmp_env = (

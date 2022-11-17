@@ -26,26 +26,34 @@
   class="fixed flex inset-y-0 flex-wrap justify-between w-full p-0 my-4 overflow-y-auto antialiased transition-transform duration-200 -translate-x-full bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 dark:brightness-110 max-w-64 z-[1000] xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0"
   aria-expanded="false"
 >
+  <!-- close btn-->
+  <svg
+    sidebar-menu-close
+    class="sm:hidden cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-2 right-2"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 320 512"
+  >
+    <path
+      d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+    />
+  </svg>
+  <!-- close btn-->
   <!-- top sidebar -->
   <div class="w-full">
     <!-- logo and version -->
     <div class="h-19">
-      <i
-        class="absolute top-0 right-0 p-4 opacity-50 cursor-pointer fas fa-times dark:text-white text-slate-400 xl:hidden"
-        sidebar-menu-close
-      ></i>
       <a
         class="flex justify-center px-8 py-6 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700"
         href="{% if current_endpoint == 'home' %}javascript:void(0){% else %}loading?next={{ url_for('home') }}{% endif %}"
       >
         <img
           src="images/logo-menu-2.png"
-          class="hidden dark:inline w-36 transition-all duration-200 h-10"
+          class="hidden dark:inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
           alt="main logo"
         />
         <img
           src="images/logo-menu.png"
-          class="dark:hidden inline w-36 transition-all duration-200 h-10"
+          class="dark:hidden inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
           alt="main logo"
         />
       </a>
@@ -249,7 +257,7 @@
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
             >
               <svg
-                class="fill-gray-600 dark:fill-gray-500 xl:h-6 xl:w-6 h-5 w-5 relative"
+                class="fill-gray-600 dark:fill-gray-500 h-5 w-5 relative"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 512 512"
               >
@@ -260,6 +268,31 @@
             </div>
             <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
               >Logs</span
+            >
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a
+            class="{% if current_endpoint == 'jobs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+            href="{% if current_endpoint == 'jobs' %}javascript:void(0){% else %}loading?next={{ url_for('jobs') }}{% endif %}"
+          >
+            <div
+              class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
+            >
+              <svg
+                class="fill-emerald-700 h-5.5 w-5.5 relative"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+                />
+              </svg>
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
+              >Jobs</span
             >
           </a>
         </li>
@@ -289,18 +322,23 @@
   <div class="w-full flex flex-col justify-end m-4">
     <!-- dark/light mode -->
     <div class="min-h-6 my-4 flex justify-center">
-      <input
-        id="darkMode"
-        dark-toggle
-        class="dark:brightness-125 hover:brightness-75 rounded-10 duration-300 ease-in-out after:rounded-circle after:shadow-2xl after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative float-left w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-primary checked:bg-primary checked:bg-none checked:bg-right"
-        type="checkbox"
-      />
+      <input {% if dark_mode == True %}checked{% endif %} id="darkMode"
+      dark-toggle class="dark:brightness-125 hover:brightness-75 rounded-10
+      duration-300 ease-in-out after:rounded-circle after:shadow-2xl
+      after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative
+      float-left w-10 cursor-pointer appearance-none border border-solid
+      border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat
+      align-top transition-all after:absolute after:top-px after:h-4 after:w-4
+      after:translate-x-px after:bg-white after:content-['']
+      checked:border-primary checked:bg-primary checked:bg-none
+      checked:bg-right" type="checkbox" />
       <label
         for="darkMode"
         dark-toggle-label
         class="dark:text-white dark:opacity-80 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700"
-        >dark</label
       >
+        {% if dark_mode == True %}dark {% else %} light {% endif %}
+      </label>
     </div>
     <!-- end dark/light mode -->
 
@@ -363,12 +401,12 @@
 
     <!-- logout-->
     <div class="w-full">
-      <button
-        type="button"
+      <a
+        href="logout"
         class="dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         Logout
-      </button>
+      </a>
     </div>
     <!-- end logout-->
   </div>
