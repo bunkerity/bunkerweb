@@ -4,7 +4,7 @@ ENV OS=rhel
 ENV NGINX_VERSION 1.20.2
 
 # RHEL subscription
-RUN subscription-manager register --username=bunkerfrsq --password=aTtWafOi2V3TvdnPmHCw --auto-attach
+RUN subscription-manager register --username=username --password=password --auto-attach
 
 # Install fpm
 RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && \
