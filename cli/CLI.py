@@ -104,7 +104,7 @@ class CLI(ApiCaller) :
         return False, "error"
 
     def bans(self) :
-        ret, resp = self._send_to_apis("GET", "/bans", response=True) :
+        ret, resp = self._send_to_apis("GET", "/bans", response=True)
         if ret :
             bans = resp["bans"]
             cli_str = "List of bans :\n"
