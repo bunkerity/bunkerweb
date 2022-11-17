@@ -154,6 +154,17 @@ if __name__ == "__main__":
 
             # Read env file
             env = dotenv_values(args.variables)
+
+            db = Database(
+                logger,
+                sqlalchemy_string=env.get("DATABASE_URI", None),
+            )
+
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
         else:
             # Read from database
             integration = "Docker"
@@ -212,45 +223,45 @@ if __name__ == "__main__":
 
             env["DATABASE_URI"] = db.get_database_uri()
 
-            # Checking if any custom config has been created by the user
-            custom_confs = []
-            root_dirs = listdir("/etc/bunkerweb/configs")
-            for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
-                if (
-                    root != "configs"
-                    and (dirs and not root.split("/")[-1] in root_dirs)
-                    or files
-                ):
-                    path_exploded = root.split("/")
-                    for file in files:
-                        with open(join(root, file), "r") as f:
-                            custom_confs.append(
-                                {
-                                    "value": f.read(),
-                                    "exploded": (
-                                        f"{path_exploded.pop()}"
-                                        if path_exploded[-1] not in root_dirs
-                                        else "",
-                                        path_exploded[-1],
-                                        file.replace(".conf", ""),
-                                    ),
-                                }
-                            )
+        # Checking if any custom config has been created by the user
+        custom_confs = []
+        root_dirs = listdir("/etc/bunkerweb/configs")
+        for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
+            if (
+                root != "configs"
+                and (dirs and not root.split("/")[-1] in root_dirs)
+                or files
+            ):
+                path_exploded = root.split("/")
+                for file in files:
+                    with open(join(root, file), "r") as f:
+                        custom_confs.append(
+                            {
+                                "value": f.read(),
+                                "exploded": (
+                                    f"{path_exploded.pop()}"
+                                    if path_exploded[-1] not in root_dirs
+                                    else "",
+                                    path_exploded[-1],
+                                    file.replace(".conf", ""),
+                                ),
+                            }
+                        )
 
-            old_configs = None
-            if custom_confs:
-                old_configs = db.get_custom_configs()
+        old_configs = None
+        if custom_confs:
+            old_configs = db.get_custom_configs()
 
-                ret = db.save_custom_configs(custom_confs, "manual")
-                if ret:
-                    logger.error(
-                        f"Couldn't save some manually created custom configs to database: {ret}",
-                    )
+            ret = db.save_custom_configs(custom_confs, "manual")
+            if ret:
+                logger.error(
+                    f"Couldn't save some manually created custom configs to database: {ret}",
+                )
 
-            custom_configs = db.get_custom_configs()
+        custom_configs = db.get_custom_configs()
 
-            if old_configs != custom_configs:
-                generate_custom_configs(custom_configs, integration, api_caller)
+        if old_configs != custom_configs:
+            generate_custom_configs(custom_configs, integration, api_caller)
 
         logger.info("Executing scheduler ...")
         generate = not exists(
