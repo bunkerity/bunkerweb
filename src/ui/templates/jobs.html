@@ -3,7 +3,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 <!-- filter -->
 <div
   {{current_endpoint}}-filter
-  class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="col-span-12 lg:col-span-12 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white">FILTER</h5>
   <div class="grid grid-cols-12 gap-x-4 gap-y-2">
@@ -178,25 +178,25 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <p
       class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
-      plugin
+      Last run
     </p>
     <p
       class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
-      Date
+      Every
     </p>
     <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
       Reload
     </p>
     <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
       Success
     </p>
     <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
     >
       Files
     </p>
@@ -206,20 +206,20 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       class="col-span-12 w-full max-h-100 overflow-y-auto"
       {{current_endpoint}}-list
     >
-      {{% for job in jobs %}}
+      {% for job in jobs %}
       <!-- job item-->
       <li class="grid grid-cols-12 border-b border-gray-300 py-2">
         <p
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0"
           {{current_endpoint}}-name
         >
-          {{job["name"]}}
+          {{job}}
         </p>
         <p
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
-          {{current_endpoint}}-plugin-id
+          {{current_endpoint}}-last_run
         >
-          {{job["plugin_id"]}}
+          {{job["last_run"]}}
         </p>
         <p
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
@@ -228,10 +228,10 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {{job["every"]}}
         </p>
         <p
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
           {{current_endpoint}}-reload
         >
-          {% if job["reload"]%}
+          {% if job["reload"] %}
           <svg
             class="fill-green-500 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
@@ -241,7 +241,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
               d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
             />
           </svg>
-          {% else %}
+          {%endif %} {% if not job["reload"] %}
           <svg
             class="fill-red-500 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
@@ -251,23 +251,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
               d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
             />
           </svg>
-          {% else %}
-          <svg
-            class="fill-sky-500 h-5 w-5"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z"
-            />
-          </svg>
           {% endif %}
         </p>
         <p
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
           {{current_endpoint}}-success
         >
-          {% if job["success"] %}
+          {% if job["success"] == True %}
           <svg
             class="fill-green-500 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
@@ -300,14 +290,12 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {% endif %}
         </p>
         <p
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0"
-          {{current_endpoint}}-cache_file
-        >
-          {{job["cache_file"]}}
-        </p>
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          {{current_endpoint}}-files
+        ></p>
       </li>
       <!-- end job item-->
-      {{% endfor %}}
+      {% endfor %}
     </ul>
     <!-- end list-->
   </div>
