@@ -1233,13 +1233,15 @@ class Database:
                     "every": job.every,
                     "reload": job.reload,
                     "success": job.success,
-                    "last_run": job.last_run,
+                    "last_run": job.last_run.strftime("%Y/%m/%d, %I:%M:%S %p"),
                     "cache": [
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
                             "data": cache.data,
-                            "last_update": cache.last_update,
+                            "last_update": cache.last_update.strftime(
+                                "%Y/%m/%d, %I:%M:%S %p"
+                            ),
                         }
                         for cache in session.query(Jobs_cache)
                         .with_entities(
