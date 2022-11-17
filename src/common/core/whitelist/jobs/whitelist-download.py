@@ -2,7 +2,7 @@
 
 from ipaddress import ip_address, ip_network
 from os import _exit, getenv, makedirs
-from re import match
+from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -15,6 +15,10 @@ from requests import get
 from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, is_cached_file, file_hash
+
+rdns_rx = re_compile(r"^(\.?[a-z\d\-]+)*\.[a-z]{2,}$", IGNORECASE)
+asn_rx = re_compile(r"^\d+$")
+uri_rx = re_compile(r"^/")
 
 
 def check_line(kind, line):
@@ -33,19 +37,19 @@ def check_line(kind, line):
                 pass
         return False, ""
     elif kind == "RDNS":
-        if match(r"^(\.?[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$", line):
+        if rdns_rx.match(line):
             return True, line.lower()
         return False, ""
     elif kind == "ASN":
-        real_line = line.replace("AS", "")
-        if match(r"^\d+$", real_line):
+        real_line = line.replace("AS", "").replace("as", "")
+        if asn_rx.match(real_line):
             return True, real_line
     elif kind == "USER_AGENT":
         return True, line.replace("\\ ", " ").replace("\\.", "%.").replace(
             "\\\\", "\\"
         ).replace("-", "%-")
     elif kind == "URI":
-        if match(r"^/", line):
+        if uri_rx.match(line):
             return True, line
     return False, ""
 
