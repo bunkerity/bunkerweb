@@ -120,17 +120,6 @@ class JobScheduler(ApiCaller):
             )
             success = False
 
-        err = self.__db.update_job(plugin, name, success)
-
-        if not err:
-            self.__logger.info(
-                f"Successfully updated database for the job {name} from plugin {plugin}",
-            )
-        else:
-            self.__logger.warning(
-                f"Failed to update database for the job {name} from plugin {plugin}: {err}",
-            )
-
         return success
 
     def setup(self):
