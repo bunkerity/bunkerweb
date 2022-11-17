@@ -1192,43 +1192,34 @@ class Database:
 
     def get_jobs(self) -> Dict[str, Dict[str, Any]]:
         """Get jobs."""
-        jobs = {}
         with self.__db_session() as session:
-            for job in (
-                session.query(Jobs)
-                .with_entities(
-                    Jobs.name,
-                    Jobs.every,
-                    Jobs.reload,
-                    Jobs.success,
-                    Jobs.last_run,
-                    Jobs.cache,
-                )
-                .all()
-            ):
-                jobs[job.name] = {
+            return {
+                job.name: {
                     "every": job.every,
                     "reload": job.reload,
-                }
-
-                if job.success is not None and job.last_run is not None:
-                    jobs[job.name].update(
+                    "success": job.success,
+                    "last_run": job.last_run,
+                    "cache": [
                         {
-                            "success": job.success,
-                            "last_run": job.last_run,
+                            "service_id": cache.service_id,
+                            "file_name": cache.file_name,
+                            "data": cache.data.decode("utf-8"),
+                            "last_update": cache.last_update,
                         }
+                        for cache in job.cache
+                    ],
+                }
+                for job in (
+                    session.query(Jobs)
+                    .join(Jobs_cache, Jobs.name == Jobs_cache.job_name)
+                    .with_entities(
+                        Jobs.name,
+                        Jobs.every,
+                        Jobs.reload,
+                        Jobs.success,
+                        Jobs.last_run,
+                        Jobs.cache,
                     )
-
-                if job.cache is not None:
-                    job["cache"] = []
-                    for cache in job.cache:
-                        jobs[job.name]["cache"].append(
-                            {
-                                "service_id": cache.service_id,
-                                "file_name": cache.file_name,
-                                "data": cache.data.decode("utf-8"),
-                                "last_update": cache.last_update,
-                            }
-                        )
-
-        return jobs
+                    .all()
+                )
+            }
