@@ -4,12 +4,14 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- settings -->
 <div
   {{current_endpoint}}-settings
-  class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="col-span-12 lg:col-span-8 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white">SETTINGS</h5>
   <div class="grid grid-cols-12 gap-x-4 gap-y-2">
     <!-- select instance -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+    <div
+      class="flex flex-col relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3"
+    >
       <h5
         class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
       >
@@ -60,26 +62,49 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     </div>
     <!-- end select instance  -->
     <!-- from date input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+    <div
+      class="flex flex-col relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3"
+    >
       <h5
         class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
       >
-        Fetch (default 1 day)
+        From date
       </h5>
       <input
-        datetimepicker
         type="date"
-        id="update-date"
-        name="update-date"
-        class="col-span-12 sm:col-span-6 lg:col-span-4 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="update date"
+        id="from-date"
+        name="from-date"
+        class="col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="from date"
         pattern="(.*?)"
         required
       />
     </div>
     <!-- end from date input -->
+    <!-- to date input -->
+    <div
+      class="flex flex-col relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3"
+    >
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        To date
+      </h5>
+      <input
+        type="date"
+        id="to-date"
+        name="to-date"
+        class="col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="to date"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <!-- end to date input -->
     <!-- refresh input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+    <div
+      class="flex flex-col relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3"
+    >
       <h5
         class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
       >
@@ -107,7 +132,9 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     </div>
     <!-- end refresh input -->
     <!-- refresh delay input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+    <div
+      class="flex flex-col relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3"
+    >
       <h5
         class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
       >
@@ -117,13 +144,22 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         type="number"
         id="update-delay"
         name="update-delay"
-        class="col-span-12 sm:col-span-6 lg:col-span-4 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        class="col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
         placeholder="2"
         pattern="(.*?)"
         required
       />
     </div>
     <!-- end refresh delay input -->
+    <div class="col-span-12 w-full justify-center flex">
+      <button
+        type="button"
+        id="submit-settings"
+        class="dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+      >
+        Submit
+      </button>
+    </div>
   </div>
 </div>
 <!-- end settings -->
@@ -131,12 +167,12 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- filter -->
 <div
   {{current_endpoint}}-filter
-  class="col-span-12 lg:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="col-span-12 lg:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white">FILTERS</h5>
   <div class="grid grid-cols-12 gap-x-4 gap-y-2">
     <!-- search inpt-->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+    <div class="flex flex-col relative col-span-12">
       <h5
         class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
       >
@@ -146,7 +182,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         type="text"
         id="keyword"
         name="keyword"
-        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
         placeholder="key words"
         pattern="(.*?)"
         required
@@ -154,7 +190,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     </div>
     <!-- end search inpt-->
     <!-- select types -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
+    <div class="flex flex-col relative col-span-12">
       <h5
         class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
       >
@@ -241,44 +277,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       <!-- end dropdown-->
     </div>
     <!-- end select types  -->
-    <!-- from date input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
-      <h5
-        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-      >
-        From date
-      </h5>
-      <input
-        datetimepicker
-        type="date"
-        id="from-date"
-        name="from-date"
-        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="from date"
-        pattern="(.*?)"
-        required
-      />
-    </div>
-    <!-- end from date input -->
-    <!-- to date input -->
-    <div class="flex flex-col relative col-span-12 sm:col-span-6">
-      <h5
-        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-      >
-        To date
-      </h5>
-      <input
-        datetimepicker
-        type="date"
-        id="to-date"
-        name="to-date"
-        class="col-span-12 sm:col-span-6 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="to date"
-        pattern="(.*?)"
-        required
-      />
-    </div>
-    <!-- end to date input -->
   </div>
 </div>
 <!-- end filter -->

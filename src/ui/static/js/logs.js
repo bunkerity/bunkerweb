@@ -43,7 +43,9 @@ class LogsDropdown {
           this.hideDropdown(btnSetting);
           this.changeDropBtnStyle(btnSetting, btn);
           //show / hide filter
-          this.hideFilterOnLocal(btn.getAttribute("_type"));
+          if (btnSetting === "instances") {
+            this.hideFilterOnLocal(btn.getAttribute("_type"));
+          }
         }
       } catch (err) {}
     });
@@ -150,52 +152,56 @@ class LogsDropdown {
 class FetchLogs {
   constructor(prefix = "logs") {
     this.prefix = prefix;
-    this.instanceInp = document.querySelector(
-      `button[${this.prefix}-setting-select='instances']`
+    this.instance = document.querySelector(
+      `[${this.prefix}-setting-select-text="instances"]`
     );
+    this.instanceName = "";
     this.updateInp = document.querySelector("input#update-date");
     this.liveUpdateInp = document.querySelector("input#live-update");
     this.updateDelayInp = document.querySelector("input#update-delay");
+    this.fromDateInp = document.querySelector("input#from-date");
+    this.toDateInp = document.querySelector("input#to-date");
+    this.fromDate = "";
+    this.toDate = "";
+
     this.isLiveUpdate = false;
     this.updateDelay = 2000;
     this.lastUpdate = Math.round(Date.now() / 1000 - 86400);
     this.container = document.querySelector(`[${this.prefix}-settings]`);
     this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
-    this.initFetch();
-    this.initLiveUpdate();
+    this.submitSettings = document.querySelector("button#submit-settings");
+    this.init();
   }
 
-  initLiveUpdate() {
-    this.liveUpdateInp.addEventListener("click", (e) => {
-      this.isLiveUpdate = this.liveUpdateInp.checked;
+  init() {
+    this.submitSettings.addEventListener("click", (e) => {
+      //wait if live update previously
       if (this.isLiveUpdate) {
         setTimeout(() => {
-          this.setLiveUpdate();
+          const isSettings = this.getSettings();
+          return isSettings ? this.getLogsFromToDate() : "";
         }, this.updateDelay);
+      } else {
+        const isSettings = this.getSettings();
+        return isSettings ? this.getLogsFromToDate() : "";
       }
-    });
-
-    this.updateDelayInp.addEventListener("input", (e) => {
-      console.log(this.updateDelayInp.valueAsNumber);
-      this.updateDelay = Math.round(this.updateDelayInp.valueAsNumber / 1000);
-      console.log(this.updateDelay + " on change");
     });
   }
 
-  setLiveUpdate() {
-    //loop
-    if (this.isLiveUpdate) {
-      setTimeout(() => {
-        this.setLiveUpdate();
-      }, this.updateDelay);
-    }
-    //conditions to live update
-    const btnInstance = document.querySelector(
-      `[${this.prefix}-setting-select-text]`
-    );
-    if (btnInstance.textContent === "none" || this.lastUpdate === "") return;
-    //get data
-    this.getInstanceLogs(btnInstance.textContent);
+  getSettings() {
+    //get settings
+    this.instanceName = this.instance.textContent;
+    if (!this.instanceName || this.instanceName.trim() === "none") return false;
+    this.formDate = this.fromDateInp.valueAsNumber
+      ? this.fromDateInp.valueAsNumber
+      : Math.round(Date.now() / 1000 - 86400);
+    this.toDate = this.toDateInp.valueAsNumber
+      ? this.toDateInp.valueAsNumber
+      : "";
+    this.updateDelay =
+      this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
+    this.isLiveUpdate = this.liveUpdateInp.checked;
+    return true;
   }
 
   goBottomList() {
@@ -207,40 +213,24 @@ class FetchLogs {
       );
   }
 
-  initFetch() {
-    this.container.addEventListener("click", (e) => {
-      //SELECT INSTANCE
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
-          "instances"
-        ) {
-          const btn = e.target.closest("button");
-          const btnValue = btn.getAttribute("value");
-          //fetch data
-          this.getInstanceLogs(btnValue);
-        }
-      } catch (err) {}
-      //SELECT DATE
-      this.updateInp.addEventListener("input", (e) => {
-        this.lastUpdate = Math.round(this.updateInp.valueAsNumber / 1000);
-        console.log(this.lastUpdate);
-        //check if instance selected
-        const btnInstance = document.querySelector(
-          `[${this.prefix}-setting-select-text]`
-        );
-        if (btnInstance.textContent.trim() === "none") return;
-        //fetch data
-        this.getInstanceLogs(btnInstance.textContent);
-      });
-    });
+  async getLogsFromToDate() {
+    const response = await fetch(
+      `${location.href}/${this.lastUpdate}?from_date=${this.fromDate}?to_date=${this.toDate}`
+    );
+
+    if (response.status === 200) {
+      const res = await response.json();
+      //last update
+      return await this.showLogs(res);
+    } else {
+      console.log(`Error: ${response.status}`);
+    }
+    return null;
   }
 
-  async getInstanceLogs(instanceName) {
+  async getLogsSinceLastUpdate() {
     const response = await fetch(
-      `${location.href}/${instanceName}` +
+      `${location.href}/${this.lastUpdate}` +
         (this.lastUpdate ? `?last_update=${this.lastUpdate}` : "")
     );
 
@@ -256,7 +246,6 @@ class FetchLogs {
 
   async showLogs(res) {
     this.lastUpdate = res.last_update;
-    console.log(this.lastUpdate);
     res.logs.forEach((log) => {
       //container
       const logContainer = document.createElement("li");
@@ -279,9 +268,16 @@ class FetchLogs {
       //show on DOM
       this.logListContainer.appendChild(logContainer);
     });
+
     setTimeout(() => {
       this.goBottomList();
     }, 100);
+    //loop if true
+    if (this.isLiveUpdate) {
+      setTimeout(() => {
+        this.getLogsSinceLastUpdate();
+      }, this.updateDelay);
+    }
   }
 }
 
@@ -290,8 +286,6 @@ class FilterLogs {
     this.prefix = prefix;
     this.container = document.querySelector(`[${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
-    this.fromDateInp = document.querySelector("input#from-date");
-    this.toDateInp = document.querySelector("input#to-date");
     this.lastType = "";
     this.initHandler();
   }
@@ -311,7 +305,7 @@ class FilterLogs {
           const btnSetting = btn.getAttribute(
             `${this.prefix}-setting-select-dropdown-btn`
           );
-          if (this.lastType === btnValue) return;
+
           this.lastType = btnValue;
           //run filter
           this.filter();
@@ -320,14 +314,6 @@ class FilterLogs {
     });
     //KEYWORD HANDLER
     this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-    //FROM DATE
-    this.fromDateInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-    //TO DATE
-    this.toDateInp.addEventListener("input", (e) => {
       this.filter();
     });
   }
@@ -343,23 +329,19 @@ class FilterLogs {
     //filter type
     this.setFilterType(logs);
     this.setFilterKeyword(logs);
-    console.log("start date filtering");
     this.setFilterDate(logs);
   }
 
   setFilterType(logs) {
-    const type = document.querySelector(
-      `[${this.prefix}-setting-select-text="types"]`
-    ).textContent;
-    if (type === "all") return;
+    if (this.lastType === "all") return;
 
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
       const typeEl = el.querySelector("[logs-type]");
-      if (type !== "misc" && typeEl.textContent !== type)
+      if (this.lastType !== "misc" && typeEl.textContent !== this.lastType)
         el.classList.add("hidden");
       if (
-        type === "misc" &&
+        this.lastType === "misc" &&
         typeEl.textContent !== "info" &&
         typeEl.textContent !== "message"
       )
@@ -375,124 +357,6 @@ class FilterLogs {
       const content = el.querySelector("[logs-content]").textContent;
       if (!content.includes(keyword)) el.classList.add("hidden");
     }
-  }
-
-  setFilterDate(logs) {
-    //get date as timestamp to check if valid
-    const isValidDate = this.isDateIntervalValid(
-      this.fromDateInp.valueAsNumber,
-      this.toDateInp.valueAsNumber
-    );
-    if (!isValidDate) return console.log("date invalid");
-    this.setFromDate(logs);
-    this.setToDate(logs);
-  }
-
-  setToDate(logs) {
-    //if from date value exist
-    if (this.toDateInp.valueAsNumber) {
-      //get it
-      const toDate = this.toDateInp.value.split("-");
-      const toMonthStr = this.monthNumToStr(toDate[1]);
-      //stop if last log is after to date
-      const isAfter = this.isToDateAfterLastLog();
-      if (isAfter === true) return console.log("after");
-      //else loop from bottom to top list
-      for (let i = 0; i < logs.length; i++) {
-        const el = logs[logs.length - 1 - i];
-        const content = el.querySelector("[logs-content]").textContent;
-        //all date format we can find on logs
-        if (
-          content.includes(`${toDate[0]}/${toDate[1]}/${toDate[2]}`) ||
-          content.includes(`${toDate[0]}-${toDate[1]}-${toDate[2]}`) ||
-          content.includes(`${toDate[0]}/${toMonthStr}/${toDate[2]}`)
-        )
-          break;
-
-        el.classList.add("hidden");
-      }
-    }
-  }
-
-  isToDateAfterLastLog() {
-    const lastLogContent = document
-      .querySelector(`[${this.prefix}-list]`)
-      .lastElementChild.querySelector("[logs-content]")
-      .textContent.replaceAll(":", " ")
-      .replaceAll("[", "[ ");
-
-    const lastLogDate = lastLogContent.match(
-      /(\d{4}([\/.-])(\d{2}|\D{3})([\/.-])\d{2} | \d{2}([\/])(\d{2}|\D{3})([\/])\d{4})/g
-    );
-    const lastLogStamp = new Date(lastLogDate).getTime();
-    console.log(
-      "last log " + lastLogStamp + " input: " + this.toDateInp.valueAsNumber
-    );
-
-    return this.toDateInp.valueAsNumber > lastLogStamp ? true : false;
-  }
-  setFromDate(logs) {
-    //if from date value exist
-    if (this.fromDateInp.valueAsNumber) {
-      //get it
-      const fromDate = this.fromDateInp.value.split("-");
-      const fromMonthStr = this.monthNumToStr(fromDate[1]);
-      //stop if first log is before date
-      const isBefore = this.isFromDateBeforeFirstlog();
-      if (isBefore === true) return;
-      //else loop from top to bottom list
-      for (let i = 0; i < logs.length; i++) {
-        const el = logs[i];
-        const content = el.querySelector("[logs-content]").textContent;
-        //all date format we can find on logs
-        if (
-          content.includes(`${fromDate[0]}/${fromDate[1]}/${fromDate[2]}`) ||
-          content.includes(`${fromDate[0]}-${fromDate[1]}-${fromDate[2]}`) ||
-          content.includes(`${fromDate[0]}/${fromMonthStr}/${fromDate[2]}`)
-        )
-          break;
-
-        el.classList.add("hidden");
-      }
-    }
-  }
-
-  isFromDateBeforeFirstlog() {
-    const firstLogContent = document
-      .querySelector(`[${this.prefix}-list]`)
-      .firstElementChild.querySelector("[logs-content]").textContent;
-
-    const firstLogDate = firstLogContent.match(
-      /(\d{4}([\/.-])(\d{2}|\D{3})([\/.-])\d{2} | \d{2}([\/])(\d{2}|\D{3})([\/])\d{4})/g
-    );
-
-    const firstLogStamp = new Date(firstLogDate).getTime();
-    return this.fromDateInp.valueAsNumber <= firstLogStamp ? true : false;
-  }
-
-  isDateIntervalValid(fromDate, toDate) {
-    //case one date
-    if (fromDate === NaN || toDate === NaN) return false;
-    if (fromDate >= toDate) return false;
-    return true;
-  }
-
-  monthNumToStr(month) {
-    const monthStr = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return monthStr[+month - 1];
   }
 }
 
