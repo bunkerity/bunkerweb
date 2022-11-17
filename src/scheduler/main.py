@@ -107,8 +107,17 @@ if __name__ == "__main__":
         integration = "Linux"
         api_caller = ApiCaller()
 
+        # Define db here because otherwhise it will be undefined for Linux
+        db = Database(
+            logger,
+            sqlalchemy_string=getenv("DATABASE_URI", None),
+        )
+        custom_configs = db.get_custom_configs()
+        # END Define db because otherwhise it will be undefined for Linux
+
         logger.info("Scheduler started ...")
 
+        # Checking if the argument variables is true.
         if args.variables:
             logger.info(f"Variables : {args.variables}")
 
@@ -243,6 +252,7 @@ if __name__ == "__main__":
                     )
 
         logger.info("Executing scheduler ...")
+        
         generate = not exists(
             "/var/tmp/bunkerweb/variables.env"
         ) or env != dotenv_values("/var/tmp/bunkerweb/variables.env")
@@ -318,12 +328,15 @@ if __name__ == "__main__":
                 # reload nginx
                 if integration == "Linux":
                     logger.info("Reloading nginx ...")
-                    proc = run(
-                        ["/usr/sbin/nginx", "-s", "reload"],
-                        stdin=DEVNULL,
-                        stderr=PIPE,
-                        env=deepcopy(env),
-                    )
+                    # Reloading the nginx server.
+                    # Had to use this instead of the nginx reload command because it was not working
+                    proc = subprocess_run(["nginx", "-s", "reload"], stdin=DEVNULL, stderr=STDOUT)
+                    # proc = run(
+                    #     ["/usr/sbin/nginx", "-s", "reload"],
+                    #     stdin=DEVNULL,
+                    #     stderr=PIPE,
+                    #     env=deepcopy(env),
+                    # )
                     if proc.returncode == 0:
                         logger.info("Successfuly reloaded nginx")
                     else:

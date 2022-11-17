@@ -8,6 +8,5 @@
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
 --after-install /usr/share/bunkerweb/scripts/postinstall.sh
---before-remove /usr/share/bunkerweb/scripts/beforeRemove.sh
 --after-remove /usr/share/bunkerweb/scripts/afterRemove.sh
-/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb bunkerweb.service=/etc/systemd/system/bunkerweb.service bunkerweb-ui.service=/etc/systemd/system/bunkerweb-ui.service
+/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /etc/systemd/system/bunkerweb.service=/etc/systemd/system/bunkerweb.service /etc/systemd/system/bunkerweb-ui.service=/etc/systemd/system/bunkerweb-ui.service

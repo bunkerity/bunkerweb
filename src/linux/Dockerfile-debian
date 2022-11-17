@@ -9,7 +9,7 @@ RUN apt update && \
     gem install fpm
 
 # Copy dependencies sources folder
-COPY src/common/deps /tmp/bunkerweb/deps
+COPY src/deps /tmp/bunkerweb/deps
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
 COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
@@ -34,8 +34,11 @@ RUN apt update && \
     mkdir -p /usr/share/bunkerweb/deps && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
-    mkdir /usr/share/bunkerweb/deps/python && \
-    pip3 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+    mkdir /usr/share/bunkerweb/deps/python
+
+    # Dirty fix to avoid errors with --target and packages same namespace
+RUN pip install --no-deps --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY src/bw/loading /usr/share/bunkerweb/loading
@@ -57,10 +60,11 @@ COPY src/VERSION /usr/share/bunkerweb/VERSION
 # Setup BW
 RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     chmod 755 /usr/bin/bwcli && \
-    mkdir /etc/bunkerweb/configs && \
-    mkdir /var/cache/bunkerweb/ && \
-    mkdir /etc/bunkerweb/plugins && \
-    mkdir /var/tmp/bunkerweb/ && \
+    mkdir -p /etc/bunkerweb/configs && \
+    mkdir -p /var/cache/bunkerweb/ && \
+    mkdir -p /etc/bunkerweb/plugins && \
+    mkdir -p /var/tmp/bunkerweb/ && \
+    mkdir -p /var/www/ && \
     #mkdir /var/www/html && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     #It's a find command that will find all files in the bunkerweb directory, excluding the ui/deps directory, and then chmod them to 0740.
@@ -68,25 +72,23 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     #It's a find command that will find all files in the bunkerweb directory, excluding the ui/deps directory, and then chmod them to 0740.
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
     chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ && \
-    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py && \
+    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
     # Don't forget to add /var/www/html on the above line
     find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
-    mkdir /usr/share/bunkerweb/ui/deps/python && \
-    pip install --no-cache-dir --require-hashes --no-deps --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/ui/deps/requirements.txt && \
+    mkdir -p /usr/share/bunkerweb/ui/deps/python && \
+    pip install --no-cache-dir --require-hashes --no-deps --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
     pip install --no-cache-dir gunicorn && \
     chmod 755 /usr/share/bunkerweb
 
 # Copy Linux files
-COPY src/linux/variables.env /etc/bunkerweb/variables.env
-COPY src/linux/ui.env /etc/bunkerweb/ui.env
 COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-ubuntu /usr/share/.fpm
-COPY src/linux/bunkerweb.service /usr/share/bunkerweb.service
-COPY src/linux/bunkerweb-ui.service /usr/share/bunkerweb-ui.service
+COPY src/linux/bunkerweb.service /etc/systemd/system/bunkerweb.service
+COPY src/linux/bunkerweb-ui.service /etc/systemd/system/bunkerweb-ui.service
 
 # Generate DEB at startup
 VOLUME /data

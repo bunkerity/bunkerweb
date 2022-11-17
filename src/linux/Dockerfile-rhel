@@ -4,7 +4,7 @@ ENV OS=rhel
 ENV NGINX_VERSION 1.20.2
 
 # RHEL subscription
-RUN subscription-manager register --username=username --password=password --auto-attach
+RUN subscription-manager register --username=bunkerfrsq --password=aTtWafOi2V3TvdnPmHCw --auto-attach
 
 # Install fpm
 RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && \
@@ -14,12 +14,12 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && 
   gem install fpm
 
 # Nginx
-COPY linux/nginx.repo /etc/yum.repos.d/nginx.repo
+COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install yum-utils -y && \
   dnf install nginx-1.20.2 -y 
 
 # Copy dependencies sources folder
-COPY src/common/deps /tmp/bunkerweb/deps
+COPY src/deps /tmp/bunkerweb/deps
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
 COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
@@ -30,12 +30,23 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
+RUN dnf install -y wget brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
   mkdir -p /usr/share/bunkerweb/deps && \
   chmod +x /tmp/bunkerweb/deps/install.sh && \
   bash /tmp/bunkerweb/deps/install.sh && \
-  mkdir /usr/share/bunkerweb/deps/python && \
-  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+  mkdir /usr/share/bunkerweb/deps/python
+
+# Install python 3.10
+RUN wget https://www.python.org/ftp/python/3.10.8/Python-3.10.8.tgz && \
+    tar -xvf Python-3.10.8.tgz && \
+    cd Python-3.10.8 && \
+    ./configure --enable-optimizations && \
+    make altinstall && \
+    cd .. && \
+    rm -rf Python-3.10.8 && \
+    rm -rf Python-3.10.8.tgz
+
+RUN pip3.10 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
 
 # Copy BW files
 # can't exclude deps from . so we are copying everything by hand
@@ -57,29 +68,32 @@ COPY src/VERSION /usr/share/bunkerweb/VERSION
 
 # Setup BW
 RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
-  chmod 755 /usr/bin/bwcli && \
-  mkdir /etc/bunkerweb/configs && \
-  mkdir /var/cache/bunkerweb/ && \
-  mkdir /etc/bunkerweb/plugins && \
-  mkdir /var/tmp/bunkerweb/ && \
-  echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
-  find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
-  find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
-  chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ && \
-  chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py && \
-  find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-  pip install --no-cache-dir --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/ui/deps/requirements.txt && \
-  chmod 755 /usr/share/bunkerweb
+    chmod 755 /usr/bin/bwcli && \
+    mkdir -p /etc/bunkerweb/configs && \
+    mkdir -p /var/cache/bunkerweb/ && \
+    mkdir -p /etc/bunkerweb/plugins && \
+    mkdir -p /var/tmp/bunkerweb/ && \
+    mkdir -p /var/www/ && \
+    echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
+    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
+    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
+    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ && \
+    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
+    find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
+    pip3.10 install --no-cache-dir --upgrade pip && \
+    pip3.10 install wheel && \
+    mkdir -p /usr/share/bunkerweb/ui/deps/python && \
+    pip3.10 install --no-cache-dir --require-hashes --no-deps --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+    pip3.10 install --no-cache-dir gunicorn && \
+    chmod 755 /usr/share/bunkerweb
 
 # Copy Linux files
-COPY src/linux/variables.env /etc/bunkerweb/variables.env
-COPY src/linux/ui.env /etc/bunkerweb/ui.env
 COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
-COPY src/linux/fpm-rhel /usr/share/.fpm
-COPY src/linux/bunkerweb.service /usr/share/bunkerweb.service
-COPY src/linux/bunkerweb-ui.service /usr/share/bunkerweb-ui.service
+COPY src/linux/fpm-ubuntu /usr/share/.fpm
+COPY src/linux/bunkerweb.service /etc/systemd/system/bunkerweb.service
+COPY src/linux/bunkerweb-ui.service /etc/systemd/system/bunkerweb-ui.service
 
 # Generate RPM at startup
 VOLUME /data

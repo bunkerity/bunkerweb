@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Stop nginx if it's running and remove the old config file if it exists 
-systemctl stop nginx
+systemctl start nginx
 
 # Change the ownership of /usr/share/bunkerweb to nginx
 chown -R nginx:nginx /usr/share/bunkerweb
