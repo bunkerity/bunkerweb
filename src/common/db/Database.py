@@ -342,10 +342,11 @@ class Database:
                             if service not in services
                         ]
 
-                        # Remove plugins that are no longer in the list
-                        session.query(Services).filter(
-                            Services.id.in_(missing_ids)
-                        ).delete()
+                        if missing_ids:
+                            # Remove plugins that are no longer in the list
+                            session.query(Services).filter(
+                                Services.id.in_(missing_ids)
+                            ).delete()
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
@@ -852,14 +853,14 @@ class Database:
             )
 
             db_ids = []
-            if db_plugins is not None:
+            if db_plugins:
+                db_ids = [plugin.id for plugin in db_plugins]
                 ids = [plugin["id"] for plugin in plugins]
-                missing_ids = [
-                    plugin.id for plugin in db_plugins if plugin.id not in ids
-                ]
+                missing_ids = [plugin for plugin in db_ids if plugin not in ids]
 
-                # Remove plugins that are no longer in the list
-                session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
+                if missing_ids:
+                    # Remove plugins that are no longer in the list
+                    session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
 
             for plugin in plugins:
                 settings = plugin.pop("settings", {})
@@ -868,12 +869,23 @@ class Database:
                 plugin["external"] = True
 
                 if plugin["id"] in db_ids:
-                    db_plugin = session.query(Plugins).get(plugin["id"])
+                    db_plugin = (
+                        session.query(Plugins)
+                        .with_entities(
+                            Plugins.order,
+                            Plugins.name,
+                            Plugins.description,
+                            Plugins.version,
+                            Plugins.external,
+                        )
+                        .filter_by(id=plugin["id"])
+                        .first()
+                    )
 
                     if db_plugin is not None:
                         if db_plugin.external is False:
                             self.__logger.warning(
-                                f"Plugin {plugin['id']} is not external, skipping update (updating a non-external plugin is forbidden for security reasons)"
+                                f"Plugin \"{plugin['id']}\" is not external, skipping update (updating a non-external plugin is forbidden for security reasons)",
                             )
                             continue
 
@@ -896,23 +908,23 @@ class Database:
                                 Plugins.id == plugin["id"]
                             ).update(updates)
 
-                        db_settings = (
+                        db_plugin_settings = (
                             session.query(Settings)
                             .with_entities(Settings.id)
                             .filter_by(plugin_id=plugin["id"])
                             .all()
                         )
+                        db_ids = [setting.id for setting in db_plugin_settings]
                         setting_ids = [setting["id"] for setting in settings.values()]
                         missing_ids = [
-                            setting.id
-                            for setting in db_settings
-                            if setting.id not in setting_ids
+                            setting for setting in db_ids if setting not in setting_ids
                         ]
 
-                        # Remove settings that are no longer in the list
-                        session.query(Settings).filter(
-                            Settings.id.in_(missing_ids)
-                        ).delete()
+                        if missing_ids:
+                            # Remove settings that are no longer in the list
+                            session.query(Settings).filter(
+                                Settings.id.in_(missing_ids)
+                            ).delete()
 
                         for setting, value in settings.items():
                             value.update(
@@ -922,7 +934,21 @@ class Database:
                                     "id": setting,
                                 }
                             )
-                            db_setting = session.query(Settings).get(setting)
+                            db_setting = (
+                                session.query(Settings)
+                                .with_entities(
+                                    Settings.name,
+                                    Settings.context,
+                                    Settings.default,
+                                    Settings.help,
+                                    Settings.label,
+                                    Settings.regex,
+                                    Settings.type,
+                                    Settings.multiple,
+                                )
+                                .filter_by(id=setting)
+                                .first()
+                            )
 
                             if setting not in db_ids or db_setting is None:
                                 for select in value.pop("select", []):
@@ -973,27 +999,25 @@ class Database:
                                     .filter_by(setting_id=setting)
                                     .all()
                                 )
+                                db_values = [select.value for select in db_selects]
                                 select_values = [
                                     select["value"]
                                     for select in value.get("select", [])
                                 ]
                                 missing_values = [
-                                    select.value
-                                    for select in db_selects
-                                    if select.value not in select_values
+                                    select
+                                    for select in db_values
+                                    if select not in select_values
                                 ]
 
-                                # Remove selects that are no longer in the list
-                                session.query(Selects).filter(
-                                    Selects.value.in_(missing_values)
-                                ).delete()
+                                if missing_values:
+                                    # Remove selects that are no longer in the list
+                                    session.query(Selects).filter(
+                                        Selects.value.in_(missing_values)
+                                    ).delete()
 
                                 for select in value.get("select", []):
-                                    db_select = session.query(Selects).get(
-                                        (setting, select)
-                                    )
-
-                                    if db_select is None:
+                                    if select not in db_values:
                                         to_put.append(
                                             Selects(setting_id=setting, value=select)
                                         )
@@ -1004,27 +1028,27 @@ class Database:
                             .filter_by(plugin_id=plugin["id"])
                             .all()
                         )
+                        db_names = [job.name for job in db_jobs]
                         job_names = [job["name"] for job in jobs]
                         missing_names = [
-                            job.name for job in db_jobs if job.name not in job_names
+                            job for job in db_names if job not in job_names
                         ]
 
-                        # Remove jobs that are no longer in the list
-                        session.query(Jobs).filter(
-                            Jobs.name.in_(missing_names)
-                        ).delete()
+                        if missing_names:
+                            # Remove jobs that are no longer in the list
+                            session.query(Jobs).filter(
+                                Jobs.name.in_(missing_names)
+                            ).delete()
 
                         for job in jobs:
                             db_job = (
                                 session.query(Jobs)
-                                .with_entities(
-                                    Jobs.id, Jobs.file_name, Jobs.every, Jobs.reload
-                                )
+                                .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
                                 .filter_by(name=job["name"], plugin_id=plugin["id"])
                                 .first()
                             )
 
-                            if job["name"] not in db_ids or db_job is None:
+                            if job["name"] not in db_names or db_job is None:
                                 job["file_name"] = job.pop("file")
                                 to_put.append(
                                     Jobs(
@@ -1035,8 +1059,8 @@ class Database:
                             else:
                                 updates = {}
 
-                                if job["file_name"] != db_job.file_name:
-                                    updates[Jobs.file_name] = job["file_name"]
+                                if job["file"] != db_job.file_name:
+                                    updates[Jobs.file_name] = job["file"]
 
                                 if job["every"] != db_job.every:
                                     updates[Jobs.every] = job["every"]
@@ -1045,7 +1069,7 @@ class Database:
                                     updates[Jobs.reload] = job["reload"]
 
                                 if updates:
-                                    updates[Jobs.last_update] = None
+                                    updates[Jobs.last_run] = None
                                     session.query(Jobs_cache).filter(
                                         Jobs_cache.job_name == job["name"]
                                     ).delete()
@@ -1092,7 +1116,7 @@ class Database:
                                             ).hexdigest(),
                                         )
                                     )
-                                else:
+                                else:  # TODO test this
                                     updates = {}
                                     template_checksum = file_hash(
                                         f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html"
@@ -1145,6 +1169,14 @@ class Database:
                 to_put.append(Plugins(**plugin))
 
                 for setting, value in settings.items():
+                    db_setting = session.query(Settings).filter_by(id=setting).first()
+
+                    if db_setting is not None:
+                        self.__logger.warning(
+                            f"A setting with id {setting} already exists, therefore it will not be added."
+                        )
+                        continue
+
                     value.update(
                         {
                             "plugin_id": plugin["id"],
@@ -1163,6 +1195,19 @@ class Database:
                     )
 
                 for job in jobs:
+                    db_job = (
+                        session.query(Jobs)
+                        .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
+                        .filter_by(name=job["name"], plugin_id=plugin["id"])
+                        .first()
+                    )
+
+                    if db_job is not None:
+                        self.__logger.warning(
+                            f"A job with the name {job['name']} already exists in the database, therefore it will not be added."
+                        )
+                        continue
+
                     job["file_name"] = job.pop("file")
                     to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
@@ -1203,22 +1248,28 @@ class Database:
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
-                            "data": cache.data.decode("utf-8"),
+                            "data": cache.data,
                             "last_update": cache.last_update,
                         }
-                        for cache in job.cache
+                        for cache in session.query(Jobs_cache)
+                        .with_entities(
+                            Jobs_cache.service_id,
+                            Jobs_cache.file_name,
+                            Jobs_cache.data,
+                            Jobs_cache.last_update,
+                        )
+                        .filter_by(job_name=job.name)
+                        .all()
                     ],
                 }
                 for job in (
                     session.query(Jobs)
-                    .join(Jobs_cache, Jobs.name == Jobs_cache.job_name)
                     .with_entities(
                         Jobs.name,
                         Jobs.every,
                         Jobs.reload,
                         Jobs.success,
                         Jobs.last_run,
-                        Jobs.cache,
                     )
                     .all()
                 )
