@@ -387,8 +387,6 @@ if __name__ == "__main__":
                     dotenv_values(args.variables) if args.variables else db.get_config()
                 )
                 if env != tmp_env:
-                    logger.warning(tmp_env)
-                    logger.warning(env)
                     logger.info("Config changed, generating ...")
                     logger.debug(f"{tmp_env=}")
                     logger.debug(f"{env=}")
