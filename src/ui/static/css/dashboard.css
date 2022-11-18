@@ -831,10 +831,6 @@ h6 {
   grid-column: span 2 / span 2;
 }
 
-.col-span-4 {
-  grid-column: span 4 / span 4;
-}
-
 .col-span-9 {
   grid-column: span 9 / span 9;
 }
@@ -1019,6 +1015,10 @@ h6 {
   margin-top: 0.25rem;
 }
 
+.ml-6 {
+  margin-left: 1.5rem;
+}
+
 .mb-4 {
   margin-bottom: 1rem;
 }
@@ -1051,10 +1051,6 @@ h6 {
   margin-top: 0.5rem;
 }
 
-.mb-auto {
-  margin-bottom: auto;
-}
-
 .mr-6 {
   margin-right: 1.5rem;
 }
@@ -1069,10 +1065,6 @@ h6 {
 
 .-ml-7 {
   margin-left: -1.75rem;
-}
-
-.ml-6 {
-  margin-left: 1.5rem;
 }
 
 .mb-5 {
@@ -1509,10 +1501,6 @@ h6 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.flex-row {
-  flex-direction: row;
-}
-
 .flex-col {
   flex-direction: column;
 }
@@ -1568,11 +1556,6 @@ h6 {
 
 .gap-y-2 {
   row-gap: 0.5rem;
-}
-
-.gap-x-1 {
-  -moz-column-gap: 0.25rem;
-       column-gap: 0.25rem;
 }
 
 .overflow-auto {
@@ -1816,16 +1799,16 @@ h6 {
   --tw-bg-opacity: 0;
 }
 
+.bg-gradient-to-tl {
+  background-image: linear-gradient(to top left, var(--tw-gradient-stops));
+}
+
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
 
 .bg-none {
   background-image: none;
-}
-
-.bg-gradient-to-tl {
-  background-image: linear-gradient(to top left, var(--tw-gradient-stops));
 }
 
 .from-transparent {
@@ -1949,6 +1932,10 @@ h6 {
 
 .fill-emerald-700 {
   fill: #047857;
+}
+
+.fill-amber-500 {
+  fill: #f59e0b;
 }
 
 .fill-slate-800 {
@@ -2717,6 +2704,10 @@ h6 {
   background-color: rgb(251 177 64 / 0.8);
 }
 
+.hover\:bg-primary\/80:hover {
+  background-color: rgb(8 85 119 / 0.8);
+}
+
 .hover\:bg-primary\/30:hover {
   background-color: rgb(8 85 119 / 0.3);
 }
@@ -2728,10 +2719,6 @@ h6 {
 .hover\:bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(248 249 250 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-primary\/80:hover {
-  background-color: rgb(8 85 119 / 0.8);
 }
 
 .hover\:opacity-80:hover {
@@ -3170,6 +3157,10 @@ h6 {
     grid-column: span 6 / span 6;
   }
 
+  .md\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+
   .md\:my-0 {
     margin-top: 0px;
     margin-bottom: 0px;
@@ -3268,16 +3259,12 @@ h6 {
     grid-column: span 12 / span 12;
   }
 
-  .lg\:col-span-9 {
-    grid-column: span 9 / span 9;
-  }
-
-  .lg\:col-span-3 {
-    grid-column: span 3 / span 3;
-  }
-
   .lg\:col-span-8 {
     grid-column: span 8 / span 8;
+  }
+
+  .lg\:col-span-2 {
+    grid-column: span 2 / span 2;
   }
 
   .lg\:mx-8 {

@@ -163,10 +163,9 @@ class FetchLogs {
     this.toDateInp = document.querySelector("input#to-date");
     this.fromDate = "";
     this.toDate = "";
-
     this.isLiveUpdate = false;
     this.updateDelay = 2000;
-    this.lastUpdate = Math.round(Date.now() / 1000 - 86400);
+    this.lastUpdate = Math.round(Date.now() / 1000) - 86400;
     this.container = document.querySelector(`[${this.prefix}-settings]`);
     this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
     this.submitSettings = document.querySelector("button#submit-settings");
@@ -220,7 +219,7 @@ class FetchLogs {
     let response;
     if (this.toDate) {
       response = await fetch(
-        `${location.href}/${this.instanceName}?from_date=${this.fromDate}?to_date=${this.toDate}`
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}&to_date=${this.toDate}`
       );
     }
 
