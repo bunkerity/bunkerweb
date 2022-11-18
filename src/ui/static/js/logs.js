@@ -194,10 +194,10 @@ class FetchLogs {
     this.instanceName = this.instance.textContent;
     if (!this.instanceName || this.instanceName.trim() === "none") return false;
     this.fromDate = this.fromDateInp.valueAsNumber
-      ? this.fromDateInp.valueAsNumber
+      ? Math.round(this.fromDateInp.valueAsNumber / 1000)
       : Math.round(Date.now() / 1000) - 86400;
     this.toDate = this.toDateInp.valueAsNumber
-      ? this.toDateInp.valueAsNumber
+      ? Math.round(this.toDateInp.valueAsNumber / 1000)
       : false;
     this.updateDelay =
       this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
