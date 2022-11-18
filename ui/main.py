@@ -37,10 +37,12 @@ from time import time
 import tarfile
 import zipfile
 
-from src.ConfigFiles import ConfigFiles
-from src.Config import Config
-from src.ReverseProxied import ReverseProxied
-from src.User import User
+sys_path.append("/opt/bunkerweb/ui/src")
+
+from ConfigFiles import ConfigFiles
+from Config import Config
+from ReverseProxied import ReverseProxied
+from User import User
 from utils import (
     check_settings,
     env_to_summary_class,
