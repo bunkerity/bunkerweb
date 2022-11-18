@@ -35,7 +35,11 @@
   <script defer type="module" src="./js/services.js"></script>
   {% elif current_endpoint == "plugins" %}
   <script type="module" defer src="./js/dropzone/dropzone-min.js"></script>
-  <script type="module" defer src="./js/dropzone/dropzone-min.js.map"></script>
+  <script
+    type="application"
+    defer
+    src="./js/dropzone/dropzone-min.js.map"
+  ></script>
   <script type="module" defer src="./js/plugins.js"></script>
   <link rel="stylesheet" type="text/css" href="./css/dropzone/dropzone.css" />
   {% elif current_endpoint == "cache" %}

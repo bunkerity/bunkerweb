@@ -1,5 +1,3 @@
-import AirDatepicker from "./air-datepicker/index.es.js";
-
 class Upload {
   constructor(prefix) {
     this.prefix = prefix;
@@ -28,3 +26,21 @@ class Upload {
     });
   }
 }
+
+const dropEl = document.querySelector("#dropzone");
+const drop = new Dropzone(dropEl, {
+  paramName: "file",
+  method: "post",
+  maxFiles: 100,
+  autoProcessQueue: false,
+  uploadMultiple: true,
+  parallelUploads: 100,
+  url: "#",
+});
+
+const submit = dropEl.querySelector('button[type="submit"]');
+submit.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  drop.processQueue();
+});

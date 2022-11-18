@@ -807,6 +807,10 @@ h6 {
   z-index: 50;
 }
 
+.-z-10 {
+  z-index: -10;
+}
+
 .order-2 {
   order: 2;
 }
@@ -1163,6 +1167,10 @@ h6 {
   height: 7.5rem;
 }
 
+.h-60 {
+  height: 15rem;
+}
+
 .h-\[90vh\] {
   height: 90vh;
 }
@@ -1179,6 +1187,14 @@ h6 {
   height: 33.333333%;
 }
 
+.h-20 {
+  height: 5rem;
+}
+
+.\!h-full {
+  height: 100% !important;
+}
+
 .max-h-screen {
   max-height: 100vh;
 }
@@ -1193,6 +1209,22 @@ h6 {
 
 .max-h-8 {
   max-height: 2rem;
+}
+
+.max-h-20 {
+  max-height: 5rem;
+}
+
+.max-h-16 {
+  max-height: 4rem;
+}
+
+.max-h-10 {
+  max-height: 2.5rem;
+}
+
+.\!max-h-10 {
+  max-height: 2.5rem !important;
 }
 
 .min-h-20 {
@@ -1215,8 +1247,8 @@ h6 {
   min-height: 13rem;
 }
 
-.min-h-75-screen {
-  min-height: 75vh;
+.min-h-12 {
+  min-height: 3rem;
 }
 
 .min-h-75 {
@@ -1225,14 +1257,6 @@ h6 {
 
 .min-h-85-screen {
   min-height: 85vh;
-}
-
-.min-h-10 {
-  min-height: 2.5rem;
-}
-
-.min-h-12 {
-  min-height: 3rem;
 }
 
 .w-full {
@@ -1335,6 +1359,14 @@ h6 {
   max-width: 300px;
 }
 
+.max-w-\[500px\] {
+  max-width: 500px;
+}
+
+.max-w-\[400px\] {
+  max-width: 400px;
+}
+
 .flex-auto {
   flex: 1 1 auto;
 }
@@ -1349,6 +1381,10 @@ h6 {
 
 .basis-full {
   flex-basis: 100%;
+}
+
+.border-separate {
+  border-collapse: separate;
 }
 
 .translate-y-2 {
@@ -1541,6 +1577,10 @@ h6 {
   justify-content: space-between;
 }
 
+.justify-evenly {
+  justify-content: space-evenly;
+}
+
 .justify-items-center {
   justify-items: center;
 }
@@ -1580,6 +1620,10 @@ h6 {
 
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden;
 }
 
 .whitespace-nowrap {
@@ -1670,6 +1714,10 @@ h6 {
   border-width: 0px;
 }
 
+.border-4 {
+  border-width: 4px;
+}
+
 .border-t {
   border-top-width: 1px;
 }
@@ -1692,6 +1740,14 @@ h6 {
 
 .border-solid {
   border-style: solid;
+}
+
+.border-dashed {
+  border-style: dashed;
+}
+
+.border-dotted {
+  border-style: dotted;
 }
 
 .border-white {
@@ -3060,6 +3116,18 @@ h6 {
     grid-column: span 1 / span 1;
   }
 
+  .sm\:col-span-8 {
+    grid-column: span 8 / span 8;
+  }
+
+  .sm\:col-span-5 {
+    grid-column: span 5 / span 5;
+  }
+
+  .sm\:col-span-7 {
+    grid-column: span 7 / span 7;
+  }
+
   .sm\:col-start-5 {
     grid-column-start: 5;
   }
@@ -3165,8 +3233,12 @@ h6 {
     grid-column: span 6 / span 6;
   }
 
-  .md\:col-span-3 {
-    grid-column: span 3 / span 3;
+  .md\:col-span-5 {
+    grid-column: span 5 / span 5;
+  }
+
+  .md\:col-span-7 {
+    grid-column: span 7 / span 7;
   }
 
   .md\:my-0 {
@@ -3271,10 +3343,6 @@ h6 {
     grid-column: span 8 / span 8;
   }
 
-  .lg\:col-span-2 {
-    grid-column: span 2 / span 2;
-  }
-
   .lg\:col-span-3 {
     grid-column: span 3 / span 3;
   }
@@ -3341,10 +3409,6 @@ h6 {
     justify-content: space-between;
   }
 
-  .lg\:justify-items-start {
-    justify-items: start;
-  }
-
   .lg\:gap-6 {
     gap: 1.5rem;
   }
@@ -3365,6 +3429,10 @@ h6 {
 
   .xl\:top-3 {
     top: 0.75rem;
+  }
+
+  .xl\:col-span-4 {
+    grid-column: span 4 / span 4;
   }
 
   .xl\:mx-4 {

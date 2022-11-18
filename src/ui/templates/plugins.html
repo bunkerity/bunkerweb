@@ -1,35 +1,62 @@
 {% extends "base.html" %} {% block content %}{% set current_endpoint =
 url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
+<!-- info -->
+<div
+  class="p-4 col-span-12 md:col-span-5 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="col-span-12 mb-2 font-bold dark:text-white">INFO</h5>
+</div>
+<!-- end info -->
 
 <!-- upload layout -->
 <div
-  class="p-4 col-span-12 lg:col-span-8 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="p-4 col-span-12 md:col-span-7 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="col-span-12 mb-2 font-bold dark:text-white">UPLOAD PLUGIN</h5>
-  <form
-    action="#"
-    class="grid grid-cols-12 w-full justify-items-center lg:justify-items-start"
-  >
-    <input
-      type="hidden"
-      id="csrf_token"
-      name="csrf_token"
-      value="{{ csrf_token() }}"
-    />
-    <input class="hidden" type="file" name="file" multiple="multiple" />
-  </form>
-  <form method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <button type="submit" class="btn btn-outline-primary btn-block mt-2">
-      Reload plugins
-    </button>
-  </form>
+
+  <div class="p-0 col-span-12 grid">
+    <form id="dropzone" class="col-span-12 dropzone max-h-16 overflow-y-auto">
+      <!-- Now setup your input fields -->
+      <input
+        name="upload-csrf"
+        class="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+      />
+      <button name="upload-submit" class="hidden" type="submit">
+        Submit data and files!
+      </button>
+    </form>
+    <div class="col-span-12 flex justify-center mt-3">
+      <button
+        type="button"
+        class="dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+      >
+        Upload
+      </button>
+    </div>
+    <form
+      method="post"
+      class="mt-2 col-span-12 flex flex-col justify-center align-middle items-center"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <p class="mb-0 font-sans font-semibold leading-normal uppercase text-sm">
+        or
+      </p>
+      <button
+        type="submit"
+        class="mt-2 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+      >
+        Reload plugins
+      </button>
+    </form>
+  </div>
 </div>
 <!-- end upload layout -->
 
 <!-- filter -->
 <div
-  class="p-4 col-span-12 lg:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="p-4 col-span-12 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="col-span-12 mb-2 font-bold dark:text-white">FILTER</h5>
 </div>
@@ -42,7 +69,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 
   <div class="grid grid-cols-12 gap-3">
     {% for plugin in plugins %} {% if plugin['page'] %}
-
     <a
       {{current_endpoint}}-external="{{plugin['external']}}"
       href="/plugins?{{plugin['id']}}"
