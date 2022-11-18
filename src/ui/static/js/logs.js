@@ -165,7 +165,7 @@ class FetchLogs {
     this.toDate = "";
     this.isLiveUpdate = false;
     this.updateDelay = 2000;
-    this.lastUpdate = Math.round(Date.now() / 1000) - 86400;
+    this.lastUpdate = Date.now() - 86400000;
     this.container = document.querySelector(`[${this.prefix}-settings]`);
     this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
     this.submitSettings = document.querySelector("button#submit-settings");
@@ -194,10 +194,10 @@ class FetchLogs {
     this.instanceName = this.instance.textContent;
     if (!this.instanceName || this.instanceName.trim() === "none") return false;
     this.fromDate = this.fromDateInp.valueAsNumber
-      ? Math.round(this.fromDateInp.valueAsNumber / 1000)
-      : Math.round(Date.now() / 1000) - 86400;
+      ? this.fromDateInp.valueAsNumber
+      : Date.now() - 86400000;
     this.toDate = this.toDateInp.valueAsNumber
-      ? Math.round(this.toDateInp.valueAsNumber / 1000)
+      ? this.toDateInp.valueAsNumber
       : false;
     this.updateDelay =
       this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
