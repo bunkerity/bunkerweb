@@ -194,9 +194,9 @@ class FetchLogs {
     //get settings
     this.instanceName = this.instance.textContent;
     if (!this.instanceName || this.instanceName.trim() === "none") return false;
-    this.formDate = this.fromDateInp.valueAsNumber
+    this.fromDate = this.fromDateInp.valueAsNumber
       ? this.fromDateInp.valueAsNumber
-      : Math.round(Date.now() / 1000 - 86400);
+      : Math.round(Date.now() / 1000) - 86400;
     this.toDate = this.toDateInp.valueAsNumber
       ? this.toDateInp.valueAsNumber
       : false;
@@ -216,6 +216,7 @@ class FetchLogs {
   }
 
   async getLogsFromToDate() {
+    console.log(this.fromDate, this.toDate);
     let response;
     if (this.toDate) {
       response = await fetch(
