@@ -1275,36 +1275,48 @@ def logs_linux():
 @app.route("/logs/<container_id>", methods=["GET"])
 @login_required
 def logs_container(container_id):
-    last_update = request.args.get(
-        "last_update",
-        str(datetime.now().timestamp() - timedelta(days=1).total_seconds()),
-    )
+    last_update = request.args.get("last_update", None)
+    from_date = request.args.get("from_date", None)
+    to_date = request.args.get("to_date", None)
+
+    if from_date is not None:
+        last_update = from_date
+
+    if any(arg and not arg.isdigit() for arg in [last_update, from_date, to_date]):
+        return (
+            jsonify(
+                {
+                    "status": "ko",
+                    "message": "arguments must all be integers (timestamps)",
+                }
+            ),
+            422,
+        )
+    elif not last_update:
+        last_update = int(
+            datetime.now().timestamp()
+            - timedelta(days=1).total_seconds()  # 1 day before
+        )
+    else:
+        last_update = int(last_update) // 1000
+
+    to_date = int(to_date) // 1000 if to_date else None
+
     logs = []
     if docker_client:
         try:
-            if last_update and not last_update.isdigit():
-                return (
-                    jsonify(
-                        {
-                            "status": "ko",
-                            "message": "last_update must be an integer",
-                        }
-                    ),
-                    422,
-                )
-
             if getenv("SWARM_MODE", "no") == "no":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,
-                    since=datetime.fromtimestamp(int(last_update)),
+                    since=datetime.fromtimestamp(last_update),
                     timestamps=True,
                 )
             else:
                 docker_logs = docker_client.services.get(container_id).logs(
                     stdout=True,
                     stderr=True,
-                    since=datetime.fromtimestamp(int(last_update)),
+                    since=datetime.fromtimestamp(last_update),
                     timestamps=True,
                 )
 
@@ -1324,7 +1336,7 @@ def logs_container(container_id):
             kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
                 container_id,
                 getenv("KUBERNETES_NAMESPACE", "default"),
-                since_seconds=int(datetime.now().timestamp() - int(last_update)),
+                since_seconds=int(datetime.now().timestamp() - last_update),
                 timestamps=True,
             )
             tmp_logs = kubernetes_logs.split("\n")[0:-1]
@@ -1339,10 +1351,16 @@ def logs_container(container_id):
                 404,
             )
 
-    logger.warning(tmp_logs)
-
     for log in tmp_logs:
+        splitted = log.split(" ")
+        timestamp = splitted[0]
+
+        if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
+            break
+
+        log = " ".join(splitted[1:])
         log_lower = log.lower()
+
         logs.append(
             {
                 "content": log,
@@ -1371,7 +1389,7 @@ def logs_container(container_id):
 def jobs():
     return render_template(
         "jobs.html",
-        jobs=db.get_jobs(),
+        jobs=[dumps(job) for job in db.get_jobs()],
         dark_mode=app.config["DARK_MODE"],
     )
 
