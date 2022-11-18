@@ -44,6 +44,7 @@ class darkMode {
     this.htmlEl = document.querySelector("html");
     this.darkToggleEl = document.querySelector("[dark-toggle]");
     this.darkToggleLabel = document.querySelector("[dark-toggle-label]");
+    this.csrf = document.querySelector("input#csrf_token");
     this.init();
   }
 
@@ -63,14 +64,13 @@ class darkMode {
 
   async saveMode() {
     const isDark = this.darkToggleEl.checked ? "true" : "false";
-    console.log(isDark);
     const data = {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ darkmode: isDark }),
+      body: JSON.stringify({ darkmode: isDark, csrf_token: this.csrf.value }),
     };
     const send = await fetch(`${location.href}/darkmode}`, data);
   }

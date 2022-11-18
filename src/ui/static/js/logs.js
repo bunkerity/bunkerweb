@@ -217,10 +217,9 @@ class FetchLogs {
 
   async getLogsFromToDate() {
     const response = await fetch(
-      `${location.href}/${this.instanceName}?from_date=${this.fromDate}` +
-        this.toDate
-        ? `?to_date=${this.toDate}`
-        : ""
+      `${location.href}/${this.instanceName}?from_date=${this.fromDate}${
+        this.toDate ? `?to_date=${this.toDate}` : ``
+      }`
     );
 
     if (response.status === 200) {
