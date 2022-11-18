@@ -77,6 +77,11 @@ class Config(ConfigCaller):
             )
             sleep(5)
 
+        # update instances in database
+        ret = self._db.update_instances(self.__instances)
+        if ret:
+            self.__logger.error(f"Failed to update instances: {ret}")
+
         # save config to database
         ret = self._db.save_config(self.__config, "autoconf")
         if ret:
