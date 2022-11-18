@@ -10,7 +10,6 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     SmallInteger,
     String,
-    text,
     TIMESTAMP,
 )
 from sqlalchemy.orm import declarative_base, relationship
@@ -30,7 +29,15 @@ CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "stream_http",
     name="custom_configs_types_enum",
 )
-LOG_LEVELS_ENUM = Enum("DEBUG", "INFO", "WARNING", "ERROR", name="log_levels_enum")
+LOG_LEVELS_ENUM = Enum(
+    "CRITICAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG",
+    "NOTSET",
+    name="log_levels_enum",
+)
 INTEGRATIONS_ENUM = Enum(
     "Linux",
     "Docker",
@@ -263,6 +270,14 @@ class Logs(Base):
     message = Column(String(1023), nullable=False)
     level = Column(LOG_LEVELS_ENUM, nullable=False)
     component = Column(String(255), nullable=False)
+
+
+class Instances(Base):
+    __tablename__ = "instances"
+
+    hostname = Column(String(255), primary_key=True)
+    port = Column(Integer, nullable=False)
+    server_name = Column(String(255), nullable=False)
 
 
 class Metadata(Base):
