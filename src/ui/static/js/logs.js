@@ -216,11 +216,18 @@ class FetchLogs {
   }
 
   async getLogsFromToDate() {
-    const response = await fetch(
-      `${location.href}/${this.instanceName}?from_date=${this.fromDate}${
-        this.toDate ? `?to_date=${this.toDate}` : ``
-      }`
-    );
+    let response;
+    if (this.toDate) {
+      response = await fetch(
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}?to_date=${this.toDate}`
+      );
+    }
+
+    if (!this.toDate) {
+      response = await fetch(
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}`
+      );
+    }
 
     if (response.status === 200) {
       const res = await response.json();
