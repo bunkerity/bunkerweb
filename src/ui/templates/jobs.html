@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block content %} {% set current_endpoint =
 url_for(request.endpoint)[1:].split("/")[-1].strip() %}
+<div value="{{jobs}}">t</div>
 <!-- filter -->
 <div
   {{current_endpoint}}-filter
@@ -206,7 +207,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       class="col-span-12 w-full max-h-100 overflow-y-auto"
       {{current_endpoint}}-list
     >
-      {% for job in jobs %}
+      {% for job in jobs %} {{job['every']}}
       <!-- job item-->
       <li class="grid grid-cols-12 border-b border-gray-300 py-2">
         <p
@@ -219,7 +220,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"
           {{current_endpoint}}-last_run
         >
-          {{job["last_run"]}}
+          {{job['last_run']}}
         </p>
         <p
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0"

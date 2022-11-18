@@ -302,14 +302,48 @@
 
       <!-- plugin list -->
       <div>
+        {% set plugs = config["CONFIG"].get_plugins() %}
         <ul>
           <li class="w-full mt-4">
             <h6
               class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60"
             >
-              PLUGINS
+              PLUGINS PAGE
             </h6>
           </li>
+          {% if not plugs %}
+          <li
+          class="hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-6 transition"
+          >no plugins to display</span
+          >
+          {% else %} {% for plugin in plugs %} {% if plugin['page'] %}
+          <li class="mt-0.5 w-full">
+            <a
+              target="_blank"
+              class="{% if current_endpoint == 'logs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+              href="/plugins?{{plugin['id']}}"
+            >
+              <div
+                class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
+              >
+                <svg
+                  class="fill-amber-500 h-5 w-5 relative"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 384 512"
+                >
+                  <path
+                    d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z"
+                  />
+                </svg>
+              </div>
+              <span
+                class="ml-1 duration-300 opacity-100 pointer-events-none ease"
+                >{{plugin['name']}}</span
+              >
+            </a>
+          </li>
+          {% endif %} {% endfor %} {% endif %}
+
         </ul>
         <!-- end plugin list -->
       </div>
@@ -322,6 +356,12 @@
   <div class="w-full flex flex-col justify-end m-4">
     <!-- dark/light mode -->
     <div class="min-h-6 my-4 flex justify-center">
+      <input
+        type="hidden"
+        id="csrf_token"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+      />
       <input {% if dark_mode == True %}checked{% endif %} id="darkMode"
       dark-toggle class="dark:brightness-125 hover:brightness-75 rounded-10
       duration-300 ease-in-out after:rounded-circle after:shadow-2xl

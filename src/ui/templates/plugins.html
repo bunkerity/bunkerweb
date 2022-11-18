@@ -1,57 +1,80 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block content %}{% set current_endpoint =
+url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
+
+<!-- upload layout -->
+<div
+  class="p-4 col-span-12 lg:col-span-8 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="col-span-12 mb-2 font-bold dark:text-white">UPLOAD PLUGIN</h5>
+  <form
+    action="#"
+    class="grid grid-cols-12 w-full justify-items-center lg:justify-items-start"
+  >
+    <input
+      type="hidden"
+      id="csrf_token"
+      name="csrf_token"
+      value="{{ csrf_token() }}"
+    />
+    <input class="hidden" type="file" name="file" multiple="multiple" />
+  </form>
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <button type="submit" class="btn btn-outline-primary btn-block mt-2">
+      Reload plugins
+    </button>
+  </form>
+</div>
+<!-- end upload layout -->
+
+<!-- filter -->
+<div
+  class="p-4 col-span-12 lg:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="col-span-12 mb-2 font-bold dark:text-white">FILTER</h5>
+</div>
+<!-- end filter -->
 
 <div
-  class="min-h-75-screen p-4 col-span-12 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="min-h-50-screen max-h-100 p-4 col-span-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <!-- upload layout -->
-  <div class="col-span-12 lg:col-span-6">
-    <h5 class="mb-2 font-bold dark:text-white">UPLOAD PLUGIN</h5>
-    <form
-      action="#"
-      class="grid grid-cols-12 w-full justify-items-center lg:justify-items-start"
-    >
-      <input
-        type="hidden"
-        id="csrf_token"
-        name="csrf_token"
-        value="{{ csrf_token() }}"
-      />
-      <input class="hidden" type="file" name="file" multiple="multiple" />
-    </form>
-    <form method="POST">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <button type="submit" class="btn btn-outline-primary btn-block mt-2">
-        Reload plugins
-      </button>
-    </form>
-  </div>
-  <!-- end upload layout -->
-  <!-- plugin list -->
-  <div class="col-span-12 lg:col-span-6">
-    <h5 class="mb-2 font-bold dark:text-white">LIST PLUGIN</h5>
-    {% if pages %}
+  <h5 class="col-mb-2 font-bold dark:text-white">LIST</h5>
 
-    <ul
-      class="nav nav-pills flex-md-column flex-row mb-auto justify-content-start text-truncate"
-      id="pills-tab"
-      role="tablist"
+  <div class="grid grid-cols-12 gap-3">
+    {% for plugin in plugins %} {% if plugin['page'] %}
+
+    <a
+      {{current_endpoint}}-external="{{plugin['external']}}"
+      href="/plugins?{{plugin['id']}}"
+      class="py-3 cursor-pointer min-h-12 relative col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 3xl:col-span-2 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
-      {% for page in pages %}
-      <li class="nav-item">
-        <a
-          class="nav-link d-flex flex-row justify-content-between align-items-center px-2 text-truncate{{' active' if page['active']}}"
-          id="plugins-pages-{{ page['id'] }}-tab"
-          data-bs-toggle="pill"
-          href="#plugins-pages-{{ page['id'] }}"
-          role="tab"
-          aria-controls="plugins-pages-{{ page['id'] }}"
-          aria-selected=""
-        >
-          <span class="d-md-inline">{{ page["name"] }}</span>
-        </a>
-      </li>
-    </ul>
-    {% endfor %} {% endif %}
+      <p
+        class="ml-3 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-center text-sm md:text-base text-slate-700 dark:text-gray-300"
+      >
+        {{plugin['name']}}
+      </p>
+      <svg
+        class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+      >
+        <path
+          d="M288 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h50.7L169.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L384 141.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H288zM80 64C35.8 64 0 99.8 0 144V400c0 44.2 35.8 80 80 80H336c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v80c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V144c0-8.8 7.2-16 16-16h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"
+        ></path>
+      </svg>
+    </a>
+    {% else %}
+    <div
+      {{current_endpoint}}-external="{{plugin['external']}}"
+      class="py-3 cursor-pointer min-h-12 relative col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 3xl:col-span-2 p-1 flex justify-start items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
+    >
+      <p
+        class="ml-3 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-center text-sm md:text-base text-slate-700 dark:text-gray-300"
+      >
+        {{plugin['name']}}
+      </p>
+    </div>
+    {% endif %} {% endfor %}
   </div>
 </div>
 {% endblock %}
