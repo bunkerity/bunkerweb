@@ -175,8 +175,10 @@ class FetchLogs {
 
   init() {
     this.submitSettings.addEventListener("click", (e) => {
+      //remove prev logs
+      this.logListContainer.textContent = "";
       //wait if live update previously
-      if (this.isLiveUpdate) {
+      if (this.isLiveUpdate && !this.toDate) {
         setTimeout(() => {
           const isSettings = this.getSettings();
           return isSettings ? this.getLogsFromToDate() : "";
@@ -197,7 +199,7 @@ class FetchLogs {
       : Math.round(Date.now() / 1000 - 86400);
     this.toDate = this.toDateInp.valueAsNumber
       ? this.toDateInp.valueAsNumber
-      : "";
+      : false;
     this.updateDelay =
       this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
     this.isLiveUpdate = this.liveUpdateInp.checked;
@@ -215,7 +217,10 @@ class FetchLogs {
 
   async getLogsFromToDate() {
     const response = await fetch(
-      `${location.href}/${this.lastUpdate}?from_date=${this.fromDate}?to_date=${this.toDate}`
+      `${location.href}/${this.instanceName}?from_date=${this.fromDate}` +
+        this.toDate
+        ? `?to_date=${this.toDate}`
+        : ""
     );
 
     if (response.status === 200) {
@@ -230,7 +235,7 @@ class FetchLogs {
 
   async getLogsSinceLastUpdate() {
     const response = await fetch(
-      `${location.href}/${this.lastUpdate}` +
+      `${location.href}/${this.instanceName}` +
         (this.lastUpdate ? `?last_update=${this.lastUpdate}` : "")
     );
 
@@ -272,8 +277,8 @@ class FetchLogs {
     setTimeout(() => {
       this.goBottomList();
     }, 100);
-    //loop if true
-    if (this.isLiveUpdate) {
+    //loop if no to date and live update true
+    if (this.isLiveUpdate && !this.toDate) {
       setTimeout(() => {
         this.getLogsSinceLastUpdate();
       }, this.updateDelay);
