@@ -1,5 +1,5 @@
 import { Checkbox } from "./utils.js";
-//import AirDatepicker from "./air-datepicker/index.js";
+import Datepicker from "./datepicker/datepicker.js";
 
 class LogsDropdown {
   constructor(prefix = "logs") {
@@ -186,17 +186,45 @@ class FetchLogs {
         return isSettings ? this.getLogsFromToDate() : "";
       }
     });
+    //disabled/enabled filed logic
+    this.toDateInp.addEventListener("input", (e) => {
+      this.toDateInp.value
+        ? this.updateDelayInp.setAttribute("disabled", "")
+        : this.updateDelayInp.removeAttribute("disabled");
+      this.toDateInp.value
+        ? this.liveUpdateInp.setAttribute("disabled", "")
+        : this.liveUpdateInp.removeAttribute("disabled");
+    });
+
+    this.updateDelayInp.addEventListener("input", (e) => {
+      this.updateDelayInp.value
+        ? this.toDateInp.setAttribute("disabled", "")
+        : this.toDateInp.removeAttribute("disabled");
+    });
+
+    this.liveUpdateInp.addEventListener("input", (e) => {
+      this.liveUpdateInp.checked
+        ? this.toDateInp.setAttribute("disabled", "")
+        : this.toDateInp.removeAttribute("disabled");
+    });
   }
 
   getSettings() {
     //get settings
+    //check valid instance name
     this.instanceName = this.instance.textContent;
     if (!this.instanceName || this.instanceName.trim() === "none") return false;
-    this.fromDate = this.fromDateInp.valueAsNumber
-      ? this.fromDateInp.valueAsNumber
+    //if a date value exist, check if is a timestamp
+    if (this.fromDateInp.value && isNaN(Date.parse(this.fromDateInp.value)))
+      return false;
+    if (this.toDateInp.value && isNaN(Date.parse(this.toDateInp.value)))
+      return false;
+    //check valid date
+    this.fromDate = Date.parse(this.fromDateInp.value)
+      ? Date.parse(this.fromDateInp.value)
       : Date.now() - 86400000;
-    this.toDate = this.toDateInp.valueAsNumber
-      ? this.toDateInp.valueAsNumber
+    this.toDate = Date.parse(this.toDateInp.value)
+      ? Date.parse(this.toDateInp.value)
       : false;
     this.updateDelay =
       this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
@@ -372,7 +400,17 @@ class FilterLogs {
   }
 }
 
+class LogsDate {
+  constructor(el, options = {}) {
+    this.datepicker = new Datepicker(el, options);
+    this.init();
+    this.container = document.querySelector("[logs-settings]");
+  }
+}
+
 const setCheckbox = new Checkbox("[logs-settings]");
 const dropdown = new LogsDropdown();
 const setLogs = new FetchLogs();
 const setFilter = new FilterLogs();
+const fromDatepicker = new LogsDate(document.querySelector("input#from-date"));
+const toDatepicker = new LogsDate(document.querySelector("input#to-date"));

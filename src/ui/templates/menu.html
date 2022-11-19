@@ -301,8 +301,9 @@
       <!-- end default anchor -->
 
       <!-- plugin list -->
+      {% set plugins = config["CONFIG"].get_plugins() %} {% if
+      plugins_pages_count != 0 %}
       <div>
-        {% set plugins = config["CONFIG"].get_plugins() %}
         <ul>
           <li class="w-full mt-4">
             <h6
@@ -311,12 +312,7 @@
               PLUGINS PAGE
             </h6>
           </li>
-          {% if not plugins %}
-          <li
-          class="hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-6 transition"
-          >no plugins to display</span
-          >
-          {% else %} {% for plugin in plugins %} {% if plugin['page'] %}
+          {% for plugin in plugins %} {% if plugin['page'] %}
           <li class="mt-0.5 w-full">
             <a
               target="_blank"
@@ -342,11 +338,11 @@
               >
             </a>
           </li>
-          {% endif %} {% endfor %} {% endif %}
-
+          {% endif %} {% endfor %}
         </ul>
         <!-- end plugin list -->
       </div>
+      {% endif %}
     </div>
     <!-- end list items -->
   </div>
