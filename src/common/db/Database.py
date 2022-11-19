@@ -1240,7 +1240,6 @@ class Database:
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
-                            "data": cache.data,
                             "last_update": cache.last_update.strftime(
                                 "%Y/%m/%d, %I:%M:%S %p"
                             ),
@@ -1249,7 +1248,6 @@ class Database:
                         .with_entities(
                             Jobs_cache.service_id,
                             Jobs_cache.file_name,
-                            Jobs_cache.data,
                             Jobs_cache.last_update,
                         )
                         .filter_by(job_name=job.name)
@@ -1268,6 +1266,16 @@ class Database:
                     .all()
                 )
             }
+
+    def get_job_cache_file(self, job_name: str, file_name: str) -> Optional[bytes]:
+        """Get job cache file."""
+        with self.__db_session() as session:
+            return (
+                session.query(Jobs_cache)
+                .with_entities(Jobs_cache.data)
+                .filter_by(job_name=job_name, file_name=file_name)
+                .first()
+            )
 
     def save_log(
         self,
@@ -1341,3 +1349,21 @@ class Database:
                 return format_exc()
 
         return ""
+
+    def get_instances(self) -> List[Dict[str, Any]]:
+        """Get instances."""
+        with self.__db_session() as session:
+            return [
+                {
+                    "hostname": instance.hostname,
+                    "port": instance.port,
+                    "server_name": instance.server_name,
+                }
+                for instance in (
+                    session.query(Instances)
+                    .with_entities(
+                        Instances.hostname, Instances.port, Instances.server_name
+                    )
+                    .all()
+                )
+            ]
