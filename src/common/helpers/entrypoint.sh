@@ -11,7 +11,7 @@ log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSIO
 function trap_exit() {
 	log "ENTRYPOINT" "ℹ️" "Catched stop operation"
 	log "ENTRYPOINT" "ℹ️" "Stopping nginx ..."
-	/usr/sbin/nginx -s stop
+	nginx -s stop
 }
 trap "trap_exit" TERM INT QUIT
 

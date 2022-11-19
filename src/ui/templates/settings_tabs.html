@@ -13,7 +13,7 @@
     >
       <div class="w-full flex justify-between items-center">
         <!-- text and icon -->
-        <span class="text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300">{% if current_endpoint != "services" %}general {% else %} {% endif %} </span>
+        <span class="text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300">general</span>
         <svg
           {{current_endpoint}}-info-btn="general"
           class="fill-blue-500 h-5 w-5 mr-2 hover:brightness-75"
@@ -85,7 +85,7 @@
     type="button"
     class="dark:hover:brightness-90 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-6 py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
   >
-    <span class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary"></span>
+    <span class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary">{% if current_endpoint == "global-config" %}general {% endif %} </span>
     <!-- chevron -->
     <svg
       {{current_endpoint}}-mobile-chevron

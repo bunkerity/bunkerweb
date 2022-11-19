@@ -66,7 +66,7 @@
     <h5 class="mb-1 font-bold dark:text-white">{{ instances_number }}</h5>
     <p class="mb-0 dark:text-white dark:opacity-60">
       <span class="font-bold leading-normal text-sm text-emerald-500 mx-0.5"
-        >1 / {{ instances_number }}</span
+        >{{instance_health_count}} / {{ instances_number }}</span
       >
       is working
     </p>
@@ -104,10 +104,18 @@
     </p>
     <h5 class="mb-1 font-bold dark:text-white">{{ services_number }}</h5>
     <p class="mb-0 dark:text-white dark:opacity-60">
-      last created is
       <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
-        >service-1</span
+        >{{services_ui_count}}</span
       >
+      ui,
+      <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
+        >{{services_scheduler_count}}</span
+      >
+      scheduler,
+      <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
+        >{{services_autoconf_count}}</span
+      >
+      autoconf
     </p>
   </div>
   <!-- end text -->
@@ -145,7 +153,7 @@
     <h5 class="mb-1 font-bold dark:text-white">1</h5>
     <p class="mb-0 dark:text-white dark:opacity-60">
       <span class="font-bold leading-normal text-sm text-red-500 mx-0.5"
-        >0</span
+        >{{plugins_errors}}</span
       >
       error
     </p>

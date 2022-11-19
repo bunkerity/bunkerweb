@@ -2,7 +2,12 @@ from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
-from logging import INFO, WARNING, Logger, getLogger
+from logging import (
+    NOTSET,
+    Logger,
+    _levelToName,
+    _nameToLevel,
+)
 import oracledb
 from os import _exit, getenv, listdir, makedirs
 from os.path import dirname, exists
@@ -24,6 +29,8 @@ from traceback import format_exc
 
 from model import (
     Base,
+    Instances,
+    Logs,
     Plugins,
     Settings,
     Global_values,
@@ -55,10 +62,6 @@ class Database:
         self.__sql_session = None
         self.__sql_engine = None
 
-        getLogger("sqlalchemy.engine").setLevel(
-            logger.level if logger.level != INFO else WARNING
-        )
-
         if not sqlalchemy_string:
             sqlalchemy_string = getenv(
                 "DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3"
@@ -77,7 +80,6 @@ class Database:
                 sqlalchemy_string,
                 encoding="utf-8",
                 future=True,
-                logging_name="sqlalchemy.engine",
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -1238,7 +1240,6 @@ class Database:
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
-                            "data": cache.data,
                             "last_update": cache.last_update.strftime(
                                 "%Y/%m/%d, %I:%M:%S %p"
                             ),
@@ -1247,7 +1248,6 @@ class Database:
                         .with_entities(
                             Jobs_cache.service_id,
                             Jobs_cache.file_name,
-                            Jobs_cache.data,
                             Jobs_cache.last_update,
                         )
                         .filter_by(job_name=job.name)
@@ -1266,3 +1266,104 @@ class Database:
                     .all()
                 )
             }
+
+    def get_job_cache_file(self, job_name: str, file_name: str) -> Optional[bytes]:
+        """Get job cache file."""
+        with self.__db_session() as session:
+            return (
+                session.query(Jobs_cache)
+                .with_entities(Jobs_cache.data)
+                .filter_by(job_name=job_name, file_name=file_name)
+                .first()
+            )
+
+    def save_log(
+        self,
+        log: str,
+        level: Tuple[str, int],
+        component: str,
+    ) -> str:
+        """Save log."""
+        with self.__db_session() as session:
+            session.add(
+                Logs(
+                    id=int(datetime.now().timestamp()),
+                    message=log,
+                    level=str(_levelToName[_nameToLevel.get(level, NOTSET)])
+                    if isinstance(level, str)
+                    else _levelToName.get(level, "NOTSET"),
+                    component=component,
+                )
+            )
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def add_instance(self, hostname: str, port: int, server_name: str) -> str:
+        """Add instance."""
+        with self.__db_session() as session:
+            db_instance = (
+                session.query(Instances)
+                .with_entities(Instances.hostname)
+                .filter_by(hostname=hostname)
+                .first()
+            )
+
+            if db_instance is not None:
+                return "An instance with the same hostname already exists."
+
+            session.add(
+                Instances(hostname=hostname, port=int(port), server_name=server_name)
+            )
+
+            try:
+                session.commit()
+            except BaseException:
+                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}).\n{format_exc()}"
+
+        return ""
+
+    def update_instances(self, instances: List[Dict[str, Any]]) -> str:
+        """Update instances."""
+        to_put = []
+        with self.__db_session() as session:
+            session.query(Instances).delete()
+
+            for instance in instances:
+                to_put.append(
+                    Instances(
+                        hostname=instance["hostname"],
+                        port=instance["env"].get("API_HTTP_PORT", 5000),
+                        server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
+                    )
+                )
+
+            try:
+                session.add_all(to_put)
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def get_instances(self) -> List[Dict[str, Any]]:
+        """Get instances."""
+        with self.__db_session() as session:
+            return [
+                {
+                    "hostname": instance.hostname,
+                    "port": instance.port,
+                    "server_name": instance.server_name,
+                }
+                for instance in (
+                    session.query(Instances)
+                    .with_entities(
+                        Instances.hostname, Instances.port, Instances.server_name
+                    )
+                    .all()
+                )
+            ]

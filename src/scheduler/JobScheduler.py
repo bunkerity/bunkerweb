@@ -80,7 +80,7 @@ class JobScheduler(ApiCaller):
         if self.__integration == "Linux":
             self.__logger.info("Reloading nginx ...")
             proc = run(
-                ["/usr/sbin/nginx", "-s", "reload"],
+                ["nginx", "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=PIPE,
                 env=self.__env,
@@ -111,6 +111,8 @@ class JobScheduler(ApiCaller):
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 env=self.__env,
+                user=101,
+                group=101,
             )
         except BaseException:
             with self.__thread_lock:

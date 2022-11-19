@@ -108,10 +108,10 @@ try:
         external_plugins.append(plugin_file)
 
     if external_plugins:
-        ret = db.update_external_plugins(external_plugins)
-        if ret:
+        err = db.update_external_plugins(external_plugins)
+        if err:
             logger.error(
-                f"Couldn't update external plugins to database: {ret}",
+                f"Couldn't update external plugins to database: {err}",
             )
 
 except:

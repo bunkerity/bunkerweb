@@ -19,7 +19,7 @@ api.global.GET["^/ping$"] = function(api)
 end
 
 api.global.POST["^/reload$"] = function(api)
-	local status = os.execute("/usr/sbin/nginx -s reload")
+	local status = os.execute("nginx -s reload")
 	if status == 0 then
 		return api:response(ngx.HTTP_OK, "success", "reload successful")
 	end
@@ -27,7 +27,7 @@ api.global.POST["^/reload$"] = function(api)
 end
 
 api.global.POST["^/stop$"] = function(api)
-	local status = os.execute("/usr/sbin/nginx -s quit")
+	local status = os.execute("nginx -s quit")
 	if status == 0 then
 		return api:response(ngx.HTTP_OK, "success", "stop successful")
 	end

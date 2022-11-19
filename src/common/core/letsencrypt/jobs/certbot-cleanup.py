@@ -1,31 +1,45 @@
 #!/usr/bin/python3
 
-import sys, os, traceback
+from os import getenv, remove
+from os.path import exists, isfile
+from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 
-sys.path.append("/usr/share/bunkerweb/deps/python")
-sys.path.append("/usr/share/bunkerweb/utils")
-sys.path.append("/usr/share/bunkerweb/api")
+sys_path.append("/usr/share/bunkerweb/deps/python")
+sys_path.append("/usr/share/bunkerweb/utils")
+sys_path.append("/usr/share/bunkerweb/api")
+sys_path.append("/usr/share/bunkerweb/db")
 
+from Database import Database
 from logger import setup_logger
 from API import API
 
-logger = setup_logger("Lets-encrypt", os.getenv("LOG_LEVEL", "INFO"))
+logger = setup_logger("Lets-encrypt", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+)
 status = 0
 
 try:
     # Get env vars
-    is_kubernetes_mode = os.getenv("KUBERNETES_MODE") == "yes"
-    is_swarm_mode = os.getenv("SWARM_MODE") == "yes"
-    is_autoconf_mode = os.getenv("AUTOCONF_MODE") == "yes"
-    token = os.getenv("CERTBOT_TOKEN")
+    bw_integration = None
+    if getenv("KUBERNETES_MODE") == "yes":
+        bw_integration = "Swarm"
+    elif getenv("SWARM_MODE") == "yes":
+        bw_integration = "Kubernetes"
+    elif getenv("AUTOCONF_MODE") == "yes":
+        bw_integration = "Autoconf"
+    elif exists("/usr/share/bunkerweb/INTEGRATION"):
+        with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
+            bw_integration = f.read().strip()
+    token = getenv("CERTBOT_TOKEN")
 
     # Cluster case
-    if is_kubernetes_mode or is_swarm_mode or is_autoconf_mode:
-        for variable, value in os.environ.items():
-            if not variable.startswith("CLUSTER_INSTANCE_"):
-                continue
-            endpoint = value.split(" ")[0]
-            host = value.split(" ")[1]
+    if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
+        for instance in db.get_instances():
+            endpoint = f"http://{instance['hostname']}:{instance['port']}"
+            host = instance["server_name"]
             api = API(endpoint, host=host)
             sent, err, status, resp = api.request(
                 "DELETE", "/lets-encrypt/challenge", data={"token": token}
@@ -45,17 +59,15 @@ try:
                     logger.info(
                         f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/challenge",
                     )
-
-    # Docker or Linux case
+    # Linux case
     else:
         challenge_path = (
             f"/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/{token}"
         )
-        if os.path.isfile(challenge_path):
-            os.remove(challenge_path)
+        if isfile(challenge_path):
+            remove(challenge_path)
 except:
     status = 1
-    logger.error("Exception while running certbot-cleanup.py :")
-    print(traceback.format_exc())
+    logger.error(f"Exception while running certbot-cleanup.py :\n{format_exc()}")
 
-sys.exit(status)
+sys_exit(status)

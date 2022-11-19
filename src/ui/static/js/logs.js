@@ -1,12 +1,11 @@
 import { Checkbox } from "./utils.js";
-//import AirDatepicker from "./air-datepicker/index.js";
+import Datepicker from "./datepicker/datepicker.js";
 
 class LogsDropdown {
   constructor(prefix = "logs") {
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.initDropdown();
-    this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
   }
 
   initDropdown() {
@@ -163,10 +162,9 @@ class FetchLogs {
     this.toDateInp = document.querySelector("input#to-date");
     this.fromDate = "";
     this.toDate = "";
-
     this.isLiveUpdate = false;
     this.updateDelay = 2000;
-    this.lastUpdate = Math.round(Date.now() / 1000 - 86400);
+    this.lastUpdate = Date.now() - 86400000;
     this.container = document.querySelector(`[${this.prefix}-settings]`);
     this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
     this.submitSettings = document.querySelector("button#submit-settings");
@@ -175,8 +173,10 @@ class FetchLogs {
 
   init() {
     this.submitSettings.addEventListener("click", (e) => {
+      //remove prev logs
+      this.logListContainer.textContent = "";
       //wait if live update previously
-      if (this.isLiveUpdate) {
+      if (this.isLiveUpdate && !this.toDate) {
         setTimeout(() => {
           const isSettings = this.getSettings();
           return isSettings ? this.getLogsFromToDate() : "";
@@ -186,18 +186,46 @@ class FetchLogs {
         return isSettings ? this.getLogsFromToDate() : "";
       }
     });
+    //disabled/enabled filed logic
+    this.toDateInp.addEventListener("input", (e) => {
+      this.toDateInp.value
+        ? this.updateDelayInp.setAttribute("disabled", "")
+        : this.updateDelayInp.removeAttribute("disabled");
+      this.toDateInp.value
+        ? this.liveUpdateInp.setAttribute("disabled", "")
+        : this.liveUpdateInp.removeAttribute("disabled");
+    });
+
+    this.updateDelayInp.addEventListener("input", (e) => {
+      this.updateDelayInp.value
+        ? this.toDateInp.setAttribute("disabled", "")
+        : this.toDateInp.removeAttribute("disabled");
+    });
+
+    this.liveUpdateInp.addEventListener("input", (e) => {
+      this.liveUpdateInp.checked
+        ? this.toDateInp.setAttribute("disabled", "")
+        : this.toDateInp.removeAttribute("disabled");
+    });
   }
 
   getSettings() {
     //get settings
+    //check valid instance name
     this.instanceName = this.instance.textContent;
     if (!this.instanceName || this.instanceName.trim() === "none") return false;
-    this.formDate = this.fromDateInp.valueAsNumber
-      ? this.fromDateInp.valueAsNumber
-      : Math.round(Date.now() / 1000 - 86400);
-    this.toDate = this.toDateInp.valueAsNumber
-      ? this.toDateInp.valueAsNumber
-      : "";
+    //if a date value exist, check if is a timestamp
+    if (this.fromDateInp.value && isNaN(Date.parse(this.fromDateInp.value)))
+      return false;
+    if (this.toDateInp.value && isNaN(Date.parse(this.toDateInp.value)))
+      return false;
+    //check valid date
+    this.fromDate = Date.parse(this.fromDateInp.value)
+      ? Date.parse(this.fromDateInp.value)
+      : Date.now() - 86400000;
+    this.toDate = Date.parse(this.toDateInp.value)
+      ? Date.parse(this.toDateInp.value)
+      : false;
     this.updateDelay =
       this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
     this.isLiveUpdate = this.liveUpdateInp.checked;
@@ -214,9 +242,19 @@ class FetchLogs {
   }
 
   async getLogsFromToDate() {
-    const response = await fetch(
-      `${location.href}/${this.lastUpdate}?from_date=${this.fromDate}?to_date=${this.toDate}`
-    );
+    console.log(this.fromDate, this.toDate);
+    let response;
+    if (this.toDate) {
+      response = await fetch(
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}&to_date=${this.toDate}`
+      );
+    }
+
+    if (!this.toDate) {
+      response = await fetch(
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}`
+      );
+    }
 
     if (response.status === 200) {
       const res = await response.json();
@@ -230,7 +268,7 @@ class FetchLogs {
 
   async getLogsSinceLastUpdate() {
     const response = await fetch(
-      `${location.href}/${this.lastUpdate}` +
+      `${location.href}/${this.instanceName}` +
         (this.lastUpdate ? `?last_update=${this.lastUpdate}` : "")
     );
 
@@ -272,8 +310,8 @@ class FetchLogs {
     setTimeout(() => {
       this.goBottomList();
     }, 100);
-    //loop if true
-    if (this.isLiveUpdate) {
+    //loop if no to date and live update true
+    if (this.isLiveUpdate && !this.toDate) {
       setTimeout(() => {
         this.getLogsSinceLastUpdate();
       }, this.updateDelay);
@@ -286,7 +324,7 @@ class FilterLogs {
     this.prefix = prefix;
     this.container = document.querySelector(`[${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
-    this.lastType = "";
+    this.lastType = "all";
     this.initHandler();
   }
 
@@ -329,7 +367,6 @@ class FilterLogs {
     //filter type
     this.setFilterType(logs);
     this.setFilterKeyword(logs);
-    this.setFilterDate(logs);
   }
 
   setFilterType(logs) {
@@ -350,13 +387,24 @@ class FilterLogs {
   }
 
   setFilterKeyword(logs) {
-    const keyword = this.keyInp.value;
+    const keyword = this.keyInp.value.trim().toLowerCase();
     if (!keyword) return;
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
-      const content = el.querySelector("[logs-content]").textContent;
+      const content = el
+        .querySelector("[logs-content]")
+        .textContent.trim()
+        .toLowerCase();
       if (!content.includes(keyword)) el.classList.add("hidden");
     }
+  }
+}
+
+class LogsDate {
+  constructor(el, options = {}) {
+    this.datepicker = new Datepicker(el, options);
+    this.init();
+    this.container = document.querySelector("[logs-settings]");
   }
 }
 
@@ -364,3 +412,5 @@ const setCheckbox = new Checkbox("[logs-settings]");
 const dropdown = new LogsDropdown();
 const setLogs = new FetchLogs();
 const setFilter = new FilterLogs();
+const fromDatepicker = new LogsDate(document.querySelector("input#from-date"));
+const toDatepicker = new LogsDate(document.querySelector("input#to-date"));

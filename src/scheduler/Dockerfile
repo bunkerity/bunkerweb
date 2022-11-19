@@ -10,7 +10,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Install python requirements
-RUN apk add --no-cache --virtual .build-deps g++ gcc libffi-dev && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev && \
   pip install --no-cache-dir --upgrade pip && \
   pip install wheel && \
   mkdir -p /usr/share/bunkerweb/deps/python && \
@@ -51,7 +51,8 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   chown -R root:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
   for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
   for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
-  chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb && \
+  chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb && \
+  find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* && \
   mkdir /etc/nginx && \
   chown -R scheduler:scheduler /etc/nginx && \

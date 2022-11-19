@@ -1,3 +1,4 @@
+from io import BytesIO
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -15,6 +16,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     url_for,
 )
 from flask_login import LoginManager, login_required, login_user, logout_user
@@ -49,12 +51,6 @@ from src.User import User
 
 from utils import (
     check_settings,
-    env_to_summary_class,
-    form_plugin_gen,
-    form_service_gen,
-    form_service_gen_multiple,
-    form_service_gen_multiple_values,
-    gen_folders_tree_html,
     get_variables,
     path_to_dict,
 )
@@ -138,6 +134,8 @@ elif integration == "Kubernetes":
     kubernetes_client = kube_client.CoreV1Api()
 
 db = Database(logger)
+with open("/usr/share/bunkerweb/VERSION", "r") as f:
+    bw_version = f.read().strip()
 
 try:
     app.config.update(
@@ -164,14 +162,6 @@ except FileNotFoundError as e:
     sys_exit(1)
 
 # Declare functions for jinja2
-app.jinja_env.globals.update(env_to_summary_class=env_to_summary_class)
-app.jinja_env.globals.update(form_plugin_gen=form_plugin_gen)
-app.jinja_env.globals.update(form_service_gen=form_service_gen)
-app.jinja_env.globals.update(form_service_gen_multiple=form_service_gen_multiple)
-app.jinja_env.globals.update(
-    form_service_gen_multiple_values=form_service_gen_multiple_values
-)
-app.jinja_env.globals.update(gen_folders_tree_html=gen_folders_tree_html)
 app.jinja_env.globals.update(check_settings=check_settings)
 
 
@@ -273,27 +263,30 @@ def home():
         posts: a list of posts
     """
 
-    r = get(
-        "https://raw.githubusercontent.com/bunkerity/bunkerweb/master/VERSION",
-    )
+    try:
+        r = get(
+            "https://raw.githubusercontent.com/bunkerity/bunkerweb/master/VERSION",
+        )
+    except BaseException:
+        r = None
     remote_version = None
 
-    if r.status_code == 200:
+    if r and r.status_code == 200:
         remote_version = r.text.strip()
-
-    with open("/usr/share/bunkerweb/VERSION", "r") as f:
-        version = f.read().strip()
 
     headers = default_headers()
     headers.update({"User-Agent": "bunkerweb-ui"})
 
-    r = get(
-        "https://www.bunkerity.com/wp-json/wp/v2/posts",
-        headers=headers,
-    )
+    try:
+        r = get(
+            "https://www.bunkerity.com/wp-json/wp/v2/posts",
+            headers=headers,
+        )
+    except BaseException:
+        r = None
 
     formatted_posts = None
-    if r.status_code == 200:
+    if r and r.status_code == 200:
         posts = r.json()
         formatted_posts = []
 
@@ -325,12 +318,13 @@ def home():
 
     return render_template(
         "home.html",
-        check_version=not remote_version or version == remote_version,
+        check_version=not remote_version or bw_version == remote_version,
         remote_version=remote_version,
-        version=version,
+        version=bw_version,
         instances_number=instances_number,
         services_number=services_number,
         posts=formatted_posts,
+        plugins_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1019,7 +1013,6 @@ def plugins():
 
     return render_template(
         "plugins.html",
-        plugins=app.config["CONFIG"].get_plugins(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1275,36 +1268,48 @@ def logs_linux():
 @app.route("/logs/<container_id>", methods=["GET"])
 @login_required
 def logs_container(container_id):
-    last_update = request.args.get(
-        "last_update",
-        str(datetime.now().timestamp() - timedelta(days=1).total_seconds()),
-    )
+    last_update = request.args.get("last_update", None)
+    from_date = request.args.get("from_date", None)
+    to_date = request.args.get("to_date", None)
+
+    if from_date is not None:
+        last_update = from_date
+
+    if any(arg and not arg.isdigit() for arg in [last_update, from_date, to_date]):
+        return (
+            jsonify(
+                {
+                    "status": "ko",
+                    "message": "arguments must all be integers (timestamps)",
+                }
+            ),
+            422,
+        )
+    elif not last_update:
+        last_update = int(
+            datetime.now().timestamp()
+            - timedelta(days=1).total_seconds()  # 1 day before
+        )
+    else:
+        last_update = int(last_update) // 1000
+
+    to_date = int(to_date) // 1000 if to_date else None
+
     logs = []
     if docker_client:
         try:
-            if last_update and not last_update.isdigit():
-                return (
-                    jsonify(
-                        {
-                            "status": "ko",
-                            "message": "last_update must be an integer",
-                        }
-                    ),
-                    422,
-                )
-
             if getenv("SWARM_MODE", "no") == "no":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,
-                    since=datetime.fromtimestamp(int(last_update)),
+                    since=datetime.fromtimestamp(last_update),
                     timestamps=True,
                 )
             else:
                 docker_logs = docker_client.services.get(container_id).logs(
                     stdout=True,
                     stderr=True,
-                    since=datetime.fromtimestamp(int(last_update)),
+                    since=datetime.fromtimestamp(last_update),
                     timestamps=True,
                 )
 
@@ -1324,7 +1329,7 @@ def logs_container(container_id):
             kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
                 container_id,
                 getenv("KUBERNETES_NAMESPACE", "default"),
-                since_seconds=int(datetime.now().timestamp() - int(last_update)),
+                since_seconds=int(datetime.now().timestamp() - last_update),
                 timestamps=True,
             )
             tmp_logs = kubernetes_logs.split("\n")[0:-1]
@@ -1339,10 +1344,16 @@ def logs_container(container_id):
                 404,
             )
 
-    logger.warning(tmp_logs)
-
     for log in tmp_logs:
+        splitted = log.split(" ")
+        timestamp = splitted[0]
+
+        if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
+            break
+
+        log = " ".join(splitted[1:])
         log_lower = log.lower()
+
         logs.append(
             {
                 "content": log,
@@ -1371,9 +1382,45 @@ def logs_container(container_id):
 def jobs():
     return render_template(
         "jobs.html",
-        jobs=db.get_jobs(),
+        jobs=dumps(db.get_jobs()),
         dark_mode=app.config["DARK_MODE"],
     )
+
+
+@app.route("/jobs/download", methods=["GET"])
+@login_required
+def jobs_download():
+    job_name = request.args.get("job_name", None)
+    file_name = request.args.get("file_name", None)
+
+    if not job_name or not file_name:
+        return (
+            jsonify(
+                {
+                    "status": "ko",
+                    "message": "job_name and file_name are required",
+                }
+            ),
+            422,
+        )
+
+    cache_file = db.get_job_cache_file(job_name, file_name)
+
+    if not cache_file:
+        return (
+            jsonify(
+                {
+                    "status": "ko",
+                    "message": "file not found",
+                }
+            ),
+            404,
+        )
+
+    with BytesIO(cache_file) as file:
+        file.seek(0)
+
+    return send_file(file, as_attachment=True, attachment_filename=file_name)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -1414,12 +1461,6 @@ def darkmode():
             app.config["DARK_MODE"] = False
 
     return jsonify({"status": "ok"})
-
-
-@app.route("/plugins_errors", methods=["GET"])
-@login_required
-def plugins_errors():
-    return jsonify({"status": "ok", "plugins_errors": db.get_plugins_errors()})
 
 
 @app.route("/check_reloading")

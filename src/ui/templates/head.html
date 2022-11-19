@@ -34,14 +34,24 @@
   {% elif current_endpoint == "services" %}
   <script defer type="module" src="./js/services.js"></script>
   {% elif current_endpoint == "plugins" %}
-  <script type="module" defer src="./js/dropzone-min.js"></script>
-  <script type="module" defer src="./js/dropzone-min.js.map"></script>
+  <script type="module" defer src="./js/dropzone/dropzone-min.js"></script>
+  <script
+    type="application"
+    defer
+    src="./js/dropzone/dropzone-min.js.map"
+  ></script>
   <script type="module" defer src="./js/plugins.js"></script>
   <link rel="stylesheet" type="text/css" href="./css/dropzone/dropzone.css" />
   {% elif current_endpoint == "cache" %}
   <script defer type="module" src="./js/cache.js"></script>
   {% elif current_endpoint == "logs" %}
-  <script type="module" src="./js/logs.js"></script>
+  <script type="module" defer src="./js/datepicker/Datepicker.js"></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="./css/datepicker-foundation.css"
+  />
 
+  <script type="module" defer src="./js/logs.js"></script>
   {% endif %}
 </head>
