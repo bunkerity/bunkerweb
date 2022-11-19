@@ -8,138 +8,126 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>BunkerWeb UI</title>
     <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
-    <link href="webfonts/karla.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/login.css" />
+    <!--     Fonts and icons     -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/dashboard.css" />
   </head>
   <body>
-    <div class="position-fixed bottom-0 end-0 p-3 pt-5 toast-container">
-      {% if error %}
-      <div
-        class="toast fade show"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="toast-header">
-          <img
-            src="images/favicon.ico"
-            class="rounded me-2"
-            alt="BunkerWeb icon"
-            width="14"
-            height="14"
-          />
-          <strong class="me-auto">BunkerWeb</strong>
-          <small style="color: rgb(168, 0, 0)">error</small>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="toast-body">{{ error }}</div>
-      </div>
-      {% endif %} {% with messages = get_flashed_messages(with_categories=true)
-      %} {% if messages %} {% for category, message in messages %}
-      <div
-        class="toast fade show"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="toast-header">
-          <img
-            src="images/favicon.ico"
-            class="rounded me-2"
-            alt="BunkerWeb icon"
-            width="14"
-            height="14"
-          />
-          <strong class="me-auto">BunkerWeb</strong>
-          <small style="color: rgb(168, 0, 0)">error</small>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="toast-body">{{ message|safe }}</div>
-      </div>
-      {% endfor %} {% endif %} {% endwith %}
+    {% if error %}
+    <!-- flash message-->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div
+      flash-message
+      class="hidden p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-screen-sm min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
+    >
+      {% if category == 'error' %}
+      <h5 class="text-lg mb-0 text-red-500">error</h5>
+      <p class="text-red-500 mb-0 text-sm">{{ message|safe }}</p>
+      {% endif %} {% if category == 'success' %}
+      <h5 class="text-lg mb-0 text-green-500">success</h5>
+      <p class="text-green-500 mb-0 text-sm">{{ message|safe }}</p>
+      {% endif %}
     </div>
-    <main>
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-6 login-section-wrapper">
-            <div class="brand-wrapper d-sm-none">
-              <img
-                src="images/BUNKERWEB-print-hd.png"
-                alt="logo"
-                class="logo"
-              />
-            </div>
-            <div class="login-wrapper my-auto">
-              <h1 class="login-title">Log in</h1>
-              <form action="login" method="POST" autocomplete="off">
-                <input
-                  type="hidden"
-                  name="csrf_token"
-                  value="{{ csrf_token() }}"
-                />
-                <input
-                  type="hidden"
-                  name="next"
-                  value="{{ request.values.get('next', '') }}"
-                />
-                <div class="form-group">
-                  <label for="username">Username</label>
-                  <input
-                    type="username"
-                    name="username"
-                    id="username"
-                    class="form-control"
-                    placeholder="Username"
-                    required=""
-                  />
-                </div>
-                <div class="form-group mb-4">
-                  <label for="password">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    class="form-control"
-                    placeholder="enter your password"
-                    required=""
-                  />
-                </div>
-                <input
-                  name="login"
-                  id="login"
-                  class="btn btn-block login-btn"
-                  type="submit"
-                  value="Login"
-                />
-              </form>
-            </div>
-          </div>
-          <div class="col-sm-6 px-0 d-none d-sm-block">
-            <div id="particles-js" class="login-img"></div>
+    {% endfor %} {% endif %} {% endwith %} {%endif %}
+    <!-- end flash message-->
+    <!--content -->
+    <main class="grid grid-cols-2 align-middle items-center min-h-screen">
+      <!--form -->
+      <div
+        class="col-span-2 lg:col-span-1 bg-none lg:bg-gray-50 h-full flex flex-col items-center justify-center"
+      >
+        <div class="bg-gray-50 rounded px-12 py-16 w-full max-w-[400px]">
+          <div class="flex justify-center">
             <img
-              src="images/BUNKERWEB-print-hd-blanc.png"
+              class="lg:hidden max-w-60 max-h-30 mb-6"
+              src="images/BUNKERWEB-print-hd.png"
               alt="logo"
-              class="images login-logo"
+              class="logo"
             />
           </div>
+          <h1
+            class="hidden lg:block text-center font-bold dark:text-white mb-8"
+          >
+            Log in
+          </h1>
+          <form action="login" method="POST" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input
+              type="hidden"
+              name="next"
+              value="{{ request.values.get('next', '') }}"
+            />
+            <!-- username inpt-->
+            <div class="flex flex-col relative col-span-12 my-3">
+              <h5
+                class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+              >
+                Username
+              </h5>
+              <input
+                type="username"
+                id="username"
+                name="username"
+                class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                placeholder="enter username"
+                pattern="(.*?)"
+                required
+              />
+            </div>
+            <!-- end username inpt-->
+            <!-- password inpt-->
+            <div class="flex flex-col relative col-span-12 my-3">
+              <h5
+                class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+              >
+                Password
+              </h5>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                placeholder="enter password"
+                pattern="(.*?)"
+                required
+              />
+            </div>
+            <!-- end password inpt-->
+            <div class="flex justify-center">
+              <button
+                type="submit"
+                id="login"
+                name="login"
+                value="login"
+                class="my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+              >
+                Log in
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- end form -->
+      <!-- particles -->
+      <div class="-z-10 fixed lg:relative lg:col-span-1 bg-primary">
+        <div id="particles-js" class="login-img [&>*]:bg-primary"></div>
+        <div class="hidden lg:flex justify-center">
+          <img
+            class="max-w-60 max-h-30"
+            src="images/BUNKERWEB-print-hd-blanc.png"
+            alt="logo"
+            class="images login-logo"
+          />
         </div>
       </div>
     </main>
+    <!-- end particles -->
+    <!-- end content -->
     <script src="js/tsparticles.bundle.min.js"></script>
-    <script src="js/jquery.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
     <script>
       tsParticles.loadJSON("particles-js", "json/particles.json");
     </script>
