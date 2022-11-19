@@ -1,32 +1,46 @@
 #!/usr/bin/python3
 
-import sys, os, traceback
+from os import getenv, makedirs
+from os.path import exists
+from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 
-sys.path.append("/usr/share/bunkerweb/deps/python")
-sys.path.append("/usr/share/bunkerweb/utils")
-sys.path.append("/usr/share/bunkerweb/api")
+sys_path.append("/usr/share/bunkerweb/deps/python")
+sys_path.append("/usr/share/bunkerweb/utils")
+sys_path.append("/usr/share/bunkerweb/api")
+sys_path.append("/usr/share/bunkerweb/db")
 
+from Database import Database
 from logger import setup_logger
 from API import API
 
-logger = setup_logger("Lets-encrypt", os.getenv("LOG_LEVEL", "INFO"))
+logger = setup_logger("Lets-encrypt", getenv("LOG_LEVEL", "INFO"))
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+)
 status = 0
 
 try:
     # Get env vars
-    is_kubernetes_mode = os.getenv("KUBERNETES_MODE") == "yes"
-    is_swarm_mode = os.getenv("SWARM_MODE") == "yes"
-    is_autoconf_mode = os.getenv("AUTOCONF_MODE") == "yes"
-    token = os.getenv("CERTBOT_TOKEN")
-    validation = os.getenv("CERTBOT_VALIDATION")
+    bw_integration = None
+    if getenv("KUBERNETES_MODE") == "yes":
+        bw_integration = "Swarm"
+    elif getenv("SWARM_MODE") == "yes":
+        bw_integration = "Kubernetes"
+    elif getenv("AUTOCONF_MODE") == "yes":
+        bw_integration = "Autoconf"
+    elif exists("/usr/share/bunkerweb/INTEGRATION"):
+        with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
+            bw_integration = f.read().strip()
+    token = getenv("CERTBOT_TOKEN")
+    validation = getenv("CERTBOT_VALIDATION")
 
     # Cluster case
-    if is_kubernetes_mode or is_swarm_mode or is_autoconf_mode:
-        for variable, value in os.environ.items():
-            if not variable.startswith("CLUSTER_INSTANCE_"):
-                continue
-            endpoint = value.split(" ")[0]
-            host = value.split(" ")[1]
+    if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
+        for instance in db.get_instances():
+            endpoint = f"http://{instance['hostname']}:{instance['port']}"
+            host = instance["server_name"]
             api = API(endpoint, host=host)
             sent, err, status, resp = api.request(
                 "POST",
@@ -49,15 +63,14 @@ try:
                         f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/challenge",
                     )
 
-    # Docker or Linux case
+    # Linux case
     else:
         root_dir = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
-        os.makedirs(root_dir, exist_ok=True)
-        with open(root_dir + token, "w") as f:
+        makedirs(root_dir, exist_ok=True)
+        with open(f"{root_dir}{token}", "w") as f:
             f.write(validation)
 except:
     status = 1
-    logger.error("Exception while running certbot-auth.py :")
-    print(traceback.format_exc())
+    logger.error(f"Exception while running certbot-auth.py :\n{format_exc()}")
 
-sys.exit(status)
+sys_exit(status)
