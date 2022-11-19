@@ -302,7 +302,7 @@
 
       <!-- plugin list -->
       <div>
-        {% set plugs = config["CONFIG"].get_plugins() %}
+        {% set plugins = config["CONFIG"].get_plugins() %}
         <ul>
           <li class="w-full mt-4">
             <h6
@@ -311,12 +311,12 @@
               PLUGINS PAGE
             </h6>
           </li>
-          {% if not plugs %}
+          {% if not plugins %}
           <li
           class="hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-6 transition"
           >no plugins to display</span
           >
-          {% else %} {% for plugin in plugs %} {% if plugin['page'] %}
+          {% else %} {% for plugin in plugins %} {% if plugin['page'] %}
           <li class="mt-0.5 w-full">
             <a
               target="_blank"

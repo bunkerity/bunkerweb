@@ -6,7 +6,6 @@ class LogsDropdown {
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.initDropdown();
-    this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
   }
 
   initDropdown() {
@@ -297,7 +296,7 @@ class FilterLogs {
     this.prefix = prefix;
     this.container = document.querySelector(`[${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
-    this.lastType = "";
+    this.lastType = "all";
     this.initHandler();
   }
 
@@ -340,7 +339,6 @@ class FilterLogs {
     //filter type
     this.setFilterType(logs);
     this.setFilterKeyword(logs);
-    this.setFilterDate(logs);
   }
 
   setFilterType(logs) {
@@ -361,11 +359,14 @@ class FilterLogs {
   }
 
   setFilterKeyword(logs) {
-    const keyword = this.keyInp.value;
+    const keyword = this.keyInp.value.trim().toLowerCase();
     if (!keyword) return;
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
-      const content = el.querySelector("[logs-content]").textContent;
+      const content = el
+        .querySelector("[logs-content]")
+        .textContent.trim()
+        .toLowerCase();
       if (!content.includes(keyword)) el.classList.add("hidden");
     }
   }
