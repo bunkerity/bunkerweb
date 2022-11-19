@@ -172,4 +172,4 @@ def path_to_dict(
 
 
 def check_settings(settings: dict, check: str) -> bool:
-    return not any(setting["context"] != check for setting in settings.values())
+    return any(setting["context"] == check for setting in settings.values())
