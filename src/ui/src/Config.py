@@ -166,10 +166,10 @@ class Config:
         if proc.returncode != 0:
             raise Exception(f"Error from generator (return code = {proc.returncode})")
 
-        ret = self.__db.save_config(conf, "ui")
-        if ret:
+        err = self.__db.save_config(conf, "ui")
+        if err:
             self.__logger.error(
-                f"Can't save config in database: {ret}",
+                f"Can't save config in database: {err}",
             )
 
     def get_plugins_settings(self) -> dict:

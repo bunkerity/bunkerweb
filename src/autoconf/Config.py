@@ -78,24 +78,24 @@ class Config(ConfigCaller):
             sleep(5)
 
         # update instances in database
-        ret = self._db.update_instances(self.__instances)
-        if ret:
-            self.__logger.error(f"Failed to update instances: {ret}")
+        err = self._db.update_instances(self.__instances)
+        if err:
+            self.__logger.error(f"Failed to update instances: {err}")
 
         # save config to database
-        ret = self._db.save_config(self.__config, "autoconf")
-        if ret:
+        err = self._db.save_config(self.__config, "autoconf")
+        if err:
             success = False
             self.__logger.error(
-                f"Can't save autoconf config in database: {ret}",
+                f"Can't save autoconf config in database: {err}",
             )
 
         # save custom configs to database
-        ret = self._db.save_custom_configs(custom_configs, "autoconf")
-        if ret:
+        err = self._db.save_custom_configs(custom_configs, "autoconf")
+        if err:
             success = False
             self.__logger.error(
-                f"Can't save autoconf custom configs in database: {ret}",
+                f"Can't save autoconf custom configs in database: {err}",
             )
 
         return success

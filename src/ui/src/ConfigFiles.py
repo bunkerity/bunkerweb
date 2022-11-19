@@ -43,9 +43,9 @@ class ConfigFiles:
                             }
                         )
 
-        ret = self.__db.save_custom_configs(custom_configs, "ui")
-        if ret:
-            self.__logger.error(f"Could not save custom configs: {ret}")
+        err = self.__db.save_custom_configs(custom_configs, "ui")
+        if err:
+            self.__logger.error(f"Could not save custom configs: {err}")
             return "Couldn't save custom configs to database"
 
         return ""

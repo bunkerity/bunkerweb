@@ -191,11 +191,11 @@ if __name__ == "__main__":
                 "Kubernetes",
                 "Autoconf",
             ):
-                ret = db.set_autoconf_load(False)
-                if ret:
+                err = db.set_autoconf_load(False)
+                if err:
                     success = False
                     logger.error(
-                        f"Can't set autoconf loaded metadata to false in database: {ret}",
+                        f"Can't set autoconf loaded metadata to false in database: {err}",
                     )
 
                 while not db.is_autoconf_loaded():
@@ -208,8 +208,16 @@ if __name__ == "__main__":
                 or db.get_config() != dotenv_values("/var/tmp/bunkerweb/variables.env")
             ):
                 # run the config saver
-                cmd = f"python /usr/share/bunkerweb/gen/save_config.py --settings /usr/share/bunkerweb/settings.json"
-                proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+                proc = subprocess_run(
+                    [
+                        "python",
+                        "/usr/share/bunkerweb/gen/save_config.py",
+                        "--settings",
+                        "/usr/share/bunkerweb/settings.json",
+                    ],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                )
                 if proc.returncode != 0:
                     logger.error(
                         "Config saver failed, configuration will not work as expected...",
@@ -260,10 +268,10 @@ if __name__ == "__main__":
         if custom_confs:
             old_configs = db.get_custom_configs()
 
-            ret = db.save_custom_configs(custom_confs, "manual")
-            if ret:
+            err = db.save_custom_configs(custom_confs, "manual")
+            if err:
                 logger.error(
-                    f"Couldn't save some manually created custom configs to database: {ret}",
+                    f"Couldn't save some manually created custom configs to database: {err}",
                 )
 
         custom_configs = db.get_custom_configs()
@@ -299,8 +307,21 @@ if __name__ == "__main__":
 
             if generate is True:
                 # run the generator
-                cmd = f"python /usr/share/bunkerweb/gen/main.py --settings /usr/share/bunkerweb/settings.json --templates /usr/share/bunkerweb/confs --output /etc/nginx{f' --variables {args.variables}' if args.variables else ''}"
-                proc = subprocess_run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+                proc = subprocess_run(
+                    [
+                        "python3",
+                        "/usr/share/bunkerweb/gen/main.py",
+                        "--settings",
+                        "/usr/share/bunkerweb/settings.json",
+                        "--templates",
+                        "/usr/share/bunkerweb/confs",
+                        "--output",
+                        "/etc/nginx",
+                    ]
+                    + (["--variables", args.variables] if args.variables else []),
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                )
 
                 if proc.returncode != 0:
                     logger.error(

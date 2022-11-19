@@ -37,10 +37,10 @@ class BWLogger(Logger):
     ):
         if store_db is True and db is not None:
             with self.db_lock:
-                ret = db.save_log(msg, level, self.name)
+                err = db.save_log(msg, level, self.name)
 
-                if ret:
-                    self.warning("Failed to save log to database")
+                if err:
+                    self.error(f"Failed to save log to database: {err}")
 
         return super(BWLogger, self)._log(
             level, msg, args, exc_info, extra, stack_info, stacklevel

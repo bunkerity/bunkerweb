@@ -373,21 +373,21 @@ if __name__ == "__main__":
         if apis:
             for api in apis:
                 endpoint_data = api.get_endpoint().replace("http://", "").split(":")
-                ret = db.add_instance(
+                err = db.add_instance(
                     endpoint_data[0], endpoint_data[1], api.get_host()
                 )
 
-                if ret:
-                    logger.warning(ret)
+                if err:
+                    logger.warning(err)
         else:
-            ret = db.add_instance(
+            err = db.add_instance(
                 "localhost",
                 config_files.get("API_HTTP_PORT", 5000),
                 config_files.get("API_SERVER_NAME", "bwapi"),
             )
 
-            if ret:
-                logger.warning(ret)
+            if err:
+                logger.warning(err)
     except SystemExit as e:
         sys_exit(e)
     except:
