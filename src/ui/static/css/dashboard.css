@@ -1219,6 +1219,10 @@ h6 {
   max-height: 7.5rem;
 }
 
+.max-h-135 {
+  max-height: 33.75rem;
+}
+
 .min-h-20 {
   min-height: 5rem;
 }
@@ -1257,6 +1261,14 @@ h6 {
 
 .min-h-screen {
   min-height: 100vh;
+}
+
+.min-h-90 {
+  min-height: 22.5rem;
+}
+
+.min-h-80 {
+  min-height: 20rem;
 }
 
 .w-full {
@@ -1329,6 +1341,26 @@ h6 {
 
 .min-w-0 {
   min-width: 0px;
+}
+
+.min-w-\[900\] {
+  min-width: 900;
+}
+
+.min-w-\[900px\] {
+  min-width: 900px;
+}
+
+.min-w-\[800px\] {
+  min-width: 800px;
+}
+
+.min-w-\[700px\] {
+  min-width: 700px;
+}
+
+.min-w-\[750px\] {
+  min-width: 750px;
 }
 
 .max-w-screen-sm {
@@ -1531,6 +1563,10 @@ h6 {
   resize: both;
 }
 
+.scroll-m-4 {
+  scroll-margin: 1rem;
+}
+
 .list-none {
   list-style-type: none;
 }
@@ -1618,12 +1654,28 @@ h6 {
   overflow: hidden;
 }
 
+.overflow-scroll {
+  overflow: scroll;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
 .overflow-y-auto {
   overflow-y: auto;
 }
 
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+
+.overflow-x-scroll {
+  overflow-x: scroll;
+}
+
+.overflow-y-scroll {
+  overflow-y: scroll;
 }
 
 .whitespace-nowrap {
@@ -3122,6 +3174,10 @@ h6 {
     grid-column: span 2 / span 2;
   }
 
+  .sm\:col-span-8 {
+    grid-column: span 8 / span 8;
+  }
+
   .sm\:col-start-5 {
     grid-column-start: 5;
   }
@@ -3171,6 +3227,22 @@ h6 {
 
   .sm\:max-h-28 {
     max-height: 7rem;
+  }
+
+  .sm\:max-h-0 {
+    max-height: 0px;
+  }
+
+  .sm\:max-h-120 {
+    max-height: 30rem;
+  }
+
+  .sm\:max-h-135 {
+    max-height: 33.75rem;
+  }
+
+  .sm\:max-h-125 {
+    max-height: 31.25rem;
   }
 
   .sm\:w-80 {
@@ -3287,8 +3359,16 @@ h6 {
     display: none;
   }
 
+  .md\:max-h-160 {
+    max-height: 40rem;
+  }
+
   .md\:min-h-75-screen {
     min-height: 75vh;
+  }
+
+  .md\:min-h-50-screen {
+    min-height: 50vh;
   }
 
   .md\:w-1\/2 {
