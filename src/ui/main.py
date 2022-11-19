@@ -1,3 +1,4 @@
+from io import BytesIO
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -15,6 +16,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     url_for,
 )
 from flask_login import LoginManager, login_required, login_user, logout_user
@@ -1383,6 +1385,42 @@ def jobs():
         jobs=dumps(db.get_jobs()),
         dark_mode=app.config["DARK_MODE"],
     )
+
+
+@app.route("/jobs/download", methods=["GET"])
+@login_required
+def jobs_download():
+    job_name = request.args.get("job_name", None)
+    file_name = request.args.get("file_name", None)
+
+    if not job_name or not file_name:
+        return (
+            jsonify(
+                {
+                    "status": "ko",
+                    "message": "job_name and file_name are required",
+                }
+            ),
+            422,
+        )
+
+    cache_file = db.get_job_cache_file(job_name, file_name)
+
+    if not cache_file:
+        return (
+            jsonify(
+                {
+                    "status": "ko",
+                    "message": "file not found",
+                }
+            ),
+            404,
+        )
+
+    with BytesIO(cache_file) as file:
+        file.seek(0)
+
+    return send_file(file, as_attachment=True, attachment_filename=file_name)
 
 
 @app.route("/login", methods=["GET", "POST"])
