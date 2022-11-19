@@ -1380,7 +1380,7 @@ def logs_container(container_id):
 def jobs():
     return render_template(
         "jobs.html",
-        jobs=[dumps(job) for job in db.get_jobs()],
+        jobs=dumps(db.get_jobs()),
         dark_mode=app.config["DARK_MODE"],
     )
 
