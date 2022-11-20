@@ -197,10 +197,14 @@ class JobScheduler(ApiCaller):
                 path = job["path"]
                 name = job["name"]
                 file = job["file"]
-                thread = Thread(
-                    target=self.__job_wrapper, args=(path, plugin, name, file)
-                )
-                threads.append(thread)
+
+                if job["name"].startswith("bunkernet"):
+                    self.__job_wrapper(path, plugin, name, file)
+                else:
+                    thread = Thread(
+                        target=self.__job_wrapper, args=(path, plugin, name, file)
+                    )
+                    threads.append(thread)
 
         for thread in threads:
             thread.start()
