@@ -27,7 +27,7 @@ services:
   ...
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -38,9 +38,10 @@ services:
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     # more info at https://docs.bunkerweb.io
     volumes:
-      - bw_data:/data
+      - bw-data:/data
     environment:
       - SERVER_NAME=${DOMAIN}
+      - API_WHITELIST_IP=127.0.0.0/8 10.7.7.0/24
       - AUTO_LETS_ENCRYPT=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
@@ -48,13 +49,26 @@ services:
       - REVERSE_PROXY_WS=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://10.7.7.253:48087
+    labels:
+      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     # You have to put this IP address in your docker-compose.yml file
     networks:
       bbb-net:
         ipv4_address: 10.7.7.254
-  
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    volumes:
+      - bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      bbb-net:
+        ipv4_address: 10.7.7.42
+
   ...
 
 volumes:
   ...
-  bw_data:
+  bw-data:

@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -16,6 +16,7 @@ services:
       - ./bw-data:/data # contains web files (PHP, assets, ...), don't forget to rename the subfolders
     environment:
       - SERVER_NAME=app1.example.com app2.example.com app3.example.com # replace with your domains
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - MULTISITE=yes
       - AUTO_LETS_ENCRYPT=yes
       - DISABLE_DEFAULT_SERVER=yes
@@ -30,10 +31,23 @@ services:
       - app2.example.com_REMOTE_PHP_PATH=/app
       - app3.example.com_REMOTE_PHP=myapp3
       - app3.example.com_REMOTE_PHP_PATH=/app
+    labels:
+      - "bunkerweb.INSTANCE"
     networks:
+      - bw-universe
       - net_app1
       - net_app2
       - net_app3
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    volumes:
+      - ./bw-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bw-universe
 
   myapp1:
     image: php:fpm
@@ -69,6 +83,11 @@ services:
       - net_app3
 
 networks:
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
   net_app1:
   net_app2:
   net_app3:
