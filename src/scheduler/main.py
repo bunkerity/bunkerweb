@@ -42,7 +42,7 @@ reloading = False
 logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
 
-def handle_stop(_, _):
+def handle_stop(signum, frame):
     global run, scheduler
     run = False
     if scheduler is not None:
