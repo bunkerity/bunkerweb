@@ -3,7 +3,6 @@
 from argparse import ArgumentParser
 from copy import deepcopy
 from glob import glob
-from json import load
 from os import (
     _exit,
     chmod,
@@ -17,10 +16,9 @@ from os import (
     walk,
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
-from re import compile as re_compile
 from shutil import chown, copy, rmtree
 from signal import SIGINT, SIGTERM, signal
-from subprocess import PIPE, run as subprocess_run, DEVNULL, STDOUT
+from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -289,6 +287,9 @@ if __name__ == "__main__":
             logger.warning(
                 "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
             )
+
+        if exists("/var/lib/bunkerweb/db.sqlite3"):
+            chmod("/var/lib/bunkerweb/db.sqlite3", 0o760)
 
         while True:
             # Instantiate scheduler

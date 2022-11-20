@@ -111,6 +111,6 @@ try:
 
 except:
     status = 2
-    logger.error(f"Exception while running certbot-new.py :\n{format_exc()}")
+    logger.error(f"Exception while running self-signed.py :\n{format_exc()}")
 
 sys_exit(status)

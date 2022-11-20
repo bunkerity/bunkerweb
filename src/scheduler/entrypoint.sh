@@ -27,10 +27,6 @@ if ! grep -q "Docker" /usr/share/bunkerweb/INTEGRATION ; then
 	fi
 fi
 
-if [ -f /var/lib/bunkerweb/db.sqlite3 ] ; then
-	chown scheduler:scheduler /var/lib/bunkerweb/db.sqlite3
-fi
-
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
 /usr/share/bunkerweb/scheduler/main.py

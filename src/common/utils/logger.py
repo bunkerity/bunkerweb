@@ -68,6 +68,9 @@ getLogger("sqlalchemy.orm.strategies.LazyLoader").setLevel(
 getLogger("sqlalchemy.pool.impl.QueuePool").setLevel(
     default_level if default_level != INFO else WARNING
 )
+getLogger("sqlalchemy.pool.impl.NullPool").setLevel(
+    default_level if default_level != INFO else WARNING
+)
 getLogger("sqlalchemy.engine.Engine").setLevel(
     default_level if default_level != INFO else WARNING
 )
