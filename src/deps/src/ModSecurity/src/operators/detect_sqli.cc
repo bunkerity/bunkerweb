@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -25,33 +25,34 @@ namespace modsecurity {
 namespace operators {
 
 
-bool DetectSQLi::evaluate(Transaction *t, Rule *rule,
+bool DetectSQLi::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
     char fingerprint[8];
     int issqli;
 
     issqli = libinjection_sqli(input.c_str(), input.length(), fingerprint);
 
-    if (issqli) {
-        if (t) {
-            t->m_matched.push_back(fingerprint);
-            ms_dbg_a(t, 4, "detected SQLi using libinjection with " \
-                "fingerprint '" + std::string(fingerprint) + "' at: '" +
-                input + "'");
-            if (rule && t && rule->m_containsCaptureAction) {
-                t->m_collections.m_tx_collection->storeOrUpdateFirst(
-                    "0", std::string(fingerprint));
-                ms_dbg_a(t, 7, "Added DetectSQLi match TX.0: " + \
-                    std::string(fingerprint));
-                }
-        }
-    } else {
-        if (t) {
-            ms_dbg_a(t, 9, "detected SQLi: not able to find an " \
-                "inject on '" + input + "'");
-        }
+    if (!t) {
+        goto tisempty;
     }
 
+    if (issqli) {
+        t->m_matched.push_back(fingerprint);
+        ms_dbg_a(t, 4, "detected SQLi using libinjection with " \
+            "fingerprint '" + std::string(fingerprint) + "' at: '" +
+            input + "'");
+        if (rule && rule->hasCaptureAction()) {
+            t->m_collections.m_tx_collection->storeOrUpdateFirst(
+                "0", std::string(fingerprint));
+            ms_dbg_a(t, 7, "Added DetectSQLi match TX.0: " + \
+                std::string(fingerprint));
+        }
+    } else {
+        ms_dbg_a(t, 9, "detected SQLi: not able to find an " \
+            "inject on '" + input + "'");
+    }
+
+tisempty:
     return issqli != 0;
 }
 

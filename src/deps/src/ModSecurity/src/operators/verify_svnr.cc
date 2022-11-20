@@ -7,12 +7,14 @@
 
 #include "modsecurity/rule.h"
 #include "modsecurity/rule_message.h"
-#include "modsecurity/rules_properties.h"
+#include "modsecurity/rules_set_properties.h"
+
+
 namespace modsecurity {
 namespace operators {
 
-int VerifySVNR::convert_to_int(const char c)
-{
+
+int VerifySVNR::convert_to_int(const char c) {
     int n;
     if ((c>='0') && (c<='9'))
         n = c - '0';
@@ -21,28 +23,18 @@ int VerifySVNR::convert_to_int(const char c)
     return n;
 }
 
+
 bool VerifySVNR::verify(const char *svnrnumber, int len) {
     int var_len = len;
     int sum = 0;
     unsigned int i = 0, svnr_len = 10;
     int svnr[11];
     char s_svnr[11];
-    char bad_svnr[12][11] = { "0000000000",
-        "0123456789",
-        "1234567890",
-        "1111111111",
-        "2222222222",
-        "3333333333",
-        "4444444444",
-        "5555555555",
-        "6666666666",
-        "7777777777",
-        "8888888888",
-        "9999999999"};
 
     while ((*svnrnumber != '\0') && ( var_len > 0))
     {
-        if (*svnrnumber != '-' || *svnrnumber != '.')
+        // Always true on the original code.
+        //if (*svnrnumber != '-' || *svnrnumber != '.')
         {
             if (i < svnr_len && isdigit(*svnrnumber))
             {
@@ -85,7 +77,7 @@ bool VerifySVNR::verify(const char *svnrnumber, int len) {
 }
 
 
-bool VerifySVNR::evaluate(Transaction *t, Rule *rule,
+bool VerifySVNR::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
     std::list<SMatch> matches;
     bool is_svnr = false;
@@ -98,15 +90,15 @@ bool VerifySVNR::evaluate(Transaction *t, Rule *rule,
     for (i = 0; i < input.size() - 1 && is_svnr == false; i++) {
         matches = m_re->searchAll(input.substr(i, input.size()));
 
-        for (const auto & i : matches) {
-            is_svnr = verify(i.str().c_str(), i.str().size());
+        for (const auto & j : matches) {
+            is_svnr = verify(j.str().c_str(), j.str().size());
             if (is_svnr) {
-                logOffset(ruleMessage, i.offset(), i.str().size());
-                if (rule && t && rule->m_containsCaptureAction) {
+                logOffset(ruleMessage, j.offset(), j.str().size());
+                if (rule && t && rule->hasCaptureAction()) {
                     t->m_collections.m_tx_collection->storeOrUpdateFirst(
-                        "0", i.str());
+                        "0", j.str());
                     ms_dbg_a(t, 7, "Added VerifySVNR match TX.0: " + \
-                        i.str());
+                        j.str());
                 }
 
                 goto out;

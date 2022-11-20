@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.0.2
+ * LuaSec 1.2.0
  *
- * Copyright (C) 2014-2021 Kim Alvefur, Paul Aurich, Tobias Markmann, 
+ * Copyright (C) 2014-2022 Kim Alvefur, Paul Aurich, Tobias Markmann, 
  *                         Matthew Wild.
- * Copyright (C) 2006-2021 Bruno Silvestre.
+ * Copyright (C) 2006-2022 Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
@@ -672,6 +672,41 @@ static int meth_getpeerfinished(lua_State *L)
 }
 
 /**
+ * Get some shared keying material
+ */
+static int meth_exportkeyingmaterial(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+
+  if(ssl->state != LSEC_STATE_CONNECTED) {
+    lua_pushnil(L);
+    lua_pushstring(L, "closed");
+    return 0;
+  }
+
+  size_t llen = 0;
+  size_t contextlen = 0;
+  const unsigned char *context = NULL;
+  const char *label = (const char*)luaL_checklstring(L, 2, &llen);
+  size_t olen = (size_t)luaL_checkinteger(L, 3);
+
+  if (!lua_isnoneornil(L, 4))
+    context = (const unsigned char*)luaL_checklstring(L, 4, &contextlen);
+
+  /* Temporary buffer memory-managed by Lua itself */
+  unsigned char *out = (unsigned char*)lua_newuserdata(L, olen);
+
+  if(SSL_export_keying_material(ssl->ssl, out, olen, label, llen, context, contextlen, context != NULL) != 1) {
+    lua_pushnil(L);
+    lua_pushstring(L, "error exporting keying material");
+    return 2;
+  }
+
+  lua_pushlstring(L, (char*)out, olen);
+  return 1;
+}
+
+/**
  * Object information -- tostring metamethod
  */
 static int meth_tostring(lua_State *L)
@@ -826,7 +861,7 @@ static int meth_getalpn(lua_State *L)
 
 static int meth_copyright(lua_State *L)
 {
-  lua_pushstring(L, "LuaSec 1.0.2 - Copyright (C) 2006-2021 Bruno Silvestre, UFG"
+  lua_pushstring(L, "LuaSec 1.2.0 - Copyright (C) 2006-2022 Bruno Silvestre, UFG"
 #if defined(WITH_LUASOCKET)
                     "\nLuaSocket 3.0-RC1 - Copyright (C) 2004-2013 Diego Nehab"
 #endif
@@ -876,6 +911,7 @@ static luaL_Reg methods[] = {
   {"getpeerchain",        meth_getpeerchain},
   {"getpeerverification", meth_getpeerverification},
   {"getpeerfinished",     meth_getpeerfinished},
+  {"exportkeyingmaterial",meth_exportkeyingmaterial},
   {"getsniname",          meth_getsniname},
   {"getstats",            meth_getstats},
   {"setstats",            meth_setstats},

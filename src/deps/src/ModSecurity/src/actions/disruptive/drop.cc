@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -21,14 +21,18 @@
 #include <cstring>
 #include <memory>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/transaction.h"
+#include "modsecurity/rule.h"
+#include "src/utils/string.h"
+#include "modsecurity/modsecurity.h"
 
 namespace modsecurity {
 namespace actions {
 namespace disruptive {
 
 
-bool Drop::evaluate(Rule *rule, Transaction *transaction,
+bool Drop::evaluate(RuleWithActions *rule, Transaction *transaction,
     std::shared_ptr<RuleMessage> rm) {
     ms_dbg_a(transaction, 8, "Running action drop " \
         "[executing deny instead of drop.]");

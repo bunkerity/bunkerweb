@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include <iostream>
 
 #include "modsecurity/transaction.h"
-#include "modsecurity/rules.h"
+#include "modsecurity/rules_set.h"
 
 #ifndef SRC_REQUEST_BODY_PROCESSOR_XML_H_
 #define SRC_REQUEST_BODY_PROCESSOR_XML_H_

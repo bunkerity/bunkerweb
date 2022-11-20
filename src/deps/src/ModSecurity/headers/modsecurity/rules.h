@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  *
  */
 
+
 #include <stdio.h>
 #include <string.h>
 
@@ -22,92 +23,74 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <memory>
 #endif
 
+#include "modsecurity/rule.h"
+#include "modsecurity/rule_with_operator.h"
+#include "modsecurity/rule_with_actions.h"
 
 #ifndef HEADERS_MODSECURITY_RULES_H_
 #define HEADERS_MODSECURITY_RULES_H_
 
-#include "modsecurity/rules_properties.h"
-#include "modsecurity/modsecurity.h"
-#include "modsecurity/transaction.h"
 
 #ifdef __cplusplus
-
 namespace modsecurity {
-class Rule;
-namespace Parser {
-class Driver;
-}
 
 
-/** @ingroup ModSecurity_CPP_API */
-class Rules : public RulesProperties {
+class Rules {
  public:
-    Rules()
-        : RulesProperties(new DebugLog()),
-        unicode_codepage(0),
-#ifndef NO_LOGS
-        m_secmarker_skipped(0),
-#endif
-        m_referenceCount(0) { }
+    void dump() const {
+        for (int j = 0; j < m_rules.size(); j++) {
+            std::cout << "    Rule ID: " << m_rules.at(j)->getReference();
+            std::cout << "--" << m_rules.at(j) << std::endl;
+        }
+    }
 
-    explicit Rules(DebugLog *customLog)
-        : RulesProperties(customLog),
-        unicode_codepage(0),
-#ifndef NO_LOGS
-        m_secmarker_skipped(0),
-#endif
-        m_referenceCount(0) { }
+    int append(Rules *from, const std::vector<int64_t> &ids, std::ostringstream *err) {
+         size_t j = 0;
+         for (; j < from->size(); j++) {
+            RuleWithOperator *rule = dynamic_cast<RuleWithOperator *>(from->at(j).get());
+            if (rule && std::binary_search(ids.begin(), ids.end(), rule->m_ruleId)) {
+                 if (err != NULL) {
+                     *err << "Rule id: " << std::to_string(rule->m_ruleId) \
+                        << " is duplicated" << std::endl;
+                 }
+                 return -1;
+             }
+         }
+         m_rules.insert(m_rules.end(), from->m_rules.begin(), from->m_rules.end());
+         return j;
+    }
 
-    ~Rules() { }
+    bool insert(const std::shared_ptr<Rule> &rule) {
+        return insert(rule, nullptr, nullptr);
+    }
 
-    void incrementReferenceCount(void);
-    void decrementReferenceCount(void);
+    bool insert(std::shared_ptr<Rule> rule, const std::vector<int64_t> *ids, std::ostringstream *err) {
+        RuleWithOperator *r = dynamic_cast<RuleWithOperator *>(rule.get());
+        if (r && ids != nullptr && std::binary_search(ids->begin(), ids->end(), r->m_ruleId)) {
+            if (err != nullptr) {
+                *err << "Rule id: " << std::to_string(r->m_ruleId) \
+                    << " is duplicated" << std::endl;
+            }
+            return false;
+        }
+        m_rules.push_back(rule);
+        return true;
+    }
 
-    int loadFromUri(const char *uri);
-    int loadRemote(const char *key, const char *uri);
-    int load(const char *rules);
-    int load(const char *rules, const std::string &ref);
+    size_t size() const { return m_rules.size(); }
+    std::shared_ptr<Rule> operator[](int index) const { return m_rules[index]; }
+    std::shared_ptr<Rule> at(int index) const { return m_rules[index]; }
 
-    void dump();
-
-    int merge(Parser::Driver *driver);
-    int merge(Rules *rules);
-
-    int evaluate(int phase, Transaction *transaction);
-    std::string getParserError();
-
-    void debug(int level, const std::string &id, const std::string &uri,
-        const std::string &msg);
-
-    int64_t unicode_codepage;
-
- private:
-    int m_referenceCount;
-#ifndef NO_LOGS
-    uint8_t m_secmarker_skipped;
-#endif
+    std::vector<std::shared_ptr<Rule> > m_rules;
 };
 
-#endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-Rules *msc_create_rules_set(void);
-void msc_rules_dump(Rules *rules);
-int msc_rules_merge(Rules *rules_dst, Rules *rules_from, const char **error);
-int msc_rules_add_remote(Rules *rules, const char *key, const char *uri,
-    const char **error);
-int msc_rules_add_file(Rules *rules, const char *file, const char **error);
-int msc_rules_add(Rules *rules, const char *plain_rules, const char **error);
-int msc_rules_cleanup(Rules *rules);
-
-#ifdef __cplusplus
-}
 }  // namespace modsecurity
 #endif
 
+
 #endif  // HEADERS_MODSECURITY_RULES_H_
+

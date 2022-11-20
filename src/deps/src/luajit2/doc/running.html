@@ -3,7 +3,7 @@
 <head>
 <title>Running LuaJIT</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -72,8 +72,6 @@ td.param_default {
 </li><li>
 <a href="faq.html">FAQ</a>
 </li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
-</li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
 </div>
@@ -111,6 +109,7 @@ are accepted:
 <li><tt>-t type</tt> &mdash; Set output file type (default: auto-detect from output name).</li>
 <li><tt>-a arch</tt> &mdash; Override architecture for object files (default: native).</li>
 <li><tt>-o os</tt> &mdash; Override OS for object files (default: native).</li>
+<li><tt>-F name</tt> &mdash; Override filename (default: input filename).</li>
 <li><tt>-e chunk</tt> &mdash; Use chunk string as input.</li>
 <li><tt>-</tt> (a single minus sign) &mdash; Use stdin as input and/or stdout as output.</li>
 </ul>
@@ -184,7 +183,7 @@ written in Lua. They are mainly used for debugging the JIT compiler
 itself. For a description of their options and output format, please
 read the comment block at the start of their source.
 They can be found in the <tt>lib</tt> directory of the source
-distribution or installed under the <tt>jit</tt> directory. By default
+distribution or installed under the <tt>jit</tt> directory. By default,
 this is <tt>/usr/local/share/luajit-XX.YY.ZZ>/jit</tt> on POSIX
 systems (replace XX.YY.ZZ by the installed version).
 </p>
@@ -216,7 +215,7 @@ to a specific value.
 You can either use this option multiple times (like <tt>-Ocse
 -O-dce -Ohotloop=10</tt>) or separate several settings with a comma
 (like <tt>-O+cse,-dce,hotloop=10</tt>). The settings are applied from
-left to right and later settings override earlier ones. You can freely
+left to right, and later settings override earlier ones. You can freely
 mix the three forms, but note that setting an optimization level
 overrides all earlier flags.
 </p>
@@ -295,7 +294,7 @@ Here are the parameters and their default settings:
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -39,7 +39,7 @@ namespace modsecurity {
 namespace engine {
 
 
-bool Lua::isCompatible(std::string script, Lua *l, std::string *error) {
+bool Lua::isCompatible(const std::string &script, Lua *l, std::string *error) {
 #ifdef WITH_LUA
     std::string lua(".lua");
     std::string err;
@@ -63,10 +63,9 @@ bool Lua::isCompatible(std::string script, Lua *l, std::string *error) {
 }
 
 
-bool Lua::load(std::string script, std::string *err) {
+bool Lua::load(const std::string &script, std::string *err) {
 #ifdef WITH_LUA
-    lua_State *L = NULL;
-    L = luaL_newstate();
+    lua_State *L = luaL_newstate();
     luaL_openlibs(L);
 
     m_scriptName = script;
@@ -155,7 +154,7 @@ int Lua::run(Transaction *t, const std::string &str) {
             case LUA_ERRMEM:
                 e.assign("Memory error. ");
                 break;
-#ifndef WITH_LUA_5_1
+#if !defined(WITH_LUA_5_1) and !defined(WITH_LUA_5_4)
             case LUA_ERRGCMM:
                 e.assign("Garbage Collector error. ");
                 break;
@@ -234,7 +233,7 @@ err:
 
 #ifdef WITH_LUA
 int Lua::log(lua_State *L) {
-    const Transaction *t = NULL;
+    const Transaction *t(NULL);
     const char *text;
     int level;
 
@@ -256,9 +255,9 @@ int Lua::log(lua_State *L) {
 
 
 int Lua::getvar(lua_State *L) {
-    const char *varname = NULL;
-    Transaction *t = NULL;
-    void *z = NULL;
+    const char *varname(NULL);
+    Transaction *t(NULL);
+    void *z(NULL);
 
     /* Retrieve parameters. */
     varname = reinterpret_cast<const char *>(luaL_checkstring(L, 1));
@@ -282,9 +281,9 @@ int Lua::getvar(lua_State *L) {
 
 
 int Lua::getvars(lua_State *L) {
-    const char *varname = NULL;
-    Transaction *t = NULL;
-    void *z = NULL;
+    const char *varname(NULL);
+    Transaction *t(NULL);
+    void *z(NULL);
     std::vector<const VariableValue *> l;
     int idx = 1;
 
@@ -323,16 +322,15 @@ int Lua::getvars(lua_State *L) {
 
 
 int Lua::setvar(lua_State *L) {
-    Transaction *t = NULL;
-    const char *var_value = NULL;
-    const char *var_name = NULL;
+    Transaction *t(NULL);
+    const char *var_value(NULL);
+    const char *var_name(NULL);
     std::string vname;
     std::string collection;
     std::string variableName;
     int nargs = lua_gettop(L);
-    char *chr = NULL;
     size_t pos;
-    void *z = NULL;
+    void *z(NULL);
 
     lua_getglobal(L, "__transaction");
     z = const_cast<void *>(lua_topointer(L, -1));
@@ -453,7 +451,7 @@ std::string Lua::applyTransformations(lua_State *L, Transaction *t,
     }
 
     if (lua_isstring(L, idx)) {
-        const char *name = NULL;
+        const char *name(NULL);
         name = reinterpret_cast<const char *>(luaL_checkstring(L, idx));
 
         actions::transformations::Transformation *tfn = \

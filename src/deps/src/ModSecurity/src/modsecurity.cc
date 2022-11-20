@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -60,8 +60,7 @@ namespace modsecurity {
  * @endcode
  */
 ModSecurity::ModSecurity()
-    : m_connector(""),
-    m_whoami(""),
+    :
 #ifdef WITH_LMDB
     m_global_collection(new collection::backend::LMDB("GLOBAL")),
     m_resource_collection(new collection::backend::LMDB("RESOURCE")),
@@ -70,14 +69,17 @@ ModSecurity::ModSecurity()
     m_user_collection(new collection::backend::LMDB("USER")),
 #else
     m_global_collection(new collection::backend::InMemoryPerProcess("GLOBAL")),
-    m_ip_collection(new collection::backend::InMemoryPerProcess("IP")),
     m_resource_collection(
         new collection::backend::InMemoryPerProcess("RESOURCE")),
+    m_ip_collection(new collection::backend::InMemoryPerProcess("IP")),
     m_session_collection(
         new collection::backend::InMemoryPerProcess("SESSION")),
     m_user_collection(new collection::backend::InMemoryPerProcess("USER")),
 #endif
-    m_logCb(NULL) {
+    m_connector(""),
+    m_whoami(""),
+    m_logCb(NULL),
+    m_logProperties(0) {
     UniqueId::uniqueId();
     srand(time(NULL));
 #ifdef MSC_WITH_CURL
@@ -136,6 +138,8 @@ const std::string& ModSecurity::whoAmI() {
     platform = "MacOSX";
 #elif FREEBSD
     platform = "FreeBSD";
+#elif DRAGONFLY
+    platform = "DragonFlyBSD";
 #elif NETBSD
     platform = "NetBSD";
 #elif WIN32
@@ -167,7 +171,7 @@ const std::string& ModSecurity::whoAmI() {
  * @param connector Information about the connector.
  *
  */
-void ModSecurity::setConnectorInformation(std::string connector) {
+void ModSecurity::setConnectorInformation(const std::string &connector) {
     m_connector = connector;
 }
 
@@ -182,7 +186,7 @@ void ModSecurity::setConnectorInformation(std::string connector) {
  * @retval "" Nothing was informed about the connector.
  * @retval !="" Connector information.
  */
-const std::string& ModSecurity::getConnectorInformation() {
+const std::string& ModSecurity::getConnectorInformation() const {
     return m_connector;
 }
 
@@ -224,7 +228,6 @@ int ModSecurity::processContentOffset(const char *content, size_t len,
     Utils::Regex transformations("t:(?:(?!t:).)+");
     yajl_gen g;
     std::string varValue;
-    std::string opValue;
     const unsigned char *buf;
     size_t jsonSize;
 
@@ -255,7 +258,7 @@ int ModSecurity::processContentOffset(const char *content, size_t len,
             strlen("highlight"));
 
         yajl_gen_array_open(g);
-    while (vars.size() > 0) {
+    while (vars.size() > 3) {
         std::string value;
         yajl_gen_map_open(g);
         vars.pop_back();
@@ -302,7 +305,7 @@ int ModSecurity::processContentOffset(const char *content, size_t len,
             varValue.size());
     yajl_gen_map_close(g);
 
-    while (trans.size() > 0) {
+    while (!trans.empty()) {
         modsecurity::actions::transformations::Transformation *t;
         std::string varValueRes;
         yajl_gen_map_open(g);
@@ -337,7 +340,7 @@ int ModSecurity::processContentOffset(const char *content, size_t len,
 
     yajl_gen_map_open(g);
 
-    while (ops.size() > 0) {
+    while (ops.size() > 3) {
         std::string value;
         yajl_gen_string(g, reinterpret_cast<const unsigned char*>("highlight"),
             strlen("highlight"));
@@ -391,11 +394,11 @@ int ModSecurity::processContentOffset(const char *content, size_t len,
     json->append("\n");
 
     yajl_gen_free(g);
+    return 0;
 #else
     *err = "Without YAJL support, we cannot generate JSON.";
     return -1;
 #endif
-    return 0;
 }
 
 

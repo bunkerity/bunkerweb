@@ -1,6 +1,6 @@
 /*
 ** FFI C library loader.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #include "lj_obj.h"
@@ -25,7 +25,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 
-#if defined(RTLD_DEFAULT)
+#if defined(RTLD_DEFAULT) && !defined(NO_RTLD_DEFAULT)
 #define CLIB_DEFHANDLE	RTLD_DEFAULT
 #elif LJ_TARGET_OSX || LJ_TARGET_BSD
 #define CLIB_DEFHANDLE	((void *)(intptr_t)-2)

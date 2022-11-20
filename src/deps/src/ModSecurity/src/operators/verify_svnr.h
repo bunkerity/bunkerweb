@@ -28,23 +28,31 @@ class VerifySVNR : public Operator {
     ~VerifySVNR() {
         delete m_re;
     }
-    bool evaluate(Transaction *transaction, Rule *rule,
-        const std::string &input) override {
-        return evaluate(transaction, NULL, input, NULL);
-    }
-    bool evaluate(Transaction *transaction,
-        const std::string &input) override {
-        return evaluate(transaction, NULL, input);
-    }
-    bool evaluate(Transaction *transaction, Rule *rule,
+
+    bool operator=(const VerifySVNR &a) = delete;
+    VerifySVNR(const VerifySVNR &a) = delete;
+
+    bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string& input,
         std::shared_ptr<RuleMessage> ruleMessage) override;
 
-    int convert_to_int(const char c);
     bool verify(const char *ssnumber, int len);
 
  private:
     Regex *m_re;
+    static int convert_to_int(const char c);
+    const char bad_svnr[12][11] = { "0000000000",
+        "0123456789",
+        "1234567890",
+        "1111111111",
+        "2222222222",
+        "3333333333",
+        "4444444444",
+        "5555555555",
+        "6666666666",
+        "7777777777",
+        "8888888888",
+        "9999999999"};
 };
 
 }  // namespace operators

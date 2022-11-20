@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -49,15 +49,16 @@ class GeoLookup {
     bool setDataBase(const std::string& filePath, std::string *err);
     void cleanUp();
 
-    bool lookup(const std::string& target, Transaction *t,
-        std::function<bool(int, std::string)> callback);
+    bool lookup(const std::string& target, Transaction *transaction,
+        std::function<bool(int, const std::string &)> debug) const;
 
  private:
     GeoLookup() :
+        m_version(NOT_LOADED)
 #if WITH_GEOIP
-        m_gi(NULL),
+        ,m_gi(NULL)
 #endif
-        m_version(NOT_LOADED) { }
+        { }
     ~GeoLookup();
     GeoLookup(GeoLookup const&);
     void operator=(GeoLookup const&);

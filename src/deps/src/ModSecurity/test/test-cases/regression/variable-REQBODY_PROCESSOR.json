@@ -73,7 +73,7 @@
     },
     "rules":[  
       "SecRuleEngine On",
-      "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+      "SecRule REQUEST_HEADERS:Content-Type \"^(?:application(?:/soap\+|/)|text/)xml\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
       "SecRule REQBODY_PROCESSOR \"@contains test\" \"id:1,pass,phase:2,t:trim\""
     ]
   },

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -54,15 +54,53 @@ struct MyEqual {
 };
 
 
+class MultipartPartTmpFile {
+ public:
+     explicit MultipartPartTmpFile(Transaction *transaction)
+        : m_transaction(transaction),
+        m_tmp_file_fd(0),
+        m_delete(false)
+    { }
+
+    ~MultipartPartTmpFile();
+
+    // forbid copying
+    MultipartPartTmpFile(const MultipartPartTmpFile&) = delete;
+    MultipartPartTmpFile& operator=(const MultipartPartTmpFile&) = delete;
+
+    int getFd() const {return m_tmp_file_fd;}
+    void setFd(int fd) {m_tmp_file_fd = fd;}
+    const std::string& getFilename() const {return m_tmp_file_name;}
+    void setDelete() {m_delete = true;}
+
+    bool isValid() const {return ((m_tmp_file_fd != 0) && (!m_tmp_file_name.empty()));}
+
+    void Open();
+    void Close();
+
+ private:
+    Transaction *m_transaction;
+    int m_tmp_file_fd;
+    std::string m_tmp_file_name;
+    bool m_delete; // whether to delete when transaction is done
+};
+
+
 class MultipartPart {
  public:
     MultipartPart()
      : m_type(MULTIPART_FORMDATA),
-     m_tmp_file_fd(0),
-     m_offset(0),
-     m_filenameOffset(0),
+     m_name(""),
      m_nameOffset(0),
+     m_value(""),
      m_valueOffset(0),
+     m_value_parts(),
+     m_tmp_file_size(),
+     m_filename(""),
+     m_filenameOffset(0),
+     m_last_header_name(""),
+     m_headers(),
+     m_offset(0),
      m_length(0) {
          m_tmp_file_size.first = 0;
          m_tmp_file_size.second = 0;
@@ -90,8 +128,7 @@ class MultipartPart {
     /* std::string m_content_type; */
 
     /* files only, the name of the temporary file holding data */
-    std::string m_tmp_file_name;
-    int m_tmp_file_fd;
+    std::shared_ptr<RequestBodyProcessor::MultipartPartTmpFile> m_tmp_file;
     std::pair<size_t, size_t> m_tmp_file_size;
 
     /* files only, filename as supplied by the browser */
@@ -101,6 +138,9 @@ class MultipartPart {
     std::string m_last_header_name;
     std::unordered_map<std::string, std::pair<size_t, std::string>,
         MyHash, MyEqual> m_headers;
+    std::string m_last_header_line;
+    std::vector<std::pair<size_t, std::string>> m_header_lines;
+
 
     unsigned int m_offset;
     unsigned int m_length;
@@ -109,14 +149,14 @@ class MultipartPart {
 
 class Multipart {
  public:
-    Multipart(std::string header, Transaction *transaction);
+    Multipart(const std::string &header, Transaction *transaction);
     ~Multipart();
 
     bool init(std::string *err);
 
-    int boundary_characters_valid(const char *boundary);
-    int count_boundary_params(const std::string& str_header_value);
-    int is_token_char(unsigned char c);
+    static int boundary_characters_valid(const char *boundary);
+    static int count_boundary_params(const std::string& str_header_value);
+    static int is_token_char(unsigned char c);
     int multipart_complete(std::string *err);
 
     int parse_content_disposition(const char *c_d_value, int offset);
@@ -125,9 +165,7 @@ class Multipart {
     int process_part_header(std::string *error, int offset);
     int process_part_data(std::string *error, size_t offset);
 
-    int tmp_file_name(std::string *filename) const;
-
-    void validate_quotes(const char *data);
+    void validate_quotes(const char *data, char quote);
 
     size_t m_reqbody_no_files_length;
     std::list<MultipartPart *> m_parts;
@@ -151,6 +189,15 @@ class Multipart {
 
     unsigned int m_buf_offset;
 
+    /* line ending status seen immediately before current position.
+     * 0 = neither LF nor CR; 1 = prev char CR; 2 = prev char LF alone;
+     * 3 = prev two chars were CRLF
+     */
+    int                      m_crlf_state;
+
+    /* crlf_state at end of previous buffer */
+    int                      m_crlf_state_buf_end;
+
     /* pointer that keeps track of a part while
      * it is being built
      */
@@ -161,6 +208,14 @@ class Multipart {
      * headers, 1 means we are collecting data
      */
     int m_mpp_state;
+
+    /* part parsing substate;  if mpp_state is 1 (collecting
+     * data), then for this variable:
+     * 0 means we have not yet read any data between the
+     * post-headers blank line and the next boundary
+     * 1 means we have read at some data after that blank line
+     */
+    int m_mpp_substate_part_data_read;
 
     /* because of the way this parsing algorithm
      * works we hold back the last two bytes of

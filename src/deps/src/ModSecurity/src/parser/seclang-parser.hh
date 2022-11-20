@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.3.2.
+// A Bison parser, made by GNU Bison 3.7.6.
 
 // Skeleton interface for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015, 2018-2019 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2021 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // As a special exception, you may create a larger work that contains
 // part or all of the Bison parser skeleton and distribute that work
@@ -38,13 +38,14 @@
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-// Undocumented macros, especially those whose name start with YY_,
-// are private implementation details.  Do not rely on them.
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
 
 #ifndef YY_YY_SECLANG_PARSER_HH_INCLUDED
 # define YY_YY_SECLANG_PARSER_HH_INCLUDED
-// //                    "%code requires" blocks.
-#line 10 "seclang-parser.yy" // lalr1.cc:401
+// "%code requires" blocks.
+#line 10 "seclang-parser.yy"
 
 #include <string>
 #include <iterator>
@@ -55,6 +56,7 @@ class Driver;
 }
 }
 
+#include "modsecurity/rule_unconditional.h"
 #include "src/rule_script.h"
 
 #include "src/actions/accuracy.h"
@@ -62,6 +64,7 @@ class Driver;
 #include "src/actions/block.h"
 #include "src/actions/capture.h"
 #include "src/actions/chain.h"
+#include "src/actions/ctl/audit_engine.h"
 #include "src/actions/ctl/audit_log_parts.h"
 #include "src/actions/ctl/request_body_access.h"
 #include "src/actions/ctl/rule_engine.h"
@@ -99,12 +102,12 @@ class Driver;
 #include "src/actions/skip_after.h"
 #include "src/actions/skip.h"
 #include "src/actions/tag.h"
-#include "src/actions/transformations/none.h"
-#include "src/actions/transformations/transformation.h"
-#include "src/actions/transformations/url_decode_uni.h"
 #include "src/actions/ver.h"
 #include "src/actions/xmlns.h"
 
+#include "src/actions/transformations/none.h"
+#include "src/actions/transformations/transformation.h"
+#include "src/actions/transformations/url_decode_uni.h"
 #include "src/actions/transformations/hex_encode.h"
 #include "src/actions/transformations/parity_even_7bit.h"
 #include "src/actions/transformations/utf8_to_unicode.h"
@@ -169,6 +172,7 @@ class Driver;
 #include "src/operators/rbl.h"
 #include "src/operators/rsub.h"
 #include "src/operators/rx.h"
+#include "src/operators/rx_global.h"
 #include "src/operators/str_eq.h"
 #include "src/operators/str_match.h"
 #include "src/operators/unconditional_match.h"
@@ -187,7 +191,7 @@ class Driver;
 
 #include "modsecurity/audit_log.h"
 #include "modsecurity/modsecurity.h"
-#include "modsecurity/rules_properties.h"
+#include "modsecurity/rules_set_properties.h"
 #include "modsecurity/rule.h"
 #include "src/operators/operator.h"
 #include "src/utils/geo_lookup.h"
@@ -252,6 +256,7 @@ class Driver;
 #include "src/variables/request_body_length.h"
 #include "src/variables/request_cookies.h"
 #include "src/variables/request_cookies_names.h"
+#include "src/variables/multipart_part_headers.h"
 #include "src/variables/request_file_name.h"
 #include "src/variables/request_headers.h"
 #include "src/variables/request_headers_names.h"
@@ -294,7 +299,6 @@ class Driver;
 #include "src/variables/global.h"
 #include "src/variables/session.h"
 #include "src/variables/status.h"
-
 
 using namespace modsecurity;
 using namespace modsecurity::variables;
@@ -348,7 +352,7 @@ using namespace modsecurity::operators;
     a = std::move(c);
 
 
-#line 352 "seclang-parser.hh" // lalr1.cc:401
+#line 356 "seclang-parser.hh"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -395,44 +399,42 @@ using namespace modsecurity::operators;
 #endif
 # include "location.hh"
 #include <typeinfo>
-#ifndef YYASSERT
+#ifndef YY_ASSERT
 # include <cassert>
-# define YYASSERT assert
+# define YY_ASSERT assert
 #endif
 
 
-#ifndef YY_ATTRIBUTE
-# if (defined __GNUC__                                               \
-      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
-     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+#ifndef YY_ATTRIBUTE_PURE
+# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
 # else
-#  define YY_ATTRIBUTE(Spec) /* empty */
+#  define YY_ATTRIBUTE_PURE
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
-#endif
-
 #ifndef YY_ATTRIBUTE_UNUSED
-# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
+# else
+#  define YY_ATTRIBUTE_UNUSED
+# endif
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
-    _Pragma ("GCC diagnostic push") \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -445,6 +447,27 @@ using namespace modsecurity::operators;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
+#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
+# define YY_IGNORE_USELESS_CAST_BEGIN                          \
+    _Pragma ("GCC diagnostic push")                            \
+    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
+# define YY_IGNORE_USELESS_CAST_END            \
+    _Pragma ("GCC diagnostic pop")
+#endif
+#ifndef YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_END
+#endif
+
+# ifndef YY_CAST
+#  ifdef __cplusplus
+#   define YY_CAST(Type, Val) static_cast<Type> (Val)
+#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
+#  else
+#   define YY_CAST(Type, Val) ((Type) (Val))
+#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
+#  endif
+# endif
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -462,9 +485,9 @@ using namespace modsecurity::operators;
 # define YYDEBUG 1
 #endif
 
-
 namespace yy {
-#line 468 "seclang-parser.hh" // lalr1.cc:401
+#line 490 "seclang-parser.hh"
+
 
 
 
@@ -495,14 +518,21 @@ namespace yy {
     semantic_type (YY_RVREF (T) t)
       : yytypeid_ (&typeid (T))
     {
-      YYASSERT (sizeof (T) <= size);
+      YY_ASSERT (sizeof (T) <= size);
       new (yyas_<T> ()) T (YY_MOVE (t));
     }
+
+#if 201103L <= YY_CPLUSPLUS
+    /// Non copyable.
+    semantic_type (const self_type&) = delete;
+    /// Non copyable.
+    self_type& operator= (const self_type&) = delete;
+#endif
 
     /// Destruction, allowed only if empty.
     ~semantic_type () YY_NOEXCEPT
     {
-      YYASSERT (!yytypeid_);
+      YY_ASSERT (!yytypeid_);
     }
 
 # if 201103L <= YY_CPLUSPLUS
@@ -511,8 +541,8 @@ namespace yy {
     T&
     emplace (U&&... u)
     {
-      YYASSERT (!yytypeid_);
-      YYASSERT (sizeof (T) <= size);
+      YY_ASSERT (!yytypeid_);
+      YY_ASSERT (sizeof (T) <= size);
       yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T (std::forward <U>(u)...);
     }
@@ -522,8 +552,8 @@ namespace yy {
     T&
     emplace ()
     {
-      YYASSERT (!yytypeid_);
-      YYASSERT (sizeof (T) <= size);
+      YY_ASSERT (!yytypeid_);
+      YY_ASSERT (sizeof (T) <= size);
       yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T ();
     }
@@ -533,8 +563,8 @@ namespace yy {
     T&
     emplace (const T& t)
     {
-      YYASSERT (!yytypeid_);
-      YYASSERT (sizeof (T) <= size);
+      YY_ASSERT (!yytypeid_);
+      YY_ASSERT (sizeof (T) <= size);
       yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T (std::move((T&)t));
     }
@@ -563,9 +593,9 @@ namespace yy {
     T&
     as () YY_NOEXCEPT
     {
-      YYASSERT (yytypeid_);
-      YYASSERT (*yytypeid_ == typeid (T));
-      YYASSERT (sizeof (T) <= size);
+      YY_ASSERT (yytypeid_);
+      YY_ASSERT (*yytypeid_ == typeid (T));
+      YY_ASSERT (sizeof (T) <= size);
       return *yyas_<T> ();
     }
 
@@ -574,9 +604,9 @@ namespace yy {
     const T&
     as () const YY_NOEXCEPT
     {
-      YYASSERT (yytypeid_);
-      YYASSERT (*yytypeid_ == typeid (T));
-      YYASSERT (sizeof (T) <= size);
+      YY_ASSERT (yytypeid_);
+      YY_ASSERT (*yytypeid_ == typeid (T));
+      YY_ASSERT (sizeof (T) <= size);
       return *yyas_<T> ();
     }
 
@@ -592,8 +622,8 @@ namespace yy {
     void
     swap (self_type& that) YY_NOEXCEPT
     {
-      YYASSERT (yytypeid_);
-      YYASSERT (*yytypeid_ == *that.yytypeid_);
+      YY_ASSERT (yytypeid_);
+      YY_ASSERT (*yytypeid_ == *that.yytypeid_);
       std::swap (as<T> (), that.as<T> ());
     }
 
@@ -642,9 +672,12 @@ namespace yy {
     }
 
   private:
-    /// Prohibit blind copies.
-    self_type& operator= (const self_type&);
+#if YY_CPLUSPLUS < 201103L
+    /// Non copyable.
     semantic_type (const self_type&);
+    /// Non copyable.
+    self_type& operator= (const self_type&);
+#endif
 
     /// Accessor to raw memory as \a T.
     template <typename T>
@@ -790,6 +823,8 @@ namespace yy {
       // "CONFIG_SEC_CONN_R_STATE_LIMIT"
       // "CONFIG_SEC_CONN_W_STATE_LIMIT"
       // "CONFIG_SEC_SENSOR_ID"
+      // "CONFIG_DIR_ARGS_LIMIT"
+      // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
       // "CONFIG_DIR_REQ_BODY"
       // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
       // "CONFIG_DIR_REQ_BODY_LIMIT"
@@ -929,369 +964,749 @@ namespace yy {
       location_type location;
     };
 
-    /// Tokens.
+    /// Token kinds.
     struct token
     {
-      enum yytokentype
+      enum token_kind_type
       {
-        TOK_END = 0,
-        TOK_COMMA = 258,
-        TOK_CONFIG_CONTENT_INJECTION = 259,
-        TOK_CONGIG_DIR_RESPONSE_BODY_MP_CLEAR = 260,
-        TOK_PIPE = 261,
-        TOK_NEW_LINE = 262,
-        TOK_VAR_COUNT = 263,
-        TOK_VAR_EXCLUSION = 264,
-        TOK_VARIABLE_ARGS = 265,
-        TOK_VARIABLE_ARGS_POST = 266,
-        TOK_VARIABLE_ARGS_GET = 267,
-        TOK_VARIABLE_FILES_SIZES = 268,
-        TOK_VARIABLE_FILES_NAMES = 269,
-        TOK_VARIABLE_FILES_TMP_CONTENT = 270,
-        TOK_VARIABLE_MULTIPART_FILENAME = 271,
-        TOK_VARIABLE_MULTIPART_NAME = 272,
-        TOK_VARIABLE_MATCHED_VARS_NAMES = 273,
-        TOK_VARIABLE_MATCHED_VARS = 274,
-        TOK_VARIABLE_FILES = 275,
-        TOK_VARIABLE_REQUEST_COOKIES = 276,
-        TOK_VARIABLE_REQUEST_HEADERS = 277,
-        TOK_VARIABLE_RESPONSE_HEADERS = 278,
-        TOK_VARIABLE_GEO = 279,
-        TOK_VARIABLE_REQUEST_COOKIES_NAMES = 280,
-        TOK_VARIABLE_ARGS_COMBINED_SIZE = 281,
-        TOK_VARIABLE_ARGS_GET_NAMES = 282,
-        TOK_VARIABLE_RULE = 283,
-        TOK_VARIABLE_ARGS_NAMES = 284,
-        TOK_VARIABLE_ARGS_POST_NAMES = 285,
-        TOK_VARIABLE_AUTH_TYPE = 286,
-        TOK_VARIABLE_FILES_COMBINED_SIZE = 287,
-        TOK_VARIABLE_FILES_TMP_NAMES = 288,
-        TOK_VARIABLE_FULL_REQUEST = 289,
-        TOK_VARIABLE_FULL_REQUEST_LENGTH = 290,
-        TOK_VARIABLE_INBOUND_DATA_ERROR = 291,
-        TOK_VARIABLE_MATCHED_VAR = 292,
-        TOK_VARIABLE_MATCHED_VAR_NAME = 293,
-        TOK_VARIABLE_MULTIPART_BOUNDARY_QUOTED = 294,
-        TOK_VARIABLE_MULTIPART_BOUNDARY_WHITESPACE = 295,
-        TOK_VARIABLE_MULTIPART_CRLF_LF_LINES = 296,
-        TOK_VARIABLE_MULTIPART_DATA_AFTER = 297,
-        TOK_VARIABLE_MULTIPART_DATA_BEFORE = 298,
-        TOK_VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED = 299,
-        TOK_VARIABLE_MULTIPART_HEADER_FOLDING = 300,
-        TOK_VARIABLE_MULTIPART_INVALID_HEADER_FOLDING = 301,
-        TOK_VARIABLE_MULTIPART_INVALID_PART = 302,
-        TOK_VARIABLE_MULTIPART_INVALID_QUOTING = 303,
-        TOK_VARIABLE_MULTIPART_LF_LINE = 304,
-        TOK_VARIABLE_MULTIPART_MISSING_SEMICOLON = 305,
-        TOK_VARIABLE_MULTIPART_SEMICOLON_MISSING = 306,
-        TOK_VARIABLE_MULTIPART_STRICT_ERROR = 307,
-        TOK_VARIABLE_MULTIPART_UNMATCHED_BOUNDARY = 308,
-        TOK_VARIABLE_OUTBOUND_DATA_ERROR = 309,
-        TOK_VARIABLE_PATH_INFO = 310,
-        TOK_VARIABLE_QUERY_STRING = 311,
-        TOK_VARIABLE_REMOTE_ADDR = 312,
-        TOK_VARIABLE_REMOTE_HOST = 313,
-        TOK_VARIABLE_REMOTE_PORT = 314,
-        TOK_VARIABLE_REQBODY_ERROR_MSG = 315,
-        TOK_VARIABLE_REQBODY_ERROR = 316,
-        TOK_VARIABLE_REQBODY_PROCESSOR_ERROR_MSG = 317,
-        TOK_VARIABLE_REQBODY_PROCESSOR_ERROR = 318,
-        TOK_VARIABLE_REQBODY_PROCESSOR = 319,
-        TOK_VARIABLE_REQUEST_BASENAME = 320,
-        TOK_VARIABLE_REQUEST_BODY_LENGTH = 321,
-        TOK_VARIABLE_REQUEST_BODY = 322,
-        TOK_VARIABLE_REQUEST_FILE_NAME = 323,
-        TOK_VARIABLE_REQUEST_HEADERS_NAMES = 324,
-        TOK_VARIABLE_REQUEST_LINE = 325,
-        TOK_VARIABLE_REQUEST_METHOD = 326,
-        TOK_VARIABLE_REQUEST_PROTOCOL = 327,
-        TOK_VARIABLE_REQUEST_URI_RAW = 328,
-        TOK_VARIABLE_REQUEST_URI = 329,
-        TOK_VARIABLE_RESOURCE = 330,
-        TOK_VARIABLE_RESPONSE_BODY = 331,
-        TOK_VARIABLE_RESPONSE_CONTENT_LENGTH = 332,
-        TOK_VARIABLE_RESPONSE_CONTENT_TYPE = 333,
-        TOK_VARIABLE_RESPONSE_HEADERS_NAMES = 334,
-        TOK_VARIABLE_RESPONSE_PROTOCOL = 335,
-        TOK_VARIABLE_RESPONSE_STATUS = 336,
-        TOK_VARIABLE_SERVER_ADDR = 337,
-        TOK_VARIABLE_SERVER_NAME = 338,
-        TOK_VARIABLE_SERVER_PORT = 339,
-        TOK_VARIABLE_SESSION_ID = 340,
-        TOK_VARIABLE_UNIQUE_ID = 341,
-        TOK_VARIABLE_URL_ENCODED_ERROR = 342,
-        TOK_VARIABLE_USER_ID = 343,
-        TOK_VARIABLE_WEB_APP_ID = 344,
-        TOK_VARIABLE_STATUS = 345,
-        TOK_VARIABLE_STATUS_LINE = 346,
-        TOK_VARIABLE_IP = 347,
-        TOK_VARIABLE_GLOBAL = 348,
-        TOK_VARIABLE_TX = 349,
-        TOK_VARIABLE_SESSION = 350,
-        TOK_VARIABLE_USER = 351,
-        TOK_RUN_TIME_VAR_ENV = 352,
-        TOK_RUN_TIME_VAR_XML = 353,
-        TOK_ACTION_SETVAR = 354,
-        TOK_SETVAR_OPERATION_EQUALS = 355,
-        TOK_SETVAR_OPERATION_EQUALS_PLUS = 356,
-        TOK_SETVAR_OPERATION_EQUALS_MINUS = 357,
-        TOK_NOT = 358,
-        TOK_OPERATOR_BEGINS_WITH = 359,
-        TOK_OPERATOR_CONTAINS = 360,
-        TOK_OPERATOR_CONTAINS_WORD = 361,
-        TOK_OPERATOR_DETECT_SQLI = 362,
-        TOK_OPERATOR_DETECT_XSS = 363,
-        TOK_OPERATOR_ENDS_WITH = 364,
-        TOK_OPERATOR_EQ = 365,
-        TOK_OPERATOR_FUZZY_HASH = 366,
-        TOK_OPERATOR_GEOLOOKUP = 367,
-        TOK_OPERATOR_GE = 368,
-        TOK_OPERATOR_GSB_LOOKUP = 369,
-        TOK_OPERATOR_GT = 370,
-        TOK_OPERATOR_INSPECT_FILE = 371,
-        TOK_OPERATOR_IP_MATCH_FROM_FILE = 372,
-        TOK_OPERATOR_IP_MATCH = 373,
-        TOK_OPERATOR_LE = 374,
-        TOK_OPERATOR_LT = 375,
-        TOK_OPERATOR_PM_FROM_FILE = 376,
-        TOK_OPERATOR_PM = 377,
-        TOK_OPERATOR_RBL = 378,
-        TOK_OPERATOR_RSUB = 379,
-        TOK_OPERATOR_RX_CONTENT_ONLY = 380,
-        TOK_OPERATOR_RX = 381,
-        TOK_OPERATOR_STR_EQ = 382,
-        TOK_OPERATOR_STR_MATCH = 383,
-        TOK_OPERATOR_UNCONDITIONAL_MATCH = 384,
-        TOK_OPERATOR_VALIDATE_BYTE_RANGE = 385,
-        TOK_OPERATOR_VALIDATE_DTD = 386,
-        TOK_OPERATOR_VALIDATE_HASH = 387,
-        TOK_OPERATOR_VALIDATE_SCHEMA = 388,
-        TOK_OPERATOR_VALIDATE_URL_ENCODING = 389,
-        TOK_OPERATOR_VALIDATE_UTF8_ENCODING = 390,
-        TOK_OPERATOR_VERIFY_CC = 391,
-        TOK_OPERATOR_VERIFY_CPF = 392,
-        TOK_OPERATOR_VERIFY_SSN = 393,
-        TOK_OPERATOR_VERIFY_SVNR = 394,
-        TOK_OPERATOR_WITHIN = 395,
-        TOK_CONFIG_DIR_AUDIT_LOG_FMT = 396,
-        TOK_JSON = 397,
-        TOK_NATIVE = 398,
-        TOK_ACTION_CTL_RULE_ENGINE = 399,
-        TOK_ACTION_ACCURACY = 400,
-        TOK_ACTION_ALLOW = 401,
-        TOK_ACTION_APPEND = 402,
-        TOK_ACTION_AUDIT_LOG = 403,
-        TOK_ACTION_BLOCK = 404,
-        TOK_ACTION_CAPTURE = 405,
-        TOK_ACTION_CHAIN = 406,
-        TOK_ACTION_CTL_AUDIT_ENGINE = 407,
-        TOK_ACTION_CTL_AUDIT_LOG_PARTS = 408,
-        TOK_ACTION_CTL_BDY_JSON = 409,
-        TOK_ACTION_CTL_BDY_XML = 410,
-        TOK_ACTION_CTL_BDY_URLENCODED = 411,
-        TOK_ACTION_CTL_FORCE_REQ_BODY_VAR = 412,
-        TOK_ACTION_CTL_REQUEST_BODY_ACCESS = 413,
-        TOK_ACTION_CTL_RULE_REMOVE_BY_ID = 414,
-        TOK_ACTION_CTL_RULE_REMOVE_BY_TAG = 415,
-        TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID = 416,
-        TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG = 417,
-        TOK_ACTION_DENY = 418,
-        TOK_ACTION_DEPRECATE_VAR = 419,
-        TOK_ACTION_DROP = 420,
-        TOK_ACTION_EXEC = 421,
-        TOK_ACTION_EXPIRE_VAR = 422,
-        TOK_ACTION_ID = 423,
-        TOK_ACTION_INITCOL = 424,
-        TOK_ACTION_LOG = 425,
-        TOK_ACTION_LOG_DATA = 426,
-        TOK_ACTION_MATURITY = 427,
-        TOK_ACTION_MSG = 428,
-        TOK_ACTION_MULTI_MATCH = 429,
-        TOK_ACTION_NO_AUDIT_LOG = 430,
-        TOK_ACTION_NO_LOG = 431,
-        TOK_ACTION_PASS = 432,
-        TOK_ACTION_PAUSE = 433,
-        TOK_ACTION_PHASE = 434,
-        TOK_ACTION_PREPEND = 435,
-        TOK_ACTION_PROXY = 436,
-        TOK_ACTION_REDIRECT = 437,
-        TOK_ACTION_REV = 438,
-        TOK_ACTION_SANITISE_ARG = 439,
-        TOK_ACTION_SANITISE_MATCHED = 440,
-        TOK_ACTION_SANITISE_MATCHED_BYTES = 441,
-        TOK_ACTION_SANITISE_REQUEST_HEADER = 442,
-        TOK_ACTION_SANITISE_RESPONSE_HEADER = 443,
-        TOK_ACTION_SETENV = 444,
-        TOK_ACTION_SETRSC = 445,
-        TOK_ACTION_SETSID = 446,
-        TOK_ACTION_SETUID = 447,
-        TOK_ACTION_SEVERITY = 448,
-        TOK_ACTION_SKIP = 449,
-        TOK_ACTION_SKIP_AFTER = 450,
-        TOK_ACTION_STATUS = 451,
-        TOK_ACTION_TAG = 452,
-        TOK_ACTION_TRANSFORMATION_BASE_64_ENCODE = 453,
-        TOK_ACTION_TRANSFORMATION_BASE_64_DECODE = 454,
-        TOK_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT = 455,
-        TOK_ACTION_TRANSFORMATION_CMD_LINE = 456,
-        TOK_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE = 457,
-        TOK_ACTION_TRANSFORMATION_CSS_DECODE = 458,
-        TOK_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE = 459,
-        TOK_ACTION_TRANSFORMATION_HEX_ENCODE = 460,
-        TOK_ACTION_TRANSFORMATION_HEX_DECODE = 461,
-        TOK_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE = 462,
-        TOK_ACTION_TRANSFORMATION_JS_DECODE = 463,
-        TOK_ACTION_TRANSFORMATION_LENGTH = 464,
-        TOK_ACTION_TRANSFORMATION_LOWERCASE = 465,
-        TOK_ACTION_TRANSFORMATION_MD5 = 466,
-        TOK_ACTION_TRANSFORMATION_NONE = 467,
-        TOK_ACTION_TRANSFORMATION_NORMALISE_PATH = 468,
-        TOK_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN = 469,
-        TOK_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT = 470,
-        TOK_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT = 471,
-        TOK_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT = 472,
-        TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS = 473,
-        TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR = 474,
-        TOK_ACTION_TRANSFORMATION_REMOVE_NULLS = 475,
-        TOK_ACTION_TRANSFORMATION_REMOVE_WHITESPACE = 476,
-        TOK_ACTION_TRANSFORMATION_REPLACE_COMMENTS = 477,
-        TOK_ACTION_TRANSFORMATION_REPLACE_NULLS = 478,
-        TOK_ACTION_TRANSFORMATION_SHA1 = 479,
-        TOK_ACTION_TRANSFORMATION_SQL_HEX_DECODE = 480,
-        TOK_ACTION_TRANSFORMATION_TRIM = 481,
-        TOK_ACTION_TRANSFORMATION_TRIM_LEFT = 482,
-        TOK_ACTION_TRANSFORMATION_TRIM_RIGHT = 483,
-        TOK_ACTION_TRANSFORMATION_UPPERCASE = 484,
-        TOK_ACTION_TRANSFORMATION_URL_ENCODE = 485,
-        TOK_ACTION_TRANSFORMATION_URL_DECODE = 486,
-        TOK_ACTION_TRANSFORMATION_URL_DECODE_UNI = 487,
-        TOK_ACTION_TRANSFORMATION_UTF8_TO_UNICODE = 488,
-        TOK_ACTION_VER = 489,
-        TOK_ACTION_XMLNS = 490,
-        TOK_CONFIG_COMPONENT_SIG = 491,
-        TOK_CONFIG_CONN_ENGINE = 492,
-        TOK_CONFIG_SEC_ARGUMENT_SEPARATOR = 493,
-        TOK_CONFIG_SEC_WEB_APP_ID = 494,
-        TOK_CONFIG_SEC_SERVER_SIG = 495,
-        TOK_CONFIG_DIR_AUDIT_DIR = 496,
-        TOK_CONFIG_DIR_AUDIT_DIR_MOD = 497,
-        TOK_CONFIG_DIR_AUDIT_ENG = 498,
-        TOK_CONFIG_DIR_AUDIT_FLE_MOD = 499,
-        TOK_CONFIG_DIR_AUDIT_LOG = 500,
-        TOK_CONFIG_DIR_AUDIT_LOG2 = 501,
-        TOK_CONFIG_DIR_AUDIT_LOG_P = 502,
-        TOK_CONFIG_DIR_AUDIT_STS = 503,
-        TOK_CONFIG_DIR_AUDIT_TPE = 504,
-        TOK_CONFIG_DIR_DEBUG_LOG = 505,
-        TOK_CONFIG_DIR_DEBUG_LVL = 506,
-        TOK_CONFIG_SEC_CACHE_TRANSFORMATIONS = 507,
-        TOK_CONFIG_SEC_DISABLE_BACKEND_COMPRESS = 508,
-        TOK_CONFIG_SEC_HASH_ENGINE = 509,
-        TOK_CONFIG_SEC_HASH_KEY = 510,
-        TOK_CONFIG_SEC_HASH_PARAM = 511,
-        TOK_CONFIG_SEC_HASH_METHOD_RX = 512,
-        TOK_CONFIG_SEC_HASH_METHOD_PM = 513,
-        TOK_CONFIG_SEC_CHROOT_DIR = 514,
-        TOK_CONFIG_DIR_GEO_DB = 515,
-        TOK_CONFIG_DIR_GSB_DB = 516,
-        TOK_CONFIG_SEC_GUARDIAN_LOG = 517,
-        TOK_CONFIG_DIR_PCRE_MATCH_LIMIT = 518,
-        TOK_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION = 519,
-        TOK_CONFIG_SEC_CONN_R_STATE_LIMIT = 520,
-        TOK_CONFIG_SEC_CONN_W_STATE_LIMIT = 521,
-        TOK_CONFIG_SEC_SENSOR_ID = 522,
-        TOK_CONFIG_DIR_REQ_BODY = 523,
-        TOK_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT = 524,
-        TOK_CONFIG_DIR_REQ_BODY_LIMIT = 525,
-        TOK_CONFIG_DIR_REQ_BODY_LIMIT_ACTION = 526,
-        TOK_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT = 527,
-        TOK_CONFIG_DIR_RES_BODY = 528,
-        TOK_CONFIG_DIR_RES_BODY_LIMIT = 529,
-        TOK_CONFIG_DIR_RES_BODY_LIMIT_ACTION = 530,
-        TOK_CONFIG_SEC_RULE_INHERITANCE = 531,
-        TOK_CONFIG_SEC_RULE_PERF_TIME = 532,
-        TOK_CONFIG_DIR_RULE_ENG = 533,
-        TOK_CONFIG_DIR_SEC_ACTION = 534,
-        TOK_CONFIG_DIR_SEC_DEFAULT_ACTION = 535,
-        TOK_CONFIG_DIR_SEC_MARKER = 536,
-        TOK_CONFIG_DIR_UNICODE_MAP_FILE = 537,
-        TOK_CONFIG_DIR_UNICODE_CODE_PAGE = 538,
-        TOK_CONFIG_SEC_COLLECTION_TIMEOUT = 539,
-        TOK_CONFIG_SEC_HTTP_BLKEY = 540,
-        TOK_CONFIG_SEC_INTERCEPT_ON_ERROR = 541,
-        TOK_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION = 542,
-        TOK_CONFIG_SEC_RULE_REMOVE_BY_ID = 543,
-        TOK_CONFIG_SEC_RULE_REMOVE_BY_MSG = 544,
-        TOK_CONFIG_SEC_RULE_REMOVE_BY_TAG = 545,
-        TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG = 546,
-        TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG = 547,
-        TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID = 548,
-        TOK_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID = 549,
-        TOK_CONFIG_UPDLOAD_KEEP_FILES = 550,
-        TOK_CONFIG_UPDLOAD_SAVE_TMP_FILES = 551,
-        TOK_CONFIG_UPLOAD_DIR = 552,
-        TOK_CONFIG_UPLOAD_FILE_LIMIT = 553,
-        TOK_CONFIG_UPLOAD_FILE_MODE = 554,
-        TOK_CONFIG_VALUE_ABORT = 555,
-        TOK_CONFIG_VALUE_DETC = 556,
-        TOK_CONFIG_VALUE_HTTPS = 557,
-        TOK_CONFIG_VALUE_OFF = 558,
-        TOK_CONFIG_VALUE_ON = 559,
-        TOK_CONFIG_VALUE_PARALLEL = 560,
-        TOK_CONFIG_VALUE_PROCESS_PARTIAL = 561,
-        TOK_CONFIG_VALUE_REJECT = 562,
-        TOK_CONFIG_VALUE_RELEVANT_ONLY = 563,
-        TOK_CONFIG_VALUE_SERIAL = 564,
-        TOK_CONFIG_VALUE_WARN = 565,
-        TOK_CONFIG_XML_EXTERNAL_ENTITY = 566,
-        TOK_CONGIG_DIR_RESPONSE_BODY_MP = 567,
-        TOK_CONGIG_DIR_SEC_ARG_SEP = 568,
-        TOK_CONGIG_DIR_SEC_COOKIE_FORMAT = 569,
-        TOK_CONFIG_SEC_COOKIEV0_SEPARATOR = 570,
-        TOK_CONGIG_DIR_SEC_DATA_DIR = 571,
-        TOK_CONGIG_DIR_SEC_STATUS_ENGINE = 572,
-        TOK_CONFIG_SEC_STREAM_IN_BODY_INSPECTION = 573,
-        TOK_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION = 574,
-        TOK_CONGIG_DIR_SEC_TMP_DIR = 575,
-        TOK_DIRECTIVE = 576,
-        TOK_DIRECTIVE_SECRULESCRIPT = 577,
-        TOK_FREE_TEXT_QUOTE_MACRO_EXPANSION = 578,
-        TOK_QUOTATION_MARK = 579,
-        TOK_RUN_TIME_VAR_BLD = 580,
-        TOK_RUN_TIME_VAR_DUR = 581,
-        TOK_RUN_TIME_VAR_HSV = 582,
-        TOK_RUN_TIME_VAR_REMOTE_USER = 583,
-        TOK_RUN_TIME_VAR_TIME = 584,
-        TOK_RUN_TIME_VAR_TIME_DAY = 585,
-        TOK_RUN_TIME_VAR_TIME_EPOCH = 586,
-        TOK_RUN_TIME_VAR_TIME_HOUR = 587,
-        TOK_RUN_TIME_VAR_TIME_MIN = 588,
-        TOK_RUN_TIME_VAR_TIME_MON = 589,
-        TOK_RUN_TIME_VAR_TIME_SEC = 590,
-        TOK_RUN_TIME_VAR_TIME_WDAY = 591,
-        TOK_RUN_TIME_VAR_TIME_YEAR = 592,
-        TOK_VARIABLE = 593,
-        TOK_DICT_ELEMENT = 594,
-        TOK_DICT_ELEMENT_REGEXP = 595
+        TOK_YYEMPTY = -2,
+    TOK_END = 0,                   // "end of file"
+    TOK_YYerror = 256,             // error
+    TOK_YYUNDEF = 257,             // "invalid token"
+    TOK_COMMA = 258,               // ","
+    TOK_CONFIG_CONTENT_INJECTION = 259, // "CONFIG_CONTENT_INJECTION"
+    TOK_CONGIG_DIR_RESPONSE_BODY_MP_CLEAR = 260, // "CONGIG_DIR_RESPONSE_BODY_MP_CLEAR"
+    TOK_PIPE = 261,                // PIPE
+    TOK_NEW_LINE = 262,            // NEW_LINE
+    TOK_VAR_COUNT = 263,           // VAR_COUNT
+    TOK_VAR_EXCLUSION = 264,       // VAR_EXCLUSION
+    TOK_VARIABLE_ARGS = 265,       // VARIABLE_ARGS
+    TOK_VARIABLE_ARGS_POST = 266,  // VARIABLE_ARGS_POST
+    TOK_VARIABLE_ARGS_GET = 267,   // VARIABLE_ARGS_GET
+    TOK_VARIABLE_FILES_SIZES = 268, // VARIABLE_FILES_SIZES
+    TOK_VARIABLE_FILES_NAMES = 269, // VARIABLE_FILES_NAMES
+    TOK_VARIABLE_FILES_TMP_CONTENT = 270, // VARIABLE_FILES_TMP_CONTENT
+    TOK_VARIABLE_MULTIPART_FILENAME = 271, // VARIABLE_MULTIPART_FILENAME
+    TOK_VARIABLE_MULTIPART_NAME = 272, // VARIABLE_MULTIPART_NAME
+    TOK_VARIABLE_MATCHED_VARS_NAMES = 273, // VARIABLE_MATCHED_VARS_NAMES
+    TOK_VARIABLE_MATCHED_VARS = 274, // VARIABLE_MATCHED_VARS
+    TOK_VARIABLE_FILES = 275,      // VARIABLE_FILES
+    TOK_VARIABLE_REQUEST_COOKIES = 276, // VARIABLE_REQUEST_COOKIES
+    TOK_VARIABLE_REQUEST_HEADERS = 277, // VARIABLE_REQUEST_HEADERS
+    TOK_VARIABLE_RESPONSE_HEADERS = 278, // VARIABLE_RESPONSE_HEADERS
+    TOK_VARIABLE_GEO = 279,        // VARIABLE_GEO
+    TOK_VARIABLE_REQUEST_COOKIES_NAMES = 280, // VARIABLE_REQUEST_COOKIES_NAMES
+    TOK_VARIABLE_MULTIPART_PART_HEADERS = 281, // VARIABLE_MULTIPART_PART_HEADERS
+    TOK_VARIABLE_ARGS_COMBINED_SIZE = 282, // VARIABLE_ARGS_COMBINED_SIZE
+    TOK_VARIABLE_ARGS_GET_NAMES = 283, // VARIABLE_ARGS_GET_NAMES
+    TOK_VARIABLE_RULE = 284,       // VARIABLE_RULE
+    TOK_VARIABLE_ARGS_NAMES = 285, // "Variable ARGS_NAMES"
+    TOK_VARIABLE_ARGS_POST_NAMES = 286, // VARIABLE_ARGS_POST_NAMES
+    TOK_VARIABLE_AUTH_TYPE = 287,  // "AUTH_TYPE"
+    TOK_VARIABLE_FILES_COMBINED_SIZE = 288, // "FILES_COMBINED_SIZE"
+    TOK_VARIABLE_FILES_TMP_NAMES = 289, // "FILES_TMPNAMES"
+    TOK_VARIABLE_FULL_REQUEST = 290, // "FULL_REQUEST"
+    TOK_VARIABLE_FULL_REQUEST_LENGTH = 291, // "FULL_REQUEST_LENGTH"
+    TOK_VARIABLE_INBOUND_DATA_ERROR = 292, // "INBOUND_DATA_ERROR"
+    TOK_VARIABLE_MATCHED_VAR = 293, // "MATCHED_VAR"
+    TOK_VARIABLE_MATCHED_VAR_NAME = 294, // "MATCHED_VAR_NAME"
+    TOK_VARIABLE_MULTIPART_BOUNDARY_QUOTED = 295, // VARIABLE_MULTIPART_BOUNDARY_QUOTED
+    TOK_VARIABLE_MULTIPART_BOUNDARY_WHITESPACE = 296, // VARIABLE_MULTIPART_BOUNDARY_WHITESPACE
+    TOK_VARIABLE_MULTIPART_CRLF_LF_LINES = 297, // "MULTIPART_CRLF_LF_LINES"
+    TOK_VARIABLE_MULTIPART_DATA_AFTER = 298, // "MULTIPART_DATA_AFTER"
+    TOK_VARIABLE_MULTIPART_DATA_BEFORE = 299, // VARIABLE_MULTIPART_DATA_BEFORE
+    TOK_VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED = 300, // "MULTIPART_FILE_LIMIT_EXCEEDED"
+    TOK_VARIABLE_MULTIPART_HEADER_FOLDING = 301, // "MULTIPART_HEADER_FOLDING"
+    TOK_VARIABLE_MULTIPART_INVALID_HEADER_FOLDING = 302, // "MULTIPART_INVALID_HEADER_FOLDING"
+    TOK_VARIABLE_MULTIPART_INVALID_PART = 303, // VARIABLE_MULTIPART_INVALID_PART
+    TOK_VARIABLE_MULTIPART_INVALID_QUOTING = 304, // "MULTIPART_INVALID_QUOTING"
+    TOK_VARIABLE_MULTIPART_LF_LINE = 305, // VARIABLE_MULTIPART_LF_LINE
+    TOK_VARIABLE_MULTIPART_MISSING_SEMICOLON = 306, // VARIABLE_MULTIPART_MISSING_SEMICOLON
+    TOK_VARIABLE_MULTIPART_SEMICOLON_MISSING = 307, // VARIABLE_MULTIPART_SEMICOLON_MISSING
+    TOK_VARIABLE_MULTIPART_STRICT_ERROR = 308, // "MULTIPART_STRICT_ERROR"
+    TOK_VARIABLE_MULTIPART_UNMATCHED_BOUNDARY = 309, // "MULTIPART_UNMATCHED_BOUNDARY"
+    TOK_VARIABLE_OUTBOUND_DATA_ERROR = 310, // "OUTBOUND_DATA_ERROR"
+    TOK_VARIABLE_PATH_INFO = 311,  // "PATH_INFO"
+    TOK_VARIABLE_QUERY_STRING = 312, // "QUERY_STRING"
+    TOK_VARIABLE_REMOTE_ADDR = 313, // "REMOTE_ADDR"
+    TOK_VARIABLE_REMOTE_HOST = 314, // "REMOTE_HOST"
+    TOK_VARIABLE_REMOTE_PORT = 315, // "REMOTE_PORT"
+    TOK_VARIABLE_REQBODY_ERROR_MSG = 316, // "REQBODY_ERROR_MSG"
+    TOK_VARIABLE_REQBODY_ERROR = 317, // "REQBODY_ERROR"
+    TOK_VARIABLE_REQBODY_PROCESSOR_ERROR_MSG = 318, // "REQBODY_PROCESSOR_ERROR_MSG"
+    TOK_VARIABLE_REQBODY_PROCESSOR_ERROR = 319, // "REQBODY_PROCESSOR_ERROR"
+    TOK_VARIABLE_REQBODY_PROCESSOR = 320, // "REQBODY_PROCESSOR"
+    TOK_VARIABLE_REQUEST_BASENAME = 321, // "REQUEST_BASENAME"
+    TOK_VARIABLE_REQUEST_BODY_LENGTH = 322, // "REQUEST_BODY_LENGTH"
+    TOK_VARIABLE_REQUEST_BODY = 323, // "REQUEST_BODY"
+    TOK_VARIABLE_REQUEST_FILE_NAME = 324, // "REQUEST_FILENAME"
+    TOK_VARIABLE_REQUEST_HEADERS_NAMES = 325, // VARIABLE_REQUEST_HEADERS_NAMES
+    TOK_VARIABLE_REQUEST_LINE = 326, // "REQUEST_LINE"
+    TOK_VARIABLE_REQUEST_METHOD = 327, // "REQUEST_METHOD"
+    TOK_VARIABLE_REQUEST_PROTOCOL = 328, // "REQUEST_PROTOCOL"
+    TOK_VARIABLE_REQUEST_URI_RAW = 329, // "REQUEST_URI_RAW"
+    TOK_VARIABLE_REQUEST_URI = 330, // "REQUEST_URI"
+    TOK_VARIABLE_RESOURCE = 331,   // "RESOURCE"
+    TOK_VARIABLE_RESPONSE_BODY = 332, // "RESPONSE_BODY"
+    TOK_VARIABLE_RESPONSE_CONTENT_LENGTH = 333, // "RESPONSE_CONTENT_LENGTH"
+    TOK_VARIABLE_RESPONSE_CONTENT_TYPE = 334, // VARIABLE_RESPONSE_CONTENT_TYPE
+    TOK_VARIABLE_RESPONSE_HEADERS_NAMES = 335, // VARIABLE_RESPONSE_HEADERS_NAMES
+    TOK_VARIABLE_RESPONSE_PROTOCOL = 336, // "RESPONSE_PROTOCOL"
+    TOK_VARIABLE_RESPONSE_STATUS = 337, // "RESPONSE_STATUS"
+    TOK_VARIABLE_SERVER_ADDR = 338, // "SERVER_ADDR"
+    TOK_VARIABLE_SERVER_NAME = 339, // "SERVER_NAME"
+    TOK_VARIABLE_SERVER_PORT = 340, // "SERVER_PORT"
+    TOK_VARIABLE_SESSION_ID = 341, // "SESSIONID"
+    TOK_VARIABLE_UNIQUE_ID = 342,  // "UNIQUE_ID"
+    TOK_VARIABLE_URL_ENCODED_ERROR = 343, // "URLENCODED_ERROR"
+    TOK_VARIABLE_USER_ID = 344,    // "USERID"
+    TOK_VARIABLE_WEB_APP_ID = 345, // "WEBAPPID"
+    TOK_VARIABLE_STATUS = 346,     // "VARIABLE_STATUS"
+    TOK_VARIABLE_STATUS_LINE = 347, // "VARIABLE_STATUS_LINE"
+    TOK_VARIABLE_IP = 348,         // "VARIABLE_IP"
+    TOK_VARIABLE_GLOBAL = 349,     // "VARIABLE_GLOBAL"
+    TOK_VARIABLE_TX = 350,         // "VARIABLE_TX"
+    TOK_VARIABLE_SESSION = 351,    // "VARIABLE_SESSION"
+    TOK_VARIABLE_USER = 352,       // "VARIABLE_USER"
+    TOK_RUN_TIME_VAR_ENV = 353,    // "RUN_TIME_VAR_ENV"
+    TOK_RUN_TIME_VAR_XML = 354,    // "RUN_TIME_VAR_XML"
+    TOK_ACTION_SETVAR = 355,       // "SetVar"
+    TOK_SETVAR_OPERATION_EQUALS = 356, // SETVAR_OPERATION_EQUALS
+    TOK_SETVAR_OPERATION_EQUALS_PLUS = 357, // SETVAR_OPERATION_EQUALS_PLUS
+    TOK_SETVAR_OPERATION_EQUALS_MINUS = 358, // SETVAR_OPERATION_EQUALS_MINUS
+    TOK_NOT = 359,                 // "NOT"
+    TOK_OPERATOR_BEGINS_WITH = 360, // "OPERATOR_BEGINS_WITH"
+    TOK_OPERATOR_CONTAINS = 361,   // "OPERATOR_CONTAINS"
+    TOK_OPERATOR_CONTAINS_WORD = 362, // "OPERATOR_CONTAINS_WORD"
+    TOK_OPERATOR_DETECT_SQLI = 363, // "OPERATOR_DETECT_SQLI"
+    TOK_OPERATOR_DETECT_XSS = 364, // "OPERATOR_DETECT_XSS"
+    TOK_OPERATOR_ENDS_WITH = 365,  // "OPERATOR_ENDS_WITH"
+    TOK_OPERATOR_EQ = 366,         // "OPERATOR_EQ"
+    TOK_OPERATOR_FUZZY_HASH = 367, // "OPERATOR_FUZZY_HASH"
+    TOK_OPERATOR_GEOLOOKUP = 368,  // "OPERATOR_GEOLOOKUP"
+    TOK_OPERATOR_GE = 369,         // "OPERATOR_GE"
+    TOK_OPERATOR_GSB_LOOKUP = 370, // "OPERATOR_GSB_LOOKUP"
+    TOK_OPERATOR_GT = 371,         // "OPERATOR_GT"
+    TOK_OPERATOR_INSPECT_FILE = 372, // "OPERATOR_INSPECT_FILE"
+    TOK_OPERATOR_IP_MATCH_FROM_FILE = 373, // "OPERATOR_IP_MATCH_FROM_FILE"
+    TOK_OPERATOR_IP_MATCH = 374,   // "OPERATOR_IP_MATCH"
+    TOK_OPERATOR_LE = 375,         // "OPERATOR_LE"
+    TOK_OPERATOR_LT = 376,         // "OPERATOR_LT"
+    TOK_OPERATOR_PM_FROM_FILE = 377, // "OPERATOR_PM_FROM_FILE"
+    TOK_OPERATOR_PM = 378,         // "OPERATOR_PM"
+    TOK_OPERATOR_RBL = 379,        // "OPERATOR_RBL"
+    TOK_OPERATOR_RSUB = 380,       // "OPERATOR_RSUB"
+    TOK_OPERATOR_RX_CONTENT_ONLY = 381, // "Operator RX (content only)"
+    TOK_OPERATOR_RX = 382,         // "OPERATOR_RX"
+    TOK_OPERATOR_RX_GLOBAL = 383,  // "OPERATOR_RX_GLOBAL"
+    TOK_OPERATOR_STR_EQ = 384,     // "OPERATOR_STR_EQ"
+    TOK_OPERATOR_STR_MATCH = 385,  // "OPERATOR_STR_MATCH"
+    TOK_OPERATOR_UNCONDITIONAL_MATCH = 386, // "OPERATOR_UNCONDITIONAL_MATCH"
+    TOK_OPERATOR_VALIDATE_BYTE_RANGE = 387, // "OPERATOR_VALIDATE_BYTE_RANGE"
+    TOK_OPERATOR_VALIDATE_DTD = 388, // "OPERATOR_VALIDATE_DTD"
+    TOK_OPERATOR_VALIDATE_HASH = 389, // "OPERATOR_VALIDATE_HASH"
+    TOK_OPERATOR_VALIDATE_SCHEMA = 390, // "OPERATOR_VALIDATE_SCHEMA"
+    TOK_OPERATOR_VALIDATE_URL_ENCODING = 391, // "OPERATOR_VALIDATE_URL_ENCODING"
+    TOK_OPERATOR_VALIDATE_UTF8_ENCODING = 392, // "OPERATOR_VALIDATE_UTF8_ENCODING"
+    TOK_OPERATOR_VERIFY_CC = 393,  // "OPERATOR_VERIFY_CC"
+    TOK_OPERATOR_VERIFY_CPF = 394, // "OPERATOR_VERIFY_CPF"
+    TOK_OPERATOR_VERIFY_SSN = 395, // "OPERATOR_VERIFY_SSN"
+    TOK_OPERATOR_VERIFY_SVNR = 396, // "OPERATOR_VERIFY_SVNR"
+    TOK_OPERATOR_WITHIN = 397,     // "OPERATOR_WITHIN"
+    TOK_CONFIG_DIR_AUDIT_LOG_FMT = 398, // CONFIG_DIR_AUDIT_LOG_FMT
+    TOK_JSON = 399,                // JSON
+    TOK_NATIVE = 400,              // NATIVE
+    TOK_ACTION_CTL_RULE_ENGINE = 401, // "ACTION_CTL_RULE_ENGINE"
+    TOK_ACTION_ACCURACY = 402,     // "Accuracy"
+    TOK_ACTION_ALLOW = 403,        // "Allow"
+    TOK_ACTION_APPEND = 404,       // "Append"
+    TOK_ACTION_AUDIT_LOG = 405,    // "AuditLog"
+    TOK_ACTION_BLOCK = 406,        // "Block"
+    TOK_ACTION_CAPTURE = 407,      // "Capture"
+    TOK_ACTION_CHAIN = 408,        // "Chain"
+    TOK_ACTION_CTL_AUDIT_ENGINE = 409, // "ACTION_CTL_AUDIT_ENGINE"
+    TOK_ACTION_CTL_AUDIT_LOG_PARTS = 410, // "ACTION_CTL_AUDIT_LOG_PARTS"
+    TOK_ACTION_CTL_BDY_JSON = 411, // "ACTION_CTL_BDY_JSON"
+    TOK_ACTION_CTL_BDY_XML = 412,  // "ACTION_CTL_BDY_XML"
+    TOK_ACTION_CTL_BDY_URLENCODED = 413, // "ACTION_CTL_BDY_URLENCODED"
+    TOK_ACTION_CTL_FORCE_REQ_BODY_VAR = 414, // "ACTION_CTL_FORCE_REQ_BODY_VAR"
+    TOK_ACTION_CTL_REQUEST_BODY_ACCESS = 415, // "ACTION_CTL_REQUEST_BODY_ACCESS"
+    TOK_ACTION_CTL_RULE_REMOVE_BY_ID = 416, // "ACTION_CTL_RULE_REMOVE_BY_ID"
+    TOK_ACTION_CTL_RULE_REMOVE_BY_TAG = 417, // "ACTION_CTL_RULE_REMOVE_BY_TAG"
+    TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID = 418, // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
+    TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG = 419, // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
+    TOK_ACTION_DENY = 420,         // "Deny"
+    TOK_ACTION_DEPRECATE_VAR = 421, // "DeprecateVar"
+    TOK_ACTION_DROP = 422,         // "Drop"
+    TOK_ACTION_EXEC = 423,         // "Exec"
+    TOK_ACTION_EXPIRE_VAR = 424,   // "ExpireVar"
+    TOK_ACTION_ID = 425,           // "Id"
+    TOK_ACTION_INITCOL = 426,      // "InitCol"
+    TOK_ACTION_LOG = 427,          // "Log"
+    TOK_ACTION_LOG_DATA = 428,     // "LogData"
+    TOK_ACTION_MATURITY = 429,     // "Maturity"
+    TOK_ACTION_MSG = 430,          // "Msg"
+    TOK_ACTION_MULTI_MATCH = 431,  // "MultiMatch"
+    TOK_ACTION_NO_AUDIT_LOG = 432, // "NoAuditLog"
+    TOK_ACTION_NO_LOG = 433,       // "NoLog"
+    TOK_ACTION_PASS = 434,         // "Pass"
+    TOK_ACTION_PAUSE = 435,        // "Pause"
+    TOK_ACTION_PHASE = 436,        // "Phase"
+    TOK_ACTION_PREPEND = 437,      // "Prepend"
+    TOK_ACTION_PROXY = 438,        // "Proxy"
+    TOK_ACTION_REDIRECT = 439,     // "Redirect"
+    TOK_ACTION_REV = 440,          // "Rev"
+    TOK_ACTION_SANITISE_ARG = 441, // "SanitiseArg"
+    TOK_ACTION_SANITISE_MATCHED = 442, // "SanitiseMatched"
+    TOK_ACTION_SANITISE_MATCHED_BYTES = 443, // "SanitiseMatchedBytes"
+    TOK_ACTION_SANITISE_REQUEST_HEADER = 444, // "SanitiseRequestHeader"
+    TOK_ACTION_SANITISE_RESPONSE_HEADER = 445, // "SanitiseResponseHeader"
+    TOK_ACTION_SETENV = 446,       // "SetEnv"
+    TOK_ACTION_SETRSC = 447,       // "SetRsc"
+    TOK_ACTION_SETSID = 448,       // "SetSid"
+    TOK_ACTION_SETUID = 449,       // "SetUID"
+    TOK_ACTION_SEVERITY = 450,     // "Severity"
+    TOK_ACTION_SKIP = 451,         // "Skip"
+    TOK_ACTION_SKIP_AFTER = 452,   // "SkipAfter"
+    TOK_ACTION_STATUS = 453,       // "Status"
+    TOK_ACTION_TAG = 454,          // "Tag"
+    TOK_ACTION_TRANSFORMATION_BASE_64_ENCODE = 455, // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
+    TOK_ACTION_TRANSFORMATION_BASE_64_DECODE = 456, // "ACTION_TRANSFORMATION_BASE_64_DECODE"
+    TOK_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT = 457, // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
+    TOK_ACTION_TRANSFORMATION_CMD_LINE = 458, // "ACTION_TRANSFORMATION_CMD_LINE"
+    TOK_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE = 459, // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
+    TOK_ACTION_TRANSFORMATION_CSS_DECODE = 460, // "ACTION_TRANSFORMATION_CSS_DECODE"
+    TOK_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE = 461, // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
+    TOK_ACTION_TRANSFORMATION_HEX_ENCODE = 462, // "ACTION_TRANSFORMATION_HEX_ENCODE"
+    TOK_ACTION_TRANSFORMATION_HEX_DECODE = 463, // "ACTION_TRANSFORMATION_HEX_DECODE"
+    TOK_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE = 464, // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
+    TOK_ACTION_TRANSFORMATION_JS_DECODE = 465, // "ACTION_TRANSFORMATION_JS_DECODE"
+    TOK_ACTION_TRANSFORMATION_LENGTH = 466, // "ACTION_TRANSFORMATION_LENGTH"
+    TOK_ACTION_TRANSFORMATION_LOWERCASE = 467, // "ACTION_TRANSFORMATION_LOWERCASE"
+    TOK_ACTION_TRANSFORMATION_MD5 = 468, // "ACTION_TRANSFORMATION_MD5"
+    TOK_ACTION_TRANSFORMATION_NONE = 469, // "ACTION_TRANSFORMATION_NONE"
+    TOK_ACTION_TRANSFORMATION_NORMALISE_PATH = 470, // "ACTION_TRANSFORMATION_NORMALISE_PATH"
+    TOK_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN = 471, // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
+    TOK_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT = 472, // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
+    TOK_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT = 473, // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
+    TOK_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT = 474, // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
+    TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS = 475, // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
+    TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR = 476, // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
+    TOK_ACTION_TRANSFORMATION_REMOVE_NULLS = 477, // "ACTION_TRANSFORMATION_REMOVE_NULLS"
+    TOK_ACTION_TRANSFORMATION_REMOVE_WHITESPACE = 478, // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
+    TOK_ACTION_TRANSFORMATION_REPLACE_COMMENTS = 479, // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
+    TOK_ACTION_TRANSFORMATION_REPLACE_NULLS = 480, // "ACTION_TRANSFORMATION_REPLACE_NULLS"
+    TOK_ACTION_TRANSFORMATION_SHA1 = 481, // "ACTION_TRANSFORMATION_SHA1"
+    TOK_ACTION_TRANSFORMATION_SQL_HEX_DECODE = 482, // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
+    TOK_ACTION_TRANSFORMATION_TRIM = 483, // "ACTION_TRANSFORMATION_TRIM"
+    TOK_ACTION_TRANSFORMATION_TRIM_LEFT = 484, // "ACTION_TRANSFORMATION_TRIM_LEFT"
+    TOK_ACTION_TRANSFORMATION_TRIM_RIGHT = 485, // "ACTION_TRANSFORMATION_TRIM_RIGHT"
+    TOK_ACTION_TRANSFORMATION_UPPERCASE = 486, // "ACTION_TRANSFORMATION_UPPERCASE"
+    TOK_ACTION_TRANSFORMATION_URL_ENCODE = 487, // "ACTION_TRANSFORMATION_URL_ENCODE"
+    TOK_ACTION_TRANSFORMATION_URL_DECODE = 488, // "ACTION_TRANSFORMATION_URL_DECODE"
+    TOK_ACTION_TRANSFORMATION_URL_DECODE_UNI = 489, // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
+    TOK_ACTION_TRANSFORMATION_UTF8_TO_UNICODE = 490, // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
+    TOK_ACTION_VER = 491,          // "Ver"
+    TOK_ACTION_XMLNS = 492,        // "xmlns"
+    TOK_CONFIG_COMPONENT_SIG = 493, // "CONFIG_COMPONENT_SIG"
+    TOK_CONFIG_CONN_ENGINE = 494,  // "CONFIG_CONN_ENGINE"
+    TOK_CONFIG_SEC_ARGUMENT_SEPARATOR = 495, // "CONFIG_SEC_ARGUMENT_SEPARATOR"
+    TOK_CONFIG_SEC_WEB_APP_ID = 496, // "CONFIG_SEC_WEB_APP_ID"
+    TOK_CONFIG_SEC_SERVER_SIG = 497, // "CONFIG_SEC_SERVER_SIG"
+    TOK_CONFIG_DIR_AUDIT_DIR = 498, // "CONFIG_DIR_AUDIT_DIR"
+    TOK_CONFIG_DIR_AUDIT_DIR_MOD = 499, // "CONFIG_DIR_AUDIT_DIR_MOD"
+    TOK_CONFIG_DIR_AUDIT_ENG = 500, // "CONFIG_DIR_AUDIT_ENG"
+    TOK_CONFIG_DIR_AUDIT_FLE_MOD = 501, // "CONFIG_DIR_AUDIT_FLE_MOD"
+    TOK_CONFIG_DIR_AUDIT_LOG = 502, // "CONFIG_DIR_AUDIT_LOG"
+    TOK_CONFIG_DIR_AUDIT_LOG2 = 503, // "CONFIG_DIR_AUDIT_LOG2"
+    TOK_CONFIG_DIR_AUDIT_LOG_P = 504, // "CONFIG_DIR_AUDIT_LOG_P"
+    TOK_CONFIG_DIR_AUDIT_STS = 505, // "CONFIG_DIR_AUDIT_STS"
+    TOK_CONFIG_DIR_AUDIT_TPE = 506, // "CONFIG_DIR_AUDIT_TPE"
+    TOK_CONFIG_DIR_DEBUG_LOG = 507, // "CONFIG_DIR_DEBUG_LOG"
+    TOK_CONFIG_DIR_DEBUG_LVL = 508, // "CONFIG_DIR_DEBUG_LVL"
+    TOK_CONFIG_SEC_CACHE_TRANSFORMATIONS = 509, // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
+    TOK_CONFIG_SEC_DISABLE_BACKEND_COMPRESS = 510, // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
+    TOK_CONFIG_SEC_HASH_ENGINE = 511, // "CONFIG_SEC_HASH_ENGINE"
+    TOK_CONFIG_SEC_HASH_KEY = 512, // "CONFIG_SEC_HASH_KEY"
+    TOK_CONFIG_SEC_HASH_PARAM = 513, // "CONFIG_SEC_HASH_PARAM"
+    TOK_CONFIG_SEC_HASH_METHOD_RX = 514, // "CONFIG_SEC_HASH_METHOD_RX"
+    TOK_CONFIG_SEC_HASH_METHOD_PM = 515, // "CONFIG_SEC_HASH_METHOD_PM"
+    TOK_CONFIG_SEC_CHROOT_DIR = 516, // "CONFIG_SEC_CHROOT_DIR"
+    TOK_CONFIG_DIR_GEO_DB = 517,   // "CONFIG_DIR_GEO_DB"
+    TOK_CONFIG_DIR_GSB_DB = 518,   // "CONFIG_DIR_GSB_DB"
+    TOK_CONFIG_SEC_GUARDIAN_LOG = 519, // "CONFIG_SEC_GUARDIAN_LOG"
+    TOK_CONFIG_DIR_PCRE_MATCH_LIMIT = 520, // "CONFIG_DIR_PCRE_MATCH_LIMIT"
+    TOK_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION = 521, // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
+    TOK_CONFIG_SEC_CONN_R_STATE_LIMIT = 522, // "CONFIG_SEC_CONN_R_STATE_LIMIT"
+    TOK_CONFIG_SEC_CONN_W_STATE_LIMIT = 523, // "CONFIG_SEC_CONN_W_STATE_LIMIT"
+    TOK_CONFIG_SEC_SENSOR_ID = 524, // "CONFIG_SEC_SENSOR_ID"
+    TOK_CONFIG_DIR_ARGS_LIMIT = 525, // "CONFIG_DIR_ARGS_LIMIT"
+    TOK_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT = 526, // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
+    TOK_CONFIG_DIR_REQ_BODY = 527, // "CONFIG_DIR_REQ_BODY"
+    TOK_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT = 528, // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
+    TOK_CONFIG_DIR_REQ_BODY_LIMIT = 529, // "CONFIG_DIR_REQ_BODY_LIMIT"
+    TOK_CONFIG_DIR_REQ_BODY_LIMIT_ACTION = 530, // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
+    TOK_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT = 531, // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
+    TOK_CONFIG_DIR_RES_BODY = 532, // "CONFIG_DIR_RES_BODY"
+    TOK_CONFIG_DIR_RES_BODY_LIMIT = 533, // "CONFIG_DIR_RES_BODY_LIMIT"
+    TOK_CONFIG_DIR_RES_BODY_LIMIT_ACTION = 534, // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
+    TOK_CONFIG_SEC_RULE_INHERITANCE = 535, // "CONFIG_SEC_RULE_INHERITANCE"
+    TOK_CONFIG_SEC_RULE_PERF_TIME = 536, // "CONFIG_SEC_RULE_PERF_TIME"
+    TOK_CONFIG_DIR_RULE_ENG = 537, // "CONFIG_DIR_RULE_ENG"
+    TOK_CONFIG_DIR_SEC_ACTION = 538, // "CONFIG_DIR_SEC_ACTION"
+    TOK_CONFIG_DIR_SEC_DEFAULT_ACTION = 539, // "CONFIG_DIR_SEC_DEFAULT_ACTION"
+    TOK_CONFIG_DIR_SEC_MARKER = 540, // "CONFIG_DIR_SEC_MARKER"
+    TOK_CONFIG_DIR_UNICODE_MAP_FILE = 541, // "CONFIG_DIR_UNICODE_MAP_FILE"
+    TOK_CONFIG_DIR_UNICODE_CODE_PAGE = 542, // "CONFIG_DIR_UNICODE_CODE_PAGE"
+    TOK_CONFIG_SEC_COLLECTION_TIMEOUT = 543, // "CONFIG_SEC_COLLECTION_TIMEOUT"
+    TOK_CONFIG_SEC_HTTP_BLKEY = 544, // "CONFIG_SEC_HTTP_BLKEY"
+    TOK_CONFIG_SEC_INTERCEPT_ON_ERROR = 545, // "CONFIG_SEC_INTERCEPT_ON_ERROR"
+    TOK_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION = 546, // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
+    TOK_CONFIG_SEC_RULE_REMOVE_BY_ID = 547, // "CONFIG_SEC_RULE_REMOVE_BY_ID"
+    TOK_CONFIG_SEC_RULE_REMOVE_BY_MSG = 548, // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
+    TOK_CONFIG_SEC_RULE_REMOVE_BY_TAG = 549, // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
+    TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG = 550, // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
+    TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG = 551, // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
+    TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID = 552, // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
+    TOK_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID = 553, // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
+    TOK_CONFIG_UPDLOAD_KEEP_FILES = 554, // "CONFIG_UPDLOAD_KEEP_FILES"
+    TOK_CONFIG_UPDLOAD_SAVE_TMP_FILES = 555, // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
+    TOK_CONFIG_UPLOAD_DIR = 556,   // "CONFIG_UPLOAD_DIR"
+    TOK_CONFIG_UPLOAD_FILE_LIMIT = 557, // "CONFIG_UPLOAD_FILE_LIMIT"
+    TOK_CONFIG_UPLOAD_FILE_MODE = 558, // "CONFIG_UPLOAD_FILE_MODE"
+    TOK_CONFIG_VALUE_ABORT = 559,  // "CONFIG_VALUE_ABORT"
+    TOK_CONFIG_VALUE_DETC = 560,   // "CONFIG_VALUE_DETC"
+    TOK_CONFIG_VALUE_HTTPS = 561,  // "CONFIG_VALUE_HTTPS"
+    TOK_CONFIG_VALUE_OFF = 562,    // "CONFIG_VALUE_OFF"
+    TOK_CONFIG_VALUE_ON = 563,     // "CONFIG_VALUE_ON"
+    TOK_CONFIG_VALUE_PARALLEL = 564, // "CONFIG_VALUE_PARALLEL"
+    TOK_CONFIG_VALUE_PROCESS_PARTIAL = 565, // "CONFIG_VALUE_PROCESS_PARTIAL"
+    TOK_CONFIG_VALUE_REJECT = 566, // "CONFIG_VALUE_REJECT"
+    TOK_CONFIG_VALUE_RELEVANT_ONLY = 567, // "CONFIG_VALUE_RELEVANT_ONLY"
+    TOK_CONFIG_VALUE_SERIAL = 568, // "CONFIG_VALUE_SERIAL"
+    TOK_CONFIG_VALUE_WARN = 569,   // "CONFIG_VALUE_WARN"
+    TOK_CONFIG_XML_EXTERNAL_ENTITY = 570, // "CONFIG_XML_EXTERNAL_ENTITY"
+    TOK_CONGIG_DIR_RESPONSE_BODY_MP = 571, // "CONGIG_DIR_RESPONSE_BODY_MP"
+    TOK_CONGIG_DIR_SEC_ARG_SEP = 572, // "CONGIG_DIR_SEC_ARG_SEP"
+    TOK_CONGIG_DIR_SEC_COOKIE_FORMAT = 573, // "CONGIG_DIR_SEC_COOKIE_FORMAT"
+    TOK_CONFIG_SEC_COOKIEV0_SEPARATOR = 574, // "CONFIG_SEC_COOKIEV0_SEPARATOR"
+    TOK_CONGIG_DIR_SEC_DATA_DIR = 575, // "CONGIG_DIR_SEC_DATA_DIR"
+    TOK_CONGIG_DIR_SEC_STATUS_ENGINE = 576, // "CONGIG_DIR_SEC_STATUS_ENGINE"
+    TOK_CONFIG_SEC_STREAM_IN_BODY_INSPECTION = 577, // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
+    TOK_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION = 578, // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
+    TOK_CONGIG_DIR_SEC_TMP_DIR = 579, // "CONGIG_DIR_SEC_TMP_DIR"
+    TOK_DIRECTIVE = 580,           // "DIRECTIVE"
+    TOK_DIRECTIVE_SECRULESCRIPT = 581, // "DIRECTIVE_SECRULESCRIPT"
+    TOK_FREE_TEXT_QUOTE_MACRO_EXPANSION = 582, // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
+    TOK_QUOTATION_MARK = 583,      // "QUOTATION_MARK"
+    TOK_RUN_TIME_VAR_BLD = 584,    // "RUN_TIME_VAR_BLD"
+    TOK_RUN_TIME_VAR_DUR = 585,    // "RUN_TIME_VAR_DUR"
+    TOK_RUN_TIME_VAR_HSV = 586,    // "RUN_TIME_VAR_HSV"
+    TOK_RUN_TIME_VAR_REMOTE_USER = 587, // "RUN_TIME_VAR_REMOTE_USER"
+    TOK_RUN_TIME_VAR_TIME = 588,   // "RUN_TIME_VAR_TIME"
+    TOK_RUN_TIME_VAR_TIME_DAY = 589, // "RUN_TIME_VAR_TIME_DAY"
+    TOK_RUN_TIME_VAR_TIME_EPOCH = 590, // "RUN_TIME_VAR_TIME_EPOCH"
+    TOK_RUN_TIME_VAR_TIME_HOUR = 591, // "RUN_TIME_VAR_TIME_HOUR"
+    TOK_RUN_TIME_VAR_TIME_MIN = 592, // "RUN_TIME_VAR_TIME_MIN"
+    TOK_RUN_TIME_VAR_TIME_MON = 593, // "RUN_TIME_VAR_TIME_MON"
+    TOK_RUN_TIME_VAR_TIME_SEC = 594, // "RUN_TIME_VAR_TIME_SEC"
+    TOK_RUN_TIME_VAR_TIME_WDAY = 595, // "RUN_TIME_VAR_TIME_WDAY"
+    TOK_RUN_TIME_VAR_TIME_YEAR = 596, // "RUN_TIME_VAR_TIME_YEAR"
+    TOK_VARIABLE = 597,            // "VARIABLE"
+    TOK_DICT_ELEMENT = 598,        // "Dictionary element"
+    TOK_DICT_ELEMENT_REGEXP = 599  // "Dictionary element, selected by regexp"
+      };
+      /// Backward compatibility alias (Bison 3.6).
+      typedef token_kind_type yytokentype;
+    };
+
+    /// Token kind, as returned by yylex.
+    typedef token::yytokentype token_kind_type;
+
+    /// Backward compatibility alias (Bison 3.6).
+    typedef token_kind_type token_type;
+
+    /// Symbol kinds.
+    struct symbol_kind
+    {
+      enum symbol_kind_type
+      {
+        YYNTOKENS = 345, ///< Number of tokens.
+        S_YYEMPTY = -2,
+        S_YYEOF = 0,                             // "end of file"
+        S_YYerror = 1,                           // error
+        S_YYUNDEF = 2,                           // "invalid token"
+        S_COMMA = 3,                             // ","
+        S_CONFIG_CONTENT_INJECTION = 4,          // "CONFIG_CONTENT_INJECTION"
+        S_CONGIG_DIR_RESPONSE_BODY_MP_CLEAR = 5, // "CONGIG_DIR_RESPONSE_BODY_MP_CLEAR"
+        S_PIPE = 6,                              // PIPE
+        S_NEW_LINE = 7,                          // NEW_LINE
+        S_VAR_COUNT = 8,                         // VAR_COUNT
+        S_VAR_EXCLUSION = 9,                     // VAR_EXCLUSION
+        S_VARIABLE_ARGS = 10,                    // VARIABLE_ARGS
+        S_VARIABLE_ARGS_POST = 11,               // VARIABLE_ARGS_POST
+        S_VARIABLE_ARGS_GET = 12,                // VARIABLE_ARGS_GET
+        S_VARIABLE_FILES_SIZES = 13,             // VARIABLE_FILES_SIZES
+        S_VARIABLE_FILES_NAMES = 14,             // VARIABLE_FILES_NAMES
+        S_VARIABLE_FILES_TMP_CONTENT = 15,       // VARIABLE_FILES_TMP_CONTENT
+        S_VARIABLE_MULTIPART_FILENAME = 16,      // VARIABLE_MULTIPART_FILENAME
+        S_VARIABLE_MULTIPART_NAME = 17,          // VARIABLE_MULTIPART_NAME
+        S_VARIABLE_MATCHED_VARS_NAMES = 18,      // VARIABLE_MATCHED_VARS_NAMES
+        S_VARIABLE_MATCHED_VARS = 19,            // VARIABLE_MATCHED_VARS
+        S_VARIABLE_FILES = 20,                   // VARIABLE_FILES
+        S_VARIABLE_REQUEST_COOKIES = 21,         // VARIABLE_REQUEST_COOKIES
+        S_VARIABLE_REQUEST_HEADERS = 22,         // VARIABLE_REQUEST_HEADERS
+        S_VARIABLE_RESPONSE_HEADERS = 23,        // VARIABLE_RESPONSE_HEADERS
+        S_VARIABLE_GEO = 24,                     // VARIABLE_GEO
+        S_VARIABLE_REQUEST_COOKIES_NAMES = 25,   // VARIABLE_REQUEST_COOKIES_NAMES
+        S_VARIABLE_MULTIPART_PART_HEADERS = 26,  // VARIABLE_MULTIPART_PART_HEADERS
+        S_VARIABLE_ARGS_COMBINED_SIZE = 27,      // VARIABLE_ARGS_COMBINED_SIZE
+        S_VARIABLE_ARGS_GET_NAMES = 28,          // VARIABLE_ARGS_GET_NAMES
+        S_VARIABLE_RULE = 29,                    // VARIABLE_RULE
+        S_VARIABLE_ARGS_NAMES = 30,              // "Variable ARGS_NAMES"
+        S_VARIABLE_ARGS_POST_NAMES = 31,         // VARIABLE_ARGS_POST_NAMES
+        S_VARIABLE_AUTH_TYPE = 32,               // "AUTH_TYPE"
+        S_VARIABLE_FILES_COMBINED_SIZE = 33,     // "FILES_COMBINED_SIZE"
+        S_VARIABLE_FILES_TMP_NAMES = 34,         // "FILES_TMPNAMES"
+        S_VARIABLE_FULL_REQUEST = 35,            // "FULL_REQUEST"
+        S_VARIABLE_FULL_REQUEST_LENGTH = 36,     // "FULL_REQUEST_LENGTH"
+        S_VARIABLE_INBOUND_DATA_ERROR = 37,      // "INBOUND_DATA_ERROR"
+        S_VARIABLE_MATCHED_VAR = 38,             // "MATCHED_VAR"
+        S_VARIABLE_MATCHED_VAR_NAME = 39,        // "MATCHED_VAR_NAME"
+        S_VARIABLE_MULTIPART_BOUNDARY_QUOTED = 40, // VARIABLE_MULTIPART_BOUNDARY_QUOTED
+        S_VARIABLE_MULTIPART_BOUNDARY_WHITESPACE = 41, // VARIABLE_MULTIPART_BOUNDARY_WHITESPACE
+        S_VARIABLE_MULTIPART_CRLF_LF_LINES = 42, // "MULTIPART_CRLF_LF_LINES"
+        S_VARIABLE_MULTIPART_DATA_AFTER = 43,    // "MULTIPART_DATA_AFTER"
+        S_VARIABLE_MULTIPART_DATA_BEFORE = 44,   // VARIABLE_MULTIPART_DATA_BEFORE
+        S_VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED = 45, // "MULTIPART_FILE_LIMIT_EXCEEDED"
+        S_VARIABLE_MULTIPART_HEADER_FOLDING = 46, // "MULTIPART_HEADER_FOLDING"
+        S_VARIABLE_MULTIPART_INVALID_HEADER_FOLDING = 47, // "MULTIPART_INVALID_HEADER_FOLDING"
+        S_VARIABLE_MULTIPART_INVALID_PART = 48,  // VARIABLE_MULTIPART_INVALID_PART
+        S_VARIABLE_MULTIPART_INVALID_QUOTING = 49, // "MULTIPART_INVALID_QUOTING"
+        S_VARIABLE_MULTIPART_LF_LINE = 50,       // VARIABLE_MULTIPART_LF_LINE
+        S_VARIABLE_MULTIPART_MISSING_SEMICOLON = 51, // VARIABLE_MULTIPART_MISSING_SEMICOLON
+        S_VARIABLE_MULTIPART_SEMICOLON_MISSING = 52, // VARIABLE_MULTIPART_SEMICOLON_MISSING
+        S_VARIABLE_MULTIPART_STRICT_ERROR = 53,  // "MULTIPART_STRICT_ERROR"
+        S_VARIABLE_MULTIPART_UNMATCHED_BOUNDARY = 54, // "MULTIPART_UNMATCHED_BOUNDARY"
+        S_VARIABLE_OUTBOUND_DATA_ERROR = 55,     // "OUTBOUND_DATA_ERROR"
+        S_VARIABLE_PATH_INFO = 56,               // "PATH_INFO"
+        S_VARIABLE_QUERY_STRING = 57,            // "QUERY_STRING"
+        S_VARIABLE_REMOTE_ADDR = 58,             // "REMOTE_ADDR"
+        S_VARIABLE_REMOTE_HOST = 59,             // "REMOTE_HOST"
+        S_VARIABLE_REMOTE_PORT = 60,             // "REMOTE_PORT"
+        S_VARIABLE_REQBODY_ERROR_MSG = 61,       // "REQBODY_ERROR_MSG"
+        S_VARIABLE_REQBODY_ERROR = 62,           // "REQBODY_ERROR"
+        S_VARIABLE_REQBODY_PROCESSOR_ERROR_MSG = 63, // "REQBODY_PROCESSOR_ERROR_MSG"
+        S_VARIABLE_REQBODY_PROCESSOR_ERROR = 64, // "REQBODY_PROCESSOR_ERROR"
+        S_VARIABLE_REQBODY_PROCESSOR = 65,       // "REQBODY_PROCESSOR"
+        S_VARIABLE_REQUEST_BASENAME = 66,        // "REQUEST_BASENAME"
+        S_VARIABLE_REQUEST_BODY_LENGTH = 67,     // "REQUEST_BODY_LENGTH"
+        S_VARIABLE_REQUEST_BODY = 68,            // "REQUEST_BODY"
+        S_VARIABLE_REQUEST_FILE_NAME = 69,       // "REQUEST_FILENAME"
+        S_VARIABLE_REQUEST_HEADERS_NAMES = 70,   // VARIABLE_REQUEST_HEADERS_NAMES
+        S_VARIABLE_REQUEST_LINE = 71,            // "REQUEST_LINE"
+        S_VARIABLE_REQUEST_METHOD = 72,          // "REQUEST_METHOD"
+        S_VARIABLE_REQUEST_PROTOCOL = 73,        // "REQUEST_PROTOCOL"
+        S_VARIABLE_REQUEST_URI_RAW = 74,         // "REQUEST_URI_RAW"
+        S_VARIABLE_REQUEST_URI = 75,             // "REQUEST_URI"
+        S_VARIABLE_RESOURCE = 76,                // "RESOURCE"
+        S_VARIABLE_RESPONSE_BODY = 77,           // "RESPONSE_BODY"
+        S_VARIABLE_RESPONSE_CONTENT_LENGTH = 78, // "RESPONSE_CONTENT_LENGTH"
+        S_VARIABLE_RESPONSE_CONTENT_TYPE = 79,   // VARIABLE_RESPONSE_CONTENT_TYPE
+        S_VARIABLE_RESPONSE_HEADERS_NAMES = 80,  // VARIABLE_RESPONSE_HEADERS_NAMES
+        S_VARIABLE_RESPONSE_PROTOCOL = 81,       // "RESPONSE_PROTOCOL"
+        S_VARIABLE_RESPONSE_STATUS = 82,         // "RESPONSE_STATUS"
+        S_VARIABLE_SERVER_ADDR = 83,             // "SERVER_ADDR"
+        S_VARIABLE_SERVER_NAME = 84,             // "SERVER_NAME"
+        S_VARIABLE_SERVER_PORT = 85,             // "SERVER_PORT"
+        S_VARIABLE_SESSION_ID = 86,              // "SESSIONID"
+        S_VARIABLE_UNIQUE_ID = 87,               // "UNIQUE_ID"
+        S_VARIABLE_URL_ENCODED_ERROR = 88,       // "URLENCODED_ERROR"
+        S_VARIABLE_USER_ID = 89,                 // "USERID"
+        S_VARIABLE_WEB_APP_ID = 90,              // "WEBAPPID"
+        S_VARIABLE_STATUS = 91,                  // "VARIABLE_STATUS"
+        S_VARIABLE_STATUS_LINE = 92,             // "VARIABLE_STATUS_LINE"
+        S_VARIABLE_IP = 93,                      // "VARIABLE_IP"
+        S_VARIABLE_GLOBAL = 94,                  // "VARIABLE_GLOBAL"
+        S_VARIABLE_TX = 95,                      // "VARIABLE_TX"
+        S_VARIABLE_SESSION = 96,                 // "VARIABLE_SESSION"
+        S_VARIABLE_USER = 97,                    // "VARIABLE_USER"
+        S_RUN_TIME_VAR_ENV = 98,                 // "RUN_TIME_VAR_ENV"
+        S_RUN_TIME_VAR_XML = 99,                 // "RUN_TIME_VAR_XML"
+        S_ACTION_SETVAR = 100,                   // "SetVar"
+        S_SETVAR_OPERATION_EQUALS = 101,         // SETVAR_OPERATION_EQUALS
+        S_SETVAR_OPERATION_EQUALS_PLUS = 102,    // SETVAR_OPERATION_EQUALS_PLUS
+        S_SETVAR_OPERATION_EQUALS_MINUS = 103,   // SETVAR_OPERATION_EQUALS_MINUS
+        S_NOT = 104,                             // "NOT"
+        S_OPERATOR_BEGINS_WITH = 105,            // "OPERATOR_BEGINS_WITH"
+        S_OPERATOR_CONTAINS = 106,               // "OPERATOR_CONTAINS"
+        S_OPERATOR_CONTAINS_WORD = 107,          // "OPERATOR_CONTAINS_WORD"
+        S_OPERATOR_DETECT_SQLI = 108,            // "OPERATOR_DETECT_SQLI"
+        S_OPERATOR_DETECT_XSS = 109,             // "OPERATOR_DETECT_XSS"
+        S_OPERATOR_ENDS_WITH = 110,              // "OPERATOR_ENDS_WITH"
+        S_OPERATOR_EQ = 111,                     // "OPERATOR_EQ"
+        S_OPERATOR_FUZZY_HASH = 112,             // "OPERATOR_FUZZY_HASH"
+        S_OPERATOR_GEOLOOKUP = 113,              // "OPERATOR_GEOLOOKUP"
+        S_OPERATOR_GE = 114,                     // "OPERATOR_GE"
+        S_OPERATOR_GSB_LOOKUP = 115,             // "OPERATOR_GSB_LOOKUP"
+        S_OPERATOR_GT = 116,                     // "OPERATOR_GT"
+        S_OPERATOR_INSPECT_FILE = 117,           // "OPERATOR_INSPECT_FILE"
+        S_OPERATOR_IP_MATCH_FROM_FILE = 118,     // "OPERATOR_IP_MATCH_FROM_FILE"
+        S_OPERATOR_IP_MATCH = 119,               // "OPERATOR_IP_MATCH"
+        S_OPERATOR_LE = 120,                     // "OPERATOR_LE"
+        S_OPERATOR_LT = 121,                     // "OPERATOR_LT"
+        S_OPERATOR_PM_FROM_FILE = 122,           // "OPERATOR_PM_FROM_FILE"
+        S_OPERATOR_PM = 123,                     // "OPERATOR_PM"
+        S_OPERATOR_RBL = 124,                    // "OPERATOR_RBL"
+        S_OPERATOR_RSUB = 125,                   // "OPERATOR_RSUB"
+        S_OPERATOR_RX_CONTENT_ONLY = 126,        // "Operator RX (content only)"
+        S_OPERATOR_RX = 127,                     // "OPERATOR_RX"
+        S_OPERATOR_RX_GLOBAL = 128,              // "OPERATOR_RX_GLOBAL"
+        S_OPERATOR_STR_EQ = 129,                 // "OPERATOR_STR_EQ"
+        S_OPERATOR_STR_MATCH = 130,              // "OPERATOR_STR_MATCH"
+        S_OPERATOR_UNCONDITIONAL_MATCH = 131,    // "OPERATOR_UNCONDITIONAL_MATCH"
+        S_OPERATOR_VALIDATE_BYTE_RANGE = 132,    // "OPERATOR_VALIDATE_BYTE_RANGE"
+        S_OPERATOR_VALIDATE_DTD = 133,           // "OPERATOR_VALIDATE_DTD"
+        S_OPERATOR_VALIDATE_HASH = 134,          // "OPERATOR_VALIDATE_HASH"
+        S_OPERATOR_VALIDATE_SCHEMA = 135,        // "OPERATOR_VALIDATE_SCHEMA"
+        S_OPERATOR_VALIDATE_URL_ENCODING = 136,  // "OPERATOR_VALIDATE_URL_ENCODING"
+        S_OPERATOR_VALIDATE_UTF8_ENCODING = 137, // "OPERATOR_VALIDATE_UTF8_ENCODING"
+        S_OPERATOR_VERIFY_CC = 138,              // "OPERATOR_VERIFY_CC"
+        S_OPERATOR_VERIFY_CPF = 139,             // "OPERATOR_VERIFY_CPF"
+        S_OPERATOR_VERIFY_SSN = 140,             // "OPERATOR_VERIFY_SSN"
+        S_OPERATOR_VERIFY_SVNR = 141,            // "OPERATOR_VERIFY_SVNR"
+        S_OPERATOR_WITHIN = 142,                 // "OPERATOR_WITHIN"
+        S_CONFIG_DIR_AUDIT_LOG_FMT = 143,        // CONFIG_DIR_AUDIT_LOG_FMT
+        S_JSON = 144,                            // JSON
+        S_NATIVE = 145,                          // NATIVE
+        S_ACTION_CTL_RULE_ENGINE = 146,          // "ACTION_CTL_RULE_ENGINE"
+        S_ACTION_ACCURACY = 147,                 // "Accuracy"
+        S_ACTION_ALLOW = 148,                    // "Allow"
+        S_ACTION_APPEND = 149,                   // "Append"
+        S_ACTION_AUDIT_LOG = 150,                // "AuditLog"
+        S_ACTION_BLOCK = 151,                    // "Block"
+        S_ACTION_CAPTURE = 152,                  // "Capture"
+        S_ACTION_CHAIN = 153,                    // "Chain"
+        S_ACTION_CTL_AUDIT_ENGINE = 154,         // "ACTION_CTL_AUDIT_ENGINE"
+        S_ACTION_CTL_AUDIT_LOG_PARTS = 155,      // "ACTION_CTL_AUDIT_LOG_PARTS"
+        S_ACTION_CTL_BDY_JSON = 156,             // "ACTION_CTL_BDY_JSON"
+        S_ACTION_CTL_BDY_XML = 157,              // "ACTION_CTL_BDY_XML"
+        S_ACTION_CTL_BDY_URLENCODED = 158,       // "ACTION_CTL_BDY_URLENCODED"
+        S_ACTION_CTL_FORCE_REQ_BODY_VAR = 159,   // "ACTION_CTL_FORCE_REQ_BODY_VAR"
+        S_ACTION_CTL_REQUEST_BODY_ACCESS = 160,  // "ACTION_CTL_REQUEST_BODY_ACCESS"
+        S_ACTION_CTL_RULE_REMOVE_BY_ID = 161,    // "ACTION_CTL_RULE_REMOVE_BY_ID"
+        S_ACTION_CTL_RULE_REMOVE_BY_TAG = 162,   // "ACTION_CTL_RULE_REMOVE_BY_TAG"
+        S_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID = 163, // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
+        S_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG = 164, // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
+        S_ACTION_DENY = 165,                     // "Deny"
+        S_ACTION_DEPRECATE_VAR = 166,            // "DeprecateVar"
+        S_ACTION_DROP = 167,                     // "Drop"
+        S_ACTION_EXEC = 168,                     // "Exec"
+        S_ACTION_EXPIRE_VAR = 169,               // "ExpireVar"
+        S_ACTION_ID = 170,                       // "Id"
+        S_ACTION_INITCOL = 171,                  // "InitCol"
+        S_ACTION_LOG = 172,                      // "Log"
+        S_ACTION_LOG_DATA = 173,                 // "LogData"
+        S_ACTION_MATURITY = 174,                 // "Maturity"
+        S_ACTION_MSG = 175,                      // "Msg"
+        S_ACTION_MULTI_MATCH = 176,              // "MultiMatch"
+        S_ACTION_NO_AUDIT_LOG = 177,             // "NoAuditLog"
+        S_ACTION_NO_LOG = 178,                   // "NoLog"
+        S_ACTION_PASS = 179,                     // "Pass"
+        S_ACTION_PAUSE = 180,                    // "Pause"
+        S_ACTION_PHASE = 181,                    // "Phase"
+        S_ACTION_PREPEND = 182,                  // "Prepend"
+        S_ACTION_PROXY = 183,                    // "Proxy"
+        S_ACTION_REDIRECT = 184,                 // "Redirect"
+        S_ACTION_REV = 185,                      // "Rev"
+        S_ACTION_SANITISE_ARG = 186,             // "SanitiseArg"
+        S_ACTION_SANITISE_MATCHED = 187,         // "SanitiseMatched"
+        S_ACTION_SANITISE_MATCHED_BYTES = 188,   // "SanitiseMatchedBytes"
+        S_ACTION_SANITISE_REQUEST_HEADER = 189,  // "SanitiseRequestHeader"
+        S_ACTION_SANITISE_RESPONSE_HEADER = 190, // "SanitiseResponseHeader"
+        S_ACTION_SETENV = 191,                   // "SetEnv"
+        S_ACTION_SETRSC = 192,                   // "SetRsc"
+        S_ACTION_SETSID = 193,                   // "SetSid"
+        S_ACTION_SETUID = 194,                   // "SetUID"
+        S_ACTION_SEVERITY = 195,                 // "Severity"
+        S_ACTION_SKIP = 196,                     // "Skip"
+        S_ACTION_SKIP_AFTER = 197,               // "SkipAfter"
+        S_ACTION_STATUS = 198,                   // "Status"
+        S_ACTION_TAG = 199,                      // "Tag"
+        S_ACTION_TRANSFORMATION_BASE_64_ENCODE = 200, // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
+        S_ACTION_TRANSFORMATION_BASE_64_DECODE = 201, // "ACTION_TRANSFORMATION_BASE_64_DECODE"
+        S_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT = 202, // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
+        S_ACTION_TRANSFORMATION_CMD_LINE = 203,  // "ACTION_TRANSFORMATION_CMD_LINE"
+        S_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE = 204, // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
+        S_ACTION_TRANSFORMATION_CSS_DECODE = 205, // "ACTION_TRANSFORMATION_CSS_DECODE"
+        S_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE = 206, // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
+        S_ACTION_TRANSFORMATION_HEX_ENCODE = 207, // "ACTION_TRANSFORMATION_HEX_ENCODE"
+        S_ACTION_TRANSFORMATION_HEX_DECODE = 208, // "ACTION_TRANSFORMATION_HEX_DECODE"
+        S_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE = 209, // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
+        S_ACTION_TRANSFORMATION_JS_DECODE = 210, // "ACTION_TRANSFORMATION_JS_DECODE"
+        S_ACTION_TRANSFORMATION_LENGTH = 211,    // "ACTION_TRANSFORMATION_LENGTH"
+        S_ACTION_TRANSFORMATION_LOWERCASE = 212, // "ACTION_TRANSFORMATION_LOWERCASE"
+        S_ACTION_TRANSFORMATION_MD5 = 213,       // "ACTION_TRANSFORMATION_MD5"
+        S_ACTION_TRANSFORMATION_NONE = 214,      // "ACTION_TRANSFORMATION_NONE"
+        S_ACTION_TRANSFORMATION_NORMALISE_PATH = 215, // "ACTION_TRANSFORMATION_NORMALISE_PATH"
+        S_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN = 216, // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
+        S_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT = 217, // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
+        S_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT = 218, // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
+        S_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT = 219, // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
+        S_ACTION_TRANSFORMATION_REMOVE_COMMENTS = 220, // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
+        S_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR = 221, // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
+        S_ACTION_TRANSFORMATION_REMOVE_NULLS = 222, // "ACTION_TRANSFORMATION_REMOVE_NULLS"
+        S_ACTION_TRANSFORMATION_REMOVE_WHITESPACE = 223, // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
+        S_ACTION_TRANSFORMATION_REPLACE_COMMENTS = 224, // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
+        S_ACTION_TRANSFORMATION_REPLACE_NULLS = 225, // "ACTION_TRANSFORMATION_REPLACE_NULLS"
+        S_ACTION_TRANSFORMATION_SHA1 = 226,      // "ACTION_TRANSFORMATION_SHA1"
+        S_ACTION_TRANSFORMATION_SQL_HEX_DECODE = 227, // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
+        S_ACTION_TRANSFORMATION_TRIM = 228,      // "ACTION_TRANSFORMATION_TRIM"
+        S_ACTION_TRANSFORMATION_TRIM_LEFT = 229, // "ACTION_TRANSFORMATION_TRIM_LEFT"
+        S_ACTION_TRANSFORMATION_TRIM_RIGHT = 230, // "ACTION_TRANSFORMATION_TRIM_RIGHT"
+        S_ACTION_TRANSFORMATION_UPPERCASE = 231, // "ACTION_TRANSFORMATION_UPPERCASE"
+        S_ACTION_TRANSFORMATION_URL_ENCODE = 232, // "ACTION_TRANSFORMATION_URL_ENCODE"
+        S_ACTION_TRANSFORMATION_URL_DECODE = 233, // "ACTION_TRANSFORMATION_URL_DECODE"
+        S_ACTION_TRANSFORMATION_URL_DECODE_UNI = 234, // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
+        S_ACTION_TRANSFORMATION_UTF8_TO_UNICODE = 235, // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
+        S_ACTION_VER = 236,                      // "Ver"
+        S_ACTION_XMLNS = 237,                    // "xmlns"
+        S_CONFIG_COMPONENT_SIG = 238,            // "CONFIG_COMPONENT_SIG"
+        S_CONFIG_CONN_ENGINE = 239,              // "CONFIG_CONN_ENGINE"
+        S_CONFIG_SEC_ARGUMENT_SEPARATOR = 240,   // "CONFIG_SEC_ARGUMENT_SEPARATOR"
+        S_CONFIG_SEC_WEB_APP_ID = 241,           // "CONFIG_SEC_WEB_APP_ID"
+        S_CONFIG_SEC_SERVER_SIG = 242,           // "CONFIG_SEC_SERVER_SIG"
+        S_CONFIG_DIR_AUDIT_DIR = 243,            // "CONFIG_DIR_AUDIT_DIR"
+        S_CONFIG_DIR_AUDIT_DIR_MOD = 244,        // "CONFIG_DIR_AUDIT_DIR_MOD"
+        S_CONFIG_DIR_AUDIT_ENG = 245,            // "CONFIG_DIR_AUDIT_ENG"
+        S_CONFIG_DIR_AUDIT_FLE_MOD = 246,        // "CONFIG_DIR_AUDIT_FLE_MOD"
+        S_CONFIG_DIR_AUDIT_LOG = 247,            // "CONFIG_DIR_AUDIT_LOG"
+        S_CONFIG_DIR_AUDIT_LOG2 = 248,           // "CONFIG_DIR_AUDIT_LOG2"
+        S_CONFIG_DIR_AUDIT_LOG_P = 249,          // "CONFIG_DIR_AUDIT_LOG_P"
+        S_CONFIG_DIR_AUDIT_STS = 250,            // "CONFIG_DIR_AUDIT_STS"
+        S_CONFIG_DIR_AUDIT_TPE = 251,            // "CONFIG_DIR_AUDIT_TPE"
+        S_CONFIG_DIR_DEBUG_LOG = 252,            // "CONFIG_DIR_DEBUG_LOG"
+        S_CONFIG_DIR_DEBUG_LVL = 253,            // "CONFIG_DIR_DEBUG_LVL"
+        S_CONFIG_SEC_CACHE_TRANSFORMATIONS = 254, // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
+        S_CONFIG_SEC_DISABLE_BACKEND_COMPRESS = 255, // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
+        S_CONFIG_SEC_HASH_ENGINE = 256,          // "CONFIG_SEC_HASH_ENGINE"
+        S_CONFIG_SEC_HASH_KEY = 257,             // "CONFIG_SEC_HASH_KEY"
+        S_CONFIG_SEC_HASH_PARAM = 258,           // "CONFIG_SEC_HASH_PARAM"
+        S_CONFIG_SEC_HASH_METHOD_RX = 259,       // "CONFIG_SEC_HASH_METHOD_RX"
+        S_CONFIG_SEC_HASH_METHOD_PM = 260,       // "CONFIG_SEC_HASH_METHOD_PM"
+        S_CONFIG_SEC_CHROOT_DIR = 261,           // "CONFIG_SEC_CHROOT_DIR"
+        S_CONFIG_DIR_GEO_DB = 262,               // "CONFIG_DIR_GEO_DB"
+        S_CONFIG_DIR_GSB_DB = 263,               // "CONFIG_DIR_GSB_DB"
+        S_CONFIG_SEC_GUARDIAN_LOG = 264,         // "CONFIG_SEC_GUARDIAN_LOG"
+        S_CONFIG_DIR_PCRE_MATCH_LIMIT = 265,     // "CONFIG_DIR_PCRE_MATCH_LIMIT"
+        S_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION = 266, // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
+        S_CONFIG_SEC_CONN_R_STATE_LIMIT = 267,   // "CONFIG_SEC_CONN_R_STATE_LIMIT"
+        S_CONFIG_SEC_CONN_W_STATE_LIMIT = 268,   // "CONFIG_SEC_CONN_W_STATE_LIMIT"
+        S_CONFIG_SEC_SENSOR_ID = 269,            // "CONFIG_SEC_SENSOR_ID"
+        S_CONFIG_DIR_ARGS_LIMIT = 270,           // "CONFIG_DIR_ARGS_LIMIT"
+        S_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT = 271, // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
+        S_CONFIG_DIR_REQ_BODY = 272,             // "CONFIG_DIR_REQ_BODY"
+        S_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT = 273, // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
+        S_CONFIG_DIR_REQ_BODY_LIMIT = 274,       // "CONFIG_DIR_REQ_BODY_LIMIT"
+        S_CONFIG_DIR_REQ_BODY_LIMIT_ACTION = 275, // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
+        S_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT = 276, // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
+        S_CONFIG_DIR_RES_BODY = 277,             // "CONFIG_DIR_RES_BODY"
+        S_CONFIG_DIR_RES_BODY_LIMIT = 278,       // "CONFIG_DIR_RES_BODY_LIMIT"
+        S_CONFIG_DIR_RES_BODY_LIMIT_ACTION = 279, // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
+        S_CONFIG_SEC_RULE_INHERITANCE = 280,     // "CONFIG_SEC_RULE_INHERITANCE"
+        S_CONFIG_SEC_RULE_PERF_TIME = 281,       // "CONFIG_SEC_RULE_PERF_TIME"
+        S_CONFIG_DIR_RULE_ENG = 282,             // "CONFIG_DIR_RULE_ENG"
+        S_CONFIG_DIR_SEC_ACTION = 283,           // "CONFIG_DIR_SEC_ACTION"
+        S_CONFIG_DIR_SEC_DEFAULT_ACTION = 284,   // "CONFIG_DIR_SEC_DEFAULT_ACTION"
+        S_CONFIG_DIR_SEC_MARKER = 285,           // "CONFIG_DIR_SEC_MARKER"
+        S_CONFIG_DIR_UNICODE_MAP_FILE = 286,     // "CONFIG_DIR_UNICODE_MAP_FILE"
+        S_CONFIG_DIR_UNICODE_CODE_PAGE = 287,    // "CONFIG_DIR_UNICODE_CODE_PAGE"
+        S_CONFIG_SEC_COLLECTION_TIMEOUT = 288,   // "CONFIG_SEC_COLLECTION_TIMEOUT"
+        S_CONFIG_SEC_HTTP_BLKEY = 289,           // "CONFIG_SEC_HTTP_BLKEY"
+        S_CONFIG_SEC_INTERCEPT_ON_ERROR = 290,   // "CONFIG_SEC_INTERCEPT_ON_ERROR"
+        S_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION = 291, // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
+        S_CONFIG_SEC_RULE_REMOVE_BY_ID = 292,    // "CONFIG_SEC_RULE_REMOVE_BY_ID"
+        S_CONFIG_SEC_RULE_REMOVE_BY_MSG = 293,   // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
+        S_CONFIG_SEC_RULE_REMOVE_BY_TAG = 294,   // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
+        S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG = 295, // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
+        S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG = 296, // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
+        S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID = 297, // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
+        S_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID = 298, // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
+        S_CONFIG_UPDLOAD_KEEP_FILES = 299,       // "CONFIG_UPDLOAD_KEEP_FILES"
+        S_CONFIG_UPDLOAD_SAVE_TMP_FILES = 300,   // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
+        S_CONFIG_UPLOAD_DIR = 301,               // "CONFIG_UPLOAD_DIR"
+        S_CONFIG_UPLOAD_FILE_LIMIT = 302,        // "CONFIG_UPLOAD_FILE_LIMIT"
+        S_CONFIG_UPLOAD_FILE_MODE = 303,         // "CONFIG_UPLOAD_FILE_MODE"
+        S_CONFIG_VALUE_ABORT = 304,              // "CONFIG_VALUE_ABORT"
+        S_CONFIG_VALUE_DETC = 305,               // "CONFIG_VALUE_DETC"
+        S_CONFIG_VALUE_HTTPS = 306,              // "CONFIG_VALUE_HTTPS"
+        S_CONFIG_VALUE_OFF = 307,                // "CONFIG_VALUE_OFF"
+        S_CONFIG_VALUE_ON = 308,                 // "CONFIG_VALUE_ON"
+        S_CONFIG_VALUE_PARALLEL = 309,           // "CONFIG_VALUE_PARALLEL"
+        S_CONFIG_VALUE_PROCESS_PARTIAL = 310,    // "CONFIG_VALUE_PROCESS_PARTIAL"
+        S_CONFIG_VALUE_REJECT = 311,             // "CONFIG_VALUE_REJECT"
+        S_CONFIG_VALUE_RELEVANT_ONLY = 312,      // "CONFIG_VALUE_RELEVANT_ONLY"
+        S_CONFIG_VALUE_SERIAL = 313,             // "CONFIG_VALUE_SERIAL"
+        S_CONFIG_VALUE_WARN = 314,               // "CONFIG_VALUE_WARN"
+        S_CONFIG_XML_EXTERNAL_ENTITY = 315,      // "CONFIG_XML_EXTERNAL_ENTITY"
+        S_CONGIG_DIR_RESPONSE_BODY_MP = 316,     // "CONGIG_DIR_RESPONSE_BODY_MP"
+        S_CONGIG_DIR_SEC_ARG_SEP = 317,          // "CONGIG_DIR_SEC_ARG_SEP"
+        S_CONGIG_DIR_SEC_COOKIE_FORMAT = 318,    // "CONGIG_DIR_SEC_COOKIE_FORMAT"
+        S_CONFIG_SEC_COOKIEV0_SEPARATOR = 319,   // "CONFIG_SEC_COOKIEV0_SEPARATOR"
+        S_CONGIG_DIR_SEC_DATA_DIR = 320,         // "CONGIG_DIR_SEC_DATA_DIR"
+        S_CONGIG_DIR_SEC_STATUS_ENGINE = 321,    // "CONGIG_DIR_SEC_STATUS_ENGINE"
+        S_CONFIG_SEC_STREAM_IN_BODY_INSPECTION = 322, // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
+        S_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION = 323, // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
+        S_CONGIG_DIR_SEC_TMP_DIR = 324,          // "CONGIG_DIR_SEC_TMP_DIR"
+        S_DIRECTIVE = 325,                       // "DIRECTIVE"
+        S_DIRECTIVE_SECRULESCRIPT = 326,         // "DIRECTIVE_SECRULESCRIPT"
+        S_FREE_TEXT_QUOTE_MACRO_EXPANSION = 327, // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
+        S_QUOTATION_MARK = 328,                  // "QUOTATION_MARK"
+        S_RUN_TIME_VAR_BLD = 329,                // "RUN_TIME_VAR_BLD"
+        S_RUN_TIME_VAR_DUR = 330,                // "RUN_TIME_VAR_DUR"
+        S_RUN_TIME_VAR_HSV = 331,                // "RUN_TIME_VAR_HSV"
+        S_RUN_TIME_VAR_REMOTE_USER = 332,        // "RUN_TIME_VAR_REMOTE_USER"
+        S_RUN_TIME_VAR_TIME = 333,               // "RUN_TIME_VAR_TIME"
+        S_RUN_TIME_VAR_TIME_DAY = 334,           // "RUN_TIME_VAR_TIME_DAY"
+        S_RUN_TIME_VAR_TIME_EPOCH = 335,         // "RUN_TIME_VAR_TIME_EPOCH"
+        S_RUN_TIME_VAR_TIME_HOUR = 336,          // "RUN_TIME_VAR_TIME_HOUR"
+        S_RUN_TIME_VAR_TIME_MIN = 337,           // "RUN_TIME_VAR_TIME_MIN"
+        S_RUN_TIME_VAR_TIME_MON = 338,           // "RUN_TIME_VAR_TIME_MON"
+        S_RUN_TIME_VAR_TIME_SEC = 339,           // "RUN_TIME_VAR_TIME_SEC"
+        S_RUN_TIME_VAR_TIME_WDAY = 340,          // "RUN_TIME_VAR_TIME_WDAY"
+        S_RUN_TIME_VAR_TIME_YEAR = 341,          // "RUN_TIME_VAR_TIME_YEAR"
+        S_VARIABLE = 342,                        // "VARIABLE"
+        S_DICT_ELEMENT = 343,                    // "Dictionary element"
+        S_DICT_ELEMENT_REGEXP = 344,             // "Dictionary element, selected by regexp"
+        S_YYACCEPT = 345,                        // $accept
+        S_input = 346,                           // input
+        S_line = 347,                            // line
+        S_audit_log = 348,                       // audit_log
+        S_actions = 349,                         // actions
+        S_actions_may_quoted = 350,              // actions_may_quoted
+        S_op = 351,                              // op
+        S_op_before_init = 352,                  // op_before_init
+        S_expression = 353,                      // expression
+        S_variables = 354,                       // variables
+        S_variables_pre_process = 355,           // variables_pre_process
+        S_variables_may_be_quoted = 356,         // variables_may_be_quoted
+        S_var = 357,                             // var
+        S_act = 358,                             // act
+        S_setvar_action = 359,                   // setvar_action
+        S_run_time_string = 360                  // run_time_string
       };
     };
 
-    /// (External) token type, as returned by yylex.
-    typedef token::yytokentype token_type;
+    /// (Internal) symbol kind.
+    typedef symbol_kind::symbol_kind_type symbol_kind_type;
 
-    /// Symbol type: an internal symbol number.
-    typedef int symbol_number_type;
-
-    /// The symbol type number to denote an empty symbol.
-    enum { empty_symbol = -2 };
-
-    /// Internal symbol number for tokens (subsumed by symbol_number_type).
-    typedef unsigned short token_number_type;
+    /// The number of tokens.
+    static const symbol_kind_type YYNTOKENS = symbol_kind::YYNTOKENS;
 
     /// A complete symbol.
     ///
-    /// Expects its Base type to provide access to the symbol type
-    /// via type_get ().
+    /// Expects its Base type to provide access to the symbol kind
+    /// via kind ().
     ///
     /// Provide access to semantic value and location.
     template <typename Base>
@@ -1308,13 +1723,254 @@ namespace yy {
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      basic_symbol (basic_symbol&& that);
+      basic_symbol (basic_symbol&& that)
+        : Base (std::move (that))
+        , value ()
+        , location (std::move (that.location))
+      {
+        switch (this->kind ())
+    {
+      case symbol_kind::S_ACTION_ACCURACY: // "Accuracy"
+      case symbol_kind::S_ACTION_ALLOW: // "Allow"
+      case symbol_kind::S_ACTION_APPEND: // "Append"
+      case symbol_kind::S_ACTION_AUDIT_LOG: // "AuditLog"
+      case symbol_kind::S_ACTION_BLOCK: // "Block"
+      case symbol_kind::S_ACTION_CAPTURE: // "Capture"
+      case symbol_kind::S_ACTION_CHAIN: // "Chain"
+      case symbol_kind::S_ACTION_CTL_AUDIT_ENGINE: // "ACTION_CTL_AUDIT_ENGINE"
+      case symbol_kind::S_ACTION_CTL_AUDIT_LOG_PARTS: // "ACTION_CTL_AUDIT_LOG_PARTS"
+      case symbol_kind::S_ACTION_CTL_BDY_JSON: // "ACTION_CTL_BDY_JSON"
+      case symbol_kind::S_ACTION_CTL_BDY_XML: // "ACTION_CTL_BDY_XML"
+      case symbol_kind::S_ACTION_CTL_BDY_URLENCODED: // "ACTION_CTL_BDY_URLENCODED"
+      case symbol_kind::S_ACTION_CTL_FORCE_REQ_BODY_VAR: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
+      case symbol_kind::S_ACTION_CTL_REQUEST_BODY_ACCESS: // "ACTION_CTL_REQUEST_BODY_ACCESS"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_ID: // "ACTION_CTL_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_TAG: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
+      case symbol_kind::S_ACTION_DENY: // "Deny"
+      case symbol_kind::S_ACTION_DEPRECATE_VAR: // "DeprecateVar"
+      case symbol_kind::S_ACTION_DROP: // "Drop"
+      case symbol_kind::S_ACTION_EXEC: // "Exec"
+      case symbol_kind::S_ACTION_EXPIRE_VAR: // "ExpireVar"
+      case symbol_kind::S_ACTION_ID: // "Id"
+      case symbol_kind::S_ACTION_INITCOL: // "InitCol"
+      case symbol_kind::S_ACTION_LOG: // "Log"
+      case symbol_kind::S_ACTION_LOG_DATA: // "LogData"
+      case symbol_kind::S_ACTION_MATURITY: // "Maturity"
+      case symbol_kind::S_ACTION_MSG: // "Msg"
+      case symbol_kind::S_ACTION_MULTI_MATCH: // "MultiMatch"
+      case symbol_kind::S_ACTION_NO_AUDIT_LOG: // "NoAuditLog"
+      case symbol_kind::S_ACTION_NO_LOG: // "NoLog"
+      case symbol_kind::S_ACTION_PASS: // "Pass"
+      case symbol_kind::S_ACTION_PAUSE: // "Pause"
+      case symbol_kind::S_ACTION_PHASE: // "Phase"
+      case symbol_kind::S_ACTION_PREPEND: // "Prepend"
+      case symbol_kind::S_ACTION_PROXY: // "Proxy"
+      case symbol_kind::S_ACTION_REDIRECT: // "Redirect"
+      case symbol_kind::S_ACTION_REV: // "Rev"
+      case symbol_kind::S_ACTION_SANITISE_ARG: // "SanitiseArg"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED: // "SanitiseMatched"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED_BYTES: // "SanitiseMatchedBytes"
+      case symbol_kind::S_ACTION_SANITISE_REQUEST_HEADER: // "SanitiseRequestHeader"
+      case symbol_kind::S_ACTION_SANITISE_RESPONSE_HEADER: // "SanitiseResponseHeader"
+      case symbol_kind::S_ACTION_SETENV: // "SetEnv"
+      case symbol_kind::S_ACTION_SETRSC: // "SetRsc"
+      case symbol_kind::S_ACTION_SETSID: // "SetSid"
+      case symbol_kind::S_ACTION_SETUID: // "SetUID"
+      case symbol_kind::S_ACTION_SEVERITY: // "Severity"
+      case symbol_kind::S_ACTION_SKIP: // "Skip"
+      case symbol_kind::S_ACTION_SKIP_AFTER: // "SkipAfter"
+      case symbol_kind::S_ACTION_STATUS: // "Status"
+      case symbol_kind::S_ACTION_TAG: // "Tag"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_ENCODE: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CMD_LINE: // "ACTION_TRANSFORMATION_CMD_LINE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CSS_DECODE: // "ACTION_TRANSFORMATION_CSS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_ENCODE: // "ACTION_TRANSFORMATION_HEX_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_DECODE: // "ACTION_TRANSFORMATION_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_JS_DECODE: // "ACTION_TRANSFORMATION_JS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LENGTH: // "ACTION_TRANSFORMATION_LENGTH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LOWERCASE: // "ACTION_TRANSFORMATION_LOWERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_MD5: // "ACTION_TRANSFORMATION_MD5"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NONE: // "ACTION_TRANSFORMATION_NONE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_NULLS: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_WHITESPACE: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_COMMENTS: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_NULLS: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SHA1: // "ACTION_TRANSFORMATION_SHA1"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SQL_HEX_DECODE: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM: // "ACTION_TRANSFORMATION_TRIM"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_LEFT: // "ACTION_TRANSFORMATION_TRIM_LEFT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_RIGHT: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UPPERCASE: // "ACTION_TRANSFORMATION_UPPERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_ENCODE: // "ACTION_TRANSFORMATION_URL_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE: // "ACTION_TRANSFORMATION_URL_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE_UNI: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UTF8_TO_UNICODE: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
+      case symbol_kind::S_ACTION_VER: // "Ver"
+      case symbol_kind::S_ACTION_XMLNS: // "xmlns"
+      case symbol_kind::S_CONFIG_COMPONENT_SIG: // "CONFIG_COMPONENT_SIG"
+      case symbol_kind::S_CONFIG_CONN_ENGINE: // "CONFIG_CONN_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_ARGUMENT_SEPARATOR: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
+      case symbol_kind::S_CONFIG_SEC_WEB_APP_ID: // "CONFIG_SEC_WEB_APP_ID"
+      case symbol_kind::S_CONFIG_SEC_SERVER_SIG: // "CONFIG_SEC_SERVER_SIG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR: // "CONFIG_DIR_AUDIT_DIR"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR_MOD: // "CONFIG_DIR_AUDIT_DIR_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_ENG: // "CONFIG_DIR_AUDIT_ENG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_FLE_MOD: // "CONFIG_DIR_AUDIT_FLE_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG: // "CONFIG_DIR_AUDIT_LOG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG2: // "CONFIG_DIR_AUDIT_LOG2"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG_P: // "CONFIG_DIR_AUDIT_LOG_P"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_STS: // "CONFIG_DIR_AUDIT_STS"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_TPE: // "CONFIG_DIR_AUDIT_TPE"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LOG: // "CONFIG_DIR_DEBUG_LOG"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LVL: // "CONFIG_DIR_DEBUG_LVL"
+      case symbol_kind::S_CONFIG_SEC_CACHE_TRANSFORMATIONS: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
+      case symbol_kind::S_CONFIG_SEC_DISABLE_BACKEND_COMPRESS: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
+      case symbol_kind::S_CONFIG_SEC_HASH_ENGINE: // "CONFIG_SEC_HASH_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_HASH_KEY: // "CONFIG_SEC_HASH_KEY"
+      case symbol_kind::S_CONFIG_SEC_HASH_PARAM: // "CONFIG_SEC_HASH_PARAM"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_RX: // "CONFIG_SEC_HASH_METHOD_RX"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_PM: // "CONFIG_SEC_HASH_METHOD_PM"
+      case symbol_kind::S_CONFIG_SEC_CHROOT_DIR: // "CONFIG_SEC_CHROOT_DIR"
+      case symbol_kind::S_CONFIG_DIR_GEO_DB: // "CONFIG_DIR_GEO_DB"
+      case symbol_kind::S_CONFIG_DIR_GSB_DB: // "CONFIG_DIR_GSB_DB"
+      case symbol_kind::S_CONFIG_SEC_GUARDIAN_LOG: // "CONFIG_SEC_GUARDIAN_LOG"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
+      case symbol_kind::S_CONFIG_SEC_CONN_R_STATE_LIMIT: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_CONN_W_STATE_LIMIT: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_SENSOR_ID: // "CONFIG_SEC_SENSOR_ID"
+      case symbol_kind::S_CONFIG_DIR_ARGS_LIMIT: // "CONFIG_DIR_ARGS_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT: // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY: // "CONFIG_DIR_REQ_BODY"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT: // "CONFIG_DIR_REQ_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT_ACTION: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY: // "CONFIG_DIR_RES_BODY"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT: // "CONFIG_DIR_RES_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT_ACTION: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_INHERITANCE: // "CONFIG_SEC_RULE_INHERITANCE"
+      case symbol_kind::S_CONFIG_SEC_RULE_PERF_TIME: // "CONFIG_SEC_RULE_PERF_TIME"
+      case symbol_kind::S_CONFIG_DIR_RULE_ENG: // "CONFIG_DIR_RULE_ENG"
+      case symbol_kind::S_CONFIG_DIR_SEC_ACTION: // "CONFIG_DIR_SEC_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_DEFAULT_ACTION: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_MARKER: // "CONFIG_DIR_SEC_MARKER"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_MAP_FILE: // "CONFIG_DIR_UNICODE_MAP_FILE"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_CODE_PAGE: // "CONFIG_DIR_UNICODE_CODE_PAGE"
+      case symbol_kind::S_CONFIG_SEC_COLLECTION_TIMEOUT: // "CONFIG_SEC_COLLECTION_TIMEOUT"
+      case symbol_kind::S_CONFIG_SEC_HTTP_BLKEY: // "CONFIG_SEC_HTTP_BLKEY"
+      case symbol_kind::S_CONFIG_SEC_INTERCEPT_ON_ERROR: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
+      case symbol_kind::S_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_ID: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_MSG: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_TAG: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
+      case symbol_kind::S_CONFIG_UPDLOAD_KEEP_FILES: // "CONFIG_UPDLOAD_KEEP_FILES"
+      case symbol_kind::S_CONFIG_UPDLOAD_SAVE_TMP_FILES: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
+      case symbol_kind::S_CONFIG_UPLOAD_DIR: // "CONFIG_UPLOAD_DIR"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_LIMIT: // "CONFIG_UPLOAD_FILE_LIMIT"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_MODE: // "CONFIG_UPLOAD_FILE_MODE"
+      case symbol_kind::S_CONFIG_VALUE_ABORT: // "CONFIG_VALUE_ABORT"
+      case symbol_kind::S_CONFIG_VALUE_DETC: // "CONFIG_VALUE_DETC"
+      case symbol_kind::S_CONFIG_VALUE_HTTPS: // "CONFIG_VALUE_HTTPS"
+      case symbol_kind::S_CONFIG_VALUE_OFF: // "CONFIG_VALUE_OFF"
+      case symbol_kind::S_CONFIG_VALUE_ON: // "CONFIG_VALUE_ON"
+      case symbol_kind::S_CONFIG_VALUE_PARALLEL: // "CONFIG_VALUE_PARALLEL"
+      case symbol_kind::S_CONFIG_VALUE_PROCESS_PARTIAL: // "CONFIG_VALUE_PROCESS_PARTIAL"
+      case symbol_kind::S_CONFIG_VALUE_REJECT: // "CONFIG_VALUE_REJECT"
+      case symbol_kind::S_CONFIG_VALUE_RELEVANT_ONLY: // "CONFIG_VALUE_RELEVANT_ONLY"
+      case symbol_kind::S_CONFIG_VALUE_SERIAL: // "CONFIG_VALUE_SERIAL"
+      case symbol_kind::S_CONFIG_VALUE_WARN: // "CONFIG_VALUE_WARN"
+      case symbol_kind::S_CONFIG_XML_EXTERNAL_ENTITY: // "CONFIG_XML_EXTERNAL_ENTITY"
+      case symbol_kind::S_CONGIG_DIR_RESPONSE_BODY_MP: // "CONGIG_DIR_RESPONSE_BODY_MP"
+      case symbol_kind::S_CONGIG_DIR_SEC_ARG_SEP: // "CONGIG_DIR_SEC_ARG_SEP"
+      case symbol_kind::S_CONGIG_DIR_SEC_COOKIE_FORMAT: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
+      case symbol_kind::S_CONFIG_SEC_COOKIEV0_SEPARATOR: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
+      case symbol_kind::S_CONGIG_DIR_SEC_DATA_DIR: // "CONGIG_DIR_SEC_DATA_DIR"
+      case symbol_kind::S_CONGIG_DIR_SEC_STATUS_ENGINE: // "CONGIG_DIR_SEC_STATUS_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_STREAM_IN_BODY_INSPECTION: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
+      case symbol_kind::S_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
+      case symbol_kind::S_CONGIG_DIR_SEC_TMP_DIR: // "CONGIG_DIR_SEC_TMP_DIR"
+      case symbol_kind::S_DIRECTIVE: // "DIRECTIVE"
+      case symbol_kind::S_DIRECTIVE_SECRULESCRIPT: // "DIRECTIVE_SECRULESCRIPT"
+      case symbol_kind::S_FREE_TEXT_QUOTE_MACRO_EXPANSION: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
+      case symbol_kind::S_QUOTATION_MARK: // "QUOTATION_MARK"
+      case symbol_kind::S_RUN_TIME_VAR_BLD: // "RUN_TIME_VAR_BLD"
+      case symbol_kind::S_RUN_TIME_VAR_DUR: // "RUN_TIME_VAR_DUR"
+      case symbol_kind::S_RUN_TIME_VAR_HSV: // "RUN_TIME_VAR_HSV"
+      case symbol_kind::S_RUN_TIME_VAR_REMOTE_USER: // "RUN_TIME_VAR_REMOTE_USER"
+      case symbol_kind::S_RUN_TIME_VAR_TIME: // "RUN_TIME_VAR_TIME"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_DAY: // "RUN_TIME_VAR_TIME_DAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_EPOCH: // "RUN_TIME_VAR_TIME_EPOCH"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_HOUR: // "RUN_TIME_VAR_TIME_HOUR"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MIN: // "RUN_TIME_VAR_TIME_MIN"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MON: // "RUN_TIME_VAR_TIME_MON"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_SEC: // "RUN_TIME_VAR_TIME_SEC"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_WDAY: // "RUN_TIME_VAR_TIME_WDAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
+      case symbol_kind::S_VARIABLE: // "VARIABLE"
+      case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
+        value.move< std::string > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_op: // op
+      case symbol_kind::S_op_before_init: // op_before_init
+        value.move< std::unique_ptr<Operator> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_run_time_string: // run_time_string
+        value.move< std::unique_ptr<RunTimeString> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_var: // var
+        value.move< std::unique_ptr<Variable> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_act: // act
+      case symbol_kind::S_setvar_action: // setvar_action
+        value.move< std::unique_ptr<actions::Action> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_variables: // variables
+      case symbol_kind::S_variables_pre_process: // variables_pre_process
+      case symbol_kind::S_variables_may_be_quoted: // variables_may_be_quoted
+        value.move< std::unique_ptr<std::vector<std::unique_ptr<Variable> > >  > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_actions: // actions
+      case symbol_kind::S_actions_may_quoted: // actions_may_quoted
+        value.move< std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > >  > (std::move (that.value));
+        break;
+
+      default:
+        break;
+    }
+
+      }
 #endif
 
       /// Copy constructor.
       basic_symbol (const basic_symbol& that);
 
-      /// Constructor for valueless symbols, and symbols from each type.
+      /// Constructors for typed symbols.
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, location_type&& l)
         : Base (t)
@@ -1326,6 +1982,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::string&& v, location_type&& l)
         : Base (t)
@@ -1339,6 +1996,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::unique_ptr<Operator>&& v, location_type&& l)
         : Base (t)
@@ -1352,6 +2010,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::unique_ptr<RunTimeString>&& v, location_type&& l)
         : Base (t)
@@ -1365,6 +2024,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::unique_ptr<Variable>&& v, location_type&& l)
         : Base (t)
@@ -1378,6 +2038,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::unique_ptr<actions::Action>&& v, location_type&& l)
         : Base (t)
@@ -1391,6 +2052,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::unique_ptr<std::vector<std::unique_ptr<Variable> > > && v, location_type&& l)
         : Base (t)
@@ -1404,6 +2066,7 @@ namespace yy {
         , location (l)
       {}
 #endif
+
 #if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > > && v, location_type&& l)
         : Base (t)
@@ -1425,246 +2088,248 @@ namespace yy {
       }
 
       /// Destroy contents, and record that is empty.
-      void clear ()
+      void clear () YY_NOEXCEPT
       {
         // User destructor.
-        symbol_number_type yytype = this->type_get ();
+        symbol_kind_type yykind = this->kind ();
         basic_symbol<Base>& yysym = *this;
         (void) yysym;
-        switch (yytype)
+        switch (yykind)
         {
        default:
           break;
         }
 
-        // Type destructor.
-switch (yytype)
+        // Value type destructor.
+switch (yykind)
     {
-      case 145: // "Accuracy"
-      case 146: // "Allow"
-      case 147: // "Append"
-      case 148: // "AuditLog"
-      case 149: // "Block"
-      case 150: // "Capture"
-      case 151: // "Chain"
-      case 152: // "ACTION_CTL_AUDIT_ENGINE"
-      case 153: // "ACTION_CTL_AUDIT_LOG_PARTS"
-      case 154: // "ACTION_CTL_BDY_JSON"
-      case 155: // "ACTION_CTL_BDY_XML"
-      case 156: // "ACTION_CTL_BDY_URLENCODED"
-      case 157: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
-      case 158: // "ACTION_CTL_REQUEST_BODY_ACCESS"
-      case 159: // "ACTION_CTL_RULE_REMOVE_BY_ID"
-      case 160: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
-      case 161: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
-      case 162: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
-      case 163: // "Deny"
-      case 164: // "DeprecateVar"
-      case 165: // "Drop"
-      case 166: // "Exec"
-      case 167: // "ExpireVar"
-      case 168: // "Id"
-      case 169: // "InitCol"
-      case 170: // "Log"
-      case 171: // "LogData"
-      case 172: // "Maturity"
-      case 173: // "Msg"
-      case 174: // "MultiMatch"
-      case 175: // "NoAuditLog"
-      case 176: // "NoLog"
-      case 177: // "Pass"
-      case 178: // "Pause"
-      case 179: // "Phase"
-      case 180: // "Prepend"
-      case 181: // "Proxy"
-      case 182: // "Redirect"
-      case 183: // "Rev"
-      case 184: // "SanitiseArg"
-      case 185: // "SanitiseMatched"
-      case 186: // "SanitiseMatchedBytes"
-      case 187: // "SanitiseRequestHeader"
-      case 188: // "SanitiseResponseHeader"
-      case 189: // "SetEnv"
-      case 190: // "SetRsc"
-      case 191: // "SetSid"
-      case 192: // "SetUID"
-      case 193: // "Severity"
-      case 194: // "Skip"
-      case 195: // "SkipAfter"
-      case 196: // "Status"
-      case 197: // "Tag"
-      case 198: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
-      case 199: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
-      case 200: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
-      case 201: // "ACTION_TRANSFORMATION_CMD_LINE"
-      case 202: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
-      case 203: // "ACTION_TRANSFORMATION_CSS_DECODE"
-      case 204: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
-      case 205: // "ACTION_TRANSFORMATION_HEX_ENCODE"
-      case 206: // "ACTION_TRANSFORMATION_HEX_DECODE"
-      case 207: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
-      case 208: // "ACTION_TRANSFORMATION_JS_DECODE"
-      case 209: // "ACTION_TRANSFORMATION_LENGTH"
-      case 210: // "ACTION_TRANSFORMATION_LOWERCASE"
-      case 211: // "ACTION_TRANSFORMATION_MD5"
-      case 212: // "ACTION_TRANSFORMATION_NONE"
-      case 213: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
-      case 214: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
-      case 215: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
-      case 216: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
-      case 217: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
-      case 218: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
-      case 219: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
-      case 220: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
-      case 221: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
-      case 222: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
-      case 223: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
-      case 224: // "ACTION_TRANSFORMATION_SHA1"
-      case 225: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
-      case 226: // "ACTION_TRANSFORMATION_TRIM"
-      case 227: // "ACTION_TRANSFORMATION_TRIM_LEFT"
-      case 228: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
-      case 229: // "ACTION_TRANSFORMATION_UPPERCASE"
-      case 230: // "ACTION_TRANSFORMATION_URL_ENCODE"
-      case 231: // "ACTION_TRANSFORMATION_URL_DECODE"
-      case 232: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
-      case 233: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
-      case 234: // "Ver"
-      case 235: // "xmlns"
-      case 236: // "CONFIG_COMPONENT_SIG"
-      case 237: // "CONFIG_CONN_ENGINE"
-      case 238: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
-      case 239: // "CONFIG_SEC_WEB_APP_ID"
-      case 240: // "CONFIG_SEC_SERVER_SIG"
-      case 241: // "CONFIG_DIR_AUDIT_DIR"
-      case 242: // "CONFIG_DIR_AUDIT_DIR_MOD"
-      case 243: // "CONFIG_DIR_AUDIT_ENG"
-      case 244: // "CONFIG_DIR_AUDIT_FLE_MOD"
-      case 245: // "CONFIG_DIR_AUDIT_LOG"
-      case 246: // "CONFIG_DIR_AUDIT_LOG2"
-      case 247: // "CONFIG_DIR_AUDIT_LOG_P"
-      case 248: // "CONFIG_DIR_AUDIT_STS"
-      case 249: // "CONFIG_DIR_AUDIT_TPE"
-      case 250: // "CONFIG_DIR_DEBUG_LOG"
-      case 251: // "CONFIG_DIR_DEBUG_LVL"
-      case 252: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
-      case 253: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
-      case 254: // "CONFIG_SEC_HASH_ENGINE"
-      case 255: // "CONFIG_SEC_HASH_KEY"
-      case 256: // "CONFIG_SEC_HASH_PARAM"
-      case 257: // "CONFIG_SEC_HASH_METHOD_RX"
-      case 258: // "CONFIG_SEC_HASH_METHOD_PM"
-      case 259: // "CONFIG_SEC_CHROOT_DIR"
-      case 260: // "CONFIG_DIR_GEO_DB"
-      case 261: // "CONFIG_DIR_GSB_DB"
-      case 262: // "CONFIG_SEC_GUARDIAN_LOG"
-      case 263: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
-      case 264: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
-      case 265: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
-      case 266: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
-      case 267: // "CONFIG_SEC_SENSOR_ID"
-      case 268: // "CONFIG_DIR_REQ_BODY"
-      case 269: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
-      case 270: // "CONFIG_DIR_REQ_BODY_LIMIT"
-      case 271: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
-      case 272: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
-      case 273: // "CONFIG_DIR_RES_BODY"
-      case 274: // "CONFIG_DIR_RES_BODY_LIMIT"
-      case 275: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
-      case 276: // "CONFIG_SEC_RULE_INHERITANCE"
-      case 277: // "CONFIG_SEC_RULE_PERF_TIME"
-      case 278: // "CONFIG_DIR_RULE_ENG"
-      case 279: // "CONFIG_DIR_SEC_ACTION"
-      case 280: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
-      case 281: // "CONFIG_DIR_SEC_MARKER"
-      case 282: // "CONFIG_DIR_UNICODE_MAP_FILE"
-      case 283: // "CONFIG_DIR_UNICODE_CODE_PAGE"
-      case 284: // "CONFIG_SEC_COLLECTION_TIMEOUT"
-      case 285: // "CONFIG_SEC_HTTP_BLKEY"
-      case 286: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
-      case 287: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
-      case 288: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
-      case 289: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
-      case 290: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
-      case 291: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
-      case 292: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
-      case 293: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
-      case 294: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
-      case 295: // "CONFIG_UPDLOAD_KEEP_FILES"
-      case 296: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
-      case 297: // "CONFIG_UPLOAD_DIR"
-      case 298: // "CONFIG_UPLOAD_FILE_LIMIT"
-      case 299: // "CONFIG_UPLOAD_FILE_MODE"
-      case 300: // "CONFIG_VALUE_ABORT"
-      case 301: // "CONFIG_VALUE_DETC"
-      case 302: // "CONFIG_VALUE_HTTPS"
-      case 303: // "CONFIG_VALUE_OFF"
-      case 304: // "CONFIG_VALUE_ON"
-      case 305: // "CONFIG_VALUE_PARALLEL"
-      case 306: // "CONFIG_VALUE_PROCESS_PARTIAL"
-      case 307: // "CONFIG_VALUE_REJECT"
-      case 308: // "CONFIG_VALUE_RELEVANT_ONLY"
-      case 309: // "CONFIG_VALUE_SERIAL"
-      case 310: // "CONFIG_VALUE_WARN"
-      case 311: // "CONFIG_XML_EXTERNAL_ENTITY"
-      case 312: // "CONGIG_DIR_RESPONSE_BODY_MP"
-      case 313: // "CONGIG_DIR_SEC_ARG_SEP"
-      case 314: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
-      case 315: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
-      case 316: // "CONGIG_DIR_SEC_DATA_DIR"
-      case 317: // "CONGIG_DIR_SEC_STATUS_ENGINE"
-      case 318: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
-      case 319: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
-      case 320: // "CONGIG_DIR_SEC_TMP_DIR"
-      case 321: // "DIRECTIVE"
-      case 322: // "DIRECTIVE_SECRULESCRIPT"
-      case 323: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
-      case 324: // "QUOTATION_MARK"
-      case 325: // "RUN_TIME_VAR_BLD"
-      case 326: // "RUN_TIME_VAR_DUR"
-      case 327: // "RUN_TIME_VAR_HSV"
-      case 328: // "RUN_TIME_VAR_REMOTE_USER"
-      case 329: // "RUN_TIME_VAR_TIME"
-      case 330: // "RUN_TIME_VAR_TIME_DAY"
-      case 331: // "RUN_TIME_VAR_TIME_EPOCH"
-      case 332: // "RUN_TIME_VAR_TIME_HOUR"
-      case 333: // "RUN_TIME_VAR_TIME_MIN"
-      case 334: // "RUN_TIME_VAR_TIME_MON"
-      case 335: // "RUN_TIME_VAR_TIME_SEC"
-      case 336: // "RUN_TIME_VAR_TIME_WDAY"
-      case 337: // "RUN_TIME_VAR_TIME_YEAR"
-      case 338: // "VARIABLE"
-      case 339: // "Dictionary element"
-      case 340: // "Dictionary element, selected by regexp"
+      case symbol_kind::S_ACTION_ACCURACY: // "Accuracy"
+      case symbol_kind::S_ACTION_ALLOW: // "Allow"
+      case symbol_kind::S_ACTION_APPEND: // "Append"
+      case symbol_kind::S_ACTION_AUDIT_LOG: // "AuditLog"
+      case symbol_kind::S_ACTION_BLOCK: // "Block"
+      case symbol_kind::S_ACTION_CAPTURE: // "Capture"
+      case symbol_kind::S_ACTION_CHAIN: // "Chain"
+      case symbol_kind::S_ACTION_CTL_AUDIT_ENGINE: // "ACTION_CTL_AUDIT_ENGINE"
+      case symbol_kind::S_ACTION_CTL_AUDIT_LOG_PARTS: // "ACTION_CTL_AUDIT_LOG_PARTS"
+      case symbol_kind::S_ACTION_CTL_BDY_JSON: // "ACTION_CTL_BDY_JSON"
+      case symbol_kind::S_ACTION_CTL_BDY_XML: // "ACTION_CTL_BDY_XML"
+      case symbol_kind::S_ACTION_CTL_BDY_URLENCODED: // "ACTION_CTL_BDY_URLENCODED"
+      case symbol_kind::S_ACTION_CTL_FORCE_REQ_BODY_VAR: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
+      case symbol_kind::S_ACTION_CTL_REQUEST_BODY_ACCESS: // "ACTION_CTL_REQUEST_BODY_ACCESS"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_ID: // "ACTION_CTL_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_TAG: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
+      case symbol_kind::S_ACTION_DENY: // "Deny"
+      case symbol_kind::S_ACTION_DEPRECATE_VAR: // "DeprecateVar"
+      case symbol_kind::S_ACTION_DROP: // "Drop"
+      case symbol_kind::S_ACTION_EXEC: // "Exec"
+      case symbol_kind::S_ACTION_EXPIRE_VAR: // "ExpireVar"
+      case symbol_kind::S_ACTION_ID: // "Id"
+      case symbol_kind::S_ACTION_INITCOL: // "InitCol"
+      case symbol_kind::S_ACTION_LOG: // "Log"
+      case symbol_kind::S_ACTION_LOG_DATA: // "LogData"
+      case symbol_kind::S_ACTION_MATURITY: // "Maturity"
+      case symbol_kind::S_ACTION_MSG: // "Msg"
+      case symbol_kind::S_ACTION_MULTI_MATCH: // "MultiMatch"
+      case symbol_kind::S_ACTION_NO_AUDIT_LOG: // "NoAuditLog"
+      case symbol_kind::S_ACTION_NO_LOG: // "NoLog"
+      case symbol_kind::S_ACTION_PASS: // "Pass"
+      case symbol_kind::S_ACTION_PAUSE: // "Pause"
+      case symbol_kind::S_ACTION_PHASE: // "Phase"
+      case symbol_kind::S_ACTION_PREPEND: // "Prepend"
+      case symbol_kind::S_ACTION_PROXY: // "Proxy"
+      case symbol_kind::S_ACTION_REDIRECT: // "Redirect"
+      case symbol_kind::S_ACTION_REV: // "Rev"
+      case symbol_kind::S_ACTION_SANITISE_ARG: // "SanitiseArg"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED: // "SanitiseMatched"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED_BYTES: // "SanitiseMatchedBytes"
+      case symbol_kind::S_ACTION_SANITISE_REQUEST_HEADER: // "SanitiseRequestHeader"
+      case symbol_kind::S_ACTION_SANITISE_RESPONSE_HEADER: // "SanitiseResponseHeader"
+      case symbol_kind::S_ACTION_SETENV: // "SetEnv"
+      case symbol_kind::S_ACTION_SETRSC: // "SetRsc"
+      case symbol_kind::S_ACTION_SETSID: // "SetSid"
+      case symbol_kind::S_ACTION_SETUID: // "SetUID"
+      case symbol_kind::S_ACTION_SEVERITY: // "Severity"
+      case symbol_kind::S_ACTION_SKIP: // "Skip"
+      case symbol_kind::S_ACTION_SKIP_AFTER: // "SkipAfter"
+      case symbol_kind::S_ACTION_STATUS: // "Status"
+      case symbol_kind::S_ACTION_TAG: // "Tag"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_ENCODE: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CMD_LINE: // "ACTION_TRANSFORMATION_CMD_LINE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CSS_DECODE: // "ACTION_TRANSFORMATION_CSS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_ENCODE: // "ACTION_TRANSFORMATION_HEX_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_DECODE: // "ACTION_TRANSFORMATION_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_JS_DECODE: // "ACTION_TRANSFORMATION_JS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LENGTH: // "ACTION_TRANSFORMATION_LENGTH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LOWERCASE: // "ACTION_TRANSFORMATION_LOWERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_MD5: // "ACTION_TRANSFORMATION_MD5"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NONE: // "ACTION_TRANSFORMATION_NONE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_NULLS: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_WHITESPACE: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_COMMENTS: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_NULLS: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SHA1: // "ACTION_TRANSFORMATION_SHA1"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SQL_HEX_DECODE: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM: // "ACTION_TRANSFORMATION_TRIM"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_LEFT: // "ACTION_TRANSFORMATION_TRIM_LEFT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_RIGHT: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UPPERCASE: // "ACTION_TRANSFORMATION_UPPERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_ENCODE: // "ACTION_TRANSFORMATION_URL_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE: // "ACTION_TRANSFORMATION_URL_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE_UNI: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UTF8_TO_UNICODE: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
+      case symbol_kind::S_ACTION_VER: // "Ver"
+      case symbol_kind::S_ACTION_XMLNS: // "xmlns"
+      case symbol_kind::S_CONFIG_COMPONENT_SIG: // "CONFIG_COMPONENT_SIG"
+      case symbol_kind::S_CONFIG_CONN_ENGINE: // "CONFIG_CONN_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_ARGUMENT_SEPARATOR: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
+      case symbol_kind::S_CONFIG_SEC_WEB_APP_ID: // "CONFIG_SEC_WEB_APP_ID"
+      case symbol_kind::S_CONFIG_SEC_SERVER_SIG: // "CONFIG_SEC_SERVER_SIG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR: // "CONFIG_DIR_AUDIT_DIR"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR_MOD: // "CONFIG_DIR_AUDIT_DIR_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_ENG: // "CONFIG_DIR_AUDIT_ENG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_FLE_MOD: // "CONFIG_DIR_AUDIT_FLE_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG: // "CONFIG_DIR_AUDIT_LOG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG2: // "CONFIG_DIR_AUDIT_LOG2"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG_P: // "CONFIG_DIR_AUDIT_LOG_P"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_STS: // "CONFIG_DIR_AUDIT_STS"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_TPE: // "CONFIG_DIR_AUDIT_TPE"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LOG: // "CONFIG_DIR_DEBUG_LOG"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LVL: // "CONFIG_DIR_DEBUG_LVL"
+      case symbol_kind::S_CONFIG_SEC_CACHE_TRANSFORMATIONS: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
+      case symbol_kind::S_CONFIG_SEC_DISABLE_BACKEND_COMPRESS: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
+      case symbol_kind::S_CONFIG_SEC_HASH_ENGINE: // "CONFIG_SEC_HASH_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_HASH_KEY: // "CONFIG_SEC_HASH_KEY"
+      case symbol_kind::S_CONFIG_SEC_HASH_PARAM: // "CONFIG_SEC_HASH_PARAM"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_RX: // "CONFIG_SEC_HASH_METHOD_RX"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_PM: // "CONFIG_SEC_HASH_METHOD_PM"
+      case symbol_kind::S_CONFIG_SEC_CHROOT_DIR: // "CONFIG_SEC_CHROOT_DIR"
+      case symbol_kind::S_CONFIG_DIR_GEO_DB: // "CONFIG_DIR_GEO_DB"
+      case symbol_kind::S_CONFIG_DIR_GSB_DB: // "CONFIG_DIR_GSB_DB"
+      case symbol_kind::S_CONFIG_SEC_GUARDIAN_LOG: // "CONFIG_SEC_GUARDIAN_LOG"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
+      case symbol_kind::S_CONFIG_SEC_CONN_R_STATE_LIMIT: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_CONN_W_STATE_LIMIT: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_SENSOR_ID: // "CONFIG_SEC_SENSOR_ID"
+      case symbol_kind::S_CONFIG_DIR_ARGS_LIMIT: // "CONFIG_DIR_ARGS_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT: // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY: // "CONFIG_DIR_REQ_BODY"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT: // "CONFIG_DIR_REQ_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT_ACTION: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY: // "CONFIG_DIR_RES_BODY"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT: // "CONFIG_DIR_RES_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT_ACTION: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_INHERITANCE: // "CONFIG_SEC_RULE_INHERITANCE"
+      case symbol_kind::S_CONFIG_SEC_RULE_PERF_TIME: // "CONFIG_SEC_RULE_PERF_TIME"
+      case symbol_kind::S_CONFIG_DIR_RULE_ENG: // "CONFIG_DIR_RULE_ENG"
+      case symbol_kind::S_CONFIG_DIR_SEC_ACTION: // "CONFIG_DIR_SEC_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_DEFAULT_ACTION: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_MARKER: // "CONFIG_DIR_SEC_MARKER"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_MAP_FILE: // "CONFIG_DIR_UNICODE_MAP_FILE"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_CODE_PAGE: // "CONFIG_DIR_UNICODE_CODE_PAGE"
+      case symbol_kind::S_CONFIG_SEC_COLLECTION_TIMEOUT: // "CONFIG_SEC_COLLECTION_TIMEOUT"
+      case symbol_kind::S_CONFIG_SEC_HTTP_BLKEY: // "CONFIG_SEC_HTTP_BLKEY"
+      case symbol_kind::S_CONFIG_SEC_INTERCEPT_ON_ERROR: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
+      case symbol_kind::S_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_ID: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_MSG: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_TAG: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
+      case symbol_kind::S_CONFIG_UPDLOAD_KEEP_FILES: // "CONFIG_UPDLOAD_KEEP_FILES"
+      case symbol_kind::S_CONFIG_UPDLOAD_SAVE_TMP_FILES: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
+      case symbol_kind::S_CONFIG_UPLOAD_DIR: // "CONFIG_UPLOAD_DIR"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_LIMIT: // "CONFIG_UPLOAD_FILE_LIMIT"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_MODE: // "CONFIG_UPLOAD_FILE_MODE"
+      case symbol_kind::S_CONFIG_VALUE_ABORT: // "CONFIG_VALUE_ABORT"
+      case symbol_kind::S_CONFIG_VALUE_DETC: // "CONFIG_VALUE_DETC"
+      case symbol_kind::S_CONFIG_VALUE_HTTPS: // "CONFIG_VALUE_HTTPS"
+      case symbol_kind::S_CONFIG_VALUE_OFF: // "CONFIG_VALUE_OFF"
+      case symbol_kind::S_CONFIG_VALUE_ON: // "CONFIG_VALUE_ON"
+      case symbol_kind::S_CONFIG_VALUE_PARALLEL: // "CONFIG_VALUE_PARALLEL"
+      case symbol_kind::S_CONFIG_VALUE_PROCESS_PARTIAL: // "CONFIG_VALUE_PROCESS_PARTIAL"
+      case symbol_kind::S_CONFIG_VALUE_REJECT: // "CONFIG_VALUE_REJECT"
+      case symbol_kind::S_CONFIG_VALUE_RELEVANT_ONLY: // "CONFIG_VALUE_RELEVANT_ONLY"
+      case symbol_kind::S_CONFIG_VALUE_SERIAL: // "CONFIG_VALUE_SERIAL"
+      case symbol_kind::S_CONFIG_VALUE_WARN: // "CONFIG_VALUE_WARN"
+      case symbol_kind::S_CONFIG_XML_EXTERNAL_ENTITY: // "CONFIG_XML_EXTERNAL_ENTITY"
+      case symbol_kind::S_CONGIG_DIR_RESPONSE_BODY_MP: // "CONGIG_DIR_RESPONSE_BODY_MP"
+      case symbol_kind::S_CONGIG_DIR_SEC_ARG_SEP: // "CONGIG_DIR_SEC_ARG_SEP"
+      case symbol_kind::S_CONGIG_DIR_SEC_COOKIE_FORMAT: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
+      case symbol_kind::S_CONFIG_SEC_COOKIEV0_SEPARATOR: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
+      case symbol_kind::S_CONGIG_DIR_SEC_DATA_DIR: // "CONGIG_DIR_SEC_DATA_DIR"
+      case symbol_kind::S_CONGIG_DIR_SEC_STATUS_ENGINE: // "CONGIG_DIR_SEC_STATUS_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_STREAM_IN_BODY_INSPECTION: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
+      case symbol_kind::S_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
+      case symbol_kind::S_CONGIG_DIR_SEC_TMP_DIR: // "CONGIG_DIR_SEC_TMP_DIR"
+      case symbol_kind::S_DIRECTIVE: // "DIRECTIVE"
+      case symbol_kind::S_DIRECTIVE_SECRULESCRIPT: // "DIRECTIVE_SECRULESCRIPT"
+      case symbol_kind::S_FREE_TEXT_QUOTE_MACRO_EXPANSION: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
+      case symbol_kind::S_QUOTATION_MARK: // "QUOTATION_MARK"
+      case symbol_kind::S_RUN_TIME_VAR_BLD: // "RUN_TIME_VAR_BLD"
+      case symbol_kind::S_RUN_TIME_VAR_DUR: // "RUN_TIME_VAR_DUR"
+      case symbol_kind::S_RUN_TIME_VAR_HSV: // "RUN_TIME_VAR_HSV"
+      case symbol_kind::S_RUN_TIME_VAR_REMOTE_USER: // "RUN_TIME_VAR_REMOTE_USER"
+      case symbol_kind::S_RUN_TIME_VAR_TIME: // "RUN_TIME_VAR_TIME"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_DAY: // "RUN_TIME_VAR_TIME_DAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_EPOCH: // "RUN_TIME_VAR_TIME_EPOCH"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_HOUR: // "RUN_TIME_VAR_TIME_HOUR"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MIN: // "RUN_TIME_VAR_TIME_MIN"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MON: // "RUN_TIME_VAR_TIME_MON"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_SEC: // "RUN_TIME_VAR_TIME_SEC"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_WDAY: // "RUN_TIME_VAR_TIME_WDAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
+      case symbol_kind::S_VARIABLE: // "VARIABLE"
+      case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.template destroy< std::string > ();
         break;
 
-      case 347: // op
-      case 348: // op_before_init
+      case symbol_kind::S_op: // op
+      case symbol_kind::S_op_before_init: // op_before_init
         value.template destroy< std::unique_ptr<Operator> > ();
         break;
 
-      case 356: // run_time_string
+      case symbol_kind::S_run_time_string: // run_time_string
         value.template destroy< std::unique_ptr<RunTimeString> > ();
         break;
 
-      case 353: // var
+      case symbol_kind::S_var: // var
         value.template destroy< std::unique_ptr<Variable> > ();
         break;
 
-      case 354: // act
-      case 355: // setvar_action
+      case symbol_kind::S_act: // act
+      case symbol_kind::S_setvar_action: // setvar_action
         value.template destroy< std::unique_ptr<actions::Action> > ();
         break;
 
-      case 350: // variables
-      case 351: // variables_pre_process
-      case 352: // variables_may_be_quoted
+      case symbol_kind::S_variables: // variables
+      case symbol_kind::S_variables_pre_process: // variables_pre_process
+      case symbol_kind::S_variables_may_be_quoted: // variables_may_be_quoted
         value.template destroy< std::unique_ptr<std::vector<std::unique_ptr<Variable> > >  > ();
         break;
 
-      case 345: // actions
-      case 346: // actions_may_quoted
+      case symbol_kind::S_actions: // actions
+      case symbol_kind::S_actions_may_quoted: // actions_may_quoted
         value.template destroy< std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > >  > ();
         break;
 
@@ -1674,6 +2339,15 @@ switch (yytype)
 
         Base::clear ();
       }
+
+      /// The user-facing name of this symbol.
+      std::string name () const YY_NOEXCEPT
+      {
+        return seclang_parser::symbol_name (this->kind ());
+      }
+
+      /// Backward compatibility (Bison 3.6).
+      symbol_kind_type type_get () const YY_NOEXCEPT;
 
       /// Whether empty.
       bool empty () const YY_NOEXCEPT;
@@ -1695,49 +2369,51 @@ switch (yytype)
     };
 
     /// Type access provider for token (enum) based symbols.
-    struct by_type
+    struct by_kind
     {
       /// Default constructor.
-      by_type ();
+      by_kind ();
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      by_type (by_type&& that);
+      by_kind (by_kind&& that);
 #endif
 
       /// Copy constructor.
-      by_type (const by_type& that);
+      by_kind (const by_kind& that);
 
-      /// The symbol type as needed by the constructor.
-      typedef token_type kind_type;
+      /// The symbol kind as needed by the constructor.
+      typedef token_kind_type kind_type;
 
       /// Constructor from (external) token numbers.
-      by_type (kind_type t);
+      by_kind (kind_type t);
 
       /// Record that this symbol is empty.
-      void clear ();
+      void clear () YY_NOEXCEPT;
 
-      /// Steal the symbol type from \a that.
-      void move (by_type& that);
+      /// Steal the symbol kind from \a that.
+      void move (by_kind& that);
 
       /// The (internal) type number (corresponding to \a type).
       /// \a empty when empty.
-      symbol_number_type type_get () const YY_NOEXCEPT;
+      symbol_kind_type kind () const YY_NOEXCEPT;
 
-      /// The token.
-      token_type token () const YY_NOEXCEPT;
+      /// Backward compatibility (Bison 3.6).
+      symbol_kind_type type_get () const YY_NOEXCEPT;
 
-      /// The symbol type.
-      /// \a empty_symbol when empty.
-      /// An int, not token_number_type, to be able to store empty_symbol.
-      int type;
+      /// The symbol kind.
+      /// \a S_YYEMPTY when empty.
+      symbol_kind_type kind_;
     };
 
+    /// Backward compatibility for a private implementation detail (Bison 3.6).
+    typedef by_kind by_type;
+
     /// "External" symbols: returned by the scanner.
-    struct symbol_type : basic_symbol<by_type>
+    struct symbol_type : basic_symbol<by_kind>
     {
       /// Superclass.
-      typedef basic_symbol<by_type> super_type;
+      typedef basic_symbol<by_kind> super_type;
 
       /// Empty symbol.
       symbol_type () {}
@@ -1746,34 +2422,36 @@ switch (yytype)
 #if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, location_type l)
         : super_type(token_type (tok), std::move (l))
-      {
-        YYASSERT (tok == token::TOK_END || tok == token::TOK_COMMA || tok == token::TOK_CONFIG_CONTENT_INJECTION || tok == token::TOK_CONGIG_DIR_RESPONSE_BODY_MP_CLEAR || tok == token::TOK_PIPE || tok == token::TOK_NEW_LINE || tok == token::TOK_VAR_COUNT || tok == token::TOK_VAR_EXCLUSION || tok == token::TOK_VARIABLE_ARGS || tok == token::TOK_VARIABLE_ARGS_POST || tok == token::TOK_VARIABLE_ARGS_GET || tok == token::TOK_VARIABLE_FILES_SIZES || tok == token::TOK_VARIABLE_FILES_NAMES || tok == token::TOK_VARIABLE_FILES_TMP_CONTENT || tok == token::TOK_VARIABLE_MULTIPART_FILENAME || tok == token::TOK_VARIABLE_MULTIPART_NAME || tok == token::TOK_VARIABLE_MATCHED_VARS_NAMES || tok == token::TOK_VARIABLE_MATCHED_VARS || tok == token::TOK_VARIABLE_FILES || tok == token::TOK_VARIABLE_REQUEST_COOKIES || tok == token::TOK_VARIABLE_REQUEST_HEADERS || tok == token::TOK_VARIABLE_RESPONSE_HEADERS || tok == token::TOK_VARIABLE_GEO || tok == token::TOK_VARIABLE_REQUEST_COOKIES_NAMES || tok == token::TOK_VARIABLE_ARGS_COMBINED_SIZE || tok == token::TOK_VARIABLE_ARGS_GET_NAMES || tok == token::TOK_VARIABLE_RULE || tok == token::TOK_VARIABLE_ARGS_NAMES || tok == token::TOK_VARIABLE_ARGS_POST_NAMES || tok == token::TOK_VARIABLE_AUTH_TYPE || tok == token::TOK_VARIABLE_FILES_COMBINED_SIZE || tok == token::TOK_VARIABLE_FILES_TMP_NAMES || tok == token::TOK_VARIABLE_FULL_REQUEST || tok == token::TOK_VARIABLE_FULL_REQUEST_LENGTH || tok == token::TOK_VARIABLE_INBOUND_DATA_ERROR || tok == token::TOK_VARIABLE_MATCHED_VAR || tok == token::TOK_VARIABLE_MATCHED_VAR_NAME || tok == token::TOK_VARIABLE_MULTIPART_BOUNDARY_QUOTED || tok == token::TOK_VARIABLE_MULTIPART_BOUNDARY_WHITESPACE || tok == token::TOK_VARIABLE_MULTIPART_CRLF_LF_LINES || tok == token::TOK_VARIABLE_MULTIPART_DATA_AFTER || tok == token::TOK_VARIABLE_MULTIPART_DATA_BEFORE || tok == token::TOK_VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED || tok == token::TOK_VARIABLE_MULTIPART_HEADER_FOLDING || tok == token::TOK_VARIABLE_MULTIPART_INVALID_HEADER_FOLDING || tok == token::TOK_VARIABLE_MULTIPART_INVALID_PART || tok == token::TOK_VARIABLE_MULTIPART_INVALID_QUOTING || tok == token::TOK_VARIABLE_MULTIPART_LF_LINE || tok == token::TOK_VARIABLE_MULTIPART_MISSING_SEMICOLON || tok == token::TOK_VARIABLE_MULTIPART_SEMICOLON_MISSING || tok == token::TOK_VARIABLE_MULTIPART_STRICT_ERROR || tok == token::TOK_VARIABLE_MULTIPART_UNMATCHED_BOUNDARY || tok == token::TOK_VARIABLE_OUTBOUND_DATA_ERROR || tok == token::TOK_VARIABLE_PATH_INFO || tok == token::TOK_VARIABLE_QUERY_STRING || tok == token::TOK_VARIABLE_REMOTE_ADDR || tok == token::TOK_VARIABLE_REMOTE_HOST || tok == token::TOK_VARIABLE_REMOTE_PORT || tok == token::TOK_VARIABLE_REQBODY_ERROR_MSG || tok == token::TOK_VARIABLE_REQBODY_ERROR || tok == token::TOK_VARIABLE_REQBODY_PROCESSOR_ERROR_MSG || tok == token::TOK_VARIABLE_REQBODY_PROCESSOR_ERROR || tok == token::TOK_VARIABLE_REQBODY_PROCESSOR || tok == token::TOK_VARIABLE_REQUEST_BASENAME || tok == token::TOK_VARIABLE_REQUEST_BODY_LENGTH || tok == token::TOK_VARIABLE_REQUEST_BODY || tok == token::TOK_VARIABLE_REQUEST_FILE_NAME || tok == token::TOK_VARIABLE_REQUEST_HEADERS_NAMES || tok == token::TOK_VARIABLE_REQUEST_LINE || tok == token::TOK_VARIABLE_REQUEST_METHOD || tok == token::TOK_VARIABLE_REQUEST_PROTOCOL || tok == token::TOK_VARIABLE_REQUEST_URI_RAW || tok == token::TOK_VARIABLE_REQUEST_URI || tok == token::TOK_VARIABLE_RESOURCE || tok == token::TOK_VARIABLE_RESPONSE_BODY || tok == token::TOK_VARIABLE_RESPONSE_CONTENT_LENGTH || tok == token::TOK_VARIABLE_RESPONSE_CONTENT_TYPE || tok == token::TOK_VARIABLE_RESPONSE_HEADERS_NAMES || tok == token::TOK_VARIABLE_RESPONSE_PROTOCOL || tok == token::TOK_VARIABLE_RESPONSE_STATUS || tok == token::TOK_VARIABLE_SERVER_ADDR || tok == token::TOK_VARIABLE_SERVER_NAME || tok == token::TOK_VARIABLE_SERVER_PORT || tok == token::TOK_VARIABLE_SESSION_ID || tok == token::TOK_VARIABLE_UNIQUE_ID || tok == token::TOK_VARIABLE_URL_ENCODED_ERROR || tok == token::TOK_VARIABLE_USER_ID || tok == token::TOK_VARIABLE_WEB_APP_ID || tok == token::TOK_VARIABLE_STATUS || tok == token::TOK_VARIABLE_STATUS_LINE || tok == token::TOK_VARIABLE_IP || tok == token::TOK_VARIABLE_GLOBAL || tok == token::TOK_VARIABLE_TX || tok == token::TOK_VARIABLE_SESSION || tok == token::TOK_VARIABLE_USER || tok == token::TOK_RUN_TIME_VAR_ENV || tok == token::TOK_RUN_TIME_VAR_XML || tok == token::TOK_ACTION_SETVAR || tok == token::TOK_SETVAR_OPERATION_EQUALS || tok == token::TOK_SETVAR_OPERATION_EQUALS_PLUS || tok == token::TOK_SETVAR_OPERATION_EQUALS_MINUS || tok == token::TOK_NOT || tok == token::TOK_OPERATOR_BEGINS_WITH || tok == token::TOK_OPERATOR_CONTAINS || tok == token::TOK_OPERATOR_CONTAINS_WORD || tok == token::TOK_OPERATOR_DETECT_SQLI || tok == token::TOK_OPERATOR_DETECT_XSS || tok == token::TOK_OPERATOR_ENDS_WITH || tok == token::TOK_OPERATOR_EQ || tok == token::TOK_OPERATOR_FUZZY_HASH || tok == token::TOK_OPERATOR_GEOLOOKUP || tok == token::TOK_OPERATOR_GE || tok == token::TOK_OPERATOR_GSB_LOOKUP || tok == token::TOK_OPERATOR_GT || tok == token::TOK_OPERATOR_INSPECT_FILE || tok == token::TOK_OPERATOR_IP_MATCH_FROM_FILE || tok == token::TOK_OPERATOR_IP_MATCH || tok == token::TOK_OPERATOR_LE || tok == token::TOK_OPERATOR_LT || tok == token::TOK_OPERATOR_PM_FROM_FILE || tok == token::TOK_OPERATOR_PM || tok == token::TOK_OPERATOR_RBL || tok == token::TOK_OPERATOR_RSUB || tok == token::TOK_OPERATOR_RX_CONTENT_ONLY || tok == token::TOK_OPERATOR_RX || tok == token::TOK_OPERATOR_STR_EQ || tok == token::TOK_OPERATOR_STR_MATCH || tok == token::TOK_OPERATOR_UNCONDITIONAL_MATCH || tok == token::TOK_OPERATOR_VALIDATE_BYTE_RANGE || tok == token::TOK_OPERATOR_VALIDATE_DTD || tok == token::TOK_OPERATOR_VALIDATE_HASH || tok == token::TOK_OPERATOR_VALIDATE_SCHEMA || tok == token::TOK_OPERATOR_VALIDATE_URL_ENCODING || tok == token::TOK_OPERATOR_VALIDATE_UTF8_ENCODING || tok == token::TOK_OPERATOR_VERIFY_CC || tok == token::TOK_OPERATOR_VERIFY_CPF || tok == token::TOK_OPERATOR_VERIFY_SSN || tok == token::TOK_OPERATOR_VERIFY_SVNR || tok == token::TOK_OPERATOR_WITHIN || tok == token::TOK_CONFIG_DIR_AUDIT_LOG_FMT || tok == token::TOK_JSON || tok == token::TOK_NATIVE || tok == token::TOK_ACTION_CTL_RULE_ENGINE);
-      }
 #else
       symbol_type (int tok, const location_type& l)
         : super_type(token_type (tok), l)
-      {
-        YYASSERT (tok == token::TOK_END || tok == token::TOK_COMMA || tok == token::TOK_CONFIG_CONTENT_INJECTION || tok == token::TOK_CONGIG_DIR_RESPONSE_BODY_MP_CLEAR || tok == token::TOK_PIPE || tok == token::TOK_NEW_LINE || tok == token::TOK_VAR_COUNT || tok == token::TOK_VAR_EXCLUSION || tok == token::TOK_VARIABLE_ARGS || tok == token::TOK_VARIABLE_ARGS_POST || tok == token::TOK_VARIABLE_ARGS_GET || tok == token::TOK_VARIABLE_FILES_SIZES || tok == token::TOK_VARIABLE_FILES_NAMES || tok == token::TOK_VARIABLE_FILES_TMP_CONTENT || tok == token::TOK_VARIABLE_MULTIPART_FILENAME || tok == token::TOK_VARIABLE_MULTIPART_NAME || tok == token::TOK_VARIABLE_MATCHED_VARS_NAMES || tok == token::TOK_VARIABLE_MATCHED_VARS || tok == token::TOK_VARIABLE_FILES || tok == token::TOK_VARIABLE_REQUEST_COOKIES || tok == token::TOK_VARIABLE_REQUEST_HEADERS || tok == token::TOK_VARIABLE_RESPONSE_HEADERS || tok == token::TOK_VARIABLE_GEO || tok == token::TOK_VARIABLE_REQUEST_COOKIES_NAMES || tok == token::TOK_VARIABLE_ARGS_COMBINED_SIZE || tok == token::TOK_VARIABLE_ARGS_GET_NAMES || tok == token::TOK_VARIABLE_RULE || tok == token::TOK_VARIABLE_ARGS_NAMES || tok == token::TOK_VARIABLE_ARGS_POST_NAMES || tok == token::TOK_VARIABLE_AUTH_TYPE || tok == token::TOK_VARIABLE_FILES_COMBINED_SIZE || tok == token::TOK_VARIABLE_FILES_TMP_NAMES || tok == token::TOK_VARIABLE_FULL_REQUEST || tok == token::TOK_VARIABLE_FULL_REQUEST_LENGTH || tok == token::TOK_VARIABLE_INBOUND_DATA_ERROR || tok == token::TOK_VARIABLE_MATCHED_VAR || tok == token::TOK_VARIABLE_MATCHED_VAR_NAME || tok == token::TOK_VARIABLE_MULTIPART_BOUNDARY_QUOTED || tok == token::TOK_VARIABLE_MULTIPART_BOUNDARY_WHITESPACE || tok == token::TOK_VARIABLE_MULTIPART_CRLF_LF_LINES || tok == token::TOK_VARIABLE_MULTIPART_DATA_AFTER || tok == token::TOK_VARIABLE_MULTIPART_DATA_BEFORE || tok == token::TOK_VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED || tok == token::TOK_VARIABLE_MULTIPART_HEADER_FOLDING || tok == token::TOK_VARIABLE_MULTIPART_INVALID_HEADER_FOLDING || tok == token::TOK_VARIABLE_MULTIPART_INVALID_PART || tok == token::TOK_VARIABLE_MULTIPART_INVALID_QUOTING || tok == token::TOK_VARIABLE_MULTIPART_LF_LINE || tok == token::TOK_VARIABLE_MULTIPART_MISSING_SEMICOLON || tok == token::TOK_VARIABLE_MULTIPART_SEMICOLON_MISSING || tok == token::TOK_VARIABLE_MULTIPART_STRICT_ERROR || tok == token::TOK_VARIABLE_MULTIPART_UNMATCHED_BOUNDARY || tok == token::TOK_VARIABLE_OUTBOUND_DATA_ERROR || tok == token::TOK_VARIABLE_PATH_INFO || tok == token::TOK_VARIABLE_QUERY_STRING || tok == token::TOK_VARIABLE_REMOTE_ADDR || tok == token::TOK_VARIABLE_REMOTE_HOST || tok == token::TOK_VARIABLE_REMOTE_PORT || tok == token::TOK_VARIABLE_REQBODY_ERROR_MSG || tok == token::TOK_VARIABLE_REQBODY_ERROR || tok == token::TOK_VARIABLE_REQBODY_PROCESSOR_ERROR_MSG || tok == token::TOK_VARIABLE_REQBODY_PROCESSOR_ERROR || tok == token::TOK_VARIABLE_REQBODY_PROCESSOR || tok == token::TOK_VARIABLE_REQUEST_BASENAME || tok == token::TOK_VARIABLE_REQUEST_BODY_LENGTH || tok == token::TOK_VARIABLE_REQUEST_BODY || tok == token::TOK_VARIABLE_REQUEST_FILE_NAME || tok == token::TOK_VARIABLE_REQUEST_HEADERS_NAMES || tok == token::TOK_VARIABLE_REQUEST_LINE || tok == token::TOK_VARIABLE_REQUEST_METHOD || tok == token::TOK_VARIABLE_REQUEST_PROTOCOL || tok == token::TOK_VARIABLE_REQUEST_URI_RAW || tok == token::TOK_VARIABLE_REQUEST_URI || tok == token::TOK_VARIABLE_RESOURCE || tok == token::TOK_VARIABLE_RESPONSE_BODY || tok == token::TOK_VARIABLE_RESPONSE_CONTENT_LENGTH || tok == token::TOK_VARIABLE_RESPONSE_CONTENT_TYPE || tok == token::TOK_VARIABLE_RESPONSE_HEADERS_NAMES || tok == token::TOK_VARIABLE_RESPONSE_PROTOCOL || tok == token::TOK_VARIABLE_RESPONSE_STATUS || tok == token::TOK_VARIABLE_SERVER_ADDR || tok == token::TOK_VARIABLE_SERVER_NAME || tok == token::TOK_VARIABLE_SERVER_PORT || tok == token::TOK_VARIABLE_SESSION_ID || tok == token::TOK_VARIABLE_UNIQUE_ID || tok == token::TOK_VARIABLE_URL_ENCODED_ERROR || tok == token::TOK_VARIABLE_USER_ID || tok == token::TOK_VARIABLE_WEB_APP_ID || tok == token::TOK_VARIABLE_STATUS || tok == token::TOK_VARIABLE_STATUS_LINE || tok == token::TOK_VARIABLE_IP || tok == token::TOK_VARIABLE_GLOBAL || tok == token::TOK_VARIABLE_TX || tok == token::TOK_VARIABLE_SESSION || tok == token::TOK_VARIABLE_USER || tok == token::TOK_RUN_TIME_VAR_ENV || tok == token::TOK_RUN_TIME_VAR_XML || tok == token::TOK_ACTION_SETVAR || tok == token::TOK_SETVAR_OPERATION_EQUALS || tok == token::TOK_SETVAR_OPERATION_EQUALS_PLUS || tok == token::TOK_SETVAR_OPERATION_EQUALS_MINUS || tok == token::TOK_NOT || tok == token::TOK_OPERATOR_BEGINS_WITH || tok == token::TOK_OPERATOR_CONTAINS || tok == token::TOK_OPERATOR_CONTAINS_WORD || tok == token::TOK_OPERATOR_DETECT_SQLI || tok == token::TOK_OPERATOR_DETECT_XSS || tok == token::TOK_OPERATOR_ENDS_WITH || tok == token::TOK_OPERATOR_EQ || tok == token::TOK_OPERATOR_FUZZY_HASH || tok == token::TOK_OPERATOR_GEOLOOKUP || tok == token::TOK_OPERATOR_GE || tok == token::TOK_OPERATOR_GSB_LOOKUP || tok == token::TOK_OPERATOR_GT || tok == token::TOK_OPERATOR_INSPECT_FILE || tok == token::TOK_OPERATOR_IP_MATCH_FROM_FILE || tok == token::TOK_OPERATOR_IP_MATCH || tok == token::TOK_OPERATOR_LE || tok == token::TOK_OPERATOR_LT || tok == token::TOK_OPERATOR_PM_FROM_FILE || tok == token::TOK_OPERATOR_PM || tok == token::TOK_OPERATOR_RBL || tok == token::TOK_OPERATOR_RSUB || tok == token::TOK_OPERATOR_RX_CONTENT_ONLY || tok == token::TOK_OPERATOR_RX || tok == token::TOK_OPERATOR_STR_EQ || tok == token::TOK_OPERATOR_STR_MATCH || tok == token::TOK_OPERATOR_UNCONDITIONAL_MATCH || tok == token::TOK_OPERATOR_VALIDATE_BYTE_RANGE || tok == token::TOK_OPERATOR_VALIDATE_DTD || tok == token::TOK_OPERATOR_VALIDATE_HASH || tok == token::TOK_OPERATOR_VALIDATE_SCHEMA || tok == token::TOK_OPERATOR_VALIDATE_URL_ENCODING || tok == token::TOK_OPERATOR_VALIDATE_UTF8_ENCODING || tok == token::TOK_OPERATOR_VERIFY_CC || tok == token::TOK_OPERATOR_VERIFY_CPF || tok == token::TOK_OPERATOR_VERIFY_SSN || tok == token::TOK_OPERATOR_VERIFY_SVNR || tok == token::TOK_OPERATOR_WITHIN || tok == token::TOK_CONFIG_DIR_AUDIT_LOG_FMT || tok == token::TOK_JSON || tok == token::TOK_NATIVE || tok == token::TOK_ACTION_CTL_RULE_ENGINE);
-      }
 #endif
+      {
+        YY_ASSERT (tok == token::TOK_END
+                   || (token::TOK_YYerror <= tok && tok <= token::TOK_ACTION_CTL_RULE_ENGINE));
+      }
 #if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, std::string v, location_type l)
         : super_type(token_type (tok), std::move (v), std::move (l))
-      {
-        YYASSERT (tok == token::TOK_ACTION_ACCURACY || tok == token::TOK_ACTION_ALLOW || tok == token::TOK_ACTION_APPEND || tok == token::TOK_ACTION_AUDIT_LOG || tok == token::TOK_ACTION_BLOCK || tok == token::TOK_ACTION_CAPTURE || tok == token::TOK_ACTION_CHAIN || tok == token::TOK_ACTION_CTL_AUDIT_ENGINE || tok == token::TOK_ACTION_CTL_AUDIT_LOG_PARTS || tok == token::TOK_ACTION_CTL_BDY_JSON || tok == token::TOK_ACTION_CTL_BDY_XML || tok == token::TOK_ACTION_CTL_BDY_URLENCODED || tok == token::TOK_ACTION_CTL_FORCE_REQ_BODY_VAR || tok == token::TOK_ACTION_CTL_REQUEST_BODY_ACCESS || tok == token::TOK_ACTION_CTL_RULE_REMOVE_BY_ID || tok == token::TOK_ACTION_CTL_RULE_REMOVE_BY_TAG || tok == token::TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID || tok == token::TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG || tok == token::TOK_ACTION_DENY || tok == token::TOK_ACTION_DEPRECATE_VAR || tok == token::TOK_ACTION_DROP || tok == token::TOK_ACTION_EXEC || tok == token::TOK_ACTION_EXPIRE_VAR || tok == token::TOK_ACTION_ID || tok == token::TOK_ACTION_INITCOL || tok == token::TOK_ACTION_LOG || tok == token::TOK_ACTION_LOG_DATA || tok == token::TOK_ACTION_MATURITY || tok == token::TOK_ACTION_MSG || tok == token::TOK_ACTION_MULTI_MATCH || tok == token::TOK_ACTION_NO_AUDIT_LOG || tok == token::TOK_ACTION_NO_LOG || tok == token::TOK_ACTION_PASS || tok == token::TOK_ACTION_PAUSE || tok == token::TOK_ACTION_PHASE || tok == token::TOK_ACTION_PREPEND || tok == token::TOK_ACTION_PROXY || tok == token::TOK_ACTION_REDIRECT || tok == token::TOK_ACTION_REV || tok == token::TOK_ACTION_SANITISE_ARG || tok == token::TOK_ACTION_SANITISE_MATCHED || tok == token::TOK_ACTION_SANITISE_MATCHED_BYTES || tok == token::TOK_ACTION_SANITISE_REQUEST_HEADER || tok == token::TOK_ACTION_SANITISE_RESPONSE_HEADER || tok == token::TOK_ACTION_SETENV || tok == token::TOK_ACTION_SETRSC || tok == token::TOK_ACTION_SETSID || tok == token::TOK_ACTION_SETUID || tok == token::TOK_ACTION_SEVERITY || tok == token::TOK_ACTION_SKIP || tok == token::TOK_ACTION_SKIP_AFTER || tok == token::TOK_ACTION_STATUS || tok == token::TOK_ACTION_TAG || tok == token::TOK_ACTION_TRANSFORMATION_BASE_64_ENCODE || tok == token::TOK_ACTION_TRANSFORMATION_BASE_64_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT || tok == token::TOK_ACTION_TRANSFORMATION_CMD_LINE || tok == token::TOK_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE || tok == token::TOK_ACTION_TRANSFORMATION_CSS_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_HEX_ENCODE || tok == token::TOK_ACTION_TRANSFORMATION_HEX_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_JS_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_LENGTH || tok == token::TOK_ACTION_TRANSFORMATION_LOWERCASE || tok == token::TOK_ACTION_TRANSFORMATION_MD5 || tok == token::TOK_ACTION_TRANSFORMATION_NONE || tok == token::TOK_ACTION_TRANSFORMATION_NORMALISE_PATH || tok == token::TOK_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN || tok == token::TOK_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT || tok == token::TOK_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT || tok == token::TOK_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_NULLS || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_WHITESPACE || tok == token::TOK_ACTION_TRANSFORMATION_REPLACE_COMMENTS || tok == token::TOK_ACTION_TRANSFORMATION_REPLACE_NULLS || tok == token::TOK_ACTION_TRANSFORMATION_SHA1 || tok == token::TOK_ACTION_TRANSFORMATION_SQL_HEX_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_TRIM || tok == token::TOK_ACTION_TRANSFORMATION_TRIM_LEFT || tok == token::TOK_ACTION_TRANSFORMATION_TRIM_RIGHT || tok == token::TOK_ACTION_TRANSFORMATION_UPPERCASE || tok == token::TOK_ACTION_TRANSFORMATION_URL_ENCODE || tok == token::TOK_ACTION_TRANSFORMATION_URL_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_URL_DECODE_UNI || tok == token::TOK_ACTION_TRANSFORMATION_UTF8_TO_UNICODE || tok == token::TOK_ACTION_VER || tok == token::TOK_ACTION_XMLNS || tok == token::TOK_CONFIG_COMPONENT_SIG || tok == token::TOK_CONFIG_CONN_ENGINE || tok == token::TOK_CONFIG_SEC_ARGUMENT_SEPARATOR || tok == token::TOK_CONFIG_SEC_WEB_APP_ID || tok == token::TOK_CONFIG_SEC_SERVER_SIG || tok == token::TOK_CONFIG_DIR_AUDIT_DIR || tok == token::TOK_CONFIG_DIR_AUDIT_DIR_MOD || tok == token::TOK_CONFIG_DIR_AUDIT_ENG || tok == token::TOK_CONFIG_DIR_AUDIT_FLE_MOD || tok == token::TOK_CONFIG_DIR_AUDIT_LOG || tok == token::TOK_CONFIG_DIR_AUDIT_LOG2 || tok == token::TOK_CONFIG_DIR_AUDIT_LOG_P || tok == token::TOK_CONFIG_DIR_AUDIT_STS || tok == token::TOK_CONFIG_DIR_AUDIT_TPE || tok == token::TOK_CONFIG_DIR_DEBUG_LOG || tok == token::TOK_CONFIG_DIR_DEBUG_LVL || tok == token::TOK_CONFIG_SEC_CACHE_TRANSFORMATIONS || tok == token::TOK_CONFIG_SEC_DISABLE_BACKEND_COMPRESS || tok == token::TOK_CONFIG_SEC_HASH_ENGINE || tok == token::TOK_CONFIG_SEC_HASH_KEY || tok == token::TOK_CONFIG_SEC_HASH_PARAM || tok == token::TOK_CONFIG_SEC_HASH_METHOD_RX || tok == token::TOK_CONFIG_SEC_HASH_METHOD_PM || tok == token::TOK_CONFIG_SEC_CHROOT_DIR || tok == token::TOK_CONFIG_DIR_GEO_DB || tok == token::TOK_CONFIG_DIR_GSB_DB || tok == token::TOK_CONFIG_SEC_GUARDIAN_LOG || tok == token::TOK_CONFIG_DIR_PCRE_MATCH_LIMIT || tok == token::TOK_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION || tok == token::TOK_CONFIG_SEC_CONN_R_STATE_LIMIT || tok == token::TOK_CONFIG_SEC_CONN_W_STATE_LIMIT || tok == token::TOK_CONFIG_SEC_SENSOR_ID || tok == token::TOK_CONFIG_DIR_REQ_BODY || tok == token::TOK_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT || tok == token::TOK_CONFIG_DIR_REQ_BODY_LIMIT || tok == token::TOK_CONFIG_DIR_REQ_BODY_LIMIT_ACTION || tok == token::TOK_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT || tok == token::TOK_CONFIG_DIR_RES_BODY || tok == token::TOK_CONFIG_DIR_RES_BODY_LIMIT || tok == token::TOK_CONFIG_DIR_RES_BODY_LIMIT_ACTION || tok == token::TOK_CONFIG_SEC_RULE_INHERITANCE || tok == token::TOK_CONFIG_SEC_RULE_PERF_TIME || tok == token::TOK_CONFIG_DIR_RULE_ENG || tok == token::TOK_CONFIG_DIR_SEC_ACTION || tok == token::TOK_CONFIG_DIR_SEC_DEFAULT_ACTION || tok == token::TOK_CONFIG_DIR_SEC_MARKER || tok == token::TOK_CONFIG_DIR_UNICODE_MAP_FILE || tok == token::TOK_CONFIG_DIR_UNICODE_CODE_PAGE || tok == token::TOK_CONFIG_SEC_COLLECTION_TIMEOUT || tok == token::TOK_CONFIG_SEC_HTTP_BLKEY || tok == token::TOK_CONFIG_SEC_INTERCEPT_ON_ERROR || tok == token::TOK_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION || tok == token::TOK_CONFIG_SEC_RULE_REMOVE_BY_ID || tok == token::TOK_CONFIG_SEC_RULE_REMOVE_BY_MSG || tok == token::TOK_CONFIG_SEC_RULE_REMOVE_BY_TAG || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID || tok == token::TOK_CONFIG_UPDLOAD_KEEP_FILES || tok == token::TOK_CONFIG_UPDLOAD_SAVE_TMP_FILES || tok == token::TOK_CONFIG_UPLOAD_DIR || tok == token::TOK_CONFIG_UPLOAD_FILE_LIMIT || tok == token::TOK_CONFIG_UPLOAD_FILE_MODE || tok == token::TOK_CONFIG_VALUE_ABORT || tok == token::TOK_CONFIG_VALUE_DETC || tok == token::TOK_CONFIG_VALUE_HTTPS || tok == token::TOK_CONFIG_VALUE_OFF || tok == token::TOK_CONFIG_VALUE_ON || tok == token::TOK_CONFIG_VALUE_PARALLEL || tok == token::TOK_CONFIG_VALUE_PROCESS_PARTIAL || tok == token::TOK_CONFIG_VALUE_REJECT || tok == token::TOK_CONFIG_VALUE_RELEVANT_ONLY || tok == token::TOK_CONFIG_VALUE_SERIAL || tok == token::TOK_CONFIG_VALUE_WARN || tok == token::TOK_CONFIG_XML_EXTERNAL_ENTITY || tok == token::TOK_CONGIG_DIR_RESPONSE_BODY_MP || tok == token::TOK_CONGIG_DIR_SEC_ARG_SEP || tok == token::TOK_CONGIG_DIR_SEC_COOKIE_FORMAT || tok == token::TOK_CONFIG_SEC_COOKIEV0_SEPARATOR || tok == token::TOK_CONGIG_DIR_SEC_DATA_DIR || tok == token::TOK_CONGIG_DIR_SEC_STATUS_ENGINE || tok == token::TOK_CONFIG_SEC_STREAM_IN_BODY_INSPECTION || tok == token::TOK_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION || tok == token::TOK_CONGIG_DIR_SEC_TMP_DIR || tok == token::TOK_DIRECTIVE || tok == token::TOK_DIRECTIVE_SECRULESCRIPT || tok == token::TOK_FREE_TEXT_QUOTE_MACRO_EXPANSION || tok == token::TOK_QUOTATION_MARK || tok == token::TOK_RUN_TIME_VAR_BLD || tok == token::TOK_RUN_TIME_VAR_DUR || tok == token::TOK_RUN_TIME_VAR_HSV || tok == token::TOK_RUN_TIME_VAR_REMOTE_USER || tok == token::TOK_RUN_TIME_VAR_TIME || tok == token::TOK_RUN_TIME_VAR_TIME_DAY || tok == token::TOK_RUN_TIME_VAR_TIME_EPOCH || tok == token::TOK_RUN_TIME_VAR_TIME_HOUR || tok == token::TOK_RUN_TIME_VAR_TIME_MIN || tok == token::TOK_RUN_TIME_VAR_TIME_MON || tok == token::TOK_RUN_TIME_VAR_TIME_SEC || tok == token::TOK_RUN_TIME_VAR_TIME_WDAY || tok == token::TOK_RUN_TIME_VAR_TIME_YEAR || tok == token::TOK_VARIABLE || tok == token::TOK_DICT_ELEMENT || tok == token::TOK_DICT_ELEMENT_REGEXP);
-      }
 #else
       symbol_type (int tok, const std::string& v, const location_type& l)
         : super_type(token_type (tok), v, l)
-      {
-        YYASSERT (tok == token::TOK_ACTION_ACCURACY || tok == token::TOK_ACTION_ALLOW || tok == token::TOK_ACTION_APPEND || tok == token::TOK_ACTION_AUDIT_LOG || tok == token::TOK_ACTION_BLOCK || tok == token::TOK_ACTION_CAPTURE || tok == token::TOK_ACTION_CHAIN || tok == token::TOK_ACTION_CTL_AUDIT_ENGINE || tok == token::TOK_ACTION_CTL_AUDIT_LOG_PARTS || tok == token::TOK_ACTION_CTL_BDY_JSON || tok == token::TOK_ACTION_CTL_BDY_XML || tok == token::TOK_ACTION_CTL_BDY_URLENCODED || tok == token::TOK_ACTION_CTL_FORCE_REQ_BODY_VAR || tok == token::TOK_ACTION_CTL_REQUEST_BODY_ACCESS || tok == token::TOK_ACTION_CTL_RULE_REMOVE_BY_ID || tok == token::TOK_ACTION_CTL_RULE_REMOVE_BY_TAG || tok == token::TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID || tok == token::TOK_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG || tok == token::TOK_ACTION_DENY || tok == token::TOK_ACTION_DEPRECATE_VAR || tok == token::TOK_ACTION_DROP || tok == token::TOK_ACTION_EXEC || tok == token::TOK_ACTION_EXPIRE_VAR || tok == token::TOK_ACTION_ID || tok == token::TOK_ACTION_INITCOL || tok == token::TOK_ACTION_LOG || tok == token::TOK_ACTION_LOG_DATA || tok == token::TOK_ACTION_MATURITY || tok == token::TOK_ACTION_MSG || tok == token::TOK_ACTION_MULTI_MATCH || tok == token::TOK_ACTION_NO_AUDIT_LOG || tok == token::TOK_ACTION_NO_LOG || tok == token::TOK_ACTION_PASS || tok == token::TOK_ACTION_PAUSE || tok == token::TOK_ACTION_PHASE || tok == token::TOK_ACTION_PREPEND || tok == token::TOK_ACTION_PROXY || tok == token::TOK_ACTION_REDIRECT || tok == token::TOK_ACTION_REV || tok == token::TOK_ACTION_SANITISE_ARG || tok == token::TOK_ACTION_SANITISE_MATCHED || tok == token::TOK_ACTION_SANITISE_MATCHED_BYTES || tok == token::TOK_ACTION_SANITISE_REQUEST_HEADER || tok == token::TOK_ACTION_SANITISE_RESPONSE_HEADER || tok == token::TOK_ACTION_SETENV || tok == token::TOK_ACTION_SETRSC || tok == token::TOK_ACTION_SETSID || tok == token::TOK_ACTION_SETUID || tok == token::TOK_ACTION_SEVERITY || tok == token::TOK_ACTION_SKIP || tok == token::TOK_ACTION_SKIP_AFTER || tok == token::TOK_ACTION_STATUS || tok == token::TOK_ACTION_TAG || tok == token::TOK_ACTION_TRANSFORMATION_BASE_64_ENCODE || tok == token::TOK_ACTION_TRANSFORMATION_BASE_64_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT || tok == token::TOK_ACTION_TRANSFORMATION_CMD_LINE || tok == token::TOK_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE || tok == token::TOK_ACTION_TRANSFORMATION_CSS_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_HEX_ENCODE || tok == token::TOK_ACTION_TRANSFORMATION_HEX_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_JS_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_LENGTH || tok == token::TOK_ACTION_TRANSFORMATION_LOWERCASE || tok == token::TOK_ACTION_TRANSFORMATION_MD5 || tok == token::TOK_ACTION_TRANSFORMATION_NONE || tok == token::TOK_ACTION_TRANSFORMATION_NORMALISE_PATH || tok == token::TOK_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN || tok == token::TOK_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT || tok == token::TOK_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT || tok == token::TOK_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_NULLS || tok == token::TOK_ACTION_TRANSFORMATION_REMOVE_WHITESPACE || tok == token::TOK_ACTION_TRANSFORMATION_REPLACE_COMMENTS || tok == token::TOK_ACTION_TRANSFORMATION_REPLACE_NULLS || tok == token::TOK_ACTION_TRANSFORMATION_SHA1 || tok == token::TOK_ACTION_TRANSFORMATION_SQL_HEX_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_TRIM || tok == token::TOK_ACTION_TRANSFORMATION_TRIM_LEFT || tok == token::TOK_ACTION_TRANSFORMATION_TRIM_RIGHT || tok == token::TOK_ACTION_TRANSFORMATION_UPPERCASE || tok == token::TOK_ACTION_TRANSFORMATION_URL_ENCODE || tok == token::TOK_ACTION_TRANSFORMATION_URL_DECODE || tok == token::TOK_ACTION_TRANSFORMATION_URL_DECODE_UNI || tok == token::TOK_ACTION_TRANSFORMATION_UTF8_TO_UNICODE || tok == token::TOK_ACTION_VER || tok == token::TOK_ACTION_XMLNS || tok == token::TOK_CONFIG_COMPONENT_SIG || tok == token::TOK_CONFIG_CONN_ENGINE || tok == token::TOK_CONFIG_SEC_ARGUMENT_SEPARATOR || tok == token::TOK_CONFIG_SEC_WEB_APP_ID || tok == token::TOK_CONFIG_SEC_SERVER_SIG || tok == token::TOK_CONFIG_DIR_AUDIT_DIR || tok == token::TOK_CONFIG_DIR_AUDIT_DIR_MOD || tok == token::TOK_CONFIG_DIR_AUDIT_ENG || tok == token::TOK_CONFIG_DIR_AUDIT_FLE_MOD || tok == token::TOK_CONFIG_DIR_AUDIT_LOG || tok == token::TOK_CONFIG_DIR_AUDIT_LOG2 || tok == token::TOK_CONFIG_DIR_AUDIT_LOG_P || tok == token::TOK_CONFIG_DIR_AUDIT_STS || tok == token::TOK_CONFIG_DIR_AUDIT_TPE || tok == token::TOK_CONFIG_DIR_DEBUG_LOG || tok == token::TOK_CONFIG_DIR_DEBUG_LVL || tok == token::TOK_CONFIG_SEC_CACHE_TRANSFORMATIONS || tok == token::TOK_CONFIG_SEC_DISABLE_BACKEND_COMPRESS || tok == token::TOK_CONFIG_SEC_HASH_ENGINE || tok == token::TOK_CONFIG_SEC_HASH_KEY || tok == token::TOK_CONFIG_SEC_HASH_PARAM || tok == token::TOK_CONFIG_SEC_HASH_METHOD_RX || tok == token::TOK_CONFIG_SEC_HASH_METHOD_PM || tok == token::TOK_CONFIG_SEC_CHROOT_DIR || tok == token::TOK_CONFIG_DIR_GEO_DB || tok == token::TOK_CONFIG_DIR_GSB_DB || tok == token::TOK_CONFIG_SEC_GUARDIAN_LOG || tok == token::TOK_CONFIG_DIR_PCRE_MATCH_LIMIT || tok == token::TOK_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION || tok == token::TOK_CONFIG_SEC_CONN_R_STATE_LIMIT || tok == token::TOK_CONFIG_SEC_CONN_W_STATE_LIMIT || tok == token::TOK_CONFIG_SEC_SENSOR_ID || tok == token::TOK_CONFIG_DIR_REQ_BODY || tok == token::TOK_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT || tok == token::TOK_CONFIG_DIR_REQ_BODY_LIMIT || tok == token::TOK_CONFIG_DIR_REQ_BODY_LIMIT_ACTION || tok == token::TOK_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT || tok == token::TOK_CONFIG_DIR_RES_BODY || tok == token::TOK_CONFIG_DIR_RES_BODY_LIMIT || tok == token::TOK_CONFIG_DIR_RES_BODY_LIMIT_ACTION || tok == token::TOK_CONFIG_SEC_RULE_INHERITANCE || tok == token::TOK_CONFIG_SEC_RULE_PERF_TIME || tok == token::TOK_CONFIG_DIR_RULE_ENG || tok == token::TOK_CONFIG_DIR_SEC_ACTION || tok == token::TOK_CONFIG_DIR_SEC_DEFAULT_ACTION || tok == token::TOK_CONFIG_DIR_SEC_MARKER || tok == token::TOK_CONFIG_DIR_UNICODE_MAP_FILE || tok == token::TOK_CONFIG_DIR_UNICODE_CODE_PAGE || tok == token::TOK_CONFIG_SEC_COLLECTION_TIMEOUT || tok == token::TOK_CONFIG_SEC_HTTP_BLKEY || tok == token::TOK_CONFIG_SEC_INTERCEPT_ON_ERROR || tok == token::TOK_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION || tok == token::TOK_CONFIG_SEC_RULE_REMOVE_BY_ID || tok == token::TOK_CONFIG_SEC_RULE_REMOVE_BY_MSG || tok == token::TOK_CONFIG_SEC_RULE_REMOVE_BY_TAG || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID || tok == token::TOK_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID || tok == token::TOK_CONFIG_UPDLOAD_KEEP_FILES || tok == token::TOK_CONFIG_UPDLOAD_SAVE_TMP_FILES || tok == token::TOK_CONFIG_UPLOAD_DIR || tok == token::TOK_CONFIG_UPLOAD_FILE_LIMIT || tok == token::TOK_CONFIG_UPLOAD_FILE_MODE || tok == token::TOK_CONFIG_VALUE_ABORT || tok == token::TOK_CONFIG_VALUE_DETC || tok == token::TOK_CONFIG_VALUE_HTTPS || tok == token::TOK_CONFIG_VALUE_OFF || tok == token::TOK_CONFIG_VALUE_ON || tok == token::TOK_CONFIG_VALUE_PARALLEL || tok == token::TOK_CONFIG_VALUE_PROCESS_PARTIAL || tok == token::TOK_CONFIG_VALUE_REJECT || tok == token::TOK_CONFIG_VALUE_RELEVANT_ONLY || tok == token::TOK_CONFIG_VALUE_SERIAL || tok == token::TOK_CONFIG_VALUE_WARN || tok == token::TOK_CONFIG_XML_EXTERNAL_ENTITY || tok == token::TOK_CONGIG_DIR_RESPONSE_BODY_MP || tok == token::TOK_CONGIG_DIR_SEC_ARG_SEP || tok == token::TOK_CONGIG_DIR_SEC_COOKIE_FORMAT || tok == token::TOK_CONFIG_SEC_COOKIEV0_SEPARATOR || tok == token::TOK_CONGIG_DIR_SEC_DATA_DIR || tok == token::TOK_CONGIG_DIR_SEC_STATUS_ENGINE || tok == token::TOK_CONFIG_SEC_STREAM_IN_BODY_INSPECTION || tok == token::TOK_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION || tok == token::TOK_CONGIG_DIR_SEC_TMP_DIR || tok == token::TOK_DIRECTIVE || tok == token::TOK_DIRECTIVE_SECRULESCRIPT || tok == token::TOK_FREE_TEXT_QUOTE_MACRO_EXPANSION || tok == token::TOK_QUOTATION_MARK || tok == token::TOK_RUN_TIME_VAR_BLD || tok == token::TOK_RUN_TIME_VAR_DUR || tok == token::TOK_RUN_TIME_VAR_HSV || tok == token::TOK_RUN_TIME_VAR_REMOTE_USER || tok == token::TOK_RUN_TIME_VAR_TIME || tok == token::TOK_RUN_TIME_VAR_TIME_DAY || tok == token::TOK_RUN_TIME_VAR_TIME_EPOCH || tok == token::TOK_RUN_TIME_VAR_TIME_HOUR || tok == token::TOK_RUN_TIME_VAR_TIME_MIN || tok == token::TOK_RUN_TIME_VAR_TIME_MON || tok == token::TOK_RUN_TIME_VAR_TIME_SEC || tok == token::TOK_RUN_TIME_VAR_TIME_WDAY || tok == token::TOK_RUN_TIME_VAR_TIME_YEAR || tok == token::TOK_VARIABLE || tok == token::TOK_DICT_ELEMENT || tok == token::TOK_DICT_ELEMENT_REGEXP);
-      }
 #endif
+      {
+        YY_ASSERT ((token::TOK_ACTION_ACCURACY <= tok && tok <= token::TOK_DICT_ELEMENT_REGEXP));
+      }
     };
 
     /// Build a parser object.
     seclang_parser (modsecurity::Parser::Driver& driver_yyarg);
     virtual ~seclang_parser ();
+
+#if 201103L <= YY_CPLUSPLUS
+    /// Non copyable.
+    seclang_parser (const seclang_parser&) = delete;
+    /// Non copyable.
+    seclang_parser& operator= (const seclang_parser&) = delete;
+#endif
 
     /// Parse.  An alias for parse ().
     /// \returns  0 iff parsing succeeded.
@@ -1805,6 +2483,10 @@ switch (yytype)
     /// Report a syntax error.
     void error (const syntax_error& err);
 
+    /// The user-facing name of the symbol whose (internal) number is
+    /// YYSYMBOL.  No bounds checking.
+    static std::string symbol_name (symbol_kind_type yysymbol);
+
     // Implementation of make_symbol for each symbol type.
 #if 201103L <= YY_CPLUSPLUS
       static
@@ -1819,6 +2501,36 @@ switch (yytype)
       make_END (const location_type& l)
       {
         return symbol_type (token::TOK_END, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_YYerror (location_type l)
+      {
+        return symbol_type (token::TOK_YYerror, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_YYerror (const location_type& l)
+      {
+        return symbol_type (token::TOK_YYerror, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_YYUNDEF (location_type l)
+      {
+        return symbol_type (token::TOK_YYUNDEF, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_YYUNDEF (const location_type& l)
+      {
+        return symbol_type (token::TOK_YYUNDEF, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -2164,6 +2876,21 @@ switch (yytype)
       make_VARIABLE_REQUEST_COOKIES_NAMES (const location_type& l)
       {
         return symbol_type (token::TOK_VARIABLE_REQUEST_COOKIES_NAMES, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_VARIABLE_MULTIPART_PART_HEADERS (location_type l)
+      {
+        return symbol_type (token::TOK_VARIABLE_MULTIPART_PART_HEADERS, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_VARIABLE_MULTIPART_PART_HEADERS (const location_type& l)
+      {
+        return symbol_type (token::TOK_VARIABLE_MULTIPART_PART_HEADERS, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -3679,6 +4406,21 @@ switch (yytype)
       make_OPERATOR_RX (const location_type& l)
       {
         return symbol_type (token::TOK_OPERATOR_RX, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_OPERATOR_RX_GLOBAL (location_type l)
+      {
+        return symbol_type (token::TOK_OPERATOR_RX_GLOBAL, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_OPERATOR_RX_GLOBAL (const location_type& l)
+      {
+        return symbol_type (token::TOK_OPERATOR_RX_GLOBAL, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -5799,6 +6541,36 @@ switch (yytype)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_CONFIG_DIR_ARGS_LIMIT (std::string v, location_type l)
+      {
+        return symbol_type (token::TOK_CONFIG_DIR_ARGS_LIMIT, std::move (v), std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_CONFIG_DIR_ARGS_LIMIT (const std::string& v, const location_type& l)
+      {
+        return symbol_type (token::TOK_CONFIG_DIR_ARGS_LIMIT, v, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT (std::string v, location_type l)
+      {
+        return symbol_type (token::TOK_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT, std::move (v), std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT (const std::string& v, const location_type& l)
+      {
+        return symbol_type (token::TOK_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT, v, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_CONFIG_DIR_REQ_BODY (std::string v, location_type l)
       {
         return symbol_type (token::TOK_CONFIG_DIR_REQ_BODY, std::move (v), std::move (l));
@@ -6893,24 +7665,47 @@ switch (yytype)
 #endif
 
 
-  private:
-    /// This class is not copyable.
-    seclang_parser (const seclang_parser&);
-    seclang_parser& operator= (const seclang_parser&);
+    class context
+    {
+    public:
+      context (const seclang_parser& yyparser, const symbol_type& yyla);
+      const symbol_type& lookahead () const YY_NOEXCEPT { return yyla_; }
+      symbol_kind_type token () const YY_NOEXCEPT { return yyla_.kind (); }
+      const location_type& location () const YY_NOEXCEPT { return yyla_.location; }
 
-    /// State numbers.
-    typedef int state_type;
+      /// Put in YYARG at most YYARGN of the expected tokens, and return the
+      /// number of tokens stored in YYARG.  If YYARG is null, return the
+      /// number of expected tokens (guaranteed to be less than YYNTOKENS).
+      int expected_tokens (symbol_kind_type yyarg[], int yyargn) const;
+
+    private:
+      const seclang_parser& yyparser_;
+      const symbol_type& yyla_;
+    };
+
+  private:
+#if YY_CPLUSPLUS < 201103L
+    /// Non copyable.
+    seclang_parser (const seclang_parser&);
+    /// Non copyable.
+    seclang_parser& operator= (const seclang_parser&);
+#endif
+
+
+    /// Stored state numbers (used for stacks).
+    typedef short state_type;
+
+    /// The arguments of the error message.
+    int yy_syntax_error_arguments_ (const context& yyctx,
+                                    symbol_kind_type yyarg[], int yyargn) const;
 
     /// Generate an error message.
-    /// \param yystate   the state where the error occurred.
-    /// \param yyla      the lookahead token.
-    virtual std::string yysyntax_error_ (state_type yystate,
-                                         const symbol_type& yyla) const;
-
+    /// \param yyctx     the context in which the error occurred.
+    virtual std::string yysyntax_error_ (const context& yyctx) const;
     /// Compute post-reduction state.
     /// \param yystate   the current state
     /// \param yysym     the nonterminal to push on the stack
-    state_type yy_lr_goto_state_ (state_type yystate, int yysym);
+    static state_type yy_lr_goto_state_ (state_type yystate, int yysym);
 
     /// Whether the given \c yypact_ value indicates a defaulted state.
     /// \param yyvalue   the value to check
@@ -6923,63 +7718,66 @@ switch (yytype)
     static const short yypact_ninf_;
     static const signed char yytable_ninf_;
 
-    /// Convert a scanner token number \a t to a symbol number.
-    static token_number_type yytranslate_ (token_type t);
-
-    // Tables.
-  // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-  // STATE-NUM.
-  static const short yypact_[];
-
-  // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-  // Performed when YYTABLE does not specify something else to do.  Zero
-  // means the default is an error.
-  static const unsigned short yydefact_[];
-
-  // YYPGOTO[NTERM-NUM].
-  static const short yypgoto_[];
-
-  // YYDEFGOTO[NTERM-NUM].
-  static const short yydefgoto_[];
-
-  // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-  // positive, shift that token.  If negative, reduce the rule whose
-  // number is the opposite.  If YYTABLE_NINF, syntax error.
-  static const unsigned short yytable_[];
-
-  static const short yycheck_[];
-
-  // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-  // symbol of state STATE-NUM.
-  static const unsigned short yystos_[];
-
-  // YYR1[YYN] -- Symbol number of symbol that rule YYN derives.
-  static const unsigned short yyr1_[];
-
-  // YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.
-  static const unsigned char yyr2_[];
-
+    /// Convert a scanner token kind \a t to a symbol kind.
+    /// In theory \a t should be a token_kind_type, but character literals
+    /// are valid, yet not members of the token_type enum.
+    static symbol_kind_type yytranslate_ (int t);
 
     /// Convert the symbol name \a n to a form suitable for a diagnostic.
-    static std::string yytnamerr_ (const char *n);
-
+    static std::string yytnamerr_ (const char *yystr);
 
     /// For a symbol, its name in clear.
     static const char* const yytname_[];
+
+
+    // Tables.
+    // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+    // STATE-NUM.
+    static const short yypact_[];
+
+    // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+    // Performed when YYTABLE does not specify something else to do.  Zero
+    // means the default is an error.
+    static const short yydefact_[];
+
+    // YYPGOTO[NTERM-NUM].
+    static const short yypgoto_[];
+
+    // YYDEFGOTO[NTERM-NUM].
+    static const short yydefgoto_[];
+
+    // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+    // positive, shift that token.  If negative, reduce the rule whose
+    // number is the opposite.  If YYTABLE_NINF, syntax error.
+    static const short yytable_[];
+
+    static const short yycheck_[];
+
+    // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
+    // symbol of state STATE-NUM.
+    static const short yystos_[];
+
+    // YYR1[YYN] -- Symbol number of symbol that rule YYN derives.
+    static const short yyr1_[];
+
+    // YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.
+    static const signed char yyr2_[];
+
+
 #if YYDEBUG
-  // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned short yyrline_[];
+    // YYRLINE[YYN] -- Source line where rule number YYN was defined.
+    static const short yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
-    virtual void yy_reduce_print_ (int r);
+    virtual void yy_reduce_print_ (int r) const;
     /// Print the state stack on the debug stream.
-    virtual void yystack_print_ ();
+    virtual void yy_stack_print_ () const;
 
     /// Debugging level.
     int yydebug_;
     /// Debug stream.
     std::ostream* yycdebug_;
 
-    /// \brief Display a symbol type, value and location.
+    /// \brief Display a symbol kind, value and location.
     /// \param yyo    The output stream.
     /// \param yysym  The symbol.
     template <typename Base>
@@ -7000,7 +7798,7 @@ switch (yytype)
       /// Default constructor.
       by_state () YY_NOEXCEPT;
 
-      /// The symbol type as needed by the constructor.
+      /// The symbol kind as needed by the constructor.
       typedef state_type kind_type;
 
       /// Constructor.
@@ -7012,15 +7810,16 @@ switch (yytype)
       /// Record that this symbol is empty.
       void clear () YY_NOEXCEPT;
 
-      /// Steal the symbol type from \a that.
+      /// Steal the symbol kind from \a that.
       void move (by_state& that);
 
-      /// The (internal) type number (corresponding to \a state).
-      /// \a empty_symbol when empty.
-      symbol_number_type type_get () const YY_NOEXCEPT;
+      /// The symbol kind (corresponding to \a state).
+      /// \a symbol_kind::S_YYEMPTY when empty.
+      symbol_kind_type kind () const YY_NOEXCEPT;
 
       /// The state number used to denote an empty symbol.
-      enum { empty_state = -1 };
+      /// We use the initial state, as it does not have a value.
+      enum { empty_state = 0 };
 
       /// The state.
       /// \a empty when empty.
@@ -7042,6 +7841,10 @@ switch (yytype)
       /// Assignment, needed by push_back by some old implementations.
       /// Moves the contents of that.
       stack_symbol_type& operator= (stack_symbol_type& that);
+
+      /// Assignment, needed by push_back by other implementations.
+      /// Needed by some other old implementations.
+      stack_symbol_type& operator= (const stack_symbol_type& that);
 #endif
     };
 
@@ -7051,48 +7854,38 @@ switch (yytype)
     {
     public:
       // Hide our reversed order.
-      typedef typename S::reverse_iterator iterator;
-      typedef typename S::const_reverse_iterator const_iterator;
+      typedef typename S::iterator iterator;
+      typedef typename S::const_iterator const_iterator;
       typedef typename S::size_type size_type;
+      typedef typename std::ptrdiff_t index_type;
 
       stack (size_type n = 200)
         : seq_ (n)
       {}
 
-      /// Random access.
-      ///
-      /// Index 0 returns the topmost element.
-      T&
-      operator[] (size_type i)
-      {
-        return seq_[size () - 1 - i];
-      }
-
-      /// Random access.
-      ///
-      /// Index 0 returns the topmost element.
-      T&
-      operator[] (int i)
-      {
-        return operator[] (size_type (i));
-      }
+#if 201103L <= YY_CPLUSPLUS
+      /// Non copyable.
+      stack (const stack&) = delete;
+      /// Non copyable.
+      stack& operator= (const stack&) = delete;
+#endif
 
       /// Random access.
       ///
       /// Index 0 returns the topmost element.
       const T&
-      operator[] (size_type i) const
+      operator[] (index_type i) const
       {
-        return seq_[size () - 1 - i];
+        return seq_[size_type (size () - 1 - i)];
       }
 
       /// Random access.
       ///
       /// Index 0 returns the topmost element.
-      const T&
-      operator[] (int i) const
+      T&
+      operator[] (index_type i)
       {
-        return operator[] (size_type (i));
+        return seq_[size_type (size () - 1 - i)];
       }
 
       /// Steal the contents of \a t.
@@ -7107,7 +7900,7 @@ switch (yytype)
 
       /// Pop elements from the stack.
       void
-      pop (int n = 1) YY_NOEXCEPT
+      pop (std::ptrdiff_t n = 1) YY_NOEXCEPT
       {
         for (; 0 < n; --n)
           seq_.pop_back ();
@@ -7121,49 +7914,53 @@ switch (yytype)
       }
 
       /// Number of elements on the stack.
-      size_type
+      index_type
       size () const YY_NOEXCEPT
       {
-        return seq_.size ();
+        return index_type (seq_.size ());
       }
 
       /// Iterator on top of the stack (going downwards).
       const_iterator
       begin () const YY_NOEXCEPT
       {
-        return seq_.rbegin ();
+        return seq_.begin ();
       }
 
       /// Bottom of the stack.
       const_iterator
       end () const YY_NOEXCEPT
       {
-        return seq_.rend ();
+        return seq_.end ();
       }
 
       /// Present a slice of the top of a stack.
       class slice
       {
       public:
-        slice (const stack& stack, int range)
+        slice (const stack& stack, index_type range)
           : stack_ (stack)
           , range_ (range)
         {}
 
         const T&
-        operator[] (int i) const
+        operator[] (index_type i) const
         {
           return stack_[range_ - i];
         }
 
       private:
         const stack& stack_;
-        int range_;
+        index_type range_;
       };
 
     private:
+#if YY_CPLUSPLUS < 201103L
+      /// Non copyable.
       stack (const stack&);
+      /// Non copyable.
       stack& operator= (const stack&);
+#endif
       /// The wrapped container.
       S seq_;
     };
@@ -7196,28 +7993,25 @@ switch (yytype)
     /// Constants.
     enum
     {
-      yyeof_ = 0,
-      yylast_ = 3304,     ///< Last index in yytable_.
+      yylast_ = 3344,     ///< Last index in yytable_.
       yynnts_ = 16,  ///< Number of nonterminal symbols.
-      yyfinal_ = 336, ///< Termination state number.
-      yyterror_ = 1,
-      yyerrcode_ = 256,
-      yyntokens_ = 341  ///< Number of tokens.
+      yyfinal_ = 339 ///< Termination state number.
     };
 
 
     // User arguments.
     modsecurity::Parser::Driver& driver;
+
   };
 
   inline
-  seclang_parser::token_number_type
-  seclang_parser::yytranslate_ (token_type t)
+  seclang_parser::symbol_kind_type
+  seclang_parser::yytranslate_ (int t)
   {
     // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
     // TOKEN-NUM as returned by yylex.
     static
-    const token_number_type
+    const short
     translate_table[] =
     {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -7279,497 +8073,255 @@ switch (yytype)
      305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
      315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
      325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
-     335,   336,   337,   338,   339,   340
+     335,   336,   337,   338,   339,   340,   341,   342,   343,   344
     };
-    const unsigned user_token_number_max_ = 595;
-    const token_number_type undef_token_ = 2;
+    // Last valid token kind.
+    const int code_max = 599;
 
-    if (static_cast<int> (t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned> (t) <= user_token_number_max_)
-      return translate_table[t];
+    if (t <= 0)
+      return symbol_kind::S_YYEOF;
+    else if (t <= code_max)
+      return YY_CAST (symbol_kind_type, translate_table[t]);
     else
-      return undef_token_;
+      return symbol_kind::S_YYUNDEF;
   }
 
   // basic_symbol.
-#if 201103L <= YY_CPLUSPLUS
-  template <typename Base>
-  seclang_parser::basic_symbol<Base>::basic_symbol (basic_symbol&& that)
-    : Base (std::move (that))
-    , value ()
-    , location (std::move (that.location))
-  {
-    switch (this->type_get ())
-    {
-      case 145: // "Accuracy"
-      case 146: // "Allow"
-      case 147: // "Append"
-      case 148: // "AuditLog"
-      case 149: // "Block"
-      case 150: // "Capture"
-      case 151: // "Chain"
-      case 152: // "ACTION_CTL_AUDIT_ENGINE"
-      case 153: // "ACTION_CTL_AUDIT_LOG_PARTS"
-      case 154: // "ACTION_CTL_BDY_JSON"
-      case 155: // "ACTION_CTL_BDY_XML"
-      case 156: // "ACTION_CTL_BDY_URLENCODED"
-      case 157: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
-      case 158: // "ACTION_CTL_REQUEST_BODY_ACCESS"
-      case 159: // "ACTION_CTL_RULE_REMOVE_BY_ID"
-      case 160: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
-      case 161: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
-      case 162: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
-      case 163: // "Deny"
-      case 164: // "DeprecateVar"
-      case 165: // "Drop"
-      case 166: // "Exec"
-      case 167: // "ExpireVar"
-      case 168: // "Id"
-      case 169: // "InitCol"
-      case 170: // "Log"
-      case 171: // "LogData"
-      case 172: // "Maturity"
-      case 173: // "Msg"
-      case 174: // "MultiMatch"
-      case 175: // "NoAuditLog"
-      case 176: // "NoLog"
-      case 177: // "Pass"
-      case 178: // "Pause"
-      case 179: // "Phase"
-      case 180: // "Prepend"
-      case 181: // "Proxy"
-      case 182: // "Redirect"
-      case 183: // "Rev"
-      case 184: // "SanitiseArg"
-      case 185: // "SanitiseMatched"
-      case 186: // "SanitiseMatchedBytes"
-      case 187: // "SanitiseRequestHeader"
-      case 188: // "SanitiseResponseHeader"
-      case 189: // "SetEnv"
-      case 190: // "SetRsc"
-      case 191: // "SetSid"
-      case 192: // "SetUID"
-      case 193: // "Severity"
-      case 194: // "Skip"
-      case 195: // "SkipAfter"
-      case 196: // "Status"
-      case 197: // "Tag"
-      case 198: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
-      case 199: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
-      case 200: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
-      case 201: // "ACTION_TRANSFORMATION_CMD_LINE"
-      case 202: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
-      case 203: // "ACTION_TRANSFORMATION_CSS_DECODE"
-      case 204: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
-      case 205: // "ACTION_TRANSFORMATION_HEX_ENCODE"
-      case 206: // "ACTION_TRANSFORMATION_HEX_DECODE"
-      case 207: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
-      case 208: // "ACTION_TRANSFORMATION_JS_DECODE"
-      case 209: // "ACTION_TRANSFORMATION_LENGTH"
-      case 210: // "ACTION_TRANSFORMATION_LOWERCASE"
-      case 211: // "ACTION_TRANSFORMATION_MD5"
-      case 212: // "ACTION_TRANSFORMATION_NONE"
-      case 213: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
-      case 214: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
-      case 215: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
-      case 216: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
-      case 217: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
-      case 218: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
-      case 219: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
-      case 220: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
-      case 221: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
-      case 222: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
-      case 223: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
-      case 224: // "ACTION_TRANSFORMATION_SHA1"
-      case 225: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
-      case 226: // "ACTION_TRANSFORMATION_TRIM"
-      case 227: // "ACTION_TRANSFORMATION_TRIM_LEFT"
-      case 228: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
-      case 229: // "ACTION_TRANSFORMATION_UPPERCASE"
-      case 230: // "ACTION_TRANSFORMATION_URL_ENCODE"
-      case 231: // "ACTION_TRANSFORMATION_URL_DECODE"
-      case 232: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
-      case 233: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
-      case 234: // "Ver"
-      case 235: // "xmlns"
-      case 236: // "CONFIG_COMPONENT_SIG"
-      case 237: // "CONFIG_CONN_ENGINE"
-      case 238: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
-      case 239: // "CONFIG_SEC_WEB_APP_ID"
-      case 240: // "CONFIG_SEC_SERVER_SIG"
-      case 241: // "CONFIG_DIR_AUDIT_DIR"
-      case 242: // "CONFIG_DIR_AUDIT_DIR_MOD"
-      case 243: // "CONFIG_DIR_AUDIT_ENG"
-      case 244: // "CONFIG_DIR_AUDIT_FLE_MOD"
-      case 245: // "CONFIG_DIR_AUDIT_LOG"
-      case 246: // "CONFIG_DIR_AUDIT_LOG2"
-      case 247: // "CONFIG_DIR_AUDIT_LOG_P"
-      case 248: // "CONFIG_DIR_AUDIT_STS"
-      case 249: // "CONFIG_DIR_AUDIT_TPE"
-      case 250: // "CONFIG_DIR_DEBUG_LOG"
-      case 251: // "CONFIG_DIR_DEBUG_LVL"
-      case 252: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
-      case 253: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
-      case 254: // "CONFIG_SEC_HASH_ENGINE"
-      case 255: // "CONFIG_SEC_HASH_KEY"
-      case 256: // "CONFIG_SEC_HASH_PARAM"
-      case 257: // "CONFIG_SEC_HASH_METHOD_RX"
-      case 258: // "CONFIG_SEC_HASH_METHOD_PM"
-      case 259: // "CONFIG_SEC_CHROOT_DIR"
-      case 260: // "CONFIG_DIR_GEO_DB"
-      case 261: // "CONFIG_DIR_GSB_DB"
-      case 262: // "CONFIG_SEC_GUARDIAN_LOG"
-      case 263: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
-      case 264: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
-      case 265: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
-      case 266: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
-      case 267: // "CONFIG_SEC_SENSOR_ID"
-      case 268: // "CONFIG_DIR_REQ_BODY"
-      case 269: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
-      case 270: // "CONFIG_DIR_REQ_BODY_LIMIT"
-      case 271: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
-      case 272: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
-      case 273: // "CONFIG_DIR_RES_BODY"
-      case 274: // "CONFIG_DIR_RES_BODY_LIMIT"
-      case 275: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
-      case 276: // "CONFIG_SEC_RULE_INHERITANCE"
-      case 277: // "CONFIG_SEC_RULE_PERF_TIME"
-      case 278: // "CONFIG_DIR_RULE_ENG"
-      case 279: // "CONFIG_DIR_SEC_ACTION"
-      case 280: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
-      case 281: // "CONFIG_DIR_SEC_MARKER"
-      case 282: // "CONFIG_DIR_UNICODE_MAP_FILE"
-      case 283: // "CONFIG_DIR_UNICODE_CODE_PAGE"
-      case 284: // "CONFIG_SEC_COLLECTION_TIMEOUT"
-      case 285: // "CONFIG_SEC_HTTP_BLKEY"
-      case 286: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
-      case 287: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
-      case 288: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
-      case 289: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
-      case 290: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
-      case 291: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
-      case 292: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
-      case 293: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
-      case 294: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
-      case 295: // "CONFIG_UPDLOAD_KEEP_FILES"
-      case 296: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
-      case 297: // "CONFIG_UPLOAD_DIR"
-      case 298: // "CONFIG_UPLOAD_FILE_LIMIT"
-      case 299: // "CONFIG_UPLOAD_FILE_MODE"
-      case 300: // "CONFIG_VALUE_ABORT"
-      case 301: // "CONFIG_VALUE_DETC"
-      case 302: // "CONFIG_VALUE_HTTPS"
-      case 303: // "CONFIG_VALUE_OFF"
-      case 304: // "CONFIG_VALUE_ON"
-      case 305: // "CONFIG_VALUE_PARALLEL"
-      case 306: // "CONFIG_VALUE_PROCESS_PARTIAL"
-      case 307: // "CONFIG_VALUE_REJECT"
-      case 308: // "CONFIG_VALUE_RELEVANT_ONLY"
-      case 309: // "CONFIG_VALUE_SERIAL"
-      case 310: // "CONFIG_VALUE_WARN"
-      case 311: // "CONFIG_XML_EXTERNAL_ENTITY"
-      case 312: // "CONGIG_DIR_RESPONSE_BODY_MP"
-      case 313: // "CONGIG_DIR_SEC_ARG_SEP"
-      case 314: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
-      case 315: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
-      case 316: // "CONGIG_DIR_SEC_DATA_DIR"
-      case 317: // "CONGIG_DIR_SEC_STATUS_ENGINE"
-      case 318: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
-      case 319: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
-      case 320: // "CONGIG_DIR_SEC_TMP_DIR"
-      case 321: // "DIRECTIVE"
-      case 322: // "DIRECTIVE_SECRULESCRIPT"
-      case 323: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
-      case 324: // "QUOTATION_MARK"
-      case 325: // "RUN_TIME_VAR_BLD"
-      case 326: // "RUN_TIME_VAR_DUR"
-      case 327: // "RUN_TIME_VAR_HSV"
-      case 328: // "RUN_TIME_VAR_REMOTE_USER"
-      case 329: // "RUN_TIME_VAR_TIME"
-      case 330: // "RUN_TIME_VAR_TIME_DAY"
-      case 331: // "RUN_TIME_VAR_TIME_EPOCH"
-      case 332: // "RUN_TIME_VAR_TIME_HOUR"
-      case 333: // "RUN_TIME_VAR_TIME_MIN"
-      case 334: // "RUN_TIME_VAR_TIME_MON"
-      case 335: // "RUN_TIME_VAR_TIME_SEC"
-      case 336: // "RUN_TIME_VAR_TIME_WDAY"
-      case 337: // "RUN_TIME_VAR_TIME_YEAR"
-      case 338: // "VARIABLE"
-      case 339: // "Dictionary element"
-      case 340: // "Dictionary element, selected by regexp"
-        value.move< std::string > (std::move (that.value));
-        break;
-
-      case 347: // op
-      case 348: // op_before_init
-        value.move< std::unique_ptr<Operator> > (std::move (that.value));
-        break;
-
-      case 356: // run_time_string
-        value.move< std::unique_ptr<RunTimeString> > (std::move (that.value));
-        break;
-
-      case 353: // var
-        value.move< std::unique_ptr<Variable> > (std::move (that.value));
-        break;
-
-      case 354: // act
-      case 355: // setvar_action
-        value.move< std::unique_ptr<actions::Action> > (std::move (that.value));
-        break;
-
-      case 350: // variables
-      case 351: // variables_pre_process
-      case 352: // variables_may_be_quoted
-        value.move< std::unique_ptr<std::vector<std::unique_ptr<Variable> > >  > (std::move (that.value));
-        break;
-
-      case 345: // actions
-      case 346: // actions_may_quoted
-        value.move< std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > >  > (std::move (that.value));
-        break;
-
-      default:
-        break;
-    }
-
-  }
-#endif
-
   template <typename Base>
   seclang_parser::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
     : Base (that)
     , value ()
     , location (that.location)
   {
-    switch (this->type_get ())
+    switch (this->kind ())
     {
-      case 145: // "Accuracy"
-      case 146: // "Allow"
-      case 147: // "Append"
-      case 148: // "AuditLog"
-      case 149: // "Block"
-      case 150: // "Capture"
-      case 151: // "Chain"
-      case 152: // "ACTION_CTL_AUDIT_ENGINE"
-      case 153: // "ACTION_CTL_AUDIT_LOG_PARTS"
-      case 154: // "ACTION_CTL_BDY_JSON"
-      case 155: // "ACTION_CTL_BDY_XML"
-      case 156: // "ACTION_CTL_BDY_URLENCODED"
-      case 157: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
-      case 158: // "ACTION_CTL_REQUEST_BODY_ACCESS"
-      case 159: // "ACTION_CTL_RULE_REMOVE_BY_ID"
-      case 160: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
-      case 161: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
-      case 162: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
-      case 163: // "Deny"
-      case 164: // "DeprecateVar"
-      case 165: // "Drop"
-      case 166: // "Exec"
-      case 167: // "ExpireVar"
-      case 168: // "Id"
-      case 169: // "InitCol"
-      case 170: // "Log"
-      case 171: // "LogData"
-      case 172: // "Maturity"
-      case 173: // "Msg"
-      case 174: // "MultiMatch"
-      case 175: // "NoAuditLog"
-      case 176: // "NoLog"
-      case 177: // "Pass"
-      case 178: // "Pause"
-      case 179: // "Phase"
-      case 180: // "Prepend"
-      case 181: // "Proxy"
-      case 182: // "Redirect"
-      case 183: // "Rev"
-      case 184: // "SanitiseArg"
-      case 185: // "SanitiseMatched"
-      case 186: // "SanitiseMatchedBytes"
-      case 187: // "SanitiseRequestHeader"
-      case 188: // "SanitiseResponseHeader"
-      case 189: // "SetEnv"
-      case 190: // "SetRsc"
-      case 191: // "SetSid"
-      case 192: // "SetUID"
-      case 193: // "Severity"
-      case 194: // "Skip"
-      case 195: // "SkipAfter"
-      case 196: // "Status"
-      case 197: // "Tag"
-      case 198: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
-      case 199: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
-      case 200: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
-      case 201: // "ACTION_TRANSFORMATION_CMD_LINE"
-      case 202: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
-      case 203: // "ACTION_TRANSFORMATION_CSS_DECODE"
-      case 204: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
-      case 205: // "ACTION_TRANSFORMATION_HEX_ENCODE"
-      case 206: // "ACTION_TRANSFORMATION_HEX_DECODE"
-      case 207: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
-      case 208: // "ACTION_TRANSFORMATION_JS_DECODE"
-      case 209: // "ACTION_TRANSFORMATION_LENGTH"
-      case 210: // "ACTION_TRANSFORMATION_LOWERCASE"
-      case 211: // "ACTION_TRANSFORMATION_MD5"
-      case 212: // "ACTION_TRANSFORMATION_NONE"
-      case 213: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
-      case 214: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
-      case 215: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
-      case 216: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
-      case 217: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
-      case 218: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
-      case 219: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
-      case 220: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
-      case 221: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
-      case 222: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
-      case 223: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
-      case 224: // "ACTION_TRANSFORMATION_SHA1"
-      case 225: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
-      case 226: // "ACTION_TRANSFORMATION_TRIM"
-      case 227: // "ACTION_TRANSFORMATION_TRIM_LEFT"
-      case 228: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
-      case 229: // "ACTION_TRANSFORMATION_UPPERCASE"
-      case 230: // "ACTION_TRANSFORMATION_URL_ENCODE"
-      case 231: // "ACTION_TRANSFORMATION_URL_DECODE"
-      case 232: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
-      case 233: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
-      case 234: // "Ver"
-      case 235: // "xmlns"
-      case 236: // "CONFIG_COMPONENT_SIG"
-      case 237: // "CONFIG_CONN_ENGINE"
-      case 238: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
-      case 239: // "CONFIG_SEC_WEB_APP_ID"
-      case 240: // "CONFIG_SEC_SERVER_SIG"
-      case 241: // "CONFIG_DIR_AUDIT_DIR"
-      case 242: // "CONFIG_DIR_AUDIT_DIR_MOD"
-      case 243: // "CONFIG_DIR_AUDIT_ENG"
-      case 244: // "CONFIG_DIR_AUDIT_FLE_MOD"
-      case 245: // "CONFIG_DIR_AUDIT_LOG"
-      case 246: // "CONFIG_DIR_AUDIT_LOG2"
-      case 247: // "CONFIG_DIR_AUDIT_LOG_P"
-      case 248: // "CONFIG_DIR_AUDIT_STS"
-      case 249: // "CONFIG_DIR_AUDIT_TPE"
-      case 250: // "CONFIG_DIR_DEBUG_LOG"
-      case 251: // "CONFIG_DIR_DEBUG_LVL"
-      case 252: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
-      case 253: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
-      case 254: // "CONFIG_SEC_HASH_ENGINE"
-      case 255: // "CONFIG_SEC_HASH_KEY"
-      case 256: // "CONFIG_SEC_HASH_PARAM"
-      case 257: // "CONFIG_SEC_HASH_METHOD_RX"
-      case 258: // "CONFIG_SEC_HASH_METHOD_PM"
-      case 259: // "CONFIG_SEC_CHROOT_DIR"
-      case 260: // "CONFIG_DIR_GEO_DB"
-      case 261: // "CONFIG_DIR_GSB_DB"
-      case 262: // "CONFIG_SEC_GUARDIAN_LOG"
-      case 263: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
-      case 264: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
-      case 265: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
-      case 266: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
-      case 267: // "CONFIG_SEC_SENSOR_ID"
-      case 268: // "CONFIG_DIR_REQ_BODY"
-      case 269: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
-      case 270: // "CONFIG_DIR_REQ_BODY_LIMIT"
-      case 271: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
-      case 272: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
-      case 273: // "CONFIG_DIR_RES_BODY"
-      case 274: // "CONFIG_DIR_RES_BODY_LIMIT"
-      case 275: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
-      case 276: // "CONFIG_SEC_RULE_INHERITANCE"
-      case 277: // "CONFIG_SEC_RULE_PERF_TIME"
-      case 278: // "CONFIG_DIR_RULE_ENG"
-      case 279: // "CONFIG_DIR_SEC_ACTION"
-      case 280: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
-      case 281: // "CONFIG_DIR_SEC_MARKER"
-      case 282: // "CONFIG_DIR_UNICODE_MAP_FILE"
-      case 283: // "CONFIG_DIR_UNICODE_CODE_PAGE"
-      case 284: // "CONFIG_SEC_COLLECTION_TIMEOUT"
-      case 285: // "CONFIG_SEC_HTTP_BLKEY"
-      case 286: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
-      case 287: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
-      case 288: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
-      case 289: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
-      case 290: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
-      case 291: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
-      case 292: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
-      case 293: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
-      case 294: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
-      case 295: // "CONFIG_UPDLOAD_KEEP_FILES"
-      case 296: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
-      case 297: // "CONFIG_UPLOAD_DIR"
-      case 298: // "CONFIG_UPLOAD_FILE_LIMIT"
-      case 299: // "CONFIG_UPLOAD_FILE_MODE"
-      case 300: // "CONFIG_VALUE_ABORT"
-      case 301: // "CONFIG_VALUE_DETC"
-      case 302: // "CONFIG_VALUE_HTTPS"
-      case 303: // "CONFIG_VALUE_OFF"
-      case 304: // "CONFIG_VALUE_ON"
-      case 305: // "CONFIG_VALUE_PARALLEL"
-      case 306: // "CONFIG_VALUE_PROCESS_PARTIAL"
-      case 307: // "CONFIG_VALUE_REJECT"
-      case 308: // "CONFIG_VALUE_RELEVANT_ONLY"
-      case 309: // "CONFIG_VALUE_SERIAL"
-      case 310: // "CONFIG_VALUE_WARN"
-      case 311: // "CONFIG_XML_EXTERNAL_ENTITY"
-      case 312: // "CONGIG_DIR_RESPONSE_BODY_MP"
-      case 313: // "CONGIG_DIR_SEC_ARG_SEP"
-      case 314: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
-      case 315: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
-      case 316: // "CONGIG_DIR_SEC_DATA_DIR"
-      case 317: // "CONGIG_DIR_SEC_STATUS_ENGINE"
-      case 318: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
-      case 319: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
-      case 320: // "CONGIG_DIR_SEC_TMP_DIR"
-      case 321: // "DIRECTIVE"
-      case 322: // "DIRECTIVE_SECRULESCRIPT"
-      case 323: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
-      case 324: // "QUOTATION_MARK"
-      case 325: // "RUN_TIME_VAR_BLD"
-      case 326: // "RUN_TIME_VAR_DUR"
-      case 327: // "RUN_TIME_VAR_HSV"
-      case 328: // "RUN_TIME_VAR_REMOTE_USER"
-      case 329: // "RUN_TIME_VAR_TIME"
-      case 330: // "RUN_TIME_VAR_TIME_DAY"
-      case 331: // "RUN_TIME_VAR_TIME_EPOCH"
-      case 332: // "RUN_TIME_VAR_TIME_HOUR"
-      case 333: // "RUN_TIME_VAR_TIME_MIN"
-      case 334: // "RUN_TIME_VAR_TIME_MON"
-      case 335: // "RUN_TIME_VAR_TIME_SEC"
-      case 336: // "RUN_TIME_VAR_TIME_WDAY"
-      case 337: // "RUN_TIME_VAR_TIME_YEAR"
-      case 338: // "VARIABLE"
-      case 339: // "Dictionary element"
-      case 340: // "Dictionary element, selected by regexp"
+      case symbol_kind::S_ACTION_ACCURACY: // "Accuracy"
+      case symbol_kind::S_ACTION_ALLOW: // "Allow"
+      case symbol_kind::S_ACTION_APPEND: // "Append"
+      case symbol_kind::S_ACTION_AUDIT_LOG: // "AuditLog"
+      case symbol_kind::S_ACTION_BLOCK: // "Block"
+      case symbol_kind::S_ACTION_CAPTURE: // "Capture"
+      case symbol_kind::S_ACTION_CHAIN: // "Chain"
+      case symbol_kind::S_ACTION_CTL_AUDIT_ENGINE: // "ACTION_CTL_AUDIT_ENGINE"
+      case symbol_kind::S_ACTION_CTL_AUDIT_LOG_PARTS: // "ACTION_CTL_AUDIT_LOG_PARTS"
+      case symbol_kind::S_ACTION_CTL_BDY_JSON: // "ACTION_CTL_BDY_JSON"
+      case symbol_kind::S_ACTION_CTL_BDY_XML: // "ACTION_CTL_BDY_XML"
+      case symbol_kind::S_ACTION_CTL_BDY_URLENCODED: // "ACTION_CTL_BDY_URLENCODED"
+      case symbol_kind::S_ACTION_CTL_FORCE_REQ_BODY_VAR: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
+      case symbol_kind::S_ACTION_CTL_REQUEST_BODY_ACCESS: // "ACTION_CTL_REQUEST_BODY_ACCESS"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_ID: // "ACTION_CTL_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_TAG: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
+      case symbol_kind::S_ACTION_DENY: // "Deny"
+      case symbol_kind::S_ACTION_DEPRECATE_VAR: // "DeprecateVar"
+      case symbol_kind::S_ACTION_DROP: // "Drop"
+      case symbol_kind::S_ACTION_EXEC: // "Exec"
+      case symbol_kind::S_ACTION_EXPIRE_VAR: // "ExpireVar"
+      case symbol_kind::S_ACTION_ID: // "Id"
+      case symbol_kind::S_ACTION_INITCOL: // "InitCol"
+      case symbol_kind::S_ACTION_LOG: // "Log"
+      case symbol_kind::S_ACTION_LOG_DATA: // "LogData"
+      case symbol_kind::S_ACTION_MATURITY: // "Maturity"
+      case symbol_kind::S_ACTION_MSG: // "Msg"
+      case symbol_kind::S_ACTION_MULTI_MATCH: // "MultiMatch"
+      case symbol_kind::S_ACTION_NO_AUDIT_LOG: // "NoAuditLog"
+      case symbol_kind::S_ACTION_NO_LOG: // "NoLog"
+      case symbol_kind::S_ACTION_PASS: // "Pass"
+      case symbol_kind::S_ACTION_PAUSE: // "Pause"
+      case symbol_kind::S_ACTION_PHASE: // "Phase"
+      case symbol_kind::S_ACTION_PREPEND: // "Prepend"
+      case symbol_kind::S_ACTION_PROXY: // "Proxy"
+      case symbol_kind::S_ACTION_REDIRECT: // "Redirect"
+      case symbol_kind::S_ACTION_REV: // "Rev"
+      case symbol_kind::S_ACTION_SANITISE_ARG: // "SanitiseArg"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED: // "SanitiseMatched"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED_BYTES: // "SanitiseMatchedBytes"
+      case symbol_kind::S_ACTION_SANITISE_REQUEST_HEADER: // "SanitiseRequestHeader"
+      case symbol_kind::S_ACTION_SANITISE_RESPONSE_HEADER: // "SanitiseResponseHeader"
+      case symbol_kind::S_ACTION_SETENV: // "SetEnv"
+      case symbol_kind::S_ACTION_SETRSC: // "SetRsc"
+      case symbol_kind::S_ACTION_SETSID: // "SetSid"
+      case symbol_kind::S_ACTION_SETUID: // "SetUID"
+      case symbol_kind::S_ACTION_SEVERITY: // "Severity"
+      case symbol_kind::S_ACTION_SKIP: // "Skip"
+      case symbol_kind::S_ACTION_SKIP_AFTER: // "SkipAfter"
+      case symbol_kind::S_ACTION_STATUS: // "Status"
+      case symbol_kind::S_ACTION_TAG: // "Tag"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_ENCODE: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CMD_LINE: // "ACTION_TRANSFORMATION_CMD_LINE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CSS_DECODE: // "ACTION_TRANSFORMATION_CSS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_ENCODE: // "ACTION_TRANSFORMATION_HEX_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_DECODE: // "ACTION_TRANSFORMATION_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_JS_DECODE: // "ACTION_TRANSFORMATION_JS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LENGTH: // "ACTION_TRANSFORMATION_LENGTH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LOWERCASE: // "ACTION_TRANSFORMATION_LOWERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_MD5: // "ACTION_TRANSFORMATION_MD5"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NONE: // "ACTION_TRANSFORMATION_NONE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_NULLS: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_WHITESPACE: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_COMMENTS: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_NULLS: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SHA1: // "ACTION_TRANSFORMATION_SHA1"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SQL_HEX_DECODE: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM: // "ACTION_TRANSFORMATION_TRIM"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_LEFT: // "ACTION_TRANSFORMATION_TRIM_LEFT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_RIGHT: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UPPERCASE: // "ACTION_TRANSFORMATION_UPPERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_ENCODE: // "ACTION_TRANSFORMATION_URL_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE: // "ACTION_TRANSFORMATION_URL_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE_UNI: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UTF8_TO_UNICODE: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
+      case symbol_kind::S_ACTION_VER: // "Ver"
+      case symbol_kind::S_ACTION_XMLNS: // "xmlns"
+      case symbol_kind::S_CONFIG_COMPONENT_SIG: // "CONFIG_COMPONENT_SIG"
+      case symbol_kind::S_CONFIG_CONN_ENGINE: // "CONFIG_CONN_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_ARGUMENT_SEPARATOR: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
+      case symbol_kind::S_CONFIG_SEC_WEB_APP_ID: // "CONFIG_SEC_WEB_APP_ID"
+      case symbol_kind::S_CONFIG_SEC_SERVER_SIG: // "CONFIG_SEC_SERVER_SIG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR: // "CONFIG_DIR_AUDIT_DIR"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR_MOD: // "CONFIG_DIR_AUDIT_DIR_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_ENG: // "CONFIG_DIR_AUDIT_ENG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_FLE_MOD: // "CONFIG_DIR_AUDIT_FLE_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG: // "CONFIG_DIR_AUDIT_LOG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG2: // "CONFIG_DIR_AUDIT_LOG2"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG_P: // "CONFIG_DIR_AUDIT_LOG_P"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_STS: // "CONFIG_DIR_AUDIT_STS"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_TPE: // "CONFIG_DIR_AUDIT_TPE"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LOG: // "CONFIG_DIR_DEBUG_LOG"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LVL: // "CONFIG_DIR_DEBUG_LVL"
+      case symbol_kind::S_CONFIG_SEC_CACHE_TRANSFORMATIONS: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
+      case symbol_kind::S_CONFIG_SEC_DISABLE_BACKEND_COMPRESS: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
+      case symbol_kind::S_CONFIG_SEC_HASH_ENGINE: // "CONFIG_SEC_HASH_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_HASH_KEY: // "CONFIG_SEC_HASH_KEY"
+      case symbol_kind::S_CONFIG_SEC_HASH_PARAM: // "CONFIG_SEC_HASH_PARAM"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_RX: // "CONFIG_SEC_HASH_METHOD_RX"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_PM: // "CONFIG_SEC_HASH_METHOD_PM"
+      case symbol_kind::S_CONFIG_SEC_CHROOT_DIR: // "CONFIG_SEC_CHROOT_DIR"
+      case symbol_kind::S_CONFIG_DIR_GEO_DB: // "CONFIG_DIR_GEO_DB"
+      case symbol_kind::S_CONFIG_DIR_GSB_DB: // "CONFIG_DIR_GSB_DB"
+      case symbol_kind::S_CONFIG_SEC_GUARDIAN_LOG: // "CONFIG_SEC_GUARDIAN_LOG"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
+      case symbol_kind::S_CONFIG_SEC_CONN_R_STATE_LIMIT: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_CONN_W_STATE_LIMIT: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_SENSOR_ID: // "CONFIG_SEC_SENSOR_ID"
+      case symbol_kind::S_CONFIG_DIR_ARGS_LIMIT: // "CONFIG_DIR_ARGS_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT: // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY: // "CONFIG_DIR_REQ_BODY"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT: // "CONFIG_DIR_REQ_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT_ACTION: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY: // "CONFIG_DIR_RES_BODY"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT: // "CONFIG_DIR_RES_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT_ACTION: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_INHERITANCE: // "CONFIG_SEC_RULE_INHERITANCE"
+      case symbol_kind::S_CONFIG_SEC_RULE_PERF_TIME: // "CONFIG_SEC_RULE_PERF_TIME"
+      case symbol_kind::S_CONFIG_DIR_RULE_ENG: // "CONFIG_DIR_RULE_ENG"
+      case symbol_kind::S_CONFIG_DIR_SEC_ACTION: // "CONFIG_DIR_SEC_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_DEFAULT_ACTION: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_MARKER: // "CONFIG_DIR_SEC_MARKER"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_MAP_FILE: // "CONFIG_DIR_UNICODE_MAP_FILE"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_CODE_PAGE: // "CONFIG_DIR_UNICODE_CODE_PAGE"
+      case symbol_kind::S_CONFIG_SEC_COLLECTION_TIMEOUT: // "CONFIG_SEC_COLLECTION_TIMEOUT"
+      case symbol_kind::S_CONFIG_SEC_HTTP_BLKEY: // "CONFIG_SEC_HTTP_BLKEY"
+      case symbol_kind::S_CONFIG_SEC_INTERCEPT_ON_ERROR: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
+      case symbol_kind::S_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_ID: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_MSG: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_TAG: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
+      case symbol_kind::S_CONFIG_UPDLOAD_KEEP_FILES: // "CONFIG_UPDLOAD_KEEP_FILES"
+      case symbol_kind::S_CONFIG_UPDLOAD_SAVE_TMP_FILES: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
+      case symbol_kind::S_CONFIG_UPLOAD_DIR: // "CONFIG_UPLOAD_DIR"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_LIMIT: // "CONFIG_UPLOAD_FILE_LIMIT"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_MODE: // "CONFIG_UPLOAD_FILE_MODE"
+      case symbol_kind::S_CONFIG_VALUE_ABORT: // "CONFIG_VALUE_ABORT"
+      case symbol_kind::S_CONFIG_VALUE_DETC: // "CONFIG_VALUE_DETC"
+      case symbol_kind::S_CONFIG_VALUE_HTTPS: // "CONFIG_VALUE_HTTPS"
+      case symbol_kind::S_CONFIG_VALUE_OFF: // "CONFIG_VALUE_OFF"
+      case symbol_kind::S_CONFIG_VALUE_ON: // "CONFIG_VALUE_ON"
+      case symbol_kind::S_CONFIG_VALUE_PARALLEL: // "CONFIG_VALUE_PARALLEL"
+      case symbol_kind::S_CONFIG_VALUE_PROCESS_PARTIAL: // "CONFIG_VALUE_PROCESS_PARTIAL"
+      case symbol_kind::S_CONFIG_VALUE_REJECT: // "CONFIG_VALUE_REJECT"
+      case symbol_kind::S_CONFIG_VALUE_RELEVANT_ONLY: // "CONFIG_VALUE_RELEVANT_ONLY"
+      case symbol_kind::S_CONFIG_VALUE_SERIAL: // "CONFIG_VALUE_SERIAL"
+      case symbol_kind::S_CONFIG_VALUE_WARN: // "CONFIG_VALUE_WARN"
+      case symbol_kind::S_CONFIG_XML_EXTERNAL_ENTITY: // "CONFIG_XML_EXTERNAL_ENTITY"
+      case symbol_kind::S_CONGIG_DIR_RESPONSE_BODY_MP: // "CONGIG_DIR_RESPONSE_BODY_MP"
+      case symbol_kind::S_CONGIG_DIR_SEC_ARG_SEP: // "CONGIG_DIR_SEC_ARG_SEP"
+      case symbol_kind::S_CONGIG_DIR_SEC_COOKIE_FORMAT: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
+      case symbol_kind::S_CONFIG_SEC_COOKIEV0_SEPARATOR: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
+      case symbol_kind::S_CONGIG_DIR_SEC_DATA_DIR: // "CONGIG_DIR_SEC_DATA_DIR"
+      case symbol_kind::S_CONGIG_DIR_SEC_STATUS_ENGINE: // "CONGIG_DIR_SEC_STATUS_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_STREAM_IN_BODY_INSPECTION: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
+      case symbol_kind::S_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
+      case symbol_kind::S_CONGIG_DIR_SEC_TMP_DIR: // "CONGIG_DIR_SEC_TMP_DIR"
+      case symbol_kind::S_DIRECTIVE: // "DIRECTIVE"
+      case symbol_kind::S_DIRECTIVE_SECRULESCRIPT: // "DIRECTIVE_SECRULESCRIPT"
+      case symbol_kind::S_FREE_TEXT_QUOTE_MACRO_EXPANSION: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
+      case symbol_kind::S_QUOTATION_MARK: // "QUOTATION_MARK"
+      case symbol_kind::S_RUN_TIME_VAR_BLD: // "RUN_TIME_VAR_BLD"
+      case symbol_kind::S_RUN_TIME_VAR_DUR: // "RUN_TIME_VAR_DUR"
+      case symbol_kind::S_RUN_TIME_VAR_HSV: // "RUN_TIME_VAR_HSV"
+      case symbol_kind::S_RUN_TIME_VAR_REMOTE_USER: // "RUN_TIME_VAR_REMOTE_USER"
+      case symbol_kind::S_RUN_TIME_VAR_TIME: // "RUN_TIME_VAR_TIME"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_DAY: // "RUN_TIME_VAR_TIME_DAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_EPOCH: // "RUN_TIME_VAR_TIME_EPOCH"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_HOUR: // "RUN_TIME_VAR_TIME_HOUR"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MIN: // "RUN_TIME_VAR_TIME_MIN"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MON: // "RUN_TIME_VAR_TIME_MON"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_SEC: // "RUN_TIME_VAR_TIME_SEC"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_WDAY: // "RUN_TIME_VAR_TIME_WDAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
+      case symbol_kind::S_VARIABLE: // "VARIABLE"
+      case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.copy< std::string > (YY_MOVE (that.value));
         break;
 
-      case 347: // op
-      case 348: // op_before_init
+      case symbol_kind::S_op: // op
+      case symbol_kind::S_op_before_init: // op_before_init
         value.copy< std::unique_ptr<Operator> > (YY_MOVE (that.value));
         break;
 
-      case 356: // run_time_string
+      case symbol_kind::S_run_time_string: // run_time_string
         value.copy< std::unique_ptr<RunTimeString> > (YY_MOVE (that.value));
         break;
 
-      case 353: // var
+      case symbol_kind::S_var: // var
         value.copy< std::unique_ptr<Variable> > (YY_MOVE (that.value));
         break;
 
-      case 354: // act
-      case 355: // setvar_action
+      case symbol_kind::S_act: // act
+      case symbol_kind::S_setvar_action: // setvar_action
         value.copy< std::unique_ptr<actions::Action> > (YY_MOVE (that.value));
         break;
 
-      case 350: // variables
-      case 351: // variables_pre_process
-      case 352: // variables_may_be_quoted
+      case symbol_kind::S_variables: // variables
+      case symbol_kind::S_variables_pre_process: // variables_pre_process
+      case symbol_kind::S_variables_may_be_quoted: // variables_may_be_quoted
         value.copy< std::unique_ptr<std::vector<std::unique_ptr<Variable> > >  > (YY_MOVE (that.value));
         break;
 
-      case 345: // actions
-      case 346: // actions_may_quoted
+      case symbol_kind::S_actions: // actions
+      case symbol_kind::S_actions_may_quoted: // actions_may_quoted
         value.copy< std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > >  > (YY_MOVE (that.value));
         break;
 
@@ -7782,10 +8334,17 @@ switch (yytype)
 
 
   template <typename Base>
+  seclang_parser::symbol_kind_type
+  seclang_parser::basic_symbol<Base>::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
+  }
+
+  template <typename Base>
   bool
   seclang_parser::basic_symbol<Base>::empty () const YY_NOEXCEPT
   {
-    return Base::type_get () == empty_symbol;
+    return this->kind () == symbol_kind::S_YYEMPTY;
   }
 
   template <typename Base>
@@ -7793,233 +8352,235 @@ switch (yytype)
   seclang_parser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move (s);
-    switch (this->type_get ())
+    switch (this->kind ())
     {
-      case 145: // "Accuracy"
-      case 146: // "Allow"
-      case 147: // "Append"
-      case 148: // "AuditLog"
-      case 149: // "Block"
-      case 150: // "Capture"
-      case 151: // "Chain"
-      case 152: // "ACTION_CTL_AUDIT_ENGINE"
-      case 153: // "ACTION_CTL_AUDIT_LOG_PARTS"
-      case 154: // "ACTION_CTL_BDY_JSON"
-      case 155: // "ACTION_CTL_BDY_XML"
-      case 156: // "ACTION_CTL_BDY_URLENCODED"
-      case 157: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
-      case 158: // "ACTION_CTL_REQUEST_BODY_ACCESS"
-      case 159: // "ACTION_CTL_RULE_REMOVE_BY_ID"
-      case 160: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
-      case 161: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
-      case 162: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
-      case 163: // "Deny"
-      case 164: // "DeprecateVar"
-      case 165: // "Drop"
-      case 166: // "Exec"
-      case 167: // "ExpireVar"
-      case 168: // "Id"
-      case 169: // "InitCol"
-      case 170: // "Log"
-      case 171: // "LogData"
-      case 172: // "Maturity"
-      case 173: // "Msg"
-      case 174: // "MultiMatch"
-      case 175: // "NoAuditLog"
-      case 176: // "NoLog"
-      case 177: // "Pass"
-      case 178: // "Pause"
-      case 179: // "Phase"
-      case 180: // "Prepend"
-      case 181: // "Proxy"
-      case 182: // "Redirect"
-      case 183: // "Rev"
-      case 184: // "SanitiseArg"
-      case 185: // "SanitiseMatched"
-      case 186: // "SanitiseMatchedBytes"
-      case 187: // "SanitiseRequestHeader"
-      case 188: // "SanitiseResponseHeader"
-      case 189: // "SetEnv"
-      case 190: // "SetRsc"
-      case 191: // "SetSid"
-      case 192: // "SetUID"
-      case 193: // "Severity"
-      case 194: // "Skip"
-      case 195: // "SkipAfter"
-      case 196: // "Status"
-      case 197: // "Tag"
-      case 198: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
-      case 199: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
-      case 200: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
-      case 201: // "ACTION_TRANSFORMATION_CMD_LINE"
-      case 202: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
-      case 203: // "ACTION_TRANSFORMATION_CSS_DECODE"
-      case 204: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
-      case 205: // "ACTION_TRANSFORMATION_HEX_ENCODE"
-      case 206: // "ACTION_TRANSFORMATION_HEX_DECODE"
-      case 207: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
-      case 208: // "ACTION_TRANSFORMATION_JS_DECODE"
-      case 209: // "ACTION_TRANSFORMATION_LENGTH"
-      case 210: // "ACTION_TRANSFORMATION_LOWERCASE"
-      case 211: // "ACTION_TRANSFORMATION_MD5"
-      case 212: // "ACTION_TRANSFORMATION_NONE"
-      case 213: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
-      case 214: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
-      case 215: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
-      case 216: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
-      case 217: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
-      case 218: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
-      case 219: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
-      case 220: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
-      case 221: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
-      case 222: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
-      case 223: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
-      case 224: // "ACTION_TRANSFORMATION_SHA1"
-      case 225: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
-      case 226: // "ACTION_TRANSFORMATION_TRIM"
-      case 227: // "ACTION_TRANSFORMATION_TRIM_LEFT"
-      case 228: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
-      case 229: // "ACTION_TRANSFORMATION_UPPERCASE"
-      case 230: // "ACTION_TRANSFORMATION_URL_ENCODE"
-      case 231: // "ACTION_TRANSFORMATION_URL_DECODE"
-      case 232: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
-      case 233: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
-      case 234: // "Ver"
-      case 235: // "xmlns"
-      case 236: // "CONFIG_COMPONENT_SIG"
-      case 237: // "CONFIG_CONN_ENGINE"
-      case 238: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
-      case 239: // "CONFIG_SEC_WEB_APP_ID"
-      case 240: // "CONFIG_SEC_SERVER_SIG"
-      case 241: // "CONFIG_DIR_AUDIT_DIR"
-      case 242: // "CONFIG_DIR_AUDIT_DIR_MOD"
-      case 243: // "CONFIG_DIR_AUDIT_ENG"
-      case 244: // "CONFIG_DIR_AUDIT_FLE_MOD"
-      case 245: // "CONFIG_DIR_AUDIT_LOG"
-      case 246: // "CONFIG_DIR_AUDIT_LOG2"
-      case 247: // "CONFIG_DIR_AUDIT_LOG_P"
-      case 248: // "CONFIG_DIR_AUDIT_STS"
-      case 249: // "CONFIG_DIR_AUDIT_TPE"
-      case 250: // "CONFIG_DIR_DEBUG_LOG"
-      case 251: // "CONFIG_DIR_DEBUG_LVL"
-      case 252: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
-      case 253: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
-      case 254: // "CONFIG_SEC_HASH_ENGINE"
-      case 255: // "CONFIG_SEC_HASH_KEY"
-      case 256: // "CONFIG_SEC_HASH_PARAM"
-      case 257: // "CONFIG_SEC_HASH_METHOD_RX"
-      case 258: // "CONFIG_SEC_HASH_METHOD_PM"
-      case 259: // "CONFIG_SEC_CHROOT_DIR"
-      case 260: // "CONFIG_DIR_GEO_DB"
-      case 261: // "CONFIG_DIR_GSB_DB"
-      case 262: // "CONFIG_SEC_GUARDIAN_LOG"
-      case 263: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
-      case 264: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
-      case 265: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
-      case 266: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
-      case 267: // "CONFIG_SEC_SENSOR_ID"
-      case 268: // "CONFIG_DIR_REQ_BODY"
-      case 269: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
-      case 270: // "CONFIG_DIR_REQ_BODY_LIMIT"
-      case 271: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
-      case 272: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
-      case 273: // "CONFIG_DIR_RES_BODY"
-      case 274: // "CONFIG_DIR_RES_BODY_LIMIT"
-      case 275: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
-      case 276: // "CONFIG_SEC_RULE_INHERITANCE"
-      case 277: // "CONFIG_SEC_RULE_PERF_TIME"
-      case 278: // "CONFIG_DIR_RULE_ENG"
-      case 279: // "CONFIG_DIR_SEC_ACTION"
-      case 280: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
-      case 281: // "CONFIG_DIR_SEC_MARKER"
-      case 282: // "CONFIG_DIR_UNICODE_MAP_FILE"
-      case 283: // "CONFIG_DIR_UNICODE_CODE_PAGE"
-      case 284: // "CONFIG_SEC_COLLECTION_TIMEOUT"
-      case 285: // "CONFIG_SEC_HTTP_BLKEY"
-      case 286: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
-      case 287: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
-      case 288: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
-      case 289: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
-      case 290: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
-      case 291: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
-      case 292: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
-      case 293: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
-      case 294: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
-      case 295: // "CONFIG_UPDLOAD_KEEP_FILES"
-      case 296: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
-      case 297: // "CONFIG_UPLOAD_DIR"
-      case 298: // "CONFIG_UPLOAD_FILE_LIMIT"
-      case 299: // "CONFIG_UPLOAD_FILE_MODE"
-      case 300: // "CONFIG_VALUE_ABORT"
-      case 301: // "CONFIG_VALUE_DETC"
-      case 302: // "CONFIG_VALUE_HTTPS"
-      case 303: // "CONFIG_VALUE_OFF"
-      case 304: // "CONFIG_VALUE_ON"
-      case 305: // "CONFIG_VALUE_PARALLEL"
-      case 306: // "CONFIG_VALUE_PROCESS_PARTIAL"
-      case 307: // "CONFIG_VALUE_REJECT"
-      case 308: // "CONFIG_VALUE_RELEVANT_ONLY"
-      case 309: // "CONFIG_VALUE_SERIAL"
-      case 310: // "CONFIG_VALUE_WARN"
-      case 311: // "CONFIG_XML_EXTERNAL_ENTITY"
-      case 312: // "CONGIG_DIR_RESPONSE_BODY_MP"
-      case 313: // "CONGIG_DIR_SEC_ARG_SEP"
-      case 314: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
-      case 315: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
-      case 316: // "CONGIG_DIR_SEC_DATA_DIR"
-      case 317: // "CONGIG_DIR_SEC_STATUS_ENGINE"
-      case 318: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
-      case 319: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
-      case 320: // "CONGIG_DIR_SEC_TMP_DIR"
-      case 321: // "DIRECTIVE"
-      case 322: // "DIRECTIVE_SECRULESCRIPT"
-      case 323: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
-      case 324: // "QUOTATION_MARK"
-      case 325: // "RUN_TIME_VAR_BLD"
-      case 326: // "RUN_TIME_VAR_DUR"
-      case 327: // "RUN_TIME_VAR_HSV"
-      case 328: // "RUN_TIME_VAR_REMOTE_USER"
-      case 329: // "RUN_TIME_VAR_TIME"
-      case 330: // "RUN_TIME_VAR_TIME_DAY"
-      case 331: // "RUN_TIME_VAR_TIME_EPOCH"
-      case 332: // "RUN_TIME_VAR_TIME_HOUR"
-      case 333: // "RUN_TIME_VAR_TIME_MIN"
-      case 334: // "RUN_TIME_VAR_TIME_MON"
-      case 335: // "RUN_TIME_VAR_TIME_SEC"
-      case 336: // "RUN_TIME_VAR_TIME_WDAY"
-      case 337: // "RUN_TIME_VAR_TIME_YEAR"
-      case 338: // "VARIABLE"
-      case 339: // "Dictionary element"
-      case 340: // "Dictionary element, selected by regexp"
+      case symbol_kind::S_ACTION_ACCURACY: // "Accuracy"
+      case symbol_kind::S_ACTION_ALLOW: // "Allow"
+      case symbol_kind::S_ACTION_APPEND: // "Append"
+      case symbol_kind::S_ACTION_AUDIT_LOG: // "AuditLog"
+      case symbol_kind::S_ACTION_BLOCK: // "Block"
+      case symbol_kind::S_ACTION_CAPTURE: // "Capture"
+      case symbol_kind::S_ACTION_CHAIN: // "Chain"
+      case symbol_kind::S_ACTION_CTL_AUDIT_ENGINE: // "ACTION_CTL_AUDIT_ENGINE"
+      case symbol_kind::S_ACTION_CTL_AUDIT_LOG_PARTS: // "ACTION_CTL_AUDIT_LOG_PARTS"
+      case symbol_kind::S_ACTION_CTL_BDY_JSON: // "ACTION_CTL_BDY_JSON"
+      case symbol_kind::S_ACTION_CTL_BDY_XML: // "ACTION_CTL_BDY_XML"
+      case symbol_kind::S_ACTION_CTL_BDY_URLENCODED: // "ACTION_CTL_BDY_URLENCODED"
+      case symbol_kind::S_ACTION_CTL_FORCE_REQ_BODY_VAR: // "ACTION_CTL_FORCE_REQ_BODY_VAR"
+      case symbol_kind::S_ACTION_CTL_REQUEST_BODY_ACCESS: // "ACTION_CTL_REQUEST_BODY_ACCESS"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_ID: // "ACTION_CTL_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_BY_TAG: // "ACTION_CTL_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_ID: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_ID"
+      case symbol_kind::S_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG: // "ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG"
+      case symbol_kind::S_ACTION_DENY: // "Deny"
+      case symbol_kind::S_ACTION_DEPRECATE_VAR: // "DeprecateVar"
+      case symbol_kind::S_ACTION_DROP: // "Drop"
+      case symbol_kind::S_ACTION_EXEC: // "Exec"
+      case symbol_kind::S_ACTION_EXPIRE_VAR: // "ExpireVar"
+      case symbol_kind::S_ACTION_ID: // "Id"
+      case symbol_kind::S_ACTION_INITCOL: // "InitCol"
+      case symbol_kind::S_ACTION_LOG: // "Log"
+      case symbol_kind::S_ACTION_LOG_DATA: // "LogData"
+      case symbol_kind::S_ACTION_MATURITY: // "Maturity"
+      case symbol_kind::S_ACTION_MSG: // "Msg"
+      case symbol_kind::S_ACTION_MULTI_MATCH: // "MultiMatch"
+      case symbol_kind::S_ACTION_NO_AUDIT_LOG: // "NoAuditLog"
+      case symbol_kind::S_ACTION_NO_LOG: // "NoLog"
+      case symbol_kind::S_ACTION_PASS: // "Pass"
+      case symbol_kind::S_ACTION_PAUSE: // "Pause"
+      case symbol_kind::S_ACTION_PHASE: // "Phase"
+      case symbol_kind::S_ACTION_PREPEND: // "Prepend"
+      case symbol_kind::S_ACTION_PROXY: // "Proxy"
+      case symbol_kind::S_ACTION_REDIRECT: // "Redirect"
+      case symbol_kind::S_ACTION_REV: // "Rev"
+      case symbol_kind::S_ACTION_SANITISE_ARG: // "SanitiseArg"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED: // "SanitiseMatched"
+      case symbol_kind::S_ACTION_SANITISE_MATCHED_BYTES: // "SanitiseMatchedBytes"
+      case symbol_kind::S_ACTION_SANITISE_REQUEST_HEADER: // "SanitiseRequestHeader"
+      case symbol_kind::S_ACTION_SANITISE_RESPONSE_HEADER: // "SanitiseResponseHeader"
+      case symbol_kind::S_ACTION_SETENV: // "SetEnv"
+      case symbol_kind::S_ACTION_SETRSC: // "SetRsc"
+      case symbol_kind::S_ACTION_SETSID: // "SetSid"
+      case symbol_kind::S_ACTION_SETUID: // "SetUID"
+      case symbol_kind::S_ACTION_SEVERITY: // "Severity"
+      case symbol_kind::S_ACTION_SKIP: // "Skip"
+      case symbol_kind::S_ACTION_SKIP_AFTER: // "SkipAfter"
+      case symbol_kind::S_ACTION_STATUS: // "Status"
+      case symbol_kind::S_ACTION_TAG: // "Tag"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_ENCODE: // "ACTION_TRANSFORMATION_BASE_64_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE: // "ACTION_TRANSFORMATION_BASE_64_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_BASE_64_DECODE_EXT: // "ACTION_TRANSFORMATION_BASE_64_DECODE_EXT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CMD_LINE: // "ACTION_TRANSFORMATION_CMD_LINE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_COMPRESS_WHITESPACE: // "ACTION_TRANSFORMATION_COMPRESS_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_CSS_DECODE: // "ACTION_TRANSFORMATION_CSS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE: // "ACTION_TRANSFORMATION_ESCAPE_SEQ_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_ENCODE: // "ACTION_TRANSFORMATION_HEX_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HEX_DECODE: // "ACTION_TRANSFORMATION_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_HTML_ENTITY_DECODE: // "ACTION_TRANSFORMATION_HTML_ENTITY_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_JS_DECODE: // "ACTION_TRANSFORMATION_JS_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LENGTH: // "ACTION_TRANSFORMATION_LENGTH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_LOWERCASE: // "ACTION_TRANSFORMATION_LOWERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_MD5: // "ACTION_TRANSFORMATION_MD5"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NONE: // "ACTION_TRANSFORMATION_NONE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH: // "ACTION_TRANSFORMATION_NORMALISE_PATH"
+      case symbol_kind::S_ACTION_TRANSFORMATION_NORMALISE_PATH_WIN: // "ACTION_TRANSFORMATION_NORMALISE_PATH_WIN"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT: // "ACTION_TRANSFORMATION_PARITY_EVEN_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ODD_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ODD_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT: // "ACTION_TRANSFORMATION_PARITY_ZERO_7_BIT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR: // "ACTION_TRANSFORMATION_REMOVE_COMMENTS_CHAR"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_NULLS: // "ACTION_TRANSFORMATION_REMOVE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REMOVE_WHITESPACE: // "ACTION_TRANSFORMATION_REMOVE_WHITESPACE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_COMMENTS: // "ACTION_TRANSFORMATION_REPLACE_COMMENTS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_REPLACE_NULLS: // "ACTION_TRANSFORMATION_REPLACE_NULLS"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SHA1: // "ACTION_TRANSFORMATION_SHA1"
+      case symbol_kind::S_ACTION_TRANSFORMATION_SQL_HEX_DECODE: // "ACTION_TRANSFORMATION_SQL_HEX_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM: // "ACTION_TRANSFORMATION_TRIM"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_LEFT: // "ACTION_TRANSFORMATION_TRIM_LEFT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_TRIM_RIGHT: // "ACTION_TRANSFORMATION_TRIM_RIGHT"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UPPERCASE: // "ACTION_TRANSFORMATION_UPPERCASE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_ENCODE: // "ACTION_TRANSFORMATION_URL_ENCODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE: // "ACTION_TRANSFORMATION_URL_DECODE"
+      case symbol_kind::S_ACTION_TRANSFORMATION_URL_DECODE_UNI: // "ACTION_TRANSFORMATION_URL_DECODE_UNI"
+      case symbol_kind::S_ACTION_TRANSFORMATION_UTF8_TO_UNICODE: // "ACTION_TRANSFORMATION_UTF8_TO_UNICODE"
+      case symbol_kind::S_ACTION_VER: // "Ver"
+      case symbol_kind::S_ACTION_XMLNS: // "xmlns"
+      case symbol_kind::S_CONFIG_COMPONENT_SIG: // "CONFIG_COMPONENT_SIG"
+      case symbol_kind::S_CONFIG_CONN_ENGINE: // "CONFIG_CONN_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_ARGUMENT_SEPARATOR: // "CONFIG_SEC_ARGUMENT_SEPARATOR"
+      case symbol_kind::S_CONFIG_SEC_WEB_APP_ID: // "CONFIG_SEC_WEB_APP_ID"
+      case symbol_kind::S_CONFIG_SEC_SERVER_SIG: // "CONFIG_SEC_SERVER_SIG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR: // "CONFIG_DIR_AUDIT_DIR"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_DIR_MOD: // "CONFIG_DIR_AUDIT_DIR_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_ENG: // "CONFIG_DIR_AUDIT_ENG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_FLE_MOD: // "CONFIG_DIR_AUDIT_FLE_MOD"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG: // "CONFIG_DIR_AUDIT_LOG"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG2: // "CONFIG_DIR_AUDIT_LOG2"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_LOG_P: // "CONFIG_DIR_AUDIT_LOG_P"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_STS: // "CONFIG_DIR_AUDIT_STS"
+      case symbol_kind::S_CONFIG_DIR_AUDIT_TPE: // "CONFIG_DIR_AUDIT_TPE"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LOG: // "CONFIG_DIR_DEBUG_LOG"
+      case symbol_kind::S_CONFIG_DIR_DEBUG_LVL: // "CONFIG_DIR_DEBUG_LVL"
+      case symbol_kind::S_CONFIG_SEC_CACHE_TRANSFORMATIONS: // "CONFIG_SEC_CACHE_TRANSFORMATIONS"
+      case symbol_kind::S_CONFIG_SEC_DISABLE_BACKEND_COMPRESS: // "CONFIG_SEC_DISABLE_BACKEND_COMPRESS"
+      case symbol_kind::S_CONFIG_SEC_HASH_ENGINE: // "CONFIG_SEC_HASH_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_HASH_KEY: // "CONFIG_SEC_HASH_KEY"
+      case symbol_kind::S_CONFIG_SEC_HASH_PARAM: // "CONFIG_SEC_HASH_PARAM"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_RX: // "CONFIG_SEC_HASH_METHOD_RX"
+      case symbol_kind::S_CONFIG_SEC_HASH_METHOD_PM: // "CONFIG_SEC_HASH_METHOD_PM"
+      case symbol_kind::S_CONFIG_SEC_CHROOT_DIR: // "CONFIG_SEC_CHROOT_DIR"
+      case symbol_kind::S_CONFIG_DIR_GEO_DB: // "CONFIG_DIR_GEO_DB"
+      case symbol_kind::S_CONFIG_DIR_GSB_DB: // "CONFIG_DIR_GSB_DB"
+      case symbol_kind::S_CONFIG_SEC_GUARDIAN_LOG: // "CONFIG_SEC_GUARDIAN_LOG"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT: // "CONFIG_DIR_PCRE_MATCH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION: // "CONFIG_DIR_PCRE_MATCH_LIMIT_RECURSION"
+      case symbol_kind::S_CONFIG_SEC_CONN_R_STATE_LIMIT: // "CONFIG_SEC_CONN_R_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_CONN_W_STATE_LIMIT: // "CONFIG_SEC_CONN_W_STATE_LIMIT"
+      case symbol_kind::S_CONFIG_SEC_SENSOR_ID: // "CONFIG_SEC_SENSOR_ID"
+      case symbol_kind::S_CONFIG_DIR_ARGS_LIMIT: // "CONFIG_DIR_ARGS_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT: // "CONFIG_DIR_REQ_BODY_JSON_DEPTH_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY: // "CONFIG_DIR_REQ_BODY"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT: // "CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT: // "CONFIG_DIR_REQ_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_LIMIT_ACTION: // "CONFIG_DIR_REQ_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT: // "CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY: // "CONFIG_DIR_RES_BODY"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT: // "CONFIG_DIR_RES_BODY_LIMIT"
+      case symbol_kind::S_CONFIG_DIR_RES_BODY_LIMIT_ACTION: // "CONFIG_DIR_RES_BODY_LIMIT_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_INHERITANCE: // "CONFIG_SEC_RULE_INHERITANCE"
+      case symbol_kind::S_CONFIG_SEC_RULE_PERF_TIME: // "CONFIG_SEC_RULE_PERF_TIME"
+      case symbol_kind::S_CONFIG_DIR_RULE_ENG: // "CONFIG_DIR_RULE_ENG"
+      case symbol_kind::S_CONFIG_DIR_SEC_ACTION: // "CONFIG_DIR_SEC_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_DEFAULT_ACTION: // "CONFIG_DIR_SEC_DEFAULT_ACTION"
+      case symbol_kind::S_CONFIG_DIR_SEC_MARKER: // "CONFIG_DIR_SEC_MARKER"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_MAP_FILE: // "CONFIG_DIR_UNICODE_MAP_FILE"
+      case symbol_kind::S_CONFIG_DIR_UNICODE_CODE_PAGE: // "CONFIG_DIR_UNICODE_CODE_PAGE"
+      case symbol_kind::S_CONFIG_SEC_COLLECTION_TIMEOUT: // "CONFIG_SEC_COLLECTION_TIMEOUT"
+      case symbol_kind::S_CONFIG_SEC_HTTP_BLKEY: // "CONFIG_SEC_HTTP_BLKEY"
+      case symbol_kind::S_CONFIG_SEC_INTERCEPT_ON_ERROR: // "CONFIG_SEC_INTERCEPT_ON_ERROR"
+      case symbol_kind::S_CONFIG_SEC_REMOTE_RULES_FAIL_ACTION: // "CONFIG_SEC_REMOTE_RULES_FAIL_ACTION"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_ID: // "CONFIG_SEC_RULE_REMOVE_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_MSG: // "CONFIG_SEC_RULE_REMOVE_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_REMOVE_BY_TAG: // "CONFIG_SEC_RULE_REMOVE_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID: // "CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID"
+      case symbol_kind::S_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID: // "CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID"
+      case symbol_kind::S_CONFIG_UPDLOAD_KEEP_FILES: // "CONFIG_UPDLOAD_KEEP_FILES"
+      case symbol_kind::S_CONFIG_UPDLOAD_SAVE_TMP_FILES: // "CONFIG_UPDLOAD_SAVE_TMP_FILES"
+      case symbol_kind::S_CONFIG_UPLOAD_DIR: // "CONFIG_UPLOAD_DIR"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_LIMIT: // "CONFIG_UPLOAD_FILE_LIMIT"
+      case symbol_kind::S_CONFIG_UPLOAD_FILE_MODE: // "CONFIG_UPLOAD_FILE_MODE"
+      case symbol_kind::S_CONFIG_VALUE_ABORT: // "CONFIG_VALUE_ABORT"
+      case symbol_kind::S_CONFIG_VALUE_DETC: // "CONFIG_VALUE_DETC"
+      case symbol_kind::S_CONFIG_VALUE_HTTPS: // "CONFIG_VALUE_HTTPS"
+      case symbol_kind::S_CONFIG_VALUE_OFF: // "CONFIG_VALUE_OFF"
+      case symbol_kind::S_CONFIG_VALUE_ON: // "CONFIG_VALUE_ON"
+      case symbol_kind::S_CONFIG_VALUE_PARALLEL: // "CONFIG_VALUE_PARALLEL"
+      case symbol_kind::S_CONFIG_VALUE_PROCESS_PARTIAL: // "CONFIG_VALUE_PROCESS_PARTIAL"
+      case symbol_kind::S_CONFIG_VALUE_REJECT: // "CONFIG_VALUE_REJECT"
+      case symbol_kind::S_CONFIG_VALUE_RELEVANT_ONLY: // "CONFIG_VALUE_RELEVANT_ONLY"
+      case symbol_kind::S_CONFIG_VALUE_SERIAL: // "CONFIG_VALUE_SERIAL"
+      case symbol_kind::S_CONFIG_VALUE_WARN: // "CONFIG_VALUE_WARN"
+      case symbol_kind::S_CONFIG_XML_EXTERNAL_ENTITY: // "CONFIG_XML_EXTERNAL_ENTITY"
+      case symbol_kind::S_CONGIG_DIR_RESPONSE_BODY_MP: // "CONGIG_DIR_RESPONSE_BODY_MP"
+      case symbol_kind::S_CONGIG_DIR_SEC_ARG_SEP: // "CONGIG_DIR_SEC_ARG_SEP"
+      case symbol_kind::S_CONGIG_DIR_SEC_COOKIE_FORMAT: // "CONGIG_DIR_SEC_COOKIE_FORMAT"
+      case symbol_kind::S_CONFIG_SEC_COOKIEV0_SEPARATOR: // "CONFIG_SEC_COOKIEV0_SEPARATOR"
+      case symbol_kind::S_CONGIG_DIR_SEC_DATA_DIR: // "CONGIG_DIR_SEC_DATA_DIR"
+      case symbol_kind::S_CONGIG_DIR_SEC_STATUS_ENGINE: // "CONGIG_DIR_SEC_STATUS_ENGINE"
+      case symbol_kind::S_CONFIG_SEC_STREAM_IN_BODY_INSPECTION: // "CONFIG_SEC_STREAM_IN_BODY_INSPECTION"
+      case symbol_kind::S_CONFIG_SEC_STREAM_OUT_BODY_INSPECTION: // "CONFIG_SEC_STREAM_OUT_BODY_INSPECTION"
+      case symbol_kind::S_CONGIG_DIR_SEC_TMP_DIR: // "CONGIG_DIR_SEC_TMP_DIR"
+      case symbol_kind::S_DIRECTIVE: // "DIRECTIVE"
+      case symbol_kind::S_DIRECTIVE_SECRULESCRIPT: // "DIRECTIVE_SECRULESCRIPT"
+      case symbol_kind::S_FREE_TEXT_QUOTE_MACRO_EXPANSION: // "FREE_TEXT_QUOTE_MACRO_EXPANSION"
+      case symbol_kind::S_QUOTATION_MARK: // "QUOTATION_MARK"
+      case symbol_kind::S_RUN_TIME_VAR_BLD: // "RUN_TIME_VAR_BLD"
+      case symbol_kind::S_RUN_TIME_VAR_DUR: // "RUN_TIME_VAR_DUR"
+      case symbol_kind::S_RUN_TIME_VAR_HSV: // "RUN_TIME_VAR_HSV"
+      case symbol_kind::S_RUN_TIME_VAR_REMOTE_USER: // "RUN_TIME_VAR_REMOTE_USER"
+      case symbol_kind::S_RUN_TIME_VAR_TIME: // "RUN_TIME_VAR_TIME"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_DAY: // "RUN_TIME_VAR_TIME_DAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_EPOCH: // "RUN_TIME_VAR_TIME_EPOCH"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_HOUR: // "RUN_TIME_VAR_TIME_HOUR"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MIN: // "RUN_TIME_VAR_TIME_MIN"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_MON: // "RUN_TIME_VAR_TIME_MON"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_SEC: // "RUN_TIME_VAR_TIME_SEC"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_WDAY: // "RUN_TIME_VAR_TIME_WDAY"
+      case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
+      case symbol_kind::S_VARIABLE: // "VARIABLE"
+      case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.move< std::string > (YY_MOVE (s.value));
         break;
 
-      case 347: // op
-      case 348: // op_before_init
+      case symbol_kind::S_op: // op
+      case symbol_kind::S_op_before_init: // op_before_init
         value.move< std::unique_ptr<Operator> > (YY_MOVE (s.value));
         break;
 
-      case 356: // run_time_string
+      case symbol_kind::S_run_time_string: // run_time_string
         value.move< std::unique_ptr<RunTimeString> > (YY_MOVE (s.value));
         break;
 
-      case 353: // var
+      case symbol_kind::S_var: // var
         value.move< std::unique_ptr<Variable> > (YY_MOVE (s.value));
         break;
 
-      case 354: // act
-      case 355: // setvar_action
+      case symbol_kind::S_act: // act
+      case symbol_kind::S_setvar_action: // setvar_action
         value.move< std::unique_ptr<actions::Action> > (YY_MOVE (s.value));
         break;
 
-      case 350: // variables
-      case 351: // variables_pre_process
-      case 352: // variables_may_be_quoted
+      case symbol_kind::S_variables: // variables
+      case symbol_kind::S_variables_pre_process: // variables_pre_process
+      case symbol_kind::S_variables_may_be_quoted: // variables_may_be_quoted
         value.move< std::unique_ptr<std::vector<std::unique_ptr<Variable> > >  > (YY_MOVE (s.value));
         break;
 
-      case 345: // actions
-      case 346: // actions_may_quoted
+      case symbol_kind::S_actions: // actions
+      case symbol_kind::S_actions_may_quoted: // actions_may_quoted
         value.move< std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > >  > (YY_MOVE (s.value));
         break;
 
@@ -8030,105 +8591,62 @@ switch (yytype)
     location = YY_MOVE (s.location);
   }
 
-  // by_type.
+  // by_kind.
   inline
-  seclang_parser::by_type::by_type ()
-    : type (empty_symbol)
+  seclang_parser::by_kind::by_kind ()
+    : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
 #if 201103L <= YY_CPLUSPLUS
   inline
-  seclang_parser::by_type::by_type (by_type&& that)
-    : type (that.type)
+  seclang_parser::by_kind::by_kind (by_kind&& that)
+    : kind_ (that.kind_)
   {
     that.clear ();
   }
 #endif
 
   inline
-  seclang_parser::by_type::by_type (const by_type& that)
-    : type (that.type)
+  seclang_parser::by_kind::by_kind (const by_kind& that)
+    : kind_ (that.kind_)
   {}
 
   inline
-  seclang_parser::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
+  seclang_parser::by_kind::by_kind (token_kind_type t)
+    : kind_ (yytranslate_ (t))
   {}
 
   inline
   void
-  seclang_parser::by_type::clear ()
+  seclang_parser::by_kind::clear () YY_NOEXCEPT
   {
-    type = empty_symbol;
+    kind_ = symbol_kind::S_YYEMPTY;
   }
 
   inline
   void
-  seclang_parser::by_type::move (by_type& that)
+  seclang_parser::by_kind::move (by_kind& that)
   {
-    type = that.type;
+    kind_ = that.kind_;
     that.clear ();
   }
 
   inline
-  int
-  seclang_parser::by_type::type_get () const YY_NOEXCEPT
+  seclang_parser::symbol_kind_type
+  seclang_parser::by_kind::kind () const YY_NOEXCEPT
   {
-    return type;
+    return kind_;
   }
 
   inline
-  seclang_parser::token_type
-  seclang_parser::by_type::token () const YY_NOEXCEPT
+  seclang_parser::symbol_kind_type
+  seclang_parser::by_kind::type_get () const YY_NOEXCEPT
   {
-    // YYTOKNUM[NUM] -- (External) token number corresponding to the
-    // (internal) symbol number NUM (which must be that of a token).  */
-    static
-    const unsigned short
-    yytoken_number_[] =
-    {
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
-     305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
-     315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
-     325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
-     335,   336,   337,   338,   339,   340,   341,   342,   343,   344,
-     345,   346,   347,   348,   349,   350,   351,   352,   353,   354,
-     355,   356,   357,   358,   359,   360,   361,   362,   363,   364,
-     365,   366,   367,   368,   369,   370,   371,   372,   373,   374,
-     375,   376,   377,   378,   379,   380,   381,   382,   383,   384,
-     385,   386,   387,   388,   389,   390,   391,   392,   393,   394,
-     395,   396,   397,   398,   399,   400,   401,   402,   403,   404,
-     405,   406,   407,   408,   409,   410,   411,   412,   413,   414,
-     415,   416,   417,   418,   419,   420,   421,   422,   423,   424,
-     425,   426,   427,   428,   429,   430,   431,   432,   433,   434,
-     435,   436,   437,   438,   439,   440,   441,   442,   443,   444,
-     445,   446,   447,   448,   449,   450,   451,   452,   453,   454,
-     455,   456,   457,   458,   459,   460,   461,   462,   463,   464,
-     465,   466,   467,   468,   469,   470,   471,   472,   473,   474,
-     475,   476,   477,   478,   479,   480,   481,   482,   483,   484,
-     485,   486,   487,   488,   489,   490,   491,   492,   493,   494,
-     495,   496,   497,   498,   499,   500,   501,   502,   503,   504,
-     505,   506,   507,   508,   509,   510,   511,   512,   513,   514,
-     515,   516,   517,   518,   519,   520,   521,   522,   523,   524,
-     525,   526,   527,   528,   529,   530,   531,   532,   533,   534,
-     535,   536,   537,   538,   539,   540,   541,   542,   543,   544,
-     545,   546,   547,   548,   549,   550,   551,   552,   553,   554,
-     555,   556,   557,   558,   559,   560,   561,   562,   563,   564,
-     565,   566,   567,   568,   569,   570,   571,   572,   573,   574,
-     575,   576,   577,   578,   579,   580,   581,   582,   583,   584,
-     585,   586,   587,   588,   589,   590,   591,   592,   593,   594,
-     595
-    };
-    return token_type (yytoken_number_[type]);
+    return this->kind ();
   }
 
-
 } // yy
-#line 8132 "seclang-parser.hh" // lalr1.cc:401
+#line 8650 "seclang-parser.hh"
 
 
 

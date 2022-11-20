@@ -2,9 +2,9 @@
 
 void run_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-ipv4-28.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const char *ip = "::abcd";
     int gai_error, mmdb_error;

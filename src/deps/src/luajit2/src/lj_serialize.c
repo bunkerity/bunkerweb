@@ -1,6 +1,6 @@
 /*
 ** Object de/serialization.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_serialize_c
@@ -417,6 +417,7 @@ static char *serialize_get(char *r, SBufExt *sbx, TValue *o)
     uint32_t sz = tp == SER_TAG_COMPLEX ? 16 : 8;
     GCcdata *cd;
     if (LJ_UNLIKELY(r + sz > w)) goto eob;
+    if (LJ_UNLIKELY(!ctype_ctsG(G(sbufL(sbx))))) goto badtag;
     cd = lj_cdata_new_(sbufL(sbx),
 	   tp == SER_TAG_INT64 ? CTID_INT64 :
 	   tp == SER_TAG_UINT64 ? CTID_UINT64 : CTID_COMPLEX_DOUBLE,

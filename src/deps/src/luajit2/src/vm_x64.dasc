@@ -1,6 +1,6 @@
 |// Low-level VM code for x64 CPUs in LJ_GC64 mode.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch x64
 |.section code_op, code_sub
@@ -358,9 +358,6 @@
 |.endmacro
 |.macro sseconst_1, reg, tmp		// Synthesize 1.0.
 |  sseconst_hi reg, tmp, 3ff00000
-|.endmacro
-|.macro sseconst_m1, reg, tmp		// Synthesize -1.0.
-|  sseconst_hi reg, tmp, bff00000
 |.endmacro
 |.macro sseconst_2p52, reg, tmp		// Synthesize 2^52.
 |  sseconst_hi reg, tmp, 43300000
@@ -2543,15 +2540,17 @@ static void build_subroutines(BuildCtx *ctx)
   |  addsd xmm1, xmm3			// (|x| + 2^52) - 2^52
   |  subsd xmm1, xmm3
   |  orpd xmm1, xmm2			// Merge sign bit back in.
+  |  sseconst_1 xmm3, RD
   |  .if mode == 1		// ceil(x)?
-  |    sseconst_m1 xmm2, RD		// Must subtract -1 to preserve -0.
   |    cmpsd xmm0, xmm1, 6		// x > result?
+  |    andpd xmm0, xmm3
+  |    addsd xmm1, xmm0			// If yes, add 1.
+  |    orpd xmm1, xmm2			// Merge sign bit back in (again).
   |  .else			// floor(x)?
-  |    sseconst_1 xmm2, RD
   |    cmpsd xmm0, xmm1, 1		// x < result?
+  |    andpd xmm0, xmm3
+  |    subsd xmm1, xmm0			// If yes, subtract 1.
   |  .endif
-  |  andpd xmm0, xmm2
-  |  subsd xmm1, xmm0			// If yes, subtract +-1.
   |.endif
   |  movaps xmm0, xmm1
   |1:
@@ -2590,41 +2589,6 @@ static void build_subroutines(BuildCtx *ctx)
   |  mulsd xmm1, xmm0
   |  movaps xmm0, xmm5
   |  subsd xmm0, xmm1
-  |  ret
-  |
-  |// Args in xmm0/eax. Ret in xmm0. xmm0-xmm1 and eax modified.
-  |->vm_powi_sse:
-  |  cmp eax, 1; jle >6			// i<=1?
-  |  // Now 1 < (unsigned)i <= 0x80000000.
-  |1:  // Handle leading zeros.
-  |  test eax, 1; jnz >2
-  |  mulsd xmm0, xmm0
-  |  shr eax, 1
-  |  jmp <1
-  |2:
-  |  shr eax, 1; jz >5
-  |  movaps xmm1, xmm0
-  |3:  // Handle trailing bits.
-  |  mulsd xmm0, xmm0
-  |  shr eax, 1; jz >4
-  |  jnc <3
-  |  mulsd xmm1, xmm0
-  |  jmp <3
-  |4:
-  |  mulsd xmm0, xmm1
-  |5:
-  |  ret
-  |6:
-  |  je <5				// x^1 ==> x
-  |  jb >7				// x^0 ==> 1
-  |  neg eax
-  |  call <1
-  |  sseconst_1 xmm1, RD
-  |  divsd xmm1, xmm0
-  |  movaps xmm0, xmm1
-  |  ret
-  |7:
-  |  sseconst_1 xmm0, RD
   |  ret
   |
   |//-----------------------------------------------------------------------

@@ -16,7 +16,7 @@
 # platform to build for
 PLAT?=linux
 
-# LUAV: 5.1 5.2
+# LUAV: 5.1 5.2 5.3 5.4
 # lua version to build against
 LUAV?=5.1
 
@@ -163,7 +163,7 @@ O_macosx=o
 CC_macosx=gcc
 DEF_macosx= -DLUASOCKET_$(DEBUG) -DUNIX_HAS_SUN_LEN
 CFLAGS_macosx=$(LUAINC:%=-I%) $(DEF) -Wall -O2 -fno-common
-LDFLAGS_macosx= -bundle -undefined dynamic_lookup -o 
+LDFLAGS_macosx= -bundle -undefined dynamic_lookup -o
 LD_macosx=gcc
 SOCKET_macosx=usocket.o
 
@@ -176,7 +176,7 @@ CC_linux=gcc
 DEF_linux=-DLUASOCKET_$(DEBUG)
 CFLAGS_linux=$(LUAINC:%=-I%) $(DEF) -Wall -Wshadow -Wextra \
 	-Wimplicit -O2 -ggdb3 -fpic
-LDFLAGS_linux=-O -shared -fpic -o 
+LDFLAGS_linux=-O -shared -fpic -o
 LD_linux=gcc
 SOCKET_linux=usocket.o
 
@@ -189,7 +189,7 @@ CC_freebsd=gcc
 DEF_freebsd=-DLUASOCKET_$(DEBUG) -DUNIX_HAS_SUN_LEN
 CFLAGS_freebsd=$(LUAINC:%=-I%) $(DEF) -Wall -Wshadow -Wextra \
 	-Wimplicit -O2 -ggdb3 -fpic
-LDFLAGS_freebsd=-O -shared -fpic -o 
+LDFLAGS_freebsd=-O -shared -fpic -o
 LD_freebsd=gcc
 SOCKET_freebsd=usocket.o
 
@@ -202,7 +202,7 @@ CC_solaris=gcc
 DEF_solaris=-DLUASOCKET_$(DEBUG)
 CFLAGS_solaris=$(LUAINC:%=-I%) $(DEF) -Wall -Wshadow -Wextra \
 	-Wimplicit -O2 -ggdb3 -fpic
-LDFLAGS_solaris=-lnsl -lsocket -lresolv -O -shared -fpic -o 
+LDFLAGS_solaris=-lnsl -lsocket -lresolv -O -shared -fpic -o
 LD_solaris=gcc
 SOCKET_solaris=usocket.o
 
@@ -215,7 +215,7 @@ CC_mingw=gcc
 DEF_mingw= -DLUASOCKET_$(DEBUG) \
 	-DWINVER=0x0501
 CFLAGS_mingw=$(LUAINC:%=-I%) $(DEF) -Wall -O2 -fno-common
-LDFLAGS_mingw= $(LUALIB) -shared -Wl,-s -lws2_32 -o 
+LDFLAGS_mingw= $(LUALIB) -shared -Wl,-s -lws2_32 -o
 LD_mingw=gcc
 SOCKET_mingw=wsocket.o
 
@@ -272,7 +272,7 @@ SOCKET_win64=wsocket.obj
 #
 SO=$(SO_$(PLAT))
 O=$(O_$(PLAT))
-SOCKET_V=3.0-rc1
+SOCKET_V=3.0.0
 MIME_V=1.0.3
 SOCKET_SO=socket-$(SOCKET_V).$(SO)
 MIME_SO=mime-$(MIME_V).$(SO)

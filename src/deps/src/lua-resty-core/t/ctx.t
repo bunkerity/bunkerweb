@@ -10,7 +10,7 @@ log_level('debug');
 #repeat_each(120);
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3 + 11);
+plan tests => repeat_each() * (blocks() * 3 + 13);
 
 #no_diff();
 #no_long_string();
@@ -927,5 +927,114 @@ GET /t
 --- response_body
 reused
 reused again
+--- no_error_log
+[error]
+
+
+
+=== TEST 14: ngx.ctx in ssl_client_hello_by_lua
+--- http_config
+    server {
+        listen unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
+        server_name   test.com;
+        ssl_client_hello_by_lua_block {
+            ngx.ctx.answer = 42
+            ngx.log(ngx.WARN, "ngx.ctx.answer = ", ngx.ctx.answer)
+
+            ngx.ctx.count = 0
+        }
+        ssl_certificate ../../cert/test.crt;
+        ssl_certificate_key ../../cert/test.key;
+
+        server_tokens off;
+        location /foo {
+            content_by_lua_block {
+                ngx.say(ngx.ctx.answer)
+                ngx.ctx.count = ngx.ctx.count + 1
+                ngx.say(ngx.ctx.count)
+            }
+        }
+    }
+--- config
+    lua_ssl_trusted_certificate ../../cert/test.crt;
+
+    location /t {
+        content_by_lua_block {
+            do
+                local sock = ngx.socket.tcp()
+
+                sock:settimeout(3000)
+
+                local ok, err = sock:connect("unix:$TEST_NGINX_HTML_DIR/nginx.sock")
+                if not ok then
+                    ngx.say("failed to connect: ", err)
+                    return
+                end
+
+                local sess, err = sock:sslhandshake(nil, "test.com", true)
+                if not sess then
+                    ngx.say("failed to do SSL handshake: ", err)
+                    return
+                end
+
+                for i = 1, 2 do
+                    local req = "GET /foo HTTP/1.1\r\nHost: test.com\r\n\r\n"
+                    local bytes, err = sock:send(req)
+                    if not bytes then
+                        ngx.say("failed to send http request: ", err)
+                        return
+                    end
+
+                    local body_seen = false
+                    while true do
+                        local line, err = sock:receive()
+                        if not line then
+                            break
+                        end
+
+                        if body_seen then
+                            if line == "0" then
+                                assert(sock:receive())
+                                break
+                            end
+                            local line, err = sock:receive(line)
+                            ngx.print("received: ", line)
+                            assert(sock:receive())
+
+                        elseif line == "" then
+                            body_seen = true
+                        end
+                    end
+                end
+
+                sock:close()
+            end  -- do
+            -- collectgarbage()
+        }
+    }
+
+--- request
+GET /t
+--- response_body
+received: 42
+received: 1
+received: 42
+received: 1
+--- error_log
+ngx.ctx.answer = 42
+--- grep_error_log eval
+qr/lua release ngx.ctx at ref \d+/
+--- grep_error_log_out eval
+["lua release ngx.ctx at ref 2
+lua release ngx.ctx at ref 2
+lua release ngx.ctx at ref 1
+",
+"lua release ngx.ctx at ref 2
+lua release ngx.ctx at ref 2
+lua release ngx.ctx at ref 1
+lua release ngx.ctx at ref 2
+lua release ngx.ctx at ref 2
+lua release ngx.ctx at ref 1
+"]
 --- no_error_log
 [error]

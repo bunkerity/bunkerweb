@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include "modsecurity/intervention.h"
 #include "modsecurity/rule.h"
+#include "modsecurity/rule_with_actions.h"
 
 #ifndef HEADERS_MODSECURITY_ACTIONS_ACTION_H_
 #define HEADERS_MODSECURITY_ACTIONS_ACTION_H_
@@ -31,7 +32,7 @@
 
 namespace modsecurity {
 class Transaction;
-class Rule;
+class RuleWithOperator;
 
 namespace actions {
 
@@ -42,27 +43,41 @@ class Action {
         : m_isNone(false),
         temporaryAction(false),
         action_kind(2),
-        m_name(""),
-        m_parser_payload(""),
-        m_referenceCount(1) {
+        m_name(nullptr),
+        m_parser_payload("") {
             set_name_and_payload(_action);
         }
     explicit Action(const std::string& _action, int kind)
         : m_isNone(false),
         temporaryAction(false),
         action_kind(kind),
-        m_name(""),
-        m_parser_payload(""),
-        m_referenceCount(1) {
+        m_name(nullptr),
+        m_parser_payload("") {
             set_name_and_payload(_action);
         }
 
+    Action(const Action &a)
+        : m_isNone(a.m_isNone),
+        temporaryAction(a.temporaryAction),
+        action_kind(a.action_kind),
+        m_name(a.m_name),
+        m_parser_payload(a.m_parser_payload) { }
+
+    Action &operator=(const Action& a) {
+        m_isNone = a.m_isNone;
+        temporaryAction = a.temporaryAction;
+        action_kind = a.action_kind;
+        m_name = a.m_name;
+        m_parser_payload = a.m_parser_payload;
+        return *this;
+    }
+
     virtual ~Action() { }
 
-    virtual std::string evaluate(std::string exp,
+    virtual std::string evaluate(const std::string &exp,
         Transaction *transaction);
-    virtual bool evaluate(Rule *rule, Transaction *transaction);
-    virtual bool evaluate(Rule *rule, Transaction *transaction,
+    virtual bool evaluate(RuleWithActions *rule, Transaction *transaction);
+    virtual bool evaluate(RuleWithActions *rule, Transaction *transaction,
         std::shared_ptr<RuleMessage> ruleMessage) {
         return evaluate(rule, transaction);
     }
@@ -79,11 +94,11 @@ class Action {
         }
 
         if (pos == std::string::npos) {
-            m_name = data;
+            m_name = std::shared_ptr<std::string>(new std::string(data));
             return;
         }
 
-        m_name = std::string(data, 0, pos);
+        m_name = std::shared_ptr<std::string>(new std::string(data, 0, pos));
         m_parser_payload = std::string(data, pos + 1, data.length());
 
         if (m_parser_payload.at(0) == '\'' && m_parser_payload.size() > 2) {
@@ -92,23 +107,10 @@ class Action {
         }
     }
 
-    int refCountDecreaseAndCheck() {
-        this->m_referenceCount--;
-        if (this->m_referenceCount == 0) {
-            delete this;
-            return 1;
-        }
-        return 0;
-    }
-
-    void refCountIncrease() {
-        this->m_referenceCount++;
-    }
-
     bool m_isNone;
     bool temporaryAction;
     int action_kind;
-    std::string m_name;
+    std::shared_ptr<std::string> m_name;
     std::string m_parser_payload;
 
     /**
@@ -142,10 +144,7 @@ class Action {
      */
      RunTimeOnlyIfMatchKind,
     };
-
- private:
-    int m_referenceCount;
-};
+ };
 
 
 }  // namespace actions

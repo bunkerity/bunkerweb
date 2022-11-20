@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -30,12 +30,12 @@ namespace variables {
 
 class TimeDay : public Variable {
  public:
-    explicit TimeDay(std::string _name)
+    explicit TimeDay(const std::string &_name)
         : Variable(_name),
         m_retName("TIME_DAY") { }
 
     void evaluate(Transaction *transaction,
-        Rule *rule,
+        RuleWithActions *rule,
         std::vector<const VariableValue *> *l) override;
     std::string m_retName;
 };

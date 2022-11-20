@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 #include <string>
 #include <memory>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/actions/action.h"
 #include "modsecurity/transaction.h"
 #include "modsecurity/rule.h"
-#include "modsecurity/rules.h"
 #include "src/utils/string.h"
 #include "modsecurity/rule_message.h"
 
@@ -71,7 +71,7 @@ bool Severity::init(std::string *error) {
 }
 
 
-bool Severity::evaluate(Rule *rule, Transaction *transaction,
+bool Severity::evaluate(RuleWithActions *rule, Transaction *transaction,
     std::shared_ptr<RuleMessage> rm) {
     ms_dbg_a(transaction, 9, "This rule severity is: " + \
         std::to_string(this->m_severity) + " current transaction is: " + \

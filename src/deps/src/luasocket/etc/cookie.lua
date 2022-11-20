@@ -5,7 +5,7 @@ local ltn12 = require"ltn12"
 
 local token_class =  '[^%c%s%(%)%<%>%@%,%;%:%\\%"%/%[%]%?%=%{%}]'
 
-local function unquote(t, quoted) 
+local function unquote(t, quoted)
     local n = string.match(t, "%$(%d+)$")
     if n then n = tonumber(n) end
     if quoted[n] then return quoted[n]
@@ -14,19 +14,19 @@ end
 
 local function parse_set_cookie(c, quoted, cookie_table)
     c = c .. ";$last=last;"
-    local _, __, n, v, i = string.find(c, "(" .. token_class .. 
+    local _, _, n, v, i = string.find(c, "(" .. token_class ..
         "+)%s*=%s*(.-)%s*;%s*()")
     local cookie = {
-        name = n, 
-        value = unquote(v, quoted), 
+        name = n,
+        value = unquote(v, quoted),
         attributes = {}
     }
     while 1 do
-        _, __, n, v, i = string.find(c, "(" .. token_class .. 
+        _, _, n, v, i = string.find(c, "(" .. token_class ..
             "+)%s*=?%s*(.-)%s*;%s*()", i)
         if not n or n == "$last" then break end
         cookie.attributes[#cookie.attributes+1] = {
-            name = n, 
+            name = n,
             value = unquote(v, quoted)
         }
     end
@@ -46,8 +46,8 @@ local function split_set_cookie(s, cookie_table)
     -- split into individual cookies
     i = 1
     while 1 do
-        local _, __, cookie, next_token
-        _, __, cookie, i, next_token = string.find(s, "(.-)%s*%,%s*()(" .. 
+        local _, _, cookie, next_token
+        _, _, cookie, i, next_token = string.find(s, "(.-)%s*%,%s*()(" ..
             token_class .. "+)%s*=", i)
         if not next_token then break end
         parse_set_cookie(cookie, quoted, cookie_table)
@@ -62,12 +62,12 @@ local function quote(s)
 end
 
 local _empty = {}
-local function build_cookies(cookies) 
+local function build_cookies(cookies)
     s = ""
     for i,v in ipairs(cookies or _empty) do
         if v.name then
             s = s .. v.name
-            if v.value and v.value ~= "" then 
+            if v.value and v.value ~= "" then
                 s = s .. '=' .. quote(v.value)
             end
         end
@@ -83,6 +83,6 @@ local function build_cookies(cookies)
         end
         if i < #cookies then s = s .. ", " end
     end
-    return s 
+    return s
 end
 

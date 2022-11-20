@@ -1,6 +1,6 @@
 /*
 ** Common header for IR emitter and optimizations.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_IROPT_H
@@ -145,7 +145,6 @@ LJ_FUNC TRef lj_opt_narrow_arith(jit_State *J, TRef rb, TRef rc,
 				 TValue *vb, TValue *vc, IROp op);
 LJ_FUNC TRef lj_opt_narrow_unm(jit_State *J, TRef rc, TValue *vc);
 LJ_FUNC TRef lj_opt_narrow_mod(jit_State *J, TRef rb, TRef rc, TValue *vb, TValue *vc);
-LJ_FUNC TRef lj_opt_narrow_pow(jit_State *J, TRef rb, TRef rc, TValue *vb, TValue *vc);
 LJ_FUNC IRType lj_opt_narrow_forl(jit_State *J, cTValue *forbase);
 
 /* Optimization passes. */

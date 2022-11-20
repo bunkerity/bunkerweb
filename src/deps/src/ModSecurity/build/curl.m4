@@ -17,7 +17,7 @@ AC_DEFUN([CHECK_CURL], [
 
 AC_ARG_WITH(
     curl,
-    [AC_HELP_STRING([--with-curl=PATH],[Path to curl prefix or config script])],
+    [AS_HELP_STRING([--with-curl=PATH],[Path to curl prefix or config script])],
     [test_paths="${with_curl}"],
     [test_paths="/usr/local/libcurl /usr/local/curl /usr/local /opt/libcurl /opt/curl /opt /usr"])
 

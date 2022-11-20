@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -25,9 +25,9 @@
 #include <fstream>
 #include <mutex>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/audit_log.h"
 #include "modsecurity/transaction.h"
-#include "modsecurity/rules.h"
 #include "src/utils/md5.h"
 #include "src/utils/https_client.h"
 
@@ -53,7 +53,7 @@ bool Https::write(Transaction *transaction, int parts, std::string *error) {
 
     std::string log = transaction->toJSON(parts);
     m_http_client.setRequestType("application/json");
-    m_http_client.setRequestBody(log.c_str());
+    m_http_client.setRequestBody(log);
     m_http_client.download(m_audit->m_path1);
     return true;
 }

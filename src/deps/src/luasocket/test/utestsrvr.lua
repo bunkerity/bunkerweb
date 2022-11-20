@@ -9,7 +9,7 @@ ack = "\n";
 while 1 do
     print("server: waiting for client connection...");
     control = assert(server:accept());
-    while 1 do 
+    while 1 do
         command = assert(control:receive());
         assert(control:send(ack));
         ((loadstring or load)(command))();

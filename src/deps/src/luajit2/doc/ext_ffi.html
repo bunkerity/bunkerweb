@@ -3,7 +3,7 @@
 <head>
 <title>FFI Library</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -49,8 +49,6 @@
 <a href="status.html">Status</a>
 </li><li>
 <a href="faq.html">FAQ</a>
-</li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
 </li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
@@ -157,7 +155,7 @@ call the binding function. Phew!
 <h2 id="cdata">Motivating Example: Using C Data Structures</h2>
 <p>
 The FFI library allows you to create and access C&nbsp;data
-structures. Of course the main use for this is for interfacing with
+structures. Of course, the main use for this is for interfacing with
 C&nbsp;functions. But they can be used stand-alone, too.
 </p>
 <p>
@@ -169,7 +167,7 @@ implemented with a big table holding lots of tiny tables. This imposes
 both a substantial memory overhead as well as a performance overhead.
 </p>
 <p>
-Here's a sketch of a library that operates on color images plus a
+Here's a sketch of a library that operates on color images, plus a
 simple benchmark. First, the plain Lua version:
 </p>
 <pre class="code">
@@ -184,7 +182,7 @@ local function image_ramp_green(n)
   return img
 end
 
-local function image_to_grey(img, n)
+local function image_to_gray(img, n)
   for i=1,n do
     local y = floor(0.3*img[i].red + 0.59*img[i].green + 0.11*img[i].blue)
     img[i].red = y; img[i].green = y; img[i].blue = y
@@ -194,14 +192,14 @@ end
 local N = 400*400
 local img = image_ramp_green(N)
 for i=1,1000 do
-  image_to_grey(img, N)
+  image_to_gray(img, N)
 end
 </pre>
 <p>
 This creates a table with 160.000 pixels, each of which is a table
-holding four number values in the range of 0-255. First an image with
+holding four number values in the range of 0-255. First, an image with
 a green ramp is created (1D for simplicity), then the image is
-converted to greyscale 1000 times. Yes, that's silly, but I was in
+converted to grayscale 1000 times. Yes, that's silly, but I was in
 need of a simple example ...
 </p>
 <p>
@@ -308,7 +306,7 @@ be more compact and faster. This is certainly true (by a factor of
 ~1.7x). Switching to a struct-of-arrays would help, too.
 </p>
 <p style="font-size: 8pt;">
-However the resulting code would be less idiomatic and rather
+However, the resulting code would be less idiomatic and rather
 error-prone. And it still doesn't get even close to the performance of
 the FFI version of the code. Also, high-level data structures cannot
 be easily passed to other C&nbsp;functions, especially I/O functions,
@@ -318,7 +316,7 @@ without undue conversion penalties.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

@@ -27,7 +27,9 @@ jobs:
       - run: ./bootstrap
       - run: ./configure
         env:
-          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter ${{ matrix.posix }}
+          # -Wno-unknown-pragmas because we have some Clang specific pragmas
+          # which aren't interesting to cause failures for.
+          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -Wno-unknown-pragmas ${{ matrix.posix }}
       - run: make
       - run: make check
 
@@ -43,4 +45,4 @@ jobs:
           submodules: true
       - run: cmake -DBUILD_TESTING=ON .
       - run: cmake --build .
-      - run: ctest -V .
+      - run: ctest -V . -C Debug

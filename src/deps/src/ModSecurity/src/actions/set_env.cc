@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -31,13 +31,13 @@ bool SetENV::init(std::string *error) {
 }
 
 
-bool SetENV::evaluate(Rule *rule, Transaction *t) {
+bool SetENV::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string colNameExpanded(m_string->evaluate(t));
 
-    ms_dbg_a(t, 8, "Setting envoriment variable: "
-        + colNameExpanded + ".");
-
-    putenv(strdup(colNameExpanded.c_str()));
+    auto pair = utils::string::ssplit_pair(colNameExpanded, '=');
+    ms_dbg_a(t, 8, "Setting environment variable: "
+        + pair.first + " to " + pair.second);
+    setenv(pair.first.c_str(), pair.second.c_str(), /*overwrite*/ 1);
 
     return true;
 }

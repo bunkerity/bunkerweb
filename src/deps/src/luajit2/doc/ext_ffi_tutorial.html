@@ -3,7 +3,7 @@
 <head>
 <title>FFI Tutorial</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -57,8 +57,6 @@ td.idiomlua b { font-weight: normal; color: #2142bf; }
 </li><li>
 <a href="faq.html">FAQ</a>
 </li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
-</li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
 </div>
@@ -85,7 +83,7 @@ of its functions:
 local ffi = require("ffi")
 </pre>
 <p>
-Please note this doesn't define an <tt>ffi</tt> variable in the table
+Please note, this doesn't define an <tt>ffi</tt> variable in the table
 of globals &mdash; you really need to use the local variable. The
 <tt>require</tt> function ensures the library is only loaded once.
 </p>
@@ -194,7 +192,7 @@ don't need to declare them as such.
 <span class="mark">&#9316;</span> The <tt>poll()</tt>
 function takes a couple more arguments we're not going to use. You can
 simply use <tt>nil</tt> to pass a <tt>NULL</tt> pointer and <tt>0</tt>
-for the <tt>nfds</tt> parameter. Please note that the
+for the <tt>nfds</tt> parameter. Please note, that the
 number&nbsp;<tt>0</tt> <em>does not convert to a pointer value</em>,
 unlike in C++. You really have to pass pointers to pointer arguments
 and numbers to number arguments.
@@ -291,12 +289,12 @@ Here's the step-by-step explanation:
 <p>
 <span class="mark">&#9312;</span> This defines some of the
 C&nbsp;functions provided by zlib. For the sake of this example, some
-type indirections have been reduced and it uses the pre-defined
+type indirections have been reduced and it uses the predefined
 fixed-size integer types, while still adhering to the zlib API/ABI.
 </p>
 <p>
 <span class="mark">&#9313;</span> This loads the zlib shared
-library. On POSIX systems it's named <tt>libz.so</tt> and usually
+library. On POSIX systems, it's named <tt>libz.so</tt> and usually
 comes pre-installed. Since <tt>ffi.load()</tt> automatically adds any
 missing standard prefixes/suffixes, we can simply load the
 <tt>"z"</tt> library. On Windows it's named <tt>zlib1.dll</tt> and
@@ -324,7 +322,7 @@ actual length that was used.
 <p>
 In C you'd pass in the address of a local variable
 (<tt>&amp;buflen</tt>). But since there's no address-of operator in
-Lua, we'll just pass in a one-element array. Conveniently it can be
+Lua, we'll just pass in a one-element array. Conveniently, it can be
 initialized with the maximum buffer size in one step. Calling the
 actual <tt>zlib.compress2</tt> function is then straightforward.
 </p>
@@ -348,7 +346,7 @@ for garbage collection and string interning.
 <span class="mark">&#9317;</span> The <tt>uncompress</tt>
 functions does the exact opposite of the <tt>compress</tt> function.
 The compressed data doesn't include the size of the original string,
-so this needs to be passed in. Otherwise no surprises here.
+so this needs to be passed in. Otherwise, no surprises here.
 </p>
 <p>
 <span class="mark">&#9318;</span> The code, that makes use
@@ -382,7 +380,7 @@ Ok, so the <tt>ffi.*</tt> functions generally accept cdata objects
 wherever you'd want to use a number. That's why we get a away with
 passing <tt>n</tt> to <tt>ffi.string()</tt> above. But other Lua
 library functions or modules don't know how to deal with this. So for
-maximum portability one needs to use <tt>tonumber()</tt> on returned
+maximum portability, one needs to use <tt>tonumber()</tt> on returned
 <tt>long</tt> results before passing them on. Otherwise the
 application might work on some systems, but would fail in a POSIX/x64
 environment.
@@ -454,7 +452,7 @@ the origin.
 </p>
 <p>
 <span class="mark">&#9315;</span> If we run out of operators, we can
-define named methods, too. Here the <tt>__index</tt> table defines an
+define named methods, too. Here, the <tt>__index</tt> table defines an
 <tt>area</tt> function. For custom indexing needs, one might want to
 define <tt>__index</tt> and <tt>__newindex</tt> <em>functions</em> instead.
 </p>
@@ -468,13 +466,13 @@ be used e.g. to create an array of points. The metamethods automatically
 apply to any and all uses of this type.
 </p>
 <p>
-Please note that the association with a metatable is permanent and
+Please note, that the association with a metatable is permanent and
 <b>the metatable must not be modified afterwards!</b> Ditto for the
 <tt>__index</tt> table.
 </p>
 <p>
 <span class="mark">&#9317;</span> Here are some simple usage examples
-for the point type and their expected results. The pre-defined
+for the point type and their expected results. The predefined
 operations (such as <tt>a.x</tt>) can be freely mixed with the newly
 defined metamethods. Note that <tt>area</tt> is a method and must be
 called with the Lua syntax for methods: <tt>a:area()</tt>, not
@@ -483,7 +481,7 @@ called with the Lua syntax for methods: <tt>a:area()</tt>, not
 <p>
 The C&nbsp;type metamethod mechanism is most useful when used in
 conjunction with C&nbsp;libraries that are written in an object-oriented
-style. Creators return a pointer to a new instance and methods take an
+style. Creators return a pointer to a new instance, and methods take an
 instance pointer as the first argument. Sometimes you can just point
 <tt>__index</tt> to the library namespace and <tt>__gc</tt> to the
 destructor and you're done. But often enough you'll want to add
@@ -569,7 +567,7 @@ end
 </pre>
 <p>
 This turns them into indirect calls and generates bigger and slower
-machine code. Instead you'll want to cache the namespace itself and
+machine code. Instead, you'll want to cache the namespace itself and
 rely on the JIT compiler to eliminate the lookups:
 </p>
 <pre class="code">
@@ -589,7 +587,7 @@ it to a local variable in the function scope is unnecessary.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

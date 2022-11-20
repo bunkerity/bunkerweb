@@ -295,6 +295,7 @@ ngx_http_headers_more_rm_header_helper(ngx_list_t *l, ngx_list_part_t *cur,
                         if (part->next == NULL) {
                             return NGX_ERROR;
                         }
+
                         part = part->next;
                     }
 
@@ -338,6 +339,7 @@ ngx_http_headers_more_rm_header_helper(ngx_list_t *l, ngx_list_part_t *cur,
                     if (part->next == NULL) {
                         return NGX_ERROR;
                     }
+
                     part = part->next;
                 }
 

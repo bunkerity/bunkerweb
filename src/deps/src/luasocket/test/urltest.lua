@@ -60,8 +60,8 @@ end
 
 local check_absolute_url = function(base, relative, absolute)
     local res = socket.url.absolute(base, relative)
-    if res ~= absolute then 
-        io.write("absolute: In test for base='", base, "', rel='", relative, "' expected '", 
+    if res ~= absolute then
+        io.write("absolute: In test for base='", base, "', rel='", relative, "' expected '",
             absolute, "' but got '", res, "'\n")
         os.exit()
     end
@@ -73,7 +73,7 @@ local check_parse_url = function(gaba)
     local parsed = socket.url.parse(url)
     for i, v in pairs(gaba) do
         if v ~= parsed[i] then
-            io.write("parse: In test for '", url, "' expected ", i, " = '", 
+            io.write("parse: In test for '", url, "' expected ", i, " = '",
                    v, "' but got '", tostring(parsed[i]), "'\n")
             for i,v in pairs(parsed) do print(i,v) end
             os.exit()
@@ -81,7 +81,7 @@ local check_parse_url = function(gaba)
     end
     for i, v in pairs(parsed) do
         if v ~= gaba[i] then
-            io.write("parse: In test for '", url, "' expected ", i, " = '", 
+            io.write("parse: In test for '", url, "' expected ", i, " = '",
                    tostring(gaba[i]), "' but got '", v, "'\n")
             for i,v in pairs(parsed) do print(i,v) end
             os.exit()
@@ -92,8 +92,8 @@ end
 print("testing URL parsing")
 check_parse_url{
     url = "scheme://user:pass$%?#wd@host:port/path;params?query#fragment",
-    scheme = "scheme", 
-    authority = "user:pass$%?#wd@host:port", 
+    scheme = "scheme",
+    authority = "user:pass$%?#wd@host:port",
     host = "host",
     port = "port",
     userinfo = "user:pass$%?#wd",
@@ -106,8 +106,8 @@ check_parse_url{
 }
 check_parse_url{
     url = "scheme://user:pass?#wd@host:port/path;params?query#fragment",
-    scheme = "scheme", 
-    authority = "user:pass?#wd@host:port", 
+    scheme = "scheme",
+    authority = "user:pass?#wd@host:port",
     host = "host",
     port = "port",
     userinfo = "user:pass?#wd",
@@ -120,8 +120,8 @@ check_parse_url{
 }
 check_parse_url{
     url = "scheme://user:pass-wd@host:port/path;params?query#fragment",
-    scheme = "scheme", 
-    authority = "user:pass-wd@host:port", 
+    scheme = "scheme",
+    authority = "user:pass-wd@host:port",
     host = "host",
     port = "port",
     userinfo = "user:pass-wd",
@@ -134,8 +134,8 @@ check_parse_url{
 }
 check_parse_url{
     url = "scheme://user:pass#wd@host:port/path;params?query#fragment",
-    scheme = "scheme", 
-    authority = "user:pass#wd@host:port", 
+    scheme = "scheme",
+    authority = "user:pass#wd@host:port",
     host = "host",
     port = "port",
     userinfo = "user:pass#wd",
@@ -148,8 +148,8 @@ check_parse_url{
 }
 check_parse_url{
     url = "scheme://user:pass#wd@host:port/path;params?query",
-    scheme = "scheme", 
-    authority = "user:pass#wd@host:port", 
+    scheme = "scheme",
+    authority = "user:pass#wd@host:port",
     host = "host",
     port = "port",
     userinfo = "user:pass#wd",
@@ -161,8 +161,8 @@ check_parse_url{
 }
 check_parse_url{
     url = "scheme://userinfo@host:port/path;params?query#fragment",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -175,8 +175,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://user:password@host:port/path;params?query#fragment",
-    scheme = "scheme", 
-    authority = "user:password@host:port", 
+    scheme = "scheme",
+    authority = "user:password@host:port",
     host = "host",
     port = "port",
     userinfo = "user:password",
@@ -190,8 +190,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port/path;params?query#",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -204,8 +204,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port/path;params?#fragment",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -218,8 +218,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port/path;params#fragment",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -231,8 +231,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port/path;?query#fragment",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -245,8 +245,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port/path?query#fragment",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -258,8 +258,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port/;params?query#fragment",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -272,8 +272,8 @@ check_parse_url{
 
 check_parse_url{
     url = "scheme://userinfo@host:port",
-    scheme = "scheme", 
-    authority = "userinfo@host:port", 
+    scheme = "scheme",
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -282,7 +282,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//userinfo@host:port/path;params?query#fragment",
-    authority = "userinfo@host:port", 
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -295,7 +295,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//userinfo@host:port/path",
-    authority = "userinfo@host:port", 
+    authority = "userinfo@host:port",
     host = "host",
     port = "port",
     userinfo = "userinfo",
@@ -305,7 +305,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//userinfo@host/path",
-    authority = "userinfo@host", 
+    authority = "userinfo@host",
     host = "host",
     userinfo = "userinfo",
     user = "userinfo",
@@ -314,7 +314,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//user:password@host/path",
-    authority = "user:password@host", 
+    authority = "user:password@host",
     host = "host",
     userinfo = "user:password",
     password = "password",
@@ -324,7 +324,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//user:@host/path",
-    authority = "user:@host", 
+    authority = "user:@host",
     host = "host",
     userinfo = "user:",
     password = "",
@@ -334,7 +334,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//user@host:port/path",
-    authority = "user@host:port", 
+    authority = "user@host:port",
     host = "host",
     userinfo = "user",
     user = "user",
@@ -344,7 +344,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//host:port/path",
-    authority = "host:port", 
+    authority = "host:port",
     port = "port",
     host = "host",
     path = "/path",
@@ -352,14 +352,14 @@ check_parse_url{
 
 check_parse_url{
     url = "//host/path",
-    authority = "host", 
+    authority = "host",
     host = "host",
     path = "/path",
 }
 
 check_parse_url{
     url = "//host",
-    authority = "host", 
+    authority = "host",
     host = "host",
 }
 
@@ -433,7 +433,7 @@ check_parse_url{
 
 check_parse_url{
     url = "//userinfo@[::FFFF:129.144.52.38]:port/path;params?query#fragment",
-    authority = "userinfo@[::FFFF:129.144.52.38]:port", 
+    authority = "userinfo@[::FFFF:129.144.52.38]:port",
     host = "::FFFF:129.144.52.38",
     port = "port",
     userinfo = "userinfo",
@@ -447,7 +447,7 @@ check_parse_url{
 check_parse_url{
     url = "scheme://user:password@[::192.9.5.5]:port/path;params?query#fragment",
     scheme = "scheme",
-    authority = "user:password@[::192.9.5.5]:port", 
+    authority = "user:password@[::192.9.5.5]:port",
     host = "::192.9.5.5",
     port = "port",
     userinfo = "user:password",
@@ -462,7 +462,7 @@ check_parse_url{
 print("testing URL building")
 check_build_url {
     url = "scheme://user:password@host:port/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     port = "port",
     user = "user",
@@ -499,7 +499,7 @@ check_build_url{
 
 check_build_url {
     url = "scheme://user:password@host/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     user = "user",
     password = "password",
@@ -511,7 +511,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://user@host/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     user = "user",
     path = "/path",
@@ -522,7 +522,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://host/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     path = "/path",
     params = "params",
@@ -532,7 +532,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://host/path;params#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     path = "/path",
     params = "params",
@@ -541,7 +541,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://host/path#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     path = "/path",
     fragment = "fragment"
@@ -549,7 +549,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://host/path",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     path = "/path",
 }
@@ -567,7 +567,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://user:password@host:port/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     port = "port",
     user = "user",
@@ -581,7 +581,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://user:password@host:port/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     port = "port",
     user = "user",
@@ -596,7 +596,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://user:password@host:port/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     host = "host",
     port = "port",
     userinfo = "user:password",
@@ -609,7 +609,7 @@ check_build_url {
 
 check_build_url {
     url = "scheme://user:password@host:port/path;params?query#fragment",
-    scheme = "scheme", 
+    scheme = "scheme",
     authority = "user:password@host:port",
     path = "/path",
     params = "params",
@@ -683,7 +683,7 @@ check_absolute_url("//a/b/c/d;p?q#f", "d/e/f", "//a/b/c/d/e/f")
 check_absolute_url("/a/b/c/d;p?q#f", "d/e/f", "/a/b/c/d/e/f")
 check_absolute_url("a/b/c/d", "d/e/f", "a/b/c/d/e/f")
 check_absolute_url("a/b/c/d/../", "d/e/f", "a/b/c/d/e/f")
-check_absolute_url("http://velox.telemar.com.br", "/dashboard/index.html", 
+check_absolute_url("http://velox.telemar.com.br", "/dashboard/index.html",
    "http://velox.telemar.com.br/dashboard/index.html")
 check_absolute_url("http://example.com/", "../.badhost.com/", "http://example.com/.badhost.com/")
 check_absolute_url("http://example.com/", "...badhost.com/", "http://example.com/...badhost.com/")
@@ -700,11 +700,11 @@ check_absolute_url("http://example.com/a/b/c/d/", "../x/a/../y/z/../../../../q",
 print("testing path parsing and composition")
 check_parse_path("/eu/tu/ele", { "eu", "tu", "ele"; is_absolute = 1 })
 check_parse_path("/eu/", { "eu"; is_absolute = 1, is_directory = 1 })
-check_parse_path("eu/tu/ele/nos/vos/eles/", 
+check_parse_path("eu/tu/ele/nos/vos/eles/",
     { "eu", "tu", "ele", "nos", "vos", "eles"; is_directory = 1})
 check_parse_path("/", { is_absolute = 1, is_directory = 1})
 check_parse_path("", { })
-check_parse_path("eu%01/%02tu/e%03l%04e/nos/vos%05/e%12les/", 
+check_parse_path("eu%01/%02tu/e%03l%04e/nos/vos%05/e%12les/",
     { "eu\1", "\2tu", "e\3l\4e", "nos", "vos\5", "e\18les"; is_directory = 1})
 check_parse_path("eu/tu", { "eu", "tu" })
 

@@ -70,9 +70,9 @@ void run_read_node_tests(MMDB_s *mmdb,
 
 void run_24_bit_record_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-mixed-24.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const uint32_t tests[7][5] = {
         {0, 1, MMDB_RECORD_TYPE_SEARCH_NODE, 242, MMDB_RECORD_TYPE_EMPTY},
@@ -126,9 +126,9 @@ void run_24_bit_record_tests(int mode, const char *mode_desc) {
 
 void run_28_bit_record_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-mixed-28.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const uint32_t tests[7][5] = {
         {0, 1, MMDB_RECORD_TYPE_SEARCH_NODE, 242, MMDB_RECORD_TYPE_EMPTY},
@@ -182,9 +182,9 @@ void run_28_bit_record_tests(int mode, const char *mode_desc) {
 
 void run_32_bit_record_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-mixed-32.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const uint32_t tests[7][5] = {
         {0, 1, MMDB_RECORD_TYPE_SEARCH_NODE, 242, MMDB_RECORD_TYPE_EMPTY},

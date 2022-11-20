@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,8 +32,8 @@ namespace transformations {
 
 class LowerCase : public Transformation {
  public:
-    explicit LowerCase(std::string action);
-    std::string evaluate(std::string exp,
+    explicit LowerCase(const std::string &action);
+    std::string evaluate(const std::string &exp,
         Transaction *transaction) override;
 };
 

@@ -1,3 +1,22 @@
+## 1.7.1 - 2022-09-30
+
+* The external symbols test now only runs on Linux. It assumes a Linux
+  environment. Reported by Carlo Cabrera. GitHub #304.
+
+## 1.7.0 - 2022-09-28
+
+* `FD_CLOEXEC` is now set on platforms that do not support `O_CLOEXEC`.
+  Reported by rittneje. GitHub #273.
+* When building with Visual Studio, you may now build a static runtime with
+  CMake by setting `MSVC_STATIC_RUNTIME` to `ON`. Pull request by Rafael
+  Santiago. GitHub #269.
+* The CMake build now works on iOS. Pull request by SpaceIm. GitHub #271.
+* The CMake build now uses the correct library directory on Linux systems
+  using alternate directory structures. Pull request by Satadru Pramanik.
+  GitHub #284.
+* File size check now correctly compares the size to `SSIZE_MAX`. Reported
+  by marakew. GitHub #301.
+
 ## 1.6.0 - 2021-04-29
 
 * This release includes several improvements to the CMake build. In

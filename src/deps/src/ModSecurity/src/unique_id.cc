@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -72,7 +72,7 @@ void UniqueId::fillUniqueId() {
 
 // Based on:
 // http://stackoverflow.com/questions/16858782/how-to-obtain-almost-unique-system-identifier-in-a-cross-platform-way
-std::string const UniqueId::machineName() {
+std::string UniqueId::machineName() {
     char machine_name[MAX_MACHINE_NAME_SIZE];
     size_t len = MAX_MACHINE_NAME_SIZE;
 #ifdef WIN32
@@ -105,7 +105,7 @@ failed:
 #endif
 }
 
-std::string const UniqueId::ethernetMacAddress() {
+std::string UniqueId::ethernetMacAddress() {
     char mac[MAC_ADDRESS_SIZE];
     memset(mac, '\0', sizeof(char)*(MAC_ADDRESS_SIZE));
 #ifdef DARWIN
@@ -159,7 +159,6 @@ std::string const UniqueId::ethernetMacAddress() {
         }
 
         if (ioctl(sock, SIOCGIFHWADDR, ifr) == 0) {
-            int i = 0;
             if (!ifr->ifr_addr.sa_data[0] && !ifr->ifr_addr.sa_data[1]
                 && !ifr->ifr_addr.sa_data[2]) {
                 continue;
@@ -223,7 +222,9 @@ std::string const UniqueId::ethernetMacAddress() {
     free(pAdapterInfo);
 #endif
 
+#if defined(__linux__) || defined(__gnu_linux__) || defined(DARWIN) || defined(WIN32)
 end:
+#endif
     return std::string(reinterpret_cast<const char *>(mac));
 #if defined(__linux__) || defined(__gnu_linux__) || defined(DARWIN) || defined(WIN32)
 failed:

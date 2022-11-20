@@ -56,7 +56,7 @@ end
 
 function metat.__index:login(user, password)
     self.try(self.tp:command("user", user or _M.USER))
-    local code, reply = self.try(self.tp:check{"2..", 331})
+    local code, _ = self.try(self.tp:check{"2..", 331})
     if code == 331 then
         self.try(self.tp:command("pass", password or _M.PASSWORD))
         self.try(self.tp:check("2.."))
@@ -66,7 +66,7 @@ end
 
 function metat.__index:pasv()
     self.try(self.tp:command("pasv"))
-    local code, reply = self.try(self.tp:check("2.."))
+    local _, reply = self.try(self.tp:check("2.."))
     local pattern = "(%d+)%D(%d+)%D(%d+)%D(%d+)%D(%d+)%D(%d+)"
     local a, b, c, d, p1, p2 = socket.skip(2, string.find(reply, pattern))
     self.try(a and b and c and d and p1 and p2, reply)
@@ -83,9 +83,9 @@ end
 
 function metat.__index:epsv()
     self.try(self.tp:command("epsv"))
-    local code, reply = self.try(self.tp:check("229"))
+    local _, reply = self.try(self.tp:check("229"))
     local pattern = "%((.)(.-)%1(.-)%1(.-)%1%)"
-    local d, prt, address, port = string.match(reply, pattern)
+    local _, _, _, port = string.match(reply, pattern)
     self.try(port, "invalid epsv response")
     self.pasvt = {
         address = self.tp:getpeername(),
@@ -102,7 +102,7 @@ end
 function metat.__index:port(address, port)
     self.pasvt = nil
     if not address then
-        address, port = self.try(self.tp:getsockname())
+        address = self.try(self.tp:getsockname())
         self.server = self.try(socket.bind(address, 0))
         address, port = self.try(self.server:getsockname())
         self.try(self.server:settimeout(_M.TIMEOUT))
@@ -118,7 +118,7 @@ end
 function metat.__index:eprt(family, address, port)
     self.pasvt = nil
     if not address then
-        address, port = self.try(self.tp:getsockname())
+        address = self.try(self.tp:getsockname())
         self.server = self.try(socket.bind(address, 0))
         address, port = self.try(self.server:getsockname())
         self.try(self.server:settimeout(_M.TIMEOUT))
@@ -142,7 +142,7 @@ function metat.__index:send(sendt)
     local command = sendt.command or "stor"
     -- send the transfer command and check the reply
     self.try(self.tp:command(command, argument))
-    local code, reply = self.try(self.tp:check{"2..", "1.."})
+    local code, _ = self.try(self.tp:check{"2..", "1.."})
     -- if there is not a pasvt table, then there is a server
     -- and we already sent a PORT command
     if not self.pasvt then self:portconnect() end

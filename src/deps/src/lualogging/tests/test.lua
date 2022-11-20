@@ -1,6 +1,7 @@
 
 local test = {
   "generic.lua",
+  "testEnv.lua",
   "testConsole.lua",
   "testFile.lua",
   "testMail.lua",

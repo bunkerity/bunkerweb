@@ -1639,6 +1639,7 @@ lua_number2int(k,n);
 if(luai_numeq(cast_num(k),nvalue(key)))
 return luaH_getnum(t,k);
 }
+/*fallthrough*/
 default:{
 Node*n=mainposition(t,key);
 do{
@@ -2905,8 +2906,8 @@ if(sep>=0){
 read_long_string(ls,seminfo,sep);
 return TK_STRING;
 }
-else if(sep==-1)return'[';
-else luaX_lexerror(ls,"invalid long string delimiter",TK_STRING);
+else if (sep!=-1)luaX_lexerror(ls,"invalid long string delimiter",TK_STRING);
+return'[';
 }
 case'=':{
 next(ls);

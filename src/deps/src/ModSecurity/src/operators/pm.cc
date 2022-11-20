@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -34,7 +34,6 @@ namespace operators {
 
 Pm::~Pm() {
     acmp_node_t *root = m_p->root_node;
-    acmp_node_t *node = root;
 
     cleanup(root);
 
@@ -82,9 +81,9 @@ void Pm::postOrderTraversal(acmp_btree_node_t *node) {
 }
 
 
-bool Pm::evaluate(Transaction *transaction, Rule *rule,
+bool Pm::evaluate(Transaction *transaction, RuleWithActions *rule,
     const std::string &input, std::shared_ptr<RuleMessage> ruleMessage) {
-    int rc = -1;
+    int rc;
     ACMPT pt;
     pt.parser = m_p;
     pt.ptr = NULL;
@@ -98,16 +97,16 @@ bool Pm::evaluate(Transaction *transaction, Rule *rule,
 #endif
 
     if (rc >= 0 && transaction) {
-        std::string match_(match);
+        std::string match_(match?match:"");
         logOffset(ruleMessage, rc - match_.size() + 1, match_.size());
         transaction->m_matched.push_back(match_);
-    }
 
-    if (rule && rule->m_containsCaptureAction && transaction && rc >= 0) {
-        transaction->m_collections.m_tx_collection->storeOrUpdateFirst("0",
-            std::string(match));
-        ms_dbg_a(transaction, 7, "Added pm match TX.0: " + \
-            std::string(match));
+        if (rule && rule->hasCaptureAction()) {
+            transaction->m_collections.m_tx_collection->storeOrUpdateFirst("0",
+                match_);
+            ms_dbg_a(transaction, 7, "Added pm match TX.0: " + \
+                match_);
+        }
     }
 
     return rc >= 0;

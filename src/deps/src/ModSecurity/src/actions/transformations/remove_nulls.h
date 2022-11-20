@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -30,10 +30,10 @@ namespace transformations {
 
 class RemoveNulls : public Transformation {
  public:
-    explicit RemoveNulls(std::string action)
+    explicit RemoveNulls(const std::string &action) 
         : Transformation(action) { }
 
-    std::string evaluate(std::string exp,
+    std::string evaluate(const std::string &exp,
         Transaction *transaction) override;
 };
 

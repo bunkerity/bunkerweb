@@ -18,9 +18,9 @@ void test_one_ip(MMDB_s *mmdb,
 
 void run_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-no-ipv4-search-tree.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     test_one_ip(mmdb, "1.1.1.1", filename, mode_desc);
     test_one_ip(mmdb, "255.255.255.255", filename, mode_desc);

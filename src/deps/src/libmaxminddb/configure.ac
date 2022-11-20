@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.5.2], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.7.1], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 

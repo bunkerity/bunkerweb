@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -36,8 +36,8 @@
 #include <utility>
 
 #include "modsecurity/transaction.h"
-#include "modsecurity/rules_properties.h"
-#include "modsecurity/rules.h"
+#include "modsecurity/rules_set_properties.h"
+#include "modsecurity/rules_set.h"
 
 #include "src/request_body_processor/xml.h"
 #include "modsecurity/actions/action.h"
@@ -48,12 +48,12 @@ namespace variables {
 
 #ifndef WITH_LIBXML2
 void XML::evaluate(Transaction *t,
-    Rule *rule,
+    RuleWithActions *rule,
     std::vector<const VariableValue *> *l) { }
 #else
 
 void XML::evaluate(Transaction *t,
-    Rule *rule,
+    RuleWithActions *rule,
     std::vector<const VariableValue *> *l) {
     xmlXPathContextPtr xpathCtx;
     xmlXPathObjectPtr xpathObj;
@@ -61,7 +61,7 @@ void XML::evaluate(Transaction *t,
     std::string param;
     const xmlChar* xpathExpr = NULL;
     int i;
-    size_t pos;
+    //size_t pos;
 
     param = m_name;
     /*

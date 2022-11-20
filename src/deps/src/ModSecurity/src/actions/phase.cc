@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -72,8 +72,8 @@ bool Phase::init(std::string *error) {
 }
 
 
-bool Phase::evaluate(Rule *rule, Transaction *transaction) {
-    rule->m_phase = m_phase;
+bool Phase::evaluate(RuleWithActions *rule, Transaction *transaction) {
+    rule->setPhase(m_phase);
     return true;
 }
 

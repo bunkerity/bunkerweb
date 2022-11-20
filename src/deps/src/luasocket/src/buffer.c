@@ -103,11 +103,14 @@ int buffer_meth_send(lua_State *L, p_buffer buf) {
 * object:receive() interface
 \*-------------------------------------------------------------------------*/
 int buffer_meth_receive(lua_State *L, p_buffer buf) {
-    int err = IO_DONE, top = lua_gettop(L);
+    int err = IO_DONE, top;
     luaL_Buffer b;
     size_t size;
     const char *part = luaL_optlstring(L, 3, "", &size);
     timeout_markstart(buf->tm);
+    /* make sure we don't confuse buffer stuff with arguments */
+    lua_settop(L, 3);
+    top = lua_gettop(L);
     /* initialize buffer with optional extra prefix
      * (useful for concatenating previous partial results) */
     luaL_buffinit(L, &b);

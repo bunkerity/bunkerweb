@@ -4,7 +4,7 @@ use t::TestCore;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 4);
+plan tests => repeat_each() * (blocks() * 4 - 4);
 
 add_block_preprocessor(sub {
     my $block = shift;
@@ -137,3 +137,40 @@ c0
 disabled in init phase under macOS
 --- skip_eval
 4: $^O ne 'linux'
+
+
+
+=== TEST 5: bug: sub incorrectly dropped the last character
+--- config
+    location /re {
+        content_by_lua_block {
+            local s, n = ngx.re.sub("abcd", "(?<=c)", ".")
+            ngx.say(s)
+            ngx.say(n)
+        }
+    }
+--- request
+    GET /re
+--- response_body
+abc.d
+1
+
+
+
+=== TEST 6: bug: sub incorrectly dropped the last character(replace function)
+--- config
+    location /re {
+        content_by_lua_block {
+            local function repl(m)
+                return "[" .. m[0] .. "]"
+            end
+            local s, n = ngx.re.sub("abcd", "(?<=c)", repl)
+            ngx.say(s)
+            ngx.say(n)
+        }
+    }
+--- request
+    GET /re
+--- response_body
+abc[]d
+1

@@ -23,14 +23,7 @@
 <div id="navigation">
 <h1>LuaLogging</h1>
   <ul>
-    <li><strong>Home</strong>
-      <ul>
-        <li><a href="index.html#download">Download</a></li>
-        <li><a href="index.html#dependencies">Dependencies</a></li>
-        <li><a href="index.html#history">History</a></li>
-        <li><a href="index.html#credits">Credits</a></li>
-      </ul>
-    </li>
+    <li><strong>Home</strong></li>
     <li><a href="manual.html">Manual</a>
       <ul>
         <li><a href="manual.html#installation">Installation</a></li>
@@ -45,14 +38,12 @@
         <li><a href="rolling_file.html">Rolling File</a></li>
         <li><a href="sql.html">SQL</a></li>
         <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
         <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
       </ul>
     </li>
-    <li><a href="https://github.com/lunarmodules/lualogging">Project</a>
-      <ul>
-        <li><a href="https://github.com/lunarmodules/lualogging/issues">Bug Tracker</a></li>
-      </ul>
-    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
     <li><a href="license.html">License</a></li>
   </ul>
 </div> <!-- id="navigation" -->
@@ -74,7 +65,7 @@ as Lua 5.1.
 <h2><a name="status"></a>Status</h2>
 
 <p>
-Current version is 1.6.0. It was developed for Lua 5.1+.
+Current version is 1.8.0. It was developed for Lua 5.1+.
 </p>
 
 <h2><a name="download"></a>Download</h2>
@@ -115,6 +106,24 @@ downloads page or installed via LuaRocks.
 <h2><a name="history"></a>History</h2>
 
 <dl class="history">
+    <dt><strong>1.8.0</strong> [22/Oct/2022]</dt>
+    <dd><strong>Added</strong>: new module <code>logging.envconfig</code> to allow log configuration via
+    environment variables.</dd>
+    <dd><strong>Refactor</strong>: refactored the appenders to be more object like. They now return a module table.</dd>
+    <dd><strong>Fix</strong>: add rsyslog appender to makefile install target.</dd>
+    <dd><strong>Fix</strong>: errorhandler in rsyslog was omitting 'self', and also log the failed message itself to stderr.</dd>
+    <dd><strong>Fix</strong>: when using Copas and rsyslog on Lua 5.1, coxpcall is required to yield.</dd>
+    <dd><strong>Fix</strong>: rsyslog; upon failure remove the closed socket from the cache to prevent the retry from using
+    the closed socket.</dd>
+
+    <dt><strong>1.7.0</strong> [21/Sep/2022]</dt>
+    <dd><strong>Added</strong>: new function <code>logging.date</code> is compatible with <code>os.date</code>
+    but supports second-fractions, to be represented by <code>%q</code> placeholder in the
+    <code>timestampPattern</code>.</dd>
+    <dd><strong>Added</strong>: new bundled appender; "rsyslog". This logger will log in syslog format to a remote
+    syslog server. It supports both BSD as well as IETF formats, and supports sending over UDP and TCP, with an option
+    to use Copas for async-sending over TCP.</dd>
+
     <dt><strong>1.6.0</strong> [09/Nov/2021]</dt>
     <dd><strong>Added</strong>: the <code>logPattern</code> can now be specified for each log-level individually.
     This allows use cases like only adding <code>"%source"</code> on debug level, or injecting ansi-color coding
@@ -123,14 +132,14 @@ downloads page or installed via LuaRocks.
     simply pass any log messages on to the nginx log. When using LuaLogging in OpenResty, configure this logger.</dd>
     <dd><strong>Added</strong>: application level defaults. New functions <code>logging.defaultLogPatterns()</code>
       , <code>logging.defaultTimestampPattern()</code>, <code>logging.defaultLevel()</code>, and <code>logging.defaultLogger()</code>
-      can be used to get/set the global application level defaults.</br>
+      can be used to get/set the global application level defaults.<br/>
       Use carefully, this is global state, so only applications should set those, libraries should not.</dd>
     <dd><strong>Added</strong>: the included appenders now have an extra parameter to set
       log-level upon creation; <code>logLevel</code>.</dd>
-    <dd><strong>Added</strong>: the <code>logPattern</code> can now have new placeholders:</br>
-      <code>"%file"</code> (source file), </br>
-      <code>"%line"</code> (source line), </br>
-      <code>"%function"</code> (function name), and </br>
+    <dd><strong>Added</strong>: the <code>logPattern</code> can now have new placeholders:<br/>
+      <code>"%file"</code> (source file), <br/>
+      <code>"%line"</code> (source line), <br/>
+      <code>"%function"</code> (function name), and <br/>
       <code>"%source"</code> (evaluates to <code>"%file:%line in function '%function'"</code>).</dd>
     <dd><strong>Added</strong>: the console logger has a new optional parameter "destination",
       which must be either "stderr" or "stdout" (defaults to "stdout")</dd>

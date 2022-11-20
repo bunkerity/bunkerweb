@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -26,8 +26,7 @@
 #include <deque>
 
 #include "modsecurity/transaction.h"
-#include "modsecurity/rules.h"
-
+#include "modsecurity/rules_set.h"
 
 
 namespace modsecurity {
@@ -36,7 +35,7 @@ namespace RequestBodyProcessor {
 
 class JSONContainer {
  public:
-    explicit JSONContainer(std::string name) : m_name(name) { }
+    explicit JSONContainer(const std::string &name) : m_name(name) { }
     virtual ~JSONContainer() { }
     std::string m_name;
 };
@@ -44,7 +43,7 @@ class JSONContainer {
 
 class JSONContainerArray : public JSONContainer {
  public:
-    explicit JSONContainerArray(std::string name) : JSONContainer(name),
+    explicit JSONContainerArray(const std::string &name) : JSONContainer(name),
         m_elementCounter(0) { }
     size_t m_elementCounter;
 };
@@ -52,7 +51,7 @@ class JSONContainerArray : public JSONContainer {
 
 class JSONContainerMap : public JSONContainer {
  public:
-     explicit JSONContainerMap(std::string name) : JSONContainer(name) { }
+     explicit JSONContainerMap(const std::string &name) : JSONContainer(name) { }
 };
 
 
@@ -61,7 +60,7 @@ class JSON {
     explicit JSON(Transaction *transaction);
     ~JSON();
 
-    bool init();
+    static bool init();
     bool processChunk(const char *buf, unsigned int size, std::string *err);
     bool complete(std::string *err);
 
@@ -79,7 +78,7 @@ class JSON {
     static int yajl_start_array(void *ctx);
     static int yajl_end_array(void *ctx);
 
-    bool isPreviousArray() {
+    bool isPreviousArray() const {
         JSONContainerArray *prev = NULL;
         if (m_containers.size() < 1) {
             return false;
@@ -104,12 +103,19 @@ class JSON {
         return ret;
     }
 
+    void setMaxDepth(double max_depth) {
+        m_max_depth = max_depth;
+    }
+
  private:
     std::deque<JSONContainer *> m_containers;
     Transaction *m_transaction;
     yajl_handle m_handle;
     yajl_status m_status;
     std::string m_current_key;
+    double m_max_depth;
+    int64_t m_current_depth;
+    bool m_depth_limit_exceeded;
 };
 
 

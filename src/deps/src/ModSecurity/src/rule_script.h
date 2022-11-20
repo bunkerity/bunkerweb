@@ -1,7 +1,7 @@
 
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <memory>
 #include <vector>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/rule.h"
 #include "src/engine/lua.h"
 #include "src/operators/operator.h"
@@ -26,7 +27,6 @@
 #include "src/actions/transformations/none.h"
 #include "src/actions/tag.h"
 #include "src/utils/string.h"
-#include "modsecurity/rules.h"
 #include "modsecurity/rule_message.h"
 #include "src/actions/msg.h"
 #include "src/actions/log_data.h"
@@ -42,14 +42,18 @@ namespace modsecurity {
 using actions::Action;
 
 /** @ingroup ModSecurity_CPP_API */
-class RuleScript : public Rule {
+class RuleScript : public RuleWithActions {
  public:
-    RuleScript(std::string name,
+    RuleScript(const std::string &name,
         std::vector<Action *> *actions,
-        std::string fileName,
+        Transformations *t,
+        std::unique_ptr<std::string> fileName,
         int lineNumber)
-            : Rule(NULL, NULL, actions, fileName, lineNumber),
-        m_name(name) { }
+            : RuleWithActions(actions, t, std::move(fileName), lineNumber),
+        m_name(name),
+        m_lua() { }
+
+    RuleScript(const RuleWithActions& r) = delete;
 
     bool init(std::string *err);
     bool evaluate(Transaction *trans,

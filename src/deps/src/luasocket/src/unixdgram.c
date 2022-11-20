@@ -16,7 +16,7 @@
 
 #define UNIXDGRAM_DATAGRAMSIZE 8192
 
-// provide a SUN_LEN macro if sys/un.h doesn't (e.g. Android)
+/* provide a SUN_LEN macro if sys/un.h doesn't (e.g. Android) */
 #ifndef SUN_LEN
 #define SUN_LEN(ptr) \
   ((size_t) (((struct sockaddr_un *) 0)->sun_path)  \

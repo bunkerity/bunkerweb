@@ -150,6 +150,95 @@
         "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
         "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing JSON request body parser - depth not over limit",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Content-Type":"application/json"
+      },
+      "uri":"/?foo=bar",
+      "method":"POST",
+      "body": [
+        "{",
+        "   \"key1\":",
+        "{",
+        "   \"key2\":",
+        "{",
+        "   \"key3\":",
+        "{",
+        "   \"key4\":",
+        "{",
+        "   \"key5\":\"thevalue\"",
+        "}}}}}"
+      ]
+    },
+    "expected":{
+      "debug_log": "json.key1.key2.key3.key4.key5",
+      "http_code":200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyJsonDepthLimit 5",
+      "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:'200002', phase:2,t:none,log,deny,status:403,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing JSON request body parser - depth over limit",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Content-Type":"application/json"
+      },
+      "uri":"/?foo=bar",
+      "method":"POST",
+      "body": [
+        "{",
+        "   \"key1\":",
+        "{",
+        "   \"key2\":",
+        "{",
+        "   \"key3\":",
+        "{",
+        "   \"key4\":",
+        "{",
+        "   \"key5\":\"thevalue\"",
+        "}}}}}"
+      ]
+    },
+    "expected":{
+      "debug_log": "Failed to parse request body",
+      "http_code":403
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyJsonDepthLimit 4",
+      "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:'200002', phase:2,t:none,log,deny,status:403,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}'\""
+    ]
   }
 ]
-

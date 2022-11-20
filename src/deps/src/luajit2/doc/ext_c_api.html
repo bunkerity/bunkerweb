@@ -3,7 +3,7 @@
 <head>
 <title>Lua/C API Extensions</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -49,8 +49,6 @@
 <a href="status.html">Status</a>
 </li><li>
 <a href="faq.html">FAQ</a>
-</li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
 </li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
@@ -107,7 +105,7 @@ Turn the whole JIT compiler on or off or flush the whole cache of compiled code.
 This sets the mode for the function at the stack index <tt>idx</tt> or
 the parent of the calling function (<tt>idx = 0</tt>). It either
 enables JIT compilation for a function, disables it and flushes any
-already compiled code or only flushes already compiled code. This
+already compiled code, or only flushes already compiled code. This
 applies recursively to all sub-functions of the function with
 <tt>LUAJIT_MODE_ALLFUNC</tt> or only to the sub-functions with
 <tt>LUAJIT_MODE_ALLSUBFUNC</tt>.
@@ -126,7 +124,7 @@ traces which link to it.
 This mode defines a wrapper function for calls to C functions. If
 called with <tt>LUAJIT_MODE_ON</tt>, the stack index at <tt>idx</tt>
 must be a <tt>lightuserdata</tt> object holding a pointer to the wrapper
-function. From now on all C functions are called through the wrapper
+function. From now on, all C functions are called through the wrapper
 function. If called with <tt>LUAJIT_MODE_OFF</tt> this mode is turned
 off and all C functions are directly called.
 </p>
@@ -175,7 +173,7 @@ Also note that this mechanism is not without overhead.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

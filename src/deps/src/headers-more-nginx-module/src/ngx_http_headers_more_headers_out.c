@@ -327,6 +327,46 @@ static ngx_int_t
 ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
     ngx_http_headers_more_header_val_t *hv, ngx_str_t *value)
 {
+#if defined(nginx_version) && nginx_version >= 1023000
+    ngx_table_elt_t  **headers, *h, *ho, **ph;
+
+    headers = (ngx_table_elt_t **) ((char *) &r->headers_out + hv->offset);
+
+    if (*headers) {
+        for (h = (*headers)->next; h; h = h->next) {
+            h->hash = 0;
+            h->value.len = 0;
+        }
+
+        h = *headers;
+
+        h->value = *value;
+
+        if (value->len == 0) {
+            h->hash = 0;
+
+        } else {
+            h->hash = hv->hash;
+        }
+
+        return NGX_OK;
+    }
+
+    for (ph = headers; *ph; ph = &(*ph)->next) { /* void */ }
+
+    ho = ngx_list_push(&r->headers_out.headers);
+    if (ho == NULL) {
+        return NGX_ERROR;
+    }
+
+    ho->value = *value;
+    ho->hash = hv->hash;
+    ngx_str_set(&ho->key, "Cache-Control");
+    ho->next = NULL;
+    *ph = ho;
+
+    return NGX_OK;
+#else
     ngx_array_t      *pa;
     ngx_table_elt_t  *ho, **ph;
     ngx_uint_t        i;
@@ -378,6 +418,7 @@ ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
     *ph = ho;
 
     return NGX_OK;
+#endif
 }
 
 

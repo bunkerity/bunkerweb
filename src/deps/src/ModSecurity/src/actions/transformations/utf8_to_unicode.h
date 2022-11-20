@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -35,9 +35,9 @@ namespace transformations {
 
 class Utf8ToUnicode : public Transformation {
  public:
-    explicit Utf8ToUnicode(std::string action) : Transformation(action) { }
+    explicit Utf8ToUnicode(const std::string &action)  : Transformation(action) { }
 
-    std::string evaluate(std::string exp,
+    std::string evaluate(const std::string &exp,
         Transaction *transaction) override;
 
     static char *inplace(unsigned char *input, uint64_t input_len,

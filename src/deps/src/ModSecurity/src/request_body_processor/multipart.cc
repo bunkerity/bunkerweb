@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -27,16 +27,73 @@
 #include <string>
 #include <utility>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/collection/collections.h"
-#include "modsecurity/rules.h"
 #include "src/utils/string.h"
 
 
 namespace modsecurity {
 namespace RequestBodyProcessor {
 
+static const char* mime_charset_special = "!#$%&+-^_`{}~";
+static const char* attr_char_special = "!#$&+-.^_`~";
 
-Multipart::Multipart(std:: string header, Transaction *transaction)
+MultipartPartTmpFile::~MultipartPartTmpFile() {
+    if (!m_tmp_file_name.empty() && m_delete) {
+        /* make sure it is closed first */
+        if (m_tmp_file_fd > 0) {
+            Close();
+        }
+
+        const int unlink_rc = unlink(m_tmp_file_name.c_str());
+        if (unlink_rc < 0) {
+            ms_dbg_a(m_transaction, 1, "Multipart: Failed to delete file (part) \"" \
+                + m_tmp_file_name + "\" because " \
+                + std::to_string(errno) +  "(" \
+                + strerror(errno) + ")");
+        } else {
+                ms_dbg_a(m_transaction, 4, "Multipart: file deleted successfully (part) \"" \
+                            + m_tmp_file_name + "\"");
+        }
+
+    }
+}
+
+void MultipartPartTmpFile::Open() {
+    struct tm timeinfo;
+    char tstr[300];
+    time_t tt = time(NULL);
+
+    localtime_r(&tt, &timeinfo);
+
+    memset(tstr, '\0', 300);
+    strftime(tstr, 299, "/%Y%m%d-%H%M%S", &timeinfo);
+
+    std::string path = m_transaction->m_rules->m_uploadDirectory.m_value;
+    path = path + tstr + "-" + *m_transaction->m_id.get();
+    path += "-file-XXXXXX";
+
+    char* tmp = strdup(path.c_str());
+    m_tmp_file_fd = mkstemp(tmp);
+    m_tmp_file_name.assign(tmp);
+    free(tmp);
+    ms_dbg_a(m_transaction, 4, "MultipartPartTmpFile: Create filename= " + m_tmp_file_name);
+
+    int mode = m_transaction->m_rules->m_uploadFileMode.m_value;
+    if ((m_tmp_file_fd != -1) && (mode != 0)) {
+        if (fchmod(m_tmp_file_fd, mode) == -1) {
+            m_tmp_file_fd = -1;
+        }
+    }
+}
+
+void MultipartPartTmpFile::Close() {
+    close(m_tmp_file_fd);
+    m_tmp_file_fd = -1;
+}
+
+
+Multipart::Multipart(const std::string &header, Transaction *transaction)
     : m_reqbody_no_files_length(0),
     m_nfiles(0),
     m_boundary_count(0),
@@ -45,8 +102,11 @@ Multipart::Multipart(std:: string header, Transaction *transaction)
     m_bufptr(NULL),
     m_bufleft(0),
     m_buf_offset(0),
+    m_crlf_state(0),
+    m_crlf_state_buf_end(0),
     m_mpp(NULL),
     m_mpp_state(0),
+    m_mpp_substate_part_data_read(0),
     m_reserve{0},
     m_seen_data(0),
     m_is_complete(0),
@@ -71,37 +131,21 @@ Multipart::Multipart(std:: string header, Transaction *transaction)
 Multipart::~Multipart() {
     ms_dbg_a(m_transaction, 4,
         "Multipart: Cleanup started (keep files set to " \
-        + RulesProperties::configBooleanString(
+        + RulesSetProperties::configBooleanString(
             m_transaction->m_rules->m_uploadKeepFiles) \
         + ")");
 
     if (m_transaction->m_rules->m_uploadKeepFiles
-        != RulesProperties::TrueConfigBoolean) {
+        != RulesSetProperties::TrueConfigBoolean) {
         for (MultipartPart *m : m_parts) {
-            if (m->m_type == MULTIPART_FILE) {
-                if (!m->m_tmp_file_name.empty()) {
-                    /* make sure it is closed first */
-                    if (m->m_tmp_file_fd > 0) {
-                        close(m->m_tmp_file_fd);
-                        m->m_tmp_file_fd = -1;
-                    }
-                    const int unlink_rc =
-                        unlink(m->m_tmp_file_name.c_str());
-
-                    if (unlink_rc < 0) {
-                        ms_dbg_a(m_transaction, 1,
-                            "Multipart: Failed to delete file (part) \"" \
-                            + m->m_tmp_file_name + "\" because " \
-                            + std::to_string(errno) +  "(" \
-                            + strerror(errno) + ")");
-                    } else {
-                        ms_dbg_a(m_transaction, 4,
-                            "Multipart: file deleted successfully (part) \"" \
-                            + m->m_tmp_file_name + "\"");
-                    }
-
-                }
+            if ((m->m_type == MULTIPART_FILE) && (m->m_tmp_file)) {
+                // only mark for deletion for now; the file should stay on disk until
+                // the transaction is complete
+                ms_dbg_a(m_transaction, 9, "Multipart: Marking temporary file for deletion: " \
+                    + m->m_tmp_file->getFilename());
+                m->m_tmp_file->setDelete();
             }
+
         }
     }
 
@@ -186,11 +230,17 @@ int Multipart::boundary_characters_valid(const char *boundary) {
 }
 
 
-void Multipart::validate_quotes(const char *data)  {
+void Multipart::validate_quotes(const char *data, char quote)  {
     int i, len;
 
     if (data == NULL)
         return;
+
+    // if the value was enclosed in double quotes, then we don't care about
+    // a single quote character within the name.
+    if (quote == '"') {
+        return;
+    }
 
     len = strlen(data);
 
@@ -208,6 +258,7 @@ void Multipart::validate_quotes(const char *data)  {
 
 int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
     const char *p = NULL;
+    std::string filenameStar;
 
     /* accept only what we understand */
     if (strncmp(c_d_value, "form-data", 9) != 0) {
@@ -276,14 +327,47 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
             return -6;
         }
 
-        /* Accept both quotes as some backends will accept them, but
-         * technically "'" is invalid and so flag_invalid_quoting is
-         * set so the user can deal with it in the rules if they so wish.
-         */
+        char quote = '\0';
+        if (name == "filename*") {
+            /* filename*=charset'[optional-language]'filename */
+            /* Read beyond the charset and the optional language*/
+            const char* start_of_charset = p;
+            while ((*p != '\0') && (isalnum(*p) || (strchr(mime_charset_special, *p)))) {
+                p++;
+            }
+            if ((*p != '\'') || (p == start_of_charset)) {
+                return -16; // Must be at least one legit char before ' for start of language
+            }
+            p++;
+            while ((*p != '\0') && (*p != '\'')) {
+                p++;
+            }
+            if (*p != '\'') {
+                return -17; // Single quote for end-of-language not found
+            }
+            p++;
 
-        if ((*p == '"') || (*p == '\'')) {
-            /* quoted */
-            char quote = *p;
+            /* Now read what should be the actual filename */
+            const char* start_of_filename = p;
+            while ((*p != '\0') && (*p != ';')) {
+                if (*p == '%') {
+                    if ((*(p+1) == '\0') || (!isxdigit(*(p+1))) || (!isxdigit(*(p+2)))) {
+                        return -18;
+                    }
+                    p += 3;
+                } else if (isalnum(*p) || strchr(attr_char_special, *p)) {
+                    p++;
+                } else {
+                    return -19;
+                }
+            }
+            value.assign(start_of_filename, p - start_of_filename);
+        } else if ((*p == '"') || (*p == '\'')) {
+            /* Accept both quotes as some backends will accept them, but
+             * technically "'" is invalid and so flag_invalid_quoting is
+             * set so the user can deal with it in the rules if they so wish.
+             */
+            quote = *p; // remember which quote character was used for the value
 
             if (quote == '\'') {
                 m_flag_invalid_quoting = 1;
@@ -334,7 +418,7 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
 
         /* evaluate part */
         if (name == "name") {
-            validate_quotes(value.c_str());
+            validate_quotes(value.c_str(), quote);
 
             m_transaction->m_variableMultipartName.set(value, value,
                 offset + ((p - c_d_value) - value.size()));
@@ -350,7 +434,7 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
             ms_dbg_a(m_transaction, 9,
                 "Multipart: Content-Disposition name: " + value + ".");
         } else if (name == "filename") {
-            validate_quotes(value.c_str());
+            validate_quotes(value.c_str(), quote);
             m_transaction->m_variableMultipartFileName.set(value, value, \
                 offset + ((p - c_d_value) - value.size()));
 
@@ -364,8 +448,17 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
             m_mpp->m_filenameOffset = offset + ((p - c_d_value) - value.size());
 
             ms_dbg_a(m_transaction, 9,
-                "Multipart: Content-Disposition filename: " \
-                + value + ".");
+                "Multipart: Content-Disposition filename: " + value + ".");
+        } else if (name == "filename*") {
+            if (!filenameStar.empty()) {
+                ms_dbg_a(m_transaction, 4,
+                    "Multipart: Warning: Duplicate Content-Disposition " \
+                    "filename*: " + value + ".");
+                return -20;
+            }
+            filenameStar.assign(value);
+            ms_dbg_a(m_transaction, 9,
+                "Multipart: Content-Disposition filename*: " + value + ".");
         } else {
             return -11;
         }
@@ -377,61 +470,35 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
 
             /* the next character must be a zero or a semi-colon */
             if (*p == '\0') {
-                return 1; /* this is OK */
-            }
-            if (*p != ';') {
-                p--;
-                if (*p == '\'' || *p == '\"') {
-                    ms_dbg_a(m_transaction, 9,
-                        "Multipart: Invalid quoting detected: " \
-                        + std::string(p) + " length " \
-                        + std::to_string(strlen(p)) + " bytes");
-                    m_flag_invalid_quoting = 1;
+                // Just let the 'while' condition end the loop
+            } else {
+                if (*p != ';') {
+                    p--;
+                    if (*p == '\'' || *p == '\"') {
+                        ms_dbg_a(m_transaction, 9,
+                            "Multipart: Invalid quoting detected: " \
+                            + std::string(p) + " length " \
+                            + std::to_string(strlen(p)) + " bytes");
+                        m_flag_invalid_quoting = 1;
+                    }
+                    /* p++; */
+                    return -12;
                 }
-                p++;
-                return -12;
+                p++; /* move over the semi-colon */
             }
-            p++; /* move over the semi-colon */
         }
 
         /* loop will stop when (*p == '\0') */
     }
 
-    return 1;
-}
-
-
-int Multipart::tmp_file_name(std::string *filename) const {
-    std::string path;
-    struct tm timeinfo;
-    char tstr[300];
-    char *tmp;
-    int fd;
-    int mode;
-    time_t tt = time(NULL);
-
-    localtime_r(&tt, &timeinfo);
-
-    path = m_transaction->m_rules->m_uploadDirectory.m_value;
-    mode = m_transaction->m_rules->m_uploadFileMode.m_value;
-
-    memset(tstr, '\0', 300);
-    strftime(tstr, 299, "/%Y%m%d-%H%M%S", &timeinfo);
-    path = path + tstr + "-" + m_transaction->m_id;
-    path = path + "-file-XXXXXX";
-
-    tmp = strdup(path.c_str());
-
-    fd = mkstemp(tmp);
-    filename->assign(tmp);
-    free(tmp);
-    if ((fd != -1) && (mode != 0)) {
-        if (fchmod(fd, mode) == -1) {
-            return -1;
-        }
+    if (!filenameStar.empty() && m_mpp->m_filename.empty()) {
+        ms_dbg_a(m_transaction, 4,
+            "Multipart: Warning: no filename= but filename*:" \
+            + filenameStar + ".");
+        return -21;
     }
 
-    return fd;
+    return 1;
 }
 
 
@@ -439,6 +506,8 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
     char *p = m_buf + (MULTIPART_BUF_SIZE - m_bufleft);
     char localreserve[2] = { '\0', '\0' }; /* initialized to quiet warning */
     int bytes_reserved = 0;
+
+    m_mpp_substate_part_data_read = 1;
 
     /* Preserve some bytes for later. */
     if (((MULTIPART_BUF_SIZE - m_bufleft) >= 1) && (*(p - 1) == '\n')) {
@@ -462,9 +531,9 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
     /* add data to the part we are building */
     if (m_mpp->m_type == MULTIPART_FILE) {
         bool extract = m_transaction->m_rules->m_uploadKeepFiles \
-            == RulesProperties::TrueConfigBoolean \
+            == RulesSetProperties::TrueConfigBoolean \
             || m_transaction->m_rules->m_tmpSaveUploadedFiles \
-            == RulesProperties::TrueConfigBoolean;
+            == RulesSetProperties::TrueConfigBoolean;
 
         /* remember where we started */
         if (m_mpp->m_length == 0) {
@@ -494,20 +563,18 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
          */
         if (extract) {
             /* first create a temporary file if we don't have it already */
-            if (m_mpp->m_tmp_file_fd == 0) {
-                std::string path;
-                m_mpp->m_tmp_file_fd = tmp_file_name(&path);
-
-                /* construct temporary file name */
-                m_mpp->m_tmp_file_name = path;
+            if (!m_mpp->m_tmp_file || !m_mpp->m_tmp_file->isValid()) {
+                m_mpp->m_tmp_file = std::make_shared<RequestBodyProcessor::MultipartPartTmpFile>(m_transaction);
+                m_transaction->m_multipartPartTmpFiles.push_back(m_mpp->m_tmp_file);
+                m_mpp->m_tmp_file->Open();
 
                 /* do we have an opened file? */
-                if (m_mpp->m_tmp_file_fd < 0) {
+                if (!m_mpp->m_tmp_file || m_mpp->m_tmp_file->getFd() < 0) {
                     ms_dbg_a(m_transaction, 1,
                         "Multipart: Failed to create file: " \
-                        + m_mpp->m_tmp_file_name);
+                        + m_mpp->m_tmp_file->getFilename());
                     error->assign("Multipart: Failed to create file: " \
-                        + m_mpp->m_tmp_file_name);
+                        + m_mpp->m_tmp_file->getFilename());
                     return -1;
                 }
                 /* keep track of the files count */
@@ -517,18 +584,18 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
                 ms_dbg_a(m_transaction, 4,
                     "Multipart: Created temporary file " \
                     + std::to_string(m_nfiles) + " (mode o" + std::to_string(m_transaction->m_rules->m_uploadFileMode.m_value) + "): " \
-                    + m_mpp->m_tmp_file_name);
+                    + m_mpp->m_tmp_file->getFilename());
             }
 
             /* write the reserve first */
             if (m_reserve[0] != 0) {
-                if (write(m_mpp->m_tmp_file_fd, &m_reserve[1], m_reserve[0])
+                if (write(m_mpp->m_tmp_file->getFd(), &m_reserve[1], m_reserve[0])
                     != m_reserve[0]) {
                     ms_dbg_a(m_transaction, 1,
                         "Multipart: writing to \"" \
-                        + m_mpp->m_tmp_file_name + "\" failed");
+                        + m_mpp->m_tmp_file->getFilename() + "\" failed");
                     error->assign("Multipart: writing to \"" \
-                        + m_mpp->m_tmp_file_name + "\" failed");
+                        + m_mpp->m_tmp_file->getFilename() + "\" failed");
                     return -1;
                 }
 
@@ -542,14 +609,14 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
 
             /* write data to the file */
 
-            if (write(m_mpp->m_tmp_file_fd, m_buf,
+            if (write(m_mpp->m_tmp_file->getFd(), m_buf,
                 MULTIPART_BUF_SIZE - m_bufleft)
                 != (MULTIPART_BUF_SIZE - m_bufleft)) {
                 ms_dbg_a(m_transaction, 1,
                     "Multipart: writing to \"" \
-                    + m_mpp->m_tmp_file_name + "\" failed");
+                    + m_mpp->m_tmp_file->getFilename() + "\" failed");
                 error->assign("Multipart: writing to \"" \
-                    + m_mpp->m_tmp_file_name + "\" failed");
+                    + m_mpp->m_tmp_file->getFilename() + "\" failed");
                 return -1;
             }
 
@@ -635,6 +702,7 @@ int Multipart::process_part_header(std::string *error, int offset) {
 
     /* Check for nul bytes. */
     len = MULTIPART_BUF_SIZE - m_bufleft;
+    int len_without_termination = len - 1;
     for (i = 0; i < len; i++) {
         if (m_buf[i] == '\0') {
             ms_dbg_a(m_transaction, 1,
@@ -652,6 +720,7 @@ int Multipart::process_part_header(std::string *error, int offset) {
     if (len > 1) {
         if (m_buf[len - 2] == '\r') {
             m_flag_crlf_line = 1;
+            len_without_termination--;
         } else {
             m_flag_lf_line = 1;
         }
@@ -665,6 +734,13 @@ int Multipart::process_part_header(std::string *error, int offset) {
         std::string header_value("");
         int rc;
 
+        /* record the previous completed header */
+        if (!m_mpp->m_last_header_line.empty()) {
+            m_mpp->m_header_lines.push_back(std::make_pair(
+                offset-m_mpp->m_last_header_line.length(), m_mpp->m_last_header_line));
+            m_mpp->m_last_header_line.assign("");
+        }
+
         if (m_mpp->m_headers.count("Content-Disposition") == 0) {
             ms_dbg_a(m_transaction, 1,
                 "Multipart: Part missing Content-Disposition header.");
@@ -675,8 +751,14 @@ int Multipart::process_part_header(std::string *error, int offset) {
         }
         header_value = m_mpp->m_headers.at("Content-Disposition").second;
 
-        rc = parse_content_disposition(header_value.c_str(),
-            m_mpp->m_headers.at("Content-Disposition").first);
+        try {
+            rc = parse_content_disposition(header_value.c_str(),
+                m_mpp->m_headers.at("Content-Disposition").first);
+        } catch (...) {
+            ms_dbg_a(m_transaction, 1,
+                "Multipart: Unexpected error parsing Content-Disposition header.");
+            rc = -99;
+        }
         if (rc < 0) {
             ms_dbg_a(m_transaction, 1,
                 "Multipart: Invalid Content-Disposition header ("
@@ -719,6 +801,7 @@ int Multipart::process_part_header(std::string *error, int offset) {
         }
 
         m_mpp_state = 1;
+        m_mpp_substate_part_data_read = 0;
         m_mpp->m_last_header_name.assign("");
     } else {  /* Header line. */
         if (isspace(m_buf[0])) {
@@ -780,11 +863,20 @@ int Multipart::process_part_header(std::string *error, int offset) {
                 error->assign("Multipart: Part header too long.");
                 return false;
             }
+
+            m_mpp->m_last_header_line = m_mpp->m_last_header_name + ": " + new_value;
         } else {
             char *data;
             std::string header_value;
             std::string header_name;
             /* new header */
+
+            /* record the previous completed header */
+            if (!m_mpp->m_last_header_line.empty()) {
+                m_mpp->m_header_lines.push_back(std::make_pair(
+                    offset-m_mpp->m_last_header_line.length(), m_mpp->m_last_header_line));
+                m_mpp->m_last_header_line.assign("");
+            }
 
             data = m_buf;
             while ((*data != ':') && (*data != '\0')) {
@@ -842,6 +934,11 @@ int Multipart::process_part_header(std::string *error, int offset) {
             ms_dbg_a(m_transaction, 9,
                 "Multipart: Added part header \"" + header_name \
                 + "\" \"" + header_value + "\".");
+            if (len_without_termination > 0) {
+                m_mpp->m_last_header_line.assign(m_buf);
+            } else {
+                m_mpp->m_last_header_line.assign("");
+            }
         }
     }
 
@@ -852,12 +949,17 @@ int Multipart::process_part_header(std::string *error, int offset) {
 int Multipart::process_boundary(int last_part) {
     /* if there was a part being built finish it */
     if (m_mpp != NULL) {
+        /* record all the part header lines from the part into the transaction collection */
+        for (const auto& header_line : m_mpp->m_header_lines) {
+            m_transaction->m_variableMultipartPartHeaders.set(m_mpp->m_name,
+                header_line.second, header_line.first);
+            ms_dbg_a(m_transaction, 9, "Multipart: Added part header line:" + header_line.second );
+        }
+
         /* close the temp file */
-        if ((m_mpp->m_type == MULTIPART_FILE)
-            && (!m_mpp->m_tmp_file_name.empty())
-            && (m_mpp->m_tmp_file_fd != 0)) {
-            close(m_mpp->m_tmp_file_fd);
-            m_mpp->m_tmp_file_fd = -1;
+        if ((m_mpp->m_type == MULTIPART_FILE) && (m_mpp->m_tmp_file)
+            && (m_mpp->m_tmp_file->isValid())) {
+            m_mpp->m_tmp_file->Close();
         }
 
         if (m_mpp->m_type != MULTIPART_FILE) {
@@ -906,6 +1008,7 @@ int Multipart::process_boundary(int last_part) {
         m_mpp = new MultipartPart();
 
         m_mpp_state = 0;
+        m_mpp_substate_part_data_read = 0;
 
         m_reserve[0] = 0;
         m_reserve[1] = 0;
@@ -1033,6 +1136,33 @@ int Multipart::multipart_complete(std::string *error) {
                         m_boundary.size()) == 0)
                     && (*(m_buf + 2 + m_boundary.size()) == '-')
                     && (*(m_buf + 2 + m_boundary.size() + 1) == '-')) {
+                    // these next two checks may result in repeating work from earlier in this fn
+                    // ignore the duplication for now to minimize refactoring
+                    if ((m_crlf_state_buf_end == 2) && (m_flag_lf_line != 1)) {
+                        m_flag_lf_line = 1;
+                        m_transaction->m_variableMultipartLFLine.set(std::to_string(m_flag_lf_line),
+                            m_transaction->m_variableOffset);
+                        m_transaction->m_variableMultipartCrlfLFLines.set(std::to_string(m_flag_crlf_line && m_flag_lf_line),
+                            m_transaction->m_variableOffset);
+                        if (m_flag_crlf_line && m_flag_lf_line) {
+                            ms_dbg_a(m_transaction, 4, "Multipart: Warning: mixed line endings used (CRLF/LF).");
+                        } else if (m_flag_lf_line) {
+                            ms_dbg_a(m_transaction, 4, "Multipart: Warning: incorrect line endings used (LF).");
+                        }
+                        m_transaction->m_variableMultipartStrictError.set(
+                            std::to_string(m_flag_lf_line) , m_transaction->m_variableOffset);
+		    }
+                    if ((m_mpp_substate_part_data_read == 0) && (m_flag_invalid_part != 1)) {
+                        // it looks like the final boundary, but it's where part data should begin
+                        m_flag_invalid_part = 1;
+                        ms_dbg_a(m_transaction, 3, "Multipart: Invalid part (data contains final boundary)");
+                        m_transaction->m_variableMultipartStrictError.set(
+                            std::to_string(m_flag_invalid_part) , m_transaction->m_variableOffset);
+                        m_transaction->m_variableMultipartInvalidPart.set(std::to_string(m_flag_invalid_part),
+                            m_transaction->m_variableOffset);
+                        ms_dbg_a(m_transaction, 4, "Multipart: Warning: invalid part parsing.");
+                    }
+
                     /* Looks like the final boundary - process it. */
                     if (process_boundary(1 /* final */) < 0) {
                         m_flag_error = 1;
@@ -1070,14 +1200,16 @@ int Multipart::multipart_complete(std::string *error) {
         if (m->m_type == MULTIPART_FILE) {
             std::string tmp_name;
             std::string name;
-            if (!m->m_tmp_file_name.empty()) {
-                tmp_name.assign(m->m_tmp_file_name);
+        if (m->m_tmp_file && !m->m_tmp_file->getFilename().empty()) {
+            tmp_name.assign(m->m_tmp_file->getFilename());
+            m_transaction->m_variableFilesTmpNames.set(m->m_tmp_file->getFilename(),
+                m->m_tmp_file->getFilename(), m->m_filenameOffset);
             }
             if (!m->m_filename.empty()) {
                 name.assign(m->m_filename);
             }
 
-            m_transaction->m_variableFiles.set(m->m_filename,
+            m_transaction->m_variableFiles.set(m->m_name,
                 m->m_filename, m->m_filenameOffset);
 
             m_transaction->m_variableFilesNames.set(m->m_name,
@@ -1088,11 +1220,8 @@ int Multipart::multipart_complete(std::string *error) {
                 m->m_tmp_file_size.second,
                 m->m_tmp_file_size.first);
 
-            m_transaction->m_variableFilesTmpContent.set(m->m_filename,
+            m_transaction->m_variableFilesTmpContent.set(m->m_name,
                m->m_value, m->m_valueOffset);
-
-            m_transaction->m_variableFilesTmpNames.set(m->m_tmp_file_name,
-               m->m_tmp_file_name, m->m_filenameOffset);
 
             file_combined_size = file_combined_size + m->m_tmp_file_size.first;
 
@@ -1277,7 +1406,7 @@ bool Multipart::init(std::string *error) {
             /* Quoted. */
             m_boundary.assign(std::string(b + 1, len - 2));
             if (m_boundary.empty()) {
-                return -1;
+                return false;
             }
             m_flag_boundary_quoted = 1;
         } else {
@@ -1310,6 +1439,16 @@ bool Multipart::init(std::string *error) {
             return false;
         }
 
+        /* Some frameworks are known to incorrectly include a charset= parameter */
+        /* after the boundary. Doing so is not RFC-compliant, but we will tolerate it.*/
+        if (boundary_characters_valid(m_boundary.c_str()) != 1) {
+            size_t semicolon_after_boundary = m_boundary.find(';');
+            if (semicolon_after_boundary != std::string::npos) {
+                ms_dbg_a(m_transaction, 3,
+                    "Multipart: Invalid parameter after boundary in C-T (tolerated).");
+                m_boundary = m_boundary.substr(0, semicolon_after_boundary);
+            }
+        }
         /* Validate the characters used in the boundary. */
         if (boundary_characters_valid(m_boundary.c_str()) != 1) {
             m_flag_error = 1;
@@ -1418,70 +1557,80 @@ bool Multipart::process(const std::string& data, std::string *error,
                 if ((strlen(m_buf) >= m_boundary.size() + 2)
                     && (strncmp(m_buf + 2, m_boundary.c_str(),
                         m_boundary.size()) == 0)) {
-                    char *boundary_end = m_buf + 2 + m_boundary.size();
-                    /* if it match, AND there was a matched boundary at least,
-                       set the m_flag_unmatched_boundary flag to 2
-                       this indicates that there were an opened boundary, which
-                       matches the reference, and here is the final boundary.
-                       The flag will differ from 0, so the previous rules ("!@eq 0")
-                       will catch all "errors", without any modification, but we can
-                       use the new, permission mode with "@eq 1"
-                    */
-                    if (m_boundary_count > 0) {
-                        m_flag_unmatched_boundary = 2;
-                    }
-                    int is_final = 0;
+                    if (m_crlf_state_buf_end == 2) {
+                        m_flag_lf_line = 1;
+		    }
+                    if ((m_mpp_substate_part_data_read == 0) && (m_boundary_count > 0)) {
+                        /* string matches our boundary, but it's where part data should begin */
+                        m_flag_invalid_part = 1;
+                        ms_dbg_a(m_transaction, 3, "Multipart: Invalid part (data contains boundary)");
 
-                    /* Is this the final boundary? */
-                    if ((*boundary_end == '-')
-                        && (*(boundary_end + 1)== '-')) {
-                        is_final = 1;
-                        boundary_end += 2;
+                    } else {
+                        char *boundary_end = m_buf + 2 + m_boundary.size();
+                        /* if it match, AND there was a matched boundary at least,
+                           set the m_flag_unmatched_boundary flag to 2
+                           this indicates that there were an opened boundary, which
+                           matches the reference, and here is the final boundary.
+                           The flag will differ from 0, so the previous rules ("!@eq 0")
+                           will catch all "errors", without any modification, but we can
+                           use the new, permission mode with "@eq 1"
+                        */
+                        if (m_boundary_count > 0) {
+                            m_flag_unmatched_boundary = 2;
+                        }
+                        int is_final = 0;
 
-                        if (m_is_complete != 0) {
+                        /* Is this the final boundary? */
+                        if ((*boundary_end == '-')
+                            && (*(boundary_end + 1)== '-')) {
+                            is_final = 1;
+                            boundary_end += 2;
+
+                            if (m_is_complete != 0) {
+                                m_flag_error = 1;
+                                ms_dbg_a(m_transaction, 4,
+                                    "Multipart: Invalid boundary " \
+                                    "(final duplicate).");
+
+                                error->assign("Multipart: Invalid boundary " \
+                                    "(final duplicate).");
+                                return false;
+                            }
+                        }
+
+                        /* Allow for CRLF and LF line endings. */
+                        if (((*boundary_end == '\r')
+                            && (*(boundary_end + 1) == '\n')
+                            && (*(boundary_end + 2) == '\0'))
+                            || ((*boundary_end == '\n')
+                            && (*(boundary_end + 1) == '\0'))) {
+                            if (*boundary_end == '\n') {
+                                m_flag_lf_line = 1;
+                            } else {
+                                m_flag_crlf_line = 1;
+                            }
+
+                            if (process_boundary((is_final ? 1 : 0)) < 0) {
+                                m_flag_error = true;
+                                return false;
+                            }
+
+                            if (is_final) {
+                                m_is_complete = 1;
+                            }
+
+                            processed_as_boundary = 1;
+                            m_boundary_count++;
+                        } else {
+                            /* error */
                             m_flag_error = 1;
                             ms_dbg_a(m_transaction, 4,
-                                "Multipart: Invalid boundary " \
-                                "(final duplicate).");
-
-                            error->assign("Multipart: Invalid boundary " \
-                                "(final duplicate).");
+                                "Multipart: Invalid boundary: " \
+                                + std::string(m_buf));
+                            error->assign("Multipart: Invalid boundary: " \
+                                + std::string(m_buf));
                             return false;
                         }
-                    }
-
-                    /* Allow for CRLF and LF line endings. */
-                    if (((*boundary_end == '\r')
-                        && (*(boundary_end + 1) == '\n')
-                        && (*(boundary_end + 2) == '\0'))
-                        || ((*boundary_end == '\n')
-                        && (*(boundary_end + 1) == '\0'))) {
-                        if (*boundary_end == '\n') {
-                            m_flag_lf_line = 1;
-                        } else {
-                            m_flag_crlf_line = 1;
-                        }
-
-                        if (process_boundary((is_final ? 1 : 0)) < 0) {
-                            m_flag_error = true;
-                            return false;
-                        }
-
-                        if (is_final) {
-                            m_is_complete = 1;
-                        }
-
-                        processed_as_boundary = 1;
-                        m_boundary_count++;
-                    } else {
-                        /* error */
-                        m_flag_error = 1;
-                        ms_dbg_a(m_transaction, 4,
-                            "Multipart: Invalid boundary: " \
-                            + std::string(m_buf));
-                        error->assign("Multipart: Invalid boundary: " \
-                            + std::string(m_buf));
-                        return false;
                     }
                 } else { /* It looks like a boundary but */
                          /* we couldn't match it. */
@@ -1592,7 +1741,24 @@ bool Multipart::process(const std::string& data, std::string *error,
             m_bufptr = m_buf;
             m_bufleft = MULTIPART_BUF_SIZE;
             m_buf_contains_line = (c == 0x0a) ? 1 : 0;
+
+            if (c == 0x0a) {
+                if (m_crlf_state == 1) {
+                    m_crlf_state = 3;
+                } else {
+                    m_crlf_state = 2;
+                }
+            }
+            m_crlf_state_buf_end = m_crlf_state;
+
         }
+
+        if (c == 0x0d) {
+            m_crlf_state = 1;
+        } else if (c != 0x0a) {
+            m_crlf_state = 0;
+        }
+
 
         if ((m_is_complete) && (inleft != 0)) {
             m_flag_data_after = 1;

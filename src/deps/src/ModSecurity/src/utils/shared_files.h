@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -75,12 +75,13 @@ class SharedFiles {
  private:
     SharedFiles()
 #ifdef MODSEC_USE_GENERAL_LOCK
-        : m_generalLock(NULL)
+        : m_generalLock(NULL),
+        m_memKeyStructure(0)
 #endif
     {
 #ifdef MODSEC_USE_GENERAL_LOCK
         int shm_id;
-        bool toBeCreated = true;
+        bool toBeCreated(false);
         bool err = false;
 
         m_memKeyStructure = ftok(".", 1);
@@ -122,7 +123,6 @@ err_shmget1:
 err_shmat1:
             std::cerr << "err_shmat1" << std::endl;
         }
-        toBeCreated = false;
 #endif
     }
     ~SharedFiles() {

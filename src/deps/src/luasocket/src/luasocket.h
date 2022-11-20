@@ -10,7 +10,7 @@
 /*-------------------------------------------------------------------------* \
 * Current socket library version
 \*-------------------------------------------------------------------------*/
-#define LUASOCKET_VERSION    "LuaSocket 3.0-rc1"
+#define LUASOCKET_VERSION    "LuaSocket 3.0.0"
 #define LUASOCKET_COPYRIGHT  "Copyright (C) 1999-2013 Diego Nehab"
 
 /*-------------------------------------------------------------------------*\

@@ -1,4 +1,4 @@
-FROM nginx:1.20.2-alpine AS builder
+FROM nginx:1.22.1-alpine AS builder
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
@@ -21,7 +21,7 @@ RUN apk add --no-cache --virtual build py3-pip && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del build
 
-FROM nginx:1.20.2-alpine
+FROM nginx:1.22.1-alpine
 
 # Copy dependencies
 COPY --from=builder /usr/share/bunkerweb /usr/share/bunkerweb
@@ -43,7 +43,7 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
-RUN apk add --no-cache bash python3 && \
+RUN apk add --no-cache pcre bash python3 && \
 	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 	echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
 	mkdir -p /var/tmp/bunkerweb && \

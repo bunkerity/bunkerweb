@@ -6,7 +6,6 @@ read_SOURCES = \
 	read.cc
 
 read_LDADD = \
-	$(top_builddir)/src/.libs/libmodsecurity.a \
 	$(CURL_LDADD) \
 	$(GEOIP_LDADD) \
 	$(MAXMIND_LDADD) \
@@ -19,7 +18,12 @@ read_LDADD = \
 	$(YAJL_LDADD)
 
 read_LDFLAGS = \
+	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
+	-lmodsecurity \
+	-lpthread \
+	-lm \
+	-lstdc++ \
 	$(LMDB_LDFLAGS) \
 	$(LUA_LDFLAGS) \
 	$(SSDEEP_LDFLAGS) \
@@ -35,6 +39,7 @@ read_CPPFLAGS = \
 	-I../others \
 	-fPIC \
 	-O3 \
+	$(CURL_CFLAGS) \
 	$(GEOIP_CFLAGS) \
 	$(MAXMIND_CFLAGS) \
 	$(GLOBAL_CPPFLAGS) \

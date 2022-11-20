@@ -23,6 +23,7 @@ env:
   matrix:
     - NGINX_VERSION=1.19.3
     - NGINX_VERSION=1.19.9
+    - NGINX_VERSION=1.23.0 WITHOUT_PCRE2=1
 
 before_install:
   - sudo apt-get update -y
@@ -51,3 +52,4 @@ script:
   - export NGX_BUILD_CC=$CC
   - sh util/build.sh $NGINX_VERSION > build.log 2>&1 || (cat build.log && exit 1)
   - prove -I. -r t
+

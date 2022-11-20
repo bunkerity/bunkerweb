@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -31,7 +31,7 @@ bool SetRSC::init(std::string *error) {
 }
 
 
-bool SetRSC::evaluate(Rule *rule, Transaction *t) {
+bool SetRSC::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string colNameExpanded(m_string->evaluate(t));
     ms_dbg_a(t, 8, "RESOURCE initiated with value: \'"
         + colNameExpanded + "\'.");

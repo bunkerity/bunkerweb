@@ -46,6 +46,9 @@
 #include "ngx_http_lua_ssl_certby.h"
 #include "ngx_http_lua_ssl.h"
 #include "ngx_http_lua_log_ringbuf.h"
+#if (NGX_THREADS)
+#include "ngx_http_lua_worker_thread.h"
+#endif
 
 
 #if 1
@@ -373,8 +376,10 @@ ngx_http_lua_new_thread(ngx_http_request_t *r, lua_State *L, int *ref)
                 if (!lua_isnil(L, -1) && !lua_isnil(L, -2)) {
                     n++;
                 }
+
                 lua_pop(L, 1);
             }
+
             lua_pop(L, 1);
 
             ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
@@ -383,10 +388,9 @@ ngx_http_lua_new_thread(ngx_http_request_t *r, lua_State *L, int *ref)
         }
 #endif
 
-    } else {
-#else
-    {
+    } else
 #endif
+    {
         base = lua_gettop(L);
 
         lua_pushlightuserdata(L, ngx_http_lua_lightudata_mask(
@@ -715,6 +719,10 @@ ngx_http_lua_output_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
 
+    if (ctx == NULL) {
+        return rc;
+    }
+
     ngx_chain_update_chains(r->pool,
                             &ctx->free_bufs, &ctx->busy_bufs, &in,
                             (ngx_buf_tag_t) &ngx_http_lua_module);
@@ -776,10 +784,13 @@ ngx_http_lua_init_registry(lua_State *L, ngx_log_t *log)
     lua_rawset(L, LUA_REGISTRYINDEX);
     /* }}} */
 
-    /* create the registry entry for the Lua request ctx data table */
-    lua_pushliteral(L, ngx_http_lua_ctx_tables_key);
-    lua_createtable(L, 0, 32 /* nrec */);
-    lua_rawset(L, LUA_REGISTRYINDEX);
+    /*
+     * the the Lua request ctx data table will create in resty.core.ctx,
+     * just equivalent to the following code:
+     *    lua_pushliteral(L, ngx_http_lua_ctx_tables_key);
+     *    lua_createtable(L, 0, 0);
+     *    lua_rawset(L, LUA_REGISTRYINDEX);
+     */
 
     /* create the registry entry for the Lua socket connection pool table */
     lua_pushlightuserdata(L, ngx_http_lua_lightudata_mask(
@@ -842,6 +853,9 @@ ngx_http_lua_inject_ngx_api(lua_State *L, ngx_http_lua_main_conf_t *lmcf,
     ngx_http_lua_inject_uthread_api(log, L);
     ngx_http_lua_inject_timer_api(L);
     ngx_http_lua_inject_config_api(L);
+#if (NGX_THREADS)
+    ngx_http_lua_inject_worker_thread_api(log, L);
+#endif
 
     lua_getglobal(L, "package"); /* ngx package */
     lua_getfield(L, -1, "loaded"); /* ngx package loaded */
@@ -1017,9 +1031,13 @@ ngx_http_lua_generic_phase_post_read(ngx_http_request_t *r)
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
 
-    ctx->read_body_done = 1;
-
     r->main->count--;
+
+    if (ctx == NULL) {
+        return;
+    }
+
+    ctx->read_body_done = 1;
 
     if (ctx->waiting_more_body) {
         ctx->waiting_more_body = 0;
@@ -2193,6 +2211,7 @@ ngx_http_lua_escape_uri(u_char *dst, u_char *src, size_t size, ngx_uint_t type)
     return (uintptr_t) dst;
 }
 
+
 static int
 ngx_http_lua_util_hex2int(char xdigit)
 {
@@ -2204,18 +2223,19 @@ ngx_http_lua_util_hex2int(char xdigit)
     if (xdigit <= 'f' && xdigit >= 'a') {
         return xdigit - 'a' + 10;
     }
-    
+
     return -1;
 }
+
 
 /* XXX we also decode '+' to ' ' */
 void
 ngx_http_lua_unescape_uri(u_char **dst, u_char **src, size_t size,
     ngx_uint_t type)
 {
-    u_char *d = *dst, *s = *src, *de = (*dst+size);
-    int isuri = type & NGX_UNESCAPE_URI;
-    int isredirect = type & NGX_UNESCAPE_REDIRECT;
+    u_char *d = *dst, *s = *src, *de = (*dst + size);
+    int     isuri = type & NGX_UNESCAPE_URI;
+    int     isredirect = type & NGX_UNESCAPE_REDIRECT;
 
     while (size--) {
         u_char curr = *s++;
@@ -2235,14 +2255,16 @@ ngx_http_lua_unescape_uri(u_char **dst, u_char **src, size_t size,
             /* we can be sure here they must be hex digits */
             ch = ngx_http_lua_util_hex2int(s[0]) * 16 +
                  ngx_http_lua_util_hex2int(s[1]);
-                
+
             if ((isuri || isredirect) && ch == '?') {
                 *d++ = ch;
                 break;
+
             } else if (isredirect && (ch <= '%' || ch >= 0x7f)) {
                 *d++ = '%';
                 continue;
             }
+
             *d++ = ch;
             s += 2;
             size -= 2;
@@ -2255,7 +2277,7 @@ ngx_http_lua_unescape_uri(u_char **dst, u_char **src, size_t size,
             *d++ = curr;
         }
     }
-    
+
     /* a safe guard if dst need to be null-terminated */
     if (d != de) {
         *d = '\0';
@@ -4391,7 +4413,7 @@ ngx_http_lua_copy_escaped_header(ngx_http_request_t *r,
     escape = ngx_http_lua_escape_uri(NULL, data, len, type);
     if (escape > 0) {
         /*
-         * we allocate space for the trailling '\0' char here because nginx
+         * we allocate space for the trailing '\0' char here because nginx
          * header values must be null-terminated
          */
         dst->data = ngx_palloc(r->pool, len + 2 * escape + 1);

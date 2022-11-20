@@ -41,9 +41,6 @@ local SCHEMES = {
             https.tcp, 'LuaSocket: Function tcp() not available from LuaSec')
           return tcp(t) end }}
 
--- default scheme and port for document retrieval
-local SCHEME = 'http'
-local PORT = SCHEMES[SCHEME].port
 -----------------------------------------------------------------------------
 -- Reads MIME headers from a connection, unfolding where needed
 -----------------------------------------------------------------------------
@@ -92,7 +89,7 @@ socket.sourcet["http-chunked"] = function(sock, headers)
             -- was it the last chunk?
             if size > 0 then
                 -- if not, get chunk and skip terminating CRLF
-                local chunk, err, part = sock:receive(size)
+                local chunk, err, _ = sock:receive(size)
                 if chunk then sock:receive() end
                 return chunk, err
             else
@@ -166,8 +163,8 @@ function metat.__index:receivestatusline()
     if status ~= "HTTP/" then
         if ec == "timeout" then
             return 408
-        end 
-        return nil, status 
+        end
+        return nil, status
     end
     -- otherwise proceed reading a status line
     status = self.try(self.c:receive("*l", status))
@@ -286,6 +283,13 @@ local function adjustrequest(reqt)
     nreqt.uri = reqt.uri or adjusturi(nreqt)
     -- adjust headers in request
     nreqt.headers = adjustheaders(nreqt)
+    if nreqt.source
+        and not nreqt.headers["content-length"]
+        and not nreqt.headers["transfer-encoding"]
+    then
+        nreqt.headers["transfer-encoding"] = "chunked"
+    end
+
     -- ajust host and port if there is a proxy
     nreqt.host, nreqt.port = adjustproxy(nreqt)
     return nreqt
@@ -366,7 +370,7 @@ end
     local headers
     -- ignore any 100-continue messages
     while code == 100 do
-        headers = h:receiveheaders()
+        h:receiveheaders()
         code, status = h:receivestatusline()
     end
     headers = h:receiveheaders()

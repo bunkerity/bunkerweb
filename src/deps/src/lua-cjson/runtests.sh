@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
+set -eo pipefail
 
 PLATFORM="`uname -s`"
 [ "$1" ] && VERSION="$1" || VERSION="2.1devel"
 
-set -e
 
 # Portable "ggrep -A" replacement.
 # Work around Solaris awk record limit of 2559 bytes.
@@ -39,7 +39,7 @@ then
 Please ensure you do not have the Lua CJSON module installed before
 running these tests.
 EOT
-    exit
+    exit 1
 fi
 cd ..
 
@@ -50,20 +50,26 @@ luarocks remove --local lua-cjson
 make clean
 
 echo "===== Testing Makefile build ====="
-make
+make "$@"
 cp -r lua/cjson cjson.so tests
 do_tests
 make clean
 rm -rf tests/cjson{,.so}
 
-echo "===== Testing Cmake build ====="
-mkdir build
-cd build
-cmake ..
-make
-cd ..
-cp -r lua/cjson build/cjson.so tests
-do_tests
-rm -rf build tests/cjson{,.so}
+
+if [ -z "$SKIP_CMAKE" ]; then
+    echo "===== Testing Cmake build ====="
+    mkdir build
+    cd build
+    cmake ..
+    make
+    cd ..
+    cp -r lua/cjson build/cjson.so tests
+    do_tests
+    rm -rf build tests/cjson{,.so}
+else
+    echo "===== Skipping Cmake build ====="
+fi
+
 
 # vi:ai et sw=4 ts=4:

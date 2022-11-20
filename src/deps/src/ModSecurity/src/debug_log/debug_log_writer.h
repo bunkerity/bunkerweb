@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -40,9 +40,9 @@ class DebugLogWriter {
         return instance;
     }
 
-    void write_log(const std::string& file, const std::string& msg);
-    void close(const std::string& m_fileName);
-    int open(const std::string& m_fileName, std::string *error);
+    static void write_log(const std::string& file, const std::string& msg);
+    static void close(const std::string& m_fileName);
+    static int open(const std::string& m_fileName, std::string *error);
 
  private:
     DebugLogWriter() : m_first(NULL) { }

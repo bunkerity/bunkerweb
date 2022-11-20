@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,17 +15,18 @@
 
 #include "src/operators/verify_cc.h"
 
-#include <pcre.h>
 #include <iostream>
 #include <cstring>
 #include <vector>
 
 #include "src/operators/operator.h"
 
+#ifndef WITH_PCRE2
 #if PCRE_HAVE_JIT
 #define pcre_study_opt PCRE_STUDY_JIT_COMPILE
 #else
 #define pcre_study_opt 0
+#endif
 #endif
 
 
@@ -33,6 +34,9 @@ namespace modsecurity {
 namespace operators {
 
 VerifyCC::~VerifyCC() {
+#if WITH_PCRE2
+    pcre2_code_free(m_pc);
+#else
     if (m_pc != NULL) {
         pcre_free(m_pc);
         m_pc = NULL;
@@ -45,6 +49,7 @@ VerifyCC::~VerifyCC() {
 #endif
         m_pce = NULL;
     }
+#endif
 }
 
 /**
@@ -90,6 +95,17 @@ int VerifyCC::luhnVerify(const char *ccnumber, int len) {
 
 
 bool VerifyCC::init(const std::string &param2, std::string *error) {
+#ifdef WITH_PCRE2
+    PCRE2_SPTR pcre2_pattern = reinterpret_cast<PCRE2_SPTR>(m_param.c_str());
+    uint32_t pcre2_options = (PCRE2_DOTALL|PCRE2_MULTILINE);
+    int errornumber = 0;
+    PCRE2_SIZE erroroffset = 0;
+    m_pc = pcre2_compile(pcre2_pattern, PCRE2_ZERO_TERMINATED,
+        pcre2_options, &errornumber, &erroroffset, NULL);
+    if (m_pc == NULL) {
+        return false;
+    }
+#else
     const char *errptr = NULL;
     int erroffset = 0;
 
@@ -112,19 +128,34 @@ bool VerifyCC::init(const std::string &param2, std::string *error) {
         error->assign(errptr);
         return false;
     }
+#endif
 
     return true;
 }
 
 
-bool VerifyCC::evaluate(Transaction *t, Rule *rule,
+bool VerifyCC::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& i, std::shared_ptr<RuleMessage> ruleMessage) {
+#ifdef WITH_PCRE2
+    PCRE2_SIZE offset = 0;
+    size_t target_length = i.length();
+    PCRE2_SPTR pcre2_i = reinterpret_cast<PCRE2_SPTR>(i.c_str());
+    pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(m_pc, NULL);
+
+    for (offset = 0; offset < target_length; offset++) {
+        int ret = pcre2_match(m_pc, pcre2_i, target_length, offset, 0, match_data, NULL);
+
+        /* If there was no match, then we are done. */
+        if (ret < 0) {
+            break;
+        }
+	PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
+
+#else
     int offset = 0;
-    bool is_cc = false;
     int target_length = i.length();
 
     for (offset = 0; offset < target_length; offset++) {
-        std::string match;
         int ovector[33];
         memset(ovector, 0, sizeof(ovector));
         int ret = pcre_exec(m_pc, m_pce, i.c_str(), i.size(), offset,
@@ -137,12 +168,13 @@ bool VerifyCC::evaluate(Transaction *t, Rule *rule,
         if (ret < 0) {
             return false;
         }
+#endif
         if (ret > 0) {
-            match = std::string(i, ovector[0], ovector[1] - ovector[0]);
-            is_cc = luhnVerify(match.c_str(), match.size());
+            std::string match = std::string(i, ovector[0], ovector[1] - ovector[0]);
+            int is_cc = luhnVerify(match.c_str(), match.size());
             if (is_cc) {
                 if (t) {
-                    if (rule && t && rule->m_containsCaptureAction) {
+                    if (rule && rule->hasCaptureAction()) {
                         t->m_collections.m_tx_collection->storeOrUpdateFirst(
                             "0", std::string(match));
                         ms_dbg_a(t, 7, "Added VerifyCC match TX.0: " + \
@@ -152,10 +184,17 @@ bool VerifyCC::evaluate(Transaction *t, Rule *rule,
                         "\" at " + i + ". [offset " +
                         std::to_string(offset) + "]");
                 }
+#ifdef WITH_PCRE2
+                pcre2_match_data_free(match_data);
+#endif
                 return true;
             }
         }
     }
+
+#ifdef WITH_PCRE2
+    pcre2_match_data_free(match_data);
+#endif
 
     return false;
 }

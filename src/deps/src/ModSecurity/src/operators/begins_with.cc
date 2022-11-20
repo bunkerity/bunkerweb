@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -24,7 +24,7 @@ namespace modsecurity {
 namespace operators {
 
 
-bool BeginsWith::evaluate(Transaction *transaction, Rule *rule,
+bool BeginsWith::evaluate(Transaction *transaction, RuleWithActions *rule,
     const std::string &str, std::shared_ptr<RuleMessage> ruleMessage) {
     std::string p(m_string->evaluate(transaction));
 

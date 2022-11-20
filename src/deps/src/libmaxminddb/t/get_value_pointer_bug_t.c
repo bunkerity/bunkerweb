@@ -47,9 +47,9 @@ void test_one_ip(MMDB_s *mmdb,
 
 void run_tests(int mode, const char *mode_desc) {
     const char *filename = "GeoIP2-City-Test.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     /* This exercises a bug where the entire top-level value is a pointer to
      * another part of the data section. */

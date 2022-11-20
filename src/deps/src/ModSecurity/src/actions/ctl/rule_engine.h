@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 #include <string>
 
+#include "modsecurity/rules_set_properties.h"
 #include "modsecurity/actions/action.h"
 #include "modsecurity/transaction.h"
-#include "modsecurity/rules_properties.h"
 
 
 #ifndef SRC_ACTIONS_CTL_RULE_ENGINE_H_
@@ -30,14 +30,14 @@ namespace ctl {
 
 class RuleEngine : public Action {
  public:
-    explicit RuleEngine(std::string action)
+    explicit RuleEngine(const std::string &action) 
         : Action(action, RunTimeOnlyIfMatchKind),
-        m_ruleEngine(RulesProperties::PropertyNotSetRuleEngine) { }
+        m_ruleEngine(RulesSetProperties::PropertyNotSetRuleEngine) { }
 
     bool init(std::string *error) override;
-    bool evaluate(Rule *rule, Transaction *transaction) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
 
-    RulesProperties::RuleEngine m_ruleEngine;
+    RulesSetProperties::RuleEngine m_ruleEngine;
 };
 
 

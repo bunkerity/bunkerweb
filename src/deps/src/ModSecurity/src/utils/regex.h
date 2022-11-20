@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -12,13 +12,18 @@
  * directly using the email address security@modsecurity.org.
  *
  */
-
+#if WITH_PCRE2
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+#else
 #include <pcre.h>
+#endif
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <list>
+#include <vector>
 
 #ifndef SRC_UTILS_REGEX_H_
 #define SRC_UTILS_REGEX_H_
@@ -47,24 +52,43 @@ class SMatch {
     size_t m_offset;
 };
 
+struct SMatchCapture {
+    SMatchCapture(size_t group, size_t offset, size_t length) :
+	m_group(group),
+	m_offset(offset),
+	m_length(length) { }
+
+    size_t m_group; // E.g. 0 = full match; 6 = capture group 6
+    size_t m_offset; // offset of match within the analyzed string
+    size_t m_length;
+};
 
 class Regex {
  public:
-    explicit Regex(const std::string& pattern_);
+    explicit Regex(const std::string& pattern_, bool ignoreCase = false);
     ~Regex();
 
     // m_pc and m_pce can't be easily copied
     Regex(const Regex&) = delete;
     Regex& operator=(const Regex&) = delete;
 
+    bool hasError() const {
+        return (m_pc == NULL);
+    }
     std::list<SMatch> searchAll(const std::string& s) const;
-    int search(const std::string &s, SMatch *m) const;
+    bool searchOneMatch(const std::string& s, std::vector<SMatchCapture>& captures) const;
+    bool searchGlobal(const std::string& s, std::vector<SMatchCapture>& captures) const;
+    int search(const std::string &s, SMatch *match) const;
     int search(const std::string &s) const;
 
     const std::string pattern;
  private:
+#if WITH_PCRE2
+    pcre2_code *m_pc;
+#else
     pcre *m_pc = NULL;
     pcre_extra *m_pce = NULL;
+#endif
 };
 
 

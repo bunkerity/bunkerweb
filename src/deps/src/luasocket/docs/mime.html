@@ -1,0 +1,477 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<meta name="description" content="LuaSocket: MIME support">
+<meta name="keywords" content="Lua, LuaSocket, MIME, Library, Support">
+<title>LuaSocket: MIME module</title>
+<link rel="stylesheet" href="reference.css" type="text/css">
+</head>
+
+<body>
+
+<!-- header +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class="header">
+<hr>
+<center>
+<table summary="LuaSocket logo">
+<tr><td align="center"><a href="http://www.lua.org">
+<img width="128" height="128" border="0" alt="LuaSocket" src="luasocket.png">
+</a></td></tr>
+<tr><td align="center" valign="top">Network support for the Lua language
+</td></tr>
+</table>
+<p class="bar">
+<a href="index.html">home</a> &middot;
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+</center>
+<hr>
+</div>
+
+<!-- mime +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id="mime">MIME</h2>
+
+<p>
+The <tt>mime</tt> namespace offers filters that apply and remove common
+content transfer encodings, such as Base64 and Quoted-Printable.
+It also provides functions to break text into lines and change
+the end-of-line convention.
+MIME is described mainly in
+<a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>,
+<a href="http://www.ietf.org/rfc/rfc2046.txt">2046</a>,
+<a href="http://www.ietf.org/rfc/rfc2047.txt">2047</a>,
+<a href="http://www.ietf.org/rfc/rfc2047.txt">2048</a>, and
+<a href="http://www.ietf.org/rfc/rfc2048.txt">2049</a>.
+</p>
+
+<p>
+All functionality provided by the MIME module
+follows the ideas presented in
+<a href="http://lua-users.org/wiki/FiltersSourcesAndSinks">
+LTN012, Filters sources and sinks</a>.
+</p>
+
+<p>
+To obtain the <tt>mime</tt> namespace, run:
+</p>
+
+<pre class="example">
+-- loads the MIME module and everything it requires
+local mime = require("mime")
+</pre>
+
+
+<!-- High-level +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id="high">High-level filters</h3>
+
+
+<!-- decode +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="decode">
+mime.<b>decode(</b>"base64"<b>)</b><br>
+mime.<b>decode(</b>"quoted-printable"<b>)</b>
+</p>
+
+<p class="description">
+Returns a filter that decodes data from a given transfer content
+encoding.
+</p>
+
+<!-- encode +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="encode">
+mime.<b>encode(</b>"base64"<b>)</b><br>
+mime.<b>encode(</b>"quoted-printable" [, mode]<b>)</b>
+</p>
+
+<p class="description">
+Returns a filter that encodes data according to a given transfer content
+encoding.
+</p>
+
+<p class="parameters">
+In the Quoted-Printable case, the user can specify whether the data is
+textual or binary, by passing the <tt>mode</tt> strings "<tt>text</tt>" or
+"<tt>binary</tt>". <tt>Mode</tt> defaults to "<tt>text</tt>".
+</p>
+
+<p class="note">
+Although both transfer content encodings specify a limit for the line
+length, the encoding filters do <em>not</em> break text into lines (for
+added flexibility).
+Below is a filter that converts binary data to the Base64 transfer content
+encoding and breaks it into lines of the correct size.
+</p>
+
+<pre class="example">
+base64 = ltn12.filter.chain(
+  mime.encode("base64"),
+  mime.wrap("base64")
+)
+</pre>
+
+<p class="note">
+Note: Text data <em>has</em> to be converted to canonic form
+<em>before</em> being encoded.
+</p>
+
+<pre class="example">
+base64 = ltn12.filter.chain(
+  mime.normalize(),
+  mime.encode("base64"),
+  mime.wrap("base64")
+)
+</pre>
+
+<!-- normalize ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="normalize">
+mime.<b>normalize(</b>[marker]<b>)</b>
+</p>
+
+<p class="description">
+Converts most common end-of-line markers to a specific given marker.
+</p>
+
+<p class="parameters">
+<tt>Marker</tt> is the new marker. It defaults to CRLF, the canonic
+end-of-line marker defined by the MIME standard.
+</p>
+
+<p class="return">
+The function returns a filter that performs the conversion.
+</p>
+
+<p class="note">
+Note: There is no perfect solution to this problem. Different end-of-line
+markers are an evil that will probably plague developers forever.
+This function, however, will work perfectly for text created with any of
+the most common end-of-line markers, i.e. the Mac OS (CR), the Unix (LF),
+or the DOS (CRLF) conventions. Even if the data has mixed end-of-line
+markers, the function will still work well, although it doesn't
+guarantee that the number of empty lines will be correct.
+</p>
+
+<!-- stuff +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="stuff">
+mime.<b>stuff()</b><br>
+</p>
+
+<p class="description">
+Creates and returns a filter that performs stuffing of SMTP messages.
+</p>
+
+<p class="note">
+Note: The <a href="smtp.html#send"><tt>smtp.send</tt></a> function
+uses this filter automatically. You don't need to chain it with your
+source, or apply it to your message body.
+</p>
+
+<!-- wrap +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="wrap">
+mime.<b>wrap(</b>"text" [, length]<b>)</b><br>
+mime.<b>wrap(</b>"base64"<b>)</b><br>
+mime.<b>wrap(</b>"quoted-printable"<b>)</b>
+</p>
+
+<p class="description">
+Returns a filter that breaks data into lines.
+</p>
+
+<p class="parameters">
+The "<tt>text</tt>" line-wrap filter simply breaks text into lines by
+inserting CRLF end-of-line markers at appropriate positions.
+<tt>Length</tt> defaults 76.
+The "<tt>base64</tt>" line-wrap filter works just like the default
+"<tt>text</tt>" line-wrap filter with default length.
+The function can also wrap "<tt>quoted-printable</tt>" lines, taking care
+not to break lines in the middle of an escaped character. In that case, the
+line length is fixed at 76.
+</p>
+
+<p class="note">
+For example, to create an encoding filter for the Quoted-Printable transfer content encoding of text data, do the following:
+</p>
+
+<pre class="example">
+qp = ltn12.filter.chain(
+  mime.normalize(),
+  mime.encode("quoted-printable"),
+  mime.wrap("quoted-printable")
+)
+</pre>
+
+<p class="note">
+Note: To break into lines with a different end-of-line convention, apply
+a normalization filter after the line break filter.
+</p>
+
+<!-- Low-level ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id="low">Low-level filters</h3>
+
+<!-- b64 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="b64">
+A, B = mime.<b>b64(</b>C [, D]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to perform Base64 encoding.
+</p>
+
+<p class="description">
+<tt>A</tt> is the encoded version of the largest prefix of
+<tt>C..D</tt>
+that can be encoded unambiguously. <tt>B</tt> has the remaining bytes of
+<tt>C..D</tt>, <em>before</em> encoding.
+If <tt>D</tt> is <tt><b>nil</b></tt>, <tt>A</tt> is padded with
+the encoding of the remaining bytes of <tt>C</tt>.
+</p>
+
+<p class="note">
+Note: The simplest use of this function is to encode a string into it's
+Base64 transfer content encoding. Notice the extra parenthesis around the
+call to <tt>mime.b64</tt>, to discard the second return value.
+</p>
+
+<pre class="example">
+print((mime.b64("diego:password")))
+--&gt; ZGllZ286cGFzc3dvcmQ=
+</pre>
+
+<!-- dot +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<p class="name" id="dot">
+A, n = mime.<b>dot(</b>m [, B]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to perform SMTP stuffing and enable transmission of
+messages containing the sequence "CRLF.CRLF".
+</p>
+
+<p class="parameters">
+<tt>A</tt> is the stuffed version of <tt>B</tt>. '<tt>n</tt>' gives the
+number of characters from the sequence CRLF seen in the end of <tt>B</tt>.
+'<tt>m</tt>' should tell the same, but for the previous chunk.
+</p>
+
+<p class="note">Note: The message body is defined to begin with
+an implicit CRLF. Therefore, to stuff a message correctly, the
+first <tt>m</tt> should have the value 2.
+</p>
+
+<pre class="example">
+print((string.gsub(mime.dot(2, ".\r\nStuffing the message.\r\n.\r\n."), "\r\n", "\\n")))
+--&gt; ..\nStuffing the message.\n..\n..
+</pre>
+
+<p class="note">
+Note: The <a href="smtp.html#send"><tt>smtp.send</tt></a> function
+uses this filter automatically. You don't need to
+apply it again.
+</p>
+
+<!-- eol ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="eol">
+A, B = mime.<b>eol(</b>C [, D, marker]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to perform end-of-line marker translation.
+For each chunk, the function needs to know if the last character of the
+previous chunk could be part of an end-of-line marker or not. This is the
+context the function receives besides the chunk.  An updated version of
+the context is returned after each new chunk.
+</p>
+
+<p class="parameters">
+<tt>A</tt> is the translated version of <tt>D</tt>. <tt>C</tt> is the
+ASCII value of the last character of the previous chunk, if it was a
+candidate for line break, or 0 otherwise.
+<tt>B</tt> is the same as <tt>C</tt>, but for the current
+chunk. <tt>Marker</tt> gives the new end-of-line marker and defaults to CRLF.
+</p>
+
+<pre class="example">
+-- translates the end-of-line marker to UNIX
+unix = mime.eol(0, dos, "\n")
+</pre>
+
+<!-- qp ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="qp">
+A, B = mime.<b>qp(</b>C [, D, marker]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to perform Quoted-Printable encoding.
+</p>
+
+<p class="parameters">
+<tt>A</tt> is the encoded version of the largest prefix of
+<tt>C..D</tt>
+that can be encoded unambiguously. <tt>B</tt> has the remaining bytes of
+<tt>C..D</tt>, <em>before</em> encoding.
+If <tt>D</tt> is <tt><b>nil</b></tt>, <tt>A</tt> is padded with
+the encoding of the remaining bytes of <tt>C</tt>.
+Throughout encoding, occurrences of CRLF are replaced by the
+<tt>marker</tt>, which itself defaults to CRLF.
+</p>
+
+<p class="note">
+Note: The simplest use of this function is to encode a string into it's
+Quoted-Printable transfer content encoding.
+Notice the extra parenthesis around the call to <tt>mime.qp</tt>, to discard the second return value.
+</p>
+
+<pre class="example">
+print((mime.qp("ma��")))
+--&gt; ma=E7=E3=
+</pre>
+
+<!-- qpwrp ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="qpwrp">
+A, m = mime.<b>qpwrp(</b>n [, B, length]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to break Quoted-Printable text into lines.
+</p>
+
+<p class="parameters">
+<tt>A</tt> is a copy of <tt>B</tt>, broken into lines of at most
+<tt>length</tt> bytes (defaults to 76).
+'<tt>n</tt>' should tell how many bytes are left for the first
+line of <tt>B</tt> and '<tt>m</tt>' returns the number of bytes
+left in the last line of <tt>A</tt>.
+</p>
+
+<p class="note">
+Note: Besides breaking text into lines, this function makes sure the line
+breaks don't fall in the middle of an escaped character combination. Also,
+this function only breaks lines that are bigger than <tt>length</tt> bytes.
+</p>
+
+<!-- unb64 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="unb64">
+A, B = mime.<b>unb64(</b>C [, D]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to perform Base64 decoding.
+</p>
+
+<p class="parameters">
+<tt>A</tt> is the decoded version of the largest prefix of
+<tt>C..D</tt>
+that can be decoded unambiguously. <tt>B</tt> has the remaining bytes of
+<tt>C..D</tt>, <em>before</em> decoding.
+If <tt>D</tt> is <tt><b>nil</b></tt>, <tt>A</tt> is the empty string
+and <tt>B</tt> returns whatever couldn't be decoded.
+</p>
+
+<p class="note">
+Note: The simplest use of this function is to decode a string from it's
+Base64 transfer content encoding.
+Notice the extra parenthesis around the call to <tt>mime.unqp</tt>, to discard the second return value.
+</p>
+
+<pre class="example">
+print((mime.unb64("ZGllZ286cGFzc3dvcmQ=")))
+--&gt; diego:password
+</pre>
+
+<!-- unqp +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="unqp">
+A, B = mime.<b>unqp(</b>C [, D]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to remove the Quoted-Printable transfer content encoding
+from data.
+</p>
+
+<p class="parameters">
+<tt>A</tt> is the decoded version of the largest prefix of
+<tt>C..D</tt>
+that can be decoded unambiguously. <tt>B</tt> has the remaining bytes of
+<tt>C..D</tt>, <em>before</em> decoding.
+If <tt>D</tt> is <tt><b>nil</b></tt>, <tt>A</tt> is augmented with
+the encoding of the remaining bytes of <tt>C</tt>.
+</p>
+
+<p class="note">
+Note: The simplest use of this function is to decode a string from it's
+Quoted-Printable transfer content encoding.
+Notice the extra parenthesis around the call to <tt>mime.unqp</tt>, to discard the second return value.
+</p>
+
+<pre class="example">
+print((mime.qp("ma=E7=E3=")))
+--&gt; ma��
+</pre>
+
+<!-- wrp ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="wrp">
+A, m = mime.<b>wrp(</b>n [, B, length]<b>)</b>
+</p>
+
+<p class="description">
+Low-level filter to break text into lines with CRLF marker.
+Text is assumed to be in the <a href="#normalize"><tt>normalize</tt></a> form.
+</p>
+
+<p class="parameters">
+<tt>A</tt> is a copy of <tt>B</tt>, broken into lines of at most
+<tt>length</tt> bytes (defaults to 76).
+'<tt>n</tt>' should tell how many bytes are left for the first
+line of <tt>B</tt> and '<tt>m</tt>' returns the number of bytes
+left in the last line of <tt>A</tt>.
+</p>
+
+<p class="note">
+Note: This function only breaks lines that are bigger than
+<tt>length</tt> bytes. The resulting line length does not include the CRLF
+marker.
+</p>
+
+
+<!-- footer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class="footer">
+<hr>
+<center>
+<p class="bar">
+<a href="index.html">home</a> &middot;
+<a href="index.html#down">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+<p>
+<small>
+Last modified by Diego Nehab on <br>
+Fri Mar  4 15:19:17 BRT 2016
+</small>
+</p>
+</center>
+</div>
+
+</body>
+</html>

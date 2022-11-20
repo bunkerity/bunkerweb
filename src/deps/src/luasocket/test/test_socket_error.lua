@@ -19,7 +19,7 @@ for i = 1, 10 do
     assert(ss == sock)
   else
     assert('timeout' == err, 'unexpected error :' .. tostring(err))
-  end 
+  end
   err = sock:getoption("error") -- i get 'connection refused' on WinXP
   if err then
     print("Passed! Error is '" .. err .. "'.")

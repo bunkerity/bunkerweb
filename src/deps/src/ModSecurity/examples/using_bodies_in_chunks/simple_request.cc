@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -19,12 +19,13 @@
 
 
 #include <modsecurity/modsecurity.h>
-#include <modsecurity/rules.h>
+#include <modsecurity/rules_set.h>
 #include <modsecurity/rule_message.h>
 
 
 #include <string>
 #include <memory>
+
 
 
 
@@ -125,17 +126,15 @@ int process_intervention(modsecurity::Transaction *transaction) {
 
 int main(int argc, char **argv) {
     modsecurity::ModSecurity *modsec;
-    modsecurity::Rules *rules;
-    modsecurity::ModSecurityIntervention it;
+    modsecurity::RulesSet *rules;
 
     if (argc < 2) {
         std::cout << "Use " << *argv << " test-case-file.conf";
         std::cout << std::endl << std::endl;
         return -1;
     }
-    *(argv++);
-
-    std::string rules_arg(*argv);
+    char *rule = *(++argv);
+    std::string rules_arg(rule);
 
     /**
      * ModSecurity initial setup
@@ -151,7 +150,7 @@ int main(int argc, char **argv) {
      * loading the rules....
      *
      */
-    rules = new modsecurity::Rules();
+    rules = new modsecurity::RulesSet();
     if (rules->loadFromUri(rules_arg.c_str()) < 0) {
         std::cout << "Problems loading the rules..." << std::endl;
         std::cout << rules->m_parserError.str() << std::endl;

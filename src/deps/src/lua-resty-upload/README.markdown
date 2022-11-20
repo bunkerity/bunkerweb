@@ -41,7 +41,7 @@ Synopsis
 ========
 
 ```lua
-    lua_package_path "/path/to/lua-resty-redis/lib/?.lua;;";
+    lua_package_path "/path/to/lua-resty-upload/lib/?.lua;;";
 
     server {
         location /test {
@@ -161,10 +161,23 @@ not want to save the data on local file systems.
 
 [Back to TOC](#table-of-contents)
 
+Usage
+=====
+
+```lua
+local upload = require "resty.upload"
+local form, err = upload:new(self, chunk_size, max_line_size, preserve_body)
+```
+`chunk_size` defaults to 4096. It is the size used to read data from the socket.
+
+`max_line_size` defaults to 512. It is the size limit to read the chunked body header.
+
+By Default, `lua-resty-upload` will consume the request body. For proxy mode this means upstream will not see the body. When `preserve_body` is set to true, the request body will be preserved. Note that this option is not free. When enabled, it will double the memory usage of `resty.upload`.
+
 Author
 ======
 
-Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
+Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, OpenResty Inc.
 
 [Back to TOC](#table-of-contents)
 
@@ -173,7 +186,7 @@ Copyright and License
 
 This module is licensed under the BSD license.
 
-Copyright (C) 2012-2016, by Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
+Copyright (C) 2012-2017, by Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, OpenResty Inc.
 
 All rights reserved.
 

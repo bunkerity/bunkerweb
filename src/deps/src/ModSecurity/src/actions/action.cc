@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -45,13 +45,13 @@ namespace modsecurity {
 namespace actions {
 
 
-std::string Action::evaluate(std::string value,
+std::string Action::evaluate(const std::string &value,
     Transaction *transaction) {
     return value;
 }
 
 
-bool Action::evaluate(Rule *rule, Transaction *transaction) {
+bool Action::evaluate(RuleWithActions *rule, Transaction *transaction) {
     return true;
 }
 

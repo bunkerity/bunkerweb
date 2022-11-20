@@ -29,7 +29,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
 
-    - run: sudo apt install libipc-run3-perl libfile-slurp-perl libfile-which-perl pandoc
+    - run: sudo apt install libipc-run3-perl libipc-system-simple-perl libfile-slurp-perl libfile-which-perl pandoc
     - run: |
             ./bootstrap
             ./configure

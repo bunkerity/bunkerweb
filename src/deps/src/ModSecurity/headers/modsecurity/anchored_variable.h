@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -42,7 +42,19 @@ class Transaction;
 
 class AnchoredVariable {
  public:
-    AnchoredVariable(Transaction* t, std::string name);
+    AnchoredVariable(Transaction* t, const std::string &name);
+
+    AnchoredVariable(const AnchoredVariable &a) = delete;
+    AnchoredVariable &operator= (const AnchoredVariable &a) = delete;
+
+    /*
+        : m_transaction(a.m_transaction),
+        m_offset(a.m_offset),
+        m_name(a.m_name),
+        m_value(a.m_value),
+        m_var(a.m_var) { }
+    */
+
     ~AnchoredVariable();
 
     void unset();

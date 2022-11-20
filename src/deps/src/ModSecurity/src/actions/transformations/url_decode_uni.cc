@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -25,12 +25,12 @@
 #include <locale>
 #include <cstring>
 
+#include "modsecurity/rules_set_properties.h"
+#include "modsecurity/rules_set.h"
 #include "modsecurity/transaction.h"
 #include "src/actions/transformations/transformation.h"
 #include "src/utils/string.h"
 #include "src/utils/system.h"
-#include "modsecurity/rules.h"
-#include "modsecurity/rules_properties.h"
 
 
 namespace modsecurity {
@@ -38,7 +38,7 @@ namespace actions {
 namespace transformations {
 
 
-std::string UrlDecodeUni::evaluate(std::string value,
+std::string UrlDecodeUni::evaluate(const std::string &value,
     Transaction *t) {
     std::string ret;
     unsigned char *input;
@@ -108,7 +108,7 @@ int UrlDecodeUni::inplace(unsigned char *input, uint64_t input_len,
                             }
 
                             if (Code >= 0 && Code <= 65535)  {
-                                Rules *r = t->m_rules;
+                                RulesSet *r = t->m_rules;
                                 hmap = r->m_unicodeMapTable.m_unicodeMapTable->at(Code);
                             }
                         }

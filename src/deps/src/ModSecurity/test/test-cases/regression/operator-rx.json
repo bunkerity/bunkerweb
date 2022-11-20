@@ -85,5 +85,47 @@
       "SecRuleEngine On",
       "SecRule REQUEST_HEADERS:Content-Length \"!^0$\" \"id:1,phase:2,pass,t:trim,block\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Operator :: @rx with non-compiling pattern",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"HEAD",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Error with regular expression"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Content-Type \"@rx a(b\" \"id:1,phase:2,pass,t:trim,block\""
+    ]
   }
 ]

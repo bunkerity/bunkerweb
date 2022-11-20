@@ -125,20 +125,21 @@ typedef struct {
 
 
 /* must be within 16 bit */
-#define NGX_HTTP_LUA_CONTEXT_SET            0x0001
-#define NGX_HTTP_LUA_CONTEXT_REWRITE        0x0002
-#define NGX_HTTP_LUA_CONTEXT_ACCESS         0x0004
-#define NGX_HTTP_LUA_CONTEXT_CONTENT        0x0008
-#define NGX_HTTP_LUA_CONTEXT_LOG            0x0010
-#define NGX_HTTP_LUA_CONTEXT_HEADER_FILTER  0x0020
-#define NGX_HTTP_LUA_CONTEXT_BODY_FILTER    0x0040
-#define NGX_HTTP_LUA_CONTEXT_TIMER          0x0080
-#define NGX_HTTP_LUA_CONTEXT_INIT_WORKER    0x0100
-#define NGX_HTTP_LUA_CONTEXT_BALANCER       0x0200
-#define NGX_HTTP_LUA_CONTEXT_SSL_CERT       0x0400
-#define NGX_HTTP_LUA_CONTEXT_SSL_SESS_STORE 0x0800
-#define NGX_HTTP_LUA_CONTEXT_SSL_SESS_FETCH 0x1000
-#define NGX_HTTP_LUA_CONTEXT_EXIT_WORKER    0x2000
+#define NGX_HTTP_LUA_CONTEXT_SET                0x0001
+#define NGX_HTTP_LUA_CONTEXT_REWRITE            0x0002
+#define NGX_HTTP_LUA_CONTEXT_ACCESS             0x0004
+#define NGX_HTTP_LUA_CONTEXT_CONTENT            0x0008
+#define NGX_HTTP_LUA_CONTEXT_LOG                0x0010
+#define NGX_HTTP_LUA_CONTEXT_HEADER_FILTER      0x0020
+#define NGX_HTTP_LUA_CONTEXT_BODY_FILTER        0x0040
+#define NGX_HTTP_LUA_CONTEXT_TIMER              0x0080
+#define NGX_HTTP_LUA_CONTEXT_INIT_WORKER        0x0100
+#define NGX_HTTP_LUA_CONTEXT_BALANCER           0x0200
+#define NGX_HTTP_LUA_CONTEXT_SSL_CERT           0x0400
+#define NGX_HTTP_LUA_CONTEXT_SSL_SESS_STORE     0x0800
+#define NGX_HTTP_LUA_CONTEXT_SSL_SESS_FETCH     0x1000
+#define NGX_HTTP_LUA_CONTEXT_EXIT_WORKER        0x2000
+#define NGX_HTTP_LUA_CONTEXT_SSL_CLIENT_HELLO   0x4000
 
 
 #define NGX_HTTP_LUA_FFI_NO_REQ_CTX         -100
@@ -272,7 +273,7 @@ struct ngx_http_lua_main_conf_s {
     ngx_http_lua_sema_mm_t         *sema_mm;
 
     ngx_uint_t           malloc_trim_cycle;  /* a cycle is defined as the number
-                                                of reqeusts */
+                                                of requests */
     ngx_uint_t           malloc_trim_req_count;
 
 #if (nginx_version >= 1011011)
@@ -287,6 +288,8 @@ struct ngx_http_lua_main_conf_s {
 
     ngx_queue_t          free_lua_threads;  /* of ngx_http_lua_thread_ref_t */
     ngx_queue_t          cached_lua_threads;  /* of ngx_http_lua_thread_ref_t */
+
+    ngx_uint_t           worker_thread_vm_pool_size;
 
     unsigned             requires_header_filter:1;
     unsigned             requires_body_filter:1;
@@ -316,6 +319,11 @@ union ngx_http_lua_srv_conf_u {
         ngx_str_t                            ssl_sess_fetch_src;
         u_char                              *ssl_sess_fetch_src_key;
         int                                  ssl_sess_fetch_src_ref;
+
+        ngx_http_lua_srv_conf_handler_pt     ssl_client_hello_handler;
+        ngx_str_t                            ssl_client_hello_src;
+        u_char                              *ssl_client_hello_src_key;
+        int                                  ssl_client_hello_src_ref;
     } srv;
 #endif
 
@@ -336,6 +344,9 @@ typedef struct {
     ngx_uint_t              ssl_verify_depth;
     ngx_str_t               ssl_trusted_certificate;
     ngx_str_t               ssl_crl;
+#if (nginx_version >= 1019004)
+    ngx_array_t            *ssl_conf_commands;
+#endif
 #endif
 
     ngx_flag_t              force_read_body; /* whether force request body to
@@ -458,6 +469,10 @@ struct ngx_http_lua_co_ctx_s {
 
     uint8_t                 *sr_flags;
 
+    unsigned                 nresults_from_worker_thread;  /* number of results
+                                                            * from worker
+                                                            * thread callback */
+
     unsigned                 nsubreqs;  /* number of subrequests of the
                                          * current request */
 
@@ -542,6 +557,9 @@ typedef struct ngx_http_lua_ctx_s {
     ngx_chain_t             *free_bufs;
     ngx_chain_t             *busy_bufs;
     ngx_chain_t             *free_recv_bufs;
+
+    ngx_chain_t             *filter_in_bufs;  /* for the body filter */
+    ngx_chain_t             *filter_busy_bufs;  /* for the body filter */
 
     ngx_http_cleanup_pt     *cleanup;
 

@@ -22,10 +22,7 @@ SSDEEP_DISPLAY=""
 
 AC_ARG_WITH(
     ssdeep,
-    AC_HELP_STRING(
-    [--with-ssdeep=PATH],
-    [Path to ssdeep prefix]
-    )
+    [AS_HELP_STRING([--with-ssdeep=PATH],[Path to ssdeep prefix])]
 )
 
 

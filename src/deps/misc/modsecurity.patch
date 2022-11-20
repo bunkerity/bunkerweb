@@ -1,8 +1,5 @@
---- before/configure.ac  2022-05-19 17:06:36.921274500 +0200
-+++ after/configure.ac   2022-05-17 11:51:17.319667600 +0200
-@@ -308,14 +308,14 @@
-
-
+@@ -322,12 +322,12 @@
+ 
  # Decide if we want to build the tests or not.
 -buildTestUtilities=false
 -if test "x$YAJL_FOUND" = "x1"; then
@@ -12,10 +9,9 @@
      # But we still have the unit tests.
      # if test "$debugLogs" = "true"; then
 -        buildTestUtilities=true
-+#        buildTestUtilities=true
++#         buildTestUtilities=true
      # fi
 -fi
 +# fi
-
-
- AM_CONDITIONAL([TEST_UTILITIES], [test $buildTestUtilities = true])
+ 
+ 

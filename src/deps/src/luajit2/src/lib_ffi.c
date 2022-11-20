@@ -1,6 +1,6 @@
 /*
 ** FFI library.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lib_ffi_c
@@ -639,7 +639,7 @@ LJLIB_CF(ffi_alignof)	LJLIB_REC(ffi_xof FF_ffi_alignof)
   CTState *cts = ctype_cts(L);
   CTypeID id = ffi_checkctype(L, cts, NULL);
   CTSize sz = 0;
-  CTInfo info = lj_ctype_info(cts, id, &sz);
+  CTInfo info = lj_ctype_info_raw(cts, id, &sz);
   setintV(L->top-1, 1 << ctype_align(info));
   return 1;
 }
@@ -770,7 +770,7 @@ LJLIB_CF(ffi_metatype)
   CTypeID id = ffi_checkctype(L, cts, NULL);
   GCtab *mt = lj_lib_checktab(L, 2);
   GCtab *t = cts->miscmap;
-  CType *ct = ctype_get(cts, id);  /* Only allow raw types. */
+  CType *ct = ctype_raw(cts, id);
   TValue *tv;
   GCcdata *cd;
   if (!(ctype_isstruct(ct->info) || ctype_iscomplex(ct->info) ||

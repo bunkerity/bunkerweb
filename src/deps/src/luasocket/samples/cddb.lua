@@ -26,7 +26,7 @@ function parse(body)
             data[key] = value
         end
     end
-    return data, code, message 
+    return data, code, message
 end
 
 local host = socket.dns.gethostname()

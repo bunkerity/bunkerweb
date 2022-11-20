@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
--- LuaSec 1.0.2
+-- LuaSec 1.2.0
 --
--- Copyright (C) 2006-2021 Bruno Silvestre
+-- Copyright (C) 2006-2022 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
 
@@ -202,7 +202,11 @@ local function newcontext(cfg)
    end
 
    if config.capabilities.dane and cfg.dane then
-      context.setdane(ctx)
+      if type(cfg.dane) == "table" then
+         context.setdane(ctx, unpack(cfg.dane))
+      else
+         context.setdane(ctx)
+      end
    end
 
    return ctx
@@ -271,7 +275,7 @@ core.setmethod("info", info)
 --
 
 local _M = {
-  _VERSION        = "1.0.2",
+  _VERSION        = "1.2.0",
   _COPYRIGHT      = core.copyright(),
   config          = config,
   loadcertificate = x509.load,

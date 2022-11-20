@@ -191,7 +191,7 @@
     "rules": [
       "SecRuleEngine On",
       "SecRule ARGS \"@rx .\" \"id:954100,phase:1,block,capture,t:none,t:lowercase,msg:'Disclosure of IIS install location',logdata:'Matched Data',tag:'application-multi',tag:'language-multi',tag:'platform-iis',tag:'platform-windows',tag:'attack-disclosure',ctl:auditLogParts=+E,rev:3,ver:'OWASP_CRS/3.0.0',severity:'ERROR',chain\"",
-      "SecRule &GLOBAL:alerted_970018_iisDefLoc \"@eq 0\" \"setvar:'global.alerted_970018_iisDefLoc',setvar:'tx.msg=%{rule.msg}',setvar:'tx.outbound_anomaly_score=+%{tx.error_anomaly_score}',setvar:'tx.anomaly_score=+%{tx.error_anomaly_score}'\""
+      "SecRule ARGS \"@eq 0\" \"setvar:'global.alerted_970018_iisDefLoc',setvar:'tx.msg=%{rule.msg}',setvar:'tx.outbound_anomaly_score=+%{tx.error_anomaly_score}',setvar:'tx.anomaly_score=+%{tx.error_anomaly_score}'\""
     ]
   }
 ]

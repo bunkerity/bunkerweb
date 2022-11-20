@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -40,8 +40,8 @@ class FuzzyHash : public Operator {
     /** @ingroup ModSecurity_Operator */
     explicit FuzzyHash(std::unique_ptr<RunTimeString> param)
         : Operator("FuzzyHash", std::move(param)),
-        m_head(NULL),
-        m_threshold(0) { }
+        m_threshold(0),
+        m_head(NULL) { }
     ~FuzzyHash();
 
     bool evaluate(Transaction *transaction, const std::string &std) override;

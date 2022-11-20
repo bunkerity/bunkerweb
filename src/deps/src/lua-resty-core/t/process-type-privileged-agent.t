@@ -7,13 +7,15 @@ BEGIN {
 use lib '.';
 use t::TestCore;
 
+$ENV{TEST_NGINX_RANDOM_PORT} = Test::Nginx::Util::server_port();
+
 #worker_connections(1014);
 master_process_enabled(1);
 #log_level('error');
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 5 - 3);
+plan tests => repeat_each() * (blocks() * 5 - 5);
 
 add_block_preprocessor(sub {
     my $block = shift;
@@ -27,7 +29,7 @@ add_block_preprocessor(sub {
         $t::TestCore::init_by_lua_block
 
         local process = require "ngx.process"
-        local ok, err = process.enable_privileged_agent()
+        local ok, err = process.enable_privileged_agent(8)
         if not ok then
             ngx.log(ngx.ERR, "enable_privileged_agent failed: ", err)
         end
@@ -43,6 +45,19 @@ add_block_preprocessor(sub {
 
         if v == "privileged agent" then
             ngx.log(ngx.WARN, "process type: ", v)
+
+            ngx.timer.at(0, function()
+                for i = 1, 4 do
+                    local tcpsock = ngx.socket.tcp()
+                    local ok, err = tcpsock:connect("127.0.0.1", $ENV{TEST_NGINX_RANDOM_PORT})
+
+                    if ok then
+                        ngx.log(ngx.INFO, "connect ok ")
+                    else
+                        ngx.log(ngx.INFO, "connect not ok " .. tostring(err))
+                    end
+                end
+            end)
         end
     }
 _EOC_
@@ -138,3 +153,24 @@ GET /t
 missing privileged agent process patch in the nginx core
 API disabled in the current context
 --- skip_nginx: 4: >= 1.11.2
+
+
+
+=== TEST 4: connections exceed limits
+--- config
+    location = /t {
+        content_by_lua_block {
+            local process = require "ngx.process"
+            local ok, err = process.enable_privileged_agent()
+            if not ok then
+                error(err)
+            end
+        }
+    }
+--- request
+GET /t
+--- response_body_like: 500 Internal Server Error
+--- error_code: 500
+--- error_log
+worker_connections are not enough
+--- skip_nginx: 3: < 1.11.2

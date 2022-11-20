@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: bionic
 
 os: linux
 
@@ -7,7 +7,6 @@ language: c
 
 compiler:
   - gcc
-  - clang
 
 cache:
   directories:
@@ -25,12 +24,11 @@ env:
     - OPENSSL_PREFIX=/opt/ssl
     - OPENSSL_LIB=$OPENSSL_PREFIX/lib
     - OPENSSL_INC=$OPENSSL_PREFIX/include
-    - OPENSSL_VER=1.0.2h
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
     - TEST_NGINX_SLEEP=0.006
   matrix:
-    - NGINX_VERSION=1.9.15
-    - NGINX_VERSION=1.11.2
+    - NGINX_VERSION=1.17.8 OPENSSL_VER=1.1.0l
+    - NGINX_VERSION=1.19.9 OPENSSL_VER=1.1.1k
 
 install:
   - if [ ! -d download-cache ]; then mkdir download-cache; fi
@@ -42,6 +40,8 @@ install:
   - git clone https://github.com/openresty/nginx-devel-utils.git
   - git clone https://github.com/simpl/ngx_devel_kit.git ../ndk-nginx-module
   - git clone https://github.com/openresty/lua-nginx-module.git ../lua-nginx-module
+  - git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core
+  - git clone https://github.com/openresty/lua-resty-lrucache.git ../lua-resty-lrucache
   - git clone https://github.com/openresty/no-pool-nginx.git ../no-pool-nginx
   - git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git
   - git clone https://github.com/openresty/mockeagain.git
@@ -65,4 +65,4 @@ script:
   - ngx-build $NGINX_VERSION --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-cc-opt="-I$OPENSSL_INC" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB" --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --with-debug > build.log 2>&1 || (cat build.log && exit 1)
   - nginx -V
   - ldd `which nginx`|grep -E 'luajit|ssl|pcre'
-  - prove -r t
+  - prove -I. -r t

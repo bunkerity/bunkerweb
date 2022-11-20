@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -29,12 +29,12 @@ namespace utils {
 
 
 double cpu_seconds(void);
-std::string find_resource(const std::string& file, const std::string& param,
+std::string find_resource(const std::string& file, const std::string& config,
     std::string *err);
 std::string get_path(const std::string& file);
 std::list<std::string> expandEnv(const std::string& var, int flags);
-bool createDir(std::string dir, int mode, std::string *error);
-bool isFile(std::string f);
+bool createDir(const std::string& dir, int mode, std::string *error);
+bool isFile(const std::string& f);
 
 }  // namespace utils
 }  // namespace modsecurity

@@ -7,6 +7,7 @@
 #ifndef _WIN32
 #include <pthread.h>
 #endif
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -139,7 +140,7 @@ int main(int argc, char **argv) {
 
     free((void *)lookup_path);
 
-    srand((int)time(NULL));
+    srand((unsigned int)time(NULL));
 
 #ifndef _WIN32
     if (thread_count > 0) {
@@ -223,6 +224,14 @@ static const char **get_options(int argc,
     static int help = 0;
     static int version = 0;
 
+#ifdef _WIN32
+    char *program = alloca(strlen(argv[0]));
+    _splitpath(argv[0], NULL, NULL, program, NULL);
+    _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
+#else
+    char *program = basename(argv[0]);
+#endif
+
     while (1) {
         static struct option options[] = {
             {"file", required_argument, 0, 'f'},
@@ -259,23 +268,23 @@ static const char **get_options(int argc,
         } else if ('n' == opt_char) {
             version = 1;
         } else if ('b' == opt_char) {
-            *iterations = strtol(optarg, NULL, 10);
+            long const i = strtol(optarg, NULL, 10);
+            if (i > INT_MAX) {
+                usage(program, 1, "iterations exceeds maximum value");
+            }
+            *iterations = (int)i;
         } else if ('h' == opt_char || '?' == opt_char) {
             help = 1;
         } else if (opt_char == 't') {
-            *thread_count = strtol(optarg, NULL, 10);
+            long const i = strtol(optarg, NULL, 10);
+            if (i > INT_MAX) {
+                usage(program, 1, "thread count exceeds maximum value");
+            }
+            *thread_count = (int)i;
         } else if (opt_char == 'I') {
             *ip_file = optarg;
         }
     }
-
-#ifdef _WIN32
-    char *program = alloca(strlen(argv[0]));
-    _splitpath(argv[0], NULL, NULL, program, NULL);
-    _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
-#else
-    char *program = basename(argv[0]);
-#endif
 
     if (help) {
         usage(program, 0, NULL);
@@ -295,7 +304,7 @@ static const char **get_options(int argc,
     }
 
     const char **lookup_path =
-        calloc((argc - optind) + 1, sizeof(const char *));
+        calloc((size_t)(argc - optind) + 1, sizeof(const char *));
     if (!lookup_path) {
         fprintf(stderr, "calloc(): %s\n", strerror(errno));
         exit(1);
@@ -452,12 +461,12 @@ static bool lookup_from_file(MMDB_s *const mmdb,
 
         if (dump) {
             fprintf(stdout, "%s:\n", buf);
-            int const status =
+            int const status2 =
                 MMDB_dump_entry_data_list(stderr, entry_data_list, 0);
-            if (status != MMDB_SUCCESS) {
+            if (status2 != MMDB_SUCCESS) {
                 fprintf(stderr,
                         "MMDB_dump_entry_data_list(): %s\n",
-                        MMDB_strerror(status));
+                        MMDB_strerror(status2));
                 fclose(fh);
                 MMDB_free_entry_data_list(entry_data_list);
                 return false;
@@ -472,10 +481,10 @@ static bool lookup_from_file(MMDB_s *const mmdb,
 
     fprintf(
         stdout,
-        "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
+        "Looked up %llu addresses in %.2f seconds. %.2Lf lookups per second.\n",
         i,
         seconds,
-        i / seconds);
+        (long double)i / seconds);
 
     return true;
 }
@@ -594,15 +603,15 @@ static MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr) {
         MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
+#ifdef _WIN32
+        char const *const strerr = gai_strerrorA(gai_error);
+#else
+        char const *const strerr = gai_strerror(gai_error);
+#endif
         fprintf(stderr,
                 "\n  Error from call to getaddrinfo for %s - %s\n\n",
                 ipstr,
-#ifdef _WIN32
-                gai_strerrorA(gai_error)
-#else
-                gai_strerror(gai_error)
-#endif
-        );
+                strerr);
         exit(3);
     }
 
@@ -643,7 +652,7 @@ static bool start_threaded_benchmark(MMDB_s *const mmdb,
                                      int const thread_count,
                                      int const iterations) {
     struct thread_info *const tinfo =
-        calloc(thread_count, sizeof(struct thread_info));
+        calloc((size_t)thread_count, sizeof(struct thread_info));
     if (!tinfo) {
         fprintf(stderr, "calloc(): %s\n", strerror(errno));
         return false;
@@ -685,7 +694,8 @@ static bool start_threaded_benchmark(MMDB_s *const mmdb,
     }
 
     long double const elapsed = end_time - start_time;
-    unsigned long long const total_ips = iterations * thread_count;
+    unsigned long long const total_ips =
+        (unsigned long long)(iterations * thread_count);
     long double rate = total_ips;
     if (elapsed != 0) {
         rate = total_ips / elapsed;
@@ -717,7 +727,7 @@ static long double get_time(void) {
         fprintf(stderr, "clock_gettime(): %s\n", strerror(errno));
         return -1;
     }
-    return tp.tv_sec + ((float)tp.tv_nsec / 1e9);
+    return (long double)tp.tv_sec + ((float)tp.tv_nsec / 1e9);
 #else
     time_t t = time(NULL);
     if (t == (time_t)-1) {

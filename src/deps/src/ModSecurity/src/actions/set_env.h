@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,14 +32,14 @@ namespace actions {
 
 class SetENV : public Action {
  public:
-    explicit SetENV(std::string _action)
+    explicit SetENV(const std::string &_action)
         : Action(_action) { }
 
     explicit SetENV(std::unique_ptr<RunTimeString> z)
         : Action("setenv", RunTimeOnlyIfMatchKind),
             m_string(std::move(z)) { }
 
-    bool evaluate(Rule *rule, Transaction *transaction) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
     bool init(std::string *error) override;
 
  private:

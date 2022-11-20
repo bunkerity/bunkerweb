@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -180,7 +180,7 @@ RegressionTest *RegressionTest::from_yajl_node(const yajl_val &node) {
                 yajl_val val2 = val->u.object.values[j];
 
                 if (strcmp(key2, "audit_log") == 0) {
-                    u->audit_log = yajl_array_to_str(val2);
+                    u->audit_log = YAJL_GET_STRING(val2);
                 }
                 if (strcmp(key2, "debug_log") == 0) {
                     u->debug_log = YAJL_GET_STRING(val2);
@@ -200,13 +200,13 @@ RegressionTest *RegressionTest::from_yajl_node(const yajl_val &node) {
             }
         }
         if (strcmp(key, "rules") == 0) {
-            std::stringstream i;
+            std::stringstream si;
             for (int j = 0; j < val->u.array.len; j++) {
                 yajl_val val2 = val->u.array.values[ j ];
-                const char *key = YAJL_GET_STRING(val2);
-                i << key << "\n";
+                const char *keyj = YAJL_GET_STRING(val2);
+                si << keyj << "\n";
             }
-            u->rules = i.str();
+            u->rules = si.str();
         }
     }
 

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -44,7 +44,7 @@ namespace collection {
 
 class Collection {
  public:
-    explicit Collection(std::string a) : m_name(a) { }
+    explicit Collection(const std::string &a) : m_name(a) { }
     virtual ~Collection() { }
     virtual void store(std::string key, std::string value) = 0;
 

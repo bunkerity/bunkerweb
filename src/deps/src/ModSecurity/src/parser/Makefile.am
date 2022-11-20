@@ -20,6 +20,7 @@ libmodsec_parser_la_CPPFLAGS = \
 	-g \
 	-fPIC \
 	-O3 \
+	$(CURL_CFLAGS) \
 	$(GEOIP_CFLAGS) \
 	$(GLOBAL_CPPFLAGS) \
 	$(MODSEC_NO_LOGS) \

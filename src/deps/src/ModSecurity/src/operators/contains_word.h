@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,11 +32,12 @@ class ContainsWord : public Operator {
     explicit ContainsWord(std::unique_ptr<RunTimeString> param)
         : Operator("ContainsWord", std::move(param)) { }
 
-    bool evaluate(Transaction *transaction, Rule *rule,
+    bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string &str,
         std::shared_ptr<RuleMessage> ruleMessage) override;
 
-    bool acceptableChar(const std::string& a, size_t pos);
+ private:
+    static bool acceptableChar(const std::string& a, size_t pos);
 };
 
 }  // namespace operators

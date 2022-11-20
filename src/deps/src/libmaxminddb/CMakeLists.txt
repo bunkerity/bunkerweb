@@ -1,14 +1,20 @@
 cmake_minimum_required (VERSION 3.9)
+
 project(maxminddb
   LANGUAGES C
-  VERSION 1.5.2
+  VERSION 1.7.1
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_EXTENSIONS OFF)
 
+if (WIN32)
+  option(MSVC_STATIC_RUNTIME "When ON the library will be built by using MT/MTd run-time libraries" OFF)
+endif()
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
+
+include(GNUInstallDirs)
 
 include(CheckTypeSize)
 check_type_size("unsigned __int128" UINT128)
@@ -57,6 +63,17 @@ if(WIN32)
   if(BUILD_SHARED_LIBS)
     set_target_properties(maxminddb PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
   endif()
+  if(MSVC_STATIC_RUNTIME)
+    # On MSVC, when MSVC_STATIC_RUNTIME is ON, MT (Release) and MTd (Debug)
+    # run-time libraries will be used instead of MD/MDd. The default is OFF so
+    # MD/MDd are used when nothing related is passed.
+    #
+    # Adapted from https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#make-override-files
+    set(CMAKE_USER_MAKE_RULES_OVERRIDE
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_flag_overrides.cmake)
+    set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+        ${CMAKE_CURRENT_SOURCE_DIR}/cxx_flag_overrides.cmake)
+  endif()
 endif()
 
 target_include_directories(maxminddb PUBLIC
@@ -78,7 +95,7 @@ install(TARGETS maxminddb
 install(EXPORT maxminddb
         FILE maxminddb-config.cmake
         NAMESPACE maxminddb::
-        DESTINATION lib/cmake/maxminddb)
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maxminddb)
 
 # We always want to build mmdblookup
 add_subdirectory(bin)
@@ -88,3 +105,17 @@ if (BUILD_TESTING)
   add_subdirectory(t)
 endif()
 
+# Generate libmaxminddb.pc file for pkg-config
+# Set the required variables as same with autotools
+set(prefix ${CMAKE_INSTALL_PREFIX})
+set(exec_prefix \${prefix})
+set(libdir \${exec_prefix}/lib)
+set(includedir \${prefix}/include)
+set(PACKAGE_VERSION ${maxminddb_VERSION})
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/libmaxminddb.pc.in
+  ${CMAKE_CURRENT_BINARY_DIR}/src/libmaxminddb.pc
+  @ONLY)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/libmaxminddb.pc
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

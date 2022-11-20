@@ -26,7 +26,11 @@ void for_all_record_sizes(const char *filename_fmt,
         int size = sizes[i];
 
         char filename[500];
+// This warning seems ok to ignore here in the tests.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
         snprintf(filename, 500, filename_fmt, size);
+#pragma clang diagnostic pop
 
         char description[14];
         snprintf(description, 14, "%i bit record", size);
@@ -39,7 +43,7 @@ void for_all_modes(void (*tests)(int mode, const char *description)) {
     tests(MMDB_MODE_MMAP, "mmap mode");
 }
 
-const char *test_database_path(const char *filename) {
+char *test_database_path(const char *filename) {
     char *test_db_dir;
 #ifdef _WIN32
     test_db_dir = "../t/maxmind-db/test-data";
@@ -59,12 +63,11 @@ const char *test_database_path(const char *filename) {
 
     snprintf(path, 500, "%s/%s", test_db_dir, filename);
 
-    return (const char *)path;
+    return path;
 }
 
-const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
-    const char *string =
-        mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
+char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
+    char *string = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == string) {
         BAIL_OUT("mmdb_strndup failed");
     }
@@ -85,7 +88,7 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc) {
         BAIL_OUT("could not allocate memory for our MMDB_s struct");
     }
 
-    int status = MMDB_open(db_file, mode, mmdb);
+    int status = MMDB_open(db_file, (uint32_t)mode, mmdb);
 
     int is_ok = ok(MMDB_SUCCESS == status,
                    "open %s status is success - %s",
@@ -211,9 +214,9 @@ MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result,
                "no error from call to MMDB_vget_value - %s",
                description)) {
 
-        if (!cmp_ok(data.type,
+        if (!cmp_ok((int)data.type,
                     "==",
-                    expect_type,
+                    (int)expect_type,
                     "got the expected data type - %s",
                     description)) {
 

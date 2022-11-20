@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -119,7 +119,7 @@ void Base64::decode_forgiven_engine(unsigned char *plain_text,
     int i = 0, j = 0, k = 0;
     int ch = 0;
     static const char b64_pad = '=';
-    static int b64_reverse_t[256] = {
+    static const int b64_reverse_t[256] = {
         -2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -1, -2, -2, -1, -2, -2,
         -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
         -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 62, -2, -2, -2, 63,
@@ -152,9 +152,9 @@ void Base64::decode_forgiven_engine(unsigned char *plain_text,
         ch = b64_reverse_t[ch];
         if (ch < 0) {
             continue;
-        } else if (ch == -2) {
+        /*} else if (ch == -2) {
             *aiming_size = 0;
-            return;
+            return;*/
         }
         switch (i % 4) {
             case 0:

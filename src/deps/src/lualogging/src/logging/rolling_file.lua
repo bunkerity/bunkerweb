@@ -5,10 +5,11 @@
 --
 -- @author Tiago Cesar Katcipis (tiagokatcipis@gmail.com)
 --
--- @copyright 2004-2021 Kepler Project
+-- @copyright 2004-2022 Kepler Project
 ---------------------------------------------------------------------------
 
 local logging = require"logging"
+
 
 local buffer_mode do
   local dir_separator = _G.package.config:sub(1,1)
@@ -22,6 +23,7 @@ local buffer_mode do
   end
 end
 
+
 local function openFile(self)
   self.file = io.open(self.filename, "a")
   if not self.file then
@@ -30,6 +32,7 @@ local function openFile(self)
   self.file:setvbuf(buffer_mode)
   return self.file
 end
+
 
 local rollOver = function (self)
   for i = self.maxIndex - 1, 1, -1 do
@@ -70,7 +73,15 @@ local openRollingFileLogger = function (self)
 end
 
 
-function logging.rolling_file(params, ...)
+local M = setmetatable({}, {
+  __call = function(self, ...)
+    -- calling on the module instantiates a new logger
+    return self.new(...)
+  end,
+})
+
+
+function M.new(params, ...)
   params = logging.getDeprecatedParams({ "filename", "maxFileSize", "maxBackupIndex", "logPattern" }, params, ...)
   local logPatterns = logging.buildLogPatterns(params.logPatterns, params.logPattern)
   local timestampPattern = params.timestampPattern or logging.defaultTimestampPattern()
@@ -87,11 +98,12 @@ function logging.rolling_file(params, ...)
     if not f then
       return nil, msg
     end
-    local s = logging.prepareLogMsg(logPatterns[level], os.date(timestampPattern), level, message)
+    local s = logging.prepareLogMsg(logPatterns[level], logging.date(timestampPattern), level, message)
     f:write(s)
     return true
   end, startLevel)
 end
 
-return logging.rolling_file
 
+logging.rolling_file = M
+return M

@@ -3,14 +3,23 @@
 --
 -- @author Thiago Costa Ponte (thiago@ideais.com.br)
 --
--- @copyright 2004-2021 Kepler Project
+-- @copyright 2004-2022 Kepler Project
 --
 -------------------------------------------------------------------------------
 
 local logging = require"logging"
 local smtp = require"socket.smtp"
 
-function logging.email(params)
+
+local M = setmetatable({}, {
+  __call = function(self, ...)
+    -- calling on the module instantiates a new logger
+    return self.new(...)
+  end,
+})
+
+
+function M.new(params)
   params = params or {}
   params.headers = params.headers or {}
 
@@ -26,7 +35,7 @@ function logging.email(params)
   local startLevel = params.logLevel or logging.defaultLevel()
 
   return logging.new( function(self, level, message)
-    local dt = os.date(timestampPattern)
+    local dt = logging.date(timestampPattern)
     local s = logging.prepareLogMsg(logPatterns[level], dt, level, message)
     if params.headers.subject then
       params.headers.subject =
@@ -44,5 +53,6 @@ function logging.email(params)
   end, startLevel)
 end
 
-return logging.email
 
+logging.email = M
+return M

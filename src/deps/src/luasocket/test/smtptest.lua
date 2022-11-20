@@ -27,8 +27,8 @@ local total = function()
 end
 
 local similar = function(s1, s2)
-    return 
-    string.lower(string.gsub(s1, "%s", "")) == 
+    return
+    string.lower(string.gsub(s1, "%s", "")) ==
     string.lower(string.gsub(s2, "%s", ""))
 end
 
@@ -40,9 +40,9 @@ end
 
 local readfile = function(name)
     local f = io.open(name, "r")
-    if not f then 
+    if not f then
         fail("unable to open file!")
-        return nil 
+        return nil
     end
     local s = f:read("*a")
     f:close()
@@ -52,7 +52,7 @@ end
 local empty = function()
     for i,v in ipairs(files) do
         local f = io.open(v, "w")
-        if not f then 
+        if not f then
             fail("unable to open file!")
         end
         f:close()
@@ -116,8 +116,8 @@ local wait = function(sentinel, n)
     while 1 do
         local mbox = parse(get())
         if n == #mbox then break end
-        if socket.time() - sentinel.time > 50 then 
-            to = 1 
+        if socket.time() - sentinel.time > 50 then
+            to = 1
             break
         end
         socket.sleep(1)
@@ -132,7 +132,7 @@ local stuffed_body = [[
 This message body needs to be
 stuffed because it has a dot
 .
-by itself on a line. 
+by itself on a line.
 Otherwise the mailer would
 think that the dot
 .
@@ -219,7 +219,7 @@ else print("ok") end
 
 io.write("testing invalid from: ")
 local ret, err = socket.smtp.mail{
-    from = ' " " (( _ * ', 
+    from = ' " " (( _ * ',
     rcpt = rcpt,
 }
 if ret or not err then fail("wrong error message")
@@ -227,7 +227,7 @@ else print(err) end
 
 io.write("testing no rcpt: ")
 local ret, err = socket.smtp.mail{
-    from = from, 
+    from = from,
 }
 if ret or not err then fail("wrong error message")
 else print(err) end
