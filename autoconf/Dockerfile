@@ -22,7 +22,7 @@ COPY VERSION /opt/bunkerweb/VERSION
 COPY autoconf /opt/bunkerweb/autoconf
 
 # Add nginx user, drop bwcli, setup data folders, permissions and logging
-RUN apk add --no-cache git && \
+RUN apk add --no-cache libgcc libstdc++ openssl git && \
     ln -s /usr/local/bin/python3 /usr/bin/python3 && \
     addgroup -g 101 nginx && \
     adduser -h /var/cache/nginx -g nginx -s /bin/sh -G nginx -D -H -u 101 nginx && \
