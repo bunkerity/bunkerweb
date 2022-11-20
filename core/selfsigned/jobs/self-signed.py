@@ -55,7 +55,7 @@ try :
 
 except :
     status = 2
-    logger.log("SELF-SIGNED", "❌", "Exception while running certbot-new.py :")
+    logger.log("SELF-SIGNED", "❌", "Exception while running self-signed.py :")
     print(traceback.format_exc())
 
 sys.exit(status)
