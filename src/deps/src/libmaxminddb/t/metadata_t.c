@@ -101,18 +101,18 @@ test_languages_value(MMDB_entry_data_list_s *entry_data_list) {
            "==",
            MMDB_DATA_TYPE_UTF8_STRING,
            "first array entry is a UTF8_STRING");
-    const char *lang0 = dup_entry_string_or_bail(idx0->entry_data);
+    char *lang0 = dup_entry_string_or_bail(idx0->entry_data);
     is(lang0, "en", "first language is en");
-    free((void *)lang0);
+    free(lang0);
 
     MMDB_entry_data_list_s *idx1 = entry_data_list = entry_data_list->next;
     cmp_ok(idx1->entry_data.type,
            "==",
            MMDB_DATA_TYPE_UTF8_STRING,
            "second array entry is a UTF8_STRING");
-    const char *lang1 = dup_entry_string_or_bail(idx1->entry_data);
+    char *lang1 = dup_entry_string_or_bail(idx1->entry_data);
     is(lang1, "zh", "second language is zh");
-    free((void *)lang1);
+    free(lang1);
 
     return entry_data_list;
 }
@@ -136,14 +136,14 @@ test_description_value(MMDB_entry_data_list_s *entry_data_list) {
                "==",
                MMDB_DATA_TYPE_UTF8_STRING,
                "found a map key in 'map'");
-        const char *key_name = dup_entry_string_or_bail(key->entry_data);
+        char *key_name = dup_entry_string_or_bail(key->entry_data);
 
         MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
         cmp_ok(value->entry_data.type,
                "==",
                MMDB_DATA_TYPE_UTF8_STRING,
                "map value is a UTF8_STRING");
-        const char *description = dup_entry_string_or_bail(value->entry_data);
+        char *description = dup_entry_string_or_bail(value->entry_data);
 
         if (strcmp(key_name, "en") == 0) {
             is(description,
@@ -157,8 +157,8 @@ test_description_value(MMDB_entry_data_list_s *entry_data_list) {
             ok(0, "unknown key found in description map - %s", key_name);
         }
 
-        free((void *)key_name);
-        free((void *)description);
+        free(key_name);
+        free(description);
     }
 
     return entry_data_list;
@@ -193,7 +193,7 @@ void test_metadata_as_data_entry_list(MMDB_s *mmdb, const char *mode_desc) {
                MMDB_DATA_TYPE_UTF8_STRING,
                "found a map key");
 
-        const char *key_name = dup_entry_string_or_bail(key->entry_data);
+        char *key_name = dup_entry_string_or_bail(key->entry_data);
         if (strcmp(key_name, "node_count") == 0) {
             MMDB_entry_data_list_s *value = entry_data_list =
                 entry_data_list->next;
@@ -228,9 +228,9 @@ void test_metadata_as_data_entry_list(MMDB_s *mmdb, const char *mode_desc) {
         } else if (strcmp(key_name, "database_type") == 0) {
             MMDB_entry_data_list_s *value = entry_data_list =
                 entry_data_list->next;
-            const char *type = dup_entry_string_or_bail(value->entry_data);
+            char *type = dup_entry_string_or_bail(value->entry_data);
             is(type, "Test", "type == Test");
-            free((void *)type);
+            free(type);
         } else if (strcmp(key_name, "languages") == 0) {
             entry_data_list = test_languages_value(entry_data_list);
         } else if (strcmp(key_name, "description") == 0) {
@@ -239,7 +239,7 @@ void test_metadata_as_data_entry_list(MMDB_s *mmdb, const char *mode_desc) {
             ok(0, "unknown key found in metadata map - %s", key_name);
         }
 
-        free((void *)key_name);
+        free(key_name);
     }
 
     MMDB_free_entry_data_list(first);
@@ -247,7 +247,7 @@ void test_metadata_as_data_entry_list(MMDB_s *mmdb, const char *mode_desc) {
 
 void run_tests(int mode, const char *mode_desc) {
     const char *file = "MaxMind-DB-test-ipv4-24.mmdb";
-    const char *path = test_database_path(file);
+    char *path = test_database_path(file);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
 
     // All of the remaining tests require an open mmdb
@@ -255,7 +255,7 @@ void run_tests(int mode, const char *mode_desc) {
         diag("could not open %s - skipping remaining tests", path);
         return;
     }
-    free((void *)path);
+    free(path);
 
     test_metadata(mmdb, mode_desc);
     test_metadata_as_data_entry_list(mmdb, mode_desc);

@@ -1,6 +1,6 @@
 /*
 ** Math helper functions for assembler VM.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_vmmath_c
@@ -34,7 +34,7 @@ LJ_FUNCA double lj_wrap_pow(double x, double y) { return pow(x, y); }
 LJ_FUNCA double lj_wrap_fmod(double x, double y) { return fmod(x, y); }
 #endif
 
-/* -- Helper functions for generated machine code ------------------------- */
+/* -- Helper functions ---------------------------------------------------- */
 
 double lj_vm_foldarith(double x, double y, int op)
 {
@@ -55,6 +55,8 @@ double lj_vm_foldarith(double x, double y, int op)
   default: return x;
   }
 }
+
+/* -- Helper functions for generated machine code ------------------------- */
 
 #if (LJ_HASJIT && !(LJ_TARGET_ARM || LJ_TARGET_ARM64 || LJ_TARGET_PPC)) || LJ_TARGET_MIPS
 int32_t LJ_FASTCALL lj_vm_modi(int32_t a, int32_t b)
@@ -77,40 +79,6 @@ int32_t LJ_FASTCALL lj_vm_modi(int32_t a, int32_t b)
 double lj_vm_log2(double a)
 {
   return log(a) * 1.4426950408889634074;
-}
-#endif
-
-#if !LJ_TARGET_X86ORX64
-/* Unsigned x^k. */
-static double lj_vm_powui(double x, uint32_t k)
-{
-  double y;
-  lj_assertX(k != 0, "pow with zero exponent");
-  for (; (k & 1) == 0; k >>= 1) x *= x;
-  y = x;
-  if ((k >>= 1) != 0) {
-    for (;;) {
-      x *= x;
-      if (k == 1) break;
-      if (k & 1) y *= x;
-      k >>= 1;
-    }
-    y *= x;
-  }
-  return y;
-}
-
-/* Signed x^k. */
-double lj_vm_powi(double x, int32_t k)
-{
-  if (k > 1)
-    return lj_vm_powui(x, (uint32_t)k);
-  else if (k == 1)
-    return x;
-  else if (k == 0)
-    return 1.0;
-  else
-    return 1.0 / lj_vm_powui(x, (uint32_t)-k);
 }
 #endif
 

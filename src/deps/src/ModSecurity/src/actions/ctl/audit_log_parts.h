@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -28,12 +28,12 @@ namespace ctl {
 
 class AuditLogParts : public Action {
  public:
-    explicit AuditLogParts(std::string action)
+    explicit AuditLogParts(const std::string &action) 
         : Action(action, RunTimeOnlyIfMatchKind),
         mPartsAction(0),
         mParts("") { }
 
-    bool evaluate(Rule *rule, Transaction *transaction) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
     bool init(std::string *error) override;
 
  protected:

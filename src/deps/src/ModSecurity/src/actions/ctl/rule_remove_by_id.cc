@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -83,7 +83,7 @@ bool RuleRemoveById::init(std::string *error) {
     return false;
 }
 
-bool RuleRemoveById::evaluate(Rule *rule, Transaction *transaction) {
+bool RuleRemoveById::evaluate(RuleWithActions *rule, Transaction *transaction) {
     for (auto &i : m_ids) {
         transaction->m_ruleRemoveById.push_back(i);
     }

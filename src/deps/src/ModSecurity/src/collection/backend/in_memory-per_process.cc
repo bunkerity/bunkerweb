@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -36,7 +36,7 @@ namespace collection {
 namespace backend {
 
 
-InMemoryPerProcess::InMemoryPerProcess(std::string name) :
+InMemoryPerProcess::InMemoryPerProcess(const std::string &name) :
     Collection(name) {
     this->reserve(1000);
     pthread_mutex_init(&m_lock, NULL);
@@ -134,7 +134,7 @@ void InMemoryPerProcess::resolveRegularExpression(const std::string& var,
     //std::string name = std::string(var, var.find(":") + 2,
     //    var.size() - var.find(":") - 3);
     //size_t keySize = col.size();
-    Utils::Regex r(var);
+    Utils::Regex r(var, true);
 
     for (const auto& x : *this) {
         //if (x.first.size() <= keySize + 1) {

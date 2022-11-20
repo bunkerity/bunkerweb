@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -38,13 +38,15 @@ class Redirect : public Action {
  public:
     explicit Redirect(const std::string &action)
         : Action(action, RunTimeOnlyIfMatchKind),
-        m_status(0) { }
+        m_status(0),
+        m_string(nullptr) { }
 
     explicit Redirect(std::unique_ptr<RunTimeString> z)
         : Action("redirert", RunTimeOnlyIfMatchKind),
+            m_status(0),
             m_string(std::move(z)) { }
 
-    bool evaluate(Rule *rule, Transaction *transaction,
+    bool evaluate(RuleWithActions *rule, Transaction *transaction,
         std::shared_ptr<RuleMessage> rm) override;
     bool init(std::string *error) override;
     bool isDisruptive() override { return true; }

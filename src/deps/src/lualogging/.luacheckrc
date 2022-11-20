@@ -23,11 +23,10 @@ ignore = {
 
 
 exclude_files = {
-    "here/**",
-    "lua_install/**",
-    "dos/**",
-    --"spec/fixtures/invalid-module.lua",
-    --"spec-old-api/fixtures/invalid-module.lua",
+    -- The Github Actions Lua Environment
+    ".lua",
+    ".luarocks",
+    ".install",
 }
 
 files["src/logging/nginx.lua"] = {

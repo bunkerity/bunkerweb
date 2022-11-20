@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -29,7 +29,7 @@ class IpMatchFromFile : public IpMatch {
     /** @ingroup ModSecurity_Operator */
     explicit IpMatchFromFile(std::unique_ptr<RunTimeString> param)
         : IpMatch("IpMatchFromFile", std::move(param)) { }
-    IpMatchFromFile(std::string n, std::unique_ptr<RunTimeString> param)
+    IpMatchFromFile(const std::string &n, std::unique_ptr<RunTimeString> param)
         : IpMatch(n, std::move(param)) { }
     bool init(const std::string& file, std::string *error) override;
 };

@@ -115,8 +115,4 @@ popd
 
 git push
 
-message="$version
-
-$notes"
-
-hub release create -a "$dist" -m "$message" "$version"
+gh release create --target "$(git branch --show-current)" -t "$version" -n "$notes" "$version" "$dist"

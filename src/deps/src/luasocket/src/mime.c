@@ -27,12 +27,12 @@ static int mime_global_eol(lua_State *L);
 static int mime_global_dot(lua_State *L);
 
 static size_t dot(int c, size_t state, luaL_Buffer *buffer);
-//static void b64setup(UC *base);
+/*static void b64setup(UC *base);*/
 static size_t b64encode(UC c, UC *input, size_t size, luaL_Buffer *buffer);
 static size_t b64pad(const UC *input, size_t size, luaL_Buffer *buffer);
 static size_t b64decode(UC c, UC *input, size_t size, luaL_Buffer *buffer);
 
-//static void qpsetup(UC *class, UC *unbase);
+/*static void qpsetup(UC *class, UC *unbase);*/
 static void qpquote(UC c, luaL_Buffer *buffer);
 static size_t qpdecode(UC c, UC *input, size_t size, luaL_Buffer *buffer);
 static size_t qpencode(UC c, UC *input, size_t size,
@@ -176,8 +176,8 @@ LUASOCKET_API int luaopen_mime_core(lua_State *L)
     lua_pushstring(L, MIME_VERSION);
     lua_rawset(L, -3);
     /* initialize lookup tables */
-    // qpsetup(qpclass, qpunbase);
-    // b64setup(b64unbase);
+    /*qpsetup(qpclass, qpunbase);*/
+    /*b64setup(b64unbase);*/
     return 1;
 }
 

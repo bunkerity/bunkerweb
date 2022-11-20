@@ -1,7 +1,6 @@
 # Releasing this library
 
-We release by uploading the tarball to GitHub, uploading Ubuntu PPAs, and by
-updating the Homebrew recipe for this library.
+We release by uploading the tarball to GitHub and uploading Ubuntu PPAs.
 
 ## Creating the release tarball
 You may want to refer to the section about prerequisites.
@@ -9,9 +8,12 @@ You may want to refer to the section about prerequisites.
 * Check whether there are any open issues to fix while you're doing this.
 * Update `Changes.md` to include specify the new version, today's date, and
   list relevant changes. Commit this.
+* Create a new branch off of the latest `main` for the release.
 * Run `./dev-bin/release.sh` to update various files in the distro, our
   GitHub pages, and creates a GitHub release with the tarball.
 * Check the release looks good on both GitHub and launchpad.net.
+* Make a pull request against `main` with the changes from the release
+  script.
 
 ## PPA
 
@@ -29,7 +31,14 @@ before running it.
 
 You should run it from `main`.
 
-## Homebrew
+## Homebrew (optional)
+
+Releasing to Homebrew is no longer required as the formulas are easily
+updated by the end-user using a built-in feature in the tool. These
+directions remain in case there is a more significant change to the
+build process that may require a non-trivial update to the formula or
+in the case where we want the Homebrew version updated promptly for
+some reason.
 
 * Go to https://github.com/Homebrew/homebrew-core/edit/master/Formula/libmaxminddb.rb
 * Edit the file to update the url and sha256. You can get the sha256 for the
@@ -43,8 +52,7 @@ You should run it from `main`.
   autoconf automake libtool git-buildpackage libfile-slurp-perl pandoc
   dirmngr libfile-slurp-tiny-perl libdatetime-perl debhelper dh-autoreconf
   libipc-run3-perl libtest-output-perl devscripts
-* Install [hub](https://github.com/github/hub/releases). (Using `./install`
-  from the tarball is fine)
+* Install [gh](https://github.com/cli/cli/releases).
 * GitHub ssh key (e.g. in `~/.ssh/id_rsa`)
 * Git config (e.g. `~/.gitconfig`)
 * Import your GPG secret key (or create one if you don't have a suitable

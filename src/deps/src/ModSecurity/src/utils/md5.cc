@@ -7,7 +7,7 @@ namespace modsecurity {
 namespace Utils {
 
 
-std::string Md5::hexdigest(std::string& input) {
+std::string Md5::hexdigest(const std::string& input) {
     unsigned char digest[16];
 
     mbedtls_md5(reinterpret_cast<const unsigned char *>(input.c_str()),
@@ -22,7 +22,7 @@ std::string Md5::hexdigest(std::string& input) {
 }
 
 
-std::string Md5::digest(std::string& input) {
+std::string Md5::digest(const std::string& input) {
     unsigned char output[16];
     std::string ret;
 

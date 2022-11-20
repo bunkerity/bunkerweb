@@ -3,7 +3,7 @@
 <head>
 <title>FFI Semantics</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -55,8 +55,6 @@ td.convop { font-style: italic; width: 40%; }
 </li><li>
 <a href="faq.html">FAQ</a>
 </li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
-</li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
 </div>
@@ -88,7 +86,7 @@ footprint. It's used by the <a href="ext_ffi_api.html">ffi.* library
 functions</a> to declare C&nbsp;types or external symbols.
 </p>
 <p>
-It's only purpose is to parse C&nbsp;declarations, as found e.g. in
+Its only purpose is to parse C&nbsp;declarations, as found e.g. in
 C&nbsp;header files. Although it does evaluate constant expressions,
 it's <em>not</em> a C&nbsp;compiler. The body of <tt>inline</tt>
 C&nbsp;function definitions is simply ignored.
@@ -165,7 +163,7 @@ function declarations.</li>
 
 </ul>
 <p>
-The following C&nbsp;types are pre-defined by the C&nbsp;parser (like
+The following C&nbsp;types are predefined by the C&nbsp;parser (like
 a <tt>typedef</tt>, except re-declarations will be ignored):
 </p>
 <ul>
@@ -583,9 +581,9 @@ ffi.new("struct nested", {x=1,y={2,3}}) --> x = 1, y.a = 2, y.b = 3
 
 <h2 id="cdata_ops">Operations on cdata Objects</h2>
 <p>
-All of the standard Lua operators can be applied to cdata objects or a
+All standard Lua operators can be applied to cdata objects or a
 mix of a cdata object and another Lua object. The following list shows
-the pre-defined operations.
+the predefined operations.
 </p>
 <p>
 Reference types are dereferenced <em>before</em> performing each of
@@ -593,7 +591,7 @@ the operations below &mdash; the operation is applied to the
 C&nbsp;type pointed to by the reference.
 </p>
 <p>
-The pre-defined operations are always tried first before deferring to a
+The predefined operations are always tried first before deferring to a
 metamethod or index table (if any) for the corresponding ctype (except
 for <tt>__new</tt>). An error is raised if the metamethod lookup or
 index table lookup fails.
@@ -643,7 +641,7 @@ assigning to an index of a vector raises an error.</li>
 </ul>
 <p>
 A ctype object can be indexed with a string key, too. The only
-pre-defined operation is reading scoped constants of
+predefined operation is reading scoped constants of
 <tt>struct</tt>/<tt>union</tt> types. All other accesses defer
 to the corresponding metamethods or index tables (if any).
 </p>
@@ -656,7 +654,7 @@ certain optimizations.
 <p>
 As a consequence, the <em>elements</em> of complex numbers and
 vectors are immutable. But the elements of an aggregate holding these
-types <em>may</em> be modified of course. I.e. you cannot assign to
+types <em>may</em> be modified, of course. I.e. you cannot assign to
 <tt>foo.c.im</tt>, but you can assign a (newly created) complex number
 to <tt>foo.c</tt>.
 </p>
@@ -675,8 +673,8 @@ through unions is explicitly detected and allowed.
 to <tt>ffi.new(ct, ...)</tt>, unless a <tt>__new</tt> metamethod is
 defined. The <tt>__new</tt> metamethod is called with the ctype object
 plus any other arguments passed to the constructor. Note that you have to
-use <tt>ffi.new</tt> inside of it, since calling <tt>ct(...)</tt> would
-cause infinite recursion.</li>
+use <tt>ffi.new</tt> inside the metamethod, since calling <tt>ct(...)</tt>
+would cause infinite recursion.</li>
 
 <li><b>C&nbsp;function call</b>: a cdata function or cdata function
 pointer can be called. The passed arguments are
@@ -687,7 +685,7 @@ variable argument part of vararg C&nbsp;function use
 C&nbsp;function is called and the return value (if any) is
 <a href="#convert_tolua">converted to a Lua object</a>.<br>
 On Windows/x86 systems, <tt>__stdcall</tt> functions are automatically
-detected and a function declared as <tt>__cdecl</tt> (the default) is
+detected, and a function declared as <tt>__cdecl</tt> (the default) is
 silently fixed up after the first call.</li>
 
 </ul>
@@ -697,7 +695,7 @@ silently fixed up after the first call.</li>
 
 <li><b>Pointer arithmetic</b>: a cdata pointer/array and a cdata
 number or a Lua number can be added or subtracted. The number must be
-on the right hand side for a subtraction. The result is a pointer of
+on the right-hand side for a subtraction. The result is a pointer of
 the same type with an address plus or minus the number value
 multiplied by the element size in bytes. An error is raised if the
 element size is undefined.</li>
@@ -712,7 +710,7 @@ operators (<tt>+&nbsp;-&nbsp;*&nbsp;/&nbsp;%&nbsp;^</tt> and unary
 minus) can be applied to two cdata numbers, or a cdata number and a
 Lua number. If one of them is an <tt>uint64_t</tt>, the other side is
 converted to an <tt>uint64_t</tt> and an unsigned arithmetic operation
-is performed. Otherwise both sides are converted to an
+is performed. Otherwise, both sides are converted to an
 <tt>int64_t</tt> and a signed arithmetic operation is performed. The
 result is a boxed 64&nbsp;bit cdata object.<br>
 
@@ -759,7 +757,7 @@ which is compatible with any other pointer type.</li>
 <li><b>64&nbsp;bit integer comparison</b>: two cdata numbers, or a
 cdata number and a Lua number can be compared with each other. If one
 of them is an <tt>uint64_t</tt>, the other side is converted to an
-<tt>uint64_t</tt> and an unsigned comparison is performed. Otherwise
+<tt>uint64_t</tt> and an unsigned comparison is performed. Otherwise,
 both sides are converted to an <tt>int64_t</tt> and a signed
 comparison is performed.<br>
 
@@ -784,9 +782,9 @@ keys!</b>
 A cdata object is treated like any other garbage-collected object and
 is hashed and compared by its address for table indexing. Since
 there's no interning for cdata value types, the same value may be
-boxed in different cdata objects with different addresses. Thus
+boxed in different cdata objects with different addresses. Thus,
 <tt>t[1LL+1LL]</tt> and <tt>t[2LL]</tt> usually <b>do not</b> point to
-the same hash slot and they certainly <b>do not</b> point to the same
+the same hash slot, and they certainly <b>do not</b> point to the same
 hash slot as <tt>t[2]</tt>.
 </p>
 <p>
@@ -808,7 +806,7 @@ the resulting Lua number as a key when indexing tables.<br>
 One obvious benefit: <tt>t[tonumber(2LL)]</tt> <b>does</b> point to
 the same slot as <tt>t[2]</tt>.</li>
 
-<li>Otherwise use either <tt>tostring()</tt> on 64&nbsp;bit integers
+<li>Otherwise, use either <tt>tostring()</tt> on 64&nbsp;bit integers
 or complex numbers or combine multiple fields of a cdata aggregate to
 a Lua string (e.g. with
 <a href="ext_ffi_api.html#ffi_string"><tt>ffi.string()</tt></a>). Then
@@ -816,7 +814,7 @@ use the resulting Lua string as a key when indexing tables.</li>
 
 <li>Create your own specialized hash table implementation using the
 C&nbsp;types provided by the FFI library, just like you would in
-C&nbsp;code. Ultimately this may give much better performance than the
+C&nbsp;code. Ultimately, this may give much better performance than the
 other alternatives or what a generic by-value hash table could
 possibly provide.</li>
 
@@ -882,7 +880,7 @@ garbage collector will automatically free the memory used by it (at
 the end of the next GC cycle).
 </p>
 <p>
-Please note that pointers themselves are cdata objects, however they
+Please note, that pointers themselves are cdata objects, however they
 are <b>not</b> followed by the garbage collector. So e.g. if you
 assign a cdata array to a pointer, you must keep the cdata object
 holding the array alive as long as the pointer is still in use:
@@ -931,18 +929,18 @@ of the function pointer and the Lua function object (closure).
 </p>
 <p>
 This can happen implicitly due to the usual conversions, e.g. when
-passing a Lua function to a function pointer argument. Or you can use
+passing a Lua function to a function pointer argument. Or, you can use
 <tt>ffi.cast()</tt> to explicitly cast a Lua function to a
 C&nbsp;function pointer.
 </p>
 <p>
-Currently only certain C&nbsp;function types can be used as callback
+Currently, only certain C&nbsp;function types can be used as callback
 functions. Neither C&nbsp;vararg functions nor functions with
 pass-by-value aggregate argument or result types are supported. There
-are no restrictions for the kind of Lua functions that can be called
+are no restrictions on the kind of Lua functions that can be called
 from the callback &mdash; no checks for the proper number of arguments
 are made. The return value of the Lua function will be converted to the
-result type and an error will be thrown for invalid conversions.
+result type, and an error will be thrown for invalid conversions.
 </p>
 <p>
 It's allowed to throw errors across a callback invocation, but it's not
@@ -1003,7 +1001,7 @@ convention cannot be automatically detected, unlike for
 <tt>__stdcall</tt> calls <em>to</em> Windows functions.
 </p>
 <p>
-For some use cases it's necessary to free up the resources or to
+For some use cases, it's necessary to free up the resources or to
 dynamically redirect callbacks. Use an explicit cast to a
 C&nbsp;function pointer and keep the resulting cdata object. Then use
 the <a href="ext_ffi_api.html#callback_free"><tt>cb:free()</tt></a>
@@ -1056,7 +1054,7 @@ GUI application, which waits for user input most of the time, anyway.
 </p>
 <p>
 For new designs <b>avoid push-style APIs</b>: a C&nbsp;function repeatedly
-calling a callback for each result. Instead <b>use pull-style APIs</b>:
+calling a callback for each result. Instead, <b>use pull-style APIs</b>:
 call a C&nbsp;function repeatedly to get a new result. Calls from Lua
 to C via the FFI are much faster than the other way round. Most well-designed
 libraries already use pull-style APIs (read/write, get/put).
@@ -1075,7 +1073,7 @@ function.
 </p>
 <p>
 Indexing a C&nbsp;library namespace object with a symbol name (a Lua
-string) automatically binds it to the library. First the symbol type
+string) automatically binds it to the library. First, the symbol type
 is resolved &mdash; it must have been declared with
 <a href="ext_ffi_api.html#ffi_cdef"><tt>ffi.cdef</tt></a>. Then the
 symbol address is resolved by searching for the symbol name in the
@@ -1130,7 +1128,7 @@ Performance notice: the JIT compiler specializes to the identity of
 namespace objects and to the strings used to index it. This
 effectively turns function cdata objects into constants. It's not
 useful and actually counter-productive to explicitly cache these
-function objects, e.g. <tt>local strlen = ffi.C.strlen</tt>. OTOH it
+function objects, e.g. <tt>local strlen = ffi.C.strlen</tt>. OTOH, it
 <em>is</em> useful to cache the namespace itself, e.g. <tt>local C =
 ffi.C</tt>.
 </p>
@@ -1155,14 +1153,14 @@ This behavior is inevitable, since the goal is to provide full
 interoperability with C&nbsp;code. Adding extra safety measures, like
 bounds checks, would be futile. There's no way to detect
 misdeclarations of C&nbsp;functions, since shared libraries only
-provide symbol names, but no type information. Likewise there's no way
+provide symbol names, but no type information. Likewise, there's no way
 to infer the valid range of indexes for a returned pointer.
 </p>
 <p>
 Again: the FFI library is a low-level library. This implies it needs
 to be used with care, but it's flexibility and performance often
 outweigh this concern. If you're a C or C++ developer, it'll be easy
-to apply your existing knowledge. OTOH writing code for the FFI
+to apply your existing knowledge. OTOH, writing code for the FFI
 library is not for the faint of heart and probably shouldn't be the
 first exercise for someone with little experience in Lua, C or C++.
 </p>
@@ -1190,7 +1188,7 @@ currently incomplete:
 <li>C&nbsp;declarations are not passed through a C&nbsp;pre-processor,
 yet.</li>
 <li>The C&nbsp;parser is able to evaluate most constant expressions
-commonly found in C&nbsp;header files. However it doesn't handle the
+commonly found in C&nbsp;header files. However, it doesn't handle the
 full range of C&nbsp;expression semantics and may fail for some
 obscure constructs.</li>
 <li><tt>static const</tt> declarations only work for integer types
@@ -1248,7 +1246,7 @@ compiled.</li>
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

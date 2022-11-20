@@ -23,14 +23,7 @@
 <div id="navigation">
 <h1>LuaLogging</h1>
   <ul>
-    <li><a href="index.html">Home</a>
-      <ul>
-        <li><a href="index.html#download">Download</a></li>
-        <li><a href="index.html#dependencies">Dependencies</a></li>
-        <li><a href="index.html#history">History</a></li>
-        <li><a href="index.html#credits">Credits</a></li>
-      </ul>
-    </li>
+    <li><a href="index.html">Home</a></li>
     <li><a href="manual.html">Manual</a>
       <ul>
         <li><a href="manual.html#installation">Installation</a></li>
@@ -45,15 +38,12 @@
         <li><strong>Rolling File</strong></li>
         <li><a href="sql.html">SQL</a></li>
         <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
         <li><a href="email.html">Email</a></li>
         <li><a href="nginx.html">Nginx</a></li>
       </ul>
     </li>
-    <li><a href="https://github.com/lunarmodules/lualogging">Project</a>
-      <ul>
-        <li><a href="https://github.com/lunarmodules/lualogging/issues">Bug Tracker</a></li>
-      </ul>
-    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
     <li><a href="license.html">License</a></li>
   </ul>
 </div> <!-- id="navigation" -->
@@ -121,7 +111,9 @@ function logging.rolling_file {
 
     <li><code>timestampPattern</code>:<br />
       This is an optional parameter that can be used to specify a date/time formatting
-      in the log message. The default is taken from <code>logging.defaultTimestampPattern()</code>.</li>
+      in the log message.
+      See <code>logging.date</code> for the format.
+      The default is taken from <code>logging.defaultTimestampPattern()</code>.</li>
 
     <li><code>logLevel</code>:<br />
       The initial log-level to set for the created logger.</li>

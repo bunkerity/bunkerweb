@@ -115,7 +115,7 @@ ngx.say("process type:", process.type())   -- RESPONSE: worker
 
 enable_privileged_agent
 -----------------------
-**syntax:** *ok, err = process_module.enable_privileged_agent()*
+**syntax:** *ok, err = process_module.enable_privileged_agent(connections)*
 
 **context:** *init_by_lua&#42;*
 
@@ -128,6 +128,8 @@ like `root`.
 The `init_worker_by_lua*` directive handler still runs in the privileged agent process. And one can
 use the [type](#type) function provided by this module to check if the current process is a privileged
 agent.
+
+The argument connections sets the maximum number of simultaneous connections that can be opened by privileged agent process.
 
 In case of failures, returns `nil` and a string describing the error.
 

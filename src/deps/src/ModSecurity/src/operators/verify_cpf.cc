@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -37,31 +37,22 @@ int VerifyCPF::convert_to_int(const char c) {
     return n;
 }
 
+
 bool VerifyCPF::verify(const char *cpfnumber, int len) {
     int factor, part_1, part_2, var_len = len;
     unsigned int sum = 0, i = 0, cpf_len = 11, c;
     int cpf[11];
     char s_cpf[11];
-    char bad_cpf[12][12] = { "00000000000",
-        "01234567890",
-        "11111111111",
-        "22222222222",
-        "33333333333",
-        "44444444444",
-        "55555555555",
-        "66666666666",
-        "77777777777",
-        "88888888888",
-        "99999999999"};
 
     while ((*cpfnumber != '\0') && (var_len > 0)) {
-        if (*cpfnumber != '-' || *cpfnumber != '.') {
+        // Always true.
+        //if (*cpfnumber != '-' || *cpfnumber != '.') {
             if (i < cpf_len && isdigit(*cpfnumber)) {
                 s_cpf[i] = *cpfnumber;
                 cpf[i] = convert_to_int(*cpfnumber);
                 i++;
             }
-        }
+        //}
         cpfnumber++;
         var_len--;
     }
@@ -117,7 +108,7 @@ bool VerifyCPF::verify(const char *cpfnumber, int len) {
 }
 
 
-bool VerifyCPF::evaluate(Transaction *t, Rule *rule,
+bool VerifyCPF::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
     std::list<SMatch> matches;
     bool is_cpf = false;
@@ -129,15 +120,15 @@ bool VerifyCPF::evaluate(Transaction *t, Rule *rule,
 
     for (i = 0; i < input.size() - 1 && is_cpf == false; i++) {
         matches = m_re->searchAll(input.substr(i, input.size()));
-        for (const auto & i : matches) {
-            is_cpf = verify(i.str().c_str(), i.str().size());
+        for (const auto & m : matches) {
+            is_cpf = verify(m.str().c_str(), m.str().size());
             if (is_cpf) {
-                logOffset(ruleMessage, i.offset(), i.str().size());
-                if (rule && t && rule->m_containsCaptureAction) {
+                logOffset(ruleMessage, m.offset(), m.str().size());
+                if (rule && t && rule->hasCaptureAction()) {
                     t->m_collections.m_tx_collection->storeOrUpdateFirst(
-                        "0", i.str());
+                        "0", m.str());
                     ms_dbg_a(t, 7, "Added VerifyCPF match TX.0: " + \
-                        i.str());
+                        m.str());
                 }
 
                 goto out;

@@ -14,7 +14,7 @@ void test_all_data_types(MMDB_lookup_result_s *result,
                                          description,
                                          "utf8_string",
                                          NULL);
-        const char *string = mmdb_strndup(data.utf8_string, data.data_size);
+        char *string = mmdb_strndup(data.utf8_string, data.data_size);
         // This is hex for "unicode! ☯ - ♫" as bytes
         char expect[19] = {0x75,
                            0x6e,
@@ -25,19 +25,19 @@ void test_all_data_types(MMDB_lookup_result_s *result,
                            0x65,
                            0x21,
                            0x20,
-                           0xe2,
-                           0x98,
-                           0xaf,
+                           (char)0xe2,
+                           (char)0x98,
+                           (char)0xaf,
                            0x20,
                            0x2d,
                            0x20,
-                           0xe2,
-                           0x99,
-                           0xab,
+                           (char)0xe2,
+                           (char)0x99,
+                           (char)0xab,
                            0x00};
         is(string, expect, "got expected utf8_string value");
 
-        free((char *)string);
+        free(string);
     }
 
     {
@@ -67,7 +67,7 @@ void test_all_data_types(MMDB_lookup_result_s *result,
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DATA_TYPE_BYTES, description, "bytes", NULL);
         uint8_t expect[] = {0x00, 0x00, 0x00, 0x2a};
-        ok(memcmp((uint8_t *)data.bytes, expect, 4) == 0,
+        ok(memcmp(data.bytes, expect, 4) == 0,
            "bytes field has expected value");
     }
 
@@ -204,9 +204,9 @@ void test_all_data_types(MMDB_lookup_result_s *result,
                        "mapX",
                        "utf8_stringX",
                        NULL);
-        const char *string = mmdb_strndup(data.utf8_string, data.data_size);
+        char *string = mmdb_strndup(data.utf8_string, data.data_size);
         is(string, "hello", "map{mapX}{utf8_stringX} is 'hello'");
-        free((char *)string);
+        free(string);
 
         snprintf(
             description, 500, "map{mapX}{arrayX} for %s - %s", ip, mode_desc);
@@ -417,7 +417,7 @@ void test_all_data_types_as_zero(MMDB_lookup_result_s *result,
 
 void run_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
 
     // All of the remaining tests require an open mmdb
@@ -426,7 +426,7 @@ void run_tests(int mode, const char *mode_desc) {
         return;
     }
 
-    free((void *)path);
+    free(path);
 
     {
         const char *ip = "not an ip";

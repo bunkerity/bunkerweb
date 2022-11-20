@@ -2261,6 +2261,8 @@ qr/subject=\/?C(?<eq>\s?=\s?)US(?<sep>\/|,\s)ST\k<eq>California\k<sep>L\k<eq>San
 [error]
 [alert]
 
+--- timeout: 4
+
 
 
 === TEST 22: tls version - TLSv1.3

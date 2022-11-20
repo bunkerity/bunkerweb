@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -43,11 +43,11 @@ class DebugLog {
     virtual void write(int level, const std::string &msg);
     virtual void write(int level, const std::string &id,
         const std::string &uri, const std::string &msg);
-    bool isLogFileSet();
-    bool isLogLevelSet();
-    void setDebugLogLevel(int level);
-    void setDebugLogFile(const std::string &fileName, std::string *error);
-    const std::string& getDebugLogFile();
+    virtual bool isLogFileSet();
+    virtual bool isLogLevelSet();
+    virtual void setDebugLogLevel(int level);
+    virtual void setDebugLogFile(const std::string &fileName, std::string *error);
+    virtual const std::string& getDebugLogFile();
     virtual int getDebugLogLevel();
 
     int m_debugLevel;

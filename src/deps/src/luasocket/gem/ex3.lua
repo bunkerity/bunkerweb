@@ -7,7 +7,7 @@ local function chainpair(f1, f2)
 end
 
 function filter.chain(...)
-  local f = select(1, ...) 
+  local f = select(1, ...)
   for i = 2, select('#', ...) do
     f = chainpair(f, select(i, ...))
   end

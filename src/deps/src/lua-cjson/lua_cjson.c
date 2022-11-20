@@ -52,7 +52,7 @@
 #endif
 
 #ifndef CJSON_VERSION
-#define CJSON_VERSION   "2.1.0.6"
+#define CJSON_VERSION   "2.1.0.9"
 #endif
 
 #ifdef _MSC_VER
@@ -100,6 +100,10 @@
 
 #else
 #define json_lightudata_mask(ludata)    (ludata)
+#endif
+
+#if LUA_VERSION_NUM > 501
+#define lua_objlen(L,i)		lua_rawlen(L, (i))
 #endif
 
 static const char * const *json_empty_array;

@@ -147,7 +147,8 @@ local mt = { __index = _M }
 
 
 local function ptr2num(ptr)
-    return tonumber(ffi_cast(uintptr_t, ptr))
+    local v = tonumber(ffi_cast(uintptr_t, ptr))
+    return v
 end
 
 
@@ -165,7 +166,8 @@ function _M.new(size)
         num_items = 0,
         max_items = size,
     }
-    return setmetatable(self, mt)
+    setmetatable(self, mt)
+    return self
 end
 
 

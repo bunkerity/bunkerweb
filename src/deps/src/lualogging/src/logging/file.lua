@@ -3,7 +3,7 @@
 --
 -- @author Thiago Costa Ponte (thiago@ideais.com.br)
 --
--- @copyright 2004-2021 Kepler Project
+-- @copyright 2004-2022 Kepler Project
 --
 -------------------------------------------------------------------------------
 
@@ -11,6 +11,7 @@ local logging = require"logging"
 
 local lastFileNameDatePattern
 local lastFileHandler
+
 
 local buffer_mode do
   local dir_separator = _G.package.config:sub(1,1)
@@ -24,8 +25,9 @@ local buffer_mode do
   end
 end
 
+
 local openFileLogger = function (filename, datePattern)
-  local filename = string.format(filename, os.date(datePattern))
+  local filename = string.format(filename, logging.date(datePattern))
   if (lastFileNameDatePattern ~= filename) then
     local f = io.open(filename, "a")
     if (f) then
@@ -41,7 +43,16 @@ local openFileLogger = function (filename, datePattern)
   end
 end
 
-function logging.file(params, ...)
+
+local M = setmetatable({}, {
+  __call = function(self, ...)
+    -- calling on the module instantiates a new logger
+    return self.new(...)
+  end,
+})
+
+
+function M.new(params, ...)
   params = logging.getDeprecatedParams({ "filename", "datePattern", "logPattern" }, params, ...)
   local filename = params.filename
   local datePattern = params.datePattern
@@ -58,11 +69,12 @@ function logging.file(params, ...)
     if not f then
       return nil, msg
     end
-    local s = logging.prepareLogMsg(logPatterns[level], os.date(timestampPattern), level, message)
+    local s = logging.prepareLogMsg(logPatterns[level], logging.date(timestampPattern), level, message)
     f:write(s)
     return true
   end, startLevel)
 end
 
-return logging.file
 
+logging.file = M
+return M

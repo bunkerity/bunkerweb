@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -66,7 +66,7 @@ void json2bin(std::string *str) {
         unsigned int p;
         std::string toBeReplaced = match.str();
         toBeReplaced.erase(0, 2);
-        sscanf(toBeReplaced.c_str(), "%x", &p);
+        sscanf(toBeReplaced.c_str(), "%3x", &p);
         replaceAll(str, match.str(), p);
     }
 
@@ -119,7 +119,7 @@ std::string UnitTest::print() {
 }
 
 
-UnitTest *UnitTest::from_yajl_node(yajl_val &node) {
+UnitTest *UnitTest::from_yajl_node(const yajl_val &node) {
     size_t num_tests = node->u.object.len;
     UnitTest *u = new UnitTest();
 

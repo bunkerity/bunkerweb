@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 #include "src/operators/rbl.h"
 #include "src/operators/rsub.h"
 #include "src/operators/rx.h"
+#include "src/operators/rx_global.h"
 #include "src/operators/str_eq.h"
 #include "src/operators/str_match.h"
 #include "src/operators/validate_byte_range.h"
@@ -70,7 +71,7 @@ namespace operators {
 
 
 bool Operator::evaluateInternal(Transaction *transaction,
-    Rule *rule, const std::string& a, std::shared_ptr<RuleMessage> rm) {
+    RuleWithActions *rule, const std::string& a, std::shared_ptr<RuleMessage> rm) {
     bool res = evaluate(transaction, rule, a, rm);
 
     if (m_negation) {
@@ -81,7 +82,7 @@ bool Operator::evaluateInternal(Transaction *transaction,
 }
 
 bool Operator::evaluateInternal(Transaction *transaction,
-    Rule *rule, const std::string& a) {
+    RuleWithActions *rule, const std::string& a) {
     bool res = evaluate(transaction, rule, a);
 
     if (m_negation) {
@@ -137,7 +138,7 @@ bool Operator::evaluate(Transaction *transaction, const std::string& a) {
     return true;
 }
 
-Operator *Operator::instantiate(std::string op, std::string param_str) {
+Operator *Operator::instantiate(const std::string& op, const std::string& param_str) {
     std::string op_ = utils::string::tolower(op);
     std::unique_ptr<RunTimeString> param(new RunTimeString());
     param->appendText(param_str);
@@ -169,6 +170,7 @@ Operator *Operator::instantiate(std::string op, std::string param_str) {
     IF_MATCH(rbl) { return new Rbl(std::move(param)); }
     IF_MATCH(rsub) { return new Rsub(std::move(param)); }
     IF_MATCH(rx) { return new Rx(std::move(param)); }
+    IF_MATCH(rxglobal) { return new RxGlobal(std::move(param)); }
     IF_MATCH(streq) { return new StrEq(std::move(param)); }
     IF_MATCH(strmatch) { return new StrMatch(std::move(param)); }
     IF_MATCH(validatebyterange) {

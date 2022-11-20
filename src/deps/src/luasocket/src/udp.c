@@ -191,7 +191,7 @@ static int meth_sendto(lua_State *L) {
     err = getaddrinfo(ip, port, &aihint, &ai);
 	if (err) {
         lua_pushnil(L);
-        lua_pushstring(L, gai_strerror(err));
+        lua_pushstring(L, LUA_GAI_STRERROR(err));
         return 2;
     }
 
@@ -290,7 +290,7 @@ static int meth_receivefrom(lua_State *L) {
         INET6_ADDRSTRLEN, portstr, 6, NI_NUMERICHOST | NI_NUMERICSERV);
 	if (err) {
         lua_pushnil(L);
-        lua_pushstring(L, gai_strerror(err));
+        lua_pushstring(L, LUA_GAI_STRERROR(err));
         if (wanted > sizeof(buf)) free(dgram);
         return 2;
     }

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -48,11 +48,56 @@ namespace modsecurity {
 namespace collection {
 namespace backend {
 
+
+/**
+ * The MDBEnvProvider class defines the `GetInstance` method that serves as an
+ * alternative to constructor and lets clients access the same instance of this
+ * class over and over. Its used to provide single MDB_env instance for each collection
+ * that uses lmdb to store and retrieve data. That approach satisfies lmdb requirement:
+ *
+ *   "LMDB uses POSIX locks on files, and these locks have issues if one process opens
+ *    a file multiple times. Because of this, do not mdb_env_open() a file multiple
+ *    times from a single process."
+ *
+ * Creation of MDB_env is delayed to moment when first transaction is opened.
+ * This approach prevents passing env object to forked processes.
+ * In that way next lmdb requirement be satisfied:
+ *
+ *   "Use an MDB_env* in the process which opened it, without fork()ing."
+ */
+class MDBEnvProvider {
+
+ public:
+    MDBEnvProvider(MDBEnvProvider &other) = delete;
+    void operator=(const MDBEnvProvider &) = delete;
+
+    /**
+     * This is the static method that controls the access to the singleton
+     * instance. On the first run, it creates a singleton object and places it
+     * into the static field. On subsequent runs, it returns the client existing
+     * object stored in the static field (Meyers Singleton implementation).
+     */
+    static MDBEnvProvider& GetInstance() {
+        static MDBEnvProvider instance;
+        return instance;
+    }
+    MDB_env* GetEnv();
+    MDB_dbi* GetDBI();
+    bool isValid();
+
+    ~MDBEnvProvider();
+ private:
+    MDB_env *m_env;
+    MDB_dbi m_dbi;
+    bool valid;
+
+    MDBEnvProvider();
+};
+
 class LMDB :
     public Collection {
  public:
     explicit LMDB(std::string name);
-    ~LMDB();
     void store(std::string key, std::string value) override;
 
     bool storeOrUpdateFirst(const std::string &key,
@@ -75,10 +120,13 @@ class LMDB :
         variables::KeyExclusions &ke) override;
 
  private:
+    int txn_begin(unsigned int flags, MDB_txn **ret);
     void string2val(const std::string& str, MDB_val *val);
     void inline lmdb_debug(int rc, std::string op, std::string scope);
 
     MDB_env *m_env;
+    MDB_dbi m_dbi;
+    bool isOpen;
 };
 
 }  // namespace backend

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -27,13 +27,14 @@ namespace actions {
 namespace transformations {
 
 
-LowerCase::LowerCase(std::string a)
+LowerCase::LowerCase(const std::string &a)
     : Transformation(a) {
 }
 
-std::string LowerCase::evaluate(std::string value,
+std::string LowerCase::evaluate(const std::string &val,
     Transaction *transaction) {
     std::locale loc;
+    std::string value(val);
 
     for (std::string::size_type i=0; i < value.length(); ++i) {
         value[i] = std::tolower(value[i], loc);

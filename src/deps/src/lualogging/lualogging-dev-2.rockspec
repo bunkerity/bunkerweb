@@ -9,7 +9,8 @@ package = package_name
 version = package_version.."-"..rockspec_revision
 source = {
   url = "git://github.com/"..github_account_name.."/"..github_repo_name..".git",
-  branch = "master"
+  branch = (package_version == "dev") and "master" or nil,
+  tag = (package_version ~= "dev") and ("v"..package_version) or nil,
 }
 description = {
   summary = "A simple API to use logging features",
@@ -35,7 +36,9 @@ build = {
       ['logging.email']        = "src/logging/email.lua",
       ['logging.sql']          = "src/logging/sql.lua",
       ['logging.socket']       = "src/logging/socket.lua",
-      ['logging.nginx']       = "src/logging/nginx.lua",
+      ['logging.nginx']        = "src/logging/nginx.lua",
+      ['logging.rsyslog']      = "src/logging/rsyslog.lua",
+      ['logging.envconfig']    = "src/logging/envconfig.lua",
     }
   },
   copy_directories = {

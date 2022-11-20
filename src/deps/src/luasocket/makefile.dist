@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------------
 # Distribution makefile
 #--------------------------------------------------------------------------
-DIST = luasocket-3.0-rc1
+DIST = luasocket-3.0.0
 
 TEST = \
 	test/README \
@@ -92,29 +92,29 @@ MAKE = \
 	socket.vcxproj \
 	mime.vcxproj
 
-DOC = \
-	doc/dns.html \
-	doc/ftp.html \
-	doc/index.html \
-	doc/http.html \
-	doc/installation.html \
-	doc/introduction.html \
-	doc/ltn12.html \
-	doc/luasocket.png \
-	doc/mime.html \
-	doc/reference.css \
-	doc/reference.html \
-	doc/smtp.html \
-	doc/socket.html \
-	doc/tcp.html \
-	doc/udp.html \
-	doc/url.html
+DOCS = \
+	docs/dns.html \
+	docs/ftp.html \
+	docs/index.html \
+	docs/http.html \
+	docs/installation.html \
+	docs/introduction.html \
+	docs/ltn12.html \
+	docs/luasocket.png \
+	docs/mime.html \
+	docs/reference.css \
+	docs/reference.html \
+	docs/smtp.html \
+	docs/socket.html \
+	docs/tcp.html \
+	docs/udp.html \
+	docs/url.html
 
 dist:
 	mkdir -p $(DIST)
-	cp -vf NEW $(DIST)
+	cp -vf CHANGELOG.md $(DIST)
 	cp -vf LICENSE $(DIST)
-	cp -vf README $(DIST)
+	cp -vf README.md $(DIST)
 	cp -vf $(MAKE) $(DIST)
 
 	mkdir -p $(DIST)/etc
@@ -123,8 +123,8 @@ dist:
 	mkdir -p $(DIST)/src
 	cp -vf $(SRC) $(DIST)/src
 
-	mkdir -p $(DIST)/doc
-	cp -vf $(DOC) $(DIST)/doc
+	mkdir -p $(DIST)/docs
+	cp -vf $(DOCS) $(DIST)/docs
 
 	mkdir -p $(DIST)/samples
 	cp -vf $(SAMPLES) $(DIST)/samples

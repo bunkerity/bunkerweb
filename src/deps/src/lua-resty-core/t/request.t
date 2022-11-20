@@ -8,7 +8,7 @@ use t::TestCore;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 5 + 5);
+plan tests => repeat_each() * (blocks() * 5 + 2);
 
 #no_diff();
 #no_long_string();
@@ -439,6 +439,8 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):3 loop\]/
 [error]
 bad argument type
 stitch
+--- skip_nginx
+6: >= 1.21.1
 
 
 
@@ -586,3 +588,27 @@ Foo: baz, 123
 --- http09
 --- response_body
 table,table
+
+
+
+=== TEST 19: CONNECT method is considered invalid since nginx 1.21.1
+--- config
+    location = /t {
+        access_log off;
+        content_by_lua_block {
+            local t
+            for i = 1, 500 do
+                t = ngx.req.get_method()
+            end
+            ngx.say("method: ", t)
+            ngx.req.discard_body()
+        }
+    }
+--- request
+CONNECT /t
+hello
+--- error_code: 405
+--- no_error_log
+[error]
+--- skip_nginx
+2: < 1.21.1

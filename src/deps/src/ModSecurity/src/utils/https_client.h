@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -47,7 +47,7 @@ class HttpsClient {
     size_t handle_impl(char * data, size_t size, size_t nmemb);
     void setKey(const std::string& key);
     void setRequestType(const std::string& requestType);
-    void setRequestBody(const std::string& requestType);
+    void setRequestBody(const std::string& requestBody);
 
     std::string error;
  private:

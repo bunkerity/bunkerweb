@@ -5,21 +5,22 @@
 -- @author Andre Carregal (info@keplerproject.org)
 -- @author Thiago Costa Ponte (thiago@ideais.com.br)
 --
--- @copyright 2004-2021 Kepler Project
+-- @copyright 2004-2022 Kepler Project
 -------------------------------------------------------------------------------
 
 local type, table, string, _tostring, tonumber = type, table, string, tostring, tonumber
 local select = select
 local error = error
 local format = string.format
+local floor = math.floor
 local pairs = pairs
 local ipairs = ipairs
 
 local logging = {
   -- Meta information
-  _COPYRIGHT = "Copyright (C) 2004-2021 Kepler Project",
+  _COPYRIGHT = "Copyright (C) 2004-2022 Kepler Project",
   _DESCRIPTION = "A simple API to use logging features in Lua",
-  _VERSION = "LuaLogging 1.6.0",
+  _VERSION = "LuaLogging 1.8.0",
 }
 
 local LEVELS = { "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
@@ -236,6 +237,58 @@ do
 
   function logging.prepareLogMsg(lpattern, dpattern, level, message)
     return cache[lpattern](dpattern, level, message)
+  end
+end
+
+
+-------------------------------------------------------------------------------
+-- os.date replacement with milliseconds if supported
+-- ms placeholder = %q or %xq (where x is number of decimals)
+-------------------------------------------------------------------------------
+
+
+do
+  local gettime = os.time
+  local ok, socket = pcall(require, "socket") -- load luasocket if available
+  if ok then
+    gettime = socket.gettime
+  end
+
+  -- use a pattern cache to know if we even need ms to format
+  local patternCache = setmetatable({}, {
+    __index = function(self, patt)
+      local placeholder = patt:match("(%%%d*q)")
+      if not placeholder then
+        self[patt] = false
+        return false
+      end
+
+      local size = tonumber(placeholder:sub(2,-2)) or 3
+      assert(size >= 1 and size <= 6, "millisecond format %q quantifier range is 1 to 6")
+      self[patt] = ("0"):rep(size) -- a string to grab trailing "0"'s from
+      return self[patt]
+    end
+  })
+  function logging.date(fmt, t)
+    fmt = fmt or "%c"
+    t = t or gettime()
+    local pad = patternCache[fmt]
+    local ms
+    if pad then
+      -- ms required
+      ms = math.fmod(t,1)
+      local mss = (tostring(ms) .. pad):sub(3, -1)
+
+      fmt = fmt:gsub("(%%%d*q)", function(placeholder)
+        return mss:sub(1, #pad)
+      end)
+    end
+
+    local res, err = os.date(fmt, floor(t)) -- 5.3+ requires t to be an integer
+    if type(res) == "table" then
+      res.secf = ms or math.fmod(t,1)
+    end
+    return res, err
   end
 end
 

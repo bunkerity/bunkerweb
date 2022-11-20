@@ -56,13 +56,17 @@ parser:
 
 
 cppcheck:
-	@cppcheck \
+	@cppcheck -U YYSTYPE -U MBEDTLS_MD5_ALT -U MBEDTLS_SHA1_ALT \
+		-D MS_CPPCHECK_DISABLED_FOR_PARSER -U YY_USER_INIT \
 		--suppressions-list=./test/cppcheck_suppressions.txt \
-		--enable=all \
+		--enable=warning,style,performance,portability,unusedFunction,missingInclude \
 		--inconclusive \
 		--template="warning: {file},{line},{severity},{id},{message}" \
-		--std=posix . 2> cppcheck.txt
-	cat cppcheck.txt | grep -v "/ lalr1.cc"
+		-I headers -I . -I others -I src -I others/mbedtls -I src/parser \
+		--error-exitcode=1 \
+		-i "src/parser/seclang-parser.cc" -i "src/parser/seclang-scanner.cc" \
+		--force --verbose .
+
 
 check-static: cppcheck
 
@@ -92,6 +96,7 @@ TESTS+=test/test-cases/regression/action-ctl_request_body_access.json
 TESTS+=test/test-cases/regression/action-ctl_request_body_processor.json
 TESTS+=test/test-cases/regression/action-ctl_request_body_processor_urlencoded.json
 TESTS+=test/test-cases/regression/action-ctl_rule_engine.json
+TESTS+=test/test-cases/regression/action-ctl_audit_engine.json
 TESTS+=test/test-cases/regression/action-ctl_rule_remove_by_id.json
 TESTS+=test/test-cases/regression/action-ctl_rule_remove_by_tag.json
 TESTS+=test/test-cases/regression/action-ctl_rule_remove_target_by_id.json
@@ -151,7 +156,12 @@ TESTS+=test/test-cases/regression/issue-1943.json
 TESTS+=test/test-cases/regression/issue-1956.json
 TESTS+=test/test-cases/regression/issue-1960.json
 TESTS+=test/test-cases/regression/issue-2099.json
+TESTS+=test/test-cases/regression/issue-2000.json
 TESTS+=test/test-cases/regression/issue-2111.json
+TESTS+=test/test-cases/regression/issue-2196.json
+TESTS+=test/test-cases/regression/issue-2423-msg-in-chain.json
+TESTS+=test/test-cases/regression/issue-2427.json
+TESTS+=test/test-cases/regression/issue-2296.json
 TESTS+=test/test-cases/regression/issue-394.json
 TESTS+=test/test-cases/regression/issue-849.json
 TESTS+=test/test-cases/regression/issue-960.json
@@ -165,6 +175,7 @@ TESTS+=test/test-cases/regression/operator-inpectFile.json
 TESTS+=test/test-cases/regression/operator-ipMatchFromFile.json
 TESTS+=test/test-cases/regression/operator-pm.json
 TESTS+=test/test-cases/regression/operator-rx.json
+TESTS+=test/test-cases/regression/operator-rxGlobal.json
 TESTS+=test/test-cases/regression/operator-UnconditionalMatch.json
 TESTS+=test/test-cases/regression/operator-validate-byte-range.json
 TESTS+=test/test-cases/regression/operator-verifycc.json
@@ -180,6 +191,7 @@ TESTS+=test/test-cases/regression/rule-920120.json
 TESTS+=test/test-cases/regression/rule-920200.json
 TESTS+=test/test-cases/regression/rule-920274.json
 TESTS+=test/test-cases/regression/secaction.json
+TESTS+=test/test-cases/regression/secargumentslimit.json
 TESTS+=test/test-cases/regression/sec_component_signature.json
 TESTS+=test/test-cases/regression/secmarker.json
 TESTS+=test/test-cases/regression/secruleengine.json
@@ -213,6 +225,7 @@ TESTS+=test/test-cases/regression/variable-MULTIPART_CRLF_LF_LINES.json
 TESTS+=test/test-cases/regression/variable-MULTIPART_FILENAME.json
 TESTS+=test/test-cases/regression/variable-MULTIPART_INVALID_HEADER_FOLDING.json
 TESTS+=test/test-cases/regression/variable-MULTIPART_NAME.json
+TESTS+=test/test-cases/regression/variable-MULTIPART_PART_HEADERS.json
 TESTS+=test/test-cases/regression/variable-MULTIPART_STRICT_ERROR.json
 TESTS+=test/test-cases/regression/variable-MULTIPART_UNMATCHED_BOUNDARY.json
 TESTS+=test/test-cases/regression/variable-OUTBOUND_DATA_ERROR.json
@@ -283,6 +296,7 @@ TESTS+=test/test-cases/secrules-language-tests/operators/noMatch.json
 TESTS+=test/test-cases/secrules-language-tests/operators/pmFromFile.json
 TESTS+=test/test-cases/secrules-language-tests/operators/pm.json
 TESTS+=test/test-cases/secrules-language-tests/operators/rx.json
+TESTS+=test/test-cases/secrules-language-tests/operators/rxGlobal.json
 TESTS+=test/test-cases/secrules-language-tests/operators/streq.json
 TESTS+=test/test-cases/secrules-language-tests/operators/strmatch.json
 TESTS+=test/test-cases/secrules-language-tests/operators/unconditionalMatch.json

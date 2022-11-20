@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -30,8 +30,10 @@ namespace transformations {
 
 class NormalisePath : public Transformation {
  public:
-    explicit NormalisePath(std::string action);
-    std::string evaluate(std::string exp,
+
+    explicit NormalisePath(const std::string &action);
+
+    std::string evaluate(const std::string &exp,
         Transaction *transaction) override;
 
     static int normalize_path_inplace(unsigned char *input, int input_len,

@@ -3,7 +3,7 @@
 <head>
 <title>ffi.* API Functions</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -54,8 +54,6 @@ td.abiparam { font-weight: bold; width: 6em; }
 <a href="status.html">Status</a>
 </li><li>
 <a href="faq.html">FAQ</a>
-</li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
 </li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
@@ -121,7 +119,7 @@ separated by semicolons. The trailing semicolon for a single
 declaration may be omitted.
 </p>
 <p>
-Please note that external symbols are only <em>declared</em>, but they
+Please note, that external symbols are only <em>declared</em>, but they
 are <em>not bound</em> to any specific address, yet. Binding is
 achieved with C&nbsp;library namespaces (see below).
 </p>
@@ -209,7 +207,7 @@ parse the cdecl only once and get its ctype with
 <tt>ffi.typeof()</tt>. Then use the ctype as a constructor repeatedly.
 </p>
 <p style="font-size: 8pt;">
-Please note that an anonymous <tt>struct</tt> declaration implicitly
+Please note, that an anonymous <tt>struct</tt> declaration implicitly
 creates a new and distinguished ctype every time you use it for
 <tt>ffi.new()</tt>. This is probably <b>not</b> what you want,
 especially if you create more than one cdata object. Different anonymous
@@ -256,12 +254,12 @@ afterwards. Neither the contents of the <tt>metatable</tt> nor the
 contents of an <tt>__index</tt> table (if any) may be modified
 afterwards. The associated metatable automatically applies to all uses
 of this type, no matter how the objects are created or where they
-originate from. Note that pre-defined operations on types have
+originate from. Note that predefined operations on types have
 precedence (e.g. declared field names cannot be overridden).
 </p>
 <p>
 All standard Lua metamethods are implemented. These are called directly,
-without shortcuts and on any mix of types. For binary operations, the
+without shortcuts, and on any mix of types. For binary operations, the
 left operand is checked first for a valid ctype metamethod. The
 <tt>__gc</tt> metamethod only applies to <tt>struct</tt>/<tt>union</tt>
 types and performs an implicit <a href="#ffi_gc"><tt>ffi.gc()</tt></a>
@@ -492,7 +490,7 @@ have some extra methods:
 <p>
 Free the resources associated with a callback. The associated Lua
 function is unanchored and may be garbage collected. The callback
-function pointer is no longer valid and must not be called anymore
+function pointer is no longer valid and must not be called again
 (it may be reused by a subsequently created callback).
 </p>
 
@@ -558,7 +556,7 @@ named <tt>i</tt>.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

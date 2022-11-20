@@ -32,12 +32,13 @@ sub run_test ($) {
     my ($res, $err);
 
     my @cmd;
+    my $lua_bin = $ENV{LUA_BIN} || "luajit";
 
     if ($ENV{TEST_LUA_USE_VALGRIND}) {
         warn "$name\n";
-        @cmd =  ('valgrind', '-q', '--leak-check=full', 'luajit', 'test_case.lua');
+        @cmd =  ('valgrind', '-q', '--leak-check=full', $lua_bin, 'test_case.lua');
     } else {
-        @cmd =  ('luajit', 'test_case.lua');
+        @cmd =  ($lua_bin, 'test_case.lua');
     }
 
     run3 \@cmd, undef, \$res, \$err;

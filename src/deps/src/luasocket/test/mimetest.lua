@@ -15,27 +15,27 @@ local eb64test = "b64test.bin2"
 local db64test = "b64test.bin3"
 
 
--- from Machado de Assis, "A Mão e a Rosa"
+-- from Machado de Assis, "A Mï¿½o e a Rosa"
 local mao = [[
-    Cursavam estes dois moços a academia de S. Paulo, estando 
-    Luís Alves no quarto ano e Estêvão no terceiro. 
-    Conheceram-se na academia, e ficaram amigos íntimos, tanto
-    quanto podiam sê-lo dois espíritos diferentes, ou talvez por 
-    isso mesmo que o eram. Estêvão, dotado de extrema
-    sensibilidade, e não menor fraqueza de ânimo, afetuoso e
-    bom, não daquela bondade varonil, que é apanágio de uma alma
-    forte, mas dessa outra bondade mole e de cera, que vai à
-    mercê de todas as circunstâncias, tinha, além de tudo isso, 
-    o infortúnio de trazer ainda sobre o nariz os óculos 
-    cor-de-rosa de suas virginais ilusões. Luís Alves via bem
-    com os olhos da cara. Não era mau rapaz, mas tinha o seu
-    grão de egoísmo, e se não era incapaz de afeições, sabia
-    regê-las, moderá-las, e sobretudo guiá-las ao seu próprio
+    Cursavam estes dois moï¿½os a academia de S. Paulo, estando
+    Luï¿½s Alves no quarto ano e Estï¿½vï¿½o no terceiro.
+    Conheceram-se na academia, e ficaram amigos ï¿½ntimos, tanto
+    quanto podiam sï¿½-lo dois espï¿½ritos diferentes, ou talvez por
+    isso mesmo que o eram. Estï¿½vï¿½o, dotado de extrema
+    sensibilidade, e nï¿½o menor fraqueza de ï¿½nimo, afetuoso e
+    bom, nï¿½o daquela bondade varonil, que ï¿½ apanï¿½gio de uma alma
+    forte, mas dessa outra bondade mole e de cera, que vai ï¿½
+    mercï¿½ de todas as circunstï¿½ncias, tinha, alï¿½m de tudo isso,
+    o infortï¿½nio de trazer ainda sobre o nariz os ï¿½culos
+    cor-de-rosa de suas virginais ilusï¿½es. Luï¿½s Alves via bem
+    com os olhos da cara. Nï¿½o era mau rapaz, mas tinha o seu
+    grï¿½o de egoï¿½smo, e se nï¿½o era incapaz de afeiï¿½ï¿½es, sabia
+    regï¿½-las, moderï¿½-las, e sobretudo guiï¿½-las ao seu prï¿½prio
     interesse.  Entre estes dois homens travara-se amizade
-    íntima, nascida para um na simpatia, para outro no costume.
+    ï¿½ntima, nascida para um na simpatia, para outro no costume.
     Eram eles os naturais confidentes um do outro, com a
-    diferença que Luís Alves dava menos do que recebia, e, ainda
-    assim, nem tudo o que dava exprimia grande confiança.
+    diferenï¿½a que Luï¿½s Alves dava menos do que recebia, e, ainda
+    assim, nem tudo o que dava exprimia grande confianï¿½a.
 ]]
 
 local function random(handle, io_err)
@@ -44,8 +44,8 @@ local function random(handle, io_err)
             if not handle then error("source is empty!", 2) end
             local len = math.random(0, 1024)
             local chunk = handle:read(len)
-            if not chunk then 
-                handle:close() 
+            if not chunk then
+                handle:close()
                 handle = nil
             end
             return chunk
@@ -62,7 +62,7 @@ local what = nil
 local function transform(input, output, filter)
     local source = random(io.open(input, "rb"))
     local sink = ltn12.sink.file(io.open(output, "wb"))
-    if what then 
+    if what then
         sink = ltn12.sink.chain(filter, sink)
     else
         source = ltn12.source.chain(source, filter)
@@ -147,7 +147,7 @@ local function create_qptest()
         f:write(' ',string.char(32))
     end
     f:write("\r\n")
-    
+
     f:close()
 end
 
@@ -157,7 +157,7 @@ local function cleanup_qptest()
     os.remove(dqptest)
 end
 
--- create test file 
+-- create test file
 local function create_b64test()
     local f = assert(io.open(b64test, "wb"))
     local t = {}

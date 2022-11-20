@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -32,7 +32,7 @@ namespace actions {
 namespace transformations {
 
 
-std::string RemoveComments::evaluate(std::string value,
+std::string RemoveComments::evaluate(const std::string &value,
     Transaction *transaction) {
     std::string ret;
     unsigned char *input;
@@ -59,14 +59,14 @@ std::string RemoveComments::evaluate(std::string value,
             } else if ((input[i] == '<') && (i + 1 < input_len)
                 && (input[i + 1] == '!') && (i + 2 < input_len)
                 && (input[i+2] == '-') && (i + 3 < input_len)
-                && (input[i + 3] == '-') && (incomment == 0)) {
+                && (input[i + 3] == '-')) {
                 incomment = 1;
                 i += 4;
             } else if ((input[i] == '-') && (i + 1 < input_len)
-                && (input[i + 1] == '-') && (incomment == 0)) {
+                && (input[i + 1] == '-')) {
                 input[i] = ' ';
                 break;
-            } else if (input[i] == '#' && (incomment == 0)) {
+            } else if (input[i] == '#') {
                 input[i] = ' ';
                 break;
             } else {

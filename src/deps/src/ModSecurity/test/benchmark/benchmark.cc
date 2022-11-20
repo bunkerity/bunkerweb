@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include <iostream>
 #include <string>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/modsecurity.h"
-#include "modsecurity/rules.h"
 
 using modsecurity::Transaction;
 
@@ -71,14 +71,14 @@ int main(int argc, char *argv[]) {
     }
     std::cout << "Doing " << NUM_REQUESTS << " transactions...\n";
     modsecurity::ModSecurity *modsec;
-    modsecurity::Rules *rules;
+    modsecurity::RulesSet *rules;
     modsecurity::ModSecurityIntervention it;
     modsecurity::intervention::reset(&it);
     modsec = new modsecurity::ModSecurity();
     modsec->setConnectorInformation("ModSecurity-benchmark v0.0.1-alpha" \
             " (ModSecurity benchmark utility)");
 
-    rules = new modsecurity::Rules();
+    rules = new modsecurity::RulesSet();
     if (rules->loadFromUri(rules_file) < 0) {
         std::cout << "Problems loading the rules..." << std::endl;
         std::cout << rules->m_parserError.str() << std::endl;

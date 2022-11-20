@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.0.2
+ * LuaSec 1.2.0
  *
- * Copyright (C) 2006-2021 Bruno Silvestre.
+ * Copyright (C) 2006-2022 Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
@@ -77,7 +77,14 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
 #ifdef LSEC_ENABLE_DANE
   // DANE
   lua_pushstring(L, "dane");
+#ifdef DANE_FLAG_NO_DANE_EE_NAMECHECKS
+  lua_createtable(L, 0, 1);
+  lua_pushstring(L, "no_ee_namechecks");
   lua_pushboolean(L, 1);
+  lua_rawset(L, -3);
+#else
+  lua_pushboolean(L, 1);
+#endif
   lua_rawset(L, -3);
 #endif
 

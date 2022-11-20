@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -45,15 +45,14 @@ class LuaScriptBlob {
 
 
     void write(const void *data, size_t len) {
-        unsigned char *d = NULL;
-        d = (unsigned char *)realloc((unsigned char *)m_data, len + m_len);
+        unsigned char *d = (unsigned char *)realloc((unsigned char *)m_data, len + m_len);
         std::memcpy(d + m_len, data, len);
         m_len = m_len + len;
         m_data = d;
     }
 
 
-    const char *read(size_t *len) {
+    const char *read(size_t *len) const {
         *len = m_len;
         return (const char *)m_data;
     }
@@ -68,9 +67,9 @@ class Lua {
  public:
     Lua() { }
 
-    bool load(std::string script, std::string *err);
+    bool load(const std::string &script, std::string *err);
     int run(Transaction *t, const std::string &str="");
-    static bool isCompatible(std::string script, Lua *l, std::string *error);
+    static bool isCompatible(const std::string &script, Lua *l, std::string *error);
 
 #ifdef WITH_LUA
     static int blob_keeper(lua_State *L, const void *p, size_t sz, void *ud);

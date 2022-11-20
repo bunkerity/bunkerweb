@@ -49,13 +49,14 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CXX
 AM_PROG_AR
 AC_PROG_MAKE_SET
+PKG_PROG_PKG_CONFIG
 
 
 # Check if the compiler is c++11 compatible.
 # AX_CXX_COMPILE_STDCXX_11(,mandatory)
 
 # Check for libinjection
-if ! test -f "others/libinjection/src/libinjection_html5.c"; then
+if ! test -f "${srcdir}/others/libinjection/src/libinjection_html5.c"; then
 AC_MSG_ERROR([\
 
 
@@ -128,6 +129,13 @@ CHECK_LIBXML2
 CHECK_PCRE
 
 
+#
+# Check for pcre2
+#
+PROG_PCRE2
+AM_CONDITIONAL([PCRE2_CFLAGS], [test "PCRE2_CFLAGS" != ""])
+
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([string])
@@ -157,7 +165,7 @@ case $host in
     AC_DEFINE([MACOSX], [1], [Define if the operating system is Macintosh OSX])
     PLATFORM="MacOSX"
     ;;
-  *-*-linux*)
+  *-*-linux* | *-*uclinux*)
     echo "Checking platform... Identified as Linux"
     AC_DEFINE([LINUX], [1], [Define if the operating system is LINUX])
     PLATFORM="Linux"
@@ -187,6 +195,11 @@ case $host in
     AC_DEFINE([FREEBSD], [1], [Define if the operating system is FREEBSD])
     PLATFORM="kFreeBSD"
     ;;
+  *-*-dragonfly*)
+    echo "Checking platform... Identified as DragonFlyBSD, treating as linux"
+    AC_DEFINE([DRAGONFLY], [1], [Define if the operating system is DRAGONFLY])
+    PLATFORM="DragonFly"
+    ;;
   *-*-gnu*.*)
     echo "Checking platform... Identified as HURD, treating as linux"
     AC_DEFINE([LINUX], [1], [Define if the operating system is LINUX])
@@ -194,7 +207,7 @@ case $host in
     ;;
        *)
     echo "Unknown CANONICAL_HOST $host"
-    exit
+    exit 1
     ;;
 esac
 
@@ -216,7 +229,7 @@ AC_SUBST([MSC_GIT_VERSION])
 
 
 AC_ARG_ENABLE(debug-logs,
-    [AC_HELP_STRING([--disable-debug-logs],[Turn off the SecDebugLog feature])],
+    [AS_HELP_STRING([--disable-debug-logs],[Turn off the SecDebugLog feature])],
 
     [case "${enableval}" in
         yes) debugLogs=true ;;
@@ -234,7 +247,7 @@ fi
 
 # Fuzzer
 AC_ARG_ENABLE(afl-fuzz,
-    [AC_HELP_STRING([--enable-afl-fuzz],[Turn on the afl fuzzer compilation utilities])],
+    [AS_HELP_STRING([--enable-afl-fuzz],[Turn on the afl fuzzer compilation utilities])],
 
     [case "${enableval}" in
         yes) aflFuzzer=true ;;
@@ -247,7 +260,7 @@ AC_ARG_ENABLE(afl-fuzz,
 
 # Examples
 AC_ARG_ENABLE(examples,
-    [AC_HELP_STRING([--enable-examples],[Turn on the examples compilation (default option)])],
+    [AS_HELP_STRING([--enable-examples],[Turn on the examples compilation (default option)])],
 
     [case "${enableval}" in
         yes) buildExamples=true ;;
@@ -260,7 +273,7 @@ AC_ARG_ENABLE(examples,
 
 # Parser
 AC_ARG_ENABLE(parser-generation,
-    [AC_HELP_STRING([--enable-parser-generation],[Enables parser generation during the build])],
+    [AS_HELP_STRING([--enable-parser-generation],[Enables parser generation during the build])],
 
     [case "${enableval}" in
         yes) buildParser=true ;;
@@ -273,7 +286,7 @@ AC_ARG_ENABLE(parser-generation,
 
 # Mutex
 AC_ARG_ENABLE(mutex-on-pm,
-    [AC_HELP_STRING([--enable-mutex-on-pm],[Treats pm operations as a critical section])],
+    [AS_HELP_STRING([--enable-mutex-on-pm],[Treats pm operations as a critical section])],
 
     [case "${enableval}" in
         yes) mutexPm=true ;;
@@ -313,7 +326,7 @@ fi
     # Regression tests will not be able to run without the logging support.
     # But we still have the unit tests.
     # if test "$debugLogs" = "true"; then
-#        buildTestUtilities=true
+#         buildTestUtilities=true
     # fi
 # fi
 
@@ -548,6 +561,23 @@ if test "x$LUA_FOUND" = "x2"; then
     echo "   + LUA                                           ....disabled"
 fi
 
+
+## PCRE2
+if test "x$PCRE2_FOUND" = "x0"; then
+    echo "   + PCRE2                                          ....not found"
+fi
+if test "x$PCRE2_FOUND" = "x1"; then
+    echo -n "   + PCRE2                                          ....found "
+    if ! test "x$PCRE2_VERSION" = "x"; then
+        echo "v${PCRE2_VERSION}"
+    else
+        echo ""
+    fi
+    echo "      ${PCRE2_DISPLAY}"
+fi
+if test "x$PCRE2_FOUND" = "x2"; then
+    echo "   + PCRE2                                          ....disabled"
+fi
 
 echo " "
 echo " Other Options"

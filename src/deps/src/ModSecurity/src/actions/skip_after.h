@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include <memory>
 
 #include "modsecurity/actions/action.h"
 
@@ -29,10 +30,13 @@ namespace actions {
 
 class SkipAfter : public Action {
  public:
-    explicit SkipAfter(std::string action)
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+    explicit SkipAfter(const std::string &action) 
+        : Action(action, RunTimeOnlyIfMatchKind),
+        m_skipName(std::make_shared<std::string>(m_parser_payload)) { }
 
-    bool evaluate(Rule *rule, Transaction *transaction) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
+ private:
+     std::shared_ptr<std::string> m_skipName;
 };
 
 

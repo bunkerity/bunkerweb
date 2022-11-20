@@ -66,8 +66,9 @@ print(cjson.encode({arr = empty_arr}))
 === TEST 6: empty_array_mt and empty tables as objects (explicit)
 --- lua
 local cjson = require "cjson"
+local sort_json = require "tests.sort_json"
 local empty_arr = setmetatable({}, cjson.empty_array_mt)
-print(cjson.encode({obj = {}, arr = empty_arr}))
+print(sort_json(cjson.encode({obj = {}, arr = empty_arr})))
 --- out
 {"arr":[],"obj":{}}
 
@@ -76,6 +77,7 @@ print(cjson.encode({obj = {}, arr = empty_arr}))
 === TEST 7: empty_array_mt and empty tables as objects (explicit)
 --- lua
 local cjson = require "cjson"
+local sort_json = require "tests.sort_json"
 cjson.encode_empty_table_as_object(true)
 local empty_arr = setmetatable({}, cjson.empty_array_mt)
 local data = {
@@ -88,15 +90,16 @@ local data = {
     }
   }
 }
-print(cjson.encode(data))
+print(sort_json(cjson.encode(data)))
 --- out
-{"foo":{"foobar":{"obj":{},"arr":[]},"obj":{}},"arr":[]}
+{"arr":[],"foo":{"foobar":{"arr":[],"obj":{}},"obj":{}}}
 
 
 
 === TEST 8: empty_array_mt on non-empty tables
 --- lua
 local cjson = require "cjson"
+local sort_json = require "tests.sort_json"
 cjson.encode_empty_table_as_object(true)
 local array = {"hello", "world", "lua"}
 setmetatable(array, cjson.empty_array_mt)
@@ -110,9 +113,9 @@ local data = {
     }
   }
 }
-print(cjson.encode(data))
+print(sort_json(cjson.encode(data)))
 --- out
-{"foo":{"foobar":{"obj":{},"arr":[]},"obj":{}},"arr":["hello","world","lua"]}
+{"arr":["hello","world","lua"],"foo":{"foobar":{"arr":[],"obj":{}},"obj":{}}}
 
 
 

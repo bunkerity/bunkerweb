@@ -17,3 +17,4 @@ trim_trailing_whitespace = true
 
 [Makefile]
 indent_style = tab
+trim_trailing_whitespace = true

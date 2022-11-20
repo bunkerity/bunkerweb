@@ -3,7 +3,7 @@
 <head>
 <title>Profiler</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -49,8 +49,6 @@
 <a href="status.html">Status</a>
 </li><li>
 <a href="faq.html">FAQ</a>
-</li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
 </li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
@@ -158,7 +156,7 @@ To see how much time is spent in different VM states or
 Combinations of <tt>v/z</tt> with <tt>f/F/l</tt> produce two-level
 views, e.g. <tt>-jp=vf</tt> or <tt>-jp=fv</tt>. This shows the time
 spent in a VM state or zone vs. hotspots. This can be used to answer
-questions like "Which time consuming functions are only interpreted?" or
+questions like "Which time-consuming functions are only interpreted?" or
 "What's the garbage collector overhead for a specific function?".
 </p>
 <p>
@@ -217,7 +215,7 @@ local profile = require("jit.profile")
 This module can be used to implement your own higher-level profiler.
 A typical profiling run starts the profiler, captures stack dumps in
 the profiler callback, adds them to a hash table to aggregate the number
-of samples, stops the profiler and then analyzes all of the captured
+of samples, stops the profiler and then analyzes all captured
 stack dumps. Other parameters can be sampled in the profiler callback,
 too. But it's important not to spend too much time in the callback,
 since this may skew the statistics.
@@ -271,9 +269,9 @@ returns a string with a stack dump for the <tt>thread</tt> (coroutine),
 formatted according to the <tt>fmt</tt> argument:
 </p>
 <ul>
-<li><tt>p</tt> &mdash; Preserve the full path for module names. Otherwise
+<li><tt>p</tt> &mdash; Preserve the full path for module names. Otherwise,
 only the file name is used.</li>
-<li><tt>f</tt> &mdash; Dump the function name if it can be derived. Otherwise
+<li><tt>f</tt> &mdash; Dump the function name if it can be derived. Otherwise,
 use module:line.</li>
 <li><tt>F</tt> &mdash; Ditto, but dump module:name.</li>
 <li><tt>l</tt> &mdash; Dump module:line.</li>
@@ -351,7 +349,7 @@ use.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

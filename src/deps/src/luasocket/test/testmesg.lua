@@ -34,11 +34,11 @@ r, e = smtp.send{
 
 print(r, e)
 
--- creates a source to send a message with two parts. The first part is 
+-- creates a source to send a message with two parts. The first part is
 -- plain text, the second part is a PNG image, encoded as base64.
 source = smtp.message{
   headers = {
-     -- Remember that headers are *ignored* by smtp.send. 
+     -- Remember that headers are *ignored* by smtp.send.
      from = "Sicrano <sicrano@tecgraf.puc-rio.br>",
      to = "Fulano <fulano@tecgraf.puc-rio.br>",
      subject = "Here is a message with attachments"
@@ -49,18 +49,18 @@ source = smtp.message{
                "Preamble might show up even in a MIME enabled client.",
     -- first part: No headers means plain text, us-ascii.
     -- The mime.eol low-level filter normalizes end-of-line markers.
-    [1] = { 
+    [1] = {
       body = mime.eol(0, [[
-        Lines in a message body should always end with CRLF. 
+        Lines in a message body should always end with CRLF.
         The smtp module will *NOT* perform translation. It will
         perform necessary stuffing, though.
       ]])
     },
-    -- second part: Headers describe content the to be an image, 
+    -- second part: Headers describe content the to be an image,
     -- sent under the base64 transfer content encoding.
-    -- Notice that nothing happens until the message is sent. Small 
+    -- Notice that nothing happens until the message is sent. Small
     -- chunks are loaded into memory and translation happens on the fly.
-    [2] = { 
+    [2] = {
       headers = {
         ["ConTenT-tYpE"] = 'image/png; name="luasocket.png"',
         ["content-disposition"] = 'attachment; filename="luasocket.png"',

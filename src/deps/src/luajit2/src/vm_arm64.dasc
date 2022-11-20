@@ -1,6 +1,6 @@
 |// Low-level VM code for ARM64 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch arm64
 |.section code_op, code_sub
@@ -3988,6 +3988,7 @@ static void emit_asm_debug(BuildCtx *ctx)
 	"\t.align 3\n"
 	".LEFDE1:\n\n", (int)ctx->codesz - fcofs);
 #endif
+#if !LJ_NO_UNWIND
     fprintf(ctx->fp, "\t.section .eh_frame,\"a\",%%progbits\n");
     fprintf(ctx->fp,
 	".Lframe1:\n"
@@ -4055,6 +4056,7 @@ static void emit_asm_debug(BuildCtx *ctx)
 	"\t.byte 0x94\n\t.uleb128 4\n"		/* offset x20 */
 	"\t.align 3\n"
 	".LEFDE3:\n\n", (int)ctx->codesz - fcofs);
+#endif
 #endif
     break;
 #if !LJ_NO_UNWIND

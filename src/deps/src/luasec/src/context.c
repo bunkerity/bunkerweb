@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.0.2
+ * LuaSec 1.2.0
  *
- * Copyright (C) 2014-2021 Kim Alvefur, Paul Aurich, Tobias Markmann, 
+ * Copyright (C) 2014-2022 Kim Alvefur, Paul Aurich, Tobias Markmann, 
  *                         Matthew Wild.
- * Copyright (C) 2006-2021 Bruno Silvestre.
+ * Copyright (C) 2006-2022 Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
@@ -17,6 +17,7 @@
 #include <openssl/err.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
+#include <openssl/x509_vfy.h>
 #include <openssl/dh.h>
 
 #include <lua.h>
@@ -711,11 +712,31 @@ static int set_alpn_cb(lua_State *L)
 /*
  * DANE
  */
+static int dane_options[] = {
+  /* TODO move into options.c
+   * however this symbol is not from openssl/ssl.h but rather from
+   * openssl/x509_vfy.h
+   * */
+#ifdef DANE_FLAG_NO_DANE_EE_NAMECHECKS
+  DANE_FLAG_NO_DANE_EE_NAMECHECKS,
+#endif
+  0
+};
+static const char *dane_option_names[] = {
+#ifdef DANE_FLAG_NO_DANE_EE_NAMECHECKS
+  "no_ee_namechecks",
+#endif
+  NULL
+};
+
 static int set_dane(lua_State *L)
 {
-  int ret;
+  int ret, i;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
   ret = SSL_CTX_dane_enable(ctx);
+  for (i = 2; ret > 0 && i <= lua_gettop(L); i++) {
+    ret = SSL_CTX_dane_set_flags(ctx, dane_options[luaL_checkoption(L, i, NULL, dane_option_names)]);
+  }
   lua_pushboolean(L, (ret > 0));
   return 1;
 }

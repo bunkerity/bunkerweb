@@ -1,6 +1,6 @@
 /*
 ** Pseudo-random number generation.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_PRNG_H

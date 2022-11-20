@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -13,10 +13,9 @@
  *
  */
 
-#include "modsecurity/rules.h"
-
 #include "modsecurity/rule_message.h"
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/modsecurity.h"
 #include "modsecurity/transaction.h"
 #include "src/utils/string.h"
@@ -27,7 +26,7 @@ namespace modsecurity {
 std::string RuleMessage::_details(const RuleMessage *rm) {
     std::string msg;
 
-    msg.append(" [file \"" + std::string(rm->m_ruleFile) + "\"]");
+    msg.append(" [file \"" + std::string(*rm->m_ruleFile.get()) + "\"]");
     msg.append(" [line \"" + std::to_string(rm->m_ruleLine) + "\"]");
     msg.append(" [id \"" + std::to_string(rm->m_ruleId) + "\"]");
     msg.append(" [rev \"" + rm->m_rev + "\"]");
@@ -38,13 +37,15 @@ std::string RuleMessage::_details(const RuleMessage *rm) {
     msg.append(" [ver \"" + rm->m_ver + "\"]");
     msg.append(" [maturity \"" + std::to_string(rm->m_maturity) + "\"]");
     msg.append(" [accuracy \"" + std::to_string(rm->m_accuracy) + "\"]");
+
     for (auto &a : rm->m_tags) {
         msg.append(" [tag \"" + a + "\"]");
     }
-    msg.append(" [hostname \"" + std::string(rm->m_serverIpAddress) \
+
+    msg.append(" [hostname \"" + *rm->m_serverIpAddress.get() \
         + "\"]");
-    msg.append(" [uri \"" + utils::string::limitTo(200, rm->m_uriNoQueryStringDecoded) + "\"]");
-    msg.append(" [unique_id \"" + rm->m_id + "\"]");
+    msg.append(" [uri \"" + utils::string::limitTo(200, *rm->m_uriNoQueryStringDecoded.get()) + "\"]");
+    msg.append(" [unique_id \"" + *rm->m_id + "\"]");
     msg.append(" [ref \"" + utils::string::limitTo(200, rm->m_reference) + "\"]");
 
     return msg;
@@ -54,9 +55,9 @@ std::string RuleMessage::_details(const RuleMessage *rm) {
 std::string RuleMessage::_errorLogTail(const RuleMessage *rm) {
     std::string msg;
 
-    msg.append("[hostname \"" + std::string(rm->m_serverIpAddress) + "\"]");
-    msg.append(" [uri \"" + utils::string::limitTo(200, rm->m_uriNoQueryStringDecoded) + "\"]");
-    msg.append(" [unique_id \"" + rm->m_id + "\"]");
+    msg.append("[hostname \"" + *rm->m_serverIpAddress.get() + "\"]");
+    msg.append(" [uri \"" + utils::string::limitTo(200, *rm->m_uriNoQueryStringDecoded.get()) + "\"]");
+    msg.append(" [unique_id \"" + *rm->m_id + "\"]");
 
     return msg;
 }
@@ -64,9 +65,10 @@ std::string RuleMessage::_errorLogTail(const RuleMessage *rm) {
 
 std::string RuleMessage::log(const RuleMessage *rm, int props, int code) {
     std::string msg("");
+    msg.reserve(2048);
 
     if (props & ClientLogMessageInfo) {
-        msg.append("[client " + std::string(rm->m_clientIpAddress) + "] ");
+        msg.append("[client " + std::string(*rm->m_clientIpAddress.get()) + "] ");
     }
 
     if (rm->m_isDisruptive) {
@@ -77,7 +79,7 @@ std::string RuleMessage::log(const RuleMessage *rm, int props, int code) {
             msg.append(std::to_string(code));
         }
         msg.append(" (phase ");
-        msg.append(std::to_string(rm->m_rule->m_phase - 1) + "). ");
+        msg.append(std::to_string(rm->m_rule->getPhase() - 1) + "). ");
     } else {
         msg.append("ModSecurity: Warning. ");
     }

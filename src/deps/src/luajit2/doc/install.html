@@ -3,7 +3,7 @@
 <head>
 <title>Installation</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -14,25 +14,20 @@ table.compat {
 }
 table.compat td {
   border: 1px solid #bfcfff;
-  height: 2.5em;
+  height: 1.5em;
 }
 table.compat tr.compathead td {
   font-weight: bold;
   border-bottom: 2px solid #bfcfff;
 }
-tr.compathead td.compatos {
-  vertical-align: top;
+td.compatname, td.compatver {
+  width: 10%;
 }
-table.compat td.compatcpu {
-  width: 18%;
-  border-right: 2px solid #bfcfff;
+td.compatbits {
+  width: 5%;
 }
-td.compatos {
+td.compatx {
   width: 21%;
-  vertical-align: middle;
-}
-td.compatno {
-  background-color: #d0d0d0;
 }
 </style>
 </head>
@@ -78,8 +73,6 @@ td.compatno {
 </li><li>
 <a href="faq.html">FAQ</a>
 </li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
-</li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
 </div>
@@ -95,62 +88,204 @@ For the impatient (on POSIX systems):
 <pre class="code">
 make &amp;&amp; sudo make install
 </pre>
+
+<h2 id="req">Requirements</h2>
+<h3 id="systems">Systems</h3>
 <p>
-LuaJIT currently builds out-of-the box on most systems.
-Here's the compatibility matrix for the supported combinations of
-operating systems, CPUs and compilers:
+LuaJIT currently builds out-of-the box on most systems:
 </p>
 <table class="compat">
 <tr class="compathead">
-<td class="compatcpu">CPU / OS</td>
-<td class="compatos"><a href="#posix">Linux</a> or<br><a href="#android">Android</a></td>
-<td class="compatos"><a href="#posix">*BSD, Other</a></td>
-<td class="compatos"><a href="#posix">macOS 10.4+</a> or<br><a href="#ios">iOS 3.0+</a></td>
-<td class="compatos"><a href="#windows">Windows 7<br>or later</a></td>
+<td class="compatname">OS</td>
+<td class="compatver">Min. Version</td>
+<td class="compatx">Requirements</td>
+<td class="compatx">LuaJIT Versions</td>
 </tr>
 <tr class="odd separate">
-<td class="compatcpu">x86 (32 bit)</td>
-<td class="compatos">GCC 4.2+</td>
-<td class="compatos">GCC 4.2+</td>
-<td class="compatos">XCode 5.0+<br>Clang</td>
-<td class="compatos">MSVC<br>MinGW, Cygwin</td>
+<td class="compatname"><a href="#windows">Windows</a></td>
+<td class="compatver">7</td>
+<td class="compatx">x86 or x64, ARM64: TBA</td>
+<td class="compatx">v2.0 &ndash;</td>
 </tr>
 <tr class="even">
-<td class="compatcpu">x64 (64 bit)</td>
-<td class="compatos">GCC 4.2+</td>
-<td class="compatos">GCC 4.2+<br>ORBIS (<a href="#ps4">PS4</a>)</td>
-<td class="compatos">XCode 5.0+<br>Clang</td>
-<td class="compatos">MSVC<br>Durango (<a href="#xboxone">Xbox One</a>)</td>
+<td class="compatname"><a href="#posix">Linux</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">v2.0 &ndash;</td>
 </tr>
 <tr class="odd">
-<td class="compatcpu"><a href="#cross2">ARMv5+<br>ARM9E+</a></td>
-<td class="compatos">GCC 4.2+</td>
-<td class="compatos">GCC 4.2+<br>PSP2 (<a href="#psvita">PS VITA</a>)</td>
-<td class="compatos">XCode 5.0+<br>Clang</td>
-<td class="compatos compatno">&nbsp;</td>
+<td class="compatname"><a href="#posix">*BSD</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">v2.0 &ndash;</td>
 </tr>
 <tr class="even">
-<td class="compatcpu"><a href="#cross2">ARM64<br>ARM64be</a></td>
-<td class="compatos">GCC 4.8+</td>
-<td class="compatos compatno">&nbsp;</td>
-<td class="compatos">XCode 6.0+<br>Clang 3.5+</td>
-<td class="compatos compatno">&nbsp;</td>
+<td class="compatname"><a href="#posix">macOS (OSX)</a></td>
+<td class="compatver">10.4</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">v2.1 &ndash;</td>
 </tr>
 <tr class="odd">
-<td class="compatcpu"><a href="#cross2">PPC</a></td>
-<td class="compatos">GCC 4.3+</td>
-<td class="compatos">GCC 4.3+<br>GCC 4.1 (<a href="#ps3">PS3</a>)</td>
-<td class="compatos compatno">&nbsp;</td>
-<td class="compatos">XEDK (<a href="#xbox360">Xbox 360</a>)</td>
+<td class="compatname"><a href="#posix">POSIX</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">mmap, dlopen</td>
+<td class="compatx">v2.0 &ndash;</td>
+</tr>
+<tr class="even separate">
+<td class="compatname"><a href="#android">Android</a></td>
+<td class="compatver">4.0</td>
+<td class="compatx">Recent Android NDK</td>
+<td class="compatx">v2.0 &ndash;</td>
+</tr>
+<tr class="odd">
+<td class="compatname"><a href="#ios">iOS</a></td>
+<td class="compatver">3.0</td>
+<td class="compatx">Xcode iOS SDK</td>
+<td class="compatx">v2.1 &ndash;</td>
+</tr>
+<tr class="even separate">
+<td class="compatname"><a href="#consoles">PS3</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">PS3 SDK</td>
+<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
+</tr>
+<tr class="odd">
+<td class="compatname"><a href="#consoles">PS4</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">PS4 SDK (ORBIS)</td>
+<td class="compatx">v2.0 &ndash;</td>
 </tr>
 <tr class="even">
-<td class="compatcpu"><a href="#cross2">MIPS32<br>MIPS64<br>MIPS64r6</a></td>
-<td class="compatos">GCC 4.3+</td>
-<td class="compatos">GCC 4.3+</td>
-<td class="compatos compatno">&nbsp;</td>
-<td class="compatos compatno">&nbsp;</td>
+<td class="compatname"><a href="#consoles">PS5</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">PS5 SDK (PROSPERO)</td>
+<td class="compatx">v2.1 &ndash;</td>
+</tr>
+<tr class="odd">
+<td class="compatname"><a href="#consoles">PS Vita</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">PS Vita SDK (PSP2)</td>
+<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
+</tr>
+<tr class="even">
+<td class="compatname"><a href="#consoles">Xbox 360</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">Xbox 360 SDK (XEDK)</td>
+<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
+</tr>
+<tr class="odd">
+<td class="compatname"><a href="#consoles">Xbox One</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">Xbox One SDK (DURANGO)</td>
+<td class="compatx">v2.1 &ndash;</td>
+</tr>
+<tr class="even">
+<td class="compatname"><a href="#consoles">Nintendo Switch</a></td>
+<td class="compatver">&nbsp;</td>
+<td class="compatx">NintendoSDK + NX Addon</td>
+<td class="compatx">v2.1 &ndash;</td>
 </tr>
 </table>
+<p>
+The codebase has compatibility defines for some more systems, but
+without official support.
+</p>
+<h3 id="toolchains">Toolchains</h3>
+<p>
+Building LuaJIT requires a recent toolchain based on GCC, Clang/LLVM or
+MSVC++.
+</p>
+<p>
+The Makefile-based build system requires GNU Make and supports
+cross-builds. Batch files are provided for MSVC++ builds and console
+cross-builds.
+</p>
+<h3 id="architectures">CPU Architectures</h3>
+<table class="compat">
+<tr class="compathead">
+<td class="compatname">CPU</td>
+<td class="compatbits">Bits</td>
+<td class="compatx">Requirements</td>
+<td class="compatx">Variants</td>
+<td class="compatx">LuaJIT Versions</td>
+</tr>
+<tr class="odd separate">
+<td class="compatname">x86</td>
+<td class="compatbits">32</td>
+<td class="compatx">v2.1+: SSE2</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">v2.0 &ndash;</td>
+</tr>
+<tr class="even">
+<td class="compatname">x64</td>
+<td class="compatbits">64</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">v2.0 &ndash;</td>
+</tr>
+<tr class="odd">
+<td class="compatname">ARM</td>
+<td class="compatbits">32</td>
+<td class="compatx">ARMv5+, ARM9E+</td>
+<td class="compatx">hard-fp + soft-fp</td>
+<td class="compatx">v2.0 &ndash;</td>
+</tr>
+<tr class="even">
+<td class="compatname">ARM64</td>
+<td class="compatbits">64</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">ARM64le + ARM64be</td>
+<td class="compatx">v2.1 &ndash;</td>
+</tr>
+<tr class="odd">
+<td class="compatname">PPC32</td>
+<td class="compatbits">32</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">hard-fp + soft-fp</td>
+<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
+</tr>
+<tr class="even">
+<td class="compatname">PPC/e500</td>
+<td class="compatbits">32</td>
+<td class="compatx">e500v2</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">v2.0 EOL</td>
+</tr>
+<tr class="odd">
+<td class="compatname">MIPS32</td>
+<td class="compatbits">32</td>
+<td class="compatx">MIPS32r1 &ndash; r5</td>
+<td class="compatx">hard-fp + soft-fp</td>
+<td class="compatx">v2.0 &ndash;</td>
+</tr>
+<tr class="even">
+<td class="compatname">MIPS64</td>
+<td class="compatbits">64</td>
+<td class="compatx">MIPS64r1 &ndash; r5</td>
+<td class="compatx">hard-fp + soft-fp</td>
+<td class="compatx">v2.1 &ndash;</td>
+</tr>
+<tr class="odd">
+<td class="compatname">MIPS64</td>
+<td class="compatbits">64</td>
+<td class="compatx">MIPS64r6</td>
+<td class="compatx">hard-fp + soft-fp</td>
+<td class="compatx">v2.1 EOL</td>
+</tr>
+<tr class="even">
+<td class="compatname">RISC-V</td>
+<td class="compatbits">64</td>
+<td class="compatx">RVA22+</td>
+<td class="compatx">&nbsp;</td>
+<td class="compatx">TBA</td>
+</tr>
+</table>
+<p>
+There are no plans to add historic architectures or to continue support
+for end-of-life (EOL) architectures, for which no new CPUs are commonly
+available anymore. Likewise, there are no plans to support marginal
+and/or de-facto-dead architectures.
+</p>
 
 <h2>Configuring LuaJIT</h2>
 <p>
@@ -191,7 +326,7 @@ The recommended way to fetch the latest version is to do a pull from
 the git repository.
 </p>
 <p>
-Alternatively download the latest source package of LuaJIT (pick the .tar.gz).
+Alternatively, download the latest source package of LuaJIT (pick the .tar.gz).
 Move it to a directory of your choice, open a terminal window and change
 to this directory. Now unpack the archive and change to the newly created
 directory (replace XX.YY.ZZ with the version you downloaded):
@@ -411,7 +546,8 @@ NDKCROSS=$NDKBIN/aarch64-linux-android-
 NDKCC=$NDKBIN/aarch64-linux-android21-clang
 make CROSS=$NDKCROSS \
      STATIC_CC=$NDKCC DYNAMIC_CC="$NDKCC -fPIC" \
-     TARGET_LD=$NDKCC
+     TARGET_LD=$NDKCC TARGET_AR="$NDKBIN/llvm-ar rcus" \
+     TARGET_STRIP=$NDKBIN/llvm-strip
 
 # Android/ARM, armeabi-v7a (ARMv7 VFP), Android 4.1+ (JB)
 NDKDIR=/opt/android/ndk
@@ -420,7 +556,8 @@ NDKCROSS=$NDKBIN/arm-linux-androideabi-
 NDKCC=$NDKBIN/armv7a-linux-androideabi16-clang
 make HOST_CC="gcc -m32" CROSS=$NDKCROSS \
      STATIC_CC=$NDKCC DYNAMIC_CC="$NDKCC -fPIC" \
-     TARGET_LD=$NDKCC
+     TARGET_LD=$NDKCC TARGET_AR="$NDKBIN/llvm-ar rcus" \
+     TARGET_STRIP=$NDKBIN/llvm-strip
 </pre>
 <p>
 You can cross-compile for <b id="ios">iOS 3.0+</b> (iPhone/iPad) using the <a href="https://developer.apple.com/ios/"><span class="ext">&raquo;</span>&nbsp;iOS SDK</a>:
@@ -444,8 +581,7 @@ make DEFAULT_CC=clang CROSS="$(dirname $ICC)/" \
 <h3 id="consoles">Cross-compiling for consoles</h3>
 <p>
 Building LuaJIT for consoles requires both a supported host compiler
-(x86 or x64) and a cross-compiler (to PPC or ARM) from the official
-console SDK.
+(x86 or x64) and a cross-compiler from the official console SDK.
 </p>
 <p>
 Due to restrictions on consoles, the JIT compiler is disabled and only
@@ -466,45 +602,58 @@ To cross-compile for <b id="ps3">PS3</b> from a Linux host (requires
 make HOST_CC="gcc -m32" CROSS=ppu-lv2-
 </pre>
 <p>
-To cross-compile for <b id="ps4">PS4</b> from a Windows host,
-open a "Visual Studio .NET Command Prompt" (64&nbsp;bit host compiler),
-<tt>cd</tt> to the directory where you've unpacked the sources and
-run the following commands:
+To cross-compile for the other consoles from a Windows host, open a
+"Native Tools Command Prompt for VS". You need to choose either the 32
+or the 64&nbsp;bit version of the host compiler to match the target.
+Then <tt>cd</tt> to the <tt>src</tt> directory below where you've
+unpacked the sources and run the build command given in the table:
 </p>
-<pre class="code">
-cd src
-ps4build
-</pre>
+<table class="compat">
+<tr class="compathead">
+<td class="compatname">Console</td>
+<td class="compatbits">Bits</td>
+<td class="compatx">Build Command</td>
+</tr>
+<tr class="odd separate">
+<td class="compatname"><b id="ps4">PS4</b></td>
+<td class="compatbits">64</td>
+<td class="compatx"><tt>ps4build</tt></td>
+</tr>
+<tr class="even">
+<td class="compatname"><b id="ps5">PS5</b></td>
+<td class="compatbits">64</td>
+<td class="compatx"><tt>ps5build</tt></td>
+</tr>
+<tr class="odd">
+<td class="compatname"><b id="psvita">PS Vita</b></td>
+<td class="compatbits">32</td>
+<td class="compatx"><tt>psvitabuild</tt></td>
+</tr>
+<tr class="even">
+<td class="compatname"><b id="xbox360">Xbox 360</b></td>
+<td class="compatbits">32</td>
+<td class="compatx"><tt>xedkbuild</tt></td>
+</tr>
+<tr class="odd">
+<td class="compatname"><b id="xboxone">Xbox One</b></td>
+<td class="compatbits">64</td>
+<td class="compatx"><tt>xb1build</tt></td>
+</tr>
+<tr class="even">
+<td class="compatname"><b id="nx32">Nintendo Switch NX32</b></td>
+<td class="compatbits">32</td>
+<td class="compatx"><tt>nxbuild</tt></td>
+</tr>
+<tr class="odd">
+<td class="compatname"><b id="nx64">Nintendo Switch NX64</b></td>
+<td class="compatbits">64</td>
+<td class="compatx"><tt>nxbuild</tt></td>
+</tr>
+</table>
 <p>
-To cross-compile for <b id="psvita">PS Vita</b> from a Windows host,
-open a "Visual Studio .NET Command Prompt" (32&nbsp;bit host compiler),
-<tt>cd</tt> to the directory where you've unpacked the sources and
-run the following commands:
+Please check out the comments in the corresponding <tt>*.bat</tt>
+file for more options.
 </p>
-<pre class="code">
-cd src
-psvitabuild
-</pre>
-<p>
-To cross-compile for <b id="xbox360">Xbox 360</b> from a Windows host,
-open a "Visual Studio .NET Command Prompt" (32&nbsp;bit host compiler),
-<tt>cd</tt> to the directory where you've unpacked the sources and run
-the following commands:
-</p>
-<pre class="code">
-cd src
-xedkbuild
-</pre>
-<p>
-To cross-compile for <b id="xboxone">Xbox One</b> from a Windows host,
-open a "Visual Studio .NET Command Prompt" (64&nbsp;bit host compiler),
-<tt>cd</tt> to the directory where you've unpacked the sources and run
-the following commands:
-</p>
-<pre class="code">
-cd src
-xb1build
-</pre>
 
 <h2 id="embed">Embedding LuaJIT</h2>
 <p>
@@ -546,7 +695,7 @@ allocator from your system (no support for this on 64&nbsp;bit architectures).</
 of calling <tt>luaopen_base</tt> etc. directly.</li>
 <li>To change or extend the list of standard libraries to load, copy
 <tt>src/lib_init.c</tt> to your project and modify it accordingly.
-Make sure the <tt>jit</tt> library is loaded or the JIT compiler
+Make sure the <tt>jit</tt> library is loaded, or the JIT compiler
 will not be activated.</li>
 <li>The <tt>bit.*</tt> module for bitwise operations
 is already built-in. There's no need to statically link
@@ -565,7 +714,7 @@ in unspeakable ways.
 There should be absolutely no need to patch <tt>luaconf.h</tt> or any
 of the Makefiles. And please do not hand-pick files for your packages &mdash;
 simply use whatever <tt>make install</tt> creates. There's a reason
-for all of the files <em>and</em> directories it creates.
+for all the files <em>and</em> directories it creates.
 </p>
 <p>
 The build system uses GNU make and auto-detects most settings based on
@@ -617,7 +766,7 @@ to me (the upstream) and not you (the package maintainer), anyway.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

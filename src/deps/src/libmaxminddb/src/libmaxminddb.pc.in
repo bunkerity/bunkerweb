@@ -5,7 +5,7 @@ includedir=@includedir@
 
 Name: libmaxminddb
 Description: C library for the MaxMind DB file format
-URL: http://maxmind.github.io/libmaxminddb/
+URL: https://maxmind.github.io/libmaxminddb/
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lmaxminddb
 Cflags: -I${includedir}

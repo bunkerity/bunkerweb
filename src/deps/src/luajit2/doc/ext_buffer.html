@@ -3,7 +3,7 @@
 <head>
 <title>String Buffer Library</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2021">
+<meta name="Copyright" content="Copyright (C) 2005-2022">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -61,8 +61,6 @@
 </li><li>
 <a href="faq.html">FAQ</a>
 </li><li>
-<a href="http://wiki.luajit.org/">Wiki <span class="ext">&raquo;</span></a>
-</li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
 </div>
@@ -86,7 +84,7 @@ overhead. In conjunction with the FFI library, they allow zero-copy
 operations.
 </p>
 <p>
-The string buffer libary also includes a high-performance
+The string buffer library also includes a high-performance
 <a href="serialize">serializer</a> for Lua objects.
 </p>
 
@@ -434,8 +432,8 @@ unsupported object types, circular references or deeply nested tables.
 <h3 id="buffer_decode"><tt>obj = buffer.decode(str)<br>
 obj = buf:decode()</tt></h3>
 <p>
-The stand-alone function de-serializes (decodes) the string
-<tt>str</tt>, the buffer method de-serializes one object from the
+The stand-alone function deserializes (decodes) the string
+<tt>str</tt>, the buffer method deserializes one object from the
 buffer. Both return a Lua object <tt>obj</tt>.
 </p>
 <p>
@@ -448,6 +446,10 @@ encoded data. The stand-alone function throws when there's left-over
 data after decoding a single top-level object. The buffer method leaves
 any left-over data in the buffer.
 </p>
+<p>
+Attempting to deserialize an FFI type will throw an error, if the FFI
+library is not built-in or has not been loaded, yet.
+</p>
 
 <h3 id="serialize_options">Serialization Options</h3>
 <p>
@@ -458,7 +460,7 @@ the following members (all optional):
 <li>
 <tt>dict</tt> is a Lua table holding a <b>dictionary of strings</b> that
 commonly occur as table keys of objects you are serializing. These keys
-are compactly encoded as indexes during serialization. A well chosen
+are compactly encoded as indexes during serialization. A well-chosen
 dictionary saves space and improves serialization performance.
 </li>
 <li>
@@ -469,7 +471,7 @@ for the table objects you are serializing.
 <p>
 <tt>dict</tt> needs to be an array of strings and <tt>metatable</tt> needs
 to be an array of tables. Both starting at index 1 and without holes (no
-<tt>nil</tt> inbetween). The tables are anchored in the buffer object and
+<tt>nil</tt> in between). The tables are anchored in the buffer object and
 internally modified into a two-way index (don't do this yourself, just pass
 a plain array). The tables must not be modified after they have been passed
 to <tt>buffer.new()</tt>.
@@ -620,7 +622,7 @@ errors are best caught with an outer wrapper for larger parts of code.
 There's not much one can do after that, anyway.
 </p>
 <p>
-OTOH you may want to catch some errors individually. Buffer methods need
+OTOH, you may want to catch some errors individually. Buffer methods need
 to receive the buffer object as the first argument. The Lua colon-syntax
 <tt>obj:method()</tt> does that implicitly. But to wrap a method with
 <tt>pcall()</tt>, the arguments need to be passed like this:
@@ -683,7 +685,7 @@ mappings of files are OK, but only if the file does not change.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2021
+Copyright &copy; 2005-2022
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

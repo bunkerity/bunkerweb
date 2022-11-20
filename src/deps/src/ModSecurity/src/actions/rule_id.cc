@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -48,7 +48,7 @@ bool RuleId::init(std::string *error) {
 }
 
 
-bool RuleId::evaluate(Rule *rule, Transaction *transaction) {
+bool RuleId::evaluate(RuleWithActions *rule, Transaction *transaction) {
     rule->m_ruleId = m_ruleId;
     return true;
 }

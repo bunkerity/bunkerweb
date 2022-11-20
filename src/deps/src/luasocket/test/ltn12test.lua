@@ -38,7 +38,7 @@ local function named(f, name)
 end
 
 --------------------------------
-local function split(size) 
+local function split(size)
     local buffer = ""
     local last_out = ""
     local last_in = ""
@@ -50,12 +50,12 @@ local function split(size)
         return last_out
     end
     return function(chunk, done)
-        if done then 
-            return not last_in and not last_out 
+        if done then
+            return not last_in and not last_out
         end
         -- check if argument is consistent with state
         if not chunk then
-            if last_in and last_in ~= "" and last_out ~= "" then 
+            if last_in and last_in ~= "" and last_out ~= "" then
                 error("nil chunk following data chunk", 2)
             end
             if not last_out then error("extra nil chunk", 2) end
@@ -67,8 +67,8 @@ local function split(size)
             return output(chunk)
         else
             if not last_in  then error("data chunk following nil chunk", 2) end
-            if last_in ~= "" and last_out ~= "" then 
-                error("data chunk following data chunk", 2) 
+            if last_in ~= "" and last_out ~= "" then
+                error("data chunk following data chunk", 2)
             end
             buffer = chunk
             return output(chunk)
@@ -85,7 +85,7 @@ local function format(chunk)
 end
 
 --------------------------------
-local function merge(size) 
+local function merge(size)
     local buffer = ""
     local last_out = ""
     local last_in = ""
@@ -102,12 +102,12 @@ local function merge(size)
         return last_out
     end
     return function(chunk, done)
-        if done then 
-            return not last_in and not last_out 
+        if done then
+            return not last_in and not last_out
         end
         -- check if argument is consistent with state
         if not chunk then
-            if last_in and last_in ~= "" and last_out ~= "" then 
+            if last_in and last_in ~= "" and last_out ~= "" then
                 error("nil chunk following data chunk", 2)
             end
             if not last_out then error("extra nil chunk", 2) end
@@ -119,8 +119,8 @@ local function merge(size)
             return output(chunk)
         else
             if not last_in  then error("data chunk following nil chunk", 2) end
-            if last_in ~= "" and last_out ~= "" then 
-                error("data chunk following data chunk", 2) 
+            if last_in ~= "" and last_out ~= "" then
+                error("data chunk following data chunk", 2)
             end
             buffer = buffer .. chunk
             return output(chunk)

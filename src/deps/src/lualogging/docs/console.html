@@ -23,14 +23,7 @@
 <div id="navigation">
 <h1>LuaLogging</h1>
   <ul>
-    <li><a href="index.html">Home</a>
-      <ul>
-        <li><a href="index.html#download">Download</a></li>
-        <li><a href="index.html#dependencies">Dependencies</a></li>
-        <li><a href="index.html#history">History</a></li>
-        <li><a href="index.html#credits">Credits</a></li>
-      </ul>
-    </li>
+    <li><a href="index.html">Home</a></li>
     <li><a href="manual.html">Manual</a>
       <ul>
         <li><a href="manual.html#installation">Installation</a></li>
@@ -45,15 +38,12 @@
         <li><a href="rolling_file.html">Rolling File</a></li>
         <li><a href="sql.html">SQL</a></li>
         <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
         <li><a href="email.html">Email</a></li>
         <li><a href="nginx.html">Nginx</a></li>
       </ul>
     </li>
-    <li><a href="https://github.com/lunarmodules/lualogging">Project</a>
-      <ul>
-        <li><a href="https://github.com/lunarmodules/lualogging/issues">Bug Tracker</a></li>
-      </ul>
-    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
     <li><a href="license.html">License</a></li>
   </ul>
 </div> <!-- id="navigation" -->
@@ -99,7 +89,9 @@ function logging.console {
 
     <li><code>timestampPattern</code>:<br />
     This is an optional parameter that can be used to specify a date/time formatting
-    in the log message. The default is taken from <code>logging.defaultTimestampPattern()</code>.</li>
+    in the log message.
+    See <code>logging.date</code> for the format.
+    The default is taken from <code>logging.defaultTimestampPattern()</code>.</li>
 
     <li><code>destination</code>:<br />
     The destination stream, optional. The value can be either <code>"stdout"</code>,
@@ -113,13 +105,29 @@ function logging.console {
 <h2>Examples</h2>
 
 <pre class="example">
-require"logging.console"
+local ansicolors = require("ansicolors") -- https://github.com/kikito/ansicolors.lua
+local ll = require("logging")
+require "logging.console"
 
-local logger = logging.console()
+-- set up the default logger to stderr + colorization
+ll.defaultLogger(ll.console {
+  logLevel = ll.DEBUG,
+  destination = "stderr",
+  timestampPattern = "%y-%m-%d %H:%M:%S",
+  logPatterns = {
+    [ll.DEBUG] = ansicolors("%date%{cyan} %level %message %{reset}(%source)\n"),
+    [ll.INFO] = ansicolors("%date %level %message\n"),
+    [ll.WARN] = ansicolors("%date%{yellow} %level %message\n"),
+    [ll.ERROR] = ansicolors("%date%{red bright} %level %message %{reset}(%source)\n"),
+    [ll.FATAL] = ansicolors("%date%{magenta bright} %level %message %{reset}(%source)\n"),
+  }
+})
 
-logger:info("logging.console test")
-logger:debug("debugging...")
-logger:error("error!")
+local log = ll.defaultLogger()
+
+log:info("logging.console test")
+log:debug("debugging...")
+log:error("error!")
 </pre>
 
 <p>&nbsp;</p>

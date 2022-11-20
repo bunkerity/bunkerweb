@@ -53,6 +53,12 @@ local _M = {
 }
 
 
+-- use a new ctxs table to make LuaJIT JIT compiler happy to generate more
+-- efficient machine code.
+local ctxs = {}
+registry.ngx_lua_ctx_tables = ctxs
+
+
 local get_ctx_table
 do
     local in_ssl_phase = ffi.new("int[1]")
@@ -70,7 +76,6 @@ do
             error("no request ctx found")
         end
 
-        local ctxs = registry.ngx_lua_ctx_tables
         if ctx_ref < 0 then
             ctx_ref = ssl_ctx_ref[0]
             if ctx_ref > 0 and ctxs[ctx_ref] then
@@ -129,7 +134,6 @@ local function set_ctx_table(ctx)
         error("no request ctx found")
     end
 
-    local ctxs = registry.ngx_lua_ctx_tables
     if ctx_ref < 0 then
         ctx_ref = ref_in_table(ctxs, ctx)
         ngx_lua_ffi_set_ctx_ref(r, ctx_ref)

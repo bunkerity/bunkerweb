@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -24,19 +24,16 @@ bool RuleScript::init(std::string *err) {
 
 bool RuleScript::evaluate(Transaction *trans,
     std::shared_ptr<RuleMessage> ruleMessage) {
+
     ms_dbg_a(trans, 4, " Executing script: " + m_name + ".");
 
     bool containsDisruptive = false;
-
-    if (ruleMessage == NULL) {
-        ruleMessage = std::shared_ptr<RuleMessage>(
-            new RuleMessage(this, trans));
-    }
 
     executeActionsIndependentOfChainedRuleResult(trans,
         &containsDisruptive, ruleMessage);
 
     bool ret = m_lua.run(trans);
+
     if (ret) {
         executeActionsAfterFullMatch(trans, containsDisruptive, ruleMessage);
     }

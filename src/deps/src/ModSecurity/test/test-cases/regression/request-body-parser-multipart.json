@@ -3239,5 +3239,60 @@
         "SecRuleEngine On",
         "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500095\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (C-T parm after boundary -- invalid but tolerated)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"145",
+        "Content-Type":"multipart/form-data; boundary=00000000; charset=UTF-8",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "--00000000\r",
+                "Content-Disposition: form-data; name=\"namea\"\r",
+                "\r",
+                "111\r",
+                "--00000000\r",
+                "Content-Disposition: form-data; name=\"nameb\"\r",
+                "\r",
+                "222\r",
+                "--00000000--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log":"Multipart: Invalid parameter after boundary in C-T \\(tolerated\\).*Added data"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule ARGS:namea \"@streq 111\" \"phase:2,deny,id:500096\""
+    ]
   }
 ]

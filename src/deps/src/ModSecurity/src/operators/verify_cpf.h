@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -42,23 +42,30 @@ class VerifyCPF : public Operator {
     ~VerifyCPF() {
         delete m_re;
     }
-    bool evaluate(Transaction *transaction, Rule *rule,
-        const std::string &input) override {
-        return evaluate(transaction, NULL, input, NULL);
-    }
-    bool evaluate(Transaction *transaction,
-        const std::string &input) override {
-        return evaluate(transaction, NULL, input);
-    }
-    bool evaluate(Transaction *transaction, Rule *rule,
+
+    bool operator=(const VerifyCPF &a) = delete;
+    VerifyCPF(const VerifyCPF &a) = delete;
+
+    bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string& input,
         std::shared_ptr<RuleMessage> ruleMessage) override;
 
-    int convert_to_int(const char c);
     bool verify(const char *ssnumber, int len);
 
  private:
+    static int convert_to_int(const char c);
     Regex *m_re;
+    const char bad_cpf[12][12] = { "00000000000",
+        "01234567890",
+        "11111111111",
+        "22222222222",
+        "33333333333",
+        "44444444444",
+        "55555555555",
+        "66666666666",
+        "77777777777",
+        "88888888888",
+        "99999999999"};
 };
 
 }  // namespace operators

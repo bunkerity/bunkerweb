@@ -3,7 +3,7 @@
 --
 -- @author Thijs Schreijer
 --
--- @copyright 2004-2021 Kepler Project
+-- @copyright 2004-2022 Kepler Project
 --
 -------------------------------------------------------------------------------
 
@@ -11,6 +11,7 @@ local logging = require "logging"
 local prepareLogMsg = logging.prepareLogMsg
 
 local ngx_log = assert((ngx or {}).log, "this logger can only be used with OpenResty")
+
 
 local levels = {
   [logging.FATAL] = ngx.EMERG,
@@ -35,11 +36,20 @@ local target_level do
 end
 
 
-function logging.nginx(params)
+local M = setmetatable({}, {
+  __call = function(self, ...)
+    -- calling on the module instantiates a new logger
+    return self.new(...)
+  end,
+})
+
+
+function M.new(params)
   return logging.new(function(self, level, message)
     return ngx_log(levels[level], prepareLogMsg("%message", "", level, message))
   end, target_level)
 end
 
 
-return logging.nginx
+logging.nginx = M
+return M

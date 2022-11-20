@@ -27,6 +27,10 @@ local AF_INET     = 2
 local AF_INET6    = 10
 if ffi.os == "OSX" then
     AF_INET6 = 30
+elseif ffi.os == "BSD" then
+    AF_INET6 = 28
+elseif ffi.os == "Windows" then
+    AF_INET6 = 23
 end
 
 

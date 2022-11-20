@@ -1821,6 +1821,7 @@ qr/subject=\/?C(?<eq>\s?=\s?)US(?<sep>\/|,\s)ST\k<eq>California\k<sep>L\k<eq>San
 --- no_error_log
 [error]
 [alert]
+--- timeout: 5
 
 
 

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -62,10 +62,11 @@ class Rbl : public Operator {
 
     /** @ingroup ModSecurity_Operator */
     explicit Rbl(std::unique_ptr<RunTimeString> param)
-        : Operator("Rbl", std::move(param)),
-        m_demandsPassword(false) {
+        : m_service(),
+        m_demandsPassword(false),
+        m_provider(RblProvider::UnknownProvider),
+        Operator("Rbl", std::move(param)) {
             m_service = m_string->evaluate();
-            m_provider = RblProvider::UnknownProvider;
             if (m_service.find("httpbl.org") != std::string::npos) {
                 m_demandsPassword = true;
                 m_provider = RblProvider::httpbl;
@@ -75,21 +76,22 @@ class Rbl : public Operator {
                 m_provider = RblProvider::httpbl;
             }
         }
-    bool evaluate(Transaction *transaction, Rule *rule,
+    bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string& input,
         std::shared_ptr<RuleMessage> ruleMessage) override;
 
-    std::string mapIpToAddress(std::string ipStr, Transaction *trans);
+    std::string mapIpToAddress(const std::string &ipStr, Transaction *trans) const;
 
-    void futherInfo_httpbl(struct sockaddr_in *sin, std::string ipStr,
+    static void futherInfo_httpbl(struct sockaddr_in *sin, const std::string &ipStr,
         Transaction *trans);
-    void futherInfo_spamhaus(unsigned int high8bits, std::string ipStr,
+    static void futherInfo_spamhaus(unsigned int high8bits, const std::string &ipStr,
         Transaction *trans);
-    void futherInfo_uribl(unsigned int high8bits, std::string ipStr,
+    static void futherInfo_uribl(unsigned int high8bits, const std::string &ipStr,
         Transaction *trans);
-    void furtherInfo(struct sockaddr_in *sin, std::string ipStr,
-        Transaction *trans);
+    static void furtherInfo(struct sockaddr_in *sin, const std::string &ipStr,
+        Transaction *trans, RblProvider provider);
 
+ private:
     std::string m_service;
     bool m_demandsPassword;
     RblProvider m_provider;

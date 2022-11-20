@@ -5,11 +5,19 @@ use warnings;
 
 use FindBin qw( $Bin );
 
+_skip_tests_if_not_linux();
 _skip_tests_if_required_modules_are_not_present();
 _skip_tests_if_nm_is_not_present();
 _test_libs_external_symbols();
 
 done_testing();
+
+sub _skip_tests_if_not_linux {
+    return if $^O eq 'linux';
+
+    print "1..0 # skip all tests skipped - this test requires Linux.\n";
+    exit 0;
+}
 
 sub _skip_tests_if_required_modules_are_not_present {
     eval <<'EOF';

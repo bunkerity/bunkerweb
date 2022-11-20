@@ -18,9 +18,9 @@ end
 local function generate(options, version)
   print([[
 /*--------------------------------------------------------------------------
- * LuaSec 1.1.1
+ * LuaSec 1.2.0
  *
- * Copyright (C) 2006-2021 Bruno Silvestre
+ * Copyright (C) 2006-2022 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 

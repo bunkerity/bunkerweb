@@ -77,9 +77,9 @@ int call_vget_value(MMDB_entry_s *entry, MMDB_entry_data_s *entry_data, ...) {
 
 void test_simple_structure(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const char *ip = "1.1.1.1";
     MMDB_lookup_result_s result =
@@ -242,9 +242,9 @@ void test_no_result(int status,
 
 void test_nested_structure(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-nested.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const char *ip = "1.1.1.1";
     MMDB_lookup_result_s result =

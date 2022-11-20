@@ -2,9 +2,9 @@
 
 void run_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-string-value-entries.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const char *ip = "1.1.1.1";
     MMDB_lookup_result_s result =

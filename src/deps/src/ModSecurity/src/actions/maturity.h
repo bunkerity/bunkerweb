@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -29,11 +29,11 @@ namespace actions {
 
 class Maturity : public Action {
  public:
-    explicit Maturity(std::string action)
+    explicit Maturity(const std::string &action) 
         : Action(action, ConfigurationKind),
         m_maturity(0) { }
 
-    bool evaluate(Rule *rule, Transaction *transaction) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
     bool init(std::string *error) override;
 
  private:

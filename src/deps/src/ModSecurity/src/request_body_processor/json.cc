@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -26,9 +26,15 @@
 namespace modsecurity {
 namespace RequestBodyProcessor {
 
+static const double json_depth_limit_default = 10000.0;
+static const char* json_depth_limit_exceeded_msg = ". Parsing depth limit exceeded";
+
 JSON::JSON(Transaction *transaction) : m_transaction(transaction),
     m_handle(NULL),
-    m_current_key("") {
+    m_current_key(""),
+    m_max_depth(json_depth_limit_default),
+    m_current_depth(0),
+    m_depth_limit_exceeded(false) {
     /**
      * yajl callback functions
      * For more information on the function signatures and order, check
@@ -91,6 +97,9 @@ bool JSON::processChunk(const char *buf, unsigned int size, std::string *err) {
             (const unsigned char *)buf, size);
         /* We need to free the yajl error message later, how to do this? */
         err->assign((const char *)e);
+        if (m_depth_limit_exceeded) {
+            err->append(json_depth_limit_exceeded_msg);
+	}
         yajl_free_error(m_handle, e);
         return false;
     }
@@ -106,6 +115,9 @@ bool JSON::complete(std::string *err) {
         unsigned char *e = yajl_get_error(m_handle, 0, NULL, 0);
         /* We need to free the yajl error message later, how to do this? */
         err->assign((const char *)e);
+        if (m_depth_limit_exceeded) {
+            err->append(json_depth_limit_exceeded_msg);
+	}
         yajl_free_error(m_handle, e);
         return false;
     }
@@ -142,7 +154,10 @@ int JSON::addArgument(const std::string& value) {
     }
 
 
-    m_transaction->addArgument("JSON", path + data, value, 0);
+    if (!m_transaction->addArgument("JSON", path + data, value, 0)) {
+        // cancel parsing by returning false
+        return 0;
+    }
 
     return 1;
 }
@@ -223,13 +238,19 @@ int JSON::yajl_start_array(void *ctx) {
     std::string name = tthis->getCurrentKey();
     tthis->m_containers.push_back(
         reinterpret_cast<JSONContainer *>(new JSONContainerArray(name)));
+    tthis->m_current_depth++;
+    if (tthis->m_current_depth > tthis->m_max_depth) {
+        tthis->m_depth_limit_exceeded = true;
+        return 0;
+    }
     return 1;
 }
 
 
 int JSON::yajl_end_array(void *ctx) {
     JSON *tthis = reinterpret_cast<JSON *>(ctx);
-    if (tthis->m_containers.size() <= 0) {
+    if (tthis->m_containers.empty()) {
+        tthis->m_current_depth--;
         return 1;
     }
 
@@ -237,12 +258,13 @@ int JSON::yajl_end_array(void *ctx) {
     tthis->m_containers.pop_back();
     delete a;
     if (tthis->m_containers.size() > 0) {
-        JSONContainerArray *a = dynamic_cast<JSONContainerArray *>(
+        JSONContainerArray *ja = dynamic_cast<JSONContainerArray *>(
             tthis->m_containers.back());
-        if (a) {
-            a->m_elementCounter++;
+        if (ja) {
+            ja->m_elementCounter++;
         }
     }
+    tthis->m_current_depth--;
 
     return 1;
 }
@@ -253,6 +275,11 @@ int JSON::yajl_start_map(void *ctx) {
     std::string name(tthis->getCurrentKey());
     tthis->m_containers.push_back(
         reinterpret_cast<JSONContainer *>(new JSONContainerMap(name)));
+    tthis->m_current_depth++;
+    if (tthis->m_current_depth > tthis->m_max_depth) {
+        tthis->m_depth_limit_exceeded = true;
+        return 0;
+    }
     return 1;
 }
 
@@ -263,7 +290,8 @@ int JSON::yajl_start_map(void *ctx) {
  */
 int JSON::yajl_end_map(void *ctx) {
     JSON *tthis = reinterpret_cast<JSON *>(ctx);
-    if (tthis->m_containers.size() <= 0) {
+    if (tthis->m_containers.empty()) {
+        tthis->m_current_depth--;
         return 1;
     }
 
@@ -272,13 +300,14 @@ int JSON::yajl_end_map(void *ctx) {
     delete a;
 
     if (tthis->m_containers.size() > 0) {
-        JSONContainerArray *a = dynamic_cast<JSONContainerArray *>(
+        JSONContainerArray *ja = dynamic_cast<JSONContainerArray *>(
             tthis->m_containers.back());
-        if (a) {
-            a->m_elementCounter++;
+        if (ja) {
+            ja->m_elementCounter++;
         }
     }
 
+    tthis->m_current_depth--;
     return 1;
 }
 

@@ -28,7 +28,11 @@ int main(int argc, char *argv[])
 {
     const char *fname = "$test_db";
     MMDB_s mmdb;
-    return MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+    if (MMDB_open(fname, MMDB_MODE_MMAP, &mmdb) != MMDB_SUCCESS) {
+        return 1;
+    }
+    MMDB_close(&mmdb);
+    return 0;
 }
 EOF
 
@@ -45,8 +49,17 @@ my $include_dir = abs_path("$Bin/../include");
 my $lib_dir = abs_path("$Bin/../src/.libs");
 
 my $cxx = $ENV{CXX} || 'c++';
+my @cxxflags = $ENV{CXXFLAGS} ? ( split ' ', $ENV{CXXFLAGS} ) : ();
 _test_cmd(
-    [ $cxx, $file, "-I$include_dir", "-L$lib_dir", "-lmaxminddb", "-o$exe" ],
+    [
+        $cxx,
+        $file,
+        @cxxflags,
+        "-I$include_dir",
+        "-L$lib_dir",
+        "-lmaxminddb",
+        "-o$exe",
+    ],
     qr/^$/,
     q{},
     0,

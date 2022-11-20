@@ -89,21 +89,6 @@
 }
 {
    <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_pcalloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:(below main)
-}
-{
-   <insert_a_suppression_name_here>
    Memcheck:Param
    epoll_ctl(event)
    fun:epoll_ctl
@@ -131,14 +116,6 @@
 }
 {
    <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:memalign
-   fun:posix_memalign
-   fun:ngx_memalign
-   fun:ngx_pcalloc
-}
-{
-   <insert_a_suppression_name_here>
    Memcheck:Param
    socketcall.setsockopt(optval)
    fun:setsockopt
@@ -149,21 +126,7 @@
    Memcheck:Leak
    fun:malloc
    fun:ngx_alloc
-   fun:ngx_palloc_large
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
    fun:ngx_pool_cleanup_add
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_pnalloc
 }
 {
    <insert_a_suppression_name_here>
@@ -172,53 +135,6 @@
    fun:ngx_single_process_cycle
    fun:main
 }
-
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_pcalloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_palloc_large
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_create_pool
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_palloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_pnalloc
-}
-
 {
    <insert_a_suppression_name_here>
    Memcheck:Leak
@@ -235,7 +151,6 @@
    fun:ngx_init_cycle
    fun:main
 }
-
 {
    <insert_a_suppression_name_here>
    Memcheck:Leak
@@ -432,23 +347,6 @@
 }
 {
    <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:memalign
-   fun:posix_memalign
-   fun:ngx_memalign
-   fun:ngx_create_pool
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:memalign
-   fun:posix_memalign
-   fun:ngx_memalign
-   fun:ngx_palloc_block
-   fun:ngx_palloc
-}
-{
-   <insert_a_suppression_name_here>
    Memcheck:Cond
    fun:index
    fun:expand_dynamic_string_token
@@ -459,4 +357,23 @@
    fun:dl_main
    fun:_dl_sysdep_start
    fun:_dl_start
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:ngx_alloc
+   fun:ngx_set_environment
+   fun:ngx_single_process_cycle
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:ngx_alloc
+   fun:ngx_set_environment
+   fun:ngx_worker_process_init
+   fun:ngx_worker_process_cycle
 }

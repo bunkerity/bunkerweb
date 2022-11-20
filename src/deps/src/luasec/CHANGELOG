@@ -1,4 +1,20 @@
 --------------------------------------------------------------------------------
+LuaSec 1.2.0
+---------------
+This version includes:
+
+* Add key material export method
+* Backguard compat for openssl on providers, like LTS linuxes
+
+--------------------------------------------------------------------------------
+LuaSec 1.1.0
+---------------
+This version includes:
+
+* Fix missing DANE flag
+* Remove unused parameter in https.lua
+
+--------------------------------------------------------------------------------
 LuaSec 1.0.2
 ---------------
 This version includes:

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -18,18 +18,18 @@
 #include <iostream>
 #include <string>
 
+#include "modsecurity/rules_set.h"
 #include "modsecurity/actions/action.h"
 #include "modsecurity/transaction.h"
-#include "modsecurity/rules.h"
 
 
 namespace modsecurity {
 namespace actions {
 
 
-bool SkipAfter::evaluate(Rule *rule, Transaction *transaction) {
-    ms_dbg_a(transaction, 5, "Setting skipAfter for: " + m_parser_payload);
-    transaction->m_marker = m_parser_payload;
+bool SkipAfter::evaluate(RuleWithActions *rule, Transaction *transaction) {
+    ms_dbg_a(transaction, 5, "Setting skipAfter for: " + *m_skipName);
+    transaction->addMarker(m_skipName);
     return true;
 }
 

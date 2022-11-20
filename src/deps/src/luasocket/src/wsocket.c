@@ -360,7 +360,7 @@ const char *socket_ioerror(p_socket ps, int err) {
 static const char *wstrerror(int err) {
     switch (err) {
         case WSAEINTR: return "Interrupted function call";
-        case WSAEACCES: return PIE_ACCESS; // "Permission denied";
+        case WSAEACCES: return PIE_ACCESS; /* "Permission denied"; */
         case WSAEFAULT: return "Bad address";
         case WSAEINVAL: return "Invalid argument";
         case WSAEMFILE: return "Too many open files";
@@ -373,23 +373,23 @@ static const char *wstrerror(int err) {
         case WSAEPROTOTYPE: return "Protocol wrong type for socket";
         case WSAENOPROTOOPT: return "Bad protocol option";
         case WSAEPROTONOSUPPORT: return "Protocol not supported";
-        case WSAESOCKTNOSUPPORT: return PIE_SOCKTYPE; // "Socket type not supported";
+        case WSAESOCKTNOSUPPORT: return PIE_SOCKTYPE; /* "Socket type not supported"; */
         case WSAEOPNOTSUPP: return "Operation not supported";
         case WSAEPFNOSUPPORT: return "Protocol family not supported";
-        case WSAEAFNOSUPPORT: return PIE_FAMILY; // "Address family not supported by protocol family";
-        case WSAEADDRINUSE: return PIE_ADDRINUSE; // "Address already in use";
+        case WSAEAFNOSUPPORT: return PIE_FAMILY; /* "Address family not supported by protocol family"; */
+        case WSAEADDRINUSE: return PIE_ADDRINUSE; /* "Address already in use"; */
         case WSAEADDRNOTAVAIL: return "Cannot assign requested address";
         case WSAENETDOWN: return "Network is down";
         case WSAENETUNREACH: return "Network is unreachable";
         case WSAENETRESET: return "Network dropped connection on reset";
         case WSAECONNABORTED: return "Software caused connection abort";
-        case WSAECONNRESET: return PIE_CONNRESET; // "Connection reset by peer";
+        case WSAECONNRESET: return PIE_CONNRESET; /* "Connection reset by peer"; */
         case WSAENOBUFS: return "No buffer space available";
-        case WSAEISCONN: return PIE_ISCONN; // "Socket is already connected";
+        case WSAEISCONN: return PIE_ISCONN; /* "Socket is already connected"; */
         case WSAENOTCONN: return "Socket is not connected";
         case WSAESHUTDOWN: return "Cannot send after socket shutdown";
-        case WSAETIMEDOUT: return PIE_TIMEDOUT; // "Connection timed out";
-        case WSAECONNREFUSED: return PIE_CONNREFUSED; // "Connection refused";
+        case WSAETIMEDOUT: return PIE_TIMEDOUT; /* "Connection timed out"; */
+        case WSAECONNREFUSED: return PIE_CONNREFUSED; /* "Connection refused"; */
         case WSAEHOSTDOWN: return "Host is down";
         case WSAEHOSTUNREACH: return "No route to host";
         case WSAEPROCLIM: return "Too many processes";
@@ -398,9 +398,9 @@ static const char *wstrerror(int err) {
         case WSANOTINITIALISED:
             return "Successful WSAStartup not yet performed";
         case WSAEDISCON: return "Graceful shutdown in progress";
-        case WSAHOST_NOT_FOUND: return PIE_HOST_NOT_FOUND; // "Host not found";
+        case WSAHOST_NOT_FOUND: return PIE_HOST_NOT_FOUND; /* "Host not found"; */
         case WSATRY_AGAIN: return "Nonauthoritative host not found";
-        case WSANO_RECOVERY: return PIE_FAIL; // "Nonrecoverable name lookup error";
+        case WSANO_RECOVERY: return PIE_FAIL; /* "Nonrecoverable name lookup error"; */
         case WSANO_DATA: return "Valid name, no data record of requested type";
         default: return "Unknown error";
     }
@@ -429,6 +429,6 @@ const char *socket_gaistrerror(int err) {
 #ifdef EAI_SYSTEM
         case EAI_SYSTEM: return strerror(errno);
 #endif
-        default: return gai_strerror(err);
+        default: return LUA_GAI_STRERROR(err);
     }
 }

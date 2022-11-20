@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -33,8 +33,8 @@ class Within : public Operator {
         : Operator("Within", std::move(param)) {
             m_couldContainsMacro = true;
         }
-    bool evaluate(Transaction *transaction, Rule *rule,
-        const std::string &str, std::shared_ptr<RuleMessage> ruleMessage);
+    bool evaluate(Transaction *transaction, RuleWithActions *rule,
+        const std::string &str, std::shared_ptr<RuleMessage> ruleMessage) override;
 };
 
 }  // namespace operators

@@ -1,11 +1,5 @@
---- ngx_http_modsecurity_log.c	2022-04-25 14:30:34.444469100 +0200
-+++ ngx_http_modsecurity_log.c2	2022-04-25 14:31:25.714469100 +0200
-@@ -30,7 +30,7 @@
-     }
-     msg = (const char *) data;
+@@ -32,3 +32,3 @@
  
 -    ngx_log_error(NGX_LOG_INFO, (ngx_log_t *)log, 0, "%s", msg);
 +    ngx_log_error(NGX_LOG_WARN, (ngx_log_t *)log, 0, "%s", msg);
  }
- 
- 

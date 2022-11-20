@@ -1,6 +1,6 @@
 /*
 ** Machine code management.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_mcode_c
@@ -168,7 +168,7 @@ static void mcode_protect(jit_State *J, int prot)
 #define MCPROT_RUN	MCPROT_RX
 
 /* Protection twiddling failed. Probably due to kernel security. */
-static LJ_NOINLINE void mcode_protfail(jit_State *J)
+static LJ_NORET LJ_NOINLINE void mcode_protfail(jit_State *J)
 {
   lua_CFunction panic = J2G(J)->panic;
   if (panic) {
@@ -176,6 +176,7 @@ static LJ_NOINLINE void mcode_protfail(jit_State *J)
     setstrV(L, L->top++, lj_err_str(L, LJ_ERR_JITPROT));
     panic(L);
   }
+  exit(EXIT_FAILURE);
 }
 
 /* Change protection of MCode area. */

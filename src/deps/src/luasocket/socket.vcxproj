@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\auxiliar.c" />
     <ClCompile Include="src\buffer.c" />
+    <ClCompile Include="src\compat.c" />
     <ClCompile Include="src\except.c" />
     <ClCompile Include="src\inet.c" />
     <ClCompile Include="src\io.c" />

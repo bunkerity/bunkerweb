@@ -128,10 +128,10 @@ void process_result(test_result_s *result,
 void run_ipX_tests(MMDB_s *mmdb,
                    const char *pairs[][2],
                    int pairs_rows,
-                   int mode,
                    const char *mode_desc) {
-    pthread_t threads[pairs_rows];
-    struct thread_arg thread_args[pairs_rows];
+    pthread_t *threads = malloc((unsigned long)pairs_rows * sizeof(pthread_t));
+    struct thread_arg *thread_args =
+        malloc((unsigned long)pairs_rows * sizeof(struct thread_arg));
 
     for (int i = 0; i < pairs_rows; i += 1) {
         thread_args[i].thread_id = i;
@@ -161,13 +161,16 @@ void run_ipX_tests(MMDB_s *mmdb,
             free(test_result);
         }
     }
+
+    free(threads);
+    free(thread_args);
 }
 
 void run_tests(int mode, const char *mode_desc) {
     const char *filename = "MaxMind-DB-test-mixed-32.mmdb";
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     const char *pairs[18][2] = {
         {"1.1.1.1", "::1.1.1.1"},
@@ -190,7 +193,7 @@ void run_tests(int mode, const char *mode_desc) {
         {"::2:0:59", "::2:0:58"},
     };
 
-    run_ipX_tests(mmdb, pairs, 18, mode, mode_desc);
+    run_ipX_tests(mmdb, pairs, 18, mode_desc);
 
     MMDB_close(mmdb);
     free(mmdb);

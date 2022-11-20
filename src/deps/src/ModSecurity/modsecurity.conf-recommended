@@ -19,15 +19,22 @@ SecRequestBodyAccess On
 # Enable XML request body parser.
 # Initiate XML Processor in case of xml content-type
 #
-SecRule REQUEST_HEADERS:Content-Type "(?:application(?:/soap\+|/)|text/)xml" \
+SecRule REQUEST_HEADERS:Content-Type "^(?:application(?:/soap\+|/)|text/)xml" \
      "id:'200000',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML"
 
 # Enable JSON request body parser.
 # Initiate JSON Processor in case of JSON content-type; change accordingly
 # if your application does not use 'application/json'
 #
-SecRule REQUEST_HEADERS:Content-Type "application/json" \
+SecRule REQUEST_HEADERS:Content-Type "^application/json" \
      "id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
+
+# Sample rule to enable JSON request body parser for more subtypes.
+# Uncomment or adapt this rule if you want to engage the JSON
+# Processor for "+json" subtypes
+#
+#SecRule REQUEST_HEADERS:Content-Type "^application/[a-z0-9.-]+[+]json" \
+#     "id:'200006',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
 
 # Maximum request body size we will accept for buffering. If you support
 # file uploads then the value given on the first line has to be as large
@@ -38,12 +45,27 @@ SecRule REQUEST_HEADERS:Content-Type "application/json" \
 SecRequestBodyLimit 13107200
 SecRequestBodyNoFilesLimit 131072
 
-# What do do if the request body size is above our configured limit.
+# What to do if the request body size is above our configured limit.
 # Keep in mind that this setting will automatically be set to ProcessPartial
 # when SecRuleEngine is set to DetectionOnly mode in order to minimize
 # disruptions when initially deploying ModSecurity.
 #
 SecRequestBodyLimitAction Reject
+
+# Maximum parsing depth allowed for JSON objects. You want to keep this
+# value as low as practical.
+#
+SecRequestBodyJsonDepthLimit 512
+
+# Maximum number of args allowed per request. You want to keep this
+# value as low as practical. The value should match that in rule 200007.
+SecArgumentsLimit 1000
+
+# If SecArgumentsLimit has been set, you probably want to reject any
+# request body that has only been partly parsed. The value used in this
+# rule should match what was used with SecArgumentsLimit
+SecRule &ARGS "@ge 1000" \
+"id:'200007', phase:2,t:none,log,deny,status:400,msg:'Failed to fully parse request body due to large argument count',severity:2"
 
 # Verify that we've correctly processed the request body.
 # As a rule of thumb, when failing to process a request body

@@ -1038,7 +1038,7 @@ local function re_sub_func_helper(subj, regex, replace, opts, global)
     end
 
     if count > 0 then
-        if pos < subj_len then
+        if cp_pos < subj_len then
             local suffix_len = subj_len - cp_pos
 
             local new_dst_len = dst_len + suffix_len
@@ -1167,7 +1167,7 @@ local function re_sub_str_helper(subj, regex, replace, opts, global)
     end
 
     if count > 0 then
-        if pos < subj_len then
+        if cp_pos < subj_len then
             local suffix_len = subj_len - cp_pos
 
             local new_dst_len = dst_len + suffix_len

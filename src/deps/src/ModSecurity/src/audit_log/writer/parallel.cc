@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -75,7 +75,7 @@ inline std::string Parallel::logFilePath(time_t *t,
 
 
 bool Parallel::init(std::string *error) {
-    bool ret = true;
+    bool ret;
     if (!m_audit->m_path1.empty()) {
         ret = utils::SharedFiles::getInstance().open(m_audit->m_path1, error);
         if (!ret) {
@@ -119,7 +119,7 @@ bool Parallel::write(Transaction *transaction, int parts, std::string *error) {
     }
 
     std::string logPath = m_audit->m_storage_dir;
-    fileName = logPath + fileName + "-" + transaction->m_id;
+    fileName = logPath + fileName + "-" + *transaction->m_id.get();
 
     if (logPath.empty()) {
         error->assign("Log path is not valid.");

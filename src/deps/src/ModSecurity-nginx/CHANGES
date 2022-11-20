@@ -1,3 +1,11 @@
+v1.0.3 - 2022-May-24
+--------------------
+
+ - Support http protocol versions besides 0.9, 1.0, 1.1, 2.0
+   [Issue #224 - @HQuest, @martinhsv]
+ - Support for building with nginx configured with PCRE2
+   [Issue #260 - @defanator]
+
 v1.0.2 - 2021-Jun-02
 --------------------
 

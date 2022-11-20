@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -69,14 +69,14 @@ char ip[] = "200.249.12.31";
 
 struct data_ms {
     modsecurity::ModSecurity *modsec;
-    modsecurity::Rules *rules;
+    modsecurity::RulesSet *rules;
 };
 
 
 static void *process_request(void *data) {
     struct data_ms *a = (struct data_ms *)data;
     modsecurity::ModSecurity *modsec = a->modsec;
-    modsecurity::Rules *rules = a->rules;
+    modsecurity::RulesSet *rules = a->rules;
     int z = 0;
 
     for (z = 0; z < 10000; z++) {
@@ -115,7 +115,7 @@ class ReadingLogsViaRuleMessage {
         char *response_headers,
         char *response_body,
         char *ip,
-        std::string rules) :
+        const std::string &rules) :
             m_request_header(request_header),
             m_request_uri(request_uri),
             m_request_body(request_body),
@@ -132,8 +132,7 @@ class ReadingLogsViaRuleMessage {
         void *status;
 
         modsecurity::ModSecurity *modsec;
-        modsecurity::Rules *rules;
-        modsecurity::ModSecurityIntervention it;
+        modsecurity::RulesSet *rules;
 
         modsec = new modsecurity::ModSecurity();
         modsec->setConnectorInformation("ModSecurity-test v0.0.1-alpha" \
@@ -141,7 +140,7 @@ class ReadingLogsViaRuleMessage {
         modsec->setServerLogCb(logCb, modsecurity::RuleMessageLogProperty
             | modsecurity::IncludeFullHighlightLogProperty);
 
-        rules = new modsecurity::Rules();
+        rules = new modsecurity::RulesSet();
         if (rules->loadFromUri(m_rules.c_str()) < 0) {
             std::cout << "Problems loading the rules..." << std::endl;
             std::cout << rules->m_parserError.str() << std::endl;
@@ -168,8 +167,6 @@ class ReadingLogsViaRuleMessage {
         delete modsec;
         pthread_exit(NULL);
         return 0;
-end:
-        return -1;
     }
 
     static void logCb(void *data, const void *ruleMessagev) {

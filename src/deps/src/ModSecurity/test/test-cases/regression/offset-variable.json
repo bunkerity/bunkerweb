@@ -882,11 +882,11 @@
       ]
     },
     "expected":{
-      "error_log":"o0,1v228,1t:lowercase"
+      "error_log":"o0,1v228,1t:lowercase,t:trim"
     },
     "rules":[
       "SecRequestBodyAccess On",
-      "SecRule REQUEST_COOKIES \"b\" \"id:1,phase:2,pass,t:lowercase,msg:'ops'\""
+      "SecRule REQUEST_COOKIES \"b\" \"id:1,phase:2,pass,t:lowercase,t:trim,msg:'ops'\""
     ]
     },
     {
@@ -1784,7 +1784,7 @@
       "SecRequestBodyAccess On",
       "SecUploadKeepFiles On",
       "SecUploadDir /tmp",
-      "SecRule FILES_TMP_CONTENT:small_text_file1.txt \"small\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+      "SecRule FILES_TMP_CONTENT:filedata \"small\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
     ]
   },
   {
@@ -1950,6 +1950,68 @@
       "SecUploadKeepFiles On",
       "SecUploadDir /tmp",
       "SecRule MULTIPART_NAME \"fiasdfasdfledata\" \"id:1,phase:3,pass,t:trim,msg:'s'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS n",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param01=5555&bbbbbbbmy_id=6",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "error_log":"o0,1v42,1"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@contains 6\" \"id:1,phase:2,deny,status:403,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable offset - ARGS_NAMES n",
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/index.html?param01=5555&bbbbbbbmy_id=6",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "error_log":"o7,5v29,12"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS_NAMES \"@contains my_id\" \"id:1,phase:2,deny,status:403,log\""
     ]
   }
 ]

@@ -1,0 +1,61 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: ["gcc", "clang"]
+        luaVersion: ["5.1", "5.2", "5.3", "luajit", "luajit-openresty"]
+        include:
+          - luaVersion: "luajit"
+            runtestArgs: "LUA_INCLUDE_DIR=.lua/include/luajit-2.1"
+            runtestEnv: "SKIP_CMAKE=1"
+          - luaVersion: "luajit-openresty"
+            runtestArgs: "LUA_INCLUDE_DIR=.lua/include/luajit-2.1"
+            runtestEnv: "SKIP_CMAKE=1"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+
+    - uses: leafo/gh-actions-lua@master
+      env:
+        CC: ${{ matrix.cc }}
+      with:
+        luaVersion: ${{ matrix.luaVersion }}
+        luaCompileFlags: CC=${{ matrix.cc }}
+
+    - uses: leafo/gh-actions-luarocks@master
+
+    - name: runtests.sh
+      env:
+        CC: ${{ matrix.cc }}
+      run: |
+        LUA_DIR=.lua ${{ matrix.runtestEnv }} ./runtests.sh PREFIX=.lua ${{ matrix.runtestArgs }}
+
+    - name: setup prove
+      env:
+        CC: ${{ matrix.cc }}
+      run: |
+        make PREFIX=.lua ${{ matrix.runtestArgs }}
+        sudo apt-get update
+        sudo apt-get install -q valgrind libipc-run3-perl cppcheck cpanminus
+        sudo cpanm --notest Test::Base Test::LongString
+
+    - name: cppcheck
+      run: cppcheck -i .lua/ -i .install/ -i dtoa.c --force --error-exitcode=1 --enable=warning .
+
+    - name: prove
+      run: LUA_BIN=lua prove -Itests tests
+
+    - name: prove (valgrind)
+      run: LUA_BIN=lua TEST_LUA_USE_VALGRIND=1 prove -Itests tests
+
+    - name: build
+      run: |
+        luarocks make
+

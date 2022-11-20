@@ -71,7 +71,7 @@ function stats(size)
         local current = socket.gettime()
         if chunk then
             -- total bytes received
-            got = got + string.len(chunk)   
+            got = got + string.len(chunk)
             -- not enough time for estimate
             if current - last > 1 then
                 io.stderr:write("\r", gauge(got, current - start, size))

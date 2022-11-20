@@ -823,6 +823,7 @@ map_op = {
   esxtr_2 =	"0000b3ef0000RRE",
   ex_2 =	"000044000000RX-a",
   exrl_2 =	"c60000000000RIL-b",
+  fidbra_4 =	"0000b35f0000RRF-e",
   fidr_2 =	"0000b37f0000RRE",
   fier_2 =	"0000b3770000RRE",
   fixr_2 =	"0000b3670000RRE",

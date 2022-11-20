@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace modsecurity {
 namespace variables {
 
 
-Variable::Variable(std::string name)
+Variable::Variable(const std::string &name)
     : m_name(name),
     m_collectionName("") {
     size_t a = m_name.find(":");
@@ -76,12 +76,12 @@ void Variable::addsKeyExclusion(Variable *v) {
 }
 
 
-std::string operator+(std::string a, Variable *v) {
+std::string operator+(const std::string &a, Variable *v) {
     return a + *v->m_fullName.get();
 }
 
 
-std::string operator+(std::string a, Variables *v) {
+std::string operator+(const std::string &a, Variables *v) {
     std::string test;
     for (auto &b : *v) {
         if (test.empty()) {

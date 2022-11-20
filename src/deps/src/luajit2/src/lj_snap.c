@@ -1,6 +1,6 @@
 /*
 ** Snapshot handling.
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_snap_c
@@ -313,7 +313,7 @@ static BCReg snap_usedef(jit_State *J, uint8_t *udf,
 }
 
 /* Mark slots used by upvalues of child prototypes as used. */
-void snap_useuv(GCproto *pt, uint8_t *udf)
+static void snap_useuv(GCproto *pt, uint8_t *udf)
 {
   /* This is a coarse check, because it's difficult to correlate the lifetime
   ** of slots and closures. But the number of false positives is quite low.

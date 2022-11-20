@@ -1,6 +1,6 @@
 /*
 ** ARM IR assembler (SSA IR -> machine code).
-** Copyright (C) 2005-2021 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
 */
 
 /* -- Register allocator extensions --------------------------------------- */
@@ -1250,7 +1250,12 @@ dotypecheck:
       }
     }
     asm_guardcc(as, t == IRT_NUM ? CC_HS : CC_NE);
-    emit_n(as, ARMI_CMN|ARMI_K12|-irt_toitype_(t), type);
+    if ((ir->op2 & IRSLOAD_KEYINDEX)) {
+      emit_n(as, ARMI_CMN|ARMI_K12|1, type);
+      emit_dn(as, ARMI_EOR^emit_isk12(ARMI_EOR, ~LJ_KEYINDEX), type, type);
+    } else {
+      emit_n(as, ARMI_CMN|ARMI_K12|-irt_toitype_(t), type);
+    }
   }
   if (ra_hasreg(dest)) {
 #if !LJ_SOFTFP

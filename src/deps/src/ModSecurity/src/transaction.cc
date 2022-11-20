@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -49,7 +49,7 @@
 #include "src/utils/random.h"
 #include "modsecurity/rule.h"
 #include "modsecurity/rule_message.h"
-#include "modsecurity/rules_properties.h"
+#include "modsecurity/rules_set_properties.h"
 #include "src/actions/disruptive/allow.h"
 #include "src/variables/remote_user.h"
 
@@ -99,42 +99,72 @@ namespace modsecurity {
  * @endcode
  *
  */
-Transaction::Transaction(ModSecurity *ms, Rules *rules, void *logCbData)
-    : m_clientPort(0),
-    m_serverPort(0),
-    m_uri_no_query_string_decoded(""),
-    m_rules(rules),
-    m_timeStamp(std::time(NULL)),
-    m_httpCodeReturned(200),
-    m_highestSeverityAction(255),
+Transaction::Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData)
+    : m_creationTimeStamp(utils::cpu_seconds()),
+    /* m_clientIpAddress(nullptr), */
+    m_httpVersion(""),
+    /* m_serverIpAddress(""), */
+    m_uri(""),
+    /* m_uri_no_query_string_decoded(""), */
     m_ARGScombinedSizeDouble(0),
+    m_clientPort(0),
+    m_highestSeverityAction(255),
+    m_httpCodeReturned(200),
+    m_serverPort(0),
+    m_ms(ms),
     m_requestBodyType(UnknownFormat),
     m_requestBodyProcessor(UnknownFormat),
-    m_requestBodyAccess(Rules::PropertyNotSetConfigBoolean),
-    m_marker(""),
-    m_allowType(modsecurity::actions::disruptive::NoneAllowType),
+    m_rules(rules),
+    m_ruleRemoveById(),
+    m_ruleRemoveByIdRange(),
+    m_ruleRemoveByTag(),
+    m_ruleRemoveTargetByTag(),
+    m_ruleRemoveTargetById(),
+    m_requestBodyAccess(RulesSet::PropertyNotSetConfigBoolean),
+    m_auditLogModifier(),
+    m_ctlAuditEngine(AuditLog::AuditLogStatus::NotSetLogStatus),
+    m_rulesMessages(),
+    m_requestBody(),
+    m_responseBody(),
+    /* m_id(), */
     m_skip_next(0),
-    m_creationTimeStamp(utils::cpu_seconds()),
-    m_logCbData(logCbData),
-    m_ms(ms),
-    m_secRuleEngine(RulesProperties::PropertyNotSetRuleEngine),
+    m_allowType(modsecurity::actions::disruptive::NoneAllowType),
+    m_uri_decoded(""),
+    m_actions(),
+    m_it(),
+    m_timeStamp(std::time(NULL)),
     m_collections(ms->m_global_collection, ms->m_ip_collection,
         ms->m_session_collection, ms->m_user_collection,
         ms->m_resource_collection),
-#ifdef WITH_YAJL
-    m_json(new RequestBodyProcessor::JSON(this)),
-#else
-    m_json(NULL),
-#endif
+    m_matched(),
 #ifdef WITH_LIBXML2
     m_xml(new RequestBodyProcessor::XML(this)),
 #else
     m_xml(NULL),
 #endif
+#ifdef WITH_YAJL
+    m_json(new RequestBodyProcessor::JSON(this)),
+#else
+    m_json(NULL),
+#endif
+    m_secRuleEngine(RulesSetProperties::PropertyNotSetRuleEngine),
+    m_variableDuration(""),
+    m_variableEnvs(),
+    m_variableHighestSeverityAction(""),
+    m_variableRemoteUser(""),
+    m_variableTime(""),
+    m_variableTimeDay(""),
+    m_variableTimeEpoch(""),
+    m_variableTimeHour(""),
+    m_variableTimeMin(""),
+    m_variableTimeSec(""),
+    m_variableTimeWDay(""),
+    m_variableTimeYear(""),
+    m_logCbData(logCbData),
     TransactionAnchoredVariables(this) {
-    m_id = std::to_string(this->m_timeStamp) + \
-        std::to_string(modsecurity::utils::generate_transaction_unique_id());
-    m_rules->incrementReferenceCount();
+    m_id = std::unique_ptr<std::string>( new std::string(
+        std::to_string(m_timeStamp)
+        + std::to_string(modsecurity::utils::generate_transaction_unique_id())));
 
     m_variableUrlEncodedError.set("0", 0);
 
@@ -143,41 +173,69 @@ Transaction::Transaction(ModSecurity *ms, Rules *rules, void *logCbData)
     intervention::clean(&m_it);
 }
 
-Transaction::Transaction(ModSecurity *ms, Rules *rules, char *id, void *logCbData)
-    : m_clientPort(0),
-    m_serverPort(0),
-    m_uri_no_query_string_decoded(""),
-    m_rules(rules),
-    m_timeStamp(std::time(NULL)),
-    m_httpCodeReturned(200),
-    m_highestSeverityAction(255),
+Transaction::Transaction(ModSecurity *ms, RulesSet *rules, char *id, void *logCbData)
+    : m_creationTimeStamp(utils::cpu_seconds()),
+    /* m_clientIpAddress(""), */
+    m_httpVersion(""),
+    /* m_serverIpAddress(""), */
+    m_uri(""),
+    /* m_uri_no_query_string_decoded(""), */
     m_ARGScombinedSizeDouble(0),
+    m_clientPort(0),
+    m_highestSeverityAction(255),
+    m_httpCodeReturned(200),
+    m_serverPort(0),
+    m_ms(ms),
     m_requestBodyType(UnknownFormat),
     m_requestBodyProcessor(UnknownFormat),
-    m_requestBodyAccess(Rules::PropertyNotSetConfigBoolean),
-    m_marker(""),
-    m_allowType(modsecurity::actions::disruptive::NoneAllowType),
+    m_rules(rules),
+    m_ruleRemoveById(),
+    m_ruleRemoveByIdRange(),
+    m_ruleRemoveByTag(),
+    m_ruleRemoveTargetByTag(),
+    m_ruleRemoveTargetById(),
+    m_requestBodyAccess(RulesSet::PropertyNotSetConfigBoolean),
+    m_auditLogModifier(),
+    m_ctlAuditEngine(AuditLog::AuditLogStatus::NotSetLogStatus),
+    m_rulesMessages(),
+    m_requestBody(),
+    m_responseBody(),
+    m_id(std::unique_ptr<std::string>(new std::string(id))),
     m_skip_next(0),
-    m_creationTimeStamp(utils::cpu_seconds()),
-    m_logCbData(logCbData),
-    m_ms(ms),
-    m_secRuleEngine(RulesProperties::PropertyNotSetRuleEngine),
+    m_allowType(modsecurity::actions::disruptive::NoneAllowType),
+    m_uri_decoded(""),
+    m_actions(),
+    m_it(),
+    m_timeStamp(std::time(NULL)),
     m_collections(ms->m_global_collection, ms->m_ip_collection,
         ms->m_session_collection, ms->m_user_collection,
         ms->m_resource_collection),
-#ifdef WITH_YAJL
-    m_json(new RequestBodyProcessor::JSON(this)),
-#else
-    m_json(NULL),
-#endif
+    m_matched(),
 #ifdef WITH_LIBXML2
     m_xml(new RequestBodyProcessor::XML(this)),
 #else
     m_xml(NULL),
 #endif
+#ifdef WITH_YAJL
+    m_json(new RequestBodyProcessor::JSON(this)),
+#else
+    m_json(NULL),
+#endif
+    m_secRuleEngine(RulesSetProperties::PropertyNotSetRuleEngine),
+    m_variableDuration(""),
+    m_variableEnvs(),
+    m_variableHighestSeverityAction(""),
+    m_variableRemoteUser(""),
+    m_variableTime(""),
+    m_variableTimeDay(""),
+    m_variableTimeEpoch(""),
+    m_variableTimeHour(""),
+    m_variableTimeMin(""),
+    m_variableTimeSec(""),
+    m_variableTimeWDay(""),
+    m_variableTimeYear(""),
+    m_logCbData(logCbData),
     TransactionAnchoredVariables(this) {
-    m_id = std::string(id);
-    m_rules->incrementReferenceCount();
 
     m_variableUrlEncodedError.set("0", 0);
 
@@ -195,8 +253,6 @@ Transaction::~Transaction() {
     m_requestBody.clear();
 
     m_rulesMessages.clear();
-
-    m_rules->decrementReferenceCount();
 
     intervention::free(&m_it);
     intervention::clean(&m_it);
@@ -222,12 +278,12 @@ Transaction::~Transaction() {
  *
  */
 #ifndef NO_LOGS
-void Transaction::debug(int level, std::string message) const {
+void Transaction::debug(int level, const std::string& message) const {
     if (m_rules == NULL) {
         return;
     }
 
-    m_rules->debug(level, m_id, m_uri, message);
+    m_rules->debug(level, *m_id.get(), m_uri, message);
 }
 #endif
 
@@ -254,18 +310,18 @@ void Transaction::debug(int level, std::string message) const {
  */
 int Transaction::processConnection(const char *client, int cPort,
     const char *server, int sPort) {
-    this->m_clientIpAddress = client;
-    this->m_serverIpAddress = server;
+    m_clientIpAddress = std::unique_ptr<std::string>(new std::string(client));
+    m_serverIpAddress = std::unique_ptr<std::string>(new std::string(server));
     this->m_clientPort = cPort;
     this->m_serverPort = sPort;
     ms_dbg(4, "Transaction context created.");
     ms_dbg(4, "Starting phase CONNECTION. (SecRules 0)");
 
 
-    m_variableRemoteHost.set(m_clientIpAddress, m_variableOffset);
-    m_variableUniqueID.set(m_id, m_variableOffset);
-    m_variableRemoteAddr.set(m_clientIpAddress, m_variableOffset);
-    m_variableServerAddr.set(m_serverIpAddress, m_variableOffset);
+    m_variableRemoteHost.set(*m_clientIpAddress.get(), m_variableOffset);
+    m_variableUniqueID.set(*m_id.get(), m_variableOffset);
+    m_variableRemoteAddr.set(*m_clientIpAddress.get(), m_variableOffset);
+    m_variableServerAddr.set(*m_serverIpAddress.get(), m_variableOffset);
     m_variableServerPort.set(std::to_string(this->m_serverPort),
         m_variableOffset);
     m_variableRemotePort.set(std::to_string(this->m_clientPort),
@@ -286,7 +342,6 @@ bool Transaction::extractArguments(const std::string &orig,
 
     for (std::string t : key_value_sets) {
         char sep2 = '=';
-        int i = 0;
         size_t key_s = 0;
         size_t value_s = 0;
         int invalid = 0;
@@ -334,17 +389,19 @@ bool Transaction::addArgument(const std::string& orig, const std::string& key,
     ms_dbg(4, "Adding request argument (" + orig + "): name \"" + \
                 key + "\", value \"" + value + "\"");
 
-    size_t k_offset = offset;
+    if (m_rules->m_argumentsLimit.m_set
+            && m_variableArgs.size() >= m_rules->m_argumentsLimit.m_value) {
+        ms_dbg(4, "Skipping request argument, over limit (" + std::to_string(m_rules->m_argumentsLimit.m_value) + ")")
+        return false;
+    }
+
     offset = offset + key.size() + 1;
     m_variableArgs.set(key, value, offset);
-    m_variableArgsNames.set(key, key, k_offset);
 
     if (orig == "GET") {
         m_variableArgsGet.set(key, value, offset);
-        m_variableArgsGetNames.set(key, key, k_offset);
     } else if (orig == "POST") {
         m_variableArgsPost.set(key, value, offset);
-        m_variableArgsPostNames.set(key, key, k_offset);
     }
 
     m_ARGScombinedSizeDouble = m_ARGScombinedSizeDouble + \
@@ -390,11 +447,21 @@ int Transaction::processURI(const char *uri, const char *method,
     m_httpVersion = http_version;
     m_uri = uri;
     std::string uri_s(uri);
-    m_uri_decoded = utils::uri_decode(uri);
 
-    size_t pos = m_uri_decoded.find("?");
-    size_t pos_raw = uri_s.find("?");
-    size_t var_size = pos_raw;
+    // any uri-fragment that was received should only be retained in
+    // - m_uri
+    // - m_variableRequestURIRaw
+    // - m_variableRequestLine
+    size_t pos_raw_fragment = uri_s.find("#");
+    if (pos_raw_fragment != std::string::npos) {
+        uri_s = uri_s.substr(0, pos_raw_fragment);
+    }
+
+    size_t pos_raw_query = uri_s.find("?");
+
+    m_uri_decoded = utils::uri_decode(uri_s);
+
+    size_t var_size = pos_raw_query;
 
     m_variableRequestMethod.set(method, 0);
 
@@ -407,26 +474,28 @@ int Transaction::processURI(const char *uri, const char *method,
         m_variableOffset + requestLine.size() + 1);
 
 
-
-    if (pos != std::string::npos) {
-        m_uri_no_query_string_decoded = std::string(m_uri_decoded, 0, pos);
+    size_t pos_query = m_uri_decoded.find("?");
+    if (pos_query != std::string::npos) {
+        m_uri_no_query_string_decoded = std::unique_ptr<std::string>(
+            new std::string(m_uri_decoded, 0, pos_query));
     } else {
-        m_uri_no_query_string_decoded = std::string(m_uri_decoded);
+        m_uri_no_query_string_decoded = std::unique_ptr<std::string>(
+            new std::string(m_uri_decoded));
     }
 
 
-    if (pos_raw != std::string::npos) {
-        std::string qry = std::string(uri_s, pos_raw + 1,
-            uri_s.length() - (pos_raw + 1));
-        m_variableQueryString.set(qry, pos_raw + 1
+    if (pos_raw_query != std::string::npos) {
+        std::string qry = std::string(uri_s, pos_raw_query + 1,
+            uri_s.length() - (pos_raw_query + 1));
+        m_variableQueryString.set(qry, pos_raw_query + 1
             + std::string(method).size() + 1);
     }
 
     std::string path_info;
-    if (pos == std::string::npos) {
+    if (pos_query == std::string::npos) {
         path_info = std::string(m_uri_decoded, 0);
     } else {
-        path_info = std::string(m_uri_decoded, 0, pos);
+        path_info = std::string(m_uri_decoded, 0, pos_query);
     }
     if (var_size == std::string::npos) {
         var_size = uri_s.size();
@@ -436,7 +505,6 @@ int Transaction::processURI(const char *uri, const char *method,
         1, var_size);
     m_variableRequestFilename.set(path_info,  m_variableOffset +
         strlen(method) + 1, var_size);
-
 
 
     size_t offset = path_info.find_last_of("/\\");
@@ -466,7 +534,7 @@ int Transaction::processURI(const char *uri, const char *method,
             }
             if (netloc != std::string::npos && fullDomain == true) {
                 size_t path = m_uri_decoded.find("/", netloc);
-                if (path != std::string::npos && fullDomain == true) {
+                if (path != std::string::npos) {
                     parsedURI = m_uri_decoded.substr(path);
                 }
             }
@@ -504,7 +572,7 @@ int Transaction::processURI(const char *uri, const char *method,
 int Transaction::processRequestHeaders() {
     ms_dbg(4, "Starting phase REQUEST_HEADERS.  (SecRules 1)");
 
-    if (getRuleEngineState() == Rules::DisabledRuleEngine) {
+    if (getRuleEngineState() == RulesSet::DisabledRuleEngine) {
         ms_dbg(4, "Rule engine disabled, returning...");
         return true;
     }
@@ -717,7 +785,7 @@ int Transaction::addRequestHeader(const unsigned char *key, size_t key_n,
 int Transaction::processRequestBody() {
     ms_dbg(4, "Starting phase REQUEST_BODY. (SecRules 2)");
 
-    if (getRuleEngineState() == RulesProperties::DisabledRuleEngine) {
+    if (getRuleEngineState() == RulesSetProperties::DisabledRuleEngine) {
         ms_dbg(4, "Rule engine disabled, returning...");
         return true;
     }
@@ -736,25 +804,43 @@ int Transaction::processRequestBody() {
      */
     std::unique_ptr<std::string> a = m_variableRequestHeaders.resolveFirst(
         "Content-Type");
+
+    bool requestBodyNoFilesLimitExceeded = false;
+    if ((m_requestBodyType == WWWFormUrlEncoded) ||
+        (m_requestBodyProcessor == JSONRequestBody) ||
+        (m_requestBodyProcessor == XMLRequestBody)) {
+        if ((m_rules->m_requestBodyNoFilesLimit.m_set)
+            && (m_requestBody.str().size() > m_rules->m_requestBodyNoFilesLimit.m_value)) {
+            m_variableReqbodyError.set("1", 0);
+            m_variableReqbodyErrorMsg.set("Request body excluding files is bigger than the maximum expected.", 0);
+            m_variableInboundDataError.set("1", m_variableOffset);
+            ms_dbg(5, "Request body excluding files is bigger than the maximum expected.");
+            requestBodyNoFilesLimitExceeded = true;
+	}
+    }
+
 #ifdef WITH_LIBXML2
     if (m_requestBodyProcessor == XMLRequestBody) {
-        std::string error;
-        if (m_xml->init() == true) {
-            m_xml->processChunk(m_requestBody.str().c_str(),
-                m_requestBody.str().size(),
-                &error);
-            m_xml->complete(&error);
-        }
-        if (error.empty() == false) {
-            m_variableReqbodyError.set("1", m_variableOffset);
-            m_variableReqbodyErrorMsg.set("XML parsing error: " + error,
-                m_variableOffset);
-            m_variableReqbodyProcessorErrorMsg.set("XML parsing error: " \
-                + error, m_variableOffset);
-            m_variableReqbodyProcessorError.set("1", m_variableOffset);
-        } else {
-            m_variableReqbodyError.set("0", m_variableOffset);
-            m_variableReqbodyProcessorError.set("0", m_variableOffset);
+        // large size might cause issues in the parsing itself; omit if exceeded
+        if (!requestBodyNoFilesLimitExceeded) {
+            std::string error;
+            if (m_xml->init() == true) {
+                m_xml->processChunk(m_requestBody.str().c_str(),
+                    m_requestBody.str().size(),
+                    &error);
+                m_xml->complete(&error);
+            }
+            if (error.empty() == false) {
+                m_variableReqbodyError.set("1", m_variableOffset);
+                m_variableReqbodyErrorMsg.set("XML parsing error: " + error,
+                    m_variableOffset);
+                m_variableReqbodyProcessorErrorMsg.set("XML parsing error: " \
+                    + error, m_variableOffset);
+                m_variableReqbodyProcessorError.set("1", m_variableOffset);
+            } else {
+                m_variableReqbodyError.set("0", m_variableOffset);
+                m_variableReqbodyProcessorError.set("0", m_variableOffset);
+            }
         }
 #endif
 #if WITH_YAJL
@@ -763,23 +849,29 @@ int Transaction::processRequestBody() {
 #else
     if (m_requestBodyProcessor == JSONRequestBody) {
 #endif
-        std::string error;
-        if (m_json->init() == true) {
-            m_json->processChunk(m_requestBody.str().c_str(),
-                m_requestBody.str().size(),
-                &error);
-            m_json->complete(&error);
-        }
-        if (error.empty() == false && m_requestBody.str().size() > 0) {
-            m_variableReqbodyError.set("1", m_variableOffset);
-            m_variableReqbodyProcessorError.set("1", m_variableOffset);
-            m_variableReqbodyErrorMsg.set("JSON parsing error: " + error,
-                m_variableOffset);
-            m_variableReqbodyProcessorErrorMsg.set("JSON parsing error: " \
-                + error, m_variableOffset);
-        } else {
-            m_variableReqbodyError.set("0", m_variableOffset);
-            m_variableReqbodyProcessorError.set("0", m_variableOffset);
+        // large size might cause issues in the parsing itself; omit if exceeded
+        if (!requestBodyNoFilesLimitExceeded) {
+            std::string error;
+            if (m_rules->m_requestBodyJsonDepthLimit.m_set) {
+                m_json->setMaxDepth(m_rules->m_requestBodyJsonDepthLimit.m_value);
+            }
+            if (m_json->init() == true) {
+                m_json->processChunk(m_requestBody.str().c_str(),
+                    m_requestBody.str().size(),
+                    &error);
+                m_json->complete(&error);
+            }
+            if (error.empty() == false && m_requestBody.str().size() > 0) {
+                m_variableReqbodyError.set("1", m_variableOffset);
+                m_variableReqbodyProcessorError.set("1", m_variableOffset);
+                m_variableReqbodyErrorMsg.set("JSON parsing error: " + error,
+                    m_variableOffset);
+                m_variableReqbodyProcessorErrorMsg.set("JSON parsing error: " \
+                    + error, m_variableOffset);
+            } else {
+                m_variableReqbodyError.set("0", m_variableOffset);
+                m_variableReqbodyProcessorError.set("0", m_variableOffset);
+            }
         }
 #endif
 #if defined(WITH_LIBXML2) or defined(WITH_YAJL)
@@ -788,11 +880,13 @@ int Transaction::processRequestBody() {
     if (m_requestBodyType == MultiPartRequestBody) {
 #endif
         std::string error;
+        int reqbodyNoFilesLength = 0;
         if (a != NULL) {
             Multipart m(*a, this);
             if (m.init(&error) == true) {
                 m.process(m_requestBody.str(), &error, m_variableOffset);
             }
+            reqbodyNoFilesLength = m.m_reqbody_no_files_length;
             m.multipart_complete(&error);
         }
         if (error.empty() == false) {
@@ -802,13 +896,22 @@ int Transaction::processRequestBody() {
                 m_variableOffset);
             m_variableReqbodyProcessorErrorMsg.set("Multipart parsing " \
                 "error: " + error, m_variableOffset);
+        } else if (((m_rules->m_requestBodyNoFilesLimit.m_set)
+                   && (reqbodyNoFilesLength > m_rules->m_requestBodyNoFilesLimit.m_value))) {
+            m_variableReqbodyError.set("1", 0);
+            m_variableReqbodyErrorMsg.set("Request body excluding files is bigger than the maximum expected.", 0);
+            m_variableInboundDataError.set("1", m_variableOffset);
+            ms_dbg(5, "Request body excluding files is bigger than the maximum expected.");
         } else {
             m_variableReqbodyError.set("0", m_variableOffset);
             m_variableReqbodyProcessorError.set("0", m_variableOffset);
         }
     } else if (m_requestBodyType == WWWFormUrlEncoded) {
         m_variableOffset++;
-        extractArguments("POST", m_requestBody.str(), m_variableOffset);
+        // large size might cause issues in the parsing itself; omit if exceeded
+        if (!requestBodyNoFilesLimitExceeded) {
+            extractArguments("POST", m_requestBody.str(), m_variableOffset);
+	}
     } else if (m_requestBodyType != UnknownFormat) {
         /**
          * FIXME: double check to see if that is a valid scenario...
@@ -830,8 +933,8 @@ int Transaction::processRequestBody() {
         m_variableReqbodyProcessorError.set("0", m_variableOffset);
     }
 
-    if (m_rules->m_secRequestBodyAccess == RulesProperties::FalseConfigBoolean) {
-        if (m_requestBodyAccess != RulesProperties::TrueConfigBoolean) {
+    if (m_rules->m_secRequestBodyAccess == RulesSetProperties::FalseConfigBoolean) {
+        if (m_requestBodyAccess != RulesSetProperties::TrueConfigBoolean) {
             ms_dbg(4, "Request body processing is disabled");
             return true;
         } else {
@@ -840,7 +943,7 @@ int Transaction::processRequestBody() {
                 "action");
         }
     } else {
-        if (m_requestBodyAccess == RulesProperties::FalseConfigBoolean) {
+        if (m_requestBodyAccess == RulesSetProperties::FalseConfigBoolean) {
             ms_dbg(4, "Request body processing is enabled, but " \
                 "disabled to this transaction due to ctl:requestBodyAccess " \
                 "action");
@@ -855,9 +958,9 @@ int Transaction::processRequestBody() {
     std::string fullRequest;
     std::vector<const VariableValue *> l;
     m_variableRequestHeaders.resolve(&l);
-    for (auto &a : l) {
-        fullRequest = fullRequest + a->getKey() + ": " + a->getValue() + "\n";
-        delete a;
+    for (auto &h : l) {
+        fullRequest = fullRequest + h->getKey() + ": " + h->getValue() + "\n";
+        delete h;
     }
 
     fullRequest = fullRequest + "\n\n";
@@ -945,7 +1048,7 @@ int Transaction::appendRequestBody(const unsigned char *buf, size_t len) {
         ms_dbg(5, "Request body is bigger than the maximum expected.");
 
         if (this->m_rules->m_requestBodyLimitAction ==
-            Rules::BodyLimitAction::ProcessPartialBodyLimitAction) {
+            RulesSet::BodyLimitAction::ProcessPartialBodyLimitAction) {
             size_t spaceLeft = this->m_rules->m_requestBodyLimit.m_value
                 - current_size;
             this->m_requestBody.write(reinterpret_cast<const char*>(buf),
@@ -954,10 +1057,10 @@ int Transaction::appendRequestBody(const unsigned char *buf, size_t len) {
             return false;
         } else {
             if (this->m_rules->m_requestBodyLimitAction ==
-                Rules::BodyLimitAction::RejectBodyLimitAction) {
+                RulesSet::BodyLimitAction::RejectBodyLimitAction) {
                 ms_dbg(5, "Request body limit is marked to reject the " \
                     "request");
-                if (getRuleEngineState() == Rules::EnabledRuleEngine) {
+                if (getRuleEngineState() == RulesSet::EnabledRuleEngine) {
                     intervention::free(&m_it);
                     m_it.log = strdup("Request body limit is marked to " \
                             "reject the request");
@@ -1002,7 +1105,7 @@ int Transaction::processResponseHeaders(int code, const std::string& proto) {
     m_variableResponseStatus.set(std::to_string(code), m_variableOffset);
     m_variableResponseProtocol.set(proto, m_variableOffset);
 
-    if (getRuleEngineState() == Rules::DisabledRuleEngine) {
+    if (getRuleEngineState() == RulesSet::DisabledRuleEngine) {
         ms_dbg(4, "Rule engine disabled, returning...");
         return true;
     }
@@ -1123,12 +1226,12 @@ int Transaction::addResponseHeader(const unsigned char *key, size_t key_n,
 int Transaction::processResponseBody() {
     ms_dbg(4, "Starting phase RESPONSE_BODY. (SecRules 4)");
 
-    if (getRuleEngineState() == Rules::DisabledRuleEngine) {
+    if (getRuleEngineState() == RulesSet::DisabledRuleEngine) {
         ms_dbg(4, "Rule engine disabled, returning...");
         return true;
     }
 
-    if (m_rules->m_secResponseBodyAccess != RulesProperties::TrueConfigBoolean) {
+    if (m_rules->m_secResponseBodyAccess != RulesSetProperties::TrueConfigBoolean) {
         ms_dbg(4, "Response body is disabled, returning... " + std::to_string(m_rules->m_secResponseBodyAccess));
         return true;
     }
@@ -1143,7 +1246,7 @@ int Transaction::processResponseBody() {
             + ". It is not marked to be inspected.");
         std::string validContetTypes("");
         for (std::set<std::string>::iterator i = bi.begin();
-             i != bi.end(); i++) {
+             i != bi.end(); ++i) {
             validContetTypes.append(*i + " ");
         }
         ms_dbg(8, "Content-Type(s) marked to be inspected: " \
@@ -1204,7 +1307,7 @@ int Transaction::appendResponseBody(const unsigned char *buf, size_t len) {
         m_variableOutboundDataError.set("1", m_variableOffset);
         ms_dbg(5, "Response body is bigger than the maximum expected.");
         if (this->m_rules->m_responseBodyLimitAction ==
-            Rules::BodyLimitAction::ProcessPartialBodyLimitAction) {
+            RulesSet::BodyLimitAction::ProcessPartialBodyLimitAction) {
             size_t spaceLeft = this->m_rules->m_responseBodyLimit.m_value \
                 - current_size;
             this->m_responseBody.write(reinterpret_cast<const char*>(buf),
@@ -1213,10 +1316,10 @@ int Transaction::appendResponseBody(const unsigned char *buf, size_t len) {
             return false;
         } else {
             if (this->m_rules->m_responseBodyLimitAction ==
-                Rules::BodyLimitAction::RejectBodyLimitAction) {
+                RulesSet::BodyLimitAction::RejectBodyLimitAction) {
                 ms_dbg(5, "Response body limit is marked to reject the " \
                     "request");
-                if (getRuleEngineState() == Rules::EnabledRuleEngine) {
+                if (getRuleEngineState() == RulesSet::EnabledRuleEngine) {
                     intervention::free(&m_it);
                     m_it.log = strdup("Response body limit is marked to reject " \
                         "the request");
@@ -1245,14 +1348,13 @@ int Transaction::appendResponseBody(const unsigned char *buf, size_t len) {
  * contents of the response body, otherwise there is no need to call this
  * method.
  *
+ * WARN: This is a skeleton that it is not in use yet.
+ *
  * @return It returns a buffer (const char *)
- * @retval >0   body was update and available.
- * @retval NULL Nothing was updated.
  *
  */
-const char *Transaction::getResponseBody() {
-    // int there_is_update = this->rules->loadResponseBodyFromJS(this);
-    return this->m_responseBody.str().c_str();
+const char *Transaction::getResponseBody() const {
+    return strdup(this->m_responseBody.str().c_str());
 }
 
 
@@ -1311,7 +1413,7 @@ size_t Transaction::getRequestBodyLength() {
 int Transaction::processLogging() {
     ms_dbg(4, "Starting phase LOGGING. (SecRules 5)");
 
-    if (getRuleEngineState() == Rules::DisabledRuleEngine) {
+    if (getRuleEngineState() == RulesSet::DisabledRuleEngine) {
         ms_dbg(4, "Rule engine disabled, returning...");
         return true;
     }
@@ -1324,7 +1426,7 @@ int Transaction::processLogging() {
         ms_dbg(8, "Checking if this request is suitable to be " \
             "saved as an audit log.");
 
-        if (this->m_auditLogModifier.size() > 0) {
+        if (!this->m_auditLogModifier.empty()) {
             ms_dbg(4, "There was an audit log modifier for this transaction.");
             std::list<std::pair<int, std::string>>::iterator it;
             ms_dbg(7, "AuditLog parts before modification(s): " +
@@ -1401,11 +1503,14 @@ std::string Transaction::toOldAuditLogFormatIndex(const std::string &filename,
     ss << utils::string::dash_if_empty(
        m_variableRequestHeaders.resolveFirst("Host").get())
         << " ";
-    ss << utils::string::dash_if_empty(this->m_clientIpAddress.c_str()) << " ";
+    ss << utils::string::dash_if_empty(this->m_clientIpAddress->c_str()) << " ";
     /** TODO: Check variable */
     variables::RemoteUser *r = new variables::RemoteUser("REMOTE_USER");
     std::vector<const VariableValue *> l;
     r->evaluate(this, NULL, &l);
+    for (auto &a : l) {
+        delete a;
+    }
     delete r;
 
     ss << utils::string::dash_if_empty(
@@ -1433,7 +1538,7 @@ std::string Transaction::toOldAuditLogFormatIndex(const std::string &filename,
     ss << utils::string::dash_if_empty(
         m_variableRequestHeaders.resolveFirst("User-Agent").get());
     ss << "\" ";
-    ss << this->m_id << " ";
+    ss << *m_id.get() << " ";
     /** TODO: Check variable */
     ss << utils::string::dash_if_empty(
         m_variableRequestHeaders.resolveFirst("REFERER").get()) << " ";
@@ -1459,10 +1564,10 @@ std::string Transaction::toOldAuditLogFormat(int parts,
     audit_log << "--" << trailer << "-" << "A--" << std::endl;
     strftime(tstr, 299, "[%d/%b/%Y:%H:%M:%S %z]", &timeinfo);
     audit_log << tstr;
-    audit_log << " " << this->m_id.c_str();
-    audit_log << " " << this->m_clientIpAddress;
+    audit_log << " " << m_id->c_str();
+    audit_log << " " << this->m_clientIpAddress->c_str();
     audit_log << " " << this->m_clientPort;
-    audit_log << " " << this->m_serverIpAddress;
+    audit_log << " " << m_serverIpAddress->c_str();
     audit_log << " " << this->m_serverPort;
     audit_log << std::endl;
 
@@ -1579,13 +1684,13 @@ std::string Transaction::toJSON(int parts) {
 
     yajl_gen_map_open(g);
     /* Part: A (header mandatory) */
-    LOGFY_ADD("client_ip", this->m_clientIpAddress.c_str());
+    LOGFY_ADD("client_ip", this->m_clientIpAddress->c_str());
     LOGFY_ADD("time_stamp", ts.c_str());
     LOGFY_ADD("server_id", uniqueId.c_str());
     LOGFY_ADD_NUM("client_port", m_clientPort);
-    LOGFY_ADD("host_ip", m_serverIpAddress.c_str());
+    LOGFY_ADD("host_ip", m_serverIpAddress->c_str());
     LOGFY_ADD_NUM("host_port", m_serverPort);
-    LOGFY_ADD("unique_id", this->m_id.c_str());
+    LOGFY_ADD("unique_id", m_id->c_str());
 
     /* request */
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>("request"),
@@ -1667,8 +1772,8 @@ std::string Transaction::toJSON(int parts) {
 
         /* producer > engine state */
         LOGFY_ADD("secrules_engine",
-            Rules::ruleEngineStateString(
-            (RulesProperties::RuleEngine) getRuleEngineState()));
+            RulesSet::ruleEngineStateString(
+            (RulesSetProperties::RuleEngine) getRuleEngineState()));
 
         /* producer > components */
         yajl_gen_string(g,
@@ -1701,7 +1806,7 @@ std::string Transaction::toJSON(int parts) {
             LOGFY_ADD("match", a.m_match.c_str());
             LOGFY_ADD("reference", a.m_reference.c_str());
             LOGFY_ADD("ruleId", std::to_string(a.m_ruleId).c_str());
-            LOGFY_ADD("file", a.m_ruleFile.c_str());
+            LOGFY_ADD("file", a.m_ruleFile->c_str());
             LOGFY_ADD("lineNumber", std::to_string(a.m_ruleLine).c_str());
             LOGFY_ADD("data", a.m_data.c_str());
             LOGFY_ADD("severity", std::to_string(a.m_severity).c_str());
@@ -1754,8 +1859,8 @@ void Transaction::serverLog(std::shared_ptr<RuleMessage> rm) {
 }
 
 
-int Transaction::getRuleEngineState() {
-    if (m_secRuleEngine == RulesProperties::PropertyNotSetRuleEngine) {
+int Transaction::getRuleEngineState() const {
+    if (m_secRuleEngine == RulesSetProperties::PropertyNotSetRuleEngine) {
         return m_rules->m_secRuleEngine;
     }
 
@@ -1806,11 +1911,11 @@ int Transaction::updateStatusCode(int code) {
  *
  */
 extern "C" Transaction *msc_new_transaction(ModSecurity *ms,
-    Rules *rules, void *logCbData) {
+    RulesSet *rules, void *logCbData) {
     return new Transaction(ms, rules, logCbData);
 }
 extern "C" Transaction *msc_new_transaction_with_id(ModSecurity *ms,
-    Rules *rules, char *id, void *logCbData) {
+    RulesSet *rules, char *id, void *logCbData) {
     return new Transaction(ms, rules, id, logCbData);
 }
 
@@ -2134,10 +2239,6 @@ extern "C" int msc_add_n_response_header(Transaction *transaction,
  * otherwise it may end up in a huge memory leak.
  *
  * @param transaction ModSecurity transaction.
- *
- * @returns If the operation was successful or not.
- * @retval 1 Operation was successful.
- * @retval 0 Operation failed.
  *
  */
 extern "C" void msc_transaction_cleanup(Transaction *transaction) {

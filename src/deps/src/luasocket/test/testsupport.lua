@@ -7,7 +7,7 @@ function readfile(name)
 end
 
 function similar(s1, s2)
-    return string.lower(string.gsub(s1 or "", "%s", "")) == 
+    return string.lower(string.gsub(s1 or "", "%s", "")) ==
         string.lower(string.gsub(s2 or "", "%s", ""))
 end
 

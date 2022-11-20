@@ -7,6 +7,9 @@ use Test::Nginx::Socket::Lua;
 #workers(2);
 #log_level('warn');
 
+#connect 0.0.0.1 on newer kernel won't return EINVAL
+#so add an route with cmd: sudo ip route add prohibit 0.0.0.1/32
+
 repeat_each(2);
 
 plan tests => repeat_each() * (blocks() * 4 + 9);
@@ -432,7 +435,7 @@ qr{\[crit\] .*? connect\(\) to 0\.0\.0\.1:80 failed .*?, upstream: "http://0\.0\
 
 
 
-=== TEST 15: test if execeed proxy_next_upstream_limit
+=== TEST 15: test if exceed proxy_next_upstream_limit
 --- http_config
     lua_package_path "../lua-resty-core/lib/?.lua;;";
 

@@ -93,11 +93,11 @@ typedef struct MMDB_entry_data_list_s {
 # DESCRIPTION
 
 The libmaxminddb library provides functions for working MaxMind DB files. See
-http://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format specification.
-The database and results are all represented by different data structures.
-Databases are opened by calling `MMDB_open()`. You can look up IP addresses as
-a string with `MMDB_lookup_string()` or as a pointer to a `sockaddr`
-structure with `MMDB_lookup_sockaddr()`.
+https://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format
+specification. The database and results are all represented by different
+data structures. Databases are opened by calling `MMDB_open()`. You can
+look up IP addresses as a string with `MMDB_lookup_string()` or as a
+pointer to a `sockaddr` structure with `MMDB_lookup_sockaddr()`.
 
 If the lookup finds the IP address in the database, it returns a
 `MMDB_lookup_result_s` structure. If that structure indicates that the database
@@ -878,13 +878,13 @@ Rolsky (drolsky@maxmind.com).
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2013-2014 MaxMind, Inc.
+Copyright 2013-2022 MaxMind, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,

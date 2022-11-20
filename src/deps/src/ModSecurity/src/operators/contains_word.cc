@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -36,37 +36,37 @@ bool ContainsWord::acceptableChar(const std::string& a, size_t pos) {
     return true;
 }
 
-bool ContainsWord::evaluate(Transaction *transaction, Rule *rule,
-    const std::string &input, std::shared_ptr<RuleMessage> ruleMessage) {
+bool ContainsWord::evaluate(Transaction *transaction, RuleWithActions *rule,
+    const std::string &str, std::shared_ptr<RuleMessage> ruleMessage) {
     std::string paramTarget(m_string->evaluate(transaction));
 
     if (paramTarget.empty()) {
         return true;
     }
-    if (input.empty()) {
+    if (str.empty()) {
         return false;
     }
-    if (input == paramTarget) {
+    if (str == paramTarget) {
         return true;
     }
 
-    size_t pos = input.find(paramTarget);
+    size_t pos = str.find(paramTarget);
     while (pos != std::string::npos) {
-        if (pos == 0 && acceptableChar(input, paramTarget.size())) {
+        if (pos == 0 && acceptableChar(str, paramTarget.size())) {
             logOffset(ruleMessage, 0, paramTarget.size());
             return true;
         }
-        if (pos + paramTarget.size() == input.size() &&
-            acceptableChar(input, pos - 1)) {
+        if (pos + paramTarget.size() == str.size() &&
+            acceptableChar(str, pos - 1)) {
             logOffset(ruleMessage, pos, paramTarget.size());
             return true;
         }
-        if (acceptableChar(input, pos - 1) &&
-            acceptableChar(input, pos + paramTarget.size())) {
+        if (acceptableChar(str, pos - 1) &&
+            acceptableChar(str, pos + paramTarget.size())) {
             logOffset(ruleMessage, pos, paramTarget.size());
             return true;
         }
-        pos = input.find(paramTarget, pos + 1);
+        pos = str.find(paramTarget, pos + 1);
     }
 
     return false;

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -71,7 +71,7 @@ struct MyHash{
 class AnchoredSetVariable : public std::unordered_multimap<std::string,
 	VariableValue *, MyHash, MyEqual> {
  public:
-    AnchoredSetVariable(Transaction *t, std::string name);
+    AnchoredSetVariable(Transaction *t, const std::string &name);
     ~AnchoredSetVariable();
 
     void unset();

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -78,8 +78,8 @@ bool ModSecurityTest<T>::load_test_json(std::string file) {
         if (this->count(u->filename + ":" + u->name) == 0) {
             std::vector<T *> *vector = new std::vector<T *>;
             vector->push_back(u);
-            std::pair<std::string, std::vector<T *> *> a(u->filename + ":" +
-                u->name, vector);
+            std::string filename(u->filename + ":" + u->name);
+            std::pair<std::string, std::vector<T*>*> a(filename, vector);
             this->insert(a);
         } else {
             std::vector<T *> *vec = this->at(u->filename + ":" + u->name);
@@ -145,7 +145,7 @@ void ModSecurityTest<T>::cmd_options(int argc, char **argv) {
         i++;
         m_count_all = true;
     }
-    if (const char* env_p = std::getenv("AUTOMAKE_TESTS")) {
+    if (std::getenv("AUTOMAKE_TESTS")) {
         m_automake_output = true;
     }
 
