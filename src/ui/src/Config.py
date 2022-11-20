@@ -1,5 +1,5 @@
 from copy import deepcopy
-from os import listdir
+from os import listdir, remove
 from time import sleep
 from flask import flash
 from os.path import exists, isfile
@@ -147,13 +147,8 @@ class Config:
         self.__dict_to_env(env_file, conf)
         proc = run(
             [
-                "/usr/share/bunkerweb/gen/main.py",
-                "--settings",
-                "/usr/share/bunkerweb/settings.json",
-                "--templates",
-                "/usr/share/bunkerweb/confs",
-                "--output",
-                "/etc/nginx",
+                "python3",
+                "/usr/share/bunkerweb/gen/save_config.py",
                 "--variables",
                 env_file,
                 "--method",
@@ -166,11 +161,7 @@ class Config:
         if proc.returncode != 0:
             raise Exception(f"Error from generator (return code = {proc.returncode})")
 
-        err = self.__db.save_config(conf, "ui")
-        if err:
-            self.__logger.error(
-                f"Can't save config in database: {err}",
-            )
+        remove(env_file)
 
     def get_plugins_settings(self) -> dict:
         return self.__plugins_settings
@@ -181,7 +172,7 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self) -> dict:
+    def get_config(self, methods: bool = True) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -191,13 +182,13 @@ class Config:
         """
         if exists("/usr/sbin/nginx"):
             return {
-                k: {"value": v, "method": "ui"}
+                k: ({"value": v, "method": "ui"} if methods is True else v)
                 for k, v in self.__env_to_dict("/etc/nginx/variables.env").items()
             }
 
-        return self.__db.get_config(methods=True)
+        return self.__db.get_config(methods=methods)
 
-    def get_services(self) -> list[dict]:
+    def get_services(self, methods: bool = True) -> list[dict]:
         """Get nginx's services
 
         Returns
@@ -208,15 +199,20 @@ class Config:
         if exists("/usr/sbin/nginx"):
             services = []
             for filename in iglob("/etc/nginx/**/variables.env"):
+                service = filename.split("/")[3]
                 env = {
-                    k: {"value": v, "method": "ui"}
+                    k.replace(f"{service}_", ""): (
+                        {"value": v, "method": "ui"} if methods is True else v
+                    )
                     for k, v in self.__env_to_dict(filename).items()
+                    if k.startswith(f"{service}_")
+                    or k in self.__plugins_settings.keys()
                 }
                 services.append(env)
 
             return services
 
-        return self.__db.get_services_settings(methods=True)
+        return self.__db.get_services_settings(methods=methods)
 
     def check_variables(self, variables: dict, _global: bool = False) -> int:
         """Testify that the variables passed are valid
@@ -265,7 +261,9 @@ class Config:
         return error
 
     def reload_config(self) -> None:
-        self.__gen_conf(self.get_config(), self.get_services())
+        self.__gen_conf(
+            self.get_config(methods=False), self.get_services(methods=False)
+        )
 
     def new_service(self, variables: dict) -> Tuple[str, int]:
         """Creates a new service from the given variables
@@ -285,7 +283,7 @@ class Config:
         Exception
             raise this if the service already exists
         """
-        services = self.get_services()
+        services = self.get_services(methods=False)
         for service in services:
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service[
                 "SERVER_NAME"
@@ -293,7 +291,7 @@ class Config:
                 return f"Service {service['SERVER_NAME']} already exists.", 1
 
         services.append(variables)
-        self.__gen_conf(self.get_config(), services)
+        self.__gen_conf(self.get_config(methods=False), services)
         return f"Configuration for {variables['SERVER_NAME']} has been generated.", 0
 
     def edit_service(self, old_server_name: str, variables: dict) -> Tuple[str, int]:
@@ -332,7 +330,9 @@ class Config:
         str
             the confirmation message
         """
-        self.__gen_conf(self.get_config() | variables, self.get_services())
+        self.__gen_conf(
+            self.get_config(methods=False) | variables, self.get_services(methods=False)
+        )
         return f"The global configuration has been edited."
 
     def delete_service(self, service_name: str) -> Tuple[str, int]:
@@ -353,8 +353,8 @@ class Config:
         Exception
             raises this if the service_name given isn't found
         """
-        full_env = self.get_config()
-        services = self.get_services()
+        full_env = self.get_config(methods=False)
+        services = self.get_services(methods=False)
         new_services = []
         found = False
 

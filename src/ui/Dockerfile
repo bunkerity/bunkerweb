@@ -20,7 +20,6 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/api /usr/share/bunkerweb/api
-COPY src/common/confs /usr/share/bunkerweb/confs
 COPY src/common/db /usr/share/bunkerweb/db
 COPY src/common/core /usr/share/bunkerweb/core
 COPY src/common/gen /usr/share/bunkerweb/gen
@@ -46,7 +45,7 @@ RUN apk add --no-cache bash file && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
     chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb && \
-    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/deps/python/bin/* && \
+    chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/deps/python/bin/* && \
     chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs

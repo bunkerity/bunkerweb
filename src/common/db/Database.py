@@ -330,18 +330,17 @@ class Database:
                     global_values = []
                     db_services = (
                         session.query(Services)
-                        .with_entities(Services.id)
-                        .filter_by(method=method)
+                        .with_entities(Services.id, Services.method)
                         .all()
                     )
+                    db_ids = [service.id for service in db_services]
                     services = config.get("SERVER_NAME", "").split(" ")
 
                     if db_services:
-                        db_services = [service.id for service in db_services]
                         missing_ids = [
-                            service
+                            service.id
                             for service in db_services
-                            if service not in services
+                            if (service.method == method) and service.id not in services
                         ]
 
                         if missing_ids:
@@ -373,9 +372,9 @@ class Database:
                             except StopIteration:
                                 continue
 
-                            if server_name not in db_services:
+                            if server_name not in db_ids:
                                 to_put.append(Services(id=server_name, method=method))
-                                db_services.append(server_name)
+                                db_ids.append(server_name)
 
                             key = key.replace(f"{server_name}_", "")
                             setting = (
@@ -471,7 +470,16 @@ class Database:
                                     }
                                 )
                 else:
-                    if "SERVER_NAME" in config and config["SERVER_NAME"] != "":
+                    if (
+                        "SERVER_NAME" in config
+                        and config["SERVER_NAME"] != ""
+                        and not (
+                            session.query(Services)
+                            .with_entities(Services.id)
+                            .filter_by(id=config["SERVER_NAME"].split(" ")[0])
+                            .first()
+                        )
+                    ):
                         to_put.append(
                             Services(
                                 id=config["SERVER_NAME"].split(" ")[0], method=method

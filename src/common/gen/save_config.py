@@ -4,8 +4,8 @@ from argparse import ArgumentParser
 from glob import glob
 from itertools import chain
 from json import loads
-from os import R_OK, W_OK, X_OK, access, environ, getenv, path
-from os.path import exists
+from os import R_OK, X_OK, access, environ, getenv, listdir, path, walk
+from os.path import exists, join
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -108,6 +108,12 @@ if __name__ == "__main__":
             action="store_true",
             help="Only initialize the database",
         )
+        parser.add_argument(
+            "--method",
+            default="scheduler",
+            type=str,
+            help="The method that is used to save the config",
+        )
         args = parser.parse_args()
 
         logger.info("Save config started ...")
@@ -127,9 +133,12 @@ if __name__ == "__main__":
             with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
                 integration = f.read().strip()
 
-        logger.info(f"Detected {integration} integration")
+        if args.init:
+            logger.info(f"Detected {integration} integration")
+
         config_files = None
         db = None
+        apis = []
 
         # Check existences and permissions
         logger.info("Checking arguments ...")
@@ -194,10 +203,31 @@ if __name__ == "__main__":
                 for k, v in environ.items()
                 if custom_confs_rx.match(k)
             ]
+            root_dirs = listdir("/etc/bunkerweb/configs")
+            for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
+                if (
+                    root != "configs"
+                    and (dirs and not root.split("/")[-1] in root_dirs)
+                    or files
+                ):
+                    path_exploded = root.split("/")
+                    for file in files:
+                        with open(join(root, file), "r") as f:
+                            custom_confs.append(
+                                {
+                                    "value": f.read(),
+                                    "exploded": (
+                                        f"{path_exploded.pop()}"
+                                        if path_exploded[-1] not in root_dirs
+                                        else "",
+                                        path_exploded[-1],
+                                        file.replace(".conf", ""),
+                                    ),
+                                }
+                            )
         elif integration == "Kubernetes":
             corev1 = kube_client.CoreV1Api()
             tmp_config = {}
-            apis = []
 
             for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
                 if (
@@ -280,7 +310,6 @@ if __name__ == "__main__":
 
             tmp_config = {}
             custom_confs = []
-            apis = []
 
             for instance in (
                 docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
@@ -354,10 +383,10 @@ if __name__ == "__main__":
         if args.init:
             sys_exit(0)
 
-        err = db.save_config(config_files, "scheduler")
+        err = db.save_config(config_files, args.method)
 
         if not err:
-            err1 = db.save_custom_configs(custom_confs, "scheduler")
+            err1 = db.save_custom_configs(custom_confs, args.method)
         else:
             err = None
             err1 = None
