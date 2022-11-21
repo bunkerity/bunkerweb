@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -16,6 +16,7 @@ services:
       - ./bw-data:/data # contains some Core Rule Set configuration to fix FP
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - AUTO_LETS_ENCRYPT=yes
@@ -27,16 +28,46 @@ services:
       - REVERSE_PROXY_HEADERS_1=Authorization $http_authorization
       - MAX_CLIENT_SIZE=1G
       - |
-        CUSTOM_CONF_MODSEC_CRS_gogs=
-        SecAction \
-         "id:900220,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/x-amf| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json| |application/octet-stream| |application/csp-report| |application/xss-auditor-report| |text/plain| |application/x-git-upload-pack-request| |application/x-git-receive-pack-request|'"
+        CUSTOM_CONF_MODSEC_CRS_gogs=SecAction "id:900220,phase:1,nolog,pass,t:none,setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/x-amf| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json| |application/octet-stream| |application/csp-report| |application/xss-auditor-report| |text/plain| |application/x-git-upload-pack-request| |application/x-git-receive-pack-request|'"
+    labels:
+      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    environment:
+      - DOCKER_HOST=tcp://docker-proxy:2375
+    volumes:
+      - bw-data:/data
+    networks:
+      - bw-universe
+      - net-docker
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   mygogs:
     image: gogs/gogs
     volumes:
       - ./gogs-data:/data
+    networks:
+      - bw-services
+
+networks:
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+  net-docker:
