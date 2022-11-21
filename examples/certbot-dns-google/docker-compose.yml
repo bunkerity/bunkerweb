@@ -45,11 +45,22 @@ services:
     image: bunkerity/bunkerweb-scheduler:1.5.0
     depends_on:
       - mybunker
+    environment:
+      - DOCKER_HOST=tcp://docker-proxy:2375
     volumes:
       - bw-data:/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - bw-universe
+      - net-docker
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   mycertbot:
     image: certbot/dns-google
@@ -88,6 +99,7 @@ networks:
       driver: default
       config:
         - subnet: 10.20.30.0/24
+  net-docker:
   net_app1:
   net_app2:
   net_app3:

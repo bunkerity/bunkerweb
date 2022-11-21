@@ -34,7 +34,7 @@ services:
       LIMIT_REQ_RATE_1: "5r/s"
       CUSTOM_CONF_MODSEC_CRS_drupal: 'SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"'
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services
@@ -45,11 +45,21 @@ services:
       - mybunker
     environment:
       <<: *bunkerweb-env
+      DOCKER_HOST: "tcp://docker-proxy:2375"
     volumes:
       - bw-data:/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - bw-universe
+      - net-docker
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   mydrupal:
     image: drupal:9-apache
@@ -84,3 +94,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
+  net-docker:

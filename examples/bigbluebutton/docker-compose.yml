@@ -60,15 +60,30 @@ services:
     image: bunkerity/bunkerweb-scheduler:1.5.0
     depends_on:
       - mybunker
+    environment:
+      - DOCKER_HOST=tcp://docker-proxy:2375
     volumes:
       - bw-data:/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       bbb-net:
         ipv4_address: 10.7.7.42
+      net-docker:
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   ...
 
 volumes:
   ...
   bw-data:
+
+networks:
+  ...
+  net-docker:
