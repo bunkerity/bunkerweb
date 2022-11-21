@@ -16,7 +16,7 @@ COPY src/common/gen/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
 # Install python requirements
 RUN apk add --no-cache --virtual build py3-pip && \
 	pip install --no-cache-dir --upgrade pip && \
-	pip install --no-cache-dir --upgrade setuptools wheel && \
+	pip install wheel && \
 	mkdir -p /usr/share/bunkerweb/deps/python && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del build

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pip-compile --generate-hashes
+pip-compile --generate-hashes --allow-unsafe
