@@ -63,29 +63,7 @@ services:
       - bunkerweb.LIMIT_REQ_URL_3=^/static/
       - bunkerweb.LIMIT_REQ_RATE_3=10r/s
 
-  postgres:
-    image: postgres:${POSTGRES_IMAGE_TAG}
-    networks:
-      bw-services:
-        aliases:
-          - postgres
-    restart: ${RESTART_POLICY}
-    security_opt:
-      - no-new-privileges:true
-    pids_limit: 100
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /var/run/postgresql
-    volumes:
-      - ${POSTGRES_DATA_PATH}:/var/lib/postgresql/data
-    environment:
-      # timezone inside container
-      - TZ
-      # necessary Postgres options/variables
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+  # For the postgres database, you can refer to the example of the autoconf including a postgres database
 
 networks:
   bw-services:

@@ -2,7 +2,7 @@
   "name": "moodle",
   "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
   "timeout": 300,
-  "delay": 180,
+  "delay": 300,
   "tests": [
     {
       "type": "string",

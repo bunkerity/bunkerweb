@@ -3,7 +3,7 @@
   "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
   "timeout": 360,
   "no_copy_container": true,
-  "delay": 180,
+  "delay": 240,
   "tests": [
     {
       "type": "string",
