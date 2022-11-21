@@ -1,0 +1,71 @@
+---
+meta:
+  author: "terjanq"
+  description: "Restrict multiple charsets inside the content type header"
+  enabled: true
+  name: "920530.yaml"
+tests:
+  - test_title: 920530-1
+    desc: "A valid request with a single charset"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Content-Type: "application/x-www-form-urlencoded; charset=utf-8"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "test=value"
+          output:
+            no_log_contains: "id \"920530\""
+  - test_title: 920530-2
+    desc: "Bypass attempt with two charsets"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Content-Type: "application/x-www-form-urlencoded; charset=utf-8; charset=utf-7"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "test=value"
+          output:
+            log_contains: "id \"920530\""
+  - test_title: 920530-3
+    desc: "Bypass attempt with hiding the charset inside a field"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Content-Type: "application/x-www-form-urlencoded; charset=utf-8; boundary=\"charset=utf-7\""
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "test=value"
+          output:
+            log_contains: "id \"920530\""
+  - test_title: 920530-4
+    desc: "Bypass attempt with uppercase CHARSET"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Content-Type: "application/x-www-form-urlencoded; charset=utf-8; CHARSET=utf-7"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "test=value"
+          output:
+            log_contains: "id \"920530\""

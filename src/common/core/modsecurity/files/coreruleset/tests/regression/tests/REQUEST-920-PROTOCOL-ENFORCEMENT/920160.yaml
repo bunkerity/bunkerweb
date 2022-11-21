@@ -82,7 +82,7 @@
               User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
             method: POST
             port: 80
-            uri: /
+            uri: /post
             version: HTTP/1.0
             data: abc
           output:

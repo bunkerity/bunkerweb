@@ -20,7 +20,7 @@ def regexp_str(str, evasion):
     if str[0] == "'":
         return str[1:]
 
-    result = ""
+    result = ''
     for i, char in enumerate(str):
         if i > 0:
             result += evasion
@@ -28,31 +28,29 @@ def regexp_str(str, evasion):
 
     return result
 
-
 # Ensure that some special characters are escaped
 def regexp_char(char, evasion):
-    char = str.replace(char, ".", "\.")
-    char = str.replace(char, "-", "\-")
-    char = str.replace(char, "+", r"""(?:\s|<|>).*""")
-    # Unix: "cat foo", "cat<foo", "cat>foo"
-    char = str.replace(char, "@", r"""(?:[\s,;]|\.|/|<|>).*""")
-    # Windows: "more foo", "more,foo", "more;foo", "more.com", "more/e",
-    # "more<foo", "more>foo"
-    char = str.replace(char, " ", "\s+")
-    # Ensure multiple spaces are matched
+    char = str.replace(char, '.', '\.')
+    char = str.replace(char, '-', '\-')
+    char = str.replace(char, '+', r'''(?:\s|<|>).*''')
+        # Unix: "cat foo", "cat<foo", "cat>foo"
+    char = str.replace(char, '@', r'''(?:[\s,;]|\.|/|<|>).*''')
+        # Windows: "more foo", "more,foo", "more;foo", "more.com", "more/e",
+        # "more<foo", "more>foo"
+    char = str.replace(char, ' ', '\s+')
+        # Ensure multiple spaces are matched
     return char
-
 
 # Insert these sequences between characters to prevent evasion.
 # This emulates the relevant parts of t:cmdLine.
 evasions = {
-    "unix": r"""[\\\\'\"]*""",
-    "windows": r"""[\"\^]*""",
+    'unix': r'''[\\\\'\"]*''',
+    'windows': r'''[\"\^]*''',
 }
 
 # Parse arguments
 if len(sys.argv) <= 1 or not sys.argv[1] in evasions:
-    print(sys.argv[0] + " unix|windows [infile]")
+    print(sys.argv[0] + ' unix|windows [infile]')
     sys.exit(1)
 
 evasion = evasions[sys.argv[1]]
@@ -60,7 +58,7 @@ del sys.argv[1]
 
 # Process lines from input file, or if not specified, standard input
 for line in fileinput.input():
-    line = line.rstrip("\n ")
-    line = line.split("#")[0]
-    if line != "":
+    line = line.rstrip('\n ')
+    line = line.split('#')[0]
+    if line != '':
         print(regexp_str(line, evasion))

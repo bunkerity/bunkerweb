@@ -36,11 +36,11 @@ import fileinput, sys
 
 for line in fileinput.input():
     line = line.strip()
-    if line == "":
+    if line == '':
         sys.stdout.write("\n")
         continue
 
-    if line[-1] == "\\":
+    if line[-1] == '\\':
         sys.stdout.write(line[0:-1])
     else:
         sys.stdout.write(line)
