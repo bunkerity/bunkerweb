@@ -11,7 +11,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
 # Install dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install wheel && \
+    pip install --no-cache-dir --upgrade setuptools wheel && \
     mkdir -p /usr/share/bunkerweb/deps/python && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
     apk del .build-deps
