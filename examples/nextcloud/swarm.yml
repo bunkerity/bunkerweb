@@ -37,22 +37,7 @@ services:
         - bunkerweb.LIMIT_REQ_URL_3=/core/preview
         - bunkerweb.LIMIT_REQ_RATE_3=5r/s
 
-  mydb:
-    image: mariadb:10.9
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - bw-services
-    environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=nc
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
-    deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
+  # For the database, you can refer to the example of the autoconf in swarm mode including a database
 
 networks:
   bw-services:
@@ -61,4 +46,3 @@ networks:
 
 volumes:
   nc_files:
-  db_data:

@@ -1,8 +1,12 @@
 version: "3"
 
+x-bunkerweb-env:
+  &bunkerweb-env
+  DATABASE_URI: "mariadb+pymysql://${MOODLE_USER:-user}:${MOODLE_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
+
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -13,18 +17,47 @@ services:
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     # more info at https://docs.bunkerweb.io
     volumes:
-      - bw_data:/data
+      - bw-data:/data
     environment:
-      - SERVER_NAME=www.example.com # replace with your domain
-      - AUTO_LETS_ENCRYPT=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - MAX_CLIENT_SIZE=50m
-      - SERVE_FILES=no
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=https://mymoodle:8443
+      <<: *bunkerweb-env
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      MAX_CLIENT_SIZE: "50m"
+      SERVE_FILES: "no"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "https://mymoodle:8443"
+    labels:
+      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    environment:
+      <<: *bunkerweb-env
+      DOCKER_HOST: "tcp://docker-proxy:2375"
+    volumes:
+      - bw-data:/data
+    networks:
+      - bw-universe
+      - net-docker
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   mymoodle:
     image: bitnami/moodle:latest
@@ -39,21 +72,33 @@ services:
       - MOODLE_EMAIL=moodle@example.com # replace with your moodle admin email
       - MOODLE_SITE_NAME=My Moodle # replace with your moodle site name
       - MOODLE_DATABASE_HOST=mydb
-      - MOODLE_DATABASE_NAME=moodle
-      - MOODLE_DATABASE_USER=user
-      - MOODLE_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - MOODLE_DATABASE_NAME=${MOODLE_DATABASE:-moodledb}
+      - MOODLE_DATABASE_USER=${MOODLE_USER:-user}
+      - MOODLE_DATABASE_PASSWORD=${MOODLE_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+    networks:
+      - bw-services
 
   mydb:
     image: mariadb:10.5
     volumes:
-      - ./db-data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=moodle
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
-      - MARIADB_CHARACTER_SET=utf8mb4
-      - MARIADB_COLLATE=utf8mb4_unicode_ci
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    entrypoint: sh -c "echo 'DROP USER IF EXISTS \"${MOODLE_USER:-user}\"; CREATE USER \"${MOODLE_USER:-user}\"@\"%\"; CREATE DATABASE IF NOT EXISTS ${MOODLE_DATABASE:-moodledb}; CREATE DATABASE IF NOT EXISTS ${BUNKERWEB_DATABASE:-bunkerweb}; GRANT ALL PRIVILEGES ON ${MOODLE_DATABASE:-moodledb}.* TO \"${MOODLE_USER:-user}\"@\"%\" IDENTIFIED BY \"${MOODLE_PASSWORD:-secret}\"; GRANT ALL PRIVILEGES ON ${BUNKERWEB_DATABASE:-bunkerweb}.* TO \"${MOODLE_USER:-user}\"@\"%\" IDENTIFIED BY \"${MOODLE_PASSWORD:-secret}\"; FLUSH PRIVILEGES;' > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    networks:
+      - bw-universe
+      - bw-services
 
 volumes:
-  bw_data:
+  bw-data:
+  db-data:
+
+
+networks:
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+  net-docker:
