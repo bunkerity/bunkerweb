@@ -29,4 +29,6 @@ We strive to make the OWASP ModSecurity CRS accessible to a wide audience of beg
 
 Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
 
+Copyright (c) 2021-2022 Core Rule Set project. All rights reserved.
+
 The OWASP ModSecurity Core Rule Set is distributed under Apache Software License (ASL) version 2. Please see the enclosed LICENSE file for full details.

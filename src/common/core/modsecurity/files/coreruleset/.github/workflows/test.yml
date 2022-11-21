@@ -22,53 +22,50 @@ jobs:
       fail-fast: false
       matrix:
         modsec_version: [modsec2-apache]
-        tests: [REQUEST-911-METHOD-ENFORCEMENT,
-                REQUEST-913-SCANNER-DETECTION,
-                REQUEST-920-PROTOCOL-ENFORCEMENT,
-                REQUEST-921-PROTOCOL-ATTACK,
-                REQUEST-930-APPLICATION-ATTACK-LFI,
-                REQUEST-931-APPLICATION-ATTACK-RFI,
-                REQUEST-932-APPLICATION-ATTACK-RCE,
-                REQUEST-933-APPLICATION-ATTACK-PHP,
-                REQUEST-934-APPLICATION-ATTACK-NODEJS,
-                REQUEST-941-APPLICATION-ATTACK-XSS,
-                REQUEST-942-APPLICATION-ATTACK-SQLI,
-                REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION,
-                REQUEST-944-APPLICATION-ATTACK-JAVA]
-        # Will include soon for modsec3-nginx
-
     steps:
-      - name: Checkout repo
+      - name: "Checkout repo"
         uses: actions/checkout@v2
 
-      - name: Set up Python 2
-        uses: actions/setup-python@v1
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
         with:
-          python-version: 2.7
+          python-version: '3.x'
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: "Run tests for ${{ matrix.modsec_version }}`"
-        env:
-          CONFIG: ${{ matrix.modsec_version }}
+      - name: "Install dependencies"
         run: |
-          python -V
-          mkdir -p logs/"${CONFIG}"
-          docker-compose -f ./tests/docker-compose.yml up -d "${CONFIG}"
-          pip install --upgrade setuptools
+          pip install --upgrade setuptools wheel
           pip install -r tests/regression/requirements.txt
+          pip install pytest-github-actions-annotate-failures
+
+      - name: "Run tests for ${{ matrix.modsec_version }}"
+        run: |
+          mkdir -p tests/logs/${{ matrix.modsec_version }}/{nginx,apache2}
+          docker-compose -f ./tests/docker-compose.yml up -d "${{ matrix.modsec_version }}"
           # Use mounted volume path
-          if [[ "${CONFIG}" == *"nginx" ]]; then
-            LOGDIR="/var/log/nginx"
-          else
-            LOGDIR="/var/log/apache2"
-          fi
-          sed -ie "s:${LOGDIR}:${GITHUB_WORKSPACE}/logs/${CONFIG}:g" tests/regression/config.ini
-          py.test -vs tests/regression/CRS_Tests.py \
-            --config="${CONFIG}" \
-            --ruledir=./tests/regression/tests/${{ matrix.tests }}
+          py.test -vs --tb=short tests/regression/CRS_Tests.py \
+            --config="${{ matrix.modsec_version }}" \
+            --ruledir_recurse=./tests/regression/tests/
+
+      - name: "Change permissions if failed"
+        if: failure()
+        run: |
+            # we want to get the audit log, so change permissions (file is only for root on docker)
+            sudo chmod 644 tests/logs/${{ matrix.modsec_version }}/modsec_audit.log
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: waf-logs
+          path: tests/logs/${{ matrix.modsec_version }}
 
       - name: Clean docker-compose
-        env:
-          CONFIG: modsec2-apache
         run: |
-          docker-compose -f ./tests/docker-compose.yml stop "${CONFIG}"
+          docker-compose -f ./tests/docker-compose.yml stop "${{ matrix.modsec_version }}"
           docker-compose -f ./tests/docker-compose.yml down

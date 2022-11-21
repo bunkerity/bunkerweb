@@ -1,6 +1,6 @@
 ---
   meta:
-    author: "csanders-git"
+    author: "csanders-git, karelorigin"
     enabled: true
     name: "920450.yaml"
     description: "Description"
@@ -58,7 +58,6 @@
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
@@ -82,7 +81,6 @@
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
@@ -96,6 +94,7 @@
             version: HTTP/1.1
           output:
             log_contains: id "920450"
+
     -
       test_title: 920450-6
       stages:
@@ -105,8 +104,42 @@
               dest_addr: "127.0.0.1"
               port: 80
               headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Range: "test"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: "localhost"
+                Range: "test"
             output:
               no_log_contains: "id \"920450\""
+
+    -
+      test_title: 920450-7
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/"
+              headers:
+                User-Agent: "OWASP ModSecurity Core Rule Set"
+                Host: "localhost"
+                Accept: text/html
+                Accept-Charset: UTF-8
+            output:
+              log_contains: "id \"920450\""
+
+    -
+      test_title: 920450-8
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/"
+              headers:
+                User-Agent: "OWASP ModSecurity Core Rule Set"
+                Host: "localhost"
+                Accept: text/html
+                Content-Encoding: deflate
+            output:
+              log_contains: "id \"920450\""
