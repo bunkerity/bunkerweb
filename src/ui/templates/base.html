@@ -19,24 +19,25 @@
     <div
       class="w-full relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl"
     >
-      {% include "header.html" %}
+      {% include "header.html" %} {% with messages =
+      get_flashed_messages(with_categories=true) %} {% if messages %}
       <!-- flash message-->
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
+      {% for category, message in messages %}
       <div
         flash-message
-        class="hidden p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-screen-sm min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
+        class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-screen-sm min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
       >
         {% if category == 'error' %}
-        <h5 class="text-lg mb-0 text-red-500">error</h5>
+        <h5 class="text-lg mb-0 text-red-500">Error</h5>
         <p class="text-red-500 mb-0 text-sm">{{ message|safe }}</p>
-        {% endif %} {% if category == 'success' %}
-        <h5 class="text-lg mb-0 text-green-500">success</h5>
+        {% else %}
+        <h5 class="text-lg mb-0 text-green-500">Success</h5>
         <p class="text-green-500 mb-0 text-sm">{{ message|safe }}</p>
         {% endif %}
       </div>
+      {% endfor %}
       <!-- end flash message-->
-      {% endfor %} {% endif %} {% endwith %}
+      {% endif %} {% endwith %}
     </div>
     <!-- info -->
     <main
