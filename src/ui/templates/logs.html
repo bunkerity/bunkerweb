@@ -44,7 +44,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       <!-- dropdown-->
       <div
         {{current_endpoint}}-setting-select-dropdown="instances"
-        class="hidden z-100 absolute h-full flex-col w-full translate-y-12"
+        class="hidden z-100 absolute h-full flex-col w-full translate-y-16"
       >
         {% for instance in instances %}
         <button
@@ -223,7 +223,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       <!-- dropdown-->
       <div
         {{current_endpoint}}-setting-select-dropdown="types"
-        class="hidden z-100 absolute h-full flex-col w-full translate-y-12"
+        class="hidden z-100 absolute h-full flex-col w-full translate-y-16"
       >
         <button
           {{current_endpoint}}-setting-select-dropdown-btn="types"

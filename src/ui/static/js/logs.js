@@ -1,7 +1,7 @@
 import { Checkbox } from "./utils.js";
 import Datepicker from "./datepicker/datepicker.js";
 
-class LogsDropdown {
+class Dropdown {
   constructor(prefix = "logs") {
     this.prefix = prefix;
     this.container = document.querySelector("main");
@@ -18,6 +18,13 @@ class LogsDropdown {
             .hasAttribute(`${this.prefix}-setting-select`) &&
           !e.target.closest("button").hasAttribute(`disabled`)
         ) {
+          const btnName = e.target
+            .closest("button")
+            .getAttribute(`${this.prefix}-setting-select`);
+          if (this.lastDrop !== btnName) {
+            this.lastDrop = btnName;
+            this.closeAllDrop();
+          }
           this.toggleSelectBtn(e);
         }
       } catch (err) {}
@@ -47,6 +54,23 @@ class LogsDropdown {
           }
         }
       } catch (err) {}
+    });
+  }
+
+  closeAllDrop() {
+    const drops = document.querySelectorAll(
+      `[${this.prefix}-setting-select-dropdown]`
+    );
+    drops.forEach((drop) => {
+      drop.classList.add("hidden");
+      drop.classList.remove("flex");
+      document
+        .querySelector(
+          `svg[${this.prefix}-setting-select="${drop.getAttribute(
+            `${this.prefix}-setting-select-dropdown`
+          )}"]`
+        )
+        .classList.remove("rotate-180");
     });
   }
 
@@ -319,7 +343,7 @@ class FetchLogs {
   }
 }
 
-class FilterLogs {
+class Filter {
   constructor(prefix = "logs") {
     this.prefix = prefix;
     this.container = document.querySelector(`[${this.prefix}-filter]`);
@@ -409,8 +433,8 @@ class LogsDate {
 }
 
 const setCheckbox = new Checkbox("[logs-settings]");
-const dropdown = new LogsDropdown();
+const dropdown = new Dropdown("logs");
 const setLogs = new FetchLogs();
-const setFilter = new FilterLogs();
+const setFilter = new Filter("logs");
 const fromDatepicker = new LogsDate(document.querySelector("input#from-date"));
 const toDatepicker = new LogsDate(document.querySelector("input#to-date"));

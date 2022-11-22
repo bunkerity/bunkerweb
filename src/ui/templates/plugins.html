@@ -59,34 +59,41 @@ plugins = config["CONFIG"].get_plugins() %}
 
 <!-- upload layout -->
 <div
+  {{current_endpoint}}-upload
   class="p-4 col-span-12 md:col-span-7 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="col-span-12 mb-4 font-bold dark:text-white">UPLOAD PLUGIN</h5>
+  <h5 class="col-span-12 mb-4 font-bold dark:text-white">UPLOAD / RELOAD</h5>
 
-  <div class="p-0 col-span-12 grid">
-    <form id="dropzone" class="col-span-12 dropzone max-h-16 overflow-y-auto">
-      <!-- Now setup your input fields -->
+  <div class="p-0 col-span-12 grid grid-cols-12">
+    <!-- dropzone -->
+    <form
+      id="dropzone-form"
+      action="#"
+      class="cursor-pointer col-span-12 border-2 rounded-lg p-2 border-dashed border-primary drop-zone"
+    >
       <input
-        name="upload-csrf"
-        class="hidden"
+        type="hidden"
+        id="csrf_token"
         name="csrf_token"
         value="{{ csrf_token() }}"
       />
-      <button name="upload-submit" class="hidden" type="submit">
-        Submit data and files!
-      </button>
+      <input
+        class="file-input drop-zone__input"
+        type="file"
+        name="file"
+        multiple="multiple"
+        hidden
+      />
+      <i class="fa-solid fa-cloud-upload-alt"></i>
+      <p class="text-sm text-center my-3">click or drag and drop</p>
     </form>
-    <div
-      class="col-span-12 flex flex-col sm:flex-row justify-center items-center mt-3"
-    >
-      <button
-        type="button"
-        class="dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
-      >
-        Upload
-      </button>
+    <section class="col-span-12 progress-area"></section>
+    <section class="col-span-12 uploaded-area"></section>
+
+    <!-- end dropzone -->
+    <div class="col-span-12 flex flex-col justify-center items-center">
       <p
-        class="mx-4 my-3 sm:my-0 font-sans font-semibold leading-normal uppercase text-sm"
+        class="mx-4 my-3 font-sans font-semibold leading-normal uppercase text-sm"
       >
         or
       </p>
@@ -167,7 +174,7 @@ plugins = config["CONFIG"].get_plugins() %}
       <!-- dropdown-->
       <div
         {{current_endpoint}}-setting-select-dropdown="types"
-        class="hidden z-100 absolute h-full flex-col w-full translate-y-12"
+        class="hidden z-100 absolute h-full flex-col w-full translate-y-16"
       >
         <button
           {{current_endpoint}}-setting-select-dropdown-btn="types"
@@ -208,31 +215,51 @@ plugins = config["CONFIG"].get_plugins() %}
 
   <div {{current_endpoint}}-list class="grid grid-cols-12 gap-3">
     {% for plugin in plugins %} {% if plugin['page'] %}
-    <a
+    <div
       {{current_endpoint}}-external="{% if plugin['external'] %} external {%else%} internal {%endif%}"
-      href="/plugins?{{plugin['id']}}"
-      class="py-3 cursor-pointer min-h-12 relative col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 3xl:col-span-2 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
+      class="py-3 min-h-12 relative col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 3xl:col-span-2 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
       <p
         {{current_endpoint}}-content
-        class="ml-3 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-center text-sm md:text-base text-slate-700 dark:text-gray-300"
+        class="ml-3 mr-2 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-left text-sm md:text-base text-slate-700 dark:text-gray-300"
       >
         {{plugin['name']}}
       </p>
-      <svg
-        class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-      >
-        <path
-          d="M288 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h50.7L169.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L384 141.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H288zM80 64C35.8 64 0 99.8 0 144V400c0 44.2 35.8 80 80 80H336c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v80c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V144c0-8.8 7.2-16 16-16h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"
-        ></path>
-      </svg>
-    </a>
+      <div class="flex items-center">
+        <a class="hover:-translate-y-px" href="/plugins?{{plugin['id']}}">
+          <svg
+            class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+          >
+            <path
+              d="M288 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h50.7L169.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L384 141.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H288zM80 64C35.8 64 0 99.8 0 144V400c0 44.2 35.8 80 80 80H336c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v80c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V144c0-8.8 7.2-16 16-16h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"
+            ></path>
+          </svg>
+        </a>
+        <button
+          {{current_endpoint}}-action="delete"
+          name="{{plugin['id']}}"
+          type="button"
+          class="z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px"
+        >
+          <svg
+            class="h-5 w-5 fill-red-500 dark:brightness-90"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+          >
+            <path
+              d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
     {% else %}
+
     <div
       {{current_endpoint}}-external="{% if plugin['external'] %} external {%else%} internal {%endif%}"
-      class="py-3 cursor-pointer min-h-12 relative col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 3xl:col-span-2 p-1 flex justify-start items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
+      class="py-3 min-h-12 relative col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 3xl:col-span-2 p-1 flex justify-start items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
       <p
         {{current_endpoint}}-content

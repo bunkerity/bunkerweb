@@ -76,7 +76,29 @@ class darkMode {
   }
 }
 
+class FlashMsg {
+  constructor() {
+    this.delayBeforeRemove = 5000;
+    this.init();
+  }
+
+  //remove flash message after this.delay if exist
+  init() {
+    window.addEventListener("DOMContentLoaded", () => {
+      try {
+        const flashEl = document.querySelector("[flash-message]");
+        setTimeout(() => {
+          try {
+            flashEl.remove();
+          } catch (err) {}
+        }, this.delayBeforeRemove);
+      } catch (err) {}
+    });
+  }
+}
+
 const setMenu = new Menu();
 const setNews = new News();
 const setDarkM = new darkMode();
 const setCheckbox = new Checkbox("[sidebar-info]");
+const setFlash = new FlashMsg();
