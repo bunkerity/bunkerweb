@@ -247,20 +247,67 @@ class Multiple {
         if (
           e.target.closest("button").hasAttribute(`${this.prefix}-multiple-add`)
         ) {
-          console.log("click");
+          //get plugin from btn
+          const btn = e.target.closest("button");
+          const serviceName = btn.getAttribute(`${this.prefix}-multiple-add`);
+          //get all multiple groups
+          const multipleEls = document.querySelectorAll(
+            `[${this.prefix}-settings-multiple="${serviceName}"]`
+          );
+          const multipleCount = multipleEls.length;
+          //the default (schema) group is the last group
+          const schema = multipleEls[multipleEls.length - 1];
+          //clone it and change name by total - 1 (schema is hidden)
+          const clone = schema.cloneNode(true);
+          const cloneTitles = clone.querySelectorAll("h5");
+          const cloneInps = clone.querySelectorAll("input");
+          const cloneSelects = clone.querySelectorAll("select");
+
+          cloneTitles.forEach((title) => {
+            title.textContent = `${title.textContent} #${multipleCount}`;
+          });
+
+          cloneInps.forEach((inp) => {
+            const currID = inp.getAttribute("id");
+            const currName = inp.getAttribute("name");
+            inp.setAttribute("id", `${currID}_${multipleCount}`);
+            inp.setAttribute("name", `${currName}_${multipleCount}`);
+          });
+
+          cloneSelects.forEach((select) => {
+            const currID = select.getAttribute("id");
+            const currName = select.getAttribute("name");
+            select.setAttribute("id", `${currID}_${multipleCount}`);
+            select.setAttribute("name", `${currName}_${multipleCount}`);
+          });
+          //insert new group before first one
+          const firstMultiple = multipleEls[0];
+          firstMultiple.insertAdjacentElement("beforebegin", clone);
         }
       } catch (err) {}
 
-      //add using example
       //REMOVE BTN
-      if (
-        e.target
-          .closest("button")
-          .hasAttribute(`${this.prefix}-multiple-delete`)
-      ) {
-        console.log("click");
-      }
-      //remove last child
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`${this.prefix}-multiple-delete`)
+        ) {
+          //remove the first element (last created)
+          //unless it is the schema (length 1)
+          const btn = e.target.closest("button");
+          const serviceName = btn.getAttribute(
+            `${this.prefix}-multiple-delete`
+          );
+          const multipleEls = document.querySelectorAll(
+            `[${this.prefix}-settings-multiple="${serviceName}"]`
+          );
+          if (multipleEls.length === 1) return;
+          const firstMultiple = multipleEls[0];
+          firstMultiple.remove();
+        }
+        //remove last child
+      } catch (err) {}
     });
   }
 }
@@ -271,3 +318,4 @@ const setPopover = new Popover("main", "services");
 const setTabs = new Tabs("[services-tabs]", "services");
 const setModal = new ServiceModal();
 const format = new FormatValue();
+const setMultiple = new Multiple("services");
