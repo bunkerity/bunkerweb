@@ -233,6 +233,38 @@ class ServiceModal {
   }
 }
 
+class Multiple {
+  constructor(prefix) {
+    this.prefix = prefix;
+    this.container = document.querySelector(`[${this.prefix}-modal-form]`);
+    this.init();
+  }
+
+  init() {
+    this.container.addEventListener("click", (e) => {
+      //ADD BTN
+      try {
+        if (
+          e.target.closest("button").hasAttribute(`${this.prefix}-multiple-add`)
+        ) {
+          console.log("click");
+        }
+      } catch (err) {}
+
+      //add using example
+      //REMOVE BTN
+      if (
+        e.target
+          .closest("button")
+          .hasAttribute(`${this.prefix}-multiple-delete`)
+      ) {
+        console.log("click");
+      }
+      //remove last child
+    });
+  }
+}
+
 const setCheckbox = new Checkbox("[services-modal-form]");
 const setSelect = new Select("[services-modal-form]", "services");
 const setPopover = new Popover("main", "services");
