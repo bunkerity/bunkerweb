@@ -907,7 +907,6 @@ class FormatValue {
 
   init() {
     this.inputs.forEach((inp) => {
-      console.log(inp);
       inp.setAttribute("value", inp.getAttribute("value").trim());
     });
   }

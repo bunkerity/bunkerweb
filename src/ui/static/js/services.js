@@ -236,12 +236,32 @@ class ServiceModal {
 class Multiple {
   constructor(prefix) {
     this.prefix = prefix;
-    this.container = document.querySelector(`[${this.prefix}-modal-form]`);
+    this.container = document.querySelector("main");
+    this.modalForm = document.querySelector(`[${this.prefix}-modal-form]`);
     this.init();
   }
 
   init() {
     this.container.addEventListener("click", (e) => {
+      //edit button
+      try {
+        if (
+          e.target.closest("button").getAttribute("services-action") === "edit"
+        ) {
+          //remove all multiples
+          this.removeMultiples();
+          //set multiple service values
+          const servicesSettings = e.target
+            .closest("[services-service]")
+            .querySelector("[services-settings]")
+            .getAttribute("value");
+          const obj = JSON.parse(servicesSettings);
+          this.updateModalMultiples(obj);
+        }
+      } catch (err) {}
+    });
+
+    this.modalForm.addEventListener("click", (e) => {
       //ADD BTN
       try {
         if (
@@ -252,37 +272,70 @@ class Multiple {
           const serviceName = btn.getAttribute(`${this.prefix}-multiple-add`);
           //get all multiple groups
           const multipleEls = document.querySelectorAll(
-            `[${this.prefix}-settings-multiple="${serviceName}"]`
+            `[${this.prefix}-settings-multiple*="${serviceName}"]`
           );
-          const multipleCount = multipleEls.length;
+          const count = Number(
+            multipleEls[1]
+              .getAttribute(`${this.prefix}-settings-multiple`)
+              .substring(
+                multipleEls[1].getAttribute(`${this.prefix}-settings-multiple`)
+                  .length - 1
+              )
+          );
           //the default (schema) group is the last group
-          const schema = multipleEls[multipleEls.length - 1];
+          const schema = document.querySelector(
+            `[${this.prefix}-settings-multiple="${serviceName}_SCHEMA"]`
+          );
           //clone it and change name by total - 1 (schema is hidden)
           const clone = schema.cloneNode(true);
-          const cloneTitles = clone.querySelectorAll("h5");
-          const cloneInps = clone.querySelectorAll("input");
-          const cloneSelects = clone.querySelectorAll("select");
+          console.log(clone.getAttribute("services-settings-multiple"));
+          const name = clone
+            .getAttribute("services-settings-multiple")
+            .replace(`SCHEMA`, `${count + 1}`);
+          clone.setAttribute("services-settings-multiple", name);
+          clone.classList.remove("hidden");
+          clone.classList.add("grid");
 
-          cloneTitles.forEach((title) => {
-            title.textContent = `${title.textContent} #${multipleCount}`;
-          });
+          try {
+            const cloneContainer = clone.querySelectorAll(
+              "[setting-container]"
+            );
+            cloneContainer.forEach((ctnr) => {
+              const newName = ctnr
+                .getAttribute("setting-container")
+                .replace("SCHEMA", `${count + 1}`);
+              ctnr.setAttribute("setting-container", newName);
+            });
+          } catch (err) {}
 
-          cloneInps.forEach((inp) => {
-            const currID = inp.getAttribute("id");
-            const currName = inp.getAttribute("name");
-            inp.setAttribute("id", `${currID}_${multipleCount}`);
-            inp.setAttribute("name", `${currName}_${multipleCount}`);
-          });
+          try {
+            const cloneTitles = clone.querySelectorAll("h5");
+            cloneTitles.forEach((title) => {
+              title.textContent = `${title.textContent} #${count + 1}`;
+            });
+          } catch (err) {}
 
-          cloneSelects.forEach((select) => {
-            const currID = select.getAttribute("id");
-            const currName = select.getAttribute("name");
-            select.setAttribute("id", `${currID}_${multipleCount}`);
-            select.setAttribute("name", `${currName}_${multipleCount}`);
-          });
+          try {
+            const cloneInps = clone.querySelectorAll("input");
+            cloneInps.forEach((inp) => {
+              const currID = inp.getAttribute("id");
+              const currName = inp.getAttribute("name");
+              inp.setAttribute("id", `${currID}_${count + 1}`);
+              inp.setAttribute("name", `${currName}_${count + 1}`);
+            });
+          } catch (err) {}
+
+          try {
+            const cloneSelects = clone.querySelectorAll("select");
+            cloneSelects.forEach((select) => {
+              const currID = select.getAttribute("id");
+              const currName = select.getAttribute("name");
+              select.setAttribute("id", `${currID}_${count + 1}`);
+              select.setAttribute("name", `${currName}_${count + 1}`);
+            });
+          } catch (err) {}
           //insert new group before first one
-          const firstMultiple = multipleEls[0];
-          firstMultiple.insertAdjacentElement("beforebegin", clone);
+          schema.insertAdjacentElement("afterend", clone);
         }
       } catch (err) {}
 
@@ -293,21 +346,144 @@ class Multiple {
             .closest("button")
             .hasAttribute(`${this.prefix}-multiple-delete`)
         ) {
-          //remove the first element (last created)
-          //unless it is the schema (length 1)
-          const btn = e.target.closest("button");
-          const serviceName = btn.getAttribute(
-            `${this.prefix}-multiple-delete`
+          const multContainer = e.target.closest(
+            "[services-settings-multiple]"
           );
-          const multipleEls = document.querySelectorAll(
-            `[${this.prefix}-settings-multiple="${serviceName}"]`
-          );
-          if (multipleEls.length === 1) return;
-          const firstMultiple = multipleEls[0];
-          firstMultiple.remove();
+          multContainer.remove();
         }
         //remove last child
       } catch (err) {}
+    });
+  }
+
+  removeMultiples() {
+    const multiPlugins = document.querySelectorAll(
+      `[${this.prefix}-settings-multiple]`
+    );
+    multiPlugins.forEach((multiGrp) => {
+      if (
+        !multiGrp.getAttribute("services-settings-multiple").includes("SCHEMA")
+      )
+        multiGrp.remove();
+    });
+  }
+
+  updateModalMultiples(settings) {
+    //filter to get only multiples of services
+    const multipleSettings = {};
+    for (const [key, data] of Object.entries(settings)) {
+      if (!isNaN(key[key.length - 1]) && key[key.length - 2] === "_") {
+        multipleSettings[key] = {
+          value: data["value"],
+          method: data["method"],
+        };
+      }
+    }
+
+    //add them to the right plugin
+    for (const [key, data] of Object.entries(multipleSettings)) {
+      const num = key[key.length - 1];
+      const getSchemaKey = key.substring(0, key.length - 2);
+      const getSchemaSetting = document.querySelector(
+        `[setting-container="${getSchemaKey}_SCHEMA"]`
+      );
+      const cloneSchemaSetting = getSchemaSetting.cloneNode(true);
+      //replace info
+      cloneSchemaSetting.setAttribute("setting-container", key);
+      const title = cloneSchemaSetting.querySelector("h5");
+      title.textContent = `${title.textContent} #${num}`;
+      //replace input info
+      try {
+        const inp = cloneSchemaSetting.querySelector("input");
+        inp.setAttribute("id", `${key}`);
+        inp.setAttribute("name", `${key}`);
+      } catch (err) {}
+      //or select
+      try {
+        const select = cloneSchemaSetting.querySelector("select");
+        select.setAttribute("id", `${key}`);
+        select.setAttribute("name", `${key}`);
+      } catch (err) {}
+      getSchemaSetting.insertAdjacentElement("beforebegin", cloneSchemaSetting);
+    }
+    //get multiple for all plugins
+    const multiPlugins = document.querySelectorAll(
+      `[${this.prefix}-settings-multiple]`
+    );
+
+    multiPlugins.forEach((defaultGrp) => {
+      //get group number for the multiples settings
+      const multipleEls = defaultGrp.querySelectorAll("[setting-container]");
+      const multNum = new Set();
+      multipleEls.forEach((setting) => {
+        const name = setting.getAttribute("setting-container");
+        if (!isNaN(name[name.length - 1])) multNum.add(name[name.length - 1]);
+      });
+      //create a different group for each number
+      multNum.forEach((num) => {
+        const newGroup = defaultGrp.cloneNode(true);
+        newGroup.classList.add("grid");
+        newGroup.classList.remove("hidden");
+        //change groupe name
+        const currName = newGroup.getAttribute(
+          `${this.prefix}-settings-multiple`
+        );
+        newGroup.setAttribute(
+          `${this.prefix}-settings-multiple`,
+          currName.replace("SCHEMA", num)
+        );
+
+        //remove elements that not fit num unless schema if no custom value
+        const newGroupSettings = newGroup.querySelectorAll(
+          "[setting-container]"
+        );
+        newGroupSettings.forEach((setting) => {
+          //remove logic
+          const settingName = setting.getAttribute("setting-container");
+          if (
+            (!settingName.endsWith(num) && !settingName.endsWith("SCHEMA")) ||
+            (settingName.endsWith("SCHEMA") &&
+              document.querySelector(`${settingName.replace("SCHEMA", num)}`))
+          ) {
+            return setting.remove();
+          }
+          //else update info by num
+          setting.setAttribute(
+            "setting-container",
+            setting.getAttribute("setting-container").replace(`SCHEMA`, num)
+          );
+          const title = setting.querySelector("h5");
+          if (!title.textContent.includes(`#${num}`))
+            title.textContent = `${title.textContent} #${num}`;
+          //replace input info
+          try {
+            const inp = setting.querySelector("input");
+            inp.setAttribute("id", setting.getAttribute("setting-container"));
+            inp.setAttribute("name", setting.getAttribute("setting-container"));
+          } catch (err) {}
+          //or select
+          try {
+            const select = setting.querySelector("select");
+            select.setAttribute(
+              "id",
+              setting.getAttribute("setting-container")
+            );
+            select.setAttribute(
+              "name",
+              setting.getAttribute("setting-container")
+            );
+          } catch (err) {}
+        });
+        defaultGrp.insertAdjacentElement("afterend", newGroup);
+      });
+    });
+    //remove custom multiple from schema
+    multiPlugins.forEach((defaultGrp) => {
+      const multipleEls = defaultGrp.querySelectorAll("[setting-container]");
+      multipleEls.forEach((setting) => {
+        const settingName = setting.getAttribute("setting-container");
+        if (!settingName.endsWith("SCHEMA")) setting.remove();
+      });
     });
   }
 }

@@ -5,6 +5,7 @@
   {% set plugins = config["CONFIG"].get_plugins() %} 
 <!-- plugin item -->
 {% for plugin in plugins %}
+
 <div
   {{current_endpoint}}-item="{{plugin['id']}}"
   id="{{plugin['id']}}"
@@ -215,17 +216,14 @@
     <button {{current_endpoint}}-multiple-add="{{plugin['name']}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
       Add
     </button>
-    <button {{current_endpoint}}-multiple-delete="{{plugin['name']}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
-      Remove
-    </button>
   </div>
-  <div {{current_endpoint}}-settings-multiple="{{plugin['name']}}" class="w-full grid grid-cols-12">
+  <div {{current_endpoint}}-settings-multiple="{{plugin['name']}}_SCHEMA" class="hidden w-full mb-8 grid-cols-12 border dark:border-gray-700">
 
     {% for setting, value in plugin["settings"].items() %}
     {% if current_endpoint
       == "global-config" and value['context'] == "global" and value['multiple'] or current_endpoint ==
       "services" and value['context'] == "multisite" and value['multiple'] %}
-    <div    
+    <div  setting-container="{{setting}}_SCHEMA"
       class="    
       mx-0 sm:mx-4  my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
       id="form-edit-{{current_endpoint}}-{{ value["id"] }}">
@@ -394,6 +392,11 @@
       <!--end invalid feedback-->
     </div>
     {% endif %} {% endfor %}
+    <div class="col-span-12 flex justify-center my-4">
+      <button {{current_endpoint}}-multiple-delete="{{plugin['name']}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+        Remove
+      </button>
+    </div>
     <!-- end plugin settings -->
   </div>
   {%endif %}
