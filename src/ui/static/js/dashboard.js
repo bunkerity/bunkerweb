@@ -1,4 +1,4 @@
-import { Checkbox } from "./utils.js";
+import { Checkbox, Loader } from "./utils.js";
 
 class Menu {
   constructor() {
@@ -97,6 +97,7 @@ class FlashMsg {
   }
 }
 
+const setLoader = new Loader();
 const setMenu = new Menu();
 const setNews = new News();
 const setDarkM = new darkMode();

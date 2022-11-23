@@ -9,10 +9,17 @@
     <noscript class="relative w-full p-4 text-white bg-yellow-500 rounded-lg"
       >Your browser does not support JavaScript!</noscript
     >
-
-    <!--fixed background-->
-    <div class="absolute w-full dark:hidden bg-primary"></div>
-    <!-- end fixed background-->
+    <div
+      loader
+      class="fixed z-[10000] transition duration-300 h-screen w-screen bg-primary flex justify-center align-middle items-center"
+    >
+      <img
+        loader-img
+        src="images/logo-menu-2.png"
+        class="duration-300 w-40 h-12 sm:w-50 sm:h-14 md:w-60 md:h-16 lg:w-80 lg:h-24 inline transition-all"
+        alt="main logo"
+      />
+    </div>
 
     {% include "menu.html" %} {% include "news.html" %}
 

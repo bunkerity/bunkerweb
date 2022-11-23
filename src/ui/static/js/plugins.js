@@ -403,5 +403,5 @@ class Upload {
 }
 
 const setDropdown = new Dropdown("plugins");
-const setFilter = new Plugins("plugins");
+const setFilter = new Filter("plugins");
 const setUpload = new Upload();
