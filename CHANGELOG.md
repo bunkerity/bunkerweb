@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.5 - 
+
+- Fix bwcli syntax error
+- Fix UI not working using Linux integration
+- Fix missing openssl dep in autoconf
+- Fix typo in selfsigned job
+
 ## v1.4.4 - 2022/11/10
 
 - Fix k8s controller not watching the events when there is an exception

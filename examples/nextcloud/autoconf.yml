@@ -25,7 +25,7 @@ services:
       - bunkerweb.MAX_CLIENT_SIZE=10G
       - bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
       - bunkerweb.X_FRAME_OPTIONS=SAMEORIGIN
-      - bunkerweb.BAD_BEHAVIOR_STATUS_CODES=400 401.4.4 405 444
+      - bunkerweb.BAD_BEHAVIOR_STATUS_CODES=400 401.4.5 405 444
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://mync

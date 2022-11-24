@@ -2,7 +2,7 @@ name: Automatic test, build, push and deploy (DEV)
 
 on:
   push:
-    branches: [1.4-temp-disable]
+    branches: [1.4]
 
 jobs:
 
