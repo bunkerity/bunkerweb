@@ -682,7 +682,7 @@ class Database:
                         }
                     )
 
-                if setting.multiple:
+                if setting.context == "multisite":
                     multisite.append(setting.id)
 
             for service in session.query(Services).with_entities(Services.id).all():
@@ -705,7 +705,7 @@ class Database:
                             Services_settings.suffix,
                             Services_settings.method,
                         )
-                        .filter_by(service_id=key, setting_id=setting.id, suffix=suffix)
+                        .filter_by(service_id=service.id, setting_id=key, suffix=suffix)
                         .first()
                     )
 
