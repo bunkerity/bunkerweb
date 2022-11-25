@@ -3,7 +3,10 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/bunkerweb-1.4.3-blue" />
+	<img src="https://img.shields.io/github/license/bunkerity/bunkerweb?color=40bb6b" />
+	<img src="https://img.shields.io/github/release/bunkerity/bunkerweb?color=085577" />
+	<img src="https://img.shields.io/github/downloads/bunkerity/bunkerweb/total">
+	<img src="https://img.shields.io/docker/pulls/bunkerity/bunkerweb?color=085577">
 	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28DEV%29?label=CI%2FCD%20dev" />
 	<img src="https://img.shields.io/github/workflow/status/bunkerity/bunkerweb/Automatic%20test%2C%20build%2C%20push%20and%20deploy%20%28PROD%29?label=CI%2FCD%20prod" />
@@ -262,12 +265,12 @@ BunkerWeb comes with a plugin system to make it possible to easily add new featu
 
 Here is the list of "official" plugins that we maintain (see the [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) repository for more information) :
 
-|      Name      | Version | Description                                                                                                                      |                                                 Link                                                  |
-| :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
+|      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
+| :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
 |   **ClamAV**   |   0.1   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
 |  **CrowdSec**  |   0.1   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-| **Discord** | 0.1 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
-| **Slack** | 0.1 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
+|  **Discord**   |   0.1   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |   0.1   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
 | **VirusTotal** |   0.1   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
 
 You will find more information in the [plugins section](https://docs.bunkerweb.io/latest/plugins) of the documentation.

@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 # Copy python requirements
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt

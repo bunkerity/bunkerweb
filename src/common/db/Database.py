@@ -12,7 +12,7 @@ import oracledb
 from os import _exit, getenv, listdir, makedirs
 from os.path import dirname, exists
 from pymysql import install_as_MySQLdb
-from re import search
+from re import compile as re_compile
 from sys import modules, path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import create_engine, inspect
@@ -118,6 +118,7 @@ class Database:
         self.__sql_session.configure(
             bind=self.__sql_engine, autoflush=False, expire_on_commit=False
         )
+        self.suffix_rx = re_compile(r"_\d+$")
 
     def get_database_uri(self) -> str:
         return self.database_uri
@@ -351,7 +352,7 @@ class Database:
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
-                        if search(r"_\d+$", key):
+                        if self.suffix_rx.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
@@ -488,7 +489,7 @@ class Database:
 
                     for key, value in config.items():
                         suffix = 0
-                        if search(r"_\d+$", key):
+                        if self.suffix_rx.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
@@ -637,7 +638,7 @@ class Database:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
-            db_services = session.query(Services).with_entities(Services.id).all()
+            multisite = []
             for setting in (
                 session.query(Settings)
                 .with_entities(
@@ -681,39 +682,35 @@ class Database:
                         }
                     )
 
-                if setting.context != "multisite":
-                    continue
+                if setting.context == "multisite":
+                    multisite.append(setting.id)
 
-                for service in db_services:
-                    config[f"{service.id}_{setting.id}"] = (
-                        config[setting.id]
-                        if methods is False
-                        else {
-                            "value": config[setting.id]["value"],
-                            "method": "default",
-                        }
-                    )
+            for service in session.query(Services).with_entities(Services.id).all():
+                for key, value in deepcopy(config).items():
+                    original_key = key
+                    if self.suffix_rx.search(key):
+                        suffix = int(key.split("_")[-1])
+                        key = key[: -len(str(suffix)) - 1]
 
-                    service_settings = (
+                    if key not in multisite:
+                        continue
+
+                    config[f"{service.id}_{original_key}"] = value
+                    suffix = 0
+
+                    service_setting = (
                         session.query(Services_settings)
                         .with_entities(
                             Services_settings.value,
                             Services_settings.suffix,
                             Services_settings.method,
                         )
-                        .filter_by(service_id=service.id, setting_id=setting.id)
-                        .all()
+                        .filter_by(service_id=service.id, setting_id=key, suffix=suffix)
+                        .first()
                     )
 
-                    for service_setting in service_settings:
-                        config[
-                            f"{service.id}_{setting.id}"
-                            + (
-                                f"_{service_setting.suffix}"
-                                if service_setting.suffix > 0
-                                else ""
-                            )
-                        ] = (
+                    if service_setting:
+                        config[f"{service.id}_{original_key}"] = (
                             service_setting.value
                             if methods is False
                             else {
