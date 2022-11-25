@@ -1,4 +1,4 @@
-import { Checkbox, Loader } from "./utils.js";
+import { Checkbox } from "./utils/form.js";
 
 class Menu {
   constructor() {
@@ -94,6 +94,43 @@ class FlashMsg {
         }, this.delayBeforeRemove);
       } catch (err) {}
     });
+  }
+}
+
+class Loader {
+  constructor() {
+    this.menuContainer = document.querySelector("[menu-container]");
+    this.logoContainer = document.querySelector("[loader]");
+    this.logoEl = document.querySelector("[loader-img]");
+    this.isLoading = true;
+    this.init();
+  }
+
+  init() {
+    this.loading();
+    window.addEventListener("load", (e) => {
+      setTimeout(() => {
+        this.logoContainer.classList.add("opacity-0");
+      }, 350);
+
+      setTimeout(() => {
+        this.isLoading = false;
+        this.logoContainer.classList.add("hidden");
+      }, 650);
+
+      setTimeout(() => {
+        this.logoContainer.remove();
+      }, 800);
+    });
+  }
+
+  loading() {
+    if ((this.isLoading = true)) {
+      setTimeout(() => {
+        this.logoEl.classList.toggle("scale-105");
+        this.loading();
+      }, 300);
+    }
   }
 }
 

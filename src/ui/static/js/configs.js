@@ -3,7 +3,7 @@ import {
   FolderEditor,
   FolderModal,
   FolderDropdown,
-} from "./utils.js";
+} from "./utils/file.manager.js";
 
 const setModal = new FolderModal("configs");
 const setEditor = new FolderEditor();
