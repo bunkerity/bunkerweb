@@ -576,14 +576,14 @@ module_hotfixes=true
 <p>You should now be able to install NGINX 1.20.2 :
     <div class="highlight"><pre><span></span><code>sudo dnf install nginx-1.20.2
 </code></pre></div></p>
-<pre><code>And finally install BunkerWeb 1.4.4 :
+<pre><code>And finally install BunkerWeb 1.4.5 :
 </code></pre>
 <p><code>shell
     wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &amp;&amp; \
   rpm -Uvh epel-release*rpm &amp;&amp; \
   curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash &amp;&amp; \
   sudo dnf check-update &amp;&amp; \
-  sudo dnf install -y bunkerweb-1.4.4</code></p>
+  sudo dnf install -y bunkerweb-1.4.5</code></p>
 <pre><code>To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
 ```shell
 sudo dnf versionlock add nginx &amp;&amp; \
