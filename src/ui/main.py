@@ -22,6 +22,7 @@ from flask import (
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, dumps, load as json_load
+from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import chmod, getenv, getpid, listdir, mkdir, walk
@@ -152,7 +153,7 @@ try:
         WTF_CSRF_SSL_STRICT=False,
         USER=user,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
-        PLUGIN_ARGS=None,
+        PLUGIN_ARGS={},
         RELOADING=False,
         TO_FLASH=[],
         DARK_MODE=False,
@@ -958,11 +959,13 @@ def plugins():
             # Fix permissions for plugins folders
             for root, dirs, files in walk("/etc/bunkerweb/plugins", topdown=False):
                 for name in files + dirs:
-                    chown(join(root, name), "nginx", "nginx")
+                    chown(join(root, name), 101, 101)
                     chmod(join(root, name), 0o770)
 
         if operation:
             flash(operation)
+
+        app.config["CONFIG"].reload_plugins()
 
         # Reload instances
         app.config["RELOADING"] = True
@@ -979,7 +982,6 @@ def plugins():
             except OSError:
                 pass
 
-        app.config["CONFIG"].reload_plugins()
         return redirect(
             url_for("loading", next=url_for("plugins"), message="Reloading plugins")
         )
@@ -999,8 +1001,10 @@ def plugins():
             flash(f"Plugin {plugin_id} not found", "error")
 
         if page_path:
-            return render_template(
-                page_path,
+            with open(page_path, "r") as f:
+                template = Template(f.read())
+
+            return template.render(
                 csrf_token=generate_csrf,
                 url_for=url_for,
                 dark_mode=app.config["DARK_MODE"],
@@ -1047,7 +1051,7 @@ def custom_plugin(plugin):
             f"Invalid plugin id, <b>{plugin}</b> (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)",
             "error",
         )
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     if not exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py") and not exists(
         f"/usr/share/bunkerweb/core/{plugin}/ui/actions.py"
@@ -1056,7 +1060,7 @@ def custom_plugin(plugin):
             f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
             "error",
         )
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     # Add the custom plugin to sys.path
     sys_path.append(
@@ -1075,7 +1079,7 @@ def custom_plugin(plugin):
             f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
             "error",
         )
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     error = False
     res = None
@@ -1090,7 +1094,7 @@ def custom_plugin(plugin):
             "error",
         )
         error = True
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
     except:
         flash(
             f"An error occurred while executing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
@@ -1109,12 +1113,14 @@ def custom_plugin(plugin):
             or res is None
             or isinstance(res, dict) is False
         ):
-            return redirect(url_for("loading", next=url_for("plugins")))
+            return redirect(
+                url_for("loading", next=url_for("plugins", plugin_id=plugin))
+            )
 
     app.config["PLUGIN_ARGS"] = {"plugin": plugin, "args": res}
 
     flash(f"Your action <b>{plugin}</b> has been executed")
-    return redirect(url_for("loading", next=url_for("plugins")))
+    return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
 
 @app.route("/cache", methods=["GET"])

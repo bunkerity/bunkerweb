@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import List
-from bs4 import Tag
 import magic
 import os
 
@@ -91,6 +90,8 @@ def path_to_dict(
             ):
                 with open(path, "rb") as f:
                     d["content"] = f.read().decode("utf-8")
+            else:
+                d["content"] = "Download file to view content"
     else:
         config_types = [
             "http",

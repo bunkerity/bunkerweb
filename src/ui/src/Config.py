@@ -38,6 +38,7 @@ class Config:
 
     def reload_plugins(self) -> None:
         self.__plugins = []
+        external_plugins = []
 
         for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + list(
             iglob("/usr/share/bunkerweb/core/*")
@@ -55,6 +56,13 @@ class Config:
                     "external": foldername.startswith("/etc/bunkerweb/plugins"),
                 }
             )
+
+            if plugin["external"] is True:
+                external_plugin = deepcopy(plugin)
+                del external_plugin["external"]
+                del external_plugin["page"]
+                external_plugins.append(external_plugin)
+
             if "ui" in content:
                 if "template.html" in listdir(f"{foldername}/ui"):
                     plugin["page"] = True
@@ -66,6 +74,13 @@ class Config:
             **{k: v for x in self.__plugins for k, v in x["settings"].items()},
             **self.__settings,
         }
+
+        if external_plugins:
+            err = self.__db.update_external_plugins(external_plugins)
+            if err:
+                self.__logger.error(
+                    f"Couldn't update external plugins to database: {err}",
+                )
 
     def __env_to_dict(self, filename: str) -> dict:
         """Converts the content of an env file into a dict
