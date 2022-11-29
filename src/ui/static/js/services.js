@@ -1,4 +1,5 @@
-import { Checkbox, Popover, Select, Tabs, FormatValue } from "./utils.js";
+import { Checkbox, Select } from "./utils/form.js";
+import { Popover, Tabs, FormatValue } from "./utils/settings.js";
 
 class ServiceModal {
   constructor() {
@@ -15,6 +16,8 @@ class ServiceModal {
     //general inputs
     this.inputs = this.modal.querySelectorAll("input[default-value]");
     this.selects = this.modal.querySelectorAll("select[default-value]");
+    this.lastGroup = "";
+
     this.init();
   }
 
@@ -40,7 +43,7 @@ class ServiceModal {
         ) {
           this.setDeleteForm(
             "delete",
-            e.target.closest("button").getAttribute("service-name")
+            e.target.closest("button").getAttribute("services-name")
           );
           this.openModal();
         }
@@ -60,10 +63,15 @@ class ServiceModal {
         if (
           e.target.closest("button").getAttribute("services-action") === "edit"
         ) {
-          this.setNewEditForm(
-            "edit",
-            e.target.closest("button").getAttribute("service-name")
-          );
+          //no reupdate if same service
+          const serviceName = e.target
+            .closest("button")
+            .getAttribute("services-name");
+
+          if (this.lastGroup === serviceName) return this.openModal();
+          //else
+          this.lastGroup = serviceName;
+          this.setNewEditForm("edit", serviceName);
           //change this to hidden config on service card later
           const servicesSettings = e.target
             .closest("[services-service]")
@@ -238,16 +246,28 @@ class Multiple {
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.modalForm = document.querySelector(`[${this.prefix}-modal-form]`);
+    this.lastGroup = "";
     this.init();
   }
 
   init() {
+    window.addEventListener("load", () => {
+      this.hiddenIfNoMultiples();
+    });
+
     this.container.addEventListener("click", (e) => {
       //edit button
       try {
         if (
           e.target.closest("button").getAttribute("services-action") === "edit"
         ) {
+          //avoid reupdate if same service
+          const serviceName = e.target
+            .closest("button")
+            .getAttribute("services-name");
+          if (this.lastGroup === serviceName) return;
+          //else
+          this.lastGroup = serviceName;
           //remove all multiples
           this.removeMultiples();
           //set multiple service values
@@ -274,14 +294,25 @@ class Multiple {
           const multipleEls = document.querySelectorAll(
             `[${this.prefix}-settings-multiple*="${serviceName}"]`
           );
-          const count = Number(
-            multipleEls[1]
-              .getAttribute(`${this.prefix}-settings-multiple`)
-              .substring(
-                multipleEls[1].getAttribute(`${this.prefix}-settings-multiple`)
-                  .length - 1
-              )
-          );
+          let count;
+          //case no schema
+          if (multipleEls.length <= 0) return;
+          //case only schema
+          if (multipleEls.length === 1) {
+            count = 0;
+          }
+          //case schema and custom configs with num
+          if (multipleEls.length > 1) {
+            count = Number(
+              multipleEls[1]
+                .getAttribute(`${this.prefix}-settings-multiple`)
+                .substring(
+                  multipleEls[1].getAttribute(
+                    `${this.prefix}-settings-multiple`
+                  ).length - 1
+                )
+            );
+          }
           //the default (schema) group is the last group
           const schema = document.querySelector(
             `[${this.prefix}-settings-multiple="${serviceName}_SCHEMA"]`
@@ -482,6 +513,20 @@ class Multiple {
 
   //UTILS
 
+  hiddenIfNoMultiples() {
+    //hide multiple btn if no multiple exist on a plugin
+    const multiples = document.querySelectorAll(
+      `[${this.prefix}-settings-multiple]`
+    );
+    multiples.forEach((container) => {
+      console.log(container.querySelectorAll(`[setting-container]`));
+      if (container.querySelectorAll(`[setting-container]`).length <= 0)
+        container.parentElement
+          .querySelector("[multiple-handler]")
+          .classList.add("hidden");
+    });
+  }
+
   removeMultiples() {
     const multiPlugins = document.querySelectorAll(
       `[${this.prefix}-settings-multiple]`
@@ -514,6 +559,89 @@ class Multiple {
   }
 }
 
+class FilterSettings {
+  constructor(prefix) {
+    this.prefix = prefix;
+    this.input = document.querySelector("input#settings-filter");
+    //DESKTOP
+    this.deskTabs = document.querySelectorAll(`[${this.prefix}-item-handler]`);
+    this.init();
+  }
+
+  init() {
+    this.input.addEventListener("input", () => {
+      this.resetFilter();
+      //get inp format
+      const inpValue = this.input.value.trim().toLowerCase();
+      //loop all tabs
+      this.deskTabs.forEach((tab) => {
+        //get settings of tabs except multiples
+        const settings = this.getSettingsFromTab(tab);
+
+        //compare total count to currCount to determine
+        //if tabs need to be hidden
+        const settingCount = settings.length;
+        let hiddenCount = 0;
+        settings.forEach((setting) => {
+          console.log(setting);
+          try {
+            const title = setting
+              .querySelector("h5")
+              .textContent.trim()
+              .toLowerCase();
+            if (!title.includes(inpValue)) {
+              setting.classList.add("hidden");
+              hiddenCount++;
+            }
+          } catch (err) {}
+        });
+        //case no setting match, hidden tab and content
+        if (settingCount === hiddenCount) {
+          const tabName = tab.getAttribute(`${this.prefix}-item-handler`);
+          //hide mobile and desk tabs
+          tab.classList.add("hidden");
+          document
+            .querySelector(`[${this.prefix}-mobile-item-handler="${tabName}"]`)
+            .classList.add("hidden");
+          document
+            .querySelector(`[${this.prefix}-item=${tabName}]`)
+            .querySelector("[setting-header]")
+
+            .classList.add("hidden");
+        }
+      });
+    });
+  }
+
+  resetFilter() {
+    this.deskTabs.forEach((tab) => {
+      const tabName = tab.getAttribute(`${this.prefix}-item-handler`);
+      //hide mobile and desk tabs
+      tab.classList.remove("hidden");
+      document
+        .querySelector(`[${this.prefix}-mobile-item-handler="${tabName}"]`)
+        .classList.remove("hidden");
+      document
+        .querySelector(`[${this.prefix}-item=${tabName}]`)
+        .querySelector("[setting-header]")
+        .classList.remove("hidden");
+      const settings = this.getSettingsFromTab(tab);
+      settings.forEach((setting) => {
+        setting.classList.remove("hidden");
+      });
+    });
+  }
+
+  getSettingsFromTab(tabEl) {
+    const tabName = tabEl.getAttribute(`${this.prefix}-item-handler`);
+    const settingContainer = document
+      .querySelector(`[${this.prefix}-item="${tabName}"]`)
+      .querySelector(`[${this.prefix}-settings]`);
+    const settings = settingContainer.querySelectorAll("[setting-container]");
+    return settings;
+  }
+}
+
 const setCheckbox = new Checkbox("[services-modal-form]");
 const setSelect = new Select("[services-modal-form]", "services");
 const setPopover = new Popover("main", "services");
@@ -521,3 +649,4 @@ const setTabs = new Tabs("[services-tabs]", "services");
 const setModal = new ServiceModal();
 const format = new FormatValue();
 const setMultiple = new Multiple("services");
+const setFilter = new FilterSettings("services");

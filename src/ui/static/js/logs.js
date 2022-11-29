@@ -1,4 +1,4 @@
-import { Checkbox } from "./utils.js";
+import { Checkbox } from "./utils/form.js";
 import Datepicker from "./datepicker/datepicker.js";
 
 class Dropdown {
@@ -427,7 +427,6 @@ class Filter {
 class LogsDate {
   constructor(el, options = {}) {
     this.datepicker = new Datepicker(el, options);
-    this.init();
     this.container = document.querySelector("[logs-settings]");
   }
 }

@@ -56,7 +56,7 @@ services:
         bunkerweb.CUSTOM_CONF_MODSEC_nextcloud=
         SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:1000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
 
-  # For the database, you can refer to the example of the autoconf including a database
+  # For the database, you can refer to the autoconf integration example including a database
 
 networks:
   bw-services:

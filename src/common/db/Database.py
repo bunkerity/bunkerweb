@@ -1224,14 +1224,18 @@ class Database:
                     "every": job.every,
                     "reload": job.reload,
                     "success": job.success,
-                    "last_run": job.last_run.strftime("%Y/%m/%d, %I:%M:%S %p"),
+                    "last_run": job.last_run.strftime("%Y/%m/%d, %I:%M:%S %p")
+                    if job.last_run is not None
+                    else "Never",
                     "cache": [
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
                             "last_update": cache.last_update.strftime(
                                 "%Y/%m/%d, %I:%M:%S %p"
-                            ),
+                            )
+                            if cache.last_update is not None
+                            else "Never",
                         }
                         for cache in session.query(Jobs_cache)
                         .with_entities(

@@ -63,7 +63,7 @@ services:
       - bunkerweb.LIMIT_REQ_URL_3=^/static/
       - bunkerweb.LIMIT_REQ_RATE_3=10r/s
 
-  # For the postgres database, you can refer to the example of the autoconf including a postgres database
+  # For the postgres database, you can refer to the autoconf integration example including a postgres database
 
 networks:
   bw-services:

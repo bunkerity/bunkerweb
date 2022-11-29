@@ -40,21 +40,7 @@ services:
         constraints:
           - "node.role==worker"
 
-  mydb:
-    image: mariadb:10.2
-    networks:
-      - bw-services
-    volumes:
-      - db_data:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=magentodb
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
-    deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
+  # For the database, you can refer to the swarm integration example including a database
 
 networks:
   bw-services:

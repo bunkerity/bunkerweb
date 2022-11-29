@@ -22,6 +22,7 @@ from flask import (
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from json import JSONDecodeError, dumps, load as json_load
+from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import chmod, getenv, getpid, listdir, mkdir, walk
@@ -152,7 +153,7 @@ try:
         WTF_CSRF_SSL_STRICT=False,
         USER=user,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
-        PLUGIN_ARGS=None,
+        PLUGIN_ARGS={},
         RELOADING=False,
         TO_FLASH=[],
         DARK_MODE=False,
@@ -274,44 +275,44 @@ def home():
     if r and r.status_code == 200:
         remote_version = r.text.strip()
 
-    headers = default_headers()
-    headers.update({"User-Agent": "bunkerweb-ui"})
+    # headers = default_headers()
+    # headers.update({"User-Agent": "bunkerweb-ui"})
 
-    try:
-        r = get(
-            "https://www.bunkerity.com/wp-json/wp/v2/posts",
-            headers=headers,
-        )
-    except BaseException:
-        r = None
+    # try:
+    #     r = get(
+    #         "https://www.bunkerity.com/wp-json/wp/v2/posts",
+    #         headers=headers,
+    #     )
+    # except BaseException:
+    #     r = None
 
-    formatted_posts = None
-    if r and r.status_code == 200:
-        posts = r.json()
-        formatted_posts = []
+    # formatted_posts = None
+    # if r and r.status_code == 200:
+    #     posts = r.json()
+    #     formatted_posts = []
 
-        for post in posts[:5]:
-            formatted_posts.append(
-                {
-                    "link": post["link"],
-                    "title": post["title"]["rendered"],
-                    "description": BeautifulSoup(
-                        post["content"]["rendered"][
-                            post["content"]["rendered"].index("<em>")
-                            + 4 : post["content"]["rendered"].index("</em>")
-                        ],
-                        features="html.parser",
-                    ).get_text()[:256]
-                    + ("..." if len(post["content"]["rendered"]) > 256 else ""),
-                    "date": dateutil_parse(post["date"]).strftime("%B %d, %Y"),
-                    "image_url": post["yoast_head_json"]["og_image"][0]["url"].replace(
-                        "wwwdev", "www"
-                    ),
-                    "reading_time": post["yoast_head_json"]["twitter_misc"][
-                        "Est. reading time"
-                    ],
-                }
-            )
+    #     for post in posts[:5]:
+    #         formatted_posts.append(
+    #             {
+    #                 "link": post["link"],
+    #                 "title": post["title"]["rendered"],
+    #                 "description": BeautifulSoup(
+    #                     post["content"]["rendered"][
+    #                         post["content"]["rendered"].index("<em>")
+    #                         + 4 : post["content"]["rendered"].index("</em>")
+    #                     ],
+    #                     features="html.parser",
+    #                 ).get_text()[:256]
+    #                 + ("..." if len(post["content"]["rendered"]) > 256 else ""),
+    #                 "date": dateutil_parse(post["date"]).strftime("%B %d, %Y"),
+    #                 "image_url": post["yoast_head_json"]["og_image"][0]["url"].replace(
+    #                     "wwwdev", "www"
+    #                 ),
+    #                 "reading_time": post["yoast_head_json"]["twitter_misc"][
+    #                     "Est. reading time"
+    #                 ],
+    #             }
+    #         )
 
     instances_number = len(app.config["INSTANCES"].get_instances())
     services_number = len(app.config["CONFIG"].get_services())
@@ -323,7 +324,7 @@ def home():
         version=bw_version,
         instances_number=instances_number,
         services_number=services_number,
-        posts=formatted_posts,
+        # posts=formatted_posts,
         plugins_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
@@ -958,11 +959,13 @@ def plugins():
             # Fix permissions for plugins folders
             for root, dirs, files in walk("/etc/bunkerweb/plugins", topdown=False):
                 for name in files + dirs:
-                    chown(join(root, name), "nginx", "nginx")
+                    chown(join(root, name), 101, 101)
                     chmod(join(root, name), 0o770)
 
         if operation:
             flash(operation)
+
+        app.config["CONFIG"].reload_plugins()
 
         # Reload instances
         app.config["RELOADING"] = True
@@ -979,7 +982,6 @@ def plugins():
             except OSError:
                 pass
 
-        app.config["CONFIG"].reload_plugins()
         return redirect(
             url_for("loading", next=url_for("plugins"), message="Reloading plugins")
         )
@@ -999,8 +1001,10 @@ def plugins():
             flash(f"Plugin {plugin_id} not found", "error")
 
         if page_path:
-            return render_template(
-                page_path,
+            with open(page_path, "r") as f:
+                template = Template(f.read())
+
+            return template.render(
                 csrf_token=generate_csrf,
                 url_for=url_for,
                 dark_mode=app.config["DARK_MODE"],
@@ -1011,8 +1015,23 @@ def plugins():
                 ),
             )
 
+    app.config["CONFIG"].reload_plugins()
+    plugins = app.config["CONFIG"].get_plugins()
+    plugins_internal = 0
+    plugins_external = 0
+
+    for plugin in plugins:
+        if plugin["external"] is True:
+            plugins_external += 1
+        else:
+            plugins_internal += 1
+
     return render_template(
         "plugins.html",
+        plugins=plugins,
+        plugins_internal=plugins_internal,
+        plugins_external=plugins_external,
+        plugins_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1047,7 +1066,7 @@ def custom_plugin(plugin):
             f"Invalid plugin id, <b>{plugin}</b> (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)",
             "error",
         )
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     if not exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py") and not exists(
         f"/usr/share/bunkerweb/core/{plugin}/ui/actions.py"
@@ -1056,7 +1075,7 @@ def custom_plugin(plugin):
             f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
             "error",
         )
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     # Add the custom plugin to sys.path
     sys_path.append(
@@ -1075,7 +1094,7 @@ def custom_plugin(plugin):
             f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
             "error",
         )
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     error = False
     res = None
@@ -1090,7 +1109,7 @@ def custom_plugin(plugin):
             "error",
         )
         error = True
-        return redirect(url_for("loading", next=url_for("plugins")))
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
     except:
         flash(
             f"An error occurred while executing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
@@ -1109,12 +1128,14 @@ def custom_plugin(plugin):
             or res is None
             or isinstance(res, dict) is False
         ):
-            return redirect(url_for("loading", next=url_for("plugins")))
+            return redirect(
+                url_for("loading", next=url_for("plugins", plugin_id=plugin))
+            )
 
     app.config["PLUGIN_ARGS"] = {"plugin": plugin, "args": res}
 
     flash(f"Your action <b>{plugin}</b> has been executed")
-    return redirect(url_for("loading", next=url_for("plugins")))
+    return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
 
 @app.route("/cache", methods=["GET"])
@@ -1383,6 +1404,7 @@ def jobs():
     return render_template(
         "jobs.html",
         jobs=db.get_jobs(),
+        jobs_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1454,13 +1476,15 @@ def login():
 @app.route("/darkmode", methods=["POST"])
 @login_required
 def darkmode():
-    if "darkmode" in request.form:
-        if request.form["darkmode"] == "true":
-            app.config["DARK_MODE"] = True
-        else:
-            app.config["DARK_MODE"] = False
+    if not request.is_json:
+        return jsonify({"status": "ko", "message": "invalid request"}), 400
 
-    return jsonify({"status": "ok"})
+    if "darkmode" in request.json:
+        app.config["DARK_MODE"] = request.json["darkmode"] == "true"
+    else:
+        return jsonify({"status": "ko", "message": "darkmode is required"}), 422
+
+    return jsonify({"status": "ok"}), 200
 
 
 @app.route("/check_reloading")
