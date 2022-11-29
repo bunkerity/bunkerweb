@@ -20,6 +20,7 @@ class ServiceModal {
     this.inputs = this.modal.querySelectorAll("input[default-value]");
     this.selects = this.modal.querySelectorAll("select[default-value]");
     this.lastGroup = "";
+    this.lastAction = "";
 
     this.init();
   }
@@ -38,68 +39,57 @@ class ServiceModal {
     });
 
     this.container.addEventListener("click", (e) => {
-      //rename button
+      //actions
       try {
-        if (
-          e.target.closest("button").getAttribute("services-action") ===
-          "rename"
-        ) {
-          this.setRenameForm(
-            "rename",
-            e.target.closest("button").getAttribute("services-name")
-          );
-          this.openModal();
-        }
-      } catch (err) {}
-      //delete button
-      try {
-        if (
-          e.target.closest("button").getAttribute("services-action") ===
-          "delete"
-        ) {
-          this.setRenameForm(
-            "rename",
-            e.target.closest("button").getAttribute("services-name")
-          );
-          this.openModal();
-        }
-      } catch (err) {}
-      //new button
-      try {
-        if (
-          e.target.closest("button").getAttribute("services-action") === "new"
-        ) {
-          this.setNewEditForm("new", "service");
-          this.setDefaultValue();
-          this.openModal();
-        }
-      } catch (err) {}
-      //edit button
-      try {
-        if (
-          e.target.closest("button").getAttribute("services-action") === "edit"
-        ) {
-          //no reupdate if same service
+        if (e.target.closest("button").hasAttribute("services-action")) {
+          //do nothing if same btn and service as before
+          const isLastSame = this.isLastServAndAct(e.target);
+          if (isLastSame) return;
+          //else set the good form
+          const action = e.target
+            .closest("button")
+            .getAttribute("services-action");
           const serviceName = e.target
             .closest("button")
             .getAttribute("services-name");
 
-          if (this.lastGroup === serviceName) return this.openModal();
-          //else
-          this.lastGroup = serviceName;
-          this.setNewEditForm("edit", serviceName);
-          //change this to hidden config on service card later
-          const servicesSettings = e.target
-            .closest("[services-service]")
-            .querySelector("[services-settings]")
-            .getAttribute("value");
-          this.setDefaultValue();
-          const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj);
+          let form;
+          if (action === "edit" || action === "new") form = this.formNewEdit;
+          if (action === "delete") form = this.formDelete;
+          if (action === "rename") form = this.formRename;
+          this.setForm(action, serviceName, form);
+          //reset settings value
+          if (action === "edit" || action === "new") this.setDefaultValue();
+          //get custom settings of service and apply it to modal settings
+          if (action === "edit") {
+            const servicesSettings = e.target
+              .closest("[services-service]")
+              .querySelector("[services-settings]")
+              .getAttribute("value");
+            const obj = JSON.parse(servicesSettings);
+            this.updateModalData(obj);
+          }
+          //open modal when all done
           this.openModal();
         }
       } catch (err) {}
     });
+  }
+
+  isLastServAndAct(target) {
+    const serviceName = target.closest("button").getAttribute("services-name");
+    const serviceAction = target
+      .closest("button")
+      .getAttribute("services-action");
+
+    if (this.lastGroup === serviceName && this.lastAction === serviceAction) {
+      this.openModal();
+      return true;
+    } else {
+      this.lastGroup = serviceName;
+      this.lastAction = serviceAction;
+      return false;
+    }
   }
 
   setDefaultValue() {
@@ -156,86 +146,93 @@ class ServiceModal {
     }
   }
 
-  setNewEditForm(action, serviceName) {
-    this.showNewEditForm();
+  setForm(action, serviceName, formEl) {
     this.modalTitle.textContent = `${action} ${serviceName}`;
-    this.formNewEdit.setAttribute("id", `form-${action}-${serviceName}`);
-    this.formNewEdit
+    formEl.setAttribute("id", `form-${action}-${serviceName}`);
+    formEl
       .querySelector(`input[name="operation"]`)
       .setAttribute("value", action);
-    this.formNewEdit
-      .querySelector(`input[name="OLD_SERVER_NAME"]`)
-      .setAttribute("value", serviceName);
-  }
 
-  setRenameForm(action, serviceName) {
-    this.showRenameForm();
-    this.modalTitle.textContent = `${action} ${serviceName}`;
-    this.formRename.setAttribute("id", `form-${action}-${serviceName}`);
-    this.formRename
-      .querySelector(`input[name="OLD_SERVER_NAME"]`)
-      .setAttribute("value", serviceName);
-    this.formRename
-      .querySelector(`input[name="SERVER_NAME"]`)
-      .setAttribute("value", serviceName);
-  }
+    if (action === "edit" || action === "new") {
+      this.showNewEditForm();
+      formEl
+        .querySelector(`input[name="OLD_SERVER_NAME"]`)
+        .setAttribute("value", serviceName);
+    }
 
-  setDeleteForm(action, serviceName) {
-    this.showDeleteForm();
-    this.modalTitle.textContent = `${action} ${serviceName}`;
-    this.formDelete.setAttribute("id", `form-${action}-${serviceName}`);
-    this.formDelete
-      .querySelector(`input[name="SERVER_NAME"]`)
-      .setAttribute("value", serviceName);
-    this.formDelete.querySelector(
-      `[services-modal-text]`
-    ).textContent = `Are you sure you want to delete ${serviceName} ?`;
+    if (action === "rename") {
+      this.showRenameForm();
+      formEl
+        .querySelector(`input[name="OLD_SERVER_NAME"]`)
+        .setAttribute("value", serviceName);
+      formEl
+        .querySelector(`input[name="SERVER_NAME"]`)
+        .setAttribute("value", serviceName);
+    }
+
+    if (action === "delete") {
+      this.showDeleteForm();
+      formEl.setAttribute("id", `form-${action}-${serviceName}`);
+      formEl
+        .querySelector(`input[name="SERVER_NAME"]`)
+        .setAttribute("value", serviceName);
+      formEl.querySelector(
+        `[services-modal-text]`
+      ).textContent = `Are you sure you want to delete ${serviceName} ?`;
+    }
   }
 
   showNewEditForm() {
-    this.modalCard.classList.add("h-[90vh]");
-    this.modalCard.classList.add("w-full");
-
-    this.modalTabs.classList.add("grid");
-    this.modalTabs.classList.remove("hidden");
-    this.modalTabsHeader.classList.add("flex");
-    this.modalTabsHeader.classList.remove("hidden");
-
+    this.cardViewport();
+    this.showTabs();
+    this.hideForms();
     this.formNewEdit.classList.remove("hidden");
-    this.formDelete.classList.add("hidden");
-    this.formRename.classList.add("hidden");
   }
 
   showDeleteForm() {
-    this.modalCard.classList.remove("h-[90vh]");
-    this.modalCard.classList.remove("w-full");
-
-    this.modalTabs.classList.remove("grid");
-    this.modalTabs.classList.add("hidden");
-
-    this.modalTabsHeader.classList.remove("flex");
-    this.modalTabsHeader.classList.add("hidden");
-
-    this.formNewEdit.classList.add("hidden");
-    this.formRename.classList.add("hidden");
+    this.cardNoViewport();
+    this.hideTabs();
+    this.hideForms();
 
     this.formDelete.classList.remove("hidden");
   }
 
   showRenameForm() {
+    this.cardNoViewport();
+    this.hideTabs();
+    this.hideForms();
+    this.formRename.classList.remove("hidden");
+  }
+
+  cardViewport() {
+    this.modalCard.classList.add("h-[90vh]");
+    this.modalCard.classList.add("w-full");
+  }
+
+  cardNoViewport() {
     this.modalCard.classList.remove("h-[90vh]");
     this.modalCard.classList.remove("w-full");
+  }
 
+  hideForms() {
+    this.formNewEdit.classList.add("hidden");
+    this.formDelete.classList.add("hidden");
+    this.formRename.classList.add("hidden");
+  }
+
+  hideTabs() {
     this.modalTabs.classList.remove("grid");
     this.modalTabs.classList.add("hidden");
 
     this.modalTabsHeader.classList.remove("flex");
     this.modalTabsHeader.classList.add("hidden");
+  }
 
-    this.formNewEdit.classList.add("hidden");
-    this.formDelete.classList.add("hidden");
-
-    this.formRename.classList.remove("hidden");
+  showTabs() {
+    this.modalTabs.classList.add("grid");
+    this.modalTabs.classList.remove("hidden");
+    this.modalTabsHeader.classList.add("flex");
+    this.modalTabsHeader.classList.remove("hidden");
   }
 
   updateModalData(settings) {
