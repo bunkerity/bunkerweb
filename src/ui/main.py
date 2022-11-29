@@ -275,44 +275,44 @@ def home():
     if r and r.status_code == 200:
         remote_version = r.text.strip()
 
-    headers = default_headers()
-    headers.update({"User-Agent": "bunkerweb-ui"})
+    # headers = default_headers()
+    # headers.update({"User-Agent": "bunkerweb-ui"})
 
-    try:
-        r = get(
-            "https://www.bunkerity.com/wp-json/wp/v2/posts",
-            headers=headers,
-        )
-    except BaseException:
-        r = None
+    # try:
+    #     r = get(
+    #         "https://www.bunkerity.com/wp-json/wp/v2/posts",
+    #         headers=headers,
+    #     )
+    # except BaseException:
+    #     r = None
 
-    formatted_posts = None
-    if r and r.status_code == 200:
-        posts = r.json()
-        formatted_posts = []
+    # formatted_posts = None
+    # if r and r.status_code == 200:
+    #     posts = r.json()
+    #     formatted_posts = []
 
-        for post in posts[:5]:
-            formatted_posts.append(
-                {
-                    "link": post["link"],
-                    "title": post["title"]["rendered"],
-                    "description": BeautifulSoup(
-                        post["content"]["rendered"][
-                            post["content"]["rendered"].index("<em>")
-                            + 4 : post["content"]["rendered"].index("</em>")
-                        ],
-                        features="html.parser",
-                    ).get_text()[:256]
-                    + ("..." if len(post["content"]["rendered"]) > 256 else ""),
-                    "date": dateutil_parse(post["date"]).strftime("%B %d, %Y"),
-                    "image_url": post["yoast_head_json"]["og_image"][0]["url"].replace(
-                        "wwwdev", "www"
-                    ),
-                    "reading_time": post["yoast_head_json"]["twitter_misc"][
-                        "Est. reading time"
-                    ],
-                }
-            )
+    #     for post in posts[:5]:
+    #         formatted_posts.append(
+    #             {
+    #                 "link": post["link"],
+    #                 "title": post["title"]["rendered"],
+    #                 "description": BeautifulSoup(
+    #                     post["content"]["rendered"][
+    #                         post["content"]["rendered"].index("<em>")
+    #                         + 4 : post["content"]["rendered"].index("</em>")
+    #                     ],
+    #                     features="html.parser",
+    #                 ).get_text()[:256]
+    #                 + ("..." if len(post["content"]["rendered"]) > 256 else ""),
+    #                 "date": dateutil_parse(post["date"]).strftime("%B %d, %Y"),
+    #                 "image_url": post["yoast_head_json"]["og_image"][0]["url"].replace(
+    #                     "wwwdev", "www"
+    #                 ),
+    #                 "reading_time": post["yoast_head_json"]["twitter_misc"][
+    #                     "Est. reading time"
+    #                 ],
+    #             }
+    #         )
 
     instances_number = len(app.config["INSTANCES"].get_instances())
     services_number = len(app.config["CONFIG"].get_services())
@@ -324,7 +324,7 @@ def home():
         version=bw_version,
         instances_number=instances_number,
         services_number=services_number,
-        posts=formatted_posts,
+        # posts=formatted_posts,
         plugins_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
