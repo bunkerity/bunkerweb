@@ -1015,8 +1015,23 @@ def plugins():
                 ),
             )
 
+    app.config["CONFIG"].reload_plugins()
+    plugins = app.config["CONFIG"].get_plugins()
+    plugins_internal = 0
+    plugins_external = 0
+
+    for plugin in plugins:
+        if plugin["external"] is True:
+            plugins_external += 1
+        else:
+            plugins_internal += 1
+
     return render_template(
         "plugins.html",
+        plugins=plugins,
+        plugins_internal=plugins_internal,
+        plugins_external=plugins_external,
+        plugins_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1389,6 +1404,7 @@ def jobs():
     return render_template(
         "jobs.html",
         jobs=db.get_jobs(),
+        jobs_errors=db.get_plugins_errors(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1460,13 +1476,15 @@ def login():
 @app.route("/darkmode", methods=["POST"])
 @login_required
 def darkmode():
-    if "darkmode" in request.form:
-        if request.form["darkmode"] == "true":
-            app.config["DARK_MODE"] = True
-        else:
-            app.config["DARK_MODE"] = False
+    if not request.is_json:
+        return jsonify({"status": "ko", "message": "invalid request"}), 400
 
-    return jsonify({"status": "ok"})
+    if "darkmode" in request.json:
+        app.config["DARK_MODE"] = request.json["darkmode"] == "true"
+    else:
+        return jsonify({"status": "ko", "message": "darkmode is required"}), 422
+
+    return jsonify({"status": "ok"}), 200
 
 
 @app.route("/check_reloading")

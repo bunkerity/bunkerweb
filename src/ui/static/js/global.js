@@ -69,10 +69,11 @@ class darkMode {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-CSRF-Token": this.csrf.value,
       },
-      body: JSON.stringify({ darkmode: isDark, csrf_token: this.csrf.value }),
+      body: JSON.stringify({ darkmode: isDark }),
     };
-    const send = await fetch(`${location.href}/darkmode}`, data);
+    const send = await fetch(`${location.href.split("/").slice(0, -1).join("/")}/darkmode`, data);
   }
 }
 

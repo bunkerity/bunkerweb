@@ -1,6 +1,5 @@
 {% extends "base.html" %} {% block content %}{% set current_endpoint =
-url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %} {% set
-plugins = config["CONFIG"].get_plugins() %}
+url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- info -->
 <div
   class="p-4 col-span-12 md:col-span-5 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
@@ -15,7 +14,7 @@ plugins = config["CONFIG"].get_plugins() %}
     <p
       class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
     >
-      {{plugins_total}}
+      {{plugins|length}}
     </p>
   </div>
   <div class="flex items-center my-4">
