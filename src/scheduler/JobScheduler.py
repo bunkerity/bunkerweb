@@ -105,6 +105,7 @@ class JobScheduler(ApiCaller):
         self.__logger.info(
             f"Executing job {name} from plugin {plugin} ...",
         )
+        success = True
         try:
             proc = run(
                 f"{path}/jobs/{file}",
@@ -115,6 +116,7 @@ class JobScheduler(ApiCaller):
                 group=101,
             )
         except BaseException:
+            success = False
             with self.__thread_lock:
                 self.__logger.error(
                     f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}",
@@ -122,23 +124,23 @@ class JobScheduler(ApiCaller):
                 self.__job_success = False
 
         if self.__job_success and proc.returncode >= 2:
+            success = False
             with self.__thread_lock:
                 self.__logger.error(
                     f"Error while executing job {name} from plugin {plugin}",
                 )
                 self.__job_success = False
 
-        with self.__thread_lock:
-            err = self.__db.update_job(plugin, name, self.__job_success)
+        err = self.__db.update_job(plugin, name, success)
 
-            if not err:
-                self.__logger.info(
-                    f"Successfully updated database for the job {name} from plugin {plugin}",
-                )
-            else:
-                self.__logger.warning(
-                    f"Failed to update database for the job {name} from plugin {plugin}: {err}",
-                )
+        if not err:
+            self.__logger.info(
+                f"Successfully updated database for the job {name} from plugin {plugin}",
+            )
+        else:
+            self.__logger.warning(
+                f"Failed to update database for the job {name} from plugin {plugin}: {err}",
+            )
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():
