@@ -7,10 +7,13 @@ class ServiceModal {
     this.modal = document.querySelector("[services-modal]");
     this.modalTitle = this.modal.querySelector("[services-modal-title]");
     this.modalTabs = this.modal.querySelector(["[services-tabs]"]);
+    this.modalTabsHeader = this.modal.querySelector(["[services-tabs-header]"]);
+
     this.modalCard = this.modal.querySelector("[services-modal-card]");
     //modal forms
     this.formNewEdit = this.modal.querySelector("[services-modal-form]");
     this.formDelete = this.modal.querySelector("[services-modal-form-delete]");
+    this.formRename = this.modal.querySelector("[services-modal-form-rename]");
     //container
     this.container = document.querySelector("main");
     //general inputs
@@ -35,14 +38,27 @@ class ServiceModal {
     });
 
     this.container.addEventListener("click", (e) => {
+      //rename button
+      try {
+        if (
+          e.target.closest("button").getAttribute("services-action") ===
+          "rename"
+        ) {
+          this.setRenameForm(
+            "rename",
+            e.target.closest("button").getAttribute("services-name")
+          );
+          this.openModal();
+        }
+      } catch (err) {}
       //delete button
       try {
         if (
           e.target.closest("button").getAttribute("services-action") ===
           "delete"
         ) {
-          this.setDeleteForm(
-            "delete",
+          this.setRenameForm(
+            "rename",
             e.target.closest("button").getAttribute("services-name")
           );
           this.openModal();
@@ -152,6 +168,18 @@ class ServiceModal {
       .setAttribute("value", serviceName);
   }
 
+  setRenameForm(action, serviceName) {
+    this.showRenameForm();
+    this.modalTitle.textContent = `${action} ${serviceName}`;
+    this.formRename.setAttribute("id", `form-${action}-${serviceName}`);
+    this.formRename
+      .querySelector(`input[name="OLD_SERVER_NAME"]`)
+      .setAttribute("value", serviceName);
+    this.formRename
+      .querySelector(`input[name="SERVER_NAME"]`)
+      .setAttribute("value", serviceName);
+  }
+
   setDeleteForm(action, serviceName) {
     this.showDeleteForm();
     this.modalTitle.textContent = `${action} ${serviceName}`;
@@ -170,9 +198,12 @@ class ServiceModal {
 
     this.modalTabs.classList.add("grid");
     this.modalTabs.classList.remove("hidden");
+    this.modalTabsHeader.classList.add("flex");
+    this.modalTabsHeader.classList.remove("hidden");
 
     this.formNewEdit.classList.remove("hidden");
     this.formDelete.classList.add("hidden");
+    this.formRename.classList.add("hidden");
   }
 
   showDeleteForm() {
@@ -182,8 +213,29 @@ class ServiceModal {
     this.modalTabs.classList.remove("grid");
     this.modalTabs.classList.add("hidden");
 
+    this.modalTabsHeader.classList.remove("flex");
+    this.modalTabsHeader.classList.add("hidden");
+
     this.formNewEdit.classList.add("hidden");
+    this.formRename.classList.add("hidden");
+
     this.formDelete.classList.remove("hidden");
+  }
+
+  showRenameForm() {
+    this.modalCard.classList.remove("h-[90vh]");
+    this.modalCard.classList.remove("w-full");
+
+    this.modalTabs.classList.remove("grid");
+    this.modalTabs.classList.add("hidden");
+
+    this.modalTabsHeader.classList.remove("flex");
+    this.modalTabsHeader.classList.add("hidden");
+
+    this.formNewEdit.classList.add("hidden");
+    this.formDelete.classList.add("hidden");
+
+    this.formRename.classList.remove("hidden");
   }
 
   updateModalData(settings) {

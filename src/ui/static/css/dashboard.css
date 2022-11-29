@@ -711,6 +711,18 @@ h6 {
   right: 0px;
 }
 
+.right-7 {
+  right: 1.75rem;
+}
+
+.top-1\.5 {
+  top: 0.375rem;
+}
+
+.top-1 {
+  top: 0.25rem;
+}
+
 .left-3 {
   left: 0.75rem;
 }
@@ -769,30 +781,6 @@ h6 {
 
 .-right-90 {
   right: -22.5rem;
-}
-
-.right-1 {
-  right: 0.25rem;
-}
-
-.top-0\.5 {
-  top: 0.125rem;
-}
-
-.right-8 {
-  right: 2rem;
-}
-
-.top-1 {
-  top: 0.25rem;
-}
-
-.right-7 {
-  right: 1.75rem;
-}
-
-.top-1\.5 {
-  top: 0.375rem;
 }
 
 .z-100 {
@@ -1146,6 +1134,10 @@ h6 {
   height: 3rem;
 }
 
+.h-5 {
+  height: 1.25rem;
+}
+
 .h-4 {
   height: 1rem;
 }
@@ -1160,10 +1152,6 @@ h6 {
 
 .h-10 {
   height: 2.5rem;
-}
-
-.h-5 {
-  height: 1.25rem;
 }
 
 .h-48 {
@@ -1286,6 +1274,10 @@ h6 {
   width: 10rem;
 }
 
+.w-5 {
+  width: 1.25rem;
+}
+
 .w-4 {
   width: 1rem;
 }
@@ -1308,10 +1300,6 @@ h6 {
 
 .w-12 {
   width: 3rem;
-}
-
-.w-5 {
-  width: 1.25rem;
 }
 
 .w-3 {
@@ -1346,6 +1334,14 @@ h6 {
   min-width: 900px;
 }
 
+.min-w-\[400px\] {
+  min-width: 400px;
+}
+
+.min-w-\[500px\] {
+  min-width: 500px;
+}
+
 .max-w-\[300px\] {
   max-width: 300px;
 }
@@ -1356,10 +1352,6 @@ h6 {
 
 .max-w-40 {
   max-width: 10rem;
-}
-
-.max-w-screen-sm {
-  max-width: 576px;
 }
 
 .max-w-\[400px\] {
@@ -1378,8 +1370,16 @@ h6 {
   max-width: 100%;
 }
 
+.max-w-screen-sm {
+  max-width: 576px;
+}
+
 .max-w-lg {
   max-width: 32rem;
+}
+
+.max-w-\[350px\] {
+  max-width: 350px;
 }
 
 .flex-auto {
@@ -1549,6 +1549,10 @@ h6 {
 
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {
@@ -2813,6 +2817,10 @@ h6 {
   background-color: rgb(8 85 119 / 0.05);
 }
 
+.hover\:bg-blue-500\/80:hover {
+  background-color: rgb(94 114 228 / 0.8);
+}
+
 .hover\:bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(248 249 250 / var(--tw-bg-opacity));
@@ -3005,12 +3013,12 @@ h6 {
   --tw-gradient-to: transparent;
 }
 
-.dark .dark\:fill-gray-700 {
-  fill: #495057;
-}
-
 .dark .dark\:fill-gray-300 {
   fill: #d2d6da;
+}
+
+.dark .dark\:fill-gray-700 {
+  fill: #495057;
 }
 
 .dark .dark\:fill-gray-500 {
@@ -3042,16 +3050,16 @@ h6 {
   color: rgb(245 57 57 / var(--tw-text-opacity));
 }
 
+.dark .dark\:opacity-80 {
+  opacity: 0.8;
+}
+
 .dark .dark\:opacity-50 {
   opacity: 0.5;
 }
 
 .dark .dark\:opacity-90 {
   opacity: 0.9;
-}
-
-.dark .dark\:opacity-80 {
-  opacity: 0.8;
 }
 
 .dark .dark\:opacity-60 {
