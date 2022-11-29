@@ -147,7 +147,6 @@ class Dropdown {
 
   //hide date filter on local
   hideFilterOnLocal(type) {
-    console.log(type);
     if (type === "local") {
       this.hideInp(`input#from-date`);
       this.hideInp(`input#to-date`);
@@ -193,7 +192,6 @@ class Filter {
           const btnValue = btn.getAttribute("value");
 
           this.lastType = btnValue;
-          console.log(this.lastType);
           //run filter
           this.filter();
         }
@@ -402,6 +400,62 @@ class Upload {
   }
 }
 
+class Modal {
+  constructor(prefix = "plugins") {
+    this.prefix = prefix;
+    this.container = document.querySelector(`[${this.prefix}-list]`);
+    this.modal = document.querySelector(`[${this.prefix}-modal]`);
+    this.modalNameInp = this.modal.querySelector("input#name");
+    this.modalTitle = this.modal.querySelector(`[${this.prefix}-modal-title]`);
+    this.modalTxt = this.modal.querySelector(`[${this.prefix}-modal-text]`);
+    this.init();
+  }
+
+  init() {
+    this.container.addEventListener("click", (e) => {
+      //DELETE HANDLER
+      try {
+        if (
+          e.target.closest("button").getAttribute(`${this.prefix}`) === "delete"
+        ) {
+          const btnEl = e.target.closest("button");
+          const name = btnEl.getAttribute("name");
+          this.setModal(name);
+          this.showModal();
+        }
+      } catch (err) {}
+    });
+
+    this.modal.addEventListener("click", (e) => {
+      //CLOSE MODAL HANDLER
+      try {
+        if (
+          e.target.closest("button").hasAttribute(`${this.prefix}-modal-close`)
+        ) {
+          this.hideModal();
+        }
+      } catch (err) {}
+    });
+  }
+
+  setModal(name) {
+    this.modalNameInp.value = name;
+    this.modalTitle.textContent = `DELETE ${name}`;
+    this.modalTxt.textContent = `Are you sure you want to delete ${name}`;
+  }
+
+  showModal() {
+    this.modal.classList.add("flex");
+    this.modal.classList.remove("hidden");
+  }
+
+  hideModal() {
+    this.modal.classList.add("hidden");
+    this.modal.classList.remove("flex");
+  }
+}
+
 const setDropdown = new Dropdown("plugins");
 const setFilter = new Filter("plugins");
 const setUpload = new Upload();
+const setModal = new Modal("plugins");

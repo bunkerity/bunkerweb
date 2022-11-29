@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block content %}{% set current_endpoint =
-url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
+url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %} {%
+include "plugins-modal.html" %}
+
 <!-- info -->
 <div
   class="p-4 col-span-12 md:col-span-5 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
@@ -117,7 +119,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- filter -->
 <div
   {{current_endpoint}}-filter
-  class="p-4 col-span-12 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="p-4 col-span-12 md:col-span-6 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white">FILTER</h5>
   <div class="grid grid-cols-12 gap-x-4 gap-y-2">
@@ -213,7 +215,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
   <h5 class="col-mb-2 font-bold dark:text-white">LIST</h5>
 
   <div {{current_endpoint}}-list class="grid grid-cols-12 gap-3">
-    {% for plugin in plugins %} {% if plugin['page'] %}
+    {% for plugin in plugins %} {% if plugin['external'] %}
     <div
       {{current_endpoint}}-external="{% if plugin['external'] %} external {%else%} internal {%endif%}"
       class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
@@ -225,7 +227,11 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         {{plugin['name']}}
       </p>
       <div class="flex items-center">
-        <a class="hover:-translate-y-px" href="/plugins?{{plugin['id']}}">
+        {% if plugin['page']%}
+        <a
+          class="hover:-translate-y-px"
+          href="{{request.url_root}}/plugins?{{plugin['id']}}"
+        >
           <svg
             class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
             xmlns="http://www.w3.org/2000/svg"
@@ -236,6 +242,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
             ></path>
           </svg>
         </a>
+        {%endif%}
         <button
           {{current_endpoint}}-action="delete"
           name="{{plugin['id']}}"
@@ -255,7 +262,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       </div>
     </div>
     {% else %}
-
     <div
       {{current_endpoint}}-external="{% if plugin['external'] %} external {%else%} internal {%endif%}"
       class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"

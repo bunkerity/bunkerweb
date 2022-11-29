@@ -149,7 +149,6 @@ class Dropdown {
 
   //hide date filter on local
   hideFilterOnLocal(type) {
-    console.log(type);
     if (type === "local") {
       this.hideInp(`input#from-date`);
       this.hideInp(`input#to-date`);
@@ -266,7 +265,6 @@ class FetchLogs {
   }
 
   async getLogsFromToDate() {
-    console.log(this.fromDate, this.toDate);
     let response;
     if (this.toDate) {
       response = await fetch(

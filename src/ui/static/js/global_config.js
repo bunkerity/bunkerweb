@@ -25,7 +25,6 @@ class FilterSettings {
         const settingCount = settings.length;
         let hiddenCount = 0;
         settings.forEach((setting) => {
-          console.log(setting);
           try {
             const title = setting
               .querySelector("h5")
@@ -96,7 +95,6 @@ class Multiple {
       `[${this.prefix}-settings-multiple]`
     );
     multiples.forEach((container) => {
-      console.log(container.querySelectorAll(`[setting-container]`));
       if (container.querySelectorAll(`[setting-container]`).length <= 0)
         container.parentElement
           .querySelector("[multiple-handler]")

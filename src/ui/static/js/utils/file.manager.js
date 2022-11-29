@@ -325,13 +325,27 @@ class FolderModal {
       //add folder
       try {
         if (e.target.closest("li").hasAttribute(`${this.prefix}-add-folder`)) {
-          this.setModal("new", this.getPathFromBread(), "folder", "");
+          this.setModal(
+            "new",
+            this.getPathFromBread(),
+            "folder",
+            "",
+            "",
+            this.getLevelFromBread()
+          );
         }
       } catch (err) {}
       //add file
       try {
         if (e.target.closest("li").hasAttribute(`${this.prefix}-add-file`)) {
-          this.setModal("new", this.getPathFromBread(), "file", "");
+          this.setModal(
+            "new",
+            this.getPathFromBread(),
+            "file",
+            "",
+            "",
+            this.getLevelFromBread()
+          );
         }
       } catch (err) {}
     });
@@ -444,6 +458,10 @@ class FolderModal {
     return `${path}/`;
   }
 
+  getLevelFromBread() {
+    const level = this.breadContainer.lastElementChild.getAttribute("level");
+    return level;
+  }
   //set all needed data from btn action and folder info
   setModal(action, path, type, content, name, level) {
     //title

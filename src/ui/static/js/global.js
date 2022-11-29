@@ -73,13 +73,16 @@ class darkMode {
       },
       body: JSON.stringify({ darkmode: isDark }),
     };
-    const send = await fetch(`${location.href.split("/").slice(0, -1).join("/")}/darkmode`, data);
+    const send = await fetch(
+      `${location.href.split("/").slice(0, -1).join("/")}/darkmode`,
+      data
+    );
   }
 }
 
 class FlashMsg {
   constructor() {
-    this.delayBeforeRemove = 5000;
+    this.delayBeforeRemove = 8000;
     this.init();
   }
 
@@ -93,6 +96,16 @@ class FlashMsg {
             flashEl.remove();
           } catch (err) {}
         }, this.delayBeforeRemove);
+      } catch (err) {}
+    });
+
+    window.addEventListener("click", (e) => {
+      try {
+        if (e.target.closest("button").hasAttribute("close-flash-message")) {
+          const closeBtn = e.target.closest("button");
+          const flashEl = closeBtn.closest("[flash-message]");
+          flashEl.remove();
+        }
       } catch (err) {}
     });
   }
