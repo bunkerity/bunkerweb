@@ -26,21 +26,7 @@ services:
         - bunkerweb.LIMIT_REQ_URL_2=/installation/index.php
         - bunkerweb.LIMIT_REQ_RATE_2=8r/s
 
-  mydb:
-    image: mariadb
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - bw-services
-    environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=joomla_db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
-    deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
+  # For the database, you can refer to the swarm integration example including a database
 
 networks:
   bw-services:

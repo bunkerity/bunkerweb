@@ -27,7 +27,7 @@ services:
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=https://mymoodle:8443
 
-  # For the database, you can refer to the example of the autoconf including a database
+  # For the database, you can refer to the autoconf integration example including a database
   # In this example, you will need to add the following lines to the mydb service:
   # - MARIADB_CHARACTER_SET=utf8mb4
   # - MARIADB_COLLATE=utf8mb4_unicode_ci

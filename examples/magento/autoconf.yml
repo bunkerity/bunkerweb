@@ -43,7 +43,7 @@ services:
     volumes:
       - ./elasticsearch-data:/bitnami/elasticsearch/data
 
-  # For the database, you can refer to the example of the autoconf including a database
+  # For the database, you can refer to the autoconf integration example including a database
 
 networks:
   bw-services:

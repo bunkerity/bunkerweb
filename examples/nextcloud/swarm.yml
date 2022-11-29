@@ -37,7 +37,7 @@ services:
         - bunkerweb.LIMIT_REQ_URL_3=/core/preview
         - bunkerweb.LIMIT_REQ_RATE_3=5r/s
 
-  # For the database, you can refer to the example of the autoconf in swarm mode including a database
+  # For the database, you can refer to the swarm integration example including a database
 
 networks:
   bw-services:
