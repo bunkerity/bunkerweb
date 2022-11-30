@@ -17,7 +17,7 @@ from os import (
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
 from shutil import chown, copy, rmtree
-from signal import SIGINT, SIGTERM, signal
+from signal import SIGINT, SIGTERM, signal, SIGHUP
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from time import sleep
@@ -60,10 +60,11 @@ def imerge(a, b):
         yield j
 
 
-def handle_reload(env):
+def handle_reload(signum, frame, env):
     global run, scheduler, reloading
     try:
         if scheduler is not None and run:
+            # Loading the environment variables from the .env file.
             if scheduler.reload(dotenv_values(env)):
                 logger.info("Reload successful")
             else:
@@ -76,7 +77,7 @@ def handle_reload(env):
         logger.error(
             f"Exception while reloading scheduler : {format_exc()}",
         )
-
+signal(SIGHUP, handle_reload)
 
 def stop(status):
     remove("/var/tmp/bunkerweb/scheduler.pid")
@@ -373,7 +374,9 @@ if __name__ == "__main__":
                     # Reloading the nginx server.
                     # Had to use this instead of the nginx reload command because it was not working
                     proc = subprocess_run(
-                        ["nginx", "-s", "reload"],
+                        # Reload nginx
+                        ["/etc/init.d/nginx", "reload"],
+                        #["nginx", "-s", "reload"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=deepcopy(env),
@@ -403,39 +406,39 @@ if __name__ == "__main__":
                 scheduler.run_pending()
                 sleep(1)
 
-                # check if the custom configs have changed since last time
-                tmp_custom_configs = db.get_custom_configs()
-                if custom_configs != tmp_custom_configs:
-                    logger.info("Custom configs changed, generating ...")
-                    logger.debug(f"{tmp_custom_configs}")
-                    logger.debug(f"{custom_configs}")
-                    custom_configs = tmp_custom_configs
-                    original_path = "/data/configs"
+                # # check if the custom configs have changed since last time
+                # tmp_custom_configs = db.get_custom_configs()
+                # if custom_configs != tmp_custom_configs:
+                #     logger.info("Custom configs changed, generating ...")
+                #     logger.debug(f"{tmp_custom_configs}")
+                #     logger.debug(f"{custom_configs}")
+                #     custom_configs = tmp_custom_configs
+                #     original_path = "/data/configs"
 
-                    # Remove old custom configs files
-                    logger.info("Removing old custom configs files ...")
-                    files = glob(f"{original_path}/*")
-                    for file in files:
-                        if islink(file):
-                            unlink(file)
-                        elif isfile(file):
-                            remove(file)
-                        elif isdir(file):
-                            rmtree(file, ignore_errors=False)
+                #     # Remove old custom configs files
+                #     logger.info("Removing old custom configs files ...")
+                #     files = glob(f"{original_path}/*")
+                #     for file in files:
+                #         if islink(file):
+                #             unlink(file)
+                #         elif isfile(file):
+                #             remove(file)
+                #         elif isdir(file):
+                #             rmtree(file, ignore_errors=False)
 
-                    logger.info("Generating new custom configs ...")
-                    generate_custom_configs(custom_configs, integration, api_caller)
+                #     logger.info("Generating new custom configs ...")
+                #     generate_custom_configs(custom_configs, integration, api_caller)
 
-                # check if the config have changed since last time
-                tmp_env = (
-                    dotenv_values(args.variables) if args.variables else db.get_config()
-                )
-                if env != tmp_env:
-                    logger.info("Config changed, generating ...")
-                    logger.debug(f"{tmp_env=}")
-                    logger.debug(f"{env=}")
-                    env = deepcopy(tmp_env)
-                    break
+                # # check if the config have changed since last time
+                # tmp_env = (
+                #     dotenv_values(args.variables) if args.variables else db.get_config()
+                # )
+                # if env != tmp_env:
+                #     logger.info("Config changed, generating ...")
+                #     logger.debug(f"{tmp_env=}")
+                #     logger.debug(f"{env=}")
+                #     env = deepcopy(tmp_env)
+                #     break
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

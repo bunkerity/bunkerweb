@@ -1,7 +1,7 @@
 FROM quay.io/centos/centos:stream8
 
 ENV OS=centos
-ENV NGINX_VERSION 1.20.2
+ENV NGINX_VERSION 1.22.1
 
 # Install fpm
 RUN dnf install -y epel-release && \

@@ -22,12 +22,11 @@ export PYTHONPATH=/usr/share/bunkerweb/deps/python/
 
 # Create user scheduler if not exists
 if ! id -u scheduler > /dev/null 2>&1; then
-    # Create group scheduler
-    groupadd scheduler
-    # Create user scheduler
-    useradd scheduler -g scheduler 
-    chown -R scheduler:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb
-    chown -R scheduler:scheduler /etc/nginx
+    addgroup --gid 120 scheduler
+    # Line below it's not working on Ubuntu 22.04
+    # Correct way to do it is to use useradd
+    adduser --uid 120 --gid 120 --disabled-password --gecos "" scheduler
+    #adduser -h /var/cache/nginx -s /bin/sh --group scheduler -D -H -u 101 scheduler
 fi
 
 #############################################################
@@ -114,40 +113,61 @@ function stop()
 function reload()
 {
     log "ENTRYPOINT" "ℹ️" "Reloading BunkerWeb service ..."
-
-    # Check if pid file exist and remove it if so
+    # Send signal to scheduler to reload
     PID_FILE_PATH="/var/tmp/bunkerweb/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
         var=$(cat "$PID_FILE_PATH")
-		log "ENTRYPOINT" "ℹ️" "Sending reload signal to scheduler ..."
+        log "ENTRYPOINT" "ℹ️" "Sending reload signal to scheduler ..."
         kill -SIGHUP $var
-		result=$?
-		if [ $result -ne 0 ] ; then
-			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
-			exit 1
-		fi
+        result=$?
+        if [ $result -ne 0 ] ; then
+            log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+            exit 1
+        fi
     else
         log "ENTRYPOINT" "❌" "Scheduler is not running"
-		exit 1
-    fi
-
-    # Check if nginx running and if so, reload it
-    SERVICE="nginx"
-    if pgrep -x "$SERVICE" > /dev/null
-    then
-        log "ENTRYPOINT" "ℹ️" "Sending reload signal to BunkerWeb ..."
-        nginx -s reload
-		result=$?
-		if [ $result -ne 0 ] ; then
-			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
-			exit 1
-		fi
-    else
-        log "ENTRYPOINT" "❌" "BunkerWeb is not running"
-		exit 1
+        exit 1
     fi
 }
+
+# function reload()
+# {
+#     log "ENTRYPOINT" "ℹ️" "Reloading BunkerWeb service ..."
+
+#     # Check if pid file exist and remove it if so
+#     PID_FILE_PATH="/var/tmp/bunkerweb/scheduler.pid"
+#     if [ -f "$PID_FILE_PATH" ];
+#     then
+#         var=$(cat "$PID_FILE_PATH")
+# 		log "ENTRYPOINT" "ℹ️" "Sending reload signal to scheduler ..."
+#         kill -SIGHUP $var
+# 		result=$?
+# 		if [ $result -ne 0 ] ; then
+# 			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+# 			exit 1
+# 		fi
+#     else
+#         log "ENTRYPOINT" "❌" "Scheduler is not running"
+# 		exit 1
+#     fi
+
+#     # Check if nginx running and if so, reload it
+#     SERVICE="nginx"
+#     if pgrep -x "$SERVICE" > /dev/null
+#     then
+#         log "ENTRYPOINT" "ℹ️" "Sending reload signal to BunkerWeb ..."
+#         nginx -s reload
+# 		result=$?
+# 		if [ $result -ne 0 ] ; then
+# 			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
+# 			exit 1
+# 		fi
+#     else
+#         log "ENTRYPOINT" "❌" "BunkerWeb is not running"
+# 		exit 1
+#     fi
+# }
 
 # List of differents args
 case $1 in
