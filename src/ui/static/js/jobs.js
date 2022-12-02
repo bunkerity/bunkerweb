@@ -148,7 +148,6 @@ class Dropdown {
 
   //hide date filter on local
   hideFilterOnLocal(type) {
-    console.log(type);
     if (type === "local") {
       this.hideInp(`input#from-date`);
       this.hideInp(`input#to-date`);
@@ -197,7 +196,6 @@ class Filter {
             const value = document
               .querySelector(`[${this.prefix}-setting-select-text="success"]`)
               .textContent.trim();
-            console.log(value);
 
             this.successValue = value;
             //run filter
@@ -219,7 +217,6 @@ class Filter {
             const value = document
               .querySelector(`[${this.prefix}-setting-select-text="reload"]`)
               .textContent.trim();
-            console.log(value);
 
             this.reloadValue = value;
             //run filter
@@ -330,9 +327,8 @@ class Download {
     if (response.status === 200) {
       const res = await response.json();
       //last update
-      return console.log(res);
+      return;
     } else {
-      console.log(`Error: ${response.status}`);
     }
     return null;
   }
