@@ -320,17 +320,9 @@ class Download {
   }
 
   async sendFileToDL(jobName, fileName) {
-    const response = await fetch(
-      `${location.href}/jobs/download?job_name=${jobName}&file_name=${fileName}`
+    window.open(
+      `${location.href}/download?job_name=${jobName}&file_name=${fileName}`
     );
-
-    if (response.status === 200) {
-      const res = await response.json();
-      //last update
-      return;
-    } else {
-    }
-    return null;
   }
 }
 

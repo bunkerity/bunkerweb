@@ -1260,7 +1260,7 @@ class Database:
                 )
             }
 
-    def get_job_cache_file(self, job_name: str, file_name: str) -> Optional[bytes]:
+    def get_job_cache_file(self, job_name: str, file_name: str) -> Optional[Any]:
         """Get job cache file."""
         with self.__db_session() as session:
             return (

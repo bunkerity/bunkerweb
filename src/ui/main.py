@@ -592,7 +592,7 @@ def configs():
         if request.form["operation"] in ("new", "edit"):
             if not app.config["CONFIGFILES"].check_name(variables["name"]):
                 flash(
-                    f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
+                    f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores, dots and hyphens (min 4 characters and max 64))",
                     "error",
                 )
                 return redirect(url_for("loading", next=url_for("configs")))
@@ -1439,10 +1439,8 @@ def jobs_download():
             404,
         )
 
-    with BytesIO(cache_file) as file:
-        file.seek(0)
-
-    return send_file(file, as_attachment=True, attachment_filename=file_name)
+    file = BytesIO(cache_file.data)
+    return send_file(file, as_attachment=True, download_name=file_name)
 
 
 @app.route("/login", methods=["GET", "POST"])
