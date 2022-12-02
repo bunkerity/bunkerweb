@@ -903,6 +903,11 @@ h6 {
   margin-right: auto;
 }
 
+.my-3 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .mx-6 {
   margin-left: 1.5rem;
   margin-right: 1.5rem;
@@ -931,11 +936,6 @@ h6 {
 .my-1 {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
-}
-
-.my-3 {
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
 }
 
 .mx-2\.5 {
@@ -1334,10 +1334,6 @@ h6 {
   min-width: 900px;
 }
 
-.min-w-\[400px\] {
-  min-width: 400px;
-}
-
 .min-w-\[500px\] {
   min-width: 500px;
 }
@@ -1370,16 +1366,16 @@ h6 {
   max-width: 100%;
 }
 
+.max-w-\[350px\] {
+  max-width: 350px;
+}
+
 .max-w-screen-sm {
   max-width: 576px;
 }
 
 .max-w-lg {
   max-width: 32rem;
-}
-
-.max-w-\[350px\] {
-  max-width: 350px;
 }
 
 .flex-auto {
@@ -2406,6 +2402,11 @@ h6 {
 .text-slate-900 {
   --tw-text-opacity: 1;
   color: rgb(5 17 57 / var(--tw-text-opacity));
+}
+
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(108 117 125 / var(--tw-text-opacity));
 }
 
 .antialiased {

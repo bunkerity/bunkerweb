@@ -13,7 +13,6 @@ class ServiceModal {
     //modal forms
     this.formNewEdit = this.modal.querySelector("[services-modal-form]");
     this.formDelete = this.modal.querySelector("[services-modal-form-delete]");
-    this.formRename = this.modal.querySelector("[services-modal-form-rename]");
     //container
     this.container = document.querySelector("main");
     //general inputs
@@ -56,7 +55,6 @@ class ServiceModal {
           let form;
           if (action === "edit" || action === "new") form = this.formNewEdit;
           if (action === "delete") form = this.formDelete;
-          if (action === "rename") form = this.formRename;
           this.setForm(action, serviceName, form);
           //reset settings value
           if (action === "edit" || action === "new") this.setDefaultValue();
@@ -160,16 +158,6 @@ class ServiceModal {
         .setAttribute("value", serviceName);
     }
 
-    if (action === "rename") {
-      this.showRenameForm();
-      formEl
-        .querySelector(`input[name="OLD_SERVER_NAME"]`)
-        .setAttribute("value", serviceName);
-      formEl
-        .querySelector(`input[name="SERVER_NAME"]`)
-        .setAttribute("value", serviceName);
-    }
-
     if (action === "delete") {
       this.showDeleteForm();
       formEl.setAttribute("id", `form-${action}-${serviceName}`);
@@ -197,13 +185,6 @@ class ServiceModal {
     this.formDelete.classList.remove("hidden");
   }
 
-  showRenameForm() {
-    this.cardNoViewport();
-    this.hideTabs();
-    this.hideForms();
-    this.formRename.classList.remove("hidden");
-  }
-
   cardViewport() {
     this.modalCard.classList.add("h-[90vh]");
     this.modalCard.classList.add("w-full");
@@ -217,7 +198,6 @@ class ServiceModal {
   hideForms() {
     this.formNewEdit.classList.add("hidden");
     this.formDelete.classList.add("hidden");
-    this.formRename.classList.add("hidden");
   }
 
   hideTabs() {
