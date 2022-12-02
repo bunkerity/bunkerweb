@@ -131,44 +131,6 @@ function reload()
     fi
 }
 
-# function reload()
-# {
-#     log "ENTRYPOINT" "ℹ️" "Reloading BunkerWeb service ..."
-
-#     # Check if pid file exist and remove it if so
-#     PID_FILE_PATH="/var/tmp/bunkerweb/scheduler.pid"
-#     if [ -f "$PID_FILE_PATH" ];
-#     then
-#         var=$(cat "$PID_FILE_PATH")
-# 		log "ENTRYPOINT" "ℹ️" "Sending reload signal to scheduler ..."
-#         kill -SIGHUP $var
-# 		result=$?
-# 		if [ $result -ne 0 ] ; then
-# 			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
-# 			exit 1
-# 		fi
-#     else
-#         log "ENTRYPOINT" "❌" "Scheduler is not running"
-# 		exit 1
-#     fi
-
-#     # Check if nginx running and if so, reload it
-#     SERVICE="nginx"
-#     if pgrep -x "$SERVICE" > /dev/null
-#     then
-#         log "ENTRYPOINT" "ℹ️" "Sending reload signal to BunkerWeb ..."
-#         nginx -s reload
-# 		result=$?
-# 		if [ $result -ne 0 ] ; then
-# 			log "ENTRYPOINT" "❌" "Your command exited with non-zero status $result"
-# 			exit 1
-# 		fi
-#     else
-#         log "ENTRYPOINT" "❌" "BunkerWeb is not running"
-# 		exit 1
-#     fi
-# }
-
 # List of differents args
 case $1 in
     "start") 
