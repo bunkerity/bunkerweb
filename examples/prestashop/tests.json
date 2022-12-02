@@ -2,7 +2,7 @@
   "name": "prestashop",
   "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
   "timeout": 180,
-  "delay": 120,
+  "delay": 180,
   "tests": [
     {
       "type": "string",

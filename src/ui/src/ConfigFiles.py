@@ -9,7 +9,7 @@ from utils import path_to_dict
 
 class ConfigFiles:
     def __init__(self, logger, db):
-        self.__name_regex = re_compile(r"^[a-zA-Z0-9_-]{1,64}$")
+        self.__name_regex = re_compile(r"^[a-zA-Z0-9_\-.]{1,64}$")
         self.__root_dirs = [
             child["name"]
             for child in path_to_dict("/etc/bunkerweb/configs")["children"]
@@ -93,7 +93,7 @@ class ConfigFiles:
         return f"{path} was successfully deleted", 0
 
     def create_folder(self, path: str, name: str) -> Tuple[str, int]:
-        folder_path = join(path, name)
+        folder_path = join(path, name) if not path.endswith(name) else path
         try:
             mkdir(folder_path)
         except OSError:

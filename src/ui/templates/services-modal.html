@@ -119,48 +119,6 @@
       <!-- end action button-->
     </form>
     <!-- end delete form-->
-    <!-- rename form-->
-    <form
-      services-modal-form-rename
-      class="w-full h-full flex flex-col justify-between"
-      id="form-rename-server_name"
-      method="POST"
-    >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input type="hidden" value="OLD_SERVER_NAME" name="OLD_SERVER_NAME" />
-      <input type="hidden" value="rename" name="operation" />
-      <div
-        class="my-2 flex flex-row justify-center align-middle items-center"
-        {{current_endpoint}}-modal-path
-      >
-        <input
-          type="text"
-          name="SERVER_NAME"
-          id="SERVER_NAME"
-          class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 sm:ml-1 max-w-[350px] disabled:opacity-75 focus:valid:border-green-500 focus:file:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-          placeholder="path"
-          required
-        />
-      </div>
-      <!-- action button -->
-      <div class="w-full justify-center flex mt-10">
-        <button
-          services-modal-close
-          type="button"
-          class="dark:brightness-90 mr-3 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
-        >
-          Close
-        </button>
-        <button
-          type="submit"
-          class="dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
-        >
-          Rename
-        </button>
-      </div>
-      <!-- end action button-->
-    </form>
-    <!-- end rename form-->
   </div>
 </div>
 <!-- end modal -->

@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -13,9 +13,10 @@ services:
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     # more info at https://docs.bunkerweb.io
     volumes:
-      - bw_data:/data
+      - bw-data:/data
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - DISABLE_DEFAULT_SERVER=yes
       - AUTO_LETS_ENCRYPT=yes
       - USE_CLIENT_CACHE=yes
@@ -23,11 +24,48 @@ services:
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mytomcat:8080/sample/
+    labels:
+      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    environment:
+      - DOCKER_HOST=tcp://docker-proxy:2375
+    volumes:
+      - bw-data:/data
+    networks:
+      - bw-universe
+      - net-docker
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   mytomcat:
     image: tomcat
     volumes:
       - ./app:/usr/local/tomcat/webapps/ # folder containing war files
+    networks:
+      - bw-services
 
 volumes:
-  bw_data:
+  bw-data:
+
+networks:
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+  net-docker:

@@ -1,7 +1,6 @@
 version: "3"
 
-x-bunkerweb-env:
-  &bunkerweb-env
+x-bunkerweb-env: &bunkerweb-env
   DATABASE_URI: "mariadb+pymysql://${NEXTCLOUD_USER:-user}:${NEXTCLOUD_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
 
 services:
@@ -42,21 +41,21 @@ services:
       LIMIT_REQ_RATE_3: "5r/s"
       CUSTOM_CONF_MODSEC_CRS_nextcloud: "\
         SecAction \
-         \"id:900130,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:tx.crs_exclusions_nextcloud=1\"
+        \"id:900130,\
+        phase:1,\
+        nolog,\
+        pass,\
+        t:none,\
+        setvar:tx.crs_exclusions_nextcloud=1\"
 
         # WebDAV
         SecAction \
-         \"id:900200,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:'tx.allowed_methods=GET POST HEAD COPY DELETE LOCK MKCOL MOVE PROPFIND PROPPATCH PUT UNLOCK OPTIONS'\""
+        \"id:900200,\
+        phase:1,\
+        nolog,\
+        pass,\
+        t:none,\
+        setvar:'tx.allowed_methods=GET POST HEAD COPY DELETE LOCK MKCOL MOVE PROPFIND PROPPATCH PUT UNLOCK OPTIONS'\""
       CUSTOM_CONF_MODSEC_nextcloud: "\
         SecRule REQUEST_FILENAME \"@rx ^/remote.php/dav/files/\" \"id:1000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog\""
     labels:
@@ -64,7 +63,7 @@ services:
     networks:
       - bw-universe
       - bw-services
-  
+
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.0
     depends_on:
