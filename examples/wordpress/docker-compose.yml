@@ -1,8 +1,12 @@
 version: "3"
 
+x-bunkerweb-env:
+  &bunkerweb-env
+  DATABASE_URI: "mariadb+pymysql://${WORDPRESS_USER:-user}:${WORDPRESS_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
+
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -12,26 +16,47 @@ services:
     # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     volumes:
-      - bw_data:/data
+      - bw-data:/data
     environment:
-      - SERVER_NAME=www.example.com # replace with your domain
-      - AUTO_LETS_ENCRYPT=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - MAX_CLIENT_SIZE=50m
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://mywp
-      - |
-        CUSTOM_CONF_MODSEC_CRS_wordpress=
-        SecAction \
-         "id:900130,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:tx.crs_exclusions_wordpress=1"
+      <<: *bunkerweb-env
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      MAX_CLIENT_SIZE: "50m"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://mywp"
+      CUSTOM_CONF_MODSEC_CRS_wordpress: 'SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_wordpress=1"'
+    labels:
+      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    environment:
+      <<: *bunkerweb-env
+      DOCKER_HOST: "tcp://docker-proxy:2375"
+    volumes:
+      - bw-data:/data
+    networks:
+      - bw-universe
+      - net-docker
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
 
   mywp:
     image: wordpress:5-apache
@@ -39,20 +64,34 @@ services:
       - ./wp-data:/var/www/html
     environment:
       - WORDPRESS_DB_HOST=mydb
-      - WORDPRESS_DB_NAME=wp
-      - WORDPRESS_DB_USER=user
-      - WORDPRESS_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - WORDPRESS_DB_NAME=${WORDPRESS_DATABASE:-wp}
+      - WORDPRESS_DB_USER=${WORDPRESS_USER:-user}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
       - WORDPRESS_TABLE_PREFIX=prefix_ # best practice : replace with a random prefix
+    networks:
+      - bw-services
 
   mydb:
     image: mariadb
     volumes:
-      - ./db-data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=wp
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    entrypoint: sh -c "echo 'DROP USER IF EXISTS \"${WORDPRESS_USER:-user}\"; CREATE USER \"${WORDPRESS_USER:-user}\"@\"%\"; CREATE DATABASE IF NOT EXISTS ${WORDPRESS_DATABASE:-wp}; CREATE DATABASE IF NOT EXISTS ${BUNKERWEB_DATABASE:-bunkerweb}; GRANT ALL PRIVILEGES ON ${WORDPRESS_DATABASE:-wp}.* TO \"${WORDPRESS_USER:-user}\"@\"%\" IDENTIFIED BY \"${WORDPRESS_PASSWORD:-secret}\"; GRANT ALL PRIVILEGES ON ${BUNKERWEB_DATABASE:-bunkerweb}.* TO \"${WORDPRESS_USER:-user}\"@\"%\" IDENTIFIED BY \"${WORDPRESS_PASSWORD:-secret}\"; FLUSH PRIVILEGES;' > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    networks:
+      - bw-universe
+      - bw-services
 
 volumes:
-  bw_data:
+  bw-data:
+  db-data:
+
+
+networks:
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+  net-docker:

@@ -1,7 +1,6 @@
 version: "3"
 
-x-bunkerweb-env:
-  &bunkerweb-env
+x-bunkerweb-env: &bunkerweb-env
   DATABASE_URI: "mariadb+pymysql://${PASSBOLT_USER:-user}:${PASSBOLT_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
 
 services:
@@ -86,7 +85,7 @@ services:
         "0",
         "mydb:3306",
         "--",
-        "/docker-entrypoint.sh"
+        "/docker-entrypoint.sh",
       ]
     networks:
       - bw-services
@@ -107,7 +106,6 @@ volumes:
   jwt_volume:
   db-data:
   bw-data:
-
 
 networks:
   bw-universe:

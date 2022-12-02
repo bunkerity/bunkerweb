@@ -1,7 +1,6 @@
 version: "3"
 
-x-bunkerweb-env:
-  &bunkerweb-env
+x-bunkerweb-env: &bunkerweb-env
   DATABASE_URI: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${BUNKERWEB_DATABASE:-bunkerweb}"
 
 services:
@@ -139,7 +138,6 @@ services:
 
 volumes:
   bw-data:
-
 
 networks:
   bw-universe:

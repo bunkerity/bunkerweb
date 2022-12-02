@@ -1,7 +1,6 @@
 version: "3"
 
-x-bunkerweb-env:
-  &bunkerweb-env
+x-bunkerweb-env: &bunkerweb-env
   DATABASE_URI: "mariadb+pymysql://${JOOMLA_USER:-user}:${JOOMLA_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
 
 services:
@@ -88,7 +87,6 @@ services:
 volumes:
   bw-data:
   db-data:
-
 
 networks:
   bw-universe:
