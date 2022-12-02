@@ -108,9 +108,7 @@ class JobScheduler(ApiCaller):
         success = True
         try:
             proc = run(
-                # ["python3", f"{path}/{file}"],
                 f"{path}jobs/{file}",
-                #f"{path}/jobs/{file}",
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 env=self.__env,
