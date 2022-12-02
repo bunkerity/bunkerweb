@@ -41,7 +41,28 @@
     <!-- end general tab-->
     {% endif %}
     <!-- tabs -->
-    {% for plugin in config["CONFIG"].get_plugins() %} {% if current_endpoint == "services" and plugin["settings"]
+    {%set plugin_name = {
+      "id": "set name",
+      "order": "999",
+      "name": "Name",
+      "description": "The name of the current service",
+      "version": "0.1",
+      "settings": {
+        "SERVER_NAME": {
+          "context": "multisite",
+          "default": "",
+          "help": "Name of the service",
+          "id": "server-name",
+          "label": "Server name",
+          "regex": "^.*$",
+          "type": "text"
+        },
+      }
+    } %}
+
+    {%set plugins = config["CONFIG"].get_plugins()  %}
+    {{plugins}}
+    {% for plugin in plugins %} {% if current_endpoint == "services" and plugin["settings"]
     and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" and plugin["settings"]
     and check_settings(plugin["settings"], "global") %}
     <button
