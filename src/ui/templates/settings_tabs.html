@@ -42,21 +42,30 @@
     {% endif %}
     <!-- tabs -->
     {%set plugin_name = {
-      "id": "set name",
+      "id": "name",
       "order": "999",
       "name": "Name",
-      "description": "The name of the current service",
+      "description": "The name of the service",
       "version": "0.1",
       "settings": {
-        "SERVER_NAME": {
+        "OLD_SERVER_NAME": {
           "context": "multisite",
           "default": "",
-          "help": "Name of the service",
-          "id": "server-name",
-          "label": "Server name",
+          "help": "The current name used",
+          "id": "gzip-types",
+          "label": "Actual name",
           "regex": "^.*$",
           "type": "text"
         },
+        "SERVER_NAME": {
+          "context": "multisite",
+          "default": "",
+          "help": "Change the current name by this one if wanted",
+          "id": "gzip-types",
+          "label": "New name",
+          "regex": "^.*$",
+          "type": "text"
+        }
       }
     } %}
 
