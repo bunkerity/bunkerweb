@@ -77,7 +77,10 @@ def handle_reload(signum, frame, env):
         logger.error(
             f"Exception while reloading scheduler : {format_exc()}",
         )
+
+
 signal(SIGHUP, handle_reload)
+
 
 def stop(status):
     remove("/var/tmp/bunkerweb/scheduler.pid")
@@ -376,7 +379,7 @@ if __name__ == "__main__":
                     proc = subprocess_run(
                         # Reload nginx
                         ["/etc/init.d/nginx", "reload"],
-                        #["nginx", "-s", "reload"],
+                        # ["nginx", "-s", "reload"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=deepcopy(env),
@@ -406,39 +409,38 @@ if __name__ == "__main__":
                 scheduler.run_pending()
                 sleep(1)
 
-                # # check if the custom configs have changed since last time
-                # tmp_custom_configs = db.get_custom_configs()
-                # if custom_configs != tmp_custom_configs:
-                #     logger.info("Custom configs changed, generating ...")
-                #     logger.debug(f"{tmp_custom_configs}")
-                #     logger.debug(f"{custom_configs}")
-                #     custom_configs = tmp_custom_configs
-                #     original_path = "/data/configs"
+                if not args.variables:
+                    # check if the custom configs have changed since last time
+                    tmp_custom_configs = db.get_custom_configs()
+                    if custom_configs != tmp_custom_configs:
+                        logger.info("Custom configs changed, generating ...")
+                        logger.debug(f"{tmp_custom_configs}")
+                        logger.debug(f"{custom_configs}")
+                        custom_configs = tmp_custom_configs
+                        original_path = "/data/configs"
 
-                #     # Remove old custom configs files
-                #     logger.info("Removing old custom configs files ...")
-                #     files = glob(f"{original_path}/*")
-                #     for file in files:
-                #         if islink(file):
-                #             unlink(file)
-                #         elif isfile(file):
-                #             remove(file)
-                #         elif isdir(file):
-                #             rmtree(file, ignore_errors=False)
+                        # Remove old custom configs files
+                        logger.info("Removing old custom configs files ...")
+                        files = glob(f"{original_path}/*")
+                        for file in files:
+                            if islink(file):
+                                unlink(file)
+                            elif isfile(file):
+                                remove(file)
+                            elif isdir(file):
+                                rmtree(file, ignore_errors=False)
 
-                #     logger.info("Generating new custom configs ...")
-                #     generate_custom_configs(custom_configs, integration, api_caller)
+                        logger.info("Generating new custom configs ...")
+                        generate_custom_configs(custom_configs, integration, api_caller)
 
-                # # check if the config have changed since last time
-                # tmp_env = (
-                #     dotenv_values(args.variables) if args.variables else db.get_config()
-                # )
-                # if env != tmp_env:
-                #     logger.info("Config changed, generating ...")
-                #     logger.debug(f"{tmp_env=}")
-                #     logger.debug(f"{env=}")
-                #     env = deepcopy(tmp_env)
-                #     break
+                    # check if the config have changed since last time
+                    tmp_env = db.get_config()
+                    if env != tmp_env:
+                        logger.info("Config changed, generating ...")
+                        logger.debug(f"{tmp_env=}")
+                        logger.debug(f"{env=}")
+                        env = deepcopy(tmp_env)
+                        break
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",
