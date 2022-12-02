@@ -65,6 +65,8 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /etc/bunkerweb/plugins && \
     mkdir -p /var/tmp/bunkerweb/ && \
     mkdir -p /var/www/ && \
+    mkdir -p /var/lib/bunkerweb && \
+    mkdir -p /etc/letsencrypt && \
     #mkdir /var/www/html && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     #It's a find command that will find all files in the bunkerweb directory, excluding the ui/deps directory, and then chmod them to 0740.

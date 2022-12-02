@@ -59,13 +59,15 @@ def imerge(a, b):
         yield i
         yield j
 
-
-def handle_reload(signum, frame, env):
-    global run, scheduler, reloading
+# Function to catch SIGHUP and reload the scheduler
+def handle_reload(signum, frame):
+    global reloading, run, scheduler
+    reloading = True
     try:
         if scheduler is not None and run:
-            # Loading the environment variables from the .env file.
-            if scheduler.reload(dotenv_values(env)):
+            # Get the env by reading the .env file
+            env = dotenv_values("/var/tmp/bunkerweb/variables.env")
+            if scheduler.reload(env):
                 logger.info("Reload successful")
             else:
                 logger.error("Reload failed")

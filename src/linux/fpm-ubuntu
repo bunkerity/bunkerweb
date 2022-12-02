@@ -10,4 +10,4 @@
 --after-remove /usr/share/bunkerweb/scripts/afterRemove.sh
 --deb-systemd-auto-start /etc/systemd/system/bunkerweb.service
 --deb-systemd-auto-start /etc/systemd/system/bunkerweb-ui.service
-/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb
+/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /var/lib/bunkerweb=/var/lib/bunkerweb /etc/letsencrypt=/etc/letsencrypt
