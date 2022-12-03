@@ -32,11 +32,21 @@ RUN apk add --no-cache bash && \
     addgroup -g 101 nginx && \
     adduser -h /var/cache/nginx -g nginx -s /bin/sh -G nginx -D -H -u 101 nginx && \
     cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
+    mkdir -p /var/tmp/bunkerweb && \
+    mkdir -p /var/www && \
+    mkdir -p /etc/bunkerweb && \
+    mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
     mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-    chown -R nginx:nginx /usr/share/bunkerweb /var/lib/bunkerweb && \
+    mkdir -p /data/cache/letsencrypt && ln -s /data/cache/letsencrypt /etc/letsencrypt && \
+    mkdir -p /data/www && ln -s /data/www /var/www/html && \
+    for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
+    for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
+    chown -R root:nginx /data && \
+    chmod -R 770 /data && \
+    chown -R root:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
     find /usr/share/bunkerweb -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -type d -exec chmod 0750 {} \; && \
-    chmod 770 /var/lib/bunkerweb && \
+    chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/* && \
     chown root:nginx /usr/bin/bwcli
 

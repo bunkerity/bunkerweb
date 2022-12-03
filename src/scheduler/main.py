@@ -6,6 +6,7 @@ from glob import glob
 from os import (
     _exit,
     chmod,
+    chown,
     getenv,
     getpid,
     listdir,
@@ -16,7 +17,7 @@ from os import (
     walk,
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
-from shutil import chown, copy, rmtree
+from shutil import copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
@@ -110,7 +111,7 @@ def generate_custom_configs(
     # Fix permissions for the custom configs folder
     for root, dirs, files in walk("/data/configs", topdown=False):
         for name in files + dirs:
-            chown(join(root, name), "scheduler", "scheduler")
+            chown(join(root, name), 101, 101)
 
             if isdir(join(root, name)):
                 chmod(join(root, name), 0o750)
@@ -339,7 +340,7 @@ if __name__ == "__main__":
                     # Fix permissions for the nginx folder
                     for root, dirs, files in walk("/etc/nginx", topdown=False):
                         for name in files + dirs:
-                            chown(join(root, name), "scheduler", "scheduler")
+                            chown(join(root, name), 101, 101)
                             chmod(join(root, name), 0o770)
 
                     copy("/etc/nginx/variables.env", "/var/tmp/bunkerweb/variables.env")
@@ -358,7 +359,7 @@ if __name__ == "__main__":
                 walk("/data/cache", topdown=False), walk("/data/configs", topdown=False)
             ):
                 for name in files + dirs:
-                    chown(join(root, name), "scheduler", "scheduler")
+                    chown(join(root, name), 101, 101)
 
                     if isdir(join(root, name)):
                         chmod(join(root, name), 0o750)

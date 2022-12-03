@@ -112,8 +112,8 @@ class JobScheduler(ApiCaller):
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 env=self.__env,
-                user=120,
-                group=120,
+                user=101,
+                group=101,
             )
         except BaseException:
             success = False
@@ -237,4 +237,3 @@ class JobScheduler(ApiCaller):
             )
             return False
         return ret
-
