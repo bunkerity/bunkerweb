@@ -74,6 +74,8 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /etc/bunkerweb/plugins && \
     mkdir -p /var/tmp/bunkerweb/ && \
     mkdir -p /var/www/ && \
+    mkdir -p /var/lib/bunkerweb && \
+    mkdir -p /etc/letsencrypt && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \

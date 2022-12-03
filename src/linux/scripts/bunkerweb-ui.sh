@@ -7,8 +7,9 @@ start_ui() {
   set -a
   . /etc/bunkerweb/ui.env
   set +a
-  export FLASK_APP=/usr/share/bunkerweb/ui/main.py
-  python3 -m flask run --host=127.0.0.1 --port=7000
+  #export FLASK_APP=/usr/share/bunkerweb/ui/main.py
+  #python3 -m flask run --host=127.0.0.1 --port=7000
+  python3 -m gunicorn --bind=0.0.0.0:7000 --workers=1 --threads=2 --user ui --group ui main:app
 }
 
 # function to stop the UI

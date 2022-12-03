@@ -1,8 +1,24 @@
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
-{% set global_config =
-  config["CONFIG"].get_config() %}
-  {% set plugins = config["CONFIG"].get_plugins() %} 
+{% set global_config = config["CONFIG"].get_config() %}
+{% set plugins = [{
+  "id": "general",
+  "order": 999,
+  "name": "General",
+  "description": "The general settings for the server",
+  "version": "0.1",
+  "settings": {
+    "SERVER_NAME": {
+      "context": "multisite",
+      "default": "www.example.com",
+      "help": "List of the virtual hosts served by bunkerweb.",
+      "id": "server-name",
+      "label": "Server name",
+      "regex": ".*",
+      "type": "text"
+    }
+  }
+}] + config["CONFIG"].get_plugins() %}
 <!-- plugin item -->
 {% for plugin in plugins %}
 

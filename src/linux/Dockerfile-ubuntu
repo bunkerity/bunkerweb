@@ -16,7 +16,7 @@ COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
 
 RUN mkdir -p /usr/share/bunkerweb/deps && \
-    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 /tmp/req/requirements.txt.3 > /tmp/bunkerweb/deps/requirements.txt && \
+    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 /tmp/req/requirements.txt.3 > /usr/share/bunkerweb/deps/requirements.txt && \
     rm -rf /tmp/req
 
 # Nginx
@@ -35,7 +35,7 @@ RUN apt update && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -63,6 +63,8 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /etc/bunkerweb/plugins && \
     mkdir -p /var/tmp/bunkerweb/ && \
     mkdir -p /var/www/ && \
+    mkdir -p /var/lib/bunkerweb && \
+    mkdir -p /etc/letsencrypt && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
@@ -71,9 +73,10 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
-    mkdir -p /usr/share/bunkerweb/ui/deps/python && \
-    pip install --no-cache-dir --require-hashes --no-deps --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
-    pip install --no-cache-dir gunicorn && \
+    #mkdir -p /usr/share/bunkerweb/ui/deps/python && \
+    #pip install --no-cache-dir --require-hashes --no-deps --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+    #pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+    #pip install --no-cache-dir gunicorn && \
     chmod 755 /usr/share/bunkerweb
 
 # Copy Linux files

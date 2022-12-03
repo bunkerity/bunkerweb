@@ -26,7 +26,7 @@ if ! id -u scheduler > /dev/null 2>&1; then
     # Line below it's not working on Ubuntu 22.04
     # Correct way to do it is to use useradd
     adduser --uid 120 --gid 120 --disabled-password --gecos "" scheduler
-    #adduser -h /var/cache/nginx -s /bin/sh --group scheduler -D -H -u 101 scheduler
+    chown -R root:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb
 fi
 
 #############################################################
@@ -118,6 +118,7 @@ function reload()
     if [ -f "$PID_FILE_PATH" ];
     then
         var=$(cat "$PID_FILE_PATH")
+        # Send signal to scheduler to reload
         log "ENTRYPOINT" "ℹ️" "Sending reload signal to scheduler ..."
         kill -SIGHUP $var
         result=$?

@@ -1,6 +1,24 @@
 
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
+{% set plugins = [{
+  "id": "general",
+  "order": 999,
+  "name": "General",
+  "description": "The general settings for the server",
+  "version": "0.1",
+  "settings": {
+    "SERVER_NAME": {
+      "context": "multisite",
+      "default": "www.example.com",
+      "help": "List of the virtual hosts served by bunkerweb.",
+      "id": "server-name",
+      "label": "Server name",
+      "regex": ".*",
+      "type": "text"
+    }
+  }
+}] + config["CONFIG"].get_plugins() %}
 <div {{current_endpoint}}-tabs class="col-span-12 grid grid-cols-12 {% if current_endpoint == 'services' %}mb-4{% endif %}">
   <!-- desktop tabs -->
   <div {{current_endpoint}}-tabs-desktop class="hidden md:block col-span-12">
@@ -41,36 +59,6 @@
     <!-- end general tab-->
     {% endif %}
     <!-- tabs -->
-    {%set plugin_name = {
-      "id": "name",
-      "order": "999",
-      "name": "Name",
-      "description": "The name of the service",
-      "version": "0.1",
-      "settings": {
-        "OLD_SERVER_NAME": {
-          "context": "multisite",
-          "default": "",
-          "help": "The current name used",
-          "id": "gzip-types",
-          "label": "Actual name",
-          "regex": "^.*$",
-          "type": "text"
-        },
-        "SERVER_NAME": {
-          "context": "multisite",
-          "default": "",
-          "help": "Change the current name by this one if wanted",
-          "id": "gzip-types",
-          "label": "New name",
-          "regex": "^.*$",
-          "type": "text"
-        }
-      }
-    } %}
-
-    {%set plugins = config["CONFIG"].get_plugins()  %}
-    {{plugins}}
     {% for plugin in plugins %} {% if current_endpoint == "services" and plugin["settings"]
     and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" and plugin["settings"]
     and check_settings(plugin["settings"], "global") %}
@@ -166,7 +154,7 @@
   <!-- end general button-->
   {% endif %}
 
-  {% for plugin in config["CONFIG"].get_plugins() %}  {% if current_endpoint == "services" and plugin["settings"]
+  {% for plugin in plugins %}  {% if current_endpoint == "services" and plugin["settings"]
   and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" and plugin["settings"]
   and check_settings(plugin["settings"], "global") %}
     <button
