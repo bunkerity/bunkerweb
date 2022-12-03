@@ -60,7 +60,6 @@ class Tabs {
     this.desktopBtns = document.querySelectorAll(
       `[${this.prefix}-tabs-desktop] button`
     );
-    console.log(this.desktopBtns);
     //MOBILE
     this.mobileBtn = document.querySelector(`[${this.prefix}-mobile-select]`);
     this.mobileBtnTxt = this.mobileBtn.querySelector(`span`);

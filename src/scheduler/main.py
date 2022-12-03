@@ -59,6 +59,7 @@ def imerge(a, b):
         yield i
         yield j
 
+
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
     global reloading, run, scheduler
@@ -381,7 +382,6 @@ if __name__ == "__main__":
                     proc = subprocess_run(
                         # Reload nginx
                         ["/etc/init.d/nginx", "reload"],
-                        # ["nginx", "-s", "reload"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=deepcopy(env),

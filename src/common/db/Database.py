@@ -68,7 +68,10 @@ class Database:
             )
 
         if sqlalchemy_string.startswith("sqlite"):
-            makedirs(dirname(sqlalchemy_string.split("///")[1]), exist_ok=True)
+            try:
+                makedirs(dirname(sqlalchemy_string.split("///")[1]), exist_ok=True)
+            except FileExistsError:
+                pass
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
@@ -763,6 +766,12 @@ class Database:
                         del tmp_config[key]
                     elif any(key.startswith(f"{s}_") for s in service_names):
                         del tmp_config[key]
+                    else:
+                        tmp_config[key] = (
+                            {"value": value["value"], "method": "default"}
+                            if methods is True
+                            else value
+                        )
 
                 services.append(tmp_config)
 
