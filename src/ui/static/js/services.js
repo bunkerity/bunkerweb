@@ -238,8 +238,8 @@ class ServiceModal {
           inpt.tagName === "INPUT" &&
           inpt.getAttribute("type") === "checkbox"
         ) {
-          inpt.checked = defaultVal === "yes" ? true : false;
-          inpt.setAttribute("value", defaultVal);
+          inpt.checked = value === "yes" ? true : false;
+          inpt.setAttribute("value", value);
         }
         //for select
         if (inpt.tagName === "SELECT") {
