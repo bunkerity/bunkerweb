@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.2
+    image: bunkerity/bunkerweb:1.5.0
     container_name: mybunker
     restart: always
     ports:
@@ -23,11 +23,24 @@ services:
     labels:
       - "bunkerweb.INSTANCE"
     networks:
-      - bw-autoconf
+      - bw-universe
       - bw-services
 
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    environment:
+      - AUTOCONF_MODE=yes
+      - DOCKER_HOST=tcp://docker-proxy:2375
+    volumes:
+      - ./bw-data:/data
+    networks:
+      - bw-universe
+      - net-docker
+
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.2
+    image: bunkerity/bunkerweb-autoconf:1.5.0
     container_name: myautoconf
     restart: always
     # ⚠️ read this if you use local folders for volumes ⚠️
@@ -41,13 +54,26 @@ services:
       - ./bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - bw-autoconf
+      - bw-universe
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
+
+volumes:
+  bw-data:
 
 networks:
-  bw-autoconf:
+  bw-universe:
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
+  net-docker:
