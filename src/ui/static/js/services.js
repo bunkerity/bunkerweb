@@ -134,6 +134,20 @@ class ServiceModal {
         )
         .click();
     });
+    //server name always enabled for default
+    this.setNameSetting("ui", "");
+  }
+
+  setNameSetting(method, value) {
+    const nameInp = document.querySelector('input[name="SERVER_NAME"]');
+
+    if (method === "ui" || method === "default") {
+      nameInp.removeAttribute("disabled");
+    } else {
+      nameInp.setAttribute("disabled", "");
+    }
+
+    nameInp.value = value;
   }
 
   setDisabled(inp, method) {
@@ -251,6 +265,11 @@ class ServiceModal {
         }
       } catch (err) {}
     }
+    //name setting value
+    this.setNameSetting(
+      settings["SERVER_NAME"]["method"],
+      settings["SERVER_NAME"]["value"]
+    );
   }
 
   //UTILS

@@ -81,6 +81,14 @@ class Tabs {
   }
 
   initTabs() {
+    //show first element
+    window.addEventListener("load", () => {
+      try {
+        document.querySelector("button[services-item-handler]").click();
+        document.querySelector("button[services-mobile-item-handler]").click();
+      } catch (err) {}
+    });
+
     this.tabsContainer.addEventListener("click", (e) => {
       //MOBILE TABS LOGIC
       try {
@@ -112,7 +120,7 @@ class Tabs {
           const tabAtt = tab.getAttribute(`${this.prefix}-item-handler`);
           //style
           this.resetDeskStyle();
-          tab.classList.add("brightness-75");
+          tab.classList.add("brightness-95", "z-10");
           //show content
           this.showRightSetting(tabAtt);
         }
@@ -122,7 +130,7 @@ class Tabs {
 
   resetDeskStyle() {
     this.desktopBtns.forEach((tab) => {
-      tab.classList.remove("brightness-75");
+      tab.classList.remove("brightness-95", "z-10");
     });
   }
 
