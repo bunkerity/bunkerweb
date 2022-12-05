@@ -50,7 +50,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -87,7 +87,7 @@ services:
       - bw-services
 
   mydb:
-    image: mariadb:10.2
+    image: mariadb:10.10
     volumes:
       - db-data:/var/lib/mysql
     environment:

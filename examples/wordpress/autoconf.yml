@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mywp:
-    image: wordpress:5-apache
+    image: wordpress:6.1.1-apache
     volumes:
       - ./wp-data:/var/www/html
     networks:
@@ -31,19 +31,7 @@ services:
           t:none,\
           setvar:tx.crs_exclusions_wordpress=1"
 
-  mydb:
-    image: mariadb
-    volumes:
-      - ./db-data:/var/lib/mysql
-    networks:
-      bw-services:
-        aliases:
-          - mydb
-    environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=wp
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+  # For the database, you can refer to the autoconf integration example including a database
 
 networks:
   bw-services:

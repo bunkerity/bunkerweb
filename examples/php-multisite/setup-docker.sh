@@ -7,6 +7,6 @@ fi
 
 chown -R root:101 bw-data
 chmod -R 770 bw-data
-chown -R 33:101 ./bw-data/www
+chown -R 82:101 ./bw-data/www
 find ./bw-data/www -type f -exec chmod 0640 {} \;
 find ./bw-data/www -type d -exec chmod 0750 {} \;

@@ -14,7 +14,6 @@ services:
     # more info at https://docs.bunkerweb.io
     volumes:
       - bw-data:/data
-      - certs:/certs
     environment:
       - MULTISITE=yes
       - SERVER_NAME=app1.example.com app2.example.com app3.example.com # replace with your domains
@@ -49,12 +48,13 @@ services:
       - DOCKER_HOST=tcp://docker-proxy:2375
     volumes:
       - bw-data:/data
+      - certs:/certs
     networks:
       - bw-universe
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -63,7 +63,7 @@ services:
       - net-docker
 
   mycertbot:
-    image: certbot/dns-digitalocean
+    image: certbot/dns-digitalocean:v2.0.0
     environment:
       - DOMAINS=*.example.com,example.com
       - EMAIL=contact@example.com

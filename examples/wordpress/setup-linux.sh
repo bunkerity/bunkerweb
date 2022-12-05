@@ -13,8 +13,8 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-curl https://wordpress.org/latest.zip -Lo /tmp/wordpress.zip
-unzip -qq /tmp/wordpress.zip -d /tmp
+curl https://wordpress.org/wordpress-6.1.1.tar.gz -Lo /tmp/wordpress.tar.gz
+tar -xzf /tmp/wordpress.tar.gz -C /tmp
 cp -r /tmp/wordpress/* /var/www/html
 chown -R $user:nginx /var/www/html
 find /var/www/html -type f -exec chmod 0640 {} \;

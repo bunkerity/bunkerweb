@@ -49,7 +49,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -58,7 +58,7 @@ services:
       - net-docker
 
   mywp:
-    image: wordpress:5-apache
+    image: wordpress:6.1.1-apache
     volumes:
       - ./wp-data:/var/www/html
     environment:
@@ -71,7 +71,7 @@ services:
       - bw-services
 
   mydb:
-    image: mariadb
+    image: mariadb:10.10
     volumes:
       - db-data:/var/lib/mysql
     environment:

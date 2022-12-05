@@ -47,7 +47,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -56,7 +56,7 @@ services:
       - net-docker
 
   mongo:
-    image: mongo:latest
+    image: mongo:5.0.14
     volumes:
       - ./db:/data/db
     environment:
@@ -67,7 +67,7 @@ services:
       - bw-services
 
   mongo-ui:
-    image: mongo-express:latest
+    image: mongo-express:0.54.0
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root # replace with a less obvious username

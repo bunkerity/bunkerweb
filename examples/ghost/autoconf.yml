@@ -2,7 +2,7 @@ version: "3"
 
 services:
   myghost:
-    image: ghost:alpine
+    image: ghost:5.25-alpine
     volumes:
       - ./ghost_data:/var/lib/ghost/content
     networks:

@@ -51,7 +51,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -63,9 +63,9 @@ services:
   # example : docker-compose exec mypassbolt su -m -c "/usr/share/php/passbolt/bin/cake passbolt register_user -u <your@email.com> -f <yourname> -l <surname> -r admin" -s /bin/sh www-data
   # more info at https://github.com/passbolt/passbolt_docker
   mypassbolt:
-    image: passbolt/passbolt:3.8.1-1-ce
+    image: passbolt/passbolt:3.8.3-1-ce
     #Alternatively you can use rootless:
-    # image: passbolt/passbolt:3.8.1-1-ce-non-root
+    # image: passbolt/passbolt:3.8.3-1-ce-non-root
     depends_on:
       - mydb
     environment:

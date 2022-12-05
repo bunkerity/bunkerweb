@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   mydrupal:
-    image: drupal:9-apache
+    image: drupal:9.4-apache
     networks:
       - bw-services
     volumes:

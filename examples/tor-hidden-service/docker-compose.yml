@@ -2,7 +2,7 @@ version: "3"
 
 services:
   myonion:
-    image: goldy/tor-hidden-service
+    image: goldy/tor-hidden-service:0.4.6.9
     volumes:
       - ./hidden-services:/var/lib/tor/hidden_service # .onion address and private key will be located in ./hidden_service
     environment:
@@ -54,7 +54,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:

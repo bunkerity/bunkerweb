@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   radarr:
-    image: lscr.io/linuxserver/radarr:latest
+    image: lscr.io/linuxserver/radarr:4.2.4.6635-ls157
     networks:
       bw-services:
         aliases:

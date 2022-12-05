@@ -53,7 +53,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -62,7 +62,7 @@ services:
       - net-docker
 
   mysyslog:
-    image: balabit/syslog-ng
+    image: balabit/syslog-ng:3.38.1
     command: --no-caps
     volumes:
       - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf

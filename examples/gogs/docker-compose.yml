@@ -13,7 +13,7 @@ services:
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     # more info at https://docs.bunkerweb.io
     volumes:
-      - ./bw-data:/data # contains some Core Rule Set configuration to fix FP
+      - bw-data:/data
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -48,7 +48,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -57,11 +57,14 @@ services:
       - net-docker
 
   mygogs:
-    image: gogs/gogs
+    image: gogs/gogs:0.12
     volumes:
       - ./gogs-data:/data
     networks:
       - bw-services
+
+volumes:
+  bw-data:
 
 networks:
   bw-universe:

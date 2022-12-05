@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:5.0.14
     networks:
       bw-services:
         aliases:
@@ -15,7 +15,7 @@ services:
       - MONGO_INITDB_DATABASE=mongo # replace with the database name of your choice
 
   mongo-ui:
-    image: mongo-express:latest
+    image: mongo-express:0.54.0
     networks:
       bw-services:
         aliases:

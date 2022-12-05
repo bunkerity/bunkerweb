@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   radarr:
-    image: linuxserver/radarr:latest
+    image: lscr.io/linuxserver/radarr:4.2.4.6635-ls157
     networks:
       - bw-services
     environment:

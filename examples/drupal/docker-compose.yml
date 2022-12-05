@@ -29,9 +29,10 @@ services:
       USE_REVERSE_PROXY: "yes"
       REVERSE_PROXY_URL: "/"
       REVERSE_PROXY_HOST: "http://mydrupal"
+      CUSTOM_CONF_MODSEC_CRS_drupal: 'SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"'
+      # Onces the installation is done, you can remove these lines
       LIMIT_REQ_URL_1: "/core/install.php"
       LIMIT_REQ_RATE_1: "5r/s"
-      CUSTOM_CONF_MODSEC_CRS_drupal: 'SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"'
     labels:
       - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     networks:
@@ -52,7 +53,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -61,7 +62,7 @@ services:
       - net-docker
 
   mydrupal:
-    image: drupal:9-apache
+    image: drupal:9.4-apache
     volumes:
       - ./drupal-modules:/var/www/html/modules
       - ./drupal-profiles:/var/www/html/profiles
@@ -71,7 +72,7 @@ services:
       - bw-services
 
   mydb:
-    image: mariadb
+    image: mariadb:10.10
     volumes:
       - db-data:/var/lib/mysql
     environment:

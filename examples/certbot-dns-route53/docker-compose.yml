@@ -54,7 +54,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -63,7 +63,7 @@ services:
       - net-docker
 
   mycertbot:
-    image: certbot/dns-google
+    image: certbot/dns-google:v2.0.0
     environment:
       - DOMAINS=*.example.com,example.com
       - EMAIL=contact@example.com

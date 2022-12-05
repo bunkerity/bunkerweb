@@ -45,7 +45,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -54,7 +54,7 @@ services:
       - net-docker
 
   myproxy:
-    image: haproxy
+    image: haproxy:2.7.0
     ports:
       - 80:8080
     volumes:

@@ -47,7 +47,7 @@ services:
       - net-docker
 
   docker-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -56,7 +56,7 @@ services:
       - net-docker
 
   myredmine:
-    image: redmine
+    image: redmine:5.0.4-alpine
     restart: always
     volumes:
       - ./redmine-data:/usr/src/redmine/files
@@ -69,7 +69,7 @@ services:
       - bw-services
 
   mydb:
-    image: mariadb
+    image: mariadb:10.10
     volumes:
       - db-data:/var/lib/mysql
     environment:
