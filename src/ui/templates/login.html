@@ -199,7 +199,41 @@
         }
       }
 
+      class FlashMsg {
+        constructor() {
+          this.delayBeforeRemove = 8000;
+          this.init();
+        }
+
+        //remove flash message after this.delay if exist
+        init() {
+          window.addEventListener("DOMContentLoaded", () => {
+            try {
+              const flashEl = document.querySelector("[flash-message]");
+              setTimeout(() => {
+                try {
+                  flashEl.remove();
+                } catch (err) {}
+              }, this.delayBeforeRemove);
+            } catch (err) {}
+          });
+
+          window.addEventListener("click", (e) => {
+            try {
+              if (
+                e.target.closest("button").hasAttribute("close-flash-message")
+              ) {
+                const closeBtn = e.target.closest("button");
+                const flashEl = closeBtn.closest("[flash-message]");
+                flashEl.remove();
+              }
+            } catch (err) {}
+          });
+        }
+      }
+
       const setLoader = new Loader();
+      const setFlash = new FlashMsg();
       tsParticles.loadJSON("particles-js", "json/particles.json");
     </script>
   </body>
