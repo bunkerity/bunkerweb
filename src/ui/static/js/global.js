@@ -58,8 +58,8 @@ class darkMode {
   toggle() {
     document.querySelector("html").classList.toggle("dark");
     this.darkToggleLabel.textContent = this.darkToggleEl.checked
-      ? "dark"
-      : "light";
+      ? "dark mode"
+      : "light mode";
   }
 
   async saveMode() {

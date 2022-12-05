@@ -120,7 +120,7 @@ class Tabs {
           const tabAtt = tab.getAttribute(`${this.prefix}-item-handler`);
           //style
           this.resetDeskStyle();
-          tab.classList.add("brightness-95", "z-10");
+          tab.classList.add("brightness-90", "z-10");
           //show content
           this.showRightSetting(tabAtt);
         }
@@ -130,7 +130,7 @@ class Tabs {
 
   resetDeskStyle() {
     this.desktopBtns.forEach((tab) => {
-      tab.classList.remove("brightness-95", "z-10");
+      tab.classList.remove("brightness-90", "z-10");
     });
   }
 
