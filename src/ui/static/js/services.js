@@ -438,7 +438,7 @@ class Multiple {
   filterMultiple(settings) {
     const multiple = {};
     for (const [key, data] of Object.entries(settings)) {
-      if (!isNaN(key[key.length - 1]) && key[key.length - 2] === "_") {
+      if (!isNaN(key.substring(key.lastIndexOf("_") + 1))) {
         multiple[key] = {
           value: data["value"],
           method: data["method"],
