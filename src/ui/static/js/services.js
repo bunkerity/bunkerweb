@@ -134,6 +134,20 @@ class ServiceModal {
         )
         .click();
     });
+    //server name always enabled for default
+    this.setNameSetting("ui", "");
+  }
+
+  setNameSetting(method, value) {
+    const nameInp = document.querySelector('input[name="SERVER_NAME"]');
+
+    if (method === "ui" || method === "default") {
+      nameInp.removeAttribute("disabled");
+    } else {
+      nameInp.setAttribute("disabled", "");
+    }
+
+    nameInp.value = value;
   }
 
   setDisabled(inp, method) {
@@ -238,8 +252,8 @@ class ServiceModal {
           inpt.tagName === "INPUT" &&
           inpt.getAttribute("type") === "checkbox"
         ) {
-          inpt.checked = defaultVal === "yes" ? true : false;
-          inpt.setAttribute("value", defaultVal);
+          inpt.checked = value === "yes" ? true : false;
+          inpt.setAttribute("value", value);
         }
         //for select
         if (inpt.tagName === "SELECT") {
@@ -251,6 +265,11 @@ class ServiceModal {
         }
       } catch (err) {}
     }
+    //name setting value
+    this.setNameSetting(
+      settings["SERVER_NAME"]["method"],
+      settings["SERVER_NAME"]["value"]
+    );
   }
 
   //UTILS

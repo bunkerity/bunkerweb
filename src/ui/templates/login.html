@@ -16,6 +16,17 @@
     <link rel="stylesheet" href="css/dashboard.css" />
   </head>
   <body>
+    <div
+      loader
+      class="fixed z-[10000] transition duration-300 h-screen w-screen bg-primary flex justify-center align-middle items-center"
+    >
+      <img
+        loader-img
+        src="images/logo-menu-2.png"
+        class="duration-300 w-40 h-12 sm:w-50 sm:h-14 md:w-60 md:h-16 lg:w-80 lg:h-24 inline transition-all"
+        alt="main logo"
+      />
+    </div>
     {% with messages = get_flashed_messages(with_categories=true) %} {% if
     messages %}
     <!-- flash message-->
@@ -151,6 +162,44 @@
     <!-- end content -->
     <script src="js/tsparticles.bundle.min.js"></script>
     <script>
+      class Loader {
+        constructor() {
+          this.menuContainer = document.querySelector("[menu-container]");
+          this.logoContainer = document.querySelector("[loader]");
+          this.logoEl = document.querySelector("[loader-img]");
+          this.isLoading = true;
+          this.init();
+        }
+
+        init() {
+          this.loading();
+          window.addEventListener("load", (e) => {
+            setTimeout(() => {
+              this.logoContainer.classList.add("opacity-0");
+            }, 350);
+
+            setTimeout(() => {
+              this.isLoading = false;
+              this.logoContainer.classList.add("hidden");
+            }, 650);
+
+            setTimeout(() => {
+              this.logoContainer.remove();
+            }, 800);
+          });
+        }
+
+        loading() {
+          if ((this.isLoading = true)) {
+            setTimeout(() => {
+              this.logoEl.classList.toggle("scale-105");
+              this.loading();
+            }, 300);
+          }
+        }
+      }
+
+      const setLoader = new Loader();
       tsParticles.loadJSON("particles-js", "json/particles.json");
     </script>
   </body>

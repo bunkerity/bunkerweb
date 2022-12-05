@@ -10,7 +10,7 @@
   "settings": {
     "SERVER_NAME": {
       "context": "multisite",
-      "default": "www.example.com",
+      "default": "",
       "help": "List of the virtual hosts served by bunkerweb.",
       "id": "server-name",
       "label": "Server name",
@@ -65,7 +65,7 @@
     <button
     {{current_endpoint}}-item-handler="{{ plugin['id'] }}"
     type="button"
-    class="{% if current_endpoint == 'service' and loop.first %} brightness-75 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
+    class="z-1000 {% if current_endpoint == 'service' and loop.first %} brightness-75 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
   >
     <div clas="w-full flex justify-between items-center">
       <!-- text and icon -->
