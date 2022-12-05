@@ -689,8 +689,10 @@ class Database:
                     multisite.append(setting.id)
 
             for service in session.query(Services).with_entities(Services.id).all():
+                checked_settings = []
                 for key, value in deepcopy(config).items():
                     original_key = key
+                    suffix = 0
                     if self.suffix_rx.search(key):
                         suffix = int(key.split("_")[-1])
                         key = key[: -len(str(suffix)) - 1]
@@ -699,21 +701,32 @@ class Database:
                         continue
 
                     config[f"{service.id}_{original_key}"] = value
-                    suffix = 0
 
-                    service_setting = (
+                    if original_key not in checked_settings:
+                        checked_settings.append(original_key)
+                    else:
+                        continue
+
+                    service_settings = (
                         session.query(Services_settings)
                         .with_entities(
                             Services_settings.value,
                             Services_settings.suffix,
                             Services_settings.method,
                         )
-                        .filter_by(service_id=service.id, setting_id=key, suffix=suffix)
-                        .first()
+                        .filter_by(service_id=service.id, setting_id=key)
+                        .all()
                     )
 
-                    if service_setting:
-                        config[f"{service.id}_{original_key}"] = (
+                    for service_setting in service_settings:
+                        config[
+                            f"{service.id}_{key}"
+                            + (
+                                f"_{service_setting.suffix}"
+                                if service_setting.suffix > 0
+                                else ""
+                            )
+                        ] = (
                             service_setting.value
                             if methods is False
                             else {
