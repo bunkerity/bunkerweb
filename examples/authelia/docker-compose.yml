@@ -2,10 +2,15 @@ version: "3.4"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.3
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE"
+    networks:
+      - bw-universe
+      - bw-services
     # ⚠️ read this if you use local folders for volumes ⚠️
     # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
@@ -13,10 +18,11 @@ services:
     # or for an existing one : chown -R root:101 folder && chmod -R 770 folder
     # more info at https://docs.bunkerweb.io
     volumes:
-      - bw_data:/data
+      - bw-data:/data
     environment:
       - MULTISITE=yes
       - SERVER_NAME=auth.example.com app1.example.com app2.example.com # replace with your domains
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - SERVE_FILES=no
       - DISABLE_DEFAULT_SERVER=yes
       - AUTO_LETS_ENCRYPT=yes
@@ -45,16 +51,31 @@ services:
       - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email
       - app2.example.com_REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email
 
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0
+    depends_on:
+      - mybunker
+    networks:
+      - bw-universe
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   # APPLICATIONS
   app1:
     image: tutum/hello-world
+    networks:
+      - bw-services
   app2:
     image: tutum/hello-world
+    networks:
+      - bw-services
 
   # AUTHELIA
   authelia:
-    image: authelia/authelia
+    image: authelia/authelia:4
     container_name: authelia
+    networks:
+      - bw-universe
     volumes:
       - ./authelia:/config
     restart: unless-stopped
@@ -64,8 +85,10 @@ services:
       - TZ=Europe/Paris
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: redis
+    networks:
+      - bw-universe
     volumes:
       - ./redis:/data
     expose:
@@ -75,4 +98,13 @@ services:
       - TZ=Europe/Paris
 
 volumes:
-  bw_data:
+  bw-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
