@@ -349,7 +349,7 @@
   <!-- bottom sidebar  -->
   <div class="w-full flex flex-col justify-end m-4">
     <!-- dark/light mode -->
-    <div class="min-h-6 my-4 flex justify-center">
+    <div class="min-h-6 my-4 ml-12 flex justify-start">
       <input
         type="hidden"
         id="csrf_token"
@@ -371,7 +371,7 @@
         dark-toggle-label
         class="dark:text-white dark:opacity-80 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700"
       >
-        {% if dark_mode == True %}dark {% else %} light {% endif %}
+        {% if dark_mode == True %}dark mode{% else %} light mode{% endif %}
       </label>
     </div>
     <!-- end dark/light mode -->
@@ -437,7 +437,7 @@
     <div class="w-full">
       <a
         href="logout"
-        class="dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+        class="tracking-wide dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         Logout
       </a>
