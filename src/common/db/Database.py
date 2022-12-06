@@ -430,8 +430,8 @@ class Database:
                                         Services_settings.method: method,
                                     }
                                 )
-                        elif key not in global_values:
-                            global_values.append(key)
+                        elif f"{key}_{suffix}" not in global_values:
+                            global_values.append(f"{key}_{suffix}")
                             global_value = (
                                 session.query(Global_values)
                                 .with_entities(Global_values.value)
