@@ -4,8 +4,6 @@ from os import getenv, makedirs
 from os.path import isfile
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
-from tarfile import open as taropen, TarInfo
-from io import BytesIO
 from traceback import format_exc
 
 sys_path.append("/usr/share/bunkerweb/deps/python")
