@@ -1,4 +1,5 @@
 from io import BytesIO
+from signal import SIGINT, signal, SIGTERM
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -25,7 +26,7 @@ from json import JSONDecodeError, dumps, load as json_load
 from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes.client.exceptions import ApiException as kube_ApiException
-from os import chmod, getenv, getpid, listdir, mkdir, walk
+from os import _exit, chmod, getenv, getpid, listdir, mkdir, remove, walk
 from os.path import exists, isdir, isfile, join
 from re import match as re_match
 from requests import get
@@ -59,6 +60,22 @@ from logger import setup_logger
 from Database import Database
 
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
+
+
+def stop(status):
+    remove("/var/tmp/bunkerweb/ui.pid")
+    _exit(status)
+
+
+def handle_stop(signum, frame):
+    logger.info("Catched stop operation")
+    logger.info("Stopping web ui ...")
+    stop(0)
+
+
+signal(SIGINT, handle_stop)
+signal(SIGTERM, handle_stop)
+
 
 # Flask app
 app = Flask(
