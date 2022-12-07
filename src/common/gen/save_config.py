@@ -8,6 +8,7 @@ from os import R_OK, X_OK, access, environ, getenv, listdir, path, walk
 from os.path import exists, join
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 from traceback import format_exc
 from typing import Any
 
@@ -225,107 +226,56 @@ if __name__ == "__main__":
                                     ),
                                 }
                             )
-        elif integration == "Kubernetes":
-            corev1 = kube_client.CoreV1Api()
-            tmp_config = {}
-
-            for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                if (
-                    pod.metadata.annotations != None
-                    and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                ):
-                    api_http_port = None
-                    api_server_name = None
-
-                    for pod_env in pod.spec.containers[0].env:
-                        tmp_config[pod_env.name] = pod_env.value
-
-                        if db is None and pod_env.name == "DATABASE_URI":
-                            db = Database(
-                                logger,
-                                sqlalchemy_string=pod_env.value,
-                            )
-                        elif pod_env.name == "API_HTTP_PORT":
-                            api_http_port = pod_env.value
-                        elif pod_env.name == "API_SERVER_NAME":
-                            api_server_name = pod_env.value
-
-                    apis.append(
-                        API(
-                            f"http://{pod.status.pod_ip}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
-                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
-                        )
-                    )
-
-            supported_config_types = [
-                "http",
-                "stream",
-                "server-http",
-                "server-stream",
-                "default-server-http",
-                "modsec",
-                "modsec-crs",
-            ]
-            custom_confs = []
-
-            for configmap in corev1.list_config_map_for_all_namespaces(
-                watch=False
-            ).items:
-                if (
-                    configmap.metadata.annotations is None
-                    or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations
-                ):
-                    continue
-
-                config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
-
-                if config_type not in supported_config_types:
-                    logger.warning(
-                        f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}",
-                    )
-                    continue
-                elif not configmap.data:
-                    logger.warning(
-                        f"Ignoring blank ConfigMap {configmap.metadata.name}",
-                    )
-                    continue
-
-                config_site = ""
-                if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
-                    config_site = (
-                        f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
-                    )
-
-                for config_name, config_data in configmap.data.items():
-                    custom_confs.append(
-                        {
-                            "value": config_data,
-                            "exploded": (config_site, config_type, config_name),
-                        }
-                    )
         else:
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
             )
 
+            while not docker_client.containers.list(
+                filters={"label": "bunkerweb.INSTANCE"}
+            ):
+                logger.info("Waiting for BunkerWeb instance ...")
+                sleep(5)
+
+            api_http_port = None
+            api_server_name = None
             tmp_config = {}
             custom_confs = []
+            apis = []
 
-            for instance in (
-                docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
-                if integration == "Docker"
-                else docker_client.services.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                )
+            for instance in docker_client.containers.list(
+                filters={"label": "bunkerweb.INSTANCE"}
             ):
-                conf, cstm_confs, tmp_apis, tmp_db = get_instance_configs_and_apis(
-                    instance, db, integration
+                for var in instance.attrs["Config"]["Env"]:
+                    splitted = var.split("=", 1)
+                    if custom_confs_rx.match(splitted[0]):
+                        custom_confs.append(
+                            {
+                                "value": splitted[1],
+                                "exploded": custom_confs_rx.search(
+                                    splitted[0]
+                                ).groups(),
+                            }
+                        )
+                    else:
+                        tmp_config[splitted[0]] = splitted[1]
+
+                        if db is None and splitted[0] == "DATABASE_URI":
+                            db = Database(
+                                logger,
+                                sqlalchemy_string=splitted[1],
+                            )
+                        elif splitted[0] == "API_HTTP_PORT":
+                            api_http_port = splitted[1]
+                        elif splitted[0] == "API_SERVER_NAME":
+                            api_server_name = splitted[1]
+
+            apis.append(
+                API(
+                    f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                    host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                 )
-                tmp_config.update(conf)
-                custom_confs.extend(cstm_confs)
-                apis.extend(tmp_apis)
-                if db is None:
-                    db = tmp_db
+            )
 
         if db is None:
             db = Database(logger)
