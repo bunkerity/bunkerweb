@@ -2,9 +2,21 @@
 
 . /usr/share/bunkerweb/helpers/utils.sh
 
+# trap SIGTERM and SIGINT
+function trap_exit() {
+	log "ENTRYPOINT" "ℹ️ " "Catched stop operation"
+	if [ -f "/var/tmp/bunkerweb/scheduler.pid" ] ; then
+		log "ENTRYPOINT" "ℹ️ " "Stopping job scheduler ..."
+		kill -s TERM "$(cat /var/tmp/bunkerweb/scheduler.pid)"
+	fi
+}
+trap "trap_exit" TERM INT QUIT
+
 if [ -f /var/tmp/bunkerweb/scheduler.pid ] ; then
 	rm -f /var/tmp/bunkerweb/scheduler.pid
 fi
+
+log "ENTRYPOINT" "ℹ️" "Starting the job scheduler v$(cat /usr/share/bunkerweb/VERSION) ..."
 
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
@@ -29,7 +41,12 @@ fi
 
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
-/usr/share/bunkerweb/scheduler/main.py
+/usr/share/bunkerweb/scheduler/main.py &
+pid="$!"
+wait "$pid"
+while [ -f /var/tmp/bunkerweb/scheduler.pid ] ; do
+    wait "$pid"
+done
 
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
 exit 0
