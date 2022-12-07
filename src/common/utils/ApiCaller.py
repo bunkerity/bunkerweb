@@ -1,5 +1,6 @@
 from io import BytesIO
 from os import environ, getenv
+from os.path import sep
 from sys import path as sys_path
 from tarfile import open as taropen
 
@@ -129,12 +130,11 @@ class ApiCaller:
 
     def _send_files(self, path, url):
         ret = True
-        tgz = BytesIO()
-        with taropen(mode="w:gz", fileobj=tgz) as tf:
-            tf.add(path, arcname=".")
-        tgz.seek(0, 0)
-        files = {"archive.tar.gz": tgz}
-        if not self._send_to_apis("POST", url, files=files):
-            ret = False
-        tgz.close()
+        with BytesIO() as tgz:
+            with taropen(mode="w:gz", fileobj=tgz, dereference=True) as tf:
+                tf.add(path, arcname=sep)
+            tgz.seek(0, 0)
+            files = {"archive.tar.gz": tgz}
+            if not self._send_to_apis("POST", url, files=files):
+                ret = False
         return ret
