@@ -28,6 +28,7 @@ COPY --from=builder /usr/share/bunkerweb /usr/share/bunkerweb
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
+COPY src/bw/entrypoint.sh /usr/share/bunkerweb/entrypoint.sh
 COPY src/bw/loading /usr/share/bunkerweb/loading
 COPY src/bw/lua /usr/share/bunkerweb/lua
 COPY src/bw/misc /usr/share/bunkerweb/misc
@@ -60,7 +61,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
 	for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
 	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
-	chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/deps/python/bin/* && \
+	chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/entrypoint.sh /usr/bin/bwcli /usr/share/bunkerweb/deps/python/bin/* && \
 	chown -R root:nginx /etc/nginx && \
 	chmod -R 770 /etc/nginx && \
 	rm -f /var/log/nginx/* && \
@@ -85,4 +86,4 @@ USER nginx:nginx
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=10s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck.sh
 
-ENTRYPOINT ["/usr/share/bunkerweb/helpers/entrypoint.sh"]
+ENTRYPOINT ["/usr/share/bunkerweb/entrypoint.sh"]
