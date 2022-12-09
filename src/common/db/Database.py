@@ -387,9 +387,15 @@ class Database:
                                 .filter_by(id=key)
                                 .first()
                             )
+
+                            if not setting:
+                                continue
+
                             service_setting = (
                                 session.query(Services_settings)
-                                .with_entities(Services_settings.value)
+                                .with_entities(
+                                    Services_settings.value, Services_settings.method
+                                )
                                 .filter_by(
                                     service_id=server_name,
                                     setting_id=key,
@@ -401,7 +407,7 @@ class Database:
                             if service_setting is None:
                                 if key != "SERVER_NAME" and (
                                     value == setting.default
-                                    or (value == "" and setting.default is None)
+                                    or (not value.strip() and setting.default is None)
                                     or (key in config and value == config[key])
                                 ):
                                     continue
@@ -416,10 +422,21 @@ class Database:
                                     )
                                 )
                             elif (
-                                method == "autoconf"
-                                and value != setting.default
+                                method in (service_setting.method, "autoconf")
                                 and service_setting.value != value
                             ):
+                                if (
+                                    value == setting.default
+                                    or (not value.strip() and setting.default is None)
+                                    or (key in config and value == config[key])
+                                ):
+                                    session.query(Services_settings).filter(
+                                        Services_settings.service_id == server_name,
+                                        Services_settings.setting_id == key,
+                                        Services_settings.suffix == suffix,
+                                    ).delete()
+                                    continue
+
                                 session.query(Services_settings).filter(
                                     Services_settings.service_id == server_name,
                                     Services_settings.setting_id == key,
@@ -434,7 +451,9 @@ class Database:
                             global_values.append(f"{key}_{suffix}")
                             global_value = (
                                 session.query(Global_values)
-                                .with_entities(Global_values.value)
+                                .with_entities(
+                                    Global_values.value, Global_values.method
+                                )
                                 .filter_by(
                                     setting_id=key,
                                     suffix=suffix,
@@ -442,11 +461,12 @@ class Database:
                                 .first()
                             )
 
+                            if not setting:
+                                continue
+
                             if global_value is None:
-                                if (
-                                    not setting
-                                    or value == setting.default
-                                    or (value == "" and setting.default is None)
+                                if value == setting.default or (
+                                    not value.strip() and setting.default is None
                                 ):
                                     continue
 
@@ -459,11 +479,18 @@ class Database:
                                     )
                                 )
                             elif (
-                                setting
-                                and method == "autoconf"
-                                and value != setting.default
+                                method in (global_value.method, "autoconf")
                                 and global_value.value != value
                             ):
+                                if value == setting.default or (
+                                    not value.strip() and setting.default is None
+                                ):
+                                    session.query(Global_values).filter(
+                                        Global_values.setting_id == key,
+                                        Global_values.suffix == suffix,
+                                    ).delete()
+                                    continue
+
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
                                     Global_values.suffix == suffix,
@@ -503,16 +530,12 @@ class Database:
                             .first()
                         )
 
-                        if (
-                            not setting
-                            or value == setting.default
-                            or (value == "" and setting.default is None)
-                        ):
+                        if not setting:
                             continue
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.method)
+                            .with_entities(Global_values.value, Global_values.method)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
@@ -526,7 +549,19 @@ class Database:
                                     method=method,
                                 )
                             )
-                        elif global_value.method == method:
+                        elif (
+                            global_value.method == method
+                            and value != global_value.value
+                        ):
+                            if value == setting.default or (
+                                not value.strip() and setting.default is None
+                            ):
+                                session.query(Global_values).filter(
+                                    Global_values.setting_id == key,
+                                    Global_values.suffix == suffix,
+                                ).delete()
+                                continue
+
                             session.query(Global_values).filter(
                                 Global_values.setting_id == key,
                                 Global_values.suffix == suffix,
