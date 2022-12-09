@@ -1,6 +1,6 @@
 import {registerListeners, unregisterListeners} from './lib/event.js';
 import {formatDate} from './lib/date-format.js';
-import Datepicker from './Datepicker.js';
+import Datepicker from './datepicker.js';
 
 // filter out the config options inapproprite to pass to Datepicker
 function filterOptions(options) {
