@@ -387,7 +387,7 @@ class Multiple {
           try {
             const cloneTitles = clone.querySelectorAll("h5");
             cloneTitles.forEach((title) => {
-              title.textContent = `${title.textContent} #${
+              title.textContent = `${title.textContent} ${
                 multipleEls.length >= 2 ? `#${topNum + 1}` : ``
               }`;
             });
@@ -487,28 +487,25 @@ class Multiple {
             if (inp.getAttribute("type") === "checkbox") {
               if (data["value"] === "yes") inp.setAttribute("checked", "");
               if (data["value"] === "no") inp.removeAttribute("checked");
-              if (data["method"] !== "ui" || data["method"] !== "default") {
-                inp.setAttribute("disabled", "");
-              } else {
-                inp.removeAttribute("disabled");
-              }
+              inp.setAttribute("default-method", data["method"]);
             }
 
             if (inp.getAttribute("type") !== "checkbox") {
               inp.setAttribute("value", data["value"]);
-
-              if (data["method"] !== "ui" || data["method"] !== "default") {
-                inp.setAttribute("disabled", "");
-              } else {
-                inp.removeAttribute("disabled");
-              }
+              inp.setAttribute("default-method", data["method"]);
             }
           } catch (err) {}
           //or select
           try {
             const select = cloneSetting.querySelector("select");
             this.setNameID(select, key);
+            const name = select.getAttribute("services-setting-select-default");
+            const selTxt = document.querySelector(
+              `[services-setting-select-text='${name}']`
+            );
 
+            selTxt.textContent = data["value"];
+            selTxt.setAttribute("value", data["value"]);
             const options = select.options;
 
             for (let i = 0; i < options.length; i++) {
@@ -517,12 +514,7 @@ class Multiple {
                 ? option.setAttribute("selected")
                 : option.removeAttribute("selected");
             }
-
-            if (data["method"] !== "ui" || data["method"] !== "default") {
-              select.setAttribute("disabled", "");
-            } else {
-              select.removeAttribute("disabled");
-            }
+            inp.setAttribute("default-method", data["method"]);
           } catch (err) {}
 
           //get the num, check if a container with this num exist
@@ -605,6 +597,44 @@ class Multiple {
           }
         }
       }
+      //check enabled/disabled
+      this.setDisabled();
+    });
+  }
+
+  setDisabled() {
+    const multipleCtnr = document.querySelectorAll(
+      "[services-settings-multiple]"
+    );
+    multipleCtnr.forEach((container) => {
+      const settings = container.querySelectorAll("[setting-container]");
+
+      settings.forEach((setting) => {
+        //replace input info
+        try {
+          const inp = setting.querySelector("input");
+          const method = inp.getAttribute("default-method");
+          if (method === "ui" || method === "default") {
+            inp.removeAttribute("disabled");
+          } else {
+            inp.setAttribute("disabled", "");
+          }
+        } catch (err) {}
+        //or select
+        try {
+          const select = setting.querySelector("select");
+          const method = select.getAttribute("default-method");
+          const name = select.getAttribute("services-setting-select-default");
+          const selDOM = document.querySelector(
+            `button[services-setting-select='${name}']`
+          );
+          if (method === "ui" || method === "default") {
+            selDOM.setAttribute("disabled", "");
+          } else {
+            selDOM.setAttribute("disabled", "");
+          }
+        } catch (err) {}
+      });
     });
   }
 
