@@ -8,8 +8,6 @@ from string import ascii_letters, digits
 
 from jinja2 import Environment, FileSystemLoader
 
-from logger import setup_logger
-
 
 class Templator:
     def __init__(self, templates, core, plugins, output, target, config):
