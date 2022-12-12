@@ -249,7 +249,7 @@ class Config:
             if k in self.__plugins_settings:
                 if _global ^ (self.__plugins_settings[k]["context"] == "global"):
                     error = 1
-                    flash(f"Variable {k} is not valid.")
+                    flash(f"Variable {k} is not valid.", "error")
                     continue
 
                 setting = k
@@ -260,7 +260,7 @@ class Config:
                     or "multiple" not in self.__plugins_settings[setting]
                 ):
                     error = 1
-                    flash(f"Variable {k} is not valid.")
+                    flash(f"Variable {k} is not valid.", "error")
                     continue
 
             if not (
@@ -270,7 +270,7 @@ class Config:
 
             if not check:
                 error = 1
-                flash(f"Variable {k} is not valid.")
+                flash(f"Variable {k} is not valid.", "error")
                 continue
 
         return error

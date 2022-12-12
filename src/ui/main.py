@@ -422,15 +422,20 @@ def services():
             flash("Missing OLD_SERVER_NAME parameter.", "error")
             return redirect(url_for("loading", next=url_for("services")))
 
+        if "SERVER_NAME" not in variables:
+            variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
+
         if request.form["operation"] in ("new", "edit"):
             del variables["operation"]
-
-            if request.form["operation"] == "edit":
-                del variables["OLD_SERVER_NAME"]
+            del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
             config = app.config["CONFIG"].get_config()
             for variable in deepcopy(variables):
+                if variables.endswith("_SCHEMA"):
+                    del variables[variable]
+                    continue
+
                 if variables[variable] == "on":
                     variables[variable] = "yes"
                 elif variables[variable] == "off":
