@@ -21,50 +21,12 @@
       />
     </div>
 
-    {% include "menu.html" %} {% include "news.html" %}
-
+    {% include "menu.html" %} {% include "news.html" %} {% include "flashs.html"
+    %}
     <div
       class="w-full relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl"
     >
-      {% include "header.html" %} {% with messages =
-      get_flashed_messages(with_categories=true) %} {% if messages %}
-      <!-- flash message-->
-      {% for category, message in messages %}
-      <div
-        flash-message
-        class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
-      >
-        <button
-          close-flash-message
-          role="close alert message"
-          type="button"
-          class="absolute right-7 top-1.5"
-        >
-          <svg
-            class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 320 512"
-          >
-            <path
-              d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-            ></path>
-          </svg>
-        </button>
-        {% if category == 'error' %}
-        <h5 class="text-lg mb-0 text-red-500">Error</h5>
-        <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">
-          {{ message|safe }}
-        </p>
-        {% else %}
-        <h5 class="text-lg mb-0 text-green-500">Success</h5>
-        <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">
-          {{ message|safe }}
-        </p>
-        {% endif %}
-      </div>
-      {% endfor %}
-      <!-- end flash message-->
-      {% endif %} {% endwith %}
+      {% include "header.html" %}
     </div>
 
     <!-- info -->
