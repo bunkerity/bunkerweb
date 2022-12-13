@@ -23,7 +23,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
           aria-current="page"
         >
           <svg
-            class="fill-gray-600 dark:fill-gray-700 h-4 w-4 hover:brightness-90 dark:hover:brightness-90"
+            class="fill-gray-600 dark:fill-gray-600 h-4 w-4 hover:brightness-90 dark:hover:brightness-90"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
           >
@@ -59,13 +59,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         class="rounded transition hidden flex-col items-center mx-2 p-2 md:py-4 md:px-6 relative cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800"
       >
         <button type="button">
-          <svg             class="relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary"
+          <svg class="translate-x-3 relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary"
 
            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <path d="M64 32C28.7 32 0 60.7 0 96v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zM344 152c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24zm96-24c0 13.3-10.7 24-24 24s-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24zM64 288c-35.3 0-64 28.7-64 64v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V352c0-35.3-28.7-64-64-64H64zM344 408c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24zm104-24c0 13.3-10.7 24-24 24s-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24z"/></svg>
-           <svg  class="relative rounded-full border-2 border-white translate-y-2 -translate-x-3 dark:brightness-125 h-6 w-6 fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+           <svg  class="relative rounded-full border-2 border-white dark:border-slate-850 dark:brightness-125 translate-y-2 h-6 w-6 fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
             <path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg>
           <p
-            class="pt-1 mb-0 font-sans font-semibold leading-normal uppercase text-sm lg:text-md"
+            class="dark:text-gray-500 pt-1 mb-0 font-sans font-semibold leading-normal uppercase text-sm lg:text-md"
           >
             ADD SERVICE
           </p>
@@ -77,14 +77,14 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       >
         <button type="button">
           <svg
-          class="relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary"  
+          class="translate-x-2 relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary"  
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z"/></svg>
     
-          <svg  class="relative rounded-full border-2 border-white translate-y-2 -translate-x-4 dark:brightness-125 h-6 w-6 fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <svg  class="-translate-x-2 relative rounded-full border-2 border-white dark:border-slate-850 translate-y-2  dark:brightness-125 h-6 w-6 fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
            <path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg>
         
           <p
-            class="pt-1 mb-0 font-sans font-semibold leading-normal uppercase text-sm lg:text-md"
+            class="dark:text-gray-500 pt-1 mb-0 font-sans font-semibold leading-normal uppercase text-sm lg:text-md"
           >
             ADD FILE
           </p>
@@ -126,20 +126,29 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
           </svg>
          {% endif %}
         <!-- end service root-->
-        <!-- cache root-->
+
+        <!-- services folder -->
+         {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 %}
+          <svg class="absolute left-3 top-5 h-10 w-10 fill-primary dark:brightness-150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M64 32C28.7 32 0 60.7 0 96v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zM344 152c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24zm96-24c0 13.3-10.7 24-24 24s-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24zM64 288c-35.3 0-64 28.7-64 64v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V352c0-35.3-28.7-64-64-64H64zM344 408c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24zm104-24c0 13.3-10.7 24-24 24s-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24z"/></svg>
+         {% endif %}
+          <!-- end services folder-->
+          <!-- services files -->
+          {% if child['type'] == "file" and current_endpoint == "configs" and loop.depth != 1 %}
+          <svg
+          class="absolute left-3 top-5 h-10 w-10 fill-primary dark:brightness-150"
+  
+          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z"/></svg>
+          {% endif %}
+          <!-- end services files-->
+        <!-- cache folder-->
         {% if child['type'] == "folder" and current_endpoint == "cache" and loop.depth == 1 %}
         <svg  class="absolute left-3 top-5 h-10 w-10 fill-primary dark:brightness-150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
           <path d="M50.7 58.5L0 160H208V32H93.7C75.5 32 58.9 42.3 50.7 58.5zM240 160H448L397.3 58.5C389.1 42.3 372.5 32 354.3 32H240V160zm208 32H0V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192z"></path>
         </svg>
         {% endif %}
-        <!-- end cache root-->
-        <!-- services-->
-         {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 %}
-          <svg class="absolute left-3 top-5 h-10 w-10 fill-primary dark:brightness-150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M64 32C28.7 32 0 60.7 0 96v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zM344 152c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24zm96-24c0 13.3-10.7 24-24 24s-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24zM64 288c-35.3 0-64 28.7-64 64v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V352c0-35.3-28.7-64-64-64H64zM344 408c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24zm104-24c0 13.3-10.7 24-24 24s-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24z"/></svg>
-         {% endif %}
-          <!-- end services-->
-
-         {% if current_endpoint == "cache" and loop.depth == '1' %}
+        <!-- end cache folder -->
+        <!-- cache file -->
+         {% if child['type'] == "file" and current_endpoint == "cache" %}
             <svg
             class="absolute left-3 top-5 h-10 w-10 fill-primary dark:brightness-150"
             xmlns="http://www.w3.org/2000/svg"
@@ -150,14 +159,10 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
             />
           </svg>
          {% endif %}
+        <!-- end cache file -->
 
     
-       {% if child['type'] == "file" %}
-        <svg
-        class="absolute left-3 top-5 h-10 w-10 fill-primary dark:brightness-150"
 
-        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z"/></svg>
-        {% endif %}
 
         <p
           {{current_endpoint}}-element-text
@@ -197,7 +202,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         >
           <div class="flex justify-start items-center">
             <svg
-              class="h-6 w-6 fill-sky-800 dark:brightness-125"
+              class="h-6 w-6 fill-green-700 dark:brightness-125"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 576 512"
             >
@@ -317,7 +322,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     <div class="w-full flex justify-between">
       <p
         {{current_endpoint}}-modal-title
-        class="mb-0 font-sans font-semibold leading-normal uppercase text-sm"
+        class="dark:text-white mb-0 font-sans font-semibold leading-normal uppercase text-sm"
       >
         TITLE
       </p>
@@ -334,19 +339,19 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       >
         <p
           {{current_endpoint}}-modal-path-prefix
-          class="mb-0 dark:text-white dark:opacity-50 text-gray-700 opacity-50 text-sm"
+          class="mb-0 dark:text-white dark:opacity-75 text-gray-700 opacity-50 text-sm"
         ></p>
         <input
           type="text"
           name="name"
           id="name"
-          class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 sm:ml-1 max-w-40 disabled:opacity-75 focus:valid:border-green-500 focus:file:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+          class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 sm:ml-1 max-w-40  focus:valid:border-green-500 focus:file:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700"
           placeholder="path"
           required
         />
         <p
           {{current_endpoint}}-modal-path-suffix
-          class="mb-0 dark:text-white dark:opacity-50 text-gray-700 opacity-50 text-sm"
+          class="mb-0 dark:text-white dark:opacity-75 text-gray-700 opacity-50 text-sm"
         >
           suffix
         </p>

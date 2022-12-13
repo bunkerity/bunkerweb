@@ -247,20 +247,26 @@ class FolderEditor {
   initEditor() {
     //editor options
     this.editor.setShowPrintMargin(false);
-    this.darkModeBool(false);
+    this.setDarkMode();
   }
 
   //listen to dark toggle button to change theme
   listenDarkToggle() {
     this.darkMode.addEventListener("click", (e) => {
       this.darkMode.checked
-        ? this.darkModeBool(true)
-        : this.darkModeBool(false);
+        ? this.changeDarkMode(true)
+        : this.changeDarkMode(false);
     });
   }
 
+  setDarkMode() {
+    document.querySelector("html").className.includes("dark")
+      ? this.editor.setTheme("ace/theme/twilight")
+      : this.editor.setTheme("ace/theme/cloud9_day");
+  }
+
   //change theme according to mode
-  darkModeBool(bool) {
+  changeDarkMode(bool) {
     bool
       ? this.editor.setTheme("ace/theme/twilight")
       : this.editor.setTheme("ace/theme/cloud9_day");
