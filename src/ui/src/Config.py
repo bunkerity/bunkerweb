@@ -280,7 +280,7 @@ class Config:
             self.get_config(methods=False), self.get_services(methods=False)
         )
 
-    def new_service(self, variables: dict) -> Tuple[str, int]:
+    def new_service(self, variables: dict, edit: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -299,11 +299,14 @@ class Config:
             raise this if the service already exists
         """
         services = self.get_services(methods=False)
-        for service in services:
+        for i, service in enumerate(services):
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service[
                 "SERVER_NAME"
             ] in variables["SERVER_NAME"].split(" "):
-                return f"Service {service['SERVER_NAME']} already exists.", 1
+                if edit is False:
+                    return f"Service {service['SERVER_NAME']} already exists.", 1
+
+                del services[i]
 
         services.append(variables)
         self.__gen_conf(self.get_config(methods=False), services)
@@ -329,7 +332,11 @@ class Config:
         if error:
             return message, error
 
-        message, error = self.new_service(variables)
+        message, error = self.new_service(variables, edit=True)
+
+        if error:
+            return message, error
+
         return f"Configuration for {old_server_name} has been edited.", error
 
     def edit_global_conf(self, variables: dict) -> str:
