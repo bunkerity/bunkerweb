@@ -21,21 +21,107 @@ class Menu {
 
 class News {
   constructor() {
-    this.sidebarEl = document.querySelector("[sidebar-info]");
-    this.openBtn = document.querySelector("[sidebar-info-open]");
-    this.closeBtn = document.querySelector("[sidebar-info-close]");
-    this.openBtn.addEventListener("click", this.open.bind(this));
-    this.closeBtn.addEventListener("click", this.close.bind(this));
+    this.BASE_URL = "https://www.staging.bunkerweb.io/";
+    this.init();
   }
 
-  open() {
-    this.sidebarEl.classList.add("translate-x-0");
-    this.sidebarEl.classList.remove("translate-x-90");
+  init() {
+    window.addEventListener("load", async () => {
+      try {
+        const res = await fetch(
+          "https://www.staging.bunkerweb.io/api/posts/0/2",
+          {
+            headers: {
+              method: "GET",
+            },
+          }
+        );
+        return await this.render(res);
+      } catch (err) {
+        console.log(err);
+      }
+    });
   }
 
-  close() {
-    this.sidebarEl.classList.add("translate-x-90");
-    this.sidebarEl.classList.remove("translate-x-0");
+  async render(lastNews) {
+    const newsContainer = document.querySelector("[news-container]");
+    //remove default message
+    newsContainer.textContent = "";
+    //render last news
+    lastNews.forEach((news) => {
+      //get info
+      const slug = news.slug;
+      const img = news.photo.url;
+      const excerpt = news.excerpt;
+      const tags = news.tags;
+      const date = news.date;
+      const lastUpdate = news.lastUpdate;
+      //create html card from  infos
+      const cardHTML = this.template(
+        slug,
+        img,
+        excerpt,
+        tags,
+        date,
+        lastUpdate
+      );
+      //add to DOM
+      document
+        .querySelector("[news-container]")
+        .insertAdjacentHTML("afterbegin", cardHTML);
+    });
+  }
+
+  template(slug, img, excerpt, tags, date, lastUpdate) {
+    //loop on tags to get list
+    let tagList = "";
+    tags.forEach((tag) => {
+      tagList += ` <a
+      href="${this.BASE_URL}/blog/tag/${tag.slug}"
+      class="my-0 mr-1 rounded bg-secondary hover:brightness-90 hover:-translate-y-0.4 text-white py-1 px-2 text-sm"
+      >
+      ${tag.name}
+      </a>`;
+    });
+    //create card
+    const card = `  
+      <div
+        class="min-h-[400px] w-full col-span-12 transition hover:-translate-y-2  bg-gray-100 dark:bg-slate-900 rounded px-6 py-4 m-2  flex flex-col justify-between"
+      >
+        <div>
+            <img  role="link"
+                onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
+                class="cursor-pointer rounded w-full  h-40 m-0 object-cover"
+                src="${img}"
+                alt="image"
+            />
+            <h3 role="link"                     
+            onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
+            class="cursor-pointer mt-3 mb-1  text-3xl dark:text-white tracking-wide">{{ post['title'] }}</h3>            
+        </div>
+        <div>
+            <div  role="link"                     
+            onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
+            class="cursor-pointer min-h-[130px] mb-3 text-lg dark:text-gray-300 text-gray-600 pt-3">
+                ${excerpt}
+            </div>
+            <div class="min-h-[75px] mt-2 flex flex-wrap justify-start items-end align-bottom">
+                ${tagList}
+            </div>
+
+            <div class="mt-2 flex flex-col justify-start items-start">
+                <span class="text-xs  dark:text-gray-300 text-gray-600"
+                >Posted on : ${date}</span
+                >
+                {% if post["updatedAt"] %}
+                <span class="text-xs  dark:text-gray-300 text-gray-600"
+                >Last update : ${lastUpdate}</span
+                >
+                {%endif%}
+            </div>
+        </div>
+      </div>  `;
+    return card;
   }
 }
 
@@ -102,7 +188,6 @@ class darkMode {
 
 class FlashMsg {
   constructor() {
-    this.delayBeforeRemove = 8000;
     this.openBtn = document.querySelector("[flash-sidebar-open]");
     this.flashCount = document.querySelector("[flash-count]");
     this.isMsgCheck = false;
@@ -112,7 +197,7 @@ class FlashMsg {
   init() {
     //animate message button if message + never opened
     window.addEventListener("load", (e) => {
-      if (this.flashCount.textContent > 0) this.animeBtn();
+      if (Number(this.flashCount.textContent) > 0) this.animeBtn();
     });
     //stop animate if clicked once
     this.openBtn.addEventListener("click", (e) => {
@@ -193,12 +278,17 @@ class Loader {
 
 const setLoader = new Loader();
 const setMenu = new Menu();
-const setNews = new News();
+const setNewsSidebar = new Sidebar(
+  "[sidebar-info]",
+  "[sidebar-info-open]",
+  "[sidebar-info-close]"
+);
 const setFlashSidebar = new Sidebar(
   "[flash-sidebar]",
   "[flash-sidebar-open]",
   "[flash-sidebar-close]"
 );
+const setNews = new News();
 const setDarkM = new darkMode();
 const setCheckbox = new Checkbox("[sidebar-info]");
 const setFlash = new FlashMsg();
