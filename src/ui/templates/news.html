@@ -56,43 +56,12 @@
   />
   <!-- end header -->
   <!-- news-->
-  <div class="flex-auto overflow-auto">
-    {% if posts %} {% for post in posts %}
-
-    <a
-      class="transition hover:scale-102 bg-gray-100 dark:bg-slate-900 rounded px-6 py-4 m-2 col-span-12 md:col-span-6 flex flex-col justify-between"
-      href="{{ post['link'] }}"
-      target="_blank"
-    >
-      <div>
-        <h3 class="title text-base dark:text-white">{{ post['title'] }}</h3>
-
-        <img
-          class="rounded w-full h-30 m-0 object-cover"
-          src="{{ post['image_url'] }}"
-          alt="image"
-        />
-        <div class="text-sm dark:text-gray-300 pt-3">
-          {{ post['description'] }}
-        </div>
-      </div>
-
-      <div class="mt-4 flex justify-between items-center">
-        <span class="text-xs font-semibold dark:text-gray-300"
-          >{{ post['date'] }}</span
-        ><span class="ml-3 text-xs italic dark:text-gray-300"
-          >{{ post['reading_time'] }} read</span
-        >
-      </div>
-    </a>
-
-    {% endfor %} {% else %}
+  <div news-container class="flex-auto overflow-auto">
     <p
       class="text-center col-span-12 relative w-full p-4 text-blue-500 rounded-lg"
     >
       Impossible to connect to blog news.
     </p>
-    {% endif %}
   </div>
   <!-- end news-->
 
