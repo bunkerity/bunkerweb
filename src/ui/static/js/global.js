@@ -39,6 +39,26 @@ class News {
   }
 }
 
+class Sidebar {
+  constructor(elAtt, btnOpenAtt, btnCloseAtt) {
+    this.sidebarEl = document.querySelector(elAtt);
+    this.openBtn = document.querySelector(btnOpenAtt);
+    this.closeBtn = document.querySelector(btnCloseAtt);
+    this.openBtn.addEventListener("click", this.open.bind(this));
+    this.closeBtn.addEventListener("click", this.close.bind(this));
+  }
+
+  open() {
+    this.sidebarEl.classList.add("translate-x-0");
+    this.sidebarEl.classList.remove("translate-x-90");
+  }
+
+  close() {
+    this.sidebarEl.classList.add("translate-x-90");
+    this.sidebarEl.classList.remove("translate-x-0");
+  }
+}
+
 class darkMode {
   constructor() {
     this.htmlEl = document.querySelector("html");
@@ -83,22 +103,26 @@ class darkMode {
 class FlashMsg {
   constructor() {
     this.delayBeforeRemove = 8000;
+    this.openBtn = document.querySelector("[flash-sidebar-open]");
+    this.flashCount = document.querySelector("[flash-count]");
+    this.isMsgCheck = false;
     this.init();
   }
 
-  //remove flash message after this.delay if exist
   init() {
-    window.addEventListener("DOMContentLoaded", () => {
+    //animate message button if message + never opened
+    window.addEventListener("load", (e) => {
+      if (this.flashCount.textContent > 0) this.animeBtn();
+    });
+    //stop animate if clicked once
+    this.openBtn.addEventListener("click", (e) => {
       try {
-        const flashEl = document.querySelector("[flash-message]");
-        setTimeout(() => {
-          try {
-            flashEl.remove();
-          } catch (err) {}
-        }, this.delayBeforeRemove);
+        if (e.target.closest("button").hasAttribute("flash-sidebar-open")) {
+          this.isMsgCheck = true;
+        }
       } catch (err) {}
     });
-
+    //remove message after click
     window.addEventListener("click", (e) => {
       try {
         if (e.target.closest("button").hasAttribute("close-flash-message")) {
@@ -108,6 +132,25 @@ class FlashMsg {
         }
       } catch (err) {}
     });
+  }
+
+  animeBtn() {
+    this.openBtn.classList.add("rotate-12");
+
+    setTimeout(() => {
+      this.openBtn.classList.remove("rotate-12");
+      this.openBtn.classList.add("-rotate-12");
+    }, 150);
+
+    setTimeout(() => {
+      this.openBtn.classList.remove("-rotate-12");
+    }, 300);
+
+    setTimeout(() => {
+      if (!this.isMsgCheck) {
+        this.animeBtn();
+      }
+    }, 1500);
   }
 }
 
@@ -151,6 +194,11 @@ class Loader {
 const setLoader = new Loader();
 const setMenu = new Menu();
 const setNews = new News();
+const setFlashSidebar = new Sidebar(
+  "[flash-sidebar]",
+  "[flash-sidebar-open]",
+  "[flash-sidebar-close]"
+);
 const setDarkM = new darkMode();
 const setCheckbox = new Checkbox("[sidebar-info]");
 const setFlash = new FlashMsg();
