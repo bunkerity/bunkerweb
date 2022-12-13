@@ -169,7 +169,7 @@ class JobScheduler(ApiCaller):
             ret = job.run()
             if ret == 1:
                 reload = True
-            elif ret >= 2:
+            elif (ret or 2) >= 2:
                 success = False
         if reload:
             try:
