@@ -243,11 +243,14 @@
     <button {{current_endpoint}}-multiple-add="{{multiple}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
       Add
     </button>
+    <button  {{current_endpoint}}-multiple-toggle="{{multiple}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+      SHOW / HIDE
+    </button>
   </div>
   <!-- end plugin multiple handler-->
 
   <!-- multiple settings -->
-  <div {{current_endpoint}}-settings-multiple="{{multiple}}_SCHEMA" class="hidden w-full mb-8 grid-cols-12 border dark:border-gray-700">
+  <div {{current_endpoint}}-settings-multiple="{{multiple}}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full mb-8 grid-cols-12 border dark:border-gray-700 rounded">
     {% for setting, value in plugin["settings"].items() %}
     {# render only setting that match the multiple id and context #}
     {% if current_endpoint

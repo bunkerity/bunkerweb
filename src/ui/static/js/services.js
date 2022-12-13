@@ -409,6 +409,31 @@ class Multiple {
         }
       } catch (err) {}
 
+      //TOGGLE BTN
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`${this.prefix}-multiple-toggle`)
+        ) {
+          const att = e.target
+            .closest("button")
+            .getAttribute(`${this.prefix}-multiple-toggle`);
+          const multContainers = document.querySelectorAll(
+            `[services-settings-multiple^=${att}]`
+          );
+          multContainers.forEach((container) => {
+            if (
+              !container
+                .getAttribute("services-settings-multiple")
+                .includes("SCHEMA")
+            )
+              container.classList.toggle("hidden");
+          });
+        }
+        //remove last child
+      } catch (err) {}
+
       //REMOVE BTN
       try {
         if (
