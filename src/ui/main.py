@@ -432,7 +432,7 @@ def services():
             # Edit check fields and remove already existing ones
             config = app.config["CONFIG"].get_config()
             for variable in deepcopy(variables):
-                if variables.endswith("_SCHEMA"):
+                if variable.endswith("_SCHEMA"):
                     del variables[variable]
                     continue
 
