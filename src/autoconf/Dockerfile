@@ -48,7 +48,10 @@ RUN apk add --no-cache bash && \
     find /usr/share/bunkerweb -type d -exec chmod 0750 {} \; && \
     chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/* && \
-    chown root:nginx /usr/bin/bwcli
+    chown root:nginx /usr/bin/bwcli && \
+    mkdir /var/log/letsencrypt /var/lib/letsencrypt && \
+    chown root:nginx /var/log/letsencrypt /var/lib/letsencrypt && \
+    chmod 770 /var/log/letsencrypt /var/lib/letsencrypt
 
 # Fix CVEs
 RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "ncurses-libs>=6.2_p20210612-r1" "ncurses-terminfo-base>=6.2_p20210612-r1" "libtirpc>=1.3.2-r1" "libtirpc-conf>=1.3.2-r1" "zlib>=1.2.12-r2" "libxml2>=2.9.14-r1" "expat>=2.5.0-r0"

@@ -72,7 +72,6 @@ RUN apk add --no-cache pcre bash python3 && \
 	ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log && \
 	ln -s /proc/1/fd/1 /var/log/nginx/access.log && \
 	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log && \
-	ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log && \
 	chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
