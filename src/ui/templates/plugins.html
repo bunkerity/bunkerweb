@@ -70,7 +70,7 @@ include "plugins-modal.html" %}
     <form
       id="dropzone-form"
       action="#"
-      class="cursor-pointer col-span-12 border-2 rounded-lg p-2 border-dashed border-primary drop-zone"
+      class="cursor-pointer col-span-12 border-2 rounded-lg p-2 border-dashed border-primary dark:brightness-125 drop-zone"
     >
       <input
         type="hidden"
@@ -86,7 +86,9 @@ include "plugins-modal.html" %}
         hidden
       />
       <i class="fa-solid fa-cloud-upload-alt"></i>
-      <p class="text-sm text-center my-3">click or drag and drop</p>
+      <p class="dark:text-gray-500 text-sm text-center my-3">
+        click or drag and drop
+      </p>
     </form>
     <section class="col-span-12 progress-area"></section>
     <section class="col-span-12 uploaded-area"></section>
@@ -94,7 +96,7 @@ include "plugins-modal.html" %}
     <!-- end dropzone -->
     <div class="col-span-12 flex flex-col justify-center items-center">
       <p
-        class="mx-4 my-3 font-sans font-semibold leading-normal uppercase text-sm"
+        class="dark:text-gray-300 mx-4 my-3 font-sans font-semibold leading-normal uppercase text-sm"
       >
         or
       </p>
@@ -106,7 +108,7 @@ include "plugins-modal.html" %}
 
         <button
           type="submit"
-          class="dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+          class="tracking-wide dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >
           Reload
         </button>
@@ -222,7 +224,7 @@ include "plugins-modal.html" %}
     >
       <p
         {{current_endpoint}}-content
-        class="ml-3 mr-2 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-left text-sm md:text-base text-slate-700 dark:text-gray-300"
+        class="ml-3 mr-2 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-left text-sm md:text-base text-slate-700 dark:text-gray-200"
       >
         {{plugin['name']}}
       </p>
@@ -268,7 +270,7 @@ include "plugins-modal.html" %}
     >
       <p
         {{current_endpoint}}-content
-        class="ml-3 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-left text-sm md:text-base text-slate-700 dark:text-gray-300"
+        class="ml-3 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-left text-sm md:text-base text-slate-700 dark:text-gray-200"
       >
         {{plugin['name']}}
       </p>
