@@ -10,4 +10,4 @@ CONTRIBUTING.md
 LICENSE.md
 README.md
 SECURITY.md
-ui
+src/ui/static
