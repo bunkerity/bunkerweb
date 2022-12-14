@@ -684,7 +684,12 @@ def configs():
         "configs.html",
         folders=[
             path_to_dict(
-                "/etc/bunkerweb/configs", db_configs=db_configs, integration=integration
+                "/etc/bunkerweb/configs",
+                db_configs=db_configs,
+                integration=integration,
+                services=app.config["CONFIG"]
+                .get_config()["SERVER_NAME"]["value"]
+                .split(" "),
             )
         ],
         dark_mode=app.config["DARK_MODE"],

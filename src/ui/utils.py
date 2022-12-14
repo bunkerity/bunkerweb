@@ -32,6 +32,7 @@ def path_to_dict(
     is_cache: bool = False,
     db_configs: List[dict] = [],
     integration: str = "Linux",
+    services: List[str] = [],
 ) -> dict:
     if integration == "Linux":
         d = {"name": os.path.basename(path)}
@@ -116,10 +117,22 @@ def path_to_dict(
                     "type": "folder",
                     "path": f"{path}/{config}",
                     "can_create_files": True,
-                    "can_create_folders": True,
+                    "can_create_folders": False,
                     "can_edit": False,
                     "can_delete": False,
-                    "children": [],
+                    "children": [
+                        {
+                            "name": service,
+                            "type": "folder",
+                            "path": f"{path}/{config}/{service}",
+                            "can_create_files": True,
+                            "can_create_folders": False,
+                            "can_edit": False,
+                            "can_delete": False,
+                            "children": [],
+                        }
+                        for service in services
+                    ],
                 }
                 for config in config_types
             ],
@@ -136,15 +149,7 @@ def path_to_dict(
                 "content": conf["data"].decode("utf-8"),
             }
 
-            if (
-                d["children"][config_types.index(type_lower)]["children"]
-                and conf["service_id"]
-                and conf["service_id"]
-                in [
-                    x["name"]
-                    for x in d["children"][config_types.index(type_lower)]["children"]
-                ]
-            ):
+            if conf["service_id"]:
                 d["children"][config_types.index(type_lower)]["children"][
                     [
                         x["name"]
@@ -155,18 +160,7 @@ def path_to_dict(
                 ]["children"].append(file_info)
             else:
                 d["children"][config_types.index(type_lower)]["children"].append(
-                    {
-                        "name": conf["service_id"],
-                        "type": "folder",
-                        "path": f"{path}/{type_lower}/{conf['service_id']}",
-                        "can_create_files": True,
-                        "can_create_folders": False,
-                        "can_edit": True,
-                        "can_delete": True,
-                        "children": [file_info],
-                    }
-                    if conf["service_id"]
-                    else file_info
+                    file_info
                 )
 
     return d
