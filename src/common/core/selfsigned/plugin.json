@@ -17,10 +17,10 @@
     "SELF_SIGNED_SSL_EXPIRY": {
       "context": "multisite",
       "default": "365",
-      "help": "Self-signed certificate expiry.",
+      "help": "Self-signed certificate expiry in days.",
       "id": "self-signed-ssl-expiry",
       "label": "Certificate expiry",
-      "regex": "^.*$",
+      "regex": "^\\d+$",
       "type": "text"
     },
     "SELF_SIGNED_SSL_SUBJ": {
@@ -29,7 +29,7 @@
       "help": "Self-signed certificate subject.",
       "id": "self-signed-ssl-subj",
       "label": "Certificate subject",
-      "regex": "^.*$",
+      "regex": "^/CN=[^,]+$",
       "type": "text"
     }
   },

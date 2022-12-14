@@ -19,8 +19,8 @@
       "default": "/",
       "help": "URL where the limit request will be applied.",
       "id": "limit-req-url",
-      "label": "URL",
-      "regex": "^.*$",
+      "label": "Limit request URL",
+      "regex": "^[\\w\\].~:/^%?#[@!$&'()*+,;=-]+$",
       "type": "text",
       "multiple": "limit-req"
     },
@@ -29,8 +29,8 @@
       "default": "2r/s",
       "help": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
       "id": "limit-req-rate",
-      "label": "Rate",
-      "regex": "^.*$",
+      "label": "Limit request Rate",
+      "regex": "^\\d+r/[smhd]$",
       "type": "text",
       "multiple": "limit-req"
     },
@@ -49,7 +49,7 @@
       "help": "Maximum number of connections per IP when using HTTP/1.X protocol.",
       "id": "limit-conn-max-http1",
       "label": "Maximum number of HTTP/1.X connections",
-      "regex": "^.*$",
+      "regex": "^\\d+$",
       "type": "text"
     },
     "LIMIT_CONN_MAX_HTTP2": {
@@ -58,7 +58,7 @@
       "help": "Maximum number of streams per IP when using HTTP/2 protocol.",
       "id": "limit-conn-max-http2",
       "label": "Maximum number of HTTP/2 streams",
-      "regex": "^.*$",
+      "regex": "^\\d+$",
       "type": "text"
     }
   }

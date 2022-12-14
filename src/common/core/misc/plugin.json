@@ -20,8 +20,8 @@
       "help": "Redirect all HTTP request to HTTPS.",
       "id": "redirect-http-to-https",
       "label": "Redirect HTTP to HTTPS",
-      "regex": ".*",
-      "type": "text"
+      "regex": "^(yes|no)$",
+      "type": "check"
     },
     "AUTO_REDIRECT_HTTP_TO_HTTPS": {
       "context": "multisite",
@@ -29,16 +29,16 @@
       "help": "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
       "id": "auto-redirect-http-to-https",
       "label": "Auto redirect HTTP to HTTPS",
-      "regex": ".*",
-      "type": "text"
+      "regex": "^(yes|no)$",
+      "type": "check"
     },
     "ALLOWED_METHODS": {
       "context": "multisite",
       "default": "GET|POST|HEAD",
-      "help": "Allowed HTTP methods to be sent by clients.",
+      "help": "Allowed HTTP methods, separated with pipes to be sent by clients.",
       "id": "allowed-methods",
       "label": "Allowed methods",
-      "regex": ".*",
+      "regex": "^(?!\\|)(\\|?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
       "type": "text"
     },
     "MAX_CLIENT_SIZE": {
@@ -47,7 +47,7 @@
       "help": "Maximum body size (0 for infinite).",
       "id": "max-client-size",
       "label": "Maximum body size",
-      "regex": ".*",
+      "regex": "^\\d+[kKmMgG]?$",
       "type": "text"
     },
     "SERVE_FILES": {
@@ -65,7 +65,7 @@
       "help": "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
       "id": "root-folder",
       "label": "Root folder",
-      "regex": "^.*$",
+      "regex": "^(/[\\w. -]+)*/?$",
       "type": "text"
     },
     "HTTPS_PROTOCOLS": {
@@ -74,7 +74,7 @@
       "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
       "id": "https-protocols",
       "label": "HTTPS protocols",
-      "regex": ".*",
+      "regex": "^(?! )( ?TLSv1\\.[0-3])*$",
       "type": "text"
     },
     "HTTP2": {
@@ -83,7 +83,7 @@
       "help": "Support HTTP2 protocol when HTTPS is enabled.",
       "id": "http2",
       "label": "HTTP2",
-      "regex": ".*",
+      "regex": "^(yes|no)$",
       "type": "check"
     },
     "LISTEN_HTTP": {
@@ -110,7 +110,7 @@
       "help": "Open file cache directive",
       "id": "open-file-cache",
       "label": "Use open file cache",
-      "regex": "^.*$",
+      "regex": "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
       "type": "text"
     },
     "OPEN_FILE_CACHE_ERRORS": {
@@ -120,7 +120,7 @@
       "id": "open-file-cache-errors",
       "label": "Open file cache errors",
       "regex": "^(yes|no)$",
-      "type": "text"
+      "type": "check"
     },
     "OPEN_FILE_CACHE_MIN_USES": {
       "context": "multisite",
@@ -128,7 +128,7 @@
       "help": "Enable open file cache minimum uses",
       "id": "open-file-cache-min-uses",
       "label": "Open file cache min uses",
-      "regex": "^([1-9]+)$",
+      "regex": "^[1-9]\\d*$",
       "type": "text"
     },
     "OPEN_FILE_CACHE_VALID": {
@@ -137,7 +137,7 @@
       "help": "Open file cache valid time",
       "id": "open-file-cache-valid",
       "label": "Open file cache valid time",
-      "regex": "^\\d+(ms|s|m|h|d|w|M|y)$",
+      "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text"
     },
     "EXTERNAL_PLUGIN_URLS": {
@@ -146,7 +146,7 @@
       "help": "List of external plugins URLs (direct download to .zip file) to download and install (URLs are separated with space).",
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
-      "regex": "^.*$",
+      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "DENY_HTTP_STATUS": {

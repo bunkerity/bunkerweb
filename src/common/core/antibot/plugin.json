@@ -28,7 +28,7 @@
       "help": "Unused URI that clients will be redirected to to solve the challenge.",
       "id": "antibot-uri",
       "label": "Antibot URL",
-      "regex": "^.*$",
+      "regex": "^/[\\w\\].~:/?#[@!$&'()*+,;=-]*$",
       "type": "text"
     },
     "ANTIBOT_SESSION_SECRET": {
@@ -36,8 +36,8 @@
       "default": "random",
       "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
       "id": "antibot-session-secret",
-      "label": "Session secret",
-      "regex": "^.*$",
+      "label": "Antibot Session secret",
+      "regex": "^(random|\\w+)$",
       "type": "text"
     },
     "ANTIBOT_SESSION_NAME": {
@@ -45,8 +45,8 @@
       "default": "random",
       "help": "Name of the cookie used by the antibot feature.",
       "id": "antibot-session-name",
-      "label": "Session name",
-      "regex": "^.*$",
+      "label": "Antibot Session name",
+      "regex": "^(random|\\w+)$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SCORE": {
@@ -55,7 +55,7 @@
       "help": "Minimum score required for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-score",
       "label": "reCAPTCHA score",
-      "regex": "^.*$",
+      "regex": "^(0\\.[1-9]|1\\.0)$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SITEKEY": {
@@ -64,7 +64,7 @@
       "help": "Sitekey for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-sitekey",
       "label": "reCAPTCHA sitekey",
-      "regex": "^.*$",
+      "regex": "^[\\w-]*$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SECRET": {
@@ -73,7 +73,7 @@
       "help": "Secret for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-secret",
       "label": "reCAPTCHA secret",
-      "regex": "^.*$",
+      "regex": "^[\\w-]*$",
       "type": "text"
     },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
@@ -82,7 +82,7 @@
       "help": "Sitekey for hCaptcha challenge.",
       "id": "antibot-hcaptcha-sitekey",
       "label": "hCaptcha sitekey",
-      "regex": "^.*$",
+      "regex": "^[a-zA-Z0-9]*$",
       "type": "text"
     },
     "ANTIBOT_HCAPTCHA_SECRET": {
@@ -91,7 +91,7 @@
       "help": "Secret for hCaptcha challenge.",
       "id": "antibot-hcaptcha-secret",
       "label": "hCaptcha secret",
-      "regex": "^.*$",
+      "regex": "^(0x[a-zA-Z0-9]+)?$",
       "type": "text"
     }
   }

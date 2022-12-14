@@ -29,7 +29,7 @@
       "help": "Full URL of the proxied resource (proxy_pass).",
       "id": "reverse-proxy-host",
       "label": "Reverse proxy host",
-      "regex": "^.*$",
+      "regex": "^(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -39,7 +39,7 @@
       "help": "Location URL that will be proxied.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
-      "regex": "^.*$",
+      "regex": "^(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -56,20 +56,20 @@
     "REVERSE_PROXY_HEADERS": {
       "context": "multisite",
       "default": "",
-      "help": "List of HTTP headers to send to proxied resource separated with ; (values for proxy_set_header directive).",
+      "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
-      "regex": "^.*$",
+      "regex": "^(?![; ])(;? ?([\\w-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_HEADERS_CLIENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of HTTP headers to send to client separated with ; (values for add_header directive).",
+      "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
-      "regex": "^.*$",
+      "regex": "^(?![; ])(;? ?([\\w-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -99,7 +99,7 @@
       "help": "Enable authentication using an external provider (value of auth_request directive).",
       "id": "reverse-proxy-auth-request",
       "label": "Reverse proxy auth request",
-      "regex": "^.*$",
+      "regex": "^(/[\\w\\].~:/?#[@!$&'()*+,;=-]*|off)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -109,17 +109,17 @@
       "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
       "id": "reverse-proxy-auth-request-signin-url",
       "label": "Auth request signin URL",
-      "regex": "^.*$",
+      "regex": "^(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_AUTH_REQUEST_SET": {
       "context": "multisite",
       "default": "",
-      "help": "List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).",
+      "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
-      "regex": "^.*$",
+      "regex": "^(?! ;)(;? ?(\\$[a-z_-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -138,7 +138,7 @@
       "help": "Hierarchy levels of the cache.",
       "id": "proxy-cache-path-levels",
       "label": "Hierarchy levels",
-      "regex": "^.*$",
+      "regex": "^(:?[12]){1,3}$",
       "type": "text"
     },
     "PROXY_CACHE_PATH_ZONE_SIZE": {
@@ -147,7 +147,7 @@
       "help": "Maximum size of cached metadata when caching proxied resources.",
       "id": "proxy-cache-path-zone-size",
       "label": "Reverse proxy cache zone size",
-      "regex": "^.*$",
+      "regex": "^\\d+[kKmMgG]?$",
       "type": "text"
     },
     "PROXY_CACHE_PATH_PARAMS": {
@@ -165,7 +165,7 @@
       "help": "HTTP methods that should trigger a cache operation.",
       "id": "proxy-cache-methods",
       "label": "Reverse proxy cache methods",
-      "regex": "^.*$",
+      "regex": "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
       "type": "text"
     },
     "PROXY_CACHE_MIN_USES": {
@@ -174,7 +174,7 @@
       "help": "The minimum number of requests before a response is cached.",
       "id": "proxy-cache-min-uses",
       "label": "Reverse proxy cache minimum uses",
-      "regex": "^.*$",
+      "regex": "^[1-9]\\d*$",
       "type": "text"
     },
     "PROXY_CACHE_KEY": {
@@ -183,16 +183,16 @@
       "help": "The key used to uniquely identify a cached response.",
       "id": "proxy-cache-key",
       "label": "Reverse proxy cache key",
-      "regex": "^.*$",
+      "regex": "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
       "type": "text"
     },
     "PROXY_CACHE_VALID": {
       "context": "multisite",
       "default": "200=24h 301=1h 302=24h",
-      "help": "Define the caching time depending on the HTTP status code (list of status=time).",
+      "help": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
       "id": "proxy-cache-valid",
       "label": "Reverse proxy cache valid",
-      "regex": "^.*$",
+      "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
       "type": "text"
     },
     "PROXY_NO_CACHE": {
@@ -219,7 +219,7 @@
       "help": "Timeout when connecting to the proxied resource.",
       "id": "reverse-proxy-connect-timeout",
       "label": "Reverse proxy connect timeout",
-      "regex": "^.*$",
+      "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -229,7 +229,7 @@
       "help": "Timeout when reading from the proxied resource.",
       "id": "reverse-proxy-read-timeout",
       "label": "Reverse proxy read timeout",
-      "regex": "^.*$",
+      "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -239,7 +239,7 @@
       "help": "Timeout when sending to the proxied resource.",
       "id": "reverse-proxy-send-timeout",
       "label": "Reverse proxy send timeout",
-      "regex": "^.*$",
+      "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text",
       "multiple": "reverse-proxy"
     }

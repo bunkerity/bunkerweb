@@ -20,7 +20,7 @@
       "help": "List of HTTP status codes considered as 'bad'.",
       "id": "bad-behavior-status-code",
       "label": "Bad status codes",
-      "regex": "^.*$",
+      "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
       "type": "text"
     },
     "BAD_BEHAVIOR_BAN_TIME": {
@@ -29,7 +29,7 @@
       "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
       "id": "bad-behavior-ban-time",
       "label": "Ban duration (in seconds)",
-      "regex": "^.*$",
+      "regex": "^\\d+",
       "type": "text"
     },
     "BAD_BEHAVIOR_THRESHOLD": {
@@ -38,16 +38,16 @@
       "help": "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.",
       "id": "bad-behavior-threshold",
       "label": "Threshold",
-      "regex": "^.*$",
+      "regex": "^[1-9][0-9]*",
       "type": "text"
     },
     "BAD_BEHAVIOR_COUNT_TIME": {
       "context": "multisite",
       "default": "60",
-      "help": "Period of time during which we count 'bad' HTTP status codes.",
+      "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
       "id": "bad-behavior-period",
       "label": "Period (in seconds)",
-      "regex": "^.*$",
+      "regex": "^\\d+",
       "type": "text"
     }
   }

@@ -20,7 +20,7 @@
       "help": "List of MIME types that will be compressed with gzip.",
       "id": "gzip-types",
       "label": "MIME types",
-      "regex": "^.*$",
+      "regex": "^(?! )( ?([-\\w.]+/[-\\w.+]+)(?!.*\\2(?!.)))+$",
       "type": "text"
     },
     "GZIP_MIN_LENGTH": {
@@ -29,7 +29,7 @@
       "help": "Minimum length for gzip compression.",
       "id": "gzip-min-length",
       "label": "Minimum length",
-      "regex": "^.*$",
+      "regex": "^\\d+$",
       "type": "text"
     },
     "GZIP_COMP_LEVEL": {

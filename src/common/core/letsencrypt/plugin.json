@@ -20,7 +20,7 @@
       "help": "Email used for Let's Encrypt notification and in certificate.",
       "id": "email-lets-encrypt",
       "label": "Email Let's Encrypt",
-      "regex": "^.*$",
+      "regex": "^([\\w.-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,})?$",
       "type": "text"
     },
     "USE_LETS_ENCRYPT_STAGING": {

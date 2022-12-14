@@ -57,7 +57,7 @@ class Plugins(Base):
     id = Column(String(64), primary_key=True)
     order = Column(Integer, nullable=False)
     name = Column(String(128), nullable=False)
-    description = Column(String(255), nullable=False)
+    description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
     external = Column(Boolean, default=False, nullable=False)
 
@@ -78,20 +78,20 @@ class Settings(Base):
         UniqueConstraint("name"),
     )
 
-    id = Column(String(255), primary_key=True)
-    name = Column(String(255), primary_key=True)
+    id = Column(String(256), primary_key=True)
+    name = Column(String(256), primary_key=True)
     plugin_id = Column(
         String(64),
         ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
     context = Column(CONTEXTS_ENUM, nullable=False)
-    default = Column(String(1023), nullable=True, default="")
-    help = Column(String(255), nullable=False)
-    label = Column(String(255), nullable=True)
-    regex = Column(String(255), nullable=False)
+    default = Column(String(4096), nullable=True, default="")
+    help = Column(String(512), nullable=False)
+    label = Column(String(256), nullable=True)
+    regex = Column(String(1024), nullable=False)
     type = Column(SETTINGS_TYPES_ENUM, nullable=False)
-    multiple = Column(String(255), nullable=True)
+    multiple = Column(String(128), nullable=True)
 
     selects = relationship("Selects", back_populates="setting", cascade="all, delete")
     services = relationship(
@@ -107,11 +107,11 @@ class Global_values(Base):
     __tablename__ = "global_values"
 
     setting_id = Column(
-        String(255),
+        String(256),
         ForeignKey("settings.id", onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
     )
-    value = Column(String(1023), nullable=False)
+    value = Column(String(4096), nullable=False)
     suffix = Column(SmallInteger, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -144,11 +144,11 @@ class Services_settings(Base):
         primary_key=True,
     )
     setting_id = Column(
-        String(255),
+        String(256),
         ForeignKey("settings.id", onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
     )
-    value = Column(String(1023), nullable=False)
+    value = Column(String(4096), nullable=False)
     suffix = Column(SmallInteger, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -165,7 +165,7 @@ class Jobs(Base):
         String(64),
         ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
     )
-    file_name = Column(String(255), nullable=False)
+    file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, nullable=False)
     success = Column(Boolean, nullable=True)
@@ -216,7 +216,7 @@ class Jobs_cache(Base):
         nullable=True,
     )
     file_name = Column(
-        String(255),
+        String(256),
         nullable=False,
     )
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
@@ -242,7 +242,7 @@ class Custom_configs(Base):
         nullable=True,
     )
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
-    name = Column(String(255), nullable=False)
+    name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
@@ -254,11 +254,11 @@ class Selects(Base):
     __tablename__ = "selects"
 
     setting_id = Column(
-        String(255),
+        String(256),
         ForeignKey("settings.id", onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
     )
-    value = Column(String(255), primary_key=True)
+    value = Column(String(256), primary_key=True)
 
     setting = relationship("Settings", back_populates="selects")
 
@@ -267,17 +267,17 @@ class Logs(Base):
     __tablename__ = "logs"
 
     id = Column(TIMESTAMP, primary_key=True)
-    message = Column(String(1023), nullable=False)
+    message = Column(String(2048), nullable=False)
     level = Column(LOG_LEVELS_ENUM, nullable=False)
-    component = Column(String(255), nullable=False)
+    component = Column(String(256), nullable=False)
 
 
 class Instances(Base):
     __tablename__ = "instances"
 
-    hostname = Column(String(255), primary_key=True)
+    hostname = Column(String(256), primary_key=True)
     port = Column(Integer, nullable=False)
-    server_name = Column(String(255), nullable=False)
+    server_name = Column(String(256), nullable=False)
 
 
 class Metadata(Base):

@@ -11,7 +11,7 @@
       "help": "The database URI, following the sqlalchemy format.",
       "id": "database-uri",
       "label": "The database URI",
-      "regex": "^.*$",
+      "regex": "^(postgresql|mysql|mariadb|sqlite|oracle)(\\+[\\w-]+)?:.+$",
       "type": "text"
     }
   }

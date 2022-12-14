@@ -19,8 +19,8 @@
       "default": "sitewide",
       "help": "URL of the protected resource or sitewide value.",
       "id": "auth-basic-location",
-      "label": "Location",
-      "regex": "^.*$",
+      "label": "Auth basic Location",
+      "regex": "^(sitewide|/[a-zA-Z0-9-./]*)$",
       "type": "text"
     },
     "AUTH_BASIC_USER": {
@@ -28,8 +28,8 @@
       "default": "changeme",
       "help": "Username",
       "id": "auth-basic-user",
-      "label": "Username",
-      "regex": "^.*$",
+      "label": "Auth basic Username",
+      "regex": "^[\\w-]+",
       "type": "text"
     },
     "AUTH_BASIC_PASSWORD": {
@@ -38,7 +38,7 @@
       "help": "Password",
       "id": "auth-basic-password",
       "label": "Password",
-      "regex": "^.*$",
+      "regex": "^.+",
       "type": "text"
     },
     "AUTH_BASIC_TEXT": {
@@ -47,7 +47,7 @@
       "help": "Text to display",
       "id": "auth-basic-text",
       "label": "Text",
-      "regex": "^.*$",
+      "regex": "^.+",
       "type": "text"
     }
   }

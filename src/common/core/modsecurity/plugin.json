@@ -29,8 +29,9 @@
 			"help": "SecAuditEngine directive of ModSecurity.",
 			"id": "modsecurity-sec-audit-engine",
 			"label": "SecAuditEngine",
-			"regex": "^.*$",
-			"type": "text"
+			"regex": "^(On|RelevantOnly|Off)$",
+			"type": "select",
+      "select": ["On", "RelevantOnly", "Off"]
 		},
 		"MODSECURITY_SEC_RULE_ENGINE": {
 			"context": "multisite",
@@ -39,7 +40,8 @@
 			"id": "modsecurity-sec-rule-engine",
 			"label": "SecRuleEngine",
 			"regex": "^(On|DetectionOnly|Off)$",
-			"type": "text"
+			"type": "select",
+      "select": ["On", "DetectionOnly", "Off"]
 		},
 		"MODSECURITY_SEC_AUDIT_LOG_PARTS": {
 			"context": "multisite",
@@ -47,7 +49,7 @@
 			"help": "SecAuditLogParts directive of ModSecurity.",
 			"id": "modsecurity-sec-audit-log-parts",
 			"label": "SecAuditLogParts",
-			"regex": "^([A-Z]*)$",
+			"regex": "^A(([B-K])(?!.*\\2))+Z$",
 			"type": "text"
 		}
 	}

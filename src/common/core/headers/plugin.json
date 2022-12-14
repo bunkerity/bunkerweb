@@ -11,7 +11,7 @@
       "help": "Custom header to add (HeaderName: HeaderValue).",
       "id": "custom-header",
       "label": "Custom header (HeaderName: HeaderValue)",
-      "regex": "^.*$",
+      "regex": "^([\\w-]+: .+)?$",
       "type": "text",
       "multiple": "custom-headers"
     },
@@ -21,7 +21,7 @@
       "help": "Headers to remove (Header1 Header2 Header3 ...)",
       "id": "remove-headers",
       "label": "Remove headers",
-      "regex": "^.*$",
+      "regex": "^(?! )( ?[\\w-]+)*$",
       "type": "text"
     },
     "STRICT_TRANSPORT_SECURITY": {
@@ -30,7 +30,7 @@
       "help": "Value for the Strict-Transport-Security header.",
       "id": "strict-transport-security",
       "label": "Strict-Transport-Security",
-      "regex": "^.*$",
+      "regex": "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
       "type": "text"
     },
     "COOKIE_FLAGS": {
@@ -39,8 +39,9 @@
       "help": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
       "id": "cookie-flags",
       "label": "Cookie flags",
-      "regex": "^.*$",
-      "type": "text"
+      "regex": "^(\\*|\\w+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))*$",
+      "type": "text",
+      "multiple": "cookie-flags"
     },
     "COOKIE_AUTO_SECURE_FLAG": {
       "context": "multisite",
@@ -66,8 +67,19 @@
       "help": "Value for the Referrer-Policy header.",
       "id": "referrer-policy",
       "label": "Referrer-Policy",
-      "regex": "^.*$",
-      "type": "text"
+      "regex": "^(no-referrer|no-referrer-when-downgrade|origin|origin-when-cross-origin|same-origin|strict-origin|strict-origin-when-cross-origin|unsafe-url)?$",
+      "type": "select",
+      "select": [
+        "",
+        "no-referrer",
+        "no-referrer-when-downgrade",
+        "origin",
+        "origin-when-cross-origin",
+        "same-origin",
+        "strict-origin",
+        "strict-origin-when-cross-origin",
+        "unsafe-url"
+      ]
     },
     "PERMISSIONS_POLICY": {
       "context": "multisite",
@@ -75,16 +87,16 @@
       "help": "Value for the Permissions-Policy header.",
       "id": "permissions-policy",
       "label": "Permissions-Policy",
-      "regex": "^.*$",
+      "regex": "^(?![, ])(,? ?([a-z-]+)(?!.*[^-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*\\u0022))*\\)))*$",
       "type": "text"
     },
     "FEATURE_POLICY": {
       "context": "multisite",
-      "default": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none';  'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
+      "default": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
       "help": "Value for the Feature-Policy header.",
       "id": "feature-policy",
       "label": "Feature-Policy",
-      "regex": "^.*$",
+      "regex": "^(?![; ])( ?([\\w-]+)(?!.*[^-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?://[\\w@:%.+~#=-]+[\\w()!@:%+.~#?&/=$-]*))+;)*$",
       "type": "text"
     },
     "X_FRAME_OPTIONS": {
@@ -93,8 +105,9 @@
       "help": "Value for the X-Frame-Options header.",
       "id": "x-frame-options",
       "label": "X-Frame-Options",
-      "regex": "^.*$",
-      "type": "text"
+      "regex": "^(DENY|SAMEORIGIN)?$",
+      "type": "select",
+      "select": ["", "DENY", "SAMEORIGIN"]
     },
     "X_CONTENT_TYPE_OPTIONS": {
       "context": "multisite",
@@ -102,8 +115,9 @@
       "help": "Value for the X-Content-Type-Options header.",
       "id": "x-content-type-options",
       "label": "X-Content-Type-Options",
-      "regex": "^.*$",
-      "type": "text"
+      "regex": "^(nosniff)?$",
+      "type": "select",
+      "select": ["", "nosniff"]
     },
     "X_XSS_PROTECTION": {
       "context": "multisite",
@@ -111,7 +125,7 @@
       "help": "Value for the X-XSS-Protection header.",
       "id": "x-xss-protection",
       "label": "X-XSS-Protection",
-      "regex": "^.*$",
+      "regex": "^0|1(; (mode=block|report=https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*))?$",
       "type": "text"
     }
   }

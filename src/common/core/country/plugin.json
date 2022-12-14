@@ -11,7 +11,7 @@
       "help": "Deny access if the country of the client is in the list (2 letters code).",
       "id": "country-blacklist",
       "label": "Country blacklist",
-      "regex": "^.*$",
+      "regex": "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
       "type": "text"
     },
     "WHITELIST_COUNTRY": {
@@ -20,7 +20,7 @@
       "help": "Deny access if the country of the client is not in the list (2 letters code).",
       "id": "country-whitelist",
       "label": "Country whitelist",
-      "regex": "^.*$",
+      "regex": "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
       "type": "text"
     }
   }

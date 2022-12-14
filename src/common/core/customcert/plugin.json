@@ -20,7 +20,7 @@
       "help": "Full path of the certificate or bundle file.",
       "id": "custom-https-cert",
       "label": "Certificate path",
-      "regex": "^.*$",
+      "regex": "^(/[\\w. -]+)*/?$",
       "type": "text"
     },
     "CUSTOM_HTTPS_KEY": {
@@ -29,7 +29,7 @@
       "help": "Full path of the key file.",
       "id": "custom-https-key",
       "label": "Key path",
-      "regex": "^.*$",
+      "regex": "^(/[\\w. -]+)*/?$",
       "type": "text"
     }
   },
