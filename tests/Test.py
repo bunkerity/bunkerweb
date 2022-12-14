@@ -1,4 +1,5 @@
 from abc import ABC
+from pathlib import Path
 from time import time, sleep
 from requests import get
 from traceback import format_exc
@@ -134,11 +135,9 @@ class Test(ABC):
     @staticmethod
     def replace_in_file(path, old, new):
         try:
-            with open(path, "r") as f:
-                content = f.read()
-            content = sub(old, new, content, flags=MULTILINE)
-            with open(path, "w") as f:
-                f.write(content)
+            Path(path).write_text(
+                sub(old, new, Path(path).read_text(), flags=MULTILINE)
+            )
         except:
             setup_logger("Test", getenv("LOG_LEVEL", "INFO")).warning(
                 f"Can't replace file {path}"

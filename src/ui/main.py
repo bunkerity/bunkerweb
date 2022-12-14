@@ -1,4 +1,6 @@
+from contextlib import suppress
 from io import BytesIO
+from pathlib import Path
 from signal import SIGINT, signal, SIGTERM
 from bs4 import BeautifulSoup
 from copy import deepcopy
@@ -41,9 +43,13 @@ from typing import Optional
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/api")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from src.Instances import Instances
 from src.ConfigFiles import ConfigFiles
@@ -112,8 +118,7 @@ if not vars["FLASK_ENV"] == "development" and vars["ABSOLUTE_URI"].endswith(
     logger.error("Please change the default URL.")
     sys_exit(1)
 
-with open("/var/tmp/bunkerweb/ui.pid", "w") as f:
-    f.write(str(getpid()))
+Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -334,12 +339,12 @@ def instances():
     # Manage instances
     if request.method == "POST":
         # Check operation
-        if not "operation" in request.form or not request.form["operation"] in [
+        if not "operation" in request.form or not request.form["operation"] in (
             "reload",
             "start",
             "stop",
             "restart",
-        ]:
+        ):
             flash("Missing operation parameter on /instances.", "error")
             return redirect(url_for("loading", next=url_for("instances")))
 
@@ -384,11 +389,11 @@ def services():
     if request.method == "POST":
 
         # Check operation
-        if not "operation" in request.form or not request.form["operation"] in [
+        if not "operation" in request.form or not request.form["operation"] in (
             "new",
             "edit",
             "delete",
-        ]:
+        ):
             flash("Missing operation parameter on /services.", "error")
             return redirect(url_for("loading", next=url_for("services")))
 
@@ -574,11 +579,11 @@ def configs():
         operation = ""
 
         # Check operation
-        if not "operation" in request.form or not request.form["operation"] in [
+        if not "operation" in request.form or not request.form["operation"] in (
             "new",
             "edit",
             "delete",
-        ]:
+        ):
             flash("Missing operation parameter on /configs.", "error")
             return redirect(url_for("loading", next=url_for("configs")))
 
@@ -811,7 +816,7 @@ def plugins():
                         except BadZipFile:
                             error = 1
                             flash(
-                                f"{file} is not a valid zip file. ({folder_name if folder_name else temp_folder_name})",
+                                f"{file} is not a valid zip file. ({folder_name or temp_folder_name})",
                                 "error",
                             )
                     else:
@@ -911,37 +916,37 @@ def plugins():
                         except ReadError:
                             error = 1
                             flash(
-                                f"Couldn't read file {file} ({folder_name if folder_name else temp_folder_name})",
+                                f"Couldn't read file {file} ({folder_name or temp_folder_name})",
                                 "error",
                             )
                         except CompressionError:
                             error = 1
                             flash(
-                                f"{file} is not a valid tar file ({folder_name if folder_name else temp_folder_name})",
+                                f"{file} is not a valid tar file ({folder_name or temp_folder_name})",
                                 "error",
                             )
                         except HeaderError:
                             error = 1
                             flash(
-                                f"The file plugin.json in {file} is not valid ({folder_name if folder_name else temp_folder_name})",
+                                f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})",
                                 "error",
                             )
                 except KeyError:
                     error = 1
                     flash(
-                        f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name if folder_name else temp_folder_name})",
+                        f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name or temp_folder_name})",
                         "error",
                     )
                 except JSONDecodeError as e:
                     error = 1
                     flash(
-                        f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name if folder_name else temp_folder_name})",
+                        f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name or temp_folder_name})",
                         "error",
                     )
                 except ValueError:
                     error = 1
                     flash(
-                        f"The file plugin.json is missing one or more of the following keys: <i>{', '.join(PLUGIN_KEYS)}</i> ({folder_name if folder_name else temp_folder_name})",
+                        f"The file plugin.json is missing one or more of the following keys: <i>{', '.join(PLUGIN_KEYS)}</i> ({folder_name or temp_folder_name})",
                         "error",
                     )
                 except FileExistsError:
@@ -985,10 +990,8 @@ def plugins():
 
         # Remove tmp folder
         if exists("/var/tmp/bunkerweb/ui"):
-            try:
+            with suppress(OSError):
                 rmtree("/var/tmp/bunkerweb/ui")
-            except OSError:
-                pass
 
         return redirect(
             url_for("loading", next=url_for("plugins"), message="Reloading plugins")
@@ -1057,11 +1060,9 @@ def upload_plugin():
         if not file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
             return {"status": "ko"}, 422
 
-        with open(
-            f"/var/tmp/bunkerweb/ui/{uuid4()}{file.filename[file.filename.index('.'):]}",
-            "wb",
-        ) as f:
-            f.write(file.read())
+        Path(
+            f"/var/tmp/bunkerweb/ui/{uuid4()}{file.filename[file.filename.index('.'):]}"
+        ).write_bytes(file.read())
 
     return {"status": "ok"}, 201
 
@@ -1127,7 +1128,7 @@ def custom_plugin(plugin):
     finally:
         # Remove the custom plugin from the shared library
         sys_path.pop()
-        del sys_modules["actions"]
+        sys_modules.pop("actions")
         del actions
 
         if (
@@ -1304,7 +1305,7 @@ def logs_container(container_id):
     if from_date is not None:
         last_update = from_date
 
-    if any(arg and not arg.isdigit() for arg in [last_update, from_date, to_date]):
+    if any(arg and not arg.isdigit() for arg in (last_update, from_date, to_date)):
         return (
             jsonify(
                 {

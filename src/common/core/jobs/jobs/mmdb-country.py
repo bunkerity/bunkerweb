@@ -3,12 +3,17 @@
 from datetime import date
 from gzip import decompress
 from os import _exit, getenv
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from requests import get
 from maxminddb import open_database
@@ -39,8 +44,7 @@ try:
 
     # Save it to temp
     logger.info("Saving mmdb file to tmp ...")
-    with open("/var/tmp/bunkerweb/country.mmdb", "wb") as f:
-        f.write(decompress(resp.content))
+    Path(f"/var/tmp/bunkerweb/country.mmdb").write_bytes(decompress(resp.content))
 
     # Try to load it
     logger.info("Checking if mmdb file is valid ...")

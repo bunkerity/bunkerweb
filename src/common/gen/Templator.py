@@ -62,9 +62,9 @@ class Templator:
         if config != None:
             real_config = config
         Path(dirname(real_path)).mkdir(parents=True, exist_ok=True)
-        with open(real_path, "w") as f:
-            for k, v in real_config.items():
-                f.write(f"{k}={v}\n")
+        Path(real_path).write_text(
+            "\n".join(f"{k}={v}" for k, v in real_config.items())
+        )
 
     def __render_global(self):
         self.__write_config()
@@ -129,8 +129,7 @@ class Templator:
             real_name = name
         jinja_template = self.__jinja_env.get_template(template)
         Path(dirname(f"{real_output}{real_name}")).mkdir(parents=True, exist_ok=True)
-        with open(f"{real_output}{real_name}", "w") as f:
-            f.write(jinja_template.render(real_config))
+        Path(f"{real_output}{real_name}").write_text(jinja_template.render(real_config))
 
     def is_custom_conf(path):
         return glob(f"{path}/*.conf")

@@ -2,13 +2,18 @@
 
 from os import _exit, getenv, makedirs
 from os.path import isfile
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
-sys_path.append("/usr/share/bunkerweb/core/bunkernet/jobs")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+        "/usr/share/bunkerweb/core/bunkernet/jobs",
+    )
+)
 
 from bunkernet import data
 from Database import Database
@@ -83,8 +88,7 @@ try:
     # Writing data to file
     logger.info("Saving BunkerNet data ...")
     content = "\n".join(data["data"]).encode("utf-8")
-    with open("/var/tmp/bunkerweb/bunkernet-ip.list", "wb") as f:
-        f.write(content)
+    Path("/var/tmp/bunkerweb/bunkernet-ip.list").write_bytes(content)
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/bunkernet-ip.list")

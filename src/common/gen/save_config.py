@@ -13,10 +13,14 @@ from traceback import format_exc
 from typing import Any
 
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/api")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from docker import DockerClient
 from kubernetes import client as kube_client

@@ -12,9 +12,13 @@ from shutil import copytree, rmtree
 from traceback import format_exc
 from zipfile import ZipFile
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from requests import get
 
@@ -32,7 +36,6 @@ status = 0
 
 def install_plugin(plugin_dir):
     # Load plugin.json
-    metadata = {}
     with open(f"{plugin_dir}plugin.json", "rb") as f:
         metadata = loads(f.read())
     # Don't go further if plugin is already installed

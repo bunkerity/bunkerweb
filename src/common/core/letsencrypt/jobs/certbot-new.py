@@ -2,13 +2,18 @@
 
 from os import environ, getcwd, getenv
 from os.path import exists
+from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from Database import Database
 from logger import setup_logger
@@ -93,10 +98,9 @@ try:
                 )
 
                 if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
-                    with open(
-                        f"/etc/letsencrypt/live/{first_server}/cert.pem", "rb"
-                    ) as f:
-                        cert = f.read()
+                    cert = Path(
+                        f"/etc/letsencrypt/live/{first_server}/cert.pem"
+                    ).read_bytes()
 
                     # Update db
                     err = db.update_job_cache(
@@ -132,10 +136,9 @@ try:
                 )
 
                 if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
-                    with open(
-                        f"/etc/letsencrypt/live/{first_server}/cert.pem", "rb"
-                    ) as f:
-                        cert = f.read()
+                    cert = Path(
+                        f"/etc/letsencrypt/live/{first_server}/cert.pem"
+                    ).read_bytes()
 
                     # Update db
                     err = db.update_job_cache(

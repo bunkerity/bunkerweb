@@ -1,5 +1,6 @@
 from os import listdir, mkdir, remove, replace, walk
 from os.path import dirname, exists, join, isfile
+from pathlib import Path
 from re import compile as re_compile
 from shutil import rmtree, move as shutil_move
 from typing import Tuple
@@ -95,7 +96,7 @@ class ConfigFiles:
     def create_folder(self, path: str, name: str) -> Tuple[str, int]:
         folder_path = join(path, name) if not path.endswith(name) else path
         try:
-            mkdir(folder_path)
+            Path(folder_path).mkdir()
         except OSError:
             return f"Could not create {folder_path}", 1
 
@@ -103,11 +104,8 @@ class ConfigFiles:
 
     def create_file(self, path: str, name: str, content: str) -> Tuple[str, int]:
         file_path = join(path, name)
-        mkdir(path, exist_ok=True)
-
-        with open(file_path, "w") as f:
-            f.write(content)
-
+        Path(path).mkdir(exist_ok=True)
+        Path(file_path).write_text(content)
         return f"The file {file_path} was successfully created", 0
 
     def edit_folder(self, path: str, name: str, old_name: str) -> Tuple[str, int]:
@@ -137,8 +135,7 @@ class ConfigFiles:
         old_path = dirname(join(path, old_name))
 
         try:
-            with open(old_path, "r") as f:
-                file_content = f.read()
+            file_content = Path(old_path).read_text()
         except FileNotFoundError:
             return f"Could not find {old_path}", 1
 
@@ -161,7 +158,6 @@ class ConfigFiles:
             except OSError:
                 return f"Could not remove {old_path}", 1
 
-        with open(new_path, "w") as f:
-            f.write(content)
+        Path(new_path).write_text(content)
 
         return f"The file {old_path} was successfully edited", 0

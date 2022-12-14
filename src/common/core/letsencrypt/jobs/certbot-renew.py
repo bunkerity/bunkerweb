@@ -6,8 +6,12 @@ from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+    )
+)
 
 from logger import setup_logger
 
@@ -21,7 +25,7 @@ def renew(domain):
             "--cert-name",
             domain,
             "--deploy-hook",
-            f"{getcwd()}/certbot-deploy.py",
+            "/usr/share/bunkerweb/core/letsencrypt/jobs/certbot-deploy.py",
         ],
         stdin=DEVNULL,
         stderr=STDOUT,

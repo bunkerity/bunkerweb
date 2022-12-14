@@ -2,13 +2,18 @@
 
 from os import getenv, makedirs
 from os.path import exists
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/api")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from Database import Database
 from logger import setup_logger
@@ -67,8 +72,7 @@ try:
     else:
         root_dir = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
         makedirs(root_dir, exist_ok=True)
-        with open(f"{root_dir}{token}", "w") as f:
-            f.write(validation)
+        Path(f"{root_dir}{token}").write_text(validation)
 except:
     status = 1
     logger.error(f"Exception while running certbot-auth.py :\n{format_exc()}")

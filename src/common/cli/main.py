@@ -5,10 +5,14 @@ from os import _exit
 from sys import exit as sys_exit, path
 from traceback import format_exc
 
-path.append("/usr/share/bunkerweb/deps/python")
-path.append("/usr/share/bunkerweb/cli")
-path.append("/usr/share/bunkerweb/utils")
-path.append("/usr/share/bunkerweb/api")
+path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/cli",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+    )
+)
 
 from logger import setup_logger
 from CLI import CLI

@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
 from json import dumps, loads
@@ -21,7 +22,6 @@ def is_cached_file(file, expire):
             return False
         if not path.isfile(f"{file}.md"):
             return False
-        cached_time = 0
         with open(f"{file}.md", "r") as f:
             cached_time = loads(f.read())["date"]
         current_time = datetime.timestamp(datetime.now())
@@ -51,11 +51,9 @@ def file_hash(file):
 
 
 def cache_hash(cache):
-    try:
+    with suppress(BaseException):
         with open(f"{cache}.md", "r") as f:
             return loads(f.read())["checksum"]
-    except:
-        pass
     return None
 
 

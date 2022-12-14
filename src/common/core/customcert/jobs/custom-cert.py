@@ -2,13 +2,18 @@
 
 from os import getenv, makedirs, remove
 from os.path import isfile
+from pathlib import Path
 from shutil import copy
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from Database import Database
 from jobs import file_hash
@@ -45,16 +50,13 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
         cert_hash = file_hash(cert_path)
 
         if not isfile(cert_cache_path):
-            with open(cert_cache_path, "w") as f:
-                f.write(cert_hash)
+            Path(cert_cache_path).write_text(cert_hash)
 
         old_hash = file_hash(cert_cache_path)
         if old_hash == cert_hash:
             return False
 
-        with open(cert_cache_path, "w") as f:
-            f.write(cert_hash)
-
+        Path(cert_cache_path).write_text(cert_hash)
         copy(cert_path, cert_cache_path.replace(".hash", ""))
 
         if not isfile(key_path):
@@ -71,8 +73,7 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
         key_hash = file_hash(key_path)
 
         if not isfile(key_cache_path):
-            with open(key_cache_path, "w") as f:
-                f.write(key_hash)
+            Path(key_cache_path).write_text(key_hash)
 
         old_hash = file_hash(key_cache_path)
         if old_hash != key_hash:

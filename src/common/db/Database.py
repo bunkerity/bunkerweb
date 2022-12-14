@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
@@ -68,10 +68,8 @@ class Database:
             )
 
         if sqlalchemy_string.startswith("sqlite"):
-            try:
+            with suppress(FileExistsError):
                 makedirs(dirname(sqlalchemy_string.split("///")[1]), exist_ok=True)
-            except FileExistsError:
-                pass
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
@@ -567,12 +565,10 @@ class Database:
                                 Global_values.suffix == suffix,
                             ).update({Global_values.value: value})
 
-            try:
+            with suppress(ProgrammingError, OperationalError):
                 metadata = session.query(Metadata).get(1)
                 if metadata is not None and not metadata.first_config_saved:
                     metadata.first_config_saved = True
-            except (ProgrammingError, OperationalError):
-                pass
 
             try:
                 session.add_all(to_put)
@@ -645,8 +641,9 @@ class Database:
 
                 if custom_conf is None:
                     to_put.append(Custom_configs(**config))
-                elif config["checksum"] != custom_conf.checksum and (
-                    method == custom_conf.method or method == "autoconf"
+                elif config["checksum"] != custom_conf.checksum and method in (
+                    custom_conf.method,
+                    "autoconf",
                 ):
                     session.query(Custom_configs).filter(
                         Custom_configs.service_id == config.get("service_id", None),
@@ -810,10 +807,9 @@ class Database:
 
                 for key, value in deepcopy(tmp_config).items():
                     if key.startswith(f"{service}_"):
-                        tmp_config[key.replace(f"{service}_", "")] = value
-                        del tmp_config[key]
+                        tmp_config[key.replace(f"{service}_", "")] = tmp_config.pop(key)
                     elif any(key.startswith(f"{s}_") for s in service_names):
-                        del tmp_config[key]
+                        tmp_config.pop(key)
                     else:
                         tmp_config[key] = (
                             {"value": value["value"], "method": "default"}
@@ -1367,7 +1363,7 @@ class Database:
                 return "An instance with the same hostname already exists."
 
             session.add(
-                Instances(hostname=hostname, port=int(port), server_name=server_name)
+                Instances(hostname=hostname, port=port, server_name=server_name)
             )
 
             try:

@@ -42,7 +42,7 @@ class CLI(ApiCaller):
 
     def __get_apis(self):
         # Docker case
-        if self.__integration == "docker" or self.__integration == "linux":
+        if self.__integration in ("docker", "linux"):
             return [
                 API(
                     f"http://127.0.0.1:{self.__variables['API_HTTP_PORT']}",

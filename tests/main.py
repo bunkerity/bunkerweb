@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 from sys import path, argv, exit
 from glob import glob
-from os import getcwd, getenv, _exit
+from os import getenv, _exit
 from os.path import isfile
 from traceback import format_exc
 from json import loads
 from subprocess import run
 
-path.append(f"{getcwd()}/utils")
-path.append(f"{getcwd()}/tests")
+path.extend((f"{Path.cwd()}/utils", f"{Path.cwd()}/tests"))
 
 from Test import Test
 from DockerTest import DockerTest
@@ -26,7 +26,7 @@ if len(argv) <= 1:
     exit(1)
 
 test_type = argv[1]
-if not test_type in ["linux", "docker", "autoconf", "swarm", "kubernetes", "ansible"]:
+if not test_type in ("linux", "docker", "autoconf", "swarm", "kubernetes", "ansible"):
     logger.error(f"Wrong type argument {test_type}")
     exit(1)
 

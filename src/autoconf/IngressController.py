@@ -22,14 +22,14 @@ class IngressController(Controller, ConfigCaller):
         self.__logger = setup_logger("Ingress-controller", getenv("LOG_LEVEL", "INFO"))
 
     def _get_controller_instances(self):
-        controller_instances = []
-        for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items:
+        return [
+            pod
+            for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items
             if (
                 pod.metadata.annotations != None
                 and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-            ):
-                controller_instances.append(pod)
-        return controller_instances
+            )
+        ]
 
     def _to_instances(self, controller_instance):
         instance = {}
@@ -289,9 +289,10 @@ class IngressController(Controller, ConfigCaller):
 
     def process_events(self):
         watch_types = ["pod", "ingress", "configmap"]
-        threads = []
-        for watch_type in watch_types:
-            threads.append(Thread(target=self.__watch, args=(watch_type,)))
+        threads = [
+            Thread(target=self.__watch, args=(watch_type,))
+            for watch_type in watch_types
+        ]
         for thread in threads:
             thread.start()
         for thread in threads:

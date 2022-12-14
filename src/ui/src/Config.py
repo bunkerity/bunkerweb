@@ -1,5 +1,6 @@
 from copy import deepcopy
 from os import listdir, remove
+from pathlib import Path
 from time import sleep
 from flask import flash
 from os.path import exists, isfile
@@ -98,11 +99,8 @@ class Config:
         if not isfile(filename):
             return {}
 
-        with open(filename, "r") as f:
-            env = f.read()
-
         data = {}
-        for line in env.split("\n"):
+        for line in Path(filename).read_text().split("\n"):
             if not "=" in line:
                 continue
             var = line.split("=")[0]
@@ -121,8 +119,9 @@ class Config:
         variables : dict
             The dict to convert to env file
         """
-        with open(filename, "w") as f:
-            f.write("\n".join(f"{k}={variables[k]}" for k in sorted(variables)))
+        Path(filename).write_text(
+            "\n".join(f"{k}={variables[k]}" for k in sorted(variables))
+        )
 
     def __gen_conf(self, global_conf: dict, services_conf: list[dict]) -> None:
         """Generates the nginx configuration file from the given configuration
@@ -306,7 +305,7 @@ class Config:
                 if edit is False:
                     return f"Service {service['SERVER_NAME']} already exists.", 1
 
-                del services[i]
+                services.pop(i)
 
         services.append(variables)
         self.__gen_conf(self.get_config(methods=False), services)
@@ -397,11 +396,11 @@ class Config:
 
         for k in full_env:
             if k.startswith(service_name):
-                del new_env[k]
+                new_env.pop(k)
 
                 for service in new_services:
                     if k in service:
-                        del service[k]
+                        service.pop(k)
 
         self.__gen_conf(new_env, new_services)
         return f"Configuration for {service_name} has been deleted.", 0

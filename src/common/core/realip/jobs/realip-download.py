@@ -1,13 +1,19 @@
 #!/usr/bin/python3
 
+from contextlib import suppress
 from ipaddress import ip_address, ip_network
 from os import _exit, getenv, makedirs
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from requests import get
 
@@ -18,17 +24,13 @@ from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 def check_line(line):
     if "/" in line:
-        try:
+        with suppress(ValueError):
             ip_network(line)
             return True, line
-        except ValueError:
-            pass
     else:
-        try:
+        with suppress(ValueError):
             ip_address(line)
             return True, line
-        except ValueError:
-            pass
     return False, ""
 
 
@@ -69,10 +71,7 @@ try:
         _exit(0)
 
     # Get URLs
-    urls = []
-    for url in getenv("REALIP_FROM_URLS", "").split(" "):
-        if url != "" and url not in urls:
-            urls.append(url)
+    urls = [url for url in getenv("REALIP_FROM_URLS", "").split(" ") if url]
 
     # Download and write data to temp file
     i = 0
@@ -101,8 +100,7 @@ try:
                 f"Exception while getting RealIP list from {url} :\n{format_exc()}"
             )
 
-    with open("/var/tmp/bunkerweb/realip-combined.list", "wb") as f:
-        f.write(content)
+    Path("/var/tmp/bunkerweb/realip-combined.list").write_bytes(content)
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/realip-combined.list")

@@ -143,9 +143,10 @@ class SwarmController(Controller, ConfigCaller):
 
     def process_events(self):
         event_types = ["service", "config"]
-        threads = []
-        for event_type in event_types:
-            threads.append(Thread(target=self.__event, args=(event_type,)))
+        threads = [
+            Thread(target=self.__event, args=(event_type,))
+            for event_type in event_types
+        ]
         for thread in threads:
             thread.start()
         for thread in threads:

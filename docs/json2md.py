@@ -6,9 +6,9 @@ from pytablewriter import MarkdownTableWriter
 
 
 def print_md_table(settings):
-    values = []
-    for setting, data in settings.items():
-        values.append(
+    writer = MarkdownTableWriter(
+        headers=["Setting", "Default", "Context", "Multiple", "Description"],
+        value_matrix=[
             [
                 f"`{setting}`",
                 "" if data["default"] == "" else f"`{data['default']}`",
@@ -16,13 +16,11 @@ def print_md_table(settings):
                 "no" if not "multiple" in data else "yes",
                 data["help"],
             ]
-        )
-    writer = MarkdownTableWriter(
-        headers=["Setting", "Default", "Context", "Multiple", "Description"],
-        value_matrix=values,
+            for setting, data in settings.items()
+        ],
     )
     writer.write_table()
-    print("")
+    print()
 
 
 print("# Settings\n")

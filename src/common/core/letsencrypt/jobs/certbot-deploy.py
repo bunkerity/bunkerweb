@@ -9,10 +9,14 @@ from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/api")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from Database import Database
 from logger import setup_logger

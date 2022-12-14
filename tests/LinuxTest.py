@@ -18,7 +18,7 @@ class LinuxTest(Test):
             r"app2\.example\.com": getenv("TEST_DOMAIN1_2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN1_3"),
         }
-        if not distro in ["ubuntu", "debian", "fedora", "centos"]:
+        if not distro in ("ubuntu", "debian", "fedora", "centos"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
         self.__logger = setup_logger("Linux_test", getenv("LOGLEVEL", "INFO"))
@@ -40,9 +40,9 @@ class LinuxTest(Test):
             proc = run(cmd, shell=True)
             if proc.returncode != 0:
                 raise Exception("docker run failed (linux stack)")
-            if distro in ["ubuntu", "debian"]:
+            if distro in ("ubuntu", "debian"):
                 cmd = "apt install -y /opt/\$(ls /opt | grep deb)"
-            elif distro in ["centos", "fedora"]:
+            elif distro in ("centos", "fedora"):
                 cmd = "dnf install -y /opt/\$(ls /opt | grep rpm)"
             proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0:
@@ -64,7 +64,7 @@ class LinuxTest(Test):
                         f"docker exec failed for directory {src} (linux stack)"
                     )
 
-            if distro in ["ubuntu", "debian"]:
+            if distro in ("ubuntu", "debian"):
                 LinuxTest.docker_exec(
                     distro,
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
@@ -87,7 +87,7 @@ class LinuxTest(Test):
                     LinuxTest.docker_exec(
                         distro, "systemctl stop php7.4-fpm ; systemctl start php7.4-fpm"
                     )
-            elif distro in ["centos", "fedora"]:
+            elif distro in ("centos", "fedora"):
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(
                     distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf"

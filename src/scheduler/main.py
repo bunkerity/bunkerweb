@@ -16,6 +16,7 @@ from os import (
     walk,
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
+from pathlib import Path
 from shutil import chown, copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
@@ -24,10 +25,14 @@ from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/api")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from dotenv import dotenv_values
 
@@ -97,9 +102,8 @@ def generate_custom_configs(
         if custom_config["service_id"]:
             tmp_path += f"/{custom_config['service_id']}"
         tmp_path += f"/{custom_config['name']}.conf"
-        makedirs(dirname(tmp_path), exist_ok=True)
-        with open(tmp_path, "wb") as f:
-            f.write(custom_config["data"])
+        Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
+        Path(tmp_path).write_bytes(custom_config["data"])
 
     # Fix permissions for the custom configs folder
     for root, dirs, files in walk("/data/configs", topdown=False):
@@ -127,8 +131,7 @@ if __name__ == "__main__":
             _exit(1)
 
         # Write pid to file
-        with open("/var/tmp/bunkerweb/scheduler.pid", "w") as f:
-            f.write(str(getpid()))
+        Path("/var/tmp/bunkerweb/scheduler.pid").write_text(str(getpid()))
 
         # Parse arguments
         parser = ArgumentParser(description="Job scheduler for BunkerWeb")

@@ -1,15 +1,21 @@
 #!/usr/bin/python3
 
+from contextlib import suppress
 from ipaddress import ip_address, ip_network
 from os import _exit, getenv, makedirs
+from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+    )
+)
 
 from requests import get
 
@@ -25,17 +31,13 @@ uri_rx = re_compile(rb"^/")
 def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     if kind == "IP":
         if b"/" in line:
-            try:
+            with suppress(ValueError):
                 ip_network(line.decode("utf-8"))
                 return True, line
-            except ValueError:
-                pass
         else:
-            try:
+            with suppress(ValueError):
                 ip_address(line.decode("utf-8"))
                 return True, line
-            except ValueError:
-                pass
     elif kind == "RDNS":
         if rdns_rx.match(line):
             return True, line.lower()
@@ -147,8 +149,7 @@ try:
                         content += data + b"\n"
                         i += 1
 
-                with open(f"/var/tmp/bunkerweb/greylist/{kind}.list", "wb") as f:
-                    f.write(content)
+                Path(f"/var/tmp/bunkerweb/greylist/{kind}.list").write_bytes(content)
 
                 logger.info(f"Downloaded {i} grey {kind}")
                 # Check if file has changed

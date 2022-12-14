@@ -2,14 +2,19 @@
 
 from os import _exit, getenv, makedirs, remove
 from os.path import isfile
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/db")
-sys_path.append("/usr/share/bunkerweb/core/bunkernet/jobs")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
+        "/usr/share/bunkerweb/core/bunkernet/jobs",
+    )
+)
 
 from bunkernet import register, ping, get_id
 from Database import Database
@@ -76,8 +81,7 @@ try:
             f"Successfully registered on BunkerNet API with instance id {data['data']}"
         )
     else:
-        with open("/var/cache/bunkerweb/bunkernet/instance.id", "r") as f:
-            bunkernet_id = f.read()
+        bunkernet_id = Path("/var/cache/bunkerweb/bunkernet/instance.id").read_text()
         logger.info(f"Already registered on BunkerNet API with instance id {get_id()}")
 
     # Ping
@@ -115,8 +119,7 @@ try:
         logger.info("Connectivity with BunkerWeb is successful !")
         status = 1
         if not isfile("/var/cache/bunkerweb/bunkernet/instance.id"):
-            with open("/var/cache/bunkerweb/bunkernet/instance.id", "w") as f:
-                f.write(bunkernet_id)
+            Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
 
             # Update db
             err = db.update_job_cache(

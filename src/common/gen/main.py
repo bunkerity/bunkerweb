@@ -11,9 +11,13 @@ from time import sleep
 from traceback import format_exc
 
 
-sys_path.append("/usr/share/bunkerweb/deps/python")
-sys_path.append("/usr/share/bunkerweb/utils")
-sys_path.append("/usr/share/bunkerweb/api")
+sys_path.extend(
+    (
+        "/usr/share/bunkerweb/deps/python",
+        "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
+    )
+)
 
 from logger import setup_logger
 from Configurator import Configurator
