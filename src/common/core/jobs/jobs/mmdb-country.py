@@ -31,10 +31,7 @@ try:
         _exit(0)
 
     # Compute the mmdb URL
-    today = date.today()
-    mmdb_url = "https://download.db-ip.com/free/dbip-country-lite-{}-{}.mmdb.gz".format(
-        today.strftime("%Y"), today.strftime("%m")
-    )
+    mmdb_url = f"https://download.db-ip.com/free/dbip-country-lite-{date.today().strftime('%Y-%m')}.mmdb.gz"
 
     # Download the mmdb file
     logger.info(f"Downloading mmdb file from url {mmdb_url} ...")

@@ -27,18 +27,19 @@ try:
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
     # Multisite case
-    if getenv("MULTISITE") == "yes":
-        for first_server in getenv("SERVER_NAME").split(" "):
+    if getenv("MULTISITE", "no") == "yes":
+        for first_server in getenv("SERVER_NAME", "").split(" "):
             if (
-                getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET"))
+                getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
                 == "yes"
             ):
                 bunkernet_activated = True
                 break
     # Singlesite case
-    elif getenv("USE_BUNKERNET") == "yes":
+    elif getenv("USE_BUNKERNET", "yes") == "yes":
         bunkernet_activated = True
-    if not bunkernet_activated:
+
+    if bunkernet_activated is False:
         logger.info("BunkerNet is not activated, skipping download...")
         _exit(0)
 
@@ -81,9 +82,9 @@ try:
 
     # Writing data to file
     logger.info("Saving BunkerNet data ...")
-    with open("/var/tmp/bunkerweb/bunkernet-ip.list", "w") as f:
-        for ip in data["data"]:
-            f.write(f"{ip}\n")
+    content = "\n".join(data["data"]).encode("utf-8")
+    with open("/var/tmp/bunkerweb/bunkernet-ip.list", "wb") as f:
+        f.write(content)
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/bunkernet-ip.list")
@@ -109,7 +110,7 @@ try:
         "bunkernet-data",
         None,
         "ip.list",
-        "\n".join(data["data"]).encode("utf-8"),
+        content,
         checksum=new_hash,
     )
     if err:

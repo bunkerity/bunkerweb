@@ -27,7 +27,7 @@ try:
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
     # Multisite case
-    if getenv("MULTISITE") == "yes":
+    if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME").split(" "):
             if (
                 getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
@@ -38,7 +38,8 @@ try:
     # Singlesite case
     elif getenv("USE_BUNKERNET", "yes") == "yes":
         bunkernet_activated = True
-    if not bunkernet_activated:
+
+    if bunkernet_activated is False:
         logger.info("BunkerNet is not activated, skipping registration...")
         _exit(0)
 
@@ -122,7 +123,7 @@ try:
                 "bunkernet-register",
                 None,
                 "instance.id",
-                f"{bunkernet_id}".encode("utf-8"),
+                bunkernet_id.encode("utf-8"),
             )
             if err:
                 logger.warning(f"Couldn't update db cache: {err}")

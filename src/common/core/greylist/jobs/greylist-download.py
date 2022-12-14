@@ -5,6 +5,7 @@ from os import _exit, getenv, makedirs
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from typing import Tuple
 
 sys_path.append("/usr/share/bunkerweb/deps/python")
 sys_path.append("/usr/share/bunkerweb/utils")
@@ -16,42 +17,41 @@ from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, is_cached_file, file_hash
 
-rdns_rx = re_compile(r"^(\.?[a-z\d\-]+)*\.[a-z]{2,}$", IGNORECASE)
-asn_rx = re_compile(r"^\d+$")
-uri_rx = re_compile(r"^/")
+rdns_rx = re_compile(rb"^(\.?[a-z\d\-]+)*\.[a-z]{2,}$", IGNORECASE)
+asn_rx = re_compile(rb"^\d+$")
+uri_rx = re_compile(rb"^/")
 
 
-def check_line(kind, line):
+def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     if kind == "IP":
-        if "/" in line:
+        if b"/" in line:
             try:
-                ip_network(line)
+                ip_network(line.decode("utf-8"))
                 return True, line
             except ValueError:
                 pass
         else:
             try:
-                ip_address(line)
+                ip_address(line.decode("utf-8"))
                 return True, line
             except ValueError:
                 pass
-        return False, ""
     elif kind == "RDNS":
         if rdns_rx.match(line):
             return True, line.lower()
-        return False, ""
     elif kind == "ASN":
-        real_line = line.replace("AS", "").replace("as", "")
+        real_line = line.replace(b"AS", b"").replace(b"as", b"")
         if asn_rx.match(real_line):
             return True, real_line
     elif kind == "USER_AGENT":
-        return True, line.replace("\\ ", " ").replace("\\.", "%.").replace(
-            "\\\\", "\\"
-        ).replace("-", "%-")
+        return True, line.replace(b"\\ ", b" ").replace(b"\\.", b"%.").replace(
+            b"\\\\", b"\\"
+        ).replace(b"-", b"%-")
     elif kind == "URI":
         if uri_rx.match(line):
             return True, line
-    return False, ""
+
+    return False, b""
 
 
 logger = setup_logger("GREYLIST", getenv("LOG_LEVEL", "INFO"))
@@ -66,15 +66,19 @@ try:
     # Check if at least a server has Greylist activated
     greylist_activated = False
     # Multisite case
-    if getenv("MULTISITE") == "yes":
-        for first_server in getenv("SERVER_NAME").split(" "):
-            if getenv(first_server + "_USE_GREYLIST", getenv("USE_GREYLIST")) == "yes":
+    if getenv("MULTISITE", "no") == "yes":
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if (
+                getenv(f"{first_server}_USE_GREYLIST", getenv("USE_GREYLIST", "no"))
+                == "yes"
+            ):
                 greylist_activated = True
                 break
     # Singlesite case
-    elif getenv("USE_GREYLIST") == "yes":
+    elif getenv("USE_GREYLIST", "no") == "yes":
         greylist_activated = True
-    if not greylist_activated:
+
+    if greylist_activated is False:
         logger.info("Greylist is not activated, skipping downloads...")
         _exit(0)
 
@@ -105,46 +109,48 @@ try:
             logger.info(
                 f"Greylist for {kind} is already in cache, skipping downloads...",
             )
-    if all_fresh:
+    if all_fresh is True:
         _exit(0)
 
     # Get URLs
-    urls = {
-        "IP": [],
-        "RDNS": [],
-        "ASN": [],
-        "USER_AGENT": [],
-        "URI": [],
-    }
+    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
     for kind in urls:
         for url in getenv(f"GREYLIST_{kind}_URLS", "").split(" "):
-            if url != "" and url not in urls[kind]:
+            if url and url not in urls[kind]:
                 urls[kind].append(url)
 
     # Loop on kinds
     for kind, urls_list in urls.items():
-        if kinds_fresh[kind]:
+        if kinds_fresh[kind] is True:
             continue
         # Write combined data of the kind to a single temp file
         for url in urls_list:
             try:
                 logger.info(f"Downloading greylist data from {url} ...")
-                resp = get(url)
+                resp = get(url, stream=True)
+
                 if resp.status_code != 200:
                     continue
+
                 i = 0
-                with open(f"/var/tmp/bunkerweb/greylist/{kind}.list", "w") as f:
-                    for line in resp.content.decode("utf-8").splitlines():
-                        line = line.strip()
-                        if kind != "USER_AGENT":
-                            line = line.strip().split(" ")[0]
-                        if line == "" or line.startswith("#") or line.startswith(";"):
-                            continue
-                        ok, data = check_line(kind, line)
-                        if ok:
-                            f.write(data + "\n")
-                            i += 1
-                logger.info(f"Downloaded {i} bad {kind}")
+                content = b""
+                for line in resp.iter_lines():
+                    line = line.strip()
+
+                    if not line or line.startswith(b"#") or line.startswith(b";"):
+                        continue
+                    elif kind != "USER_AGENT":
+                        line = line.split(b" ")[0]
+
+                    ok, data = check_line(kind, line)
+                    if ok is True:
+                        content += data + b"\n"
+                        i += 1
+
+                with open(f"/var/tmp/bunkerweb/greylist/{kind}.list", "wb") as f:
+                    f.write(content)
+
+                logger.info(f"Downloaded {i} grey {kind}")
                 # Check if file has changed
                 new_hash = file_hash(f"/var/tmp/bunkerweb/greylist/{kind}.list")
                 old_hash = cache_hash(f"/var/cache/bunkerweb/greylist/{kind}.list")
@@ -162,18 +168,20 @@ try:
                         f"/var/cache/bunkerweb/greylist/{kind}.list",
                         new_hash,
                     )
+
                     if not cached:
                         logger.error(f"Error while caching greylist : {err}")
                         status = 2
-                    if status != 2:
+                    else:
                         # Update db
                         err = db.update_job_cache(
                             "greylist-download",
                             None,
                             f"{kind}.list",
-                            resp.content,
+                            content,
                             checksum=new_hash,
                         )
+
                         if err:
                             logger.warning(f"Couldn't update db cache: {err}")
                         status = 1

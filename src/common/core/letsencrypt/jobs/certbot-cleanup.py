@@ -33,7 +33,7 @@ try:
     elif exists("/usr/share/bunkerweb/INTEGRATION"):
         with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
             bw_integration = f.read().strip()
-    token = getenv("CERTBOT_TOKEN")
+    token = getenv("CERTBOT_TOKEN", "")
 
     # Cluster case
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):

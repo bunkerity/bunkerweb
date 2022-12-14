@@ -33,7 +33,7 @@ status = 0
 def install_plugin(plugin_dir):
     # Load plugin.json
     metadata = {}
-    with open(f"{plugin_dir}plugin.json", "r") as f:
+    with open(f"{plugin_dir}plugin.json", "rb") as f:
         metadata = loads(f.read())
     # Don't go further if plugin is already installed
     if isfile(f"/data/plugins/{metadata['id']}/plugin.json"):
@@ -53,47 +53,43 @@ try:
 
     # Check if we have plugins to download
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "")
-    if plugin_urls == "":
+    if not plugin_urls:
         logger.info("No external plugins to download")
         _exit(0)
 
     # Loop on URLs
     for plugin_url in plugin_urls.split(" "):
-
         # Download ZIP file
         try:
             req = get(plugin_url)
         except:
             logger.error(
-                f"Exception while downloading plugin(s) from {plugin_url} :",
+                f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}",
             )
-            print(format_exc())
             status = 2
             continue
 
         # Extract it to tmp folder
-        temp_dir = "/var/tmp/bunkerweb/plugins-" + str(uuid4()) + "/"
+        temp_dir = f"/var/tmp/bunkerweb/plugins-{uuid4()}/"
         try:
             makedirs(temp_dir, exist_ok=True)
             with ZipFile(BytesIO(req.content)) as zf:
                 zf.extractall(path=temp_dir)
         except:
             logger.error(
-                f"Exception while decompressing plugin(s) from {plugin_url} :",
+                f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}",
             )
-            print(format_exc())
             status = 2
             continue
 
         # Install plugins
         try:
-            for plugin_dir in glob(temp_dir + "**/plugin.json", recursive=True):
-                install_plugin(dirname(plugin_dir) + "/")
+            for plugin_dir in glob(f"{temp_dir}**/plugin.json", recursive=True):
+                install_plugin(f"{dirname(plugin_dir)}/")
         except:
             logger.error(
-                f"Exception while installing plugin(s) from {plugin_url} :",
+                f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}",
             )
-            print(format_exc())
             status = 2
             continue
 

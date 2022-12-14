@@ -21,16 +21,13 @@ db = Database(
 
 
 def generate_cert(first_server, days, subj):
-    if isfile("/var/cache/bunkerweb/selfsigned/" + first_server + ".pem"):
-        cmd = (
-            "openssl x509 -checkend 86400 -noout -in /var/cache/bunkerweb/selfsigned/"
-            + first_server
-            + ".pem"
-        )
+    if isfile(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem"):
+        cmd = f"openssl x509 -checkend 86400 -noout -in /var/cache/bunkerweb/selfsigned/{first_server}.pem"
         proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
         if proc.returncode == 0:
             logger.info(f"Self-signed certificate already present for {first_server}")
             return True, 0
+
     logger.info(f"Generating self-signed certificate for {first_server}")
     cmd = f"openssl req -nodes -x509 -newkey rsa:4096 -keyout /var/cache/bunkerweb/selfsigned/{first_server}.key -out /var/cache/bunkerweb/selfsigned/{first_server}.pem -days {days} -subj {subj}"
     proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
@@ -73,21 +70,26 @@ try:
     if getenv("MULTISITE") == "yes":
         for first_server in getenv("SERVER_NAME").split(" "):
             if (
-                getenv(
-                    first_server + "_GENERATE_SELF_SIGNED_SSL",
-                    getenv("GENERATE_SELF_SIGNED_SSL"),
+                not first_server
+                or getenv(
+                    f"{first_server}_GENERATE_SELF_SIGNED_SSL",
+                    getenv("GENERATE_SELF_SIGNED_SSL", "no"),
                 )
                 != "yes"
+                or isfile(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem")
             ):
                 continue
-            if first_server == "":
-                continue
-            if isfile("/var/cache/bunkerweb/selfsigned/" + first_server + ".pem"):
-                continue
+
             ret, ret_status = generate_cert(
                 first_server,
-                getenv(first_server + "_SELF_SIGNED_SSL_EXPIRY"),
-                getenv(first_server + "_SELF_SIGNED_SSL_SUBJ"),
+                getenv(
+                    f"{first_server}_SELF_SIGNED_SSL_EXPIRY",
+                    getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
+                ),
+                getenv(
+                    f"{first_server}_SELF_SIGNED_SSL_SUBJ",
+                    getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
+                ),
             )
             if not ret:
                 status = ret_status
@@ -95,12 +97,14 @@ try:
                 status = 1
 
     # Singlesite case
-    elif getenv("GENERATE_SELF_SIGNED_SSL") == "yes" and getenv("SERVER_NAME") != "":
-        first_server = getenv("SERVER_NAME").split(" ")[0]
+    elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv(
+        "SERVER_NAME", ""
+    ):
+        first_server = getenv("SERVER_NAME", "").split(" ")[0]
         ret, ret_status = generate_cert(
             first_server,
-            getenv("SELF_SIGNED_SSL_EXPIRY"),
-            getenv("SELF_SIGNED_SSL_SUBJ"),
+            getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
+            getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
         )
         if not ret:
             status = ret_status

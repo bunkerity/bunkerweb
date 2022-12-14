@@ -25,23 +25,20 @@ def certbot_new(domains, email):
     environ["PYTHONPATH"] = "/usr/share/bunkerweb/deps/python"
     proc = run(
         [
-            "/usr/share/bunkerweb/deps/python/bin/certbot certonly",
+            "/usr/share/bunkerweb/deps/python/bin/certbot",
+            "certonly",
             "--manual",
             "--preferred-challenges=http",
             "--manual-auth-hook",
-            f"{getcwd()}/certbot-auth.py",
+            "/usr/share/bunkerweb/core/letsencrypt/jobs/certbot-auth.py",
             "--manual-cleanup-hook",
-            f"{getcwd()}/certbot-cleanup.py",
+            "/usr/share/bunkerweb/core/letsencrypt/jobs/certbot-cleanup.py",
             "-n",
             "-d",
             domains,
             "--email",
             email,
             "--agree-tos",
-            "--logs-dir",
-            "/var/tmp/bunkerweb",
-            "--work-dir",
-            "/var/lib/bunkerweb",
         ]
         + (["--staging"] if getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes" else []),
         stdin=DEVNULL,
@@ -96,12 +93,14 @@ try:
                 )
 
                 if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
-                    with open(f"/etc/letsencrypt/live/{first_server}/cert.pem") as f:
+                    with open(
+                        f"/etc/letsencrypt/live/{first_server}/cert.pem", "rb"
+                    ) as f:
                         cert = f.read()
 
                     # Update db
                     err = db.update_job_cache(
-                        "letsencrypt",
+                        "certbot-new",
                         first_server,
                         "cert.pem",
                         cert,
@@ -133,12 +132,14 @@ try:
                 )
 
                 if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
-                    with open(f"/etc/letsencrypt/live/{first_server}/cert.pem") as f:
+                    with open(
+                        f"/etc/letsencrypt/live/{first_server}/cert.pem", "rb"
+                    ) as f:
                         cert = f.read()
 
                     # Update db
                     err = db.update_job_cache(
-                        "letsencrypt",
+                        "certbot-new",
                         first_server,
                         "cert.pem",
                         cert,

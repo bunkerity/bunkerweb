@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from io import BytesIO
-from os import getenv
-from os.path import exists
+from os import chmod, chown, getenv, walk
+from os.path import exists, join
 from subprocess import run, DEVNULL, STDOUT
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
@@ -36,7 +36,7 @@ try:
     elif exists("/usr/share/bunkerweb/INTEGRATION"):
         with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
             bw_integration = f.read().strip()
-    token = getenv("CERTBOT_TOKEN")
+    token = getenv("CERTBOT_TOKEN", "")
 
     logger.info(f"Certificates renewal for {getenv('RENEWED_DOMAINS')} successful")
 
@@ -53,6 +53,13 @@ try:
             endpoint = f"http://{instance['hostname']}:{instance['port']}"
             host = instance["server_name"]
             api = API(endpoint, host=host)
+
+            # Fix permissions for the certificates
+            for root, dirs, files in walk("/lets-encrypt/certificates", topdown=False):
+                for name in files + dirs:
+                    chown(join(root, name), 101, 101)
+                    chmod(join(root, name), 0o770)
+
             sent, err, status, resp = api.request(
                 "POST", "/lets-encrypt/certificates", files=files
             )
@@ -90,7 +97,7 @@ try:
     # Linux case
     else:
         proc = run(
-            ["nginx", "-s", "reload"],
+            ["/etc/init.d/nginx", "reload"],
             stdin=DEVNULL,
             stderr=STDOUT,
         )

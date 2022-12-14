@@ -10,7 +10,7 @@ def request(method, url, _id=None):
     try:
         resp = requests.request(
             method,
-            getenv("BUNKERNET_SERVER", "https://api.bunkerweb.io") + url,
+            f"{getenv('BUNKERNET_SERVER', 'https://api.bunkerweb.io')}{url}",
             json=data,
             headers=headers,
             timeout=5,

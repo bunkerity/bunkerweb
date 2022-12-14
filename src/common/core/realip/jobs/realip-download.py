@@ -40,19 +40,23 @@ db = Database(
 status = 0
 
 try:
-
-    # Check if at least a server has Blacklist activated
-    blacklist_activated = False
+    # Check if at least a server has Realip activated
+    realip_activated = False
     # Multisite case
-    if getenv("MULTISITE") == "yes":
+    if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME").split(" "):
-            if getenv(first_server + "_USE_REAL_IP", getenv("USE_REAL_IP")) == "yes":
-                blacklist_activated = True
+            if (
+                getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no"))
+                == "yes"
+            ):
+                realip_activated = True
                 break
+
     # Singlesite case
-    elif getenv("USE_REAL_IP") == "yes":
-        blacklist_activated = True
-    if not blacklist_activated:
+    elif getenv("USE_REAL_IP", "no") == "yes":
+        realip_activated = True
+
+    if realip_activated is False:
         logger.info("RealIP is not activated, skipping download...")
         _exit(0)
 
@@ -72,20 +76,24 @@ try:
 
     # Download and write data to temp file
     i = 0
-    content = ""
+    content = b""
     for url in urls:
         try:
             logger.info(f"Downloading RealIP list from {url} ...")
             resp = get(url, stream=True)
+
             if resp.status_code != 200:
                 continue
-            for line in resp.iter_lines(decode_unicode=True):
-                line = line.strip().split(" ")[0]
-                if line == "" or line.startswith("#") or line.startswith(";"):
+
+            for line in resp.iter_lines():
+                line = line.strip().split(b" ")[0]
+
+                if not line or line.startswith(b"#") or line.startswith(b";"):
                     continue
+
                 ok, data = check_line(line)
                 if ok:
-                    content += f"{data}\n"
+                    content += data + b"\n"
                     i += 1
         except:
             status = 2
@@ -93,7 +101,7 @@ try:
                 f"Exception while getting RealIP list from {url} :\n{format_exc()}"
             )
 
-    with open("/var/tmp/bunkerweb/realip-combined.list", "w") as f:
+    with open("/var/tmp/bunkerweb/realip-combined.list", "wb") as f:
         f.write(content)
 
     # Check if file has changed
@@ -118,7 +126,7 @@ try:
         "realip-download",
         None,
         "combined.list",
-        content.encode("utf-8"),
+        content,
         checksum=new_hash,
     )
     if err:

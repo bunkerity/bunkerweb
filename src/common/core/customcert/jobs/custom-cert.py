@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import environ, getenv, makedirs, remove
+from os import getenv, makedirs, remove
 from os.path import isfile
 from shutil import copy
 from sys import exit as sys_exit, path as sys_path
@@ -31,6 +31,11 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
         elif not isfile(cert_path):
             logger.warning(
                 f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate"
+            )
+            return False
+        elif not isfile(key_path):
+            logger.warning(
+                f"Key file {key_path} is not a valid file, ignoring the custom certificate"
             )
             return False
 
