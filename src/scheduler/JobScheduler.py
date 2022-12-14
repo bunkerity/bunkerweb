@@ -114,21 +114,22 @@ class JobScheduler(ApiCaller):
             )
         except BaseException:
             success = False
+            self.__logger.error(
+                f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}",
+            )
             with self.__thread_lock:
-                self.__logger.error(
-                    f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}",
-                )
                 self.__job_success = False
 
         if self.__job_success and proc.returncode >= 2:
             success = False
+            self.__logger.error(
+                f"Error while executing job {name} from plugin {plugin}",
+            )
             with self.__thread_lock:
-                self.__logger.error(
-                    f"Error while executing job {name} from plugin {plugin}",
-                )
                 self.__job_success = False
 
-        err = self.__db.update_job(plugin, name, success)
+        with self.__thread_lock:
+            err = self.__db.update_job(plugin, name, success)
 
         if not err:
             self.__logger.info(
