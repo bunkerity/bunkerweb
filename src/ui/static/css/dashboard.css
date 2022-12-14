@@ -2274,6 +2274,10 @@ h6 {
   padding-left: 1.5rem;
 }
 
+.pr-8 {
+  padding-right: 2rem;
+}
+
 .pl-3 {
   padding-left: 0.75rem;
 }
@@ -2312,14 +2316,6 @@ h6 {
 
 .pt-3 {
   padding-top: 0.75rem;
-}
-
-.pr-8 {
-  padding-right: 2rem;
-}
-
-.pt-2 {
-  padding-top: 0.5rem;
 }
 
 .text-left {
