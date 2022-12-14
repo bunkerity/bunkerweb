@@ -301,9 +301,14 @@
       <!-- end default anchor -->
 
       <!-- plugin list -->
-      {% set plugins = config["CONFIG"].get_plugins() %}
+      {% set isPage = false %} {% set plugins = config["CONFIG"].get_plugins()
+      %} {% for plugin in plugins %} {% if plugin['page'] %} {% set isPage =
+      true%} {% endif %} {% endfor %}
+
       <div>
         <ul>
+          {% if isPage %}
+
           <li class="w-full mt-4">
             <h6
               class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60"
@@ -311,7 +316,21 @@
               PLUGINS PAGE
             </h6>
           </li>
-          {% for plugin in plugins %} {% if plugin['page'] %}
+          {%else %}
+          <li class="w-full mt-8">
+            <h6
+              class="text-center pl-6 pr-8 ml-2 text-xs leading-tight uppercase dark:text-white opacity-60"
+            >
+              Want your own plugin ? <br />
+              <a
+                class="leading-8 font-bold hover:brightness-75"
+                target="_blank"
+                href="https://docs.bunkerweb.io/1.4/plugins/#writing-a-plugin"
+                >check doc</a
+              >
+            </h6>
+          </li>
+          {% endif %} {% for plugin in plugins %} {% if plugin['page'] %}
           <li class="mt-0.5 w-full">
             <a
               target="_blank"
