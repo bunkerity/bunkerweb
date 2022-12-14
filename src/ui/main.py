@@ -292,57 +292,38 @@ def home():
     if r and r.status_code == 200:
         remote_version = r.text.strip()
 
-    # headers = default_headers()
-    # headers.update({"User-Agent": "bunkerweb-ui"})
+    instances = app.config["INSTANCES"].get_instances()
+    services = app.config["CONFIG"].get_services()
+    instance_health_count = 0
 
-    # try:
-    #     r = get(
-    #         "https://www.bunkerity.com/wp-json/wp/v2/posts",
-    #         headers=headers,
-    #     )
-    # except BaseException:
-    #     r = None
+    for instance in instances:
+        if instance.health is True:
+            instance_health_count += 1
 
-    # formatted_posts = None
-    # if r and r.status_code == 200:
-    #     posts = r.json()
-    #     formatted_posts = []
+    services_scheduler_count = 0
+    services_ui_count = 0
+    services_autoconf_count = 0
 
-    #     for post in posts[:5]:
-    #         formatted_posts.append(
-    #             {
-    #                 "link": post["link"],
-    #                 "title": post["title"]["rendered"],
-    #                 "description": BeautifulSoup(
-    #                     post["content"]["rendered"][
-    #                         post["content"]["rendered"].index("<em>")
-    #                         + 4 : post["content"]["rendered"].index("</em>")
-    #                     ],
-    #                     features="html.parser",
-    #                 ).get_text()[:256]
-    #                 + ("..." if len(post["content"]["rendered"]) > 256 else ""),
-    #                 "date": dateutil_parse(post["date"]).strftime("%B %d, %Y"),
-    #                 "image_url": post["yoast_head_json"]["og_image"][0]["url"].replace(
-    #                     "wwwdev", "www"
-    #                 ),
-    #                 "reading_time": post["yoast_head_json"]["twitter_misc"][
-    #                     "Est. reading time"
-    #                 ],
-    #             }
-    #         )
-
-    instances_number = len(app.config["INSTANCES"].get_instances())
-    services_number = len(app.config["CONFIG"].get_services())
+    for service in services:
+        if service["SERVER_NAME"]["method"] == "scheduler":
+            services_scheduler_count += 1
+        elif service["SERVER_NAME"]["method"] == "ui":
+            services_ui_count += 1
+        elif service["SERVER_NAME"]["method"] == "autoconf":
+            services_autoconf_count += 1
 
     return render_template(
         "home.html",
         check_version=not remote_version or bw_version == remote_version,
         remote_version=remote_version,
         version=bw_version,
-        instances_number=instances_number,
-        services_number=services_number,
-        # posts=formatted_posts,
+        instances_number=len(instances),
+        services_number=len(services),
         plugins_errors=db.get_plugins_errors(),
+        instance_health_count=instance_health_count,
+        services_scheduler_count=services_scheduler_count,
+        services_ui_count=services_ui_count,
+        services_autoconf_count=services_autoconf_count,
         dark_mode=app.config["DARK_MODE"],
     )
 
