@@ -301,13 +301,14 @@
       <!-- end default anchor -->
 
       <!-- plugin list -->
-      {% set isPage = false %} {% set plugins = config["CONFIG"].get_plugins()
-      %} {% for plugin in plugins %} {% if plugin['page'] %} {% set isPage =
-      true%} {% endif %} {% endfor %}
+      {% set isPage = {"value": False} %} {% set plugins =
+      config["CONFIG"].get_plugins() %} {% for plugin in plugins %} {% if
+      plugin['page'] %} {% if isPage.update({"value": True}) %} {% endif %} {%
+      endif %} {% endfor %}
 
       <div>
         <ul>
-          {% if isPage %}
+          {% if isPage.value == True %}
 
           <li class="w-full mt-4">
             <h6
@@ -316,7 +317,7 @@
               PLUGINS PAGE
             </h6>
           </li>
-          {%else %}
+          {% else %}
           <li class="w-full mt-8">
             <h6
               class="text-center pl-6 pr-8 ml-2 text-xs leading-tight uppercase dark:text-white opacity-60"
