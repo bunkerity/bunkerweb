@@ -1,7 +1,6 @@
 version: 2
 
 updates:
-
   # GHA
   - package-ecosystem: "github-actions"
     directory: "/"

@@ -5,7 +5,6 @@ on:
     branches: [dev]
 
 jobs:
-
   # BW dev tests
   bw:
     runs-on: ubuntu-latest
@@ -195,14 +194,14 @@ jobs:
       matrix:
         language: ["python"]
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
-        config-file: ./.github/codeql.yml
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
-      with:
-        category: "/language:${{matrix.language}}"
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql.yml
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
