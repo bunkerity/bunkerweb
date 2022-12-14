@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 from io import BytesIO
-from os import chmod, chown, getenv, walk
+from os import chmod, getenv, walk
 from os.path import exists, join
+from shutil import chown
 from subprocess import run, DEVNULL, STDOUT
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
@@ -44,6 +45,13 @@ try:
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
         # Create tarball of /data/cache/letsencrypt
         tgz = BytesIO()
+
+        # Fix permissions for the certificates
+        for root, dirs, files in walk("/data/cache/letsencrypt", topdown=False):
+            for name in files + dirs:
+                chown(join(root, name), "root", 101)
+                chmod(join(root, name), 0o770)
+
         with tar_open(mode="w:gz", fileobj=tgz) as tf:
             tf.add("/data/cache/letsencrypt", arcname=".")
         tgz.seek(0, 0)
@@ -53,12 +61,6 @@ try:
             endpoint = f"http://{instance['hostname']}:{instance['port']}"
             host = instance["server_name"]
             api = API(endpoint, host=host)
-
-            # Fix permissions for the certificates
-            for root, dirs, files in walk("/lets-encrypt/certificates", topdown=False):
-                for name in files + dirs:
-                    chown(join(root, name), 101, 101)
-                    chmod(join(root, name), 0o770)
 
             sent, err, status, resp = api.request(
                 "POST", "/lets-encrypt/certificates", files=files

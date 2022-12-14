@@ -57,6 +57,10 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   mkdir /etc/nginx && \
   chown -R scheduler:scheduler /etc/nginx && \
   chmod -R 770 /etc/nginx && \
+  mkdir /var/log/letsencrypt /var/lib/letsencrypt && \
+  chown root:scheduler /var/log/letsencrypt /var/lib/letsencrypt && \
+  chmod 770 /var/log/letsencrypt /var/lib/letsencrypt && \
+  ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs

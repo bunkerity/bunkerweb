@@ -6,7 +6,6 @@ from glob import glob
 from os import (
     _exit,
     chmod,
-    chown,
     getenv,
     getpid,
     listdir,
@@ -17,7 +16,7 @@ from os import (
     walk,
 )
 from os.path import dirname, exists, isdir, isfile, islink, join
-from shutil import copy, rmtree
+from shutil import chown, copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
@@ -53,12 +52,6 @@ def handle_stop(signum, frame):
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
-
-
-def imerge(a, b):
-    for i, j in zip(a, b):
-        yield i
-        yield j
 
 
 # Function to catch SIGHUP and reload the scheduler
@@ -111,12 +104,8 @@ def generate_custom_configs(
     # Fix permissions for the custom configs folder
     for root, dirs, files in walk("/data/configs", topdown=False):
         for name in files + dirs:
-            chown(join(root, name), 101, 101)
-
-            if isdir(join(root, name)):
-                chmod(join(root, name), 0o750)
-            if isfile(join(root, name)):
-                chmod(join(root, name), 0o740)
+            chown(join(root, name), "root", 101)
+            chmod(join(root, name), 0o770)
 
     if integration != "Linux":
         logger.info("Sending custom configs to BunkerWeb")
@@ -340,7 +329,7 @@ if __name__ == "__main__":
                     # Fix permissions for the nginx folder
                     for root, dirs, files in walk("/etc/nginx", topdown=False):
                         for name in files + dirs:
-                            chown(join(root, name), 101, 101)
+                            chown(join(root, name), "root", 101)
                             chmod(join(root, name), 0o770)
 
                     copy("/etc/nginx/variables.env", "/var/tmp/bunkerweb/variables.env")
@@ -354,17 +343,11 @@ if __name__ == "__main__":
                                 "Sending nginx configs failed, configuration will not work as expected...",
                             )
 
-            # Fix permissions for the cache and the custom configs folders
-            for root, dirs, files in imerge(
-                walk("/data/cache", topdown=False), walk("/data/configs", topdown=False)
-            ):
+            # Fix permissions for the cache folders
+            for root, dirs, files in walk("/data/cache", topdown=False):
                 for name in files + dirs:
-                    chown(join(root, name), 101, 101)
-
-                    if isdir(join(root, name)):
-                        chmod(join(root, name), 0o750)
-                    if isfile(join(root, name)):
-                        chmod(join(root, name), 0o740)
+                    chown(join(root, name), "root", 101)
+                    chmod(join(root, name), 0o770)
 
             try:
                 if len(api_caller._get_apis()) > 0:
