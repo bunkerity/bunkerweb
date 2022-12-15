@@ -23,7 +23,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
 # Nginx
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install yum-utils -y && \
-    dnf install nginx-1.20.2 -y 
+    dnf install nginx-1.22.1 -y 
 
 # Compile and install dependencies
 RUN dnf install -y python39-pip brotli brotli-devel wget gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
@@ -81,7 +81,7 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
-COPY src/linux/fpm-ubuntu /usr/share/.fpm
+COPY src/linux/fpm-centos /usr/share/.fpm
 COPY src/linux/bunkerweb.service /etc/systemd/system/bunkerweb.service
 COPY src/linux/bunkerweb-ui.service /etc/systemd/system/bunkerweb-ui.service
 

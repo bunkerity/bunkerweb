@@ -10,7 +10,7 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
 # Nginx
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
-    dnf install nginx-1.20.2 -y
+    dnf install nginx-1.22.1 -y
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
@@ -76,7 +76,7 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
-COPY src/linux/fpm-ubuntu /usr/share/.fpm
+COPY src/linux/fpm-fedora /usr/share/.fpm
 COPY src/linux/bunkerweb.service /etc/systemd/system/bunkerweb.service
 COPY src/linux/bunkerweb-ui.service /etc/systemd/system/bunkerweb-ui.service
 
