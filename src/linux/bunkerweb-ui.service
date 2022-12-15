@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Restart=always
 StartLimitBurst=1
-User=nginx
+User=root
 ExecStart=/usr/share/bunkerweb/scripts/bunkerweb-ui.sh start
 ExecStop=/usr/share/bunkerweb/scripts/bunkerweb-ui.sh stop
 ExecReload=/usr/share/bunkerweb/scripts/bunkerweb-ui.sh reload
