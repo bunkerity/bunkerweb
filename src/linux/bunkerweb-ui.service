@@ -1,10 +1,10 @@
 [Unit]
 Description=BunkerWeb UI service
 Documentation=https://docs.bunkerweb.io
-After=network.target
+After=bunkerweb.service
 
 [Service]
-Restart=always
+Restart=no
 StartLimitBurst=1
 User=root
 ExecStart=/usr/share/bunkerweb/scripts/bunkerweb-ui.sh start

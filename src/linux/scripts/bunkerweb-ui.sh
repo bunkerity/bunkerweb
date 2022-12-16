@@ -2,10 +2,20 @@
 
 export PYTHONPATH=/usr/share/bunkerweb/deps/python
 
+# Create ui.env file if it doesn't exist 
+if [ ! -f /etc/bunkerweb/ui.env ]; then
+  # Creating a file called `ui.env` in the `/etc/bunkerweb` directory.
+  echo -e "ADMIN_USERNAME=admin\nADMIN_PASSWORD=changeme\nABSOLUTE_URI=" > /etc/bunkerweb/ui.env
+fi
+
 # function to start the UI
 start() {
   echo "Starting UI"
-  python3 -m gunicorn --bind=0.0.0.0:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=2 --user scheduler --group scheduler main:app
+  python3 -m gunicorn --bind=127.0.0.1:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=2 --user scheduler --group scheduler main:app &
+  # Source /etc/bunkerweb/ui.env to load variables
+  source /etc/bunkerweb/ui.env
+  # Export all variables to environment
+  export $(cat /etc/bunkerweb/ui.env)
 }
 
 # function to stop the UI
