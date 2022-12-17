@@ -58,11 +58,11 @@ if [ $? -eq 0 ] ; then
 fi
 
 # echo "ℹ️ Remove bunkerweb-ui service"
-if [ -f "/etc/systemd/system/bunkerweb-ui.service" ] ; then
+if [ -f "/lib/systemd/system/bunkerweb-ui.service" ] ; then
     echo "ℹ️ Remove bunkerweb-ui service"
     do_and_check_cmd systemctl stop bunkerweb-ui
     do_and_check_cmd systemctl disable bunkerweb-ui
-    do_and_check_cmd rm -f /etc/systemd/system/bunkerweb-ui.service
+    do_and_check_cmd rm -f /lib/systemd/system/bunkerweb-ui.service
     do_and_check_cmd systemctl daemon-reload
     do_and_check_cmd systemctl reset-failed
 fi

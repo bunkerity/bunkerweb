@@ -20,15 +20,6 @@ function display_help()
 
 export PYTHONPATH=/usr/share/bunkerweb/deps/python/
 
-# Create user scheduler if not exists
-if ! id -u scheduler > /dev/null 2>&1; then
-    addgroup --gid 120 scheduler
-    # Line below it's not working on Ubuntu 22.04
-    # Correct way to do it is to use useradd
-    adduser --uid 120 --gid 120 --disabled-password --gecos "" scheduler
-    chown -R root:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb
-fi
-
 #############################################################
 #                           Start                           #  
 #############################################################

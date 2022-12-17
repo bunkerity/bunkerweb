@@ -54,6 +54,6 @@ case $1 in
     reload
     ;;
     *)
-        echo "Usage: ./bunkerweb-ui.sh start|stop|reload"
+        echo "Usage: ./bunkerweb-ui.sh start"
         ;;
     esac

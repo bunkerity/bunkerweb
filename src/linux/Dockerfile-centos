@@ -82,8 +82,8 @@ COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-centos /usr/share/.fpm
-COPY src/linux/bunkerweb.service /etc/systemd/system/bunkerweb.service
-COPY src/linux/bunkerweb-ui.service /etc/systemd/system/bunkerweb-ui.service
+COPY src/linux/bunkerweb.service /lib/systemd/system/bunkerweb.service
+COPY src/linux/bunkerweb-ui.service /lib/systemd/system/bunkerweb-ui.service
 
 # Generate DEB at startup
 VOLUME /data
