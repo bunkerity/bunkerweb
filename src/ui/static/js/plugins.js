@@ -406,21 +406,25 @@ class Modal {
     this.container = document.querySelector(`[${this.prefix}-list]`);
     this.modal = document.querySelector(`[${this.prefix}-modal]`);
     this.modalNameInp = this.modal.querySelector("input#name");
+    this.modalExtInp = this.modal.querySelector("input#external");
+
     this.modalTitle = this.modal.querySelector(`[${this.prefix}-modal-title]`);
     this.modalTxt = this.modal.querySelector(`[${this.prefix}-modal-text]`);
     this.init();
   }
 
   init() {
+    console.log("init modal");
     this.container.addEventListener("click", (e) => {
       //DELETE HANDLER
+      console.log("click");
       try {
         if (
-          e.target.closest("button").getAttribute(`${this.prefix}`) === "delete"
+          e.target.closest("button").getAttribute(`${this.prefix}-action`) ===
+          "delete"
         ) {
           const btnEl = e.target.closest("button");
-          const name = btnEl.getAttribute("name");
-          this.setModal(name);
+          this.setModal(btnEl);
           this.showModal();
         }
       } catch (err) {}
@@ -438,10 +442,21 @@ class Modal {
     });
   }
 
-  setModal(name) {
-    this.modalNameInp.value = name;
-    this.modalTitle.textContent = `DELETE ${name}`;
-    this.modalTxt.textContent = `Are you sure you want to delete ${name}`;
+  setModal(el) {
+    //name
+    const elName = el.getAttribute("name");
+    this.modalNameInp.value = elName;
+    this.modalTitle.textContent = `DELETE ${elName}`;
+    this.modalTxt.textContent = `Are you sure you want to delete ${elName} ?`;
+    //external
+    const isExternal = el
+      .closest("[plugins-external]")
+      .getAttribute("plugins-external")
+      .trim()
+      .includes("external")
+      ? "True"
+      : "False";
+    this.modalExtInp.value = isExternal;
   }
 
   showModal() {

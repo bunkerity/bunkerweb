@@ -33,13 +33,14 @@
       id="form-delete-plugin"
       method="POST"
     >
+      <input type="hidden" name="external" id="external" />
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <input type="hidden" value="name" name="name" id="name" />
       <input type="hidden" value="delete" name="operation" id="operation" />
       <div>
         <p
           plugins-modal-text
-          class="mx-2 mb-2 mt-8 font-semibold font-sans leading-normal uppercase text-sm"
+          class="text-center mx-2 mb-2 mt-8 font-semibold font-sans leading-normal uppercase text-sm"
         ></p>
       </div>
       <!-- action button -->
