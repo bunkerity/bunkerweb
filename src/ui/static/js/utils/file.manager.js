@@ -447,10 +447,11 @@ class FolderModal {
   //get data of custom inputs and set it on submit input
   setDataForRequest() {
     //set path to input
-    const prevPath = this.modalPathPrev.textContent;
-    const name = this.modalPathName.value;
-    const newPath = `${prevPath}${name}`;
-    this.modalInpPath.value = newPath;
+    if (this.modalInpType === "folder") {
+      const prevPath = this.modalPathPrev.textContent;
+      const name = this.modalPathName.value;
+      this.modalInpPath.value = `${prevPath}${name}`;
+    }
     //set textarea value from editor
     const newTextarea = ace.edit("editor").getValue();
     this.modalTxtarea.value = newTextarea;

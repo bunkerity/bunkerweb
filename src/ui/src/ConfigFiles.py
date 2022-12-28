@@ -1,4 +1,4 @@
-from os import listdir, mkdir, remove, replace, walk
+from os import listdir, remove, replace, walk
 from os.path import dirname, exists, join, isfile
 from pathlib import Path
 from re import compile as re_compile
@@ -84,8 +84,8 @@ class ConfigFiles:
 
     def delete_path(self, path: str) -> Tuple[str, int]:
         try:
-            if isfile(path):
-                remove(path)
+            if isfile(path) or isfile(f"{path}.conf"):
+                remove(f"{path}.conf")
             else:
                 rmtree(path)
         except OSError:

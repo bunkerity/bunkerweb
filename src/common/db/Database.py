@@ -724,15 +724,13 @@ class Database:
                 checked_settings = []
                 for key, value in deepcopy(config).items():
                     original_key = key
-                    suffix = 0
                     if self.suffix_rx.search(key):
-                        suffix = int(key.split("_")[-1])
                         key = key[: -len(str(suffix)) - 1]
 
                     if key not in multisite:
                         continue
-
-                    config[f"{service.id}_{original_key}"] = value
+                    elif f"{service.id}_{original_key}" not in config:
+                        config[f"{service.id}_{original_key}"] = value
 
                     if original_key not in checked_settings:
                         checked_settings.append(original_key)

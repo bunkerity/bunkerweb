@@ -362,10 +362,9 @@ if __name__ == "__main__":
                         logger.info("Successfuly sent /data/cache folder")
 
                 # reload nginx
+                logger.info("Reloading nginx ...")
                 if integration == "Linux":
-                    logger.info("Reloading nginx ...")
                     # Reloading the nginx server.
-                    # Had to use this instead of the nginx reload command because it was not working
                     proc = subprocess_run(
                         # Reload nginx
                         ["/etc/init.d/nginx", "reload"],
@@ -380,7 +379,6 @@ if __name__ == "__main__":
                             f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
                         )
                 else:
-                    logger.info("Reloading nginx ...")
                     if api_caller._send_to_apis("POST", "/reload"):
                         logger.info("Successfuly reloaded nginx")
                     else:
@@ -421,6 +419,29 @@ if __name__ == "__main__":
 
                         logger.info("Generating new custom configs ...")
                         generate_custom_configs(custom_configs, integration, api_caller)
+
+                        # reload nginx
+                        logger.info("Reloading nginx ...")
+                        if integration == "Linux":
+                            # Reloading the nginx server.
+                            proc = subprocess_run(
+                                # Reload nginx
+                                ["/etc/init.d/nginx", "reload"],
+                                stdin=DEVNULL,
+                                stderr=STDOUT,
+                                env=deepcopy(env),
+                            )
+                            if proc.returncode == 0:
+                                logger.info("Successfuly reloaded nginx")
+                            else:
+                                logger.error(
+                                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                                )
+                        else:
+                            if api_caller._send_to_apis("POST", "/reload"):
+                                logger.info("Successfuly reloaded nginx")
+                            else:
+                                logger.error("Error while reloading nginx")
 
                     # check if the config have changed since last time
                     tmp_env = db.get_config()

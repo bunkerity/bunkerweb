@@ -40,7 +40,6 @@ from threading import Thread
 from time import time
 from traceback import format_exc
 from typing import Optional
-from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
 sys_path.extend(
@@ -416,26 +415,27 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            config = app.config["CONFIG"].get_config()
-            for variable in deepcopy(variables):
-                if variable.endswith("_SCHEMA"):
+            config = app.config["CONFIG"].get_config(methods=False)
+            for variable, value in deepcopy(variables).items():
+                if "SCHEMA" in variable.split("_"):
                     del variables[variable]
                     continue
 
-                if variables[variable] == "on":
-                    variables[variable] = "yes"
-                elif variables[variable] == "off":
-                    variables[variable] = "no"
+                if value == "on":
+                    value = "yes"
+                elif value == "off":
+                    value = "no"
 
                 if (
                     request.form["operation"] == "edit"
                     and variable != "SERVER_NAME"
-                    and variables[variable] == config.get(variable, None)
-                    or not variables[variable].strip()
+                    and value
+                    == config.get(f"{variables['SERVER_NAME']}_{variable}", None)
+                    or not value.strip()
                 ):
                     del variables[variable]
 
-            if not variables:
+            if len(variables) <= 1:
                 flash(
                     f"{variables['SERVER_NAME'].split(' ')[0]} was not edited because no values were changed."
                 )
@@ -521,17 +521,14 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config()
-        for variable in deepcopy(variables):
-            if variables[variable] == "on":
-                variables[variable] = "yes"
-            elif variables[variable] == "off":
-                variables[variable] = "no"
+        config = app.config["CONFIG"].get_config(methods=False)
+        for variable, value in deepcopy(variables).items():
+            if value == "on":
+                value = "yes"
+            elif value == "off":
+                value = "no"
 
-            if (
-                variables[variable] == config.get(variable, None)
-                or not variables[variable].strip()
-            ):
+            if value == config.get(variable, None) or not value.strip():
                 del variables[variable]
 
         if not variables:
@@ -655,14 +652,6 @@ def configs():
         if error:
             flash("Couldn't save custom configs to database", "error")
 
-        # Reload instances
-        app.config["RELOADING"] = True
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=("configs",),
-        ).start()
-
         return redirect(url_for("loading", next=url_for("configs")))
 
     db_configs = db.get_custom_configs()
@@ -674,7 +663,7 @@ def configs():
                 db_configs=db_configs,
                 integration=integration,
                 services=app.config["CONFIG"]
-                .get_config()["SERVER_NAME"]["value"]
+                .get_config(methods=False)["SERVER_NAME"]
                 .split(" "),
             )
         ],
@@ -714,10 +703,14 @@ def plugins():
                 flash("Please upload new plugins to reload plugins", "error")
                 return redirect(url_for("loading", next=url_for("plugins")))
 
+            errors = 0
+            files_count = 0
+
             for file in listdir("/var/tmp/bunkerweb/ui"):
                 if not isfile(f"/var/tmp/bunkerweb/ui/{file}"):
                     continue
 
+                files_count += 1
                 folder_name = ""
                 temp_folder_name = file.split(".")[0]
 
@@ -746,6 +739,7 @@ def plugins():
                                     if not app.config["CONFIGFILES"].check_name(
                                         folder_name
                                     ):
+                                        errors += 1
                                         error = 1
                                         flash(
                                             f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
@@ -799,6 +793,7 @@ def plugins():
                                     if not app.config["CONFIGFILES"].check_name(
                                         folder_name
                                     ):
+                                        errors += 1
                                         error = 1
                                         flash(
                                             f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
@@ -814,6 +809,7 @@ def plugins():
                                         f"/etc/bunkerweb/plugins/{folder_name}",
                                     )
                         except BadZipFile:
+                            errors += 1
                             error = 1
                             flash(
                                 f"{file} is not a valid zip file. ({folder_name or temp_folder_name})",
@@ -846,6 +842,7 @@ def plugins():
                                     if not app.config["CONFIGFILES"].check_name(
                                         folder_name
                                     ):
+                                        errors += 1
                                         error = 1
                                         flash(
                                             f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
@@ -899,6 +896,7 @@ def plugins():
                                     if not app.config["CONFIGFILES"].check_name(
                                         folder_name
                                     ):
+                                        errors += 1
                                         error = 1
                                         flash(
                                             f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
@@ -914,51 +912,60 @@ def plugins():
                                         f"/etc/bunkerweb/plugins/{folder_name}",
                                     )
                         except ReadError:
+                            errors += 1
                             error = 1
                             flash(
                                 f"Couldn't read file {file} ({folder_name or temp_folder_name})",
                                 "error",
                             )
                         except CompressionError:
+                            errors += 1
                             error = 1
                             flash(
                                 f"{file} is not a valid tar file ({folder_name or temp_folder_name})",
                                 "error",
                             )
                         except HeaderError:
+                            errors += 1
                             error = 1
                             flash(
                                 f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})",
                                 "error",
                             )
                 except KeyError:
+                    errors += 1
                     error = 1
                     flash(
                         f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name or temp_folder_name})",
                         "error",
                     )
                 except JSONDecodeError as e:
+                    errors += 1
                     error = 1
                     flash(
                         f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name or temp_folder_name})",
                         "error",
                     )
                 except ValueError:
+                    errors += 1
                     error = 1
                     flash(
                         f"The file plugin.json is missing one or more of the following keys: <i>{', '.join(PLUGIN_KEYS)}</i> ({folder_name or temp_folder_name})",
                         "error",
                     )
                 except FileExistsError:
+                    errors += 1
                     error = 1
                     flash(
                         f"A plugin named {folder_name} already exists",
                         "error",
                     )
                 except (TarError, OSError) as e:
+                    errors += 1
                     error = 1
                     flash(f"{e}", "error")
                 except Exception as e:
+                    errors += 1
                     error = 1
                     flash(f"{e}", "error")
                 finally:
@@ -968,6 +975,9 @@ def plugins():
                         )
 
                     error = 0
+
+            if errors < files_count:
+                return redirect(url_for("loading", next=url_for("plugins")))
 
             # Fix permissions for plugins folders
             for root, dirs, files in walk("/etc/bunkerweb/plugins", topdown=False):
@@ -1060,9 +1070,7 @@ def upload_plugin():
         if not file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
             return {"status": "ko"}, 422
 
-        Path(
-            f"/var/tmp/bunkerweb/ui/{uuid4()}{file.filename[file.filename.index('.'):]}"
-        ).write_bytes(file.read())
+        Path(f"/var/tmp/bunkerweb/ui/{file.filename}").write_bytes(file.read())
 
     return {"status": "ok"}, 201
 

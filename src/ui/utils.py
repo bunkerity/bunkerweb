@@ -145,6 +145,7 @@ def path_to_dict(
                 "type": "file",
                 "path": f"{path}/{type_lower}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['name']}.conf",
                 "can_edit": conf["method"] == "ui",
+                "can_delete": True,
                 "can_download": True,
                 "content": conf["data"].decode("utf-8"),
             }
