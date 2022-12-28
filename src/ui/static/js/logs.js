@@ -199,10 +199,10 @@ class FetchLogs {
       //remove prev logs
       this.logListContainer.textContent = "";
       //wait if live update previously
-      if (this.isLiveUpdate && !this.toDate) {
+      if (this.isLiveUpdate) {
         setTimeout(() => {
           const isSettings = this.getSettings();
-          return isSettings ? this.getLogsFromToDate() : "";
+          return isSettings ? this.getLogsSinceLastUpdate() : "";
         }, this.updateDelay);
       } else {
         const isSettings = this.getSettings();
@@ -270,22 +270,17 @@ class FetchLogs {
       response = await fetch(
         `${location.href}/${this.instanceName}?from_date=${this.fromDate}&to_date=${this.toDate}`
       );
+      const data = await response.json();
+      return await this.showLogs(data);
     }
 
     if (!this.toDate) {
       response = await fetch(
         `${location.href}/${this.instanceName}?from_date=${this.fromDate}`
       );
+      const data = await response.json();
+      return await this.showLogs(data);
     }
-
-    if (response.status === 200) {
-      const res = await response.json();
-      //last update
-      return await this.showLogs(res);
-    } else {
-      console.log(`Error: ${response.status}`);
-    }
-    return null;
   }
 
   async getLogsSinceLastUpdate() {
@@ -293,15 +288,8 @@ class FetchLogs {
       `${location.href}/${this.instanceName}` +
         (this.lastUpdate ? `?last_update=${this.lastUpdate}` : "")
     );
-
-    if (response.status === 200) {
-      const res = await response.json();
-      //last update
-      return await this.showLogs(res);
-    } else {
-      console.log(`Error: ${response.status}`);
-    }
-    return null;
+    const data = await response.json();
+    return await this.showLogs(data);
   }
 
   async showLogs(res) {
@@ -329,11 +317,8 @@ class FetchLogs {
       this.logListContainer.appendChild(logContainer);
     });
 
-    setTimeout(() => {
-      this.goBottomList();
-    }, 100);
     //loop if no to date and live update true
-    if (this.isLiveUpdate && !this.toDate) {
+    if (this.isLiveUpdate) {
       setTimeout(() => {
         this.getLogsSinceLastUpdate();
       }, this.updateDelay);
@@ -424,8 +409,13 @@ class Filter {
 
 class LogsDate {
   constructor(el, options = {}) {
-    this.datepicker = new Datepicker(el, options);
-    this.container = document.querySelector("[logs-settings]");
+    this.el = el;
+    this.options = options;
+    this.init();
+  }
+
+  init() {
+    this.datepicker = new Datepicker(this.el, this.options);
   }
 }
 

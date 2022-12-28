@@ -10,7 +10,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 10;
+  z-index: 100;
   padding-top: 4px;
 }
 
@@ -38,9 +38,9 @@
   text-align: center;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .datepicker-main {
@@ -92,8 +92,11 @@
 
 .datepicker-controls .button {
   margin: 0;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+
   background-color: #fefefe;
-  color: #0a0a0a;
+  color: #707070;
 }
 
 .datepicker-controls .button:hover,
@@ -105,7 +108,10 @@
 .datepicker-controls .button:focus[disabled] {
   opacity: 0.25;
   background-color: #fefefe;
-  color: #0a0a0a;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+
+  color: #707070;
 }
 
 .datepicker-header .datepicker-controls .button {
@@ -141,6 +147,7 @@
   line-height: 1.5rem;
   font-size: 0.875rem;
   font-weight: bold;
+  color: #064059;
 }
 
 .datepicker-view .week {
@@ -200,7 +207,9 @@
   background-color: #f7f7f7;
 }
 
-.datepicker-cell.highlighted:not(.selected):not(.range):not(.today):not(.disabled):hover {
+.datepicker-cell.highlighted:not(.selected):not(.range):not(.today):not(
+    .disabled
+  ):hover {
   background-color: #f1f1f1;
 }
 
