@@ -14,7 +14,7 @@
     "help": "Where nginx will search for configurations.",
     "id": "nginx-prefix",
     "label": "nginx prefix",
-    "regex": ".*",
+    "regex": "^(/[\\w. -]+)*/$",
     "type": "text"
   },
   "HTTP_PORT": {
@@ -23,7 +23,7 @@
     "help": "HTTP port number which bunkerweb binds to.",
     "id": "http-port",
     "label": "HTTP port",
-    "regex": ".*",
+    "regex": "^\\d+$",
     "type": "text"
   },
   "HTTPS_PORT": {
@@ -32,7 +32,7 @@
     "help": "HTTPS port number which bunkerweb binds to.",
     "id": "https-port",
     "label": "HTTPS port",
-    "regex": ".*",
+    "regex": "^\\d+$",
     "type": "text"
   },
   "MULTISITE": {
@@ -50,7 +50,7 @@
     "help": "List of the virtual hosts served by bunkerweb.",
     "id": "server-name",
     "label": "Server name",
-    "regex": ".*",
+    "regex": "^(?! )( ?((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)(?!.* \\2))*$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
@@ -59,7 +59,7 @@
     "help": "Number of worker processes.",
     "id": "worker-processes",
     "label": "Worker processes",
-    "regex": ".*",
+    "regex": "^(auto|\\d+)$",
     "type": "text"
   },
   "WORKER_RLIMIT_NOFILE": {
@@ -68,7 +68,7 @@
     "help": "Maximum number of open files for worker processes.",
     "id": "worker-rlimit-nofile",
     "label": "Open files per worker",
-    "regex": ".*",
+    "regex": "^\\d+$",
     "type": "text"
   },
   "WORKER_CONNECTIONS": {
@@ -77,7 +77,7 @@
     "help": "Maximum number of connections per worker.",
     "id": "worker-connections",
     "label": "Connections per worker",
-    "regex": ".*",
+    "regex": "^\\d+$",
     "type": "text"
   },
   "LOG_FORMAT": {
@@ -114,7 +114,7 @@
     "help": "DNS addresses of resolvers to use.",
     "id": "dns-resolvers",
     "label": "DNS resolvers",
-    "regex": "^.*$",
+    "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})|(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)))(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
     "type": "text"
   },
   "DATASTORE_MEMORY_SIZE": {
@@ -123,7 +123,7 @@
     "help": "Size of the internal datastore.",
     "id": "datastore-memory-size",
     "label": "Datastore memory size",
-    "regex": "^.*$",
+    "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
   "USE_API": {
@@ -141,7 +141,7 @@
     "help": "Listen port number for the API.",
     "id": "api-http-listen",
     "label": "API port number",
-    "regex": "^.*$",
+    "regex": "^\\d+$",
     "type": "text"
   },
   "API_SERVER_NAME": {
@@ -150,7 +150,7 @@
     "help": "Server name (virtual host) for the API.",
     "id": "api-server-name",
     "label": "API server name",
-    "regex": "^.*$",
+    "regex": "^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?$",
     "type": "text"
   },
   "API_WHITELIST_IP": {
@@ -159,7 +159,7 @@
     "help": "List of IP/network allowed to contact the API.",
     "id": "api-whitelist-ip",
     "label": "API whitelist IP",
-    "regex": "^.*$",
+    "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d)\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\\d){0,1}\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
     "type": "text"
   },
   "AUTOCONF_MODE": {
