@@ -232,7 +232,7 @@ include "plugins-modal.html" %}
         {% if plugin['page']%}
         <a
           class="hover:-translate-y-px"
-          href="{{request.url_root}}/plugins?{{plugin['id']}}"
+          href="{{request.url_root}}plugins?plugin_id={{plugin['id']}}"
         >
           <svg
             class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
