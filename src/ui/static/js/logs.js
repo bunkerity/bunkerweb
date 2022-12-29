@@ -196,20 +196,24 @@ class FetchLogs {
 
   init() {
     this.submitSettings.addEventListener("click", (e) => {
-      //remove prev logs
+      //check if min setting to fetch
+      const isSettings = this.isSettings();
+      if (!isSettings) return;
+      //if can fetch, remove previous logs
       this.logListContainer.textContent = "";
-      //wait if live update previously
+      //get new settings data
+      this.setSettings();
+      //two cases
       if (this.isLiveUpdate) {
-        setTimeout(() => {
-          const isSettings = this.getSettings();
-          return isSettings ? this.getLogsSinceLastUpdate() : "";
-        }, this.updateDelay);
+        //live update is checked, get data since last update or all if undefined
+        return this.getLogsSinceLastUpdate();
       } else {
-        const isSettings = this.getSettings();
-        return isSettings ? this.getLogsFromToDate() : "";
+        //get data from the range from/to (defined or default)
+        return this.getLogsFromToDate();
       }
     });
-    //disabled/enabled filed logic
+
+    //to date is disabled if live update is set
     this.toDateInp.addEventListener("input", (e) => {
       this.toDateInp.value
         ? this.updateDelayInp.setAttribute("disabled", "")
@@ -219,12 +223,14 @@ class FetchLogs {
         : this.liveUpdateInp.removeAttribute("disabled");
     });
 
+    //update disabled if to date is set
     this.updateDelayInp.addEventListener("input", (e) => {
       this.updateDelayInp.value
         ? this.toDateInp.setAttribute("disabled", "")
         : this.toDateInp.removeAttribute("disabled");
     });
 
+    //live update disabled if to date is set
     this.liveUpdateInp.addEventListener("input", (e) => {
       this.liveUpdateInp.checked
         ? this.toDateInp.setAttribute("disabled", "")
@@ -232,27 +238,32 @@ class FetchLogs {
     });
   }
 
-  getSettings() {
-    //get settings
-    //check valid instance name
-    this.instanceName = this.instance.textContent;
-    if (!this.instanceName || this.instanceName.trim() === "none") return false;
-    //if a date value exist, check if is a timestamp
+  //bool if min setting is set to fetch
+  isSettings() {
+    //no instance selected
+    if (this.instance.textContent.trim() === "none") return false;
+    //at least no from date
     if (this.fromDateInp.value && isNaN(Date.parse(this.fromDateInp.value)))
       return false;
-    if (this.toDateInp.value && isNaN(Date.parse(this.toDateInp.value)))
-      return false;
-    //check valid date
+
+    return true;
+  }
+
+  //get settings
+  setSettings() {
+    this.instanceName = this.instance.textContent;
+    //get range date
     this.fromDate = Date.parse(this.fromDateInp.value)
       ? Date.parse(this.fromDateInp.value)
       : Date.now() - 86400000;
     this.toDate = Date.parse(this.toDateInp.value)
       ? Date.parse(this.toDateInp.value)
       : false;
+    //set update delay
     this.updateDelay =
       this.updateDelayInp.value * 1000 ? this.updateDelayInp.value : 2000;
+    //look if live update
     this.isLiveUpdate = this.liveUpdateInp.checked;
-    return true;
   }
 
   goBottomList() {
@@ -265,20 +276,21 @@ class FetchLogs {
   }
 
   async getLogsFromToDate() {
-    let response;
+    let res;
+    //case from date defined only
     if (this.toDate) {
-      response = await fetch(
+      res = await fetch(
         `${location.href}/${this.instanceName}?from_date=${this.fromDate}&to_date=${this.toDate}`
       );
-      const data = await response.json();
+      const data = await res.json();
       return await this.showLogs(data);
     }
-
+    //case from date and to date defined
     if (!this.toDate) {
-      response = await fetch(
+      res = await fetch(
         `${location.href}/${this.instanceName}?from_date=${this.fromDate}`
       );
-      const data = await response.json();
+      const data = await res.json();
       return await this.showLogs(data);
     }
   }
@@ -293,7 +305,9 @@ class FetchLogs {
   }
 
   async showLogs(res) {
+    //get last update timestamp
     this.lastUpdate = res.last_update;
+    //render logs
     res.logs.forEach((log) => {
       //container
       const logContainer = document.createElement("li");
@@ -317,7 +331,7 @@ class FetchLogs {
       this.logListContainer.appendChild(logContainer);
     });
 
-    //loop if no to date and live update true
+    //if live update, refetch to last update every defined delay
     if (this.isLiveUpdate) {
       setTimeout(() => {
         this.getLogsSinceLastUpdate();
