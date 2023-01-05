@@ -10,7 +10,6 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     SmallInteger,
     String,
-    TIMESTAMP,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -261,15 +260,6 @@ class Selects(Base):
     value = Column(String(256), primary_key=True)
 
     setting = relationship("Settings", back_populates="selects")
-
-
-class Logs(Base):
-    __tablename__ = "logs"
-
-    id = Column(TIMESTAMP, primary_key=True)
-    message = Column(String(2048), nullable=False)
-    level = Column(LOG_LEVELS_ENUM, nullable=False)
-    component = Column(String(256), nullable=False)
 
 
 class Instances(Base):

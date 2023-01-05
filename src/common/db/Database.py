@@ -3,10 +3,7 @@ from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
 from logging import (
-    NOTSET,
     Logger,
-    _levelToName,
-    _nameToLevel,
 )
 import oracledb
 from os import _exit, getenv, listdir, makedirs
@@ -30,7 +27,6 @@ from traceback import format_exc
 from model import (
     Base,
     Instances,
-    Logs,
     Plugins,
     Settings,
     Global_values,
@@ -1320,32 +1316,6 @@ class Database:
                 .filter_by(job_name=job_name, file_name=file_name)
                 .first()
             )
-
-    def save_log(
-        self,
-        log: str,
-        level: Tuple[str, int],
-        component: str,
-    ) -> str:
-        """Save log."""
-        with self.__db_session() as session:
-            session.add(
-                Logs(
-                    id=int(datetime.now().timestamp()),
-                    message=log,
-                    level=str(_levelToName[_nameToLevel.get(level, NOTSET)])
-                    if isinstance(level, str)
-                    else _levelToName.get(level, "NOTSET"),
-                    component=component,
-                )
-            )
-
-            try:
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
 
     def add_instance(self, hostname: str, port: int, server_name: str) -> str:
         """Add instance."""
