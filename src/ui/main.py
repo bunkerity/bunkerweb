@@ -1420,7 +1420,7 @@ def logs_container(container_id):
             }
         )
 
-    return jsonify({"logs": logs, "last_update": int(time())})
+    return jsonify({"logs": logs, "last_update": int(time() * 1000)})
 
 
 @app.route("/jobs", methods=["GET"])
