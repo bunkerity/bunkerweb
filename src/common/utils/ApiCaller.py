@@ -132,7 +132,7 @@ class ApiCaller:
         ret = True
         with BytesIO() as tgz:
             with taropen(mode="w:gz", fileobj=tgz, dereference=True) as tf:
-                tf.add(path, arcname=sep)
+                tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
             if not self._send_to_apis("POST", url, files=files):
