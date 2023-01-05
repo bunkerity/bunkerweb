@@ -32,7 +32,6 @@ from os import _exit, chmod, getenv, getpid, listdir, mkdir, remove, walk
 from os.path import exists, isdir, isfile, join
 from re import match as re_match
 from requests import get
-from requests.utils import default_headers
 from shutil import rmtree, copytree, chown
 from sys import path as sys_path, exit as sys_exit, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
@@ -417,16 +416,19 @@ def services():
             # Edit check fields and remove already existing ones
             config = app.config["CONFIG"].get_config(methods=False)
             for variable, value in deepcopy(variables).items():
-                if "SCHEMA" in variable.split("_"):
+                variable_splitted = variable.split("_")
+                if "SCHEMA" in variable_splitted:
                     del variables[variable]
-                    continue
+                    variable_splitted.pop(variable_splitted.index("SCHEMA"))
+                    variable = "_".join(variable_splitted)
+                    variables[variable] = value
 
                 if value == "on":
                     value = "yes"
                 elif value == "off":
                     value = "no"
 
-                if (
+                if variable in variables and (
                     request.form["operation"] == "edit"
                     and variable != "SERVER_NAME"
                     and value
@@ -682,6 +684,12 @@ def plugins():
             # Check variables
             variables = deepcopy(request.form.to_dict())
             del variables["csrf_token"]
+
+            if variables["external"] == "false":
+                flash(f"Can't delete internal plugin {variables['name']}", "error")
+                return redirect(url_for("loading", next=url_for("plugins"))), 500
+
+            variables["path"] = f"/etc/bunkerweb/plugins/{variables['name']}"
 
             operation = app.config["CONFIGFILES"].check_path(
                 variables["path"], "/etc/bunkerweb/plugins/"
