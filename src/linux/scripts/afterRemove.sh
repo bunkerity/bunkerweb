@@ -90,12 +90,6 @@ if [ -e "/var/tmp/bunkerweb" ] ; then
 	do_and_check_cmd rm -rf /var/tmp/bunkerweb
 fi
 
-# Remove /var/cache/bunkerweb
-if [ -e "/var/cache/bunkerweb" ] ; then
-	echo "ℹ️ Remove /var/cache/bunkerweb"
-	do_and_check_cmd rm -rf /var/cache/bunkerweb
-fi
-
 # Remove /var/lib/bunkerweb
 if [ -e "/var/lib/bunkerweb" ] ; then
 	echo "ℹ️ Remove /var/lib/bunkerweb"
