@@ -10,7 +10,7 @@ pip install pip --upgrade > /dev/null && pip install pip-compile-multi pip-upgra
 
 echo "Updating requirements.in files"
 
-files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in" "../../tests/requirements.txt")
+files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in" "../../tests/requirements.txt" "../../tests/ui/requirements.txt")
 
 for file in "${files[@]}"
 do
