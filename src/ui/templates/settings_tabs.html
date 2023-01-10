@@ -1,24 +1,28 @@
 
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
-{% set plugins = [{
-  "id": "general",
-  "order": 999,
-  "name": "General",
-  "description": "The general settings for the server",
-  "version": "0.1",
-  "settings": {
-    "SERVER_NAME": {
-      "context": "multisite",
-      "default": "",
-      "help": "List of the virtual hosts served by bunkerweb.",
-      "id": "server-name",
-      "label": "Server name",
-      "regex": ".*",
-      "type": "text"
+{% if current_endpoint == "services"%}
+  {% set plugins = [{
+    "id": "general",
+    "order": 999,
+    "name": "General",
+    "description": "The general settings for the server",
+    "version": "0.1",
+    "settings": {
+      "SERVER_NAME": {
+        "context": "multisite",
+        "default": "",
+        "help": "List of the virtual hosts served by bunkerweb.",
+        "id": "SERVER_NAME",
+        "label": "Server name",
+        "regex": ".*",
+        "type": "text",
+      }
     }
-  }
-}] + config["CONFIG"].get_plugins() %}
+  }] + config["CONFIG"].get_plugins() %}
+{% else %}
+  {% set plugins = config["CONFIG"].get_plugins() %}
+{%endif%}
 <div {{current_endpoint}}-tabs class="col-span-12 grid grid-cols-12 {% if current_endpoint == 'services' %}mb-4{% endif %}">
   <!-- desktop tabs -->
   <div {{current_endpoint}}-tabs-desktop class="hidden md:block col-span-12">
