@@ -9,7 +9,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input
       type="hidden"
-      value="{{ service['SERVER_NAME'] }}"
+      value="{{ service['SERVER_NAME'].split(' ')[0] }}"
       name="OLD_SERVER_NAME"
     />
     <input type="hidden" value="edit" name="operation" />
@@ -19,7 +19,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modal-edit-label-{{ id_server_name }}">
-            View/edit <i>{{ service["SERVER_NAME"] }}</i> configuration
+            View/edit
+            <i>{{ service["SERVER_NAME"].split(" ")[0] }}</i> configuration
           </h5>
           <button
             type="button"

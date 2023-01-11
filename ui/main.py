@@ -458,8 +458,8 @@ def services():
                 "services",
                 request.form["operation"],
                 variables,
-                request.form.get("OLD_SERVER_NAME", None),
-                request.form.get("SERVER_NAME", None),
+                request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
+                variables.get("SERVER_NAME", "").split(" ")[0],
             ),
         ).start()
 
@@ -468,11 +468,9 @@ def services():
         if request.form["operation"] == "new":
             message = f"Creating service {variables['SERVER_NAME'].split(' ')[0]}"
         elif request.form["operation"] == "edit":
-            message = (
-                f"Saving configuration for service {request.form['OLD_SERVER_NAME']}"
-            )
+            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split(' ')[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting service {request.form['SERVER_NAME']}"
+            message = f"Deleting service {request.form['SERVER_NAME'].split(' ')[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 

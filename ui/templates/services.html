@@ -19,13 +19,13 @@
   {% else %} {% for services_batched in services|batch(3) %}
   <div class="row">
     {% for service in services_batched %} {% set id_server_name =
-    service["SERVER_NAME"].replace(".", "-") %}
+    service["SERVER_NAME"].replace(".", "-").split(" ")[0] %}
     <div class="col-lg-6 mb-2 px-2">
       <div class="card mb-2">
         <div class="d-flex align-items-center">
           <div class="flex-grow-1">
             <div class="ms-2 c-details">
-              <h6 class="mb-0">{{ service["SERVER_NAME"] }}</h6>
+              <h6 class="mb-0">{{ service["SERVER_NAME"].split(" ")[0] }}</h6>
             </div>
           </div>
           <div class="d-sm-flex align-items-center">
@@ -91,7 +91,10 @@
               </ul>
             </div>
             <div class="badge px-1">
-              <a href="http://{{ service['SERVER_NAME'] }}" target="_blank">
+              <a
+                href="http://{{ service['SERVER_NAME'].split(' ')[0] }}"
+                target="_blank"
+              >
                 <button type="button" class="btn btn-outline-primary">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </button>

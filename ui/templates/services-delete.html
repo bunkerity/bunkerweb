@@ -7,14 +7,18 @@
 >
   <form id="form-delete-{{ id_server_name }}" method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <input type="hidden" value="{{ service["SERVER_NAME"] }}"
-    name="SERVER_NAME">
+    <input
+      type="hidden"
+      value="{{ service['SERVER_NAME'].split(' ')[0] }}"
+      name="SERVER_NAME"
+    />
     <input type="hidden" value="delete" name="operation" />
     <div class="modal-dialog modal-md modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modal-delete-label-{{ id_server_name }}">
-            Delete <i>{{ service["SERVER_NAME"] }}</i> configuration
+            Delete
+            <i>{{ service["SERVER_NAME"].split(" ")[0] }}</i> configuration
           </h5>
           <button
             type="button"
@@ -27,7 +31,7 @@
         </div>
         <div class="modal-body">
           Are you sure you want to delete the configuration of
-          <b>{{ service["SERVER_NAME"] }}</b> ?
+          <b>{{ service["SERVER_NAME"].split(" ")[0] }}</b> ?
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-outline-danger">Delete</button>
