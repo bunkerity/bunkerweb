@@ -303,13 +303,19 @@ class Config:
                 "SERVER_NAME"
             ] in variables["SERVER_NAME"].split(" "):
                 if edit is False:
-                    return f"Service {service['SERVER_NAME']} already exists.", 1
+                    return (
+                        f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
+                        1,
+                    )
 
                 services.pop(i)
 
         services.append(variables)
         self.__gen_conf(self.get_config(methods=False), services)
-        return f"Configuration for {variables['SERVER_NAME']} has been generated.", 0
+        return (
+            f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.",
+            0,
+        )
 
     def edit_service(self, old_server_name: str, variables: dict) -> Tuple[str, int]:
         """Edits a service
@@ -336,7 +342,10 @@ class Config:
         if error:
             return message, error
 
-        return f"Configuration for {old_server_name} has been edited.", error
+        return (
+            f"Configuration for {old_server_name.split(' ')[0]} has been edited.",
+            error,
+        )
 
     def edit_global_conf(self, variables: dict) -> str:
         """Edits the global conf
@@ -374,6 +383,7 @@ class Config:
         Exception
             raises this if the service_name given isn't found
         """
+        service_name = service_name.split(" ")[0]
         full_env = self.get_config(methods=False)
         services = self.get_services(methods=False)
         new_services = []

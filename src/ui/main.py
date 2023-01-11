@@ -432,7 +432,9 @@ def services():
                     request.form["operation"] == "edit"
                     and variable != "SERVER_NAME"
                     and value
-                    == config.get(f"{variables['SERVER_NAME']}_{variable}", None)
+                    == config.get(
+                        f"{variables['SERVER_NAME'].split(' ')[0]}_{variable}", None
+                    )
                     or not value.strip()
                 ):
                     del variables[variable]
@@ -472,8 +474,8 @@ def services():
                 "services",
                 request.form["operation"],
                 variables,
-                request.form.get("OLD_SERVER_NAME", None),
-                request.form.get("SERVER_NAME", None),
+                request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
+                variables.get("SERVER_NAME", "").split(" ")[0],
             ),
         ).start()
 
@@ -482,11 +484,9 @@ def services():
         if request.form["operation"] == "new":
             message = f"Creating service {variables['SERVER_NAME'].split(' ')[0]}"
         elif request.form["operation"] == "edit":
-            message = (
-                f"Saving configuration for service {request.form['OLD_SERVER_NAME']}"
-            )
+            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split(' ')[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting service {request.form['SERVER_NAME']}"
+            message = f"Deleting service {request.form['SERVER_NAME'].split(' ')[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
@@ -496,15 +496,18 @@ def services():
         "services.html",
         services=[
             {
-                "SERVER_NAME": service["SERVER_NAME"],
-                "USE_REVERSE_PROXY": service.get("USE_REVERSE_PROXY", "no"),
-                "SERVE_FILES": service.get("SERVE_FILES", "no"),
-                "REMOTE_PHP": service.get("REMOTE_PHP", "no"),
-                "AUTO_LETS_ENCRYPT": service.get("AUTO_LETS_ENCRYPT", "no"),
-                "USE_MODSECURITY": service.get("USE_MODSECURITY", "no"),
-                "USE_BAD_BEHAVIOR": service.get("USE_BAD_BEHAVIOR", "no"),
-                "USE_LIMIT_REQ": service.get("USE_LIMIT_REQ", "no"),
-                "USE_DNSBL": service.get("USE_DNSBL", "no"),
+                "SERVER_NAME": {
+                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
+                    "method": service["SERVER_NAME"]["method"],
+                },
+                "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
+                "SERVE_FILES": service["SERVE_FILES"],
+                "REMOTE_PHP": service["REMOTE_PHP"],
+                "AUTO_LETS_ENCRYPT": service["AUTO_LETS_ENCRYPT"],
+                "USE_MODSECURITY": service["USE_MODSECURITY"],
+                "USE_BAD_BEHAVIOR": service["USE_BAD_BEHAVIOR"],
+                "USE_LIMIT_REQ": service["USE_LIMIT_REQ"],
+                "USE_DNSBL": service["USE_DNSBL"],
                 "settings": dumps(service),
             }
             for service in services
