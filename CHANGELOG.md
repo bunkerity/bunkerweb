@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.4.5 - 2022/11/26
+## v1.4.5 - 
 
 - Fix bwcli syntax error
 - Fix UI not working using Linux integration
