@@ -378,6 +378,24 @@ class Multiple {
                 .getAttribute("setting-container")
                 .replace("SCHEMA", `${setNum}`);
               ctnr.setAttribute("setting-container", newName);
+              //rename input
+              try {
+                const inp = ctnr.querySelector("input");
+                const newInpName = inp
+                  .getAttribute("name")
+                  .replace("_SCHEMA", "");
+                inp.setAttribute("name", newInpName);
+                inp.setAttribute("id", newInpName);
+              } catch (err) {}
+              //rename select
+              try {
+                const select = ctnr.querySelector("select");
+                const newInpName = select
+                  .getAttribute("name")
+                  .replace("_SCHEMA", "");
+                select.setAttribute("name", newInpName);
+                select.setAttribute("id", newInpName);
+              } catch (err) {}
             });
           } catch (err) {}
 
