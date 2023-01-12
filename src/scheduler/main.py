@@ -66,7 +66,7 @@ def handle_reload(signum, frame):
     try:
         if scheduler is not None and run:
             # Get the env by reading the .env file
-            env = dotenv_values("/var/tmp/bunkerweb/variables.env")
+            env = dotenv_values("/etc/bunkerweb/variables.env")
             if scheduler.reload(env):
                 logger.info("Reload successful")
             else:

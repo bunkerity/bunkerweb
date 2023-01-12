@@ -1,59 +1,65 @@
 #!/bin/bash
 
+# Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python
 
-# Create ui.env file if it doesn't exist 
+# Create the ui.env file if it doesn't exist 
 if [ ! -f /etc/bunkerweb/ui.env ]; then
-  # Creating a file called `ui.env` in the `/etc/bunkerweb` directory.
-  echo -e "ADMIN_USERNAME=admin\nADMIN_PASSWORD=changeme\nABSOLUTE_URI=" > /etc/bunkerweb/ui.env
+    echo "ADMIN_USERNAME=admin" > /etc/bunkerweb/ui.env
+    echo "ADMIN_PASSWORD=changeme" >> /etc/bunkerweb/ui.env
+    echo "ABSOLUTE_URI=" >> /etc/bunkerweb/ui.env
 fi
 
-# function to start the UI
+# Function to start the UI
 start() {
-  echo "Starting UI"
-  python3 -m gunicorn --bind=127.0.0.1:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=2 --user scheduler --group scheduler main:app &
-  # Source /etc/bunkerweb/ui.env to load variables
-  source /etc/bunkerweb/ui.env
-  # Export all variables to environment
-  export $(cat /etc/bunkerweb/ui.env)
+    echo "Starting UI"
+    if [ ! -f /var/tmp/bunkerweb/ui.pid ]; then
+        touch /var/tmp/bunkerweb/ui.pid
+    fi
+    # Check if there is a process listening on port 7000
+    if lsof -i :7000; then
+        echo "Killing existing process on port 7000"
+        lsof -i :7000 | awk '{if(NR>1) print $2}' | xargs kill -9
+    fi
+    python3 -m gunicorn --bind=127.0.0.1:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=2 main:app &
+    echo $! > /var/tmp/bunkerweb/ui.pid
+    source /etc/bunkerweb/ui.env
+    export $(cat /etc/bunkerweb/ui.env)
 }
 
-# function to stop the UI
-stop(){
-    echo "Stoping ui service ..."
-    # Check if pid file exist and remove it if so
-    PID_FILE_PATH="/var/tmp/bunkerweb/ui.pid"
-    if [ -f "$PID_FILE_PATH" ];
-    then
-        var=$( cat $PID_FILE_PATH )
-        kill -SIGINT $var
-        echo "Killing : $var"
+
+# Function to stop the UI
+stop() {
+    echo "Stopping UI service..."
+    if [ -f "/var/tmp/bunkerweb/ui.pid" ]; then
+        kill -SIGINT $(cat /var/tmp/bunkerweb/ui.pid)
+        rm -f /var/tmp/bunkerweb/ui.pid
+        echo "UI service stopped."
     else
-        echo "File doesn't exist"
+        echo "UI service is not running or the pid file doesn't exist."
     fi
 }
 
-# function reload the UI
+# Function to reload the UI
 reload() {
-  stop_ui
-  # Wait for ui to stop
-  sleep 5
-  start_ui
-  # if previous command worked then exit with 0
-  exit 0
+    stop
+    sleep 5
+    start
 }
 
+# Check the command line argument
 case $1 in
-    "start") 
-    start
-    ;;
-    "stop") 
-    stop
-    ;;
-    "reload") 
-    reload
-    ;;
-    *)
-        echo "Usage: ./bunkerweb-ui.sh start"
+    "start")
+        start
         ;;
-    esac
+    "stop")
+        stop
+        ;;
+    "reload")
+        reload
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|reload}"
+        exit 1
+        ;;
+esac
