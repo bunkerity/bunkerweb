@@ -1,4 +1,4 @@
-import { Checkbox, Select } from "./utils/form.js";
+import { Checkbox, Select, Password } from "./utils/form.js";
 import { Popover, Tabs, FormatValue } from "./utils/settings.js";
 
 class ServiceModal {
@@ -855,6 +855,8 @@ class FilterSettings {
 
 const setCheckbox = new Checkbox("[services-modal-form]");
 const setSelect = new Select("[services-modal-form]", "services");
+const setPassword = new Password();
+
 const setPopover = new Popover("main", "services");
 const setTabs = new Tabs("[services-tabs]", "services");
 const setModal = new ServiceModal();
