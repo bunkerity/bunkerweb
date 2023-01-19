@@ -61,12 +61,10 @@ class Plugins(Base):
     external = Column(Boolean, default=False, nullable=False)
 
     settings = relationship(
-        "Settings", back_populates="plugin", cascade="all, delete, delete-orphan"
+        "Settings", back_populates="plugin", cascade="all, delete-orphan"
     )
-    jobs = relationship(
-        "Jobs", back_populates="plugin", cascade="all, delete, delete-orphan"
-    )
-    pages = relationship("Plugin_pages", back_populates="plugin", cascade="all, delete")
+    jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
+    pages = relationship("Plugin_pages", back_populates="plugin", cascade="all")
 
 
 class Settings(Base):
@@ -81,7 +79,7 @@ class Settings(Base):
     name = Column(String(256), primary_key=True)
     plugin_id = Column(
         String(64),
-        ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("plugins.id", onupdate="cascade", ondelete="cascade"),
         nullable=False,
     )
     context = Column(CONTEXTS_ENUM, nullable=False)
@@ -92,12 +90,12 @@ class Settings(Base):
     type = Column(SETTINGS_TYPES_ENUM, nullable=False)
     multiple = Column(String(128), nullable=True)
 
-    selects = relationship("Selects", back_populates="setting", cascade="all, delete")
+    selects = relationship("Selects", back_populates="setting", cascade="all")
     services = relationship(
-        "Services_settings", back_populates="setting", cascade="all, delete"
+        "Services_settings", back_populates="setting", cascade="all"
     )
     global_value = relationship(
-        "Global_values", back_populates="setting", cascade="all, delete"
+        "Global_values", back_populates="setting", cascade="all"
     )
     plugin = relationship("Plugins", back_populates="settings")
 
@@ -107,7 +105,7 @@ class Global_values(Base):
 
     setting_id = Column(
         String(256),
-        ForeignKey("settings.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("settings.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
     value = Column(String(4096), nullable=False)
@@ -124,14 +122,12 @@ class Services(Base):
     method = Column(METHODS_ENUM, nullable=False)
 
     settings = relationship(
-        "Services_settings", back_populates="service", cascade="all, delete"
+        "Services_settings", back_populates="service", cascade="all"
     )
     custom_configs = relationship(
-        "Custom_configs", back_populates="service", cascade="all, delete"
+        "Custom_configs", back_populates="service", cascade="all"
     )
-    jobs_cache = relationship(
-        "Jobs_cache", back_populates="service", cascade="all, delete"
-    )
+    jobs_cache = relationship("Jobs_cache", back_populates="service", cascade="all")
 
 
 class Services_settings(Base):
@@ -139,12 +135,12 @@ class Services_settings(Base):
 
     service_id = Column(
         String(64),
-        ForeignKey("services.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("services.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
     setting_id = Column(
         String(256),
-        ForeignKey("settings.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("settings.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
     value = Column(String(4096), nullable=False)
@@ -162,7 +158,7 @@ class Jobs(Base):
     name = Column(String(128), primary_key=True)
     plugin_id = Column(
         String(64),
-        ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("plugins.id", onupdate="cascade", ondelete="cascade"),
     )
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
@@ -171,7 +167,7 @@ class Jobs(Base):
     last_run = Column(DateTime, nullable=True)
 
     plugin = relationship("Plugins", back_populates="jobs")
-    cache = relationship("Jobs_cache", back_populates="job", cascade="all, delete")
+    cache = relationship("Jobs_cache", back_populates="job", cascade="all")
 
 
 class Plugin_pages(Base):
@@ -184,7 +180,7 @@ class Plugin_pages(Base):
     )
     plugin_id = Column(
         String(64),
-        ForeignKey("plugins.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("plugins.id", onupdate="cascade", ondelete="cascade"),
         nullable=False,
     )
     template_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
@@ -206,12 +202,12 @@ class Jobs_cache(Base):
     )
     job_name = Column(
         String(128),
-        ForeignKey("jobs.name", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("jobs.name", onupdate="cascade", ondelete="cascade"),
         nullable=False,
     )
     service_id = Column(
         String(64),
-        ForeignKey("services.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("services.id", onupdate="cascade", ondelete="cascade"),
         nullable=True,
     )
     file_name = Column(
@@ -237,7 +233,7 @@ class Custom_configs(Base):
     )
     service_id = Column(
         String(64),
-        ForeignKey("services.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("services.id", onupdate="cascade", ondelete="cascade"),
         nullable=True,
     )
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
@@ -254,7 +250,7 @@ class Selects(Base):
 
     setting_id = Column(
         String(256),
-        ForeignKey("settings.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("settings.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
     value = Column(String(256), primary_key=True)

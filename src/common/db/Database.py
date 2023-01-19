@@ -1111,10 +1111,14 @@ class Database:
                                     Jobs.name == job["name"]
                                 ).update(updates)
 
-                    if exists(f"/usr/share/bunkerweb/core/{plugin['id']}/ui"):
-                        if {"template.html", "actions.py"}.issubset(
-                            listdir(f"/usr/share/bunkerweb/core/{plugin['id']}/ui")
-                        ):
+                    path_ui = (
+                        f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui"
+                        if exists(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
+                        else f"/etc/bunkerweb/plugins/{plugin['id']}/ui"
+                    )
+
+                    if exists(path_ui):
+                        if {"template.html", "actions.py"}.issubset(listdir(path_ui)):
                             db_plugin_page = (
                                 session.query(Plugin_pages)
                                 .with_entities(
@@ -1127,12 +1131,12 @@ class Database:
 
                             if db_plugin_page is None:
                                 with open(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html",
+                                    f"{path_ui}/template.html",
                                     "r",
                                 ) as file:
                                     template = file.read().encode("utf-8")
                                 with open(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py",
+                                    f"{path_ui}/actions.py",
                                     "r",
                                 ) as file:
                                     actions = file.read().encode("utf-8")
@@ -1149,18 +1153,16 @@ class Database:
                             else:  # TODO test this
                                 updates = {}
                                 template_checksum = file_hash(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html"
+                                    f"{path_ui}/template.html"
                                 )
-                                actions_checksum = file_hash(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py"
-                                )
+                                actions_checksum = file_hash(f"{path_ui}/actions.py")
 
                                 if (
                                     template_checksum
                                     != db_plugin_page.template_checksum
                                 ):
                                     with open(
-                                        f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html",
+                                        f"{path_ui}/template.html",
                                         "r",
                                     ) as file:
                                         updates.update(
@@ -1174,7 +1176,7 @@ class Database:
 
                                 if actions_checksum != db_plugin_page.actions_checksum:
                                     with open(
-                                        f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py",
+                                        f"{path_ui}/actions.py",
                                         "r",
                                     ) as file:
                                         updates.update(
@@ -1257,6 +1259,79 @@ class Database:
                 return format_exc()
 
         return ""
+
+    def get_plugins(self) -> List[Dict[str, Any]]:
+        """Get plugins."""
+        plugins = []
+        with self.__db_session() as session:
+            for plugin in (
+                session.query(Plugins)
+                .with_entities(
+                    Plugins.id,
+                    Plugins.order,
+                    Plugins.name,
+                    Plugins.description,
+                    Plugins.version,
+                    Plugins.external,
+                )
+                .order_by(Plugins.order)
+                .all()
+            ):
+                page = (
+                    session.query(Plugin_pages)
+                    .with_entities(Plugin_pages.id)
+                    .filter_by(plugin_id=plugin.id)
+                    .first()
+                )
+                data = {
+                    "id": plugin.id,
+                    "order": plugin.order,
+                    "name": plugin.name,
+                    "description": plugin.description,
+                    "version": plugin.version,
+                    "external": plugin.external,
+                    "page": page is not None,
+                    "settings": {},
+                }
+
+                for setting in (
+                    session.query(Settings)
+                    .with_entities(
+                        Settings.id,
+                        Settings.context,
+                        Settings.default,
+                        Settings.help,
+                        Settings.name,
+                        Settings.label,
+                        Settings.regex,
+                        Settings.type,
+                        Settings.multiple,
+                    )
+                    .filter_by(plugin_id=plugin.id)
+                    .all()
+                ):
+                    data["settings"][setting.id] = {
+                        "context": setting.context,
+                        "default": setting.default,
+                        "help": setting.help,
+                        "id": setting.name,
+                        "label": setting.label,
+                        "regex": setting.regex,
+                        "type": setting.type,
+                    } | ({"multiple": setting.multiple} if setting.multiple else {})
+
+                    if setting.type == "select":
+                        data["settings"][setting.id]["select"] = [
+                            select.value
+                            for select in session.query(Selects)
+                            .with_entities(Selects.value)
+                            .filter_by(setting_id=setting.id)
+                            .all()
+                        ]
+
+                plugins.append(data)
+
+        return plugins
 
     def get_plugins_errors(self) -> int:
         """Get plugins errors."""
@@ -1381,3 +1456,33 @@ class Database:
                     .all()
                 )
             ]
+
+    def get_plugin_actions(self, plugin: str) -> Optional[Any]:
+        """get actions file for the plugin"""
+        with self.__db_session() as session:
+            page = (
+                session.query(Plugin_pages)
+                .with_entities(Plugin_pages.actions_file)
+                .filter_by(plugin_id=plugin)
+                .first()
+            )
+
+            if page is None:
+                return None
+
+            return page.actions_file
+
+    def get_plugin_template(self, plugin: str) -> Optional[Any]:
+        """get template file for the plugin"""
+        with self.__db_session() as session:
+            page = (
+                session.query(Plugin_pages)
+                .with_entities(Plugin_pages.template_file)
+                .filter_by(plugin_id=plugin)
+                .first()
+            )
+
+            if page is None:
+                return None
+
+            return page.template_file

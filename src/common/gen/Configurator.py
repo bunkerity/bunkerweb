@@ -14,9 +14,11 @@ class Configurator:
         self,
         settings: str,
         core: Union[str, dict],
-        plugins: str,
+        plugins: Union[str, dict],
         variables: Union[str, dict],
         logger: Logger,
+        *,
+        plugins_settings: list = None,
     ):
         self.__logger = logger
         self.__settings = self.__load_settings(settings)
@@ -26,8 +28,12 @@ class Configurator:
         else:
             self.__core = core
 
-        self.__plugins_settings = []
-        self.__plugins = self.__load_plugins(plugins, "plugins")
+        self.__plugins_settings = plugins_settings or []
+
+        if isinstance(plugins, str):
+            self.__plugins = self.__load_plugins(plugins, "plugins")
+        else:
+            self.__plugins = plugins
 
         if isinstance(variables, str):
             self.__variables = self.__load_variables(variables)

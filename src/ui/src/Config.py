@@ -1,6 +1,7 @@
 from copy import deepcopy
-from os import listdir, remove
+from os import listdir, mkdir, remove
 from pathlib import Path
+from shutil import rmtree
 from time import sleep
 from flask import flash
 from os.path import exists, isfile
@@ -34,54 +35,6 @@ class Config:
                 )
                 sleep(3)
                 env = self.__db.get_config()
-
-        self.reload_plugins()
-
-    def reload_plugins(self) -> None:
-        self.__plugins = []
-        external_plugins = []
-
-        for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + list(
-            iglob("/usr/share/bunkerweb/core/*")
-        ):
-            content = listdir(foldername)
-            if "plugin.json" not in content:
-                continue
-
-            with open(f"{foldername}/plugin.json", "r") as f:
-                plugin = json_load(f)
-
-            plugin.update(
-                {
-                    "page": False,
-                    "external": foldername.startswith("/etc/bunkerweb/plugins"),
-                }
-            )
-
-            if plugin["external"] is True:
-                external_plugin = deepcopy(plugin)
-                del external_plugin["external"]
-                del external_plugin["page"]
-                external_plugins.append(external_plugin)
-
-            if "ui" in content:
-                if "template.html" in listdir(f"{foldername}/ui"):
-                    plugin["page"] = True
-
-            self.__plugins.append(plugin)
-
-        self.__plugins.sort(key=lambda plugin: plugin.get("name"))
-        self.__plugins_settings = {
-            **{k: v for x in self.__plugins for k, v in x["settings"].items()},
-            **self.__settings,
-        }
-
-        if external_plugins:
-            err = self.__db.update_external_plugins(external_plugins)
-            if err:
-                self.__logger.error(
-                    f"Couldn't update external plugins to database: {err}",
-                )
 
     def __env_to_dict(self, filename: str) -> dict:
         """Converts the content of an env file into a dict
@@ -139,17 +92,17 @@ class Config:
         conf = deepcopy(global_conf)
 
         servers = []
+        plugins_settings = self.get_plugins_settings()
         for service in services_conf:
             server_name = service["SERVER_NAME"].split(" ")[0]
             for k in service.keys():
                 key_without_server_name = k.replace(f"{server_name}_", "")
                 if (
-                    self.__plugins_settings[key_without_server_name]["context"]
-                    != "global"
-                    if key_without_server_name in self.__plugins_settings
+                    plugins_settings[key_without_server_name]["context"] != "global"
+                    if key_without_server_name in plugins_settings
                     else True
                 ):
-                    if not k.startswith(server_name) or k in self.__plugins_settings:
+                    if not k.startswith(server_name) or k in plugins_settings:
                         conf[f"{server_name}_{k}"] = service[k]
                     else:
                         conf[k] = service[k]
@@ -178,10 +131,44 @@ class Config:
         remove(env_file)
 
     def get_plugins_settings(self) -> dict:
-        return self.__plugins_settings
+        return {
+            **{k: v for x in self.get_plugins() for k, v in x["settings"].items()},
+            **self.__settings,
+        }
 
     def get_plugins(self) -> List[dict]:
-        return self.__plugins
+        if not exists("/usr/sbin/nginx"):
+            plugins = self.__db.get_plugins()
+            plugins.sort(key=lambda x: x["name"])
+            return plugins
+
+        plugins = []
+
+        for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + list(
+            iglob("/usr/share/bunkerweb/core/*")
+        ):
+            content = listdir(foldername)
+            if "plugin.json" not in content:
+                continue
+
+            with open(f"{foldername}/plugin.json", "r") as f:
+                plugin = json_load(f)
+
+            plugin.update(
+                {
+                    "page": False,
+                    "external": foldername.startswith("/etc/bunkerweb/plugins"),
+                }
+            )
+
+            if "ui" in content:
+                if "template.html" in listdir(f"{foldername}/ui"):
+                    plugin["page"] = True
+
+            plugins.append(plugin)
+
+        plugins.sort(key=lambda x: x["name"])
+        return plugins
 
     def get_settings(self) -> dict:
         return self.__settings
@@ -212,6 +199,7 @@ class Config:
         """
         if exists("/usr/sbin/nginx"):
             services = []
+            plugins_settings = self.get_plugins_settings()
             for filename in iglob("/etc/nginx/**/variables.env"):
                 service = filename.split("/")[3]
                 env = {
@@ -219,8 +207,7 @@ class Config:
                         {"value": v, "method": "ui"} if methods is True else v
                     )
                     for k, v in self.__env_to_dict(filename).items()
-                    if k.startswith(f"{service}_")
-                    or k in self.__plugins_settings.keys()
+                    if k.startswith(f"{service}_") or k in plugins_settings.keys()
                 }
                 services.append(env)
 
@@ -242,11 +229,12 @@ class Config:
             Return the error code
         """
         error = 0
+        plugins_settings = self.get_plugins_settings()
         for k, v in variables.items():
             check = False
 
-            if k in self.__plugins_settings:
-                if _global ^ (self.__plugins_settings[k]["context"] == "global"):
+            if k in plugins_settings:
+                if _global ^ (plugins_settings[k]["context"] == "global"):
                     error = 1
                     flash(f"Variable {k} is not valid.", "error")
                     continue
@@ -255,16 +243,16 @@ class Config:
             else:
                 setting = k[0 : k.rfind("_")]
                 if (
-                    setting not in self.__plugins_settings
-                    or "multiple" not in self.__plugins_settings[setting]
+                    setting not in plugins_settings
+                    or "multiple" not in plugins_settings[setting]
                 ):
                     error = 1
                     flash(f"Variable {k} is not valid.", "error")
                     continue
 
             if not (
-                _global ^ (self.__plugins_settings[setting]["context"] == "global")
-            ) and re_search(self.__plugins_settings[setting]["regex"], v):
+                _global ^ (plugins_settings[setting]["context"] == "global")
+            ) and re_search(plugins_settings[setting]["regex"], v):
                 check = True
 
             if not check:
