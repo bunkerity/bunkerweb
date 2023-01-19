@@ -185,12 +185,9 @@ class FolderDropdown {
         if (
           e.target.closest("div").hasAttribute(`${this.prefix}-action-button`)
         ) {
-          const att = e.target
-            .closest("div")
-            .getAttribute(`${this.prefix}-action-button`);
-          const dropEl = document.querySelector(
-            `[${this.prefix}-action-dropdown="${att}"]`
-          );
+          const dropEl = e.target
+            .closest(`div[${this.prefix}-element]`)
+            .querySelector(`[${this.prefix}-action-dropdown]`);
           //avoid multiple dropdown
           if (prevActionBtn === "") prevActionBtn = dropEl;
           if (prevActionBtn !== dropEl) this.hideDropEls();
@@ -557,7 +554,7 @@ class FolderModal {
   getInfoFromActionBtn(btnEl) {
     const action = btnEl.getAttribute("value");
     const name = btnEl.getAttribute(`${this.prefix}-action-dropdown-btn`);
-    const folder = document.querySelector(`[${this.prefix}-element='${name}']`);
+    const folder = btnEl.closest(`[${this.prefix}-element]`);
     const level = folder.getAttribute("level");
     const path = folder.getAttribute("path");
     const type = folder.getAttribute("_type");
