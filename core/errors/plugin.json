@@ -13,6 +13,15 @@
 			"label": "Errors",
 			"regex": "^.*$",
 			"type": "text"
+		},
+		"INTERCEPTED_ERROR_CODES": {
+			"context": "multisite",
+			"default": "400 401 403 404 405 413 429 500 501 502 503 504",
+			"help": "List of HTTP error code intercepted by Bunkerweb",
+			"id": "intercepted-error-codes",
+			"label": "Intercepted error codes",
+			"regex": "^.*$",
+			"type": "text"
 		}
 	}
 }
