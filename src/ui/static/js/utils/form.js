@@ -164,4 +164,59 @@ class Select {
   }
 }
 
-export { Checkbox, Select };
+class Password {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("click", (e) => {
+      try {
+        if (e.target.closest("button").hasAttribute("setting-password")) {
+          const btn = e.target.closest("button");
+          const action = btn.getAttribute("setting-password");
+          const inp = btn.closest("[setting-container]").querySelector("input");
+          this.setValDisplay(action, inp);
+          this.hiddenBtns(btn);
+          this.showOppositeBtn(btn, action);
+        }
+      } catch (err) {}
+    });
+  }
+
+  showOppositeBtn(btnEl, action) {
+    const btnEls = this.getBtns(btnEl);
+    const opposite = action === "visible" ? "invisible" : "visible";
+
+    btnEls.forEach((btn) => {
+      const action = btn.getAttribute("setting-password");
+
+      if (action === opposite) {
+        btn.classList.add("flex");
+        btn.classList.remove("hidden");
+      }
+    });
+  }
+
+  setValDisplay(action, inp) {
+    if (action === "visible") inp.setAttribute("type", "text");
+    if (action === "invisible") inp.setAttribute("type", "password");
+  }
+
+  hiddenBtns(btnEl) {
+    const btnEls = this.getBtns(btnEl);
+
+    btnEls.forEach((btn) => {
+      btn.classList.add("hidden");
+      btn.classList.remove("flex");
+    });
+  }
+
+  getBtns(btnEl) {
+    return btnEl
+      .closest("[setting-container]")
+      .querySelectorAll("button[setting-password]");
+  }
+}
+
+export { Checkbox, Select, Password };
