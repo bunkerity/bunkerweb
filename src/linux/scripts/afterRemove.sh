@@ -25,17 +25,14 @@ function remove_systemd_service {
     service=$1
     service_file="/lib/systemd/system/$service.service"
     echo "checking service $service with $service_file file "
-    if test -f "$service_file"; then
+    if [ -f "$service_file" ]; then
         echo "ℹ️ Remove $service service"
         do_and_check_cmd systemctl stop $service
         do_and_check_cmd systemctl disable $service
         do_and_check_cmd rm -f "$service_file"
         reload_systemd
     else
-        echo "❌ Error: $service file not found"
-        do_and_check_cmd systemctl stop $service
-        do_and_check_cmd systemctl disable $service
-        reload_systemd
+        echo "$service_file not found"
     fi
 }
 

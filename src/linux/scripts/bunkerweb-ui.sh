@@ -27,12 +27,13 @@ start() {
     export $(cat /etc/bunkerweb/ui.env)
 }
 
-
 # Function to stop the UI
 stop() {
     echo "Stopping UI service..."
     if [ -f "/var/tmp/bunkerweb/ui.pid" ]; then
-        kill -SIGINT $(cat /var/tmp/bunkerweb/ui.pid)
+        pid = ps aux | grep gunicorn
+        kill $pid
+        #kill -SIGINT $(cat /var/tmp/bunkerweb/ui.pid)
         rm -f /var/tmp/bunkerweb/ui.pid
         echo "UI service stopped."
     else
