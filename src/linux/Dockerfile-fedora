@@ -1,4 +1,4 @@
-FROM fedora:36
+FROM fedora:37
 
 ENV OS=fedora
 ENV NGINX_VERSION 1.22.1
