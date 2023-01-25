@@ -6,6 +6,25 @@ from kubernetes import client, config
 from ApiCaller import ApiCaller
 from API import API
 
+def format_remaining_time(seconds):
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    time_parts = []
+    if days > 0:
+        time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
+    if hours > 0:
+        time_parts.append(f"{int(hours)} hour{'' if hours == 1 else 's'}")
+    if minutes > 0:
+        time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
+    if seconds > 0:
+        time_parts.append(f"{seconds:.2f} second{'' if seconds == 1 else 's'}")
+
+    if len(time_parts) > 1:
+        time_parts[-1] = f"and {time_parts[-1]}"
+
+    return " ".join(time_parts)
+
 class CLI(ApiCaller) :
 
     def __init__(self) :
@@ -103,13 +122,17 @@ class CLI(ApiCaller) :
             return True, "IP " + ip + " has been banned"
         return False, "error"
 
-    def bans(self) :
+    def bans(self):
         ret, resp = self._send_to_apis("GET", "/bans", response=True)
-        if ret :
-            bans = resp["bans"]
+        if ret:
+            bans = resp.get("data", [])
+
+            if len(bans) == 0:
+                return True, "No ban found"
+
             cli_str = "List of bans :\n"
-            for ban in bans :
-                cli_str += "- " + ban["ip"] + " for " + str(ban["exp"]) + "s : " + ban["reason"] + "\n"
+            for ban in bans:
+                cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
             return True, cli_str
         return False, "error"
 

@@ -1,11 +1,11 @@
-local datastore	= require "datastore"
-local utils	= require "utils"
-local cjson	= require "cjson"
-local plugins	= require "plugins"
-local upload	= require "resty.upload"
-local logger	= require "logger"
+local datastore = require "datastore"
+local utils = require "utils"
+local cjson = require "cjson"
+local plugins = require "plugins"
+local upload = require "resty.upload"
+local logger = require "logger"
 
-local api = {global = {GET = {}, POST = {}, PUT = {}, DELETE = {}}}
+local api = { global = { GET = {}, POST = {}, PUT = {}, DELETE = {} } }
 
 api.response = function(self, http_status, api_status, msg)
 	local resp = {}
@@ -22,20 +22,20 @@ api.global.POST["^/jobs$"] = function(api)
 	-- ngx.req.read_body()
 	-- local data = ngx.req.get_body_data()
 	-- if not data then
-		-- local data_file = ngx.req.get_body_file()
-		-- if data_file then
-			-- local file = io.open(data_file)
-			-- data = file:read("*a")
-			-- file:close()
-		-- end
+	-- local data_file = ngx.req.get_body_file()
+	-- if data_file then
+	-- local file = io.open(data_file)
+	-- data = file:read("*a")
+	-- file:close()
+	-- end
 	-- end
 	-- local ok, env = pcall(cjson.decode, data)
 	-- if not ok then
-		-- return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+	-- return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
 	-- end
 	-- local file = io.open("/opt/bunkerweb/tmp/jobs.env", "w+")
 	-- for k, v in pairs(env) do
-		-- file:write(k .. "=" .. v .. "\n")
+	-- file:write(k .. "=" .. v .. "\n")
 	-- end
 	-- file:close()
 	local status = os.execute("/opt/bunkerweb/helpers/scheduler-restart.sh")
@@ -153,7 +153,7 @@ api.global.GET["^/bans$"] = function(api)
 			if not ret then
 				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access exp " .. k .. " from datastore : " + exp)
 			end
-			local ban = {ip = k:sub(9, #k), reason = reason, exp = exp}
+			local ban = { ip = k:sub(9, #k), reason = reason, exp = exp }
 			table.insert(data, ban)
 		end
 	end
@@ -180,7 +180,13 @@ api.do_api_call = function(self)
 				if status ~= ngx.HTTP_OK then
 					ret = false
 				end
-				return ret, resp["msg"], status, cjson.encode(resp) 
+				if (#resp["msg"] == 0) then
+					resp["msg"] = ""
+				elseif (type(resp["msg"]) == "table") then
+					resp["data"] = resp["msg"]
+					resp["msg"] = resp["status"]
+				end
+				return ret, resp["msg"], status, cjson.encode(resp)
 			end
 		end
 	end
@@ -207,7 +213,7 @@ api.do_api_call = function(self)
 	local resp = {}
 	resp["status"] = "error"
 	resp["msg"] = "not found"
-	return false, "error", ngx.HTTP_NOT_FOUND, cjson.encode(resp) 
+	return false, "error", ngx.HTTP_NOT_FOUND, cjson.encode(resp)
 end
 
 return api

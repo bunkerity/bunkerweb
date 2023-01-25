@@ -31,6 +31,8 @@ class ApiCaller :
                 else :
                     log("API", "ℹ️", "Successfully sent API request to " + api.get_endpoint() + url)
         if response :
+            if isinstance(resp, dict) :
+                return ret, resp
             return ret, resp.json()
         return ret
 
