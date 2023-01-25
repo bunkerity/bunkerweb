@@ -28,8 +28,8 @@ if distro == "ubuntu":
     with tempfile.NamedTemporaryFile(mode='w') as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(["docker", "cp", f.name, "systemd-ubuntu:/tmp/install_nginx.sh"])
-        result = subprocess.run(["docker", "exec", "-it", "systemd-ubuntu", "bash", "/tmp/install_nginx.sh"])
+        subprocess.run(["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"])
+        result = subprocess.run(["docker", "exec", "-it", "systemd-ubuntu", "bash", "/data/install_nginx.sh"])
     if result.returncode != 0:
         bunkerweb_logs = subprocess.run(["docker", "exec", "-it", "systemd-ubuntu", "bash", "-c", "systemctl status bunkerweb.service"], capture_output=True)
         print("Logs from bunkerweb:", bunkerweb_logs.stdout.decode())
@@ -107,11 +107,10 @@ if distro == "ubuntu":
         print("❌ /usr/bin/bwcli found.")
     #Checking Removing test
     try:
-        if not os.path.isdir("/usr/share/bunkerweb") and not os.path.isdir("/var/tmp/bunkerweb") and not os.path.isdir("/var/cache/bunkerweb") and not os.path.isfile("/usr/bin/bwcli"):
-            test_results["Removing test"] = "OK"
-        else:
+        if os.path.exists("/usr/share/bunkerweb") or os.path.exists("/var/tmp/bunkerweb") or os.path.exists("/var/cache/bunkerweb") or os.path.exists("/usr/bin/bwcli"):
             test_results["Removing test"] = "KO"
-            sys.exit(1)
+        else:
+            test_results["Removing test"] = "OK"
     except:
         test_results["Removing test"] = "KO"
 
@@ -132,10 +131,10 @@ if distro == "ubuntu":
         print("❌ /etc/bunkerweb found.")
     #Checking Purging test
     try:
-        if not os.path.isdir("/var/lib/bunkerweb") and not os.path.isdir("/etc/bunkerweb"):
-            test_results["Purging test"] = "OK"
-        else:
+        if os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
             test_results["Purging test"] = "KO"
+        else:
+            test_results["Purging test"] = "OK"
     except:
         test_results["Purging test"] = "KO"
 
@@ -275,7 +274,7 @@ elif distro == "debian":
         print("❌ /usr/bin/bwcli found.")
     #Checking Removing test
     try:
-        if not os.path.isdir("/usr/share/bunkerweb") and not os.path.isdir("/var/tmp/bunkerweb") and not os.path.isdir("/var/cache/bunkerweb") and not os.path.isfile("/usr/bin/bwcli"):
+        if os.path.exists("/usr/share/bunkerweb") or os.path.exists("/var/tmp/bunkerweb") or os.path.exists("/var/cache/bunkerweb") or os.path.exists("/usr/bin/bwcli"):
             test_results["Removing test"] = "OK"
         else:
             test_results["Removing test"] = "KO"
@@ -299,7 +298,7 @@ elif distro == "debian":
         print("❌ /etc/bunkerweb found.")
     #Checking Purging test
     try:
-        if not os.path.isdir("/var/lib/bunkerweb") and not os.path.isdir("/etc/bunkerweb"):
+        if os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
             test_results["Purging test"] = "OK"
         else:
             test_results["Purging test"] = "KO"
@@ -341,7 +340,7 @@ elif distro == "debian":
         sys.exit(1)
 
 elif distro == "fedora":
-    test_results = {"Installation test": None, "Reloading test": None, "Removing test": None, "Purging test": None, "Upgrading test": None}
+    test_results = {"Installation test": None, "Reloading test": None, "Removing test": None, "Upgrading test": None}
     subprocess.run(["docker", "build", "-t", "fedora-image", "-f", "src/linux/Dockerfile-fedora", "."])
     subprocess.run(["docker", "run", "-it", "--name", "fedora-container", "-v", "deb:/data", "fedora-image"])
     subprocess.run(["docker", "run", "-d", "--name", "systemd-{}".format(distro), "--privileged", "-v", "/sys/fs/cgroup:/sys/fs/cgroup", "-v", "deb:/data", "jrei/systemd-fedora"])
@@ -391,13 +390,11 @@ elif distro == "fedora":
     if bunkerweb_state.stdout.decode().strip() != "active":
         bunkerweb_logs = subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "journalctl -u bunkerweb.service"], capture_output=True)
         print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
-        sys.exit(1)
 
     bunkerweb_ui_state = subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "systemctl is-active bunkerweb-ui.service"], capture_output=True)
     if bunkerweb_ui_state.stdout.decode().strip() != "active":
         bunkerweb_ui_logs = subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "journalctl -u bunkerweb-ui.service"], capture_output=True)
         print("❌ bunkerweb-ui.service is not running. Logs:", bunkerweb_ui_logs.stdout.decode())
-        sys.exit(1)
     else:
         print("✔️ bunkerweb.service and bunkerweb-ui.service are running ✔️")
     #Checking Reloading test
@@ -436,47 +433,35 @@ elif distro == "fedora":
         print("✔️ /usr/bin/bwcli not found.")
     else:
         print("❌ /usr/bin/bwcli found.")
+
+    result = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "[ -d /var/lib/bunkerweb ]"], capture_output=True)
+    if result.returncode != 0:
+        print("✔️ /var/lib/bunkerweb not found.")
+    else:
+        print("❌ /var/lib/bunkerweb found.")
+
+    result = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "[ -d /etc/bunkerweb ]"], capture_output=True)
+    if result.returncode != 0:
+        print("✔️ /etc/bunkerweb not found.")
+    else:
+        print("❌ /etc/bunkerweb found.")
     #Checking Removing test
     try:
-        if os.path.exists("/usr/share/bunkerweb") or os.path.exists("/var/tmp/bunkerweb") or os.path.exists("/var/cache/bunkerweb") or os.path.exists("/usr/bin/bwcli"):
+        if os.path.exists("/usr/share/bunkerweb") or os.path.exists("/var/tmp/bunkerweb") or os.path.exists("/var/cache/bunkerweb") or os.path.exists("/usr/bin/bwcli") or os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
             test_results["Removing test"] = "KO"
         else:
             test_results["Removing test"] = "OK"
     except:
         test_results["Removing test"] = "KO"
 
-    # Purging test
-    print("Purging bunkerweb...")
-    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "dnf purge -y bunkerweb"])
-
-    result = subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "[ -d /var/lib/bunkerweb ]"], capture_output=True)
-    if result.returncode != 0:
-        print("✔️ /var/lib/bunkerweb not found.")
-    else:
-        print("❌ /var/lib/bunkerweb found.")
-
-    result = subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "[ -d /etc/bunkerweb ]"], capture_output=True)
-    if result.returncode != 0:
-        print("✔️ /etc/bunkerweb not found.")
-    else:
-        print("❌ /etc/bunkerweb found.")
-    #Checking Purging test
-    try:
-        if not os.path.isdir("/var/lib/bunkerweb") and not os.path.isdir("/etc/bunkerweb"):
-            test_results["Purging test"] = "OK"
-        else:
-            test_results["Purging test"] = "KO"
-    except:
-        test_results["Purging test"] = "KO"
-
     # Upgrading test
     print("Upgrading bunkerweb...")
     # Installing official package
     subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf remove -y nginx"])
-    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf install -y nginx=1.20.2-1~jammy"])
-    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash"])
-    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf update"])
-    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf install -y bunkerweb=1.4.5"])
+    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf install -y nginx-1.20.2"])
+    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash"])
+    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf check-update"])
+    subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "sudo dnf install -y bunkerweb-1.4.5"])
 
     # Checking version
     old_version = subprocess.run(["docker", "exec", "-it", "systemd-fedora", "bash", "-c", "cat /usr/share/bunkerweb/VERSION"], capture_output=True)
@@ -504,23 +489,29 @@ elif distro == "fedora":
 
 elif distro == "rhel":
     print("RHEL not supported yet.")
+
 elif distro == "centos":
+    test_results = {"Installation test": None, "Reloading test": None, "Removing test": None, "Upgrading test": None}
     subprocess.run(["docker", "build", "-t", "centos-image", "-f", "src/linux/Dockerfile-centos", "."])
+    # Building local systemd image
+    subprocess.run(["docker", "build", "-t", "centos", "-f", "tests/Dockerfile-centos", "."])
     subprocess.run(["docker", "run", "-it", "--name", "centos-container", "-v", "deb:/data", "centos-image"])
-    subprocess.run(["docker", "run", "-d", "--name", "systemd-{}".format(distro), "--privileged", "-v", "/sys/fs/cgroup:/sys/fs/cgroup", "-v", "deb:/data", "quay.io/centos/centos:stream8"])
+    subprocess.run(["docker", "run", "-d", "--name", "systemd-{}".format(distro), "--privileged", "-v", "/sys/fs/cgroup:/sys/fs/cgroup", "-v", "deb:/data", "centos"])
 
     # Installing test
     print("Installing bunkerweb...")
     bash_script = """
+    dnf install yum-utils epel-release redhat-lsb-core -y
     dnf install -y nginx-1.22.1
-    apt install /data/bunkerweb.deb -y
+    dnf install /data/bunkerweb.rpm -y
     """
 
     with tempfile.NamedTemporaryFile(mode='w') as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(["docker", "cp", f.name, "systemd-centos:/tmp/install_nginx.sh"])
-        result = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "/tmp/install_nginx.sh"])
+        subprocess.run(["docker", "cp", "src/linux/nginx.repo", "systemd-centos:/etc/yum.repos.d/nginx.repo"])
+        subprocess.run(["docker", "cp", f.name, "systemd-centos:/data/install_nginx.sh"])
+        result = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "/data/install_nginx.sh"])
     if result.returncode != 0:
         bunkerweb_logs = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "systemctl status bunkerweb.service"], capture_output=True)
         print("Logs from bunkerweb:", bunkerweb_logs.stdout.decode())
@@ -553,27 +544,25 @@ elif distro == "centos":
     if bunkerweb_state.stdout.decode().strip() != "active":
         bunkerweb_logs = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "journalctl -u bunkerweb.service"], capture_output=True)
         print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
-        sys.exit(1)
 
     bunkerweb_ui_state = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "systemctl is-active bunkerweb-ui.service"], capture_output=True)
     if bunkerweb_ui_state.stdout.decode().strip() != "active":
         bunkerweb_ui_logs = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "journalctl -u bunkerweb-ui.service"], capture_output=True)
         print("❌ bunkerweb-ui.service is not running. Logs:", bunkerweb_ui_logs.stdout.decode())
-        sys.exit(1)
+    else:
+        print("✔️ bunkerweb.service and bunkerweb-ui.service are running ✔️")
     #Checking Reloading test
     try:
         if bunkerweb_state.stdout.decode().strip() == "active":
             test_results["Reloading test"] = "OK"
         else:
             test_results["Reloading test"] = "KO"
-            sys.exit(1)
     except:
         test_results["Reloading test"] = "KO"
-        sys.exit(1)
     
     # Removing test
     print("Removing bunkerweb...")
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "apt remove -y bunkerweb"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "dnf remove -y bunkerweb"])
 
     result = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "[ -d /usr/share/bunkerweb ]"], capture_output=True)
     if result.returncode != 0:
@@ -598,20 +587,7 @@ elif distro == "centos":
         print("✔️ /usr/bin/bwcli not found.")
     else:
         print("❌ /usr/bin/bwcli found.")
-    #Checking Removing test
-    try:
-        if not os.path.isdir("/usr/share/bunkerweb") and not os.path.isdir("/var/tmp/bunkerweb") and not os.path.isdir("/var/cache/bunkerweb") and not os.path.isfile("/usr/bin/bwcli"):
-            test_results["Removing test"] = "OK"
-        else:
-            test_results["Removing test"] = "KO"
-            sys.exit(1)
-    except:
-        test_results["Removing test"] = "KO"
-
-    # Purging test
-    print("Purging bunkerweb...")
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "apt purge -y bunkerweb"])
-
+        
     result = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "[ -d /var/lib/bunkerweb ]"], capture_output=True)
     if result.returncode != 0:
         print("✔️ /var/lib/bunkerweb not found.")
@@ -623,32 +599,30 @@ elif distro == "centos":
         print("✔️ /etc/bunkerweb not found.")
     else:
         print("❌ /etc/bunkerweb found.")
-    #Checking Purging test
+    #Checking Removing test
     try:
-        if not os.path.isdir("/var/lib/bunkerweb") and not os.path.isdir("/etc/bunkerweb"):
-            test_results["Purging test"] = "OK"
+        if os.path.exists("/usr/share/bunkerweb") or os.path.exists("/var/tmp/bunkerweb") or os.path.exists("/var/cache/bunkerweb") or os.path.exists("/usr/bin/bwcli") or os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
+            test_results["Removing test"] = "KO"
         else:
-            test_results["Purging test"] = "KO"
-            sys.exit(1)
+            test_results["Removing test"] = "OK"
     except:
-        test_results["Purging test"] = "KO"
-        sys.exit(1)
+        test_results["Removing test"] = "KO"
 
     # Upgrading test
     print("Upgrading bunkerweb...")
     # Installing official package
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo apt remove -y nginx"])
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo apt install -y nginx=1.20.2-1~jammy"])
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash"])
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo apt update"])
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo apt install -y bunkerweb=1.4.5"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo dnf remove -y nginx"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo dnf install -y nginx-1.20.2"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo dnf check-update"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo dnf install -y bunkerweb-1.4.5"])
 
     # Checking version
-    old_version = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "cat /usr/share/bunkerweb/VERSION"], capture_output=True)
+    old_version = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "cat /opt/bunkerweb/VERSION"], capture_output=True)
     print("Old version:", old_version.stdout.decode().strip())
 
     # Upgrading package
-    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo apt install -y /data/bunkerweb.deb"])
+    subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "sudo dnf install -y /data/bunkerweb.rpm"])
 
     # Checking version
     new_version = subprocess.run(["docker", "exec", "-it", "systemd-centos", "bash", "-c", "cat /usr/share/bunkerweb/VERSION"], capture_output=True)
@@ -658,10 +632,8 @@ elif distro == "centos":
             test_results["Upgrading test"] = "OK"
         else:
             test_results["Upgrading test"] = "KO"
-            sys.exit(1)
     except:
         test_results["Upgrading test"] = "KO"
-        sys.exit(1)
 
     # Print summary
     for key, value in test_results.items():
