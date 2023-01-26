@@ -1,8 +1,9 @@
 from contextlib import suppress
-from importlib.machinery import SourceFileLoader, SourcelessFileLoader
+from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from pathlib import Path
 from signal import SIGINT, signal, SIGTERM
+from subprocess import PIPE, Popen, call
 from tempfile import NamedTemporaryFile
 from bs4 import BeautifulSoup
 from copy import deepcopy
@@ -35,7 +36,7 @@ from os.path import exists, isdir, isfile, join
 from re import match as re_match
 from requests import get
 from shutil import rmtree, copytree, chown
-from sys import path as sys_path, exit as sys_exit, modules as sys_modules
+from sys import path as sys_path, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from time import time
@@ -68,20 +69,32 @@ from Database import Database
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
 
-def stop(status):
-    remove("/var/tmp/bunkerweb/ui.pid")
+def stop_gunicorn():
+    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+    out, _ = p.communicate()
+    pid = out.strip().decode().split("\n")[0]
+    call(["kill", "-SIGTERM", pid])
+
+
+def stop(status, stop=True):
+    if exists("/var/tmp/bunkerweb/ui.pid"):
+        remove("/var/tmp/bunkerweb/ui.pid")
+    if stop is True:
+        stop_gunicorn()
     _exit(status)
 
 
 def handle_stop(signum, frame):
     logger.info("Catched stop operation")
     logger.info("Stopping web ui ...")
-    stop(0)
+    stop(0, False)
 
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
+
+Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 # Flask app
 app = Flask(
@@ -97,28 +110,25 @@ vars = get_variables()
 
 if "ABSOLUTE_URI" not in vars:
     logger.error("ABSOLUTE_URI is not set")
-    sys_exit(1)
+    stop(1)
 elif "ADMIN_USERNAME" not in vars:
     logger.error("ADMIN_USERNAME is not set")
-    sys_exit(1)
+    stop(1)
 elif "ADMIN_PASSWORD" not in vars:
     logger.error("ADMIN_PASSWORD is not set")
-    sys_exit(1)
+    stop(1)
 
-if not vars["FLASK_ENV"] == "development" and vars["ADMIN_PASSWORD"] == "changeme":
+if not vars.get("FLASK_DEBUG", False) and vars["ADMIN_PASSWORD"] == "changeme":
     logger.error("Please change the default admin password.")
-    sys_exit(1)
+    stop(1)
 
 if not vars["ABSOLUTE_URI"].endswith("/"):
     vars["ABSOLUTE_URI"] += "/"
 
-if not vars["FLASK_ENV"] == "development" and vars["ABSOLUTE_URI"].endswith(
-    "/changeme/"
-):
+if not vars.get("FLASK_DEBUG", False) and vars["ABSOLUTE_URI"].endswith("/changeme/"):
     logger.error("Please change the default URL.")
-    sys_exit(1)
+    stop(1)
 
-Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -182,7 +192,7 @@ try:
     )
 except FileNotFoundError as e:
     logger.error(repr(e), e.filename)
-    sys_exit(1)
+    stop(1)
 
 # Declare functions for jinja2
 app.jinja_env.globals.update(check_settings=check_settings)
