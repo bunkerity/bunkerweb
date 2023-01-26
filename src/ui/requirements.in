@@ -1,7 +1,7 @@
 Flask==2.2.2
 Flask_Cors==3.0.10
 Flask_Login==0.6.2
-Flask_WTF==1.0.1
+Flask_WTF==1.1.1
 beautifulsoup4==4.11.1
 python_dateutil==2.8.2
 python-magic==0.4.27
