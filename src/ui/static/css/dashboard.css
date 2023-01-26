@@ -823,10 +823,6 @@ h6 {
   top: 4rem;
 }
 
-.right-3 {
-  right: 0.75rem;
-}
-
 .z-100 {
   z-index: 100;
 }
@@ -873,6 +869,10 @@ h6 {
 
 .z-50 {
   z-index: 50;
+}
+
+.z-\[20\] {
+  z-index: 20;
 }
 
 .order-2 {
@@ -1530,12 +1530,6 @@ h6 {
 .scale-105 {
   --tw-scale-x: 1.05;
   --tw-scale-y: 1.05;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.scale-102 {
-  --tw-scale-x: 1.02;
-  --tw-scale-y: 1.02;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -2756,6 +2750,10 @@ h6 {
   border-color: rgb(34 197 94 / var(--tw-border-opacity));
 }
 
+.focus\:border-gray-300\/0:focus {
+  border-color: rgb(210 214 218 / 0);
+}
+
 .focus\:bg-red-500\/80:focus {
   background-color: rgb(245 57 57 / 0.8);
 }
@@ -2776,14 +2774,30 @@ h6 {
   background-color: rgb(8 85 119 / 0.8);
 }
 
+.focus\:ring-1:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
 .focus\:valid\:border-green-500:valid:focus {
   --tw-border-opacity: 1;
   border-color: rgb(34 197 94 / var(--tw-border-opacity));
 }
 
+.focus\:valid\:ring-green-500:valid:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(34 197 94 / var(--tw-ring-opacity));
+}
+
 .focus\:invalid\:border-red-500:invalid:focus {
   --tw-border-opacity: 1;
   border-color: rgb(245 57 57 / var(--tw-border-opacity));
+}
+
+.focus\:invalid\:ring-red-500:invalid:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(245 57 57 / var(--tw-ring-opacity));
 }
 
 .focus\:file\:invalid\:border-red-500:invalid::-webkit-file-upload-button:focus {
