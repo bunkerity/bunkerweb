@@ -100,7 +100,6 @@ volumes:
   bw-data:
   mariadb:
 
-
 networks:
   bw-universe:
     name: bw-universe
