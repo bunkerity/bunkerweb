@@ -1,5 +1,6 @@
 <!-- modal -->
 <div
+  service-content="settings"
   services-modal
   class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
 >
@@ -62,6 +63,7 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <input type="hidden" id="operation" value="new" name="operation" />
       <input type="hidden" value="new" name="OLD_SERVER_NAME" />
+
       {% include "settings_plugins.html" %}
 
       <!-- action button -->

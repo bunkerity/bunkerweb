@@ -290,5 +290,5 @@ const setFlashSidebar = new Sidebar(
 );
 const setNews = new News();
 const setDarkM = new darkMode();
-const setCheckbox = new Checkbox("[sidebar-info]");
+const setCheckbox = new Checkbox();
 const setFlash = new FlashMsg();

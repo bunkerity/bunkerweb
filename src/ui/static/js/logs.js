@@ -256,6 +256,7 @@ class FetchLogs {
     this.fromDate = Date.parse(this.fromDateInp.value)
       ? Date.parse(this.fromDateInp.value)
       : Date.now() - 86400000;
+    console.log(Date.parse(this.fromDateInp.value));
     this.toDate = Date.parse(this.toDateInp.value)
       ? Date.parse(this.toDateInp.value)
       : false;
@@ -433,7 +434,7 @@ class LogsDate {
   }
 }
 
-const setCheckbox = new Checkbox("[logs-settings]");
+const setCheckbox = new Checkbox();
 const dropdown = new Dropdown("logs");
 const setLogs = new FetchLogs();
 const setFilter = new Filter("logs");

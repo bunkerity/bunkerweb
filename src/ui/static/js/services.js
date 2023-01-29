@@ -1,5 +1,10 @@
 import { Checkbox, Select, Password } from "./utils/form.js";
-import { Popover, Tabs, FormatValue } from "./utils/settings.js";
+import {
+  Popover,
+  Tabs,
+  FormatValue,
+  FilterSettings,
+} from "./utils/settings.js";
 
 class ServiceModal {
   constructor() {
@@ -41,6 +46,7 @@ class ServiceModal {
       //actions
       try {
         if (e.target.closest("button").hasAttribute("services-action")) {
+          console.log("click");
           //do nothing if same btn and service as before
           const isLastSame = this.isLastServAndAct(e.target);
           if (isLastSame) return;
@@ -51,20 +57,28 @@ class ServiceModal {
           const serviceName = e.target
             .closest("button")
             .getAttribute("services-name");
+          console.log(action);
+          console.log(serviceName);
 
-          let form;
-          if (action === "edit" || action === "new") form = this.formNewEdit;
-          if (action === "delete") form = this.formDelete;
-          this.setForm(action, serviceName, form);
-          //reset settings value
-          if (action === "edit" || action === "new") this.setDefaultValue();
+          if (action === "edit" || action === "new") {
+            this.setForm(action, serviceName, this.formNewEdit);
+            this.setDefaultValue();
+            console.log("set default");
+          }
+
+          if (action === "delete")
+            this.setForm(action, serviceName, this.formDelete);
+
           //get custom settings of service and apply it to modal settings
           if (action === "edit") {
             const servicesSettings = e.target
               .closest("[services-service]")
               .querySelector("[services-settings]")
               .getAttribute("value");
+            console.log(servicesSettings);
             const obj = JSON.parse(servicesSettings);
+            console.log(obj);
+            console.log("start update");
             this.updateModalData(obj);
           }
           //open modal when all done
@@ -92,8 +106,19 @@ class ServiceModal {
 
   setDefaultValue() {
     this.inputs.forEach((inpt) => {
-      const defaultVal = inpt.getAttribute("default-value");
-      const defaultMethod = inpt.getAttribute("default-method");
+      let defaultVal = "";
+      try {
+        defaultVal = inpt.getAttribute("default-value");
+      } catch (err) {
+        defaultVal = "";
+      }
+
+      let defaultMethod = "ui";
+      try {
+        defaultMethod = inpt.getAttribute("default-method");
+      } catch (err) {
+        defaultMethod = "ui";
+      }
       //SET METHOD
       this.setDisabled(inpt, defaultMethod);
 
@@ -108,32 +133,44 @@ class ServiceModal {
       }
     });
 
+    console.log("input default");
+
     this.selects.forEach((select) => {
-      const defaultVal = select.getAttribute("default-value");
-      const defaultMethod = select.getAttribute("default-method");
+      let defaultVal = "";
+      try {
+        defaultVal = select.getAttribute("default-value");
+      } catch (err) {
+        defaultVal = "";
+      }
+
+      let defaultMethod = "ui";
+      try {
+        defaultMethod = select.getAttribute("default-method");
+      } catch (err) {
+        defaultMethod = "ui";
+      }
+
       if (defaultMethod === "ui" || defaultMethod === "default") {
         document
           .querySelector(
-            `[services-setting-select=${select.getAttribute(
-              "services-setting-select-default"
-            )}]`
+            `[setting-select=${select.getAttribute("setting-select-default")}]`
           )
           .removeAttribute("disabled");
       } else {
         document
           .querySelector(
-            `[services-setting-select=${select.getAttribute(
-              "services-setting-select-default"
-            )}]`
+            `[setting-select=${select.getAttribute("setting-select-default")}]`
           )
           .setAttribute("disabled", "");
       }
       select.parentElement
         .querySelector(
-          `button[services-setting-select-dropdown-btn][value='${defaultVal}']`
+          `button[setting-select-dropdown-btn][value='${defaultVal}']`
         )
         .click();
     });
+
+    console.log("default select");
     //server name always enabled for default
     this.setNameSetting("ui", "");
   }
@@ -259,7 +296,7 @@ class ServiceModal {
         if (inpt.tagName === "SELECT") {
           inpt.parentElement
             .querySelector(
-              `button[services-setting-select-dropdown-btn][value='${value}']`
+              `button[setting-select-dropdown-btn][value='${value}']`
             )
             .click();
         }
@@ -771,95 +808,17 @@ class Multiple {
   }
 }
 
-class FilterSettings {
-  constructor(prefix) {
-    this.prefix = prefix;
-    this.input = document.querySelector("input#settings-filter");
-    //DESKTOP
-    this.deskTabs = document.querySelectorAll(`[${this.prefix}-item-handler]`);
-    this.init();
-  }
-
-  init() {
-    this.input.addEventListener("input", () => {
-      this.resetFilter();
-      //get inp format
-      const inpValue = this.input.value.trim().toLowerCase();
-      //loop all tabs
-      this.deskTabs.forEach((tab) => {
-        //get settings of tabs except multiples
-        const settings = this.getSettingsFromTab(tab);
-
-        //compare total count to currCount to determine
-        //if tabs need to be hidden
-        const settingCount = settings.length;
-        let hiddenCount = 0;
-        settings.forEach((setting) => {
-          try {
-            const title = setting
-              .querySelector("h5")
-              .textContent.trim()
-              .toLowerCase();
-            if (!title.includes(inpValue)) {
-              setting.classList.add("hidden");
-              hiddenCount++;
-            }
-          } catch (err) {}
-        });
-        //case no setting match, hidden tab and content
-        if (settingCount === hiddenCount) {
-          const tabName = tab.getAttribute(`${this.prefix}-item-handler`);
-          //hide mobile and desk tabs
-          tab.classList.add("hidden");
-          document
-            .querySelector(`[${this.prefix}-mobile-item-handler="${tabName}"]`)
-            .classList.add("hidden");
-          document
-            .querySelector(`[${this.prefix}-item=${tabName}]`)
-            .querySelector("[setting-header]")
-
-            .classList.add("hidden");
-        }
-      });
-    });
-  }
-
-  resetFilter() {
-    this.deskTabs.forEach((tab) => {
-      const tabName = tab.getAttribute(`${this.prefix}-item-handler`);
-      //hide mobile and desk tabs
-      tab.classList.remove("hidden");
-      document
-        .querySelector(`[${this.prefix}-mobile-item-handler="${tabName}"]`)
-        .classList.remove("hidden");
-      document
-        .querySelector(`[${this.prefix}-item=${tabName}]`)
-        .querySelector("[setting-header]")
-        .classList.remove("hidden");
-      const settings = this.getSettingsFromTab(tab);
-      settings.forEach((setting) => {
-        setting.classList.remove("hidden");
-      });
-    });
-  }
-
-  getSettingsFromTab(tabEl) {
-    const tabName = tabEl.getAttribute(`${this.prefix}-item-handler`);
-    const settingContainer = document
-      .querySelector(`[${this.prefix}-item="${tabName}"]`)
-      .querySelector(`[${this.prefix}-settings]`);
-    const settings = settingContainer.querySelectorAll("[setting-container]");
-    return settings;
-  }
-}
-
-const setCheckbox = new Checkbox("[services-modal-form]");
-const setSelect = new Select("[services-modal-form]", "services");
+const setCheckbox = new Checkbox();
+const setSelect = new Select();
 const setPassword = new Password();
 
-const setPopover = new Popover("main", "services");
-const setTabs = new Tabs("[services-tabs]", "services");
+const setPopover = new Popover();
+const setTabs = new Tabs();
 const setModal = new ServiceModal();
 const format = new FormatValue();
+const setFilterGlobal = new FilterSettings(
+  "settings-filter",
+  "[service-content='settings']"
+);
+
 const setMultiple = new Multiple("services");
-const setFilter = new FilterSettings("services");
