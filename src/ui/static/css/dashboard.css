@@ -823,6 +823,10 @@ h6 {
   top: 4rem;
 }
 
+.top-\[60px\] {
+  top: 60px;
+}
+
 .z-100 {
   z-index: 100;
 }
