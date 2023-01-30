@@ -196,7 +196,7 @@
         <input id="{{setting}}" name="{{setting}}"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
-        global_config[setting]['method'] != 'ui' or global_config[setting]['method']
+        global_config[setting]['method'] != 'ui' and global_config[setting]['method']
         != 'default' %} disabled {% endif %} {% if global_config[setting]['value'] and
         global_config[setting]['value'] == 'yes' or not
         global_config[setting]['value'] and value['default'] == 'yes' %} checked {%
@@ -416,7 +416,7 @@
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
-        global_config[setting]['method'] != 'ui' or global_config[setting]['method']
+        global_config[setting]['method'] != 'ui' and global_config[setting]['method']
         != 'default' %} disabled {% endif %} {% if global_config[setting]['value'] and
         global_config[setting]['value'] == 'yes' or not
         global_config[setting]['value'] and value['default'] == 'yes' %} checked {%
