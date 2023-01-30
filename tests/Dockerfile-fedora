@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM fedora:36
 
 ENV container docker
 
@@ -21,8 +21,6 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 RUN dnf update -y && \
     dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
     dnf install nginx-1.20.2 -y
-
-COPY ./packages/fedora/*.rpm /opt
 
 VOLUME ["/sys/fs/cgroup"]
 

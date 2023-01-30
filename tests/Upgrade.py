@@ -14,6 +14,7 @@ if distro == "ubuntu":
     }
     subprocess.run(
         [
+            "sudo",
             "docker",
             "build",
             "-t",
@@ -414,7 +415,29 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            'sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx=1.20.2-1~jammy',
+            "sudo apt purge -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-ubuntu",
+            "bash",
+            "-c",
+            "sudo apt autoremove -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-ubuntu",
+            "bash",
+            "-c",
+            'sudo apt-get install -y nginx=1.20.2-1~jammy',
         ]
     )
     subprocess.run(
@@ -467,6 +490,39 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
+            "sudo apt remove -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-ubuntu",
+            "bash",
+            "-c",
+            "sudo apt purge -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-ubuntu",
+            "bash",
+            "-c",
+            "sudo apt autoremove -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-ubuntu",
+            "bash",
+            "-c",
             "sudo apt install -y /data/bunkerweb.deb",
         ]
     )
@@ -510,6 +566,7 @@ elif distro == "debian":
     }
     subprocess.run(
         [
+            "sudo",
             "docker",
             "build",
             "-t",
@@ -815,9 +872,9 @@ elif distro == "debian":
             or os.path.exists("/var/cache/bunkerweb")
             or os.path.exists("/usr/bin/bwcli")
         ):
-            test_results["Removing test"] = "OK"
-        else:
             test_results["Removing test"] = "KO"
+        else:
+            test_results["Removing test"] = "OK"
     except:
         test_results["Removing test"] = "KO"
 
@@ -871,9 +928,9 @@ elif distro == "debian":
     # Checking Purging test
     try:
         if os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
-            test_results["Purging test"] = "OK"
-        else:
             test_results["Purging test"] = "KO"
+        else:
+            test_results["Purging test"] = "OK"
     except:
         test_results["Purging test"] = "KO"
 
@@ -899,7 +956,29 @@ elif distro == "debian":
             "systemd-debian",
             "bash",
             "-c",
-            'sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx=1.20.2-1~bullseye',
+            "sudo apt purge -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-debian",
+            "bash",
+            "-c",
+            "sudo apt autoremove -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-debian",
+            "bash",
+            "-c",
+            'sudo apt-get install -y nginx=1.20.2-1~bullseye',
         ]
     )
     subprocess.run(
@@ -952,6 +1031,39 @@ elif distro == "debian":
             "systemd-debian",
             "bash",
             "-c",
+            "sudo apt remove -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-debian",
+            "bash",
+            "-c",
+            "sudo apt purge -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-debian",
+            "bash",
+            "-c",
+            "sudo apt autoremove -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-debian",
+            "bash",
+            "-c",
             "sudo apt install -y /data/bunkerweb.deb",
         ]
     )
@@ -994,6 +1106,7 @@ elif distro == "fedora":
     }
     subprocess.run(
         [
+            "sudo",
             "docker",
             "build",
             "-t",
@@ -1005,6 +1118,7 @@ elif distro == "fedora":
     )
     subprocess.run(
         [
+            "sudo",
             "docker",
             "run",
             "-it",
@@ -1017,6 +1131,7 @@ elif distro == "fedora":
     )
     subprocess.run(
         [
+            "sudo",
             "docker",
             "run",
             "-d",
@@ -1351,23 +1466,37 @@ elif distro == "fedora":
     subprocess.run(
         [
             "docker",
-            "exec",
-            "-it",
-            "systemd-fedora",
-            "bash",
-            "-c",
-            "sudo dnf remove -y nginx",
+            "rm",
+            "-f",
+            "systemd-{distro}".format(distro),
         ]
     )
     subprocess.run(
         [
+            "sudo",
             "docker",
-            "exec",
-            "-it",
-            "systemd-fedora",
-            "bash",
-            "-c",
-            "sudo dnf install -y nginx-1.20.2",
+            "build",
+            "-t",
+            "systemd-{}".format(distro),
+            "-f",
+            "tests/Dockerfile-fedora",
+            ".",
+        ]
+    )
+    subprocess.run(
+        [
+            "sudo",
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            "systemd-{}".format(distro),
+            "--privileged",
+            "-v",
+            "/sys/fs/cgroup:/sys/fs/cgroup",
+            "-v",
+            "deb:/data",
+            "systemd-{}".format(distro),
         ]
     )
     subprocess.run(
@@ -1428,10 +1557,20 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
+            "sudo dnf upgrade -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-fedora",
+            "bash",
+            "-c",
             "sudo dnf install -y /data/bunkerweb.deb",
         ]
     )
-
     # Checking version
     new_version = subprocess.run(
         [
