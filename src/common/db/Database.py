@@ -5,7 +5,6 @@ from hashlib import sha256
 from logging import (
     Logger,
 )
-import oracledb
 from os import _exit, getenv, listdir, makedirs
 from os.path import dirname, exists
 from pymysql import install_as_MySQLdb
@@ -45,9 +44,6 @@ if "/usr/share/bunkerweb/utils" not in sys_path:
 
 from jobs import file_hash
 
-oracledb.version = "8.3.0"
-modules["cx_Oracle"] = oracledb
-
 install_as_MySQLdb()
 
 
@@ -86,7 +82,7 @@ class Database:
             )
 
         not_connected = True
-        retries = 5
+        retries = 15
 
         while not_connected:
             try:
@@ -721,7 +717,7 @@ class Database:
                 for key, value in deepcopy(config).items():
                     original_key = key
                     if self.suffix_rx.search(key):
-                        key = key[: -len(str(suffix)) - 1]
+                        key = key[: -len(str(key.split("_")[-1])) - 1]
 
                     if key not in multisite:
                         continue
