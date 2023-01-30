@@ -1,7 +1,6 @@
 from copy import deepcopy
-from os import listdir, mkdir, remove
+from os import listdir, remove
 from pathlib import Path
-from shutil import rmtree
 from time import sleep
 from flask import flash
 from os.path import exists, isfile
