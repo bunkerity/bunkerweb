@@ -26,9 +26,9 @@ function start() {
     echo $nginx_pid > /var/tmp/bunkerweb/nginx.pid
 
     # Check if scheduler pid file exist and remove it if so
-    if [ -f /var/tmp/bunkerweb/scheduler.pid ] ; then
-        rm -f /var/tmp/bunkerweb/scheduler.pid
-    fi
+    # if [ -f /var/tmp/bunkerweb/scheduler.pid ] ; then
+    #     rm -f /var/tmp/bunkerweb/scheduler.pid
+    # fi
 
     # Setup and check /data folder
     /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"

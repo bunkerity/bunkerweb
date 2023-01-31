@@ -26,8 +26,8 @@ start() {
 stop() {
     echo "Stopping UI service..."
     if [ -f "/var/tmp/bunkerweb/ui.pid" ]; then
-        kill -TERM $(cat /var/tmp/bunkerweb/ui.pid)
-        echo "UI service stopped."
+        pid=$(cat /var/tmp/bunkerweb/ui.pid)
+        kill -SIGINT $pid
     else
         echo "UI service is not running or the pid file doesn't exist."
     fi

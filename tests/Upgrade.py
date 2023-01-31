@@ -1468,7 +1468,7 @@ elif distro == "fedora":
             "docker",
             "rm",
             "-f",
-            "systemd-{distro}".format(distro),
+            "systemd-fedora",
         ]
     )
     subprocess.run(
@@ -1477,7 +1477,7 @@ elif distro == "fedora":
             "docker",
             "build",
             "-t",
-            "systemd-{}".format(distro),
+            "systemd-fedora",
             "-f",
             "tests/Dockerfile-fedora",
             ".",
@@ -1490,13 +1490,13 @@ elif distro == "fedora":
             "run",
             "-d",
             "--name",
-            "systemd-{}".format(distro),
+            "systemd-fedora",
             "--privileged",
             "-v",
             "/sys/fs/cgroup:/sys/fs/cgroup",
             "-v",
             "deb:/data",
-            "systemd-{}".format(distro),
+            "systemd-fedora",
         ]
     )
     subprocess.run(

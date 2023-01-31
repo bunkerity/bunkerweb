@@ -6,6 +6,7 @@
 --description "BunkerWeb %VERSION% for Ubuntu 22.04"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
+--before-install /usr/share/bunkerweb/scripts/beforeInstall.sh
 --after-install /usr/share/bunkerweb/scripts/postinstall.sh
 --after-remove /usr/share/bunkerweb/scripts/afterRemoveDEB.sh
 --deb-no-default-config-files
