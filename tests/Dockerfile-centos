@@ -13,6 +13,9 @@ rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 RUN dnf -y install sudo
 
+RUN echo -e "[nginx-stable]\nname=nginx stable repo\nbaseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/\ngpgcheck=1\nenabled=1\ngpgkey=https://nginx.org/keys/nginx_signing.key\nmodule_hotfixes=true" > /etc/yum.repos.d/nginx.repo
+RUN sudo dnf install nginx-1.20.2 -y && sudo dnf install epel-release -y
+
 VOLUME [/sys/fs/cgroup]
 
 CMD ["/usr/sbin/init"]

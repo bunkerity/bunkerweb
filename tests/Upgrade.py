@@ -2,6 +2,7 @@ import subprocess
 import sys
 import tempfile
 import os
+import time
 
 distro = sys.argv[1]
 if distro == "ubuntu":
@@ -71,7 +72,12 @@ if distro == "ubuntu":
         f.write(bash_script)
         f.flush()
         subprocess.run(
-            ["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"]
+            [
+                "docker", 
+                "cp", 
+                f.name, 
+                "systemd-ubuntu:/data/install_nginx.sh"
+            ]
         )
         result = subprocess.run(
             [
@@ -399,34 +405,24 @@ if distro == "ubuntu":
     subprocess.run(
         [
             "docker",
-            "exec",
-            "-it",
+            "rm",
+            "-f",
             "systemd-ubuntu",
-            "bash",
-            "-c",
-            "sudo apt remove -y nginx",
         ]
     )
     subprocess.run(
         [
             "docker",
-            "exec",
-            "-it",
-            "systemd-ubuntu",
-            "bash",
-            "-c",
-            "sudo apt purge -y nginx",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-ubuntu",
-            "bash",
-            "-c",
-            "sudo apt autoremove -y",
+            "run",
+            "-d",
+            "--name",
+            "systemd-{}".format(distro),
+            "--privileged",
+            "-v",
+            "/sys/fs/cgroup:/sys/fs/cgroup",
+            "-v",
+            "deb:/data",
+            "jrei/systemd-ubuntu:22.04",
         ]
     )
     subprocess.run(
@@ -452,7 +448,15 @@ if distro == "ubuntu":
         ]
     )
     subprocess.run(
-        ["docker", "exec", "-it", "systemd-ubuntu", "bash", "-c", "sudo apt update"]
+        [
+            "docker",
+            "exec", 
+            "-it", 
+            "systemd-ubuntu", 
+            "bash", 
+            "-c", 
+            "sudo apt update"
+        ]
     )
     subprocess.run(
         [
@@ -1416,7 +1420,7 @@ elif distro == "fedora":
             "docker",
             "exec",
             "-it",
-            "systemd-centos",
+            "systemd-fedora",
             "bash",
             "-c",
             "[ -d /var/lib/bunkerweb ]",
@@ -1433,7 +1437,7 @@ elif distro == "fedora":
             "docker",
             "exec",
             "-it",
-            "systemd-centos",
+            "systemd-fedora",
             "bash",
             "-c",
             "[ -d /etc/bunkerweb ]",
@@ -1542,7 +1546,7 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "cat /usr/share/bunkerweb/VERSION",
+            "cat /opt/bunkerweb/VERSION",
         ],
         capture_output=True,
     )
@@ -1557,7 +1561,7 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "sudo dnf upgrade -y",
+            "sudo dnf upgrade --refresh -y",
         ]
     )
     subprocess.run(
@@ -1568,7 +1572,77 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "sudo dnf install -y /data/bunkerweb.deb",
+            "sudo dnf install dnf-plugin-system-upgrade -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-fedora",
+            "bash",
+            "-c",
+            "sudo dnf system-upgrade download --releasever=37 -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-fedora",
+            "bash",
+            "-c",
+            "sudo dnf system-upgrade reboot",
+        ]
+    )
+    # Checking container is running
+    def start_container():
+        subprocess.run(["docker", "start", "systemd-fedora"])
+
+    def check_container_status():
+        result = subprocess.run(["docker", "inspect", "systemd-fedora"], stdout=subprocess.PIPE)
+        return "running" in str(result.stdout)
+
+    while True:
+        start_container()
+        time.sleep(30)
+        if not check_container_status():
+            continue
+        break
+
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-fedora",
+            "bash",
+            "-c",
+            "sudo dnf install -y curl gnupg2 ca-certificates redhat-lsb-core",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-fedora",
+            "bash",
+            "-c",
+            "sudo dnf install nginx-1.22.1 -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-fedora",
+            "bash",
+            "-c",
+            "sudo dnf upgrade -y /data/bunkerweb.rpm",
         ]
     )
     # Checking version
@@ -1976,27 +2050,40 @@ elif distro == "centos":
 
     # Upgrading test
     print("Upgrading bunkerweb...")
-    # Installing official package
     subprocess.run(
         [
             "docker",
-            "exec",
-            "-it",
+            "rm",
+            "-f",
             "systemd-centos",
-            "bash",
-            "-c",
-            "sudo dnf remove -y nginx",
         ]
     )
     subprocess.run(
         [
+            "sudo",
             "docker",
-            "exec",
-            "-it",
+            "build",
+            "-t",
             "systemd-centos",
-            "bash",
-            "-c",
-            "sudo dnf install -y nginx-1.20.2",
+            "-f",
+            "tests/Dockerfile-centos",
+            ".",
+        ]
+    )
+    subprocess.run(
+        [
+            "sudo",
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            "systemd-centos",
+            "--privileged",
+            "-v",
+            "/sys/fs/cgroup:/sys/fs/cgroup",
+            "-v",
+            "deb:/data",
+            "systemd-centos",
         ]
     )
     subprocess.run(
@@ -2049,6 +2136,28 @@ elif distro == "centos":
     print("Old version:", old_version.stdout.decode().strip())
 
     # Upgrading package
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-centos",
+            "bash",
+            "-c",
+            "sudo dnf remove -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-centos",
+            "bash",
+            "-c",
+            "sudo dnf autoremove -y",
+        ]
+    )
     subprocess.run(
         [
             "docker",
