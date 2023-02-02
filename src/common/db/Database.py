@@ -67,6 +67,7 @@ class Database:
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
 
         self.database_uri = sqlalchemy_string
+        error = False
 
         try:
             self.__sql_engine = create_engine(
@@ -76,10 +77,21 @@ class Database:
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            error = True
         except SQLAlchemyError:
             self.__logger.error(
                 f"Error when trying to create the engine: {format_exc()}"
             )
+            error = True
+        finally:
+            if error:
+                _exit(1)
+
+        try:
+            assert self.__sql_engine is not None
+        except AssertionError:
+            self.__logger.error("The database engine is not initialized")
+            _exit(1)
 
         not_connected = True
         retries = 15
@@ -94,12 +106,12 @@ class Database:
                         f"Can't connect to database : {format_exc()}",
                     )
                     _exit(1)
-                else:
-                    self.__logger.warning(
-                        "Can't connect to database, retrying in 5 seconds ...",
-                    )
-                    retries -= 1
-                    sleep(5)
+
+                self.__logger.warning(
+                    "Can't connect to database, retrying in 5 seconds ...",
+                )
+                retries -= 1
+                sleep(5)
             except SQLAlchemyError:
                 self.__logger.error(
                     f"Error when trying to connect to the database: {format_exc()}"
@@ -126,6 +138,12 @@ class Database:
 
     @contextmanager
     def __db_session(self):
+        try:
+            assert self.__sql_session is not None
+        except AssertionError:
+            self.__logger.error("The database session is not initialized")
+            _exit(1)
+
         session = self.__sql_session()
 
         session.expire_on_commit = False
@@ -214,7 +232,7 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_settings: List[Dict[str, str]]) -> Tuple[bool, str]:
+    def init_tables(self, default_settings: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
         if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):

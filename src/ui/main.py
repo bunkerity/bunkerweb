@@ -201,6 +201,8 @@ app.jinja_env.globals.update(check_settings=check_settings)
 def manage_bunkerweb(method: str, operation: str = "reloads", *args):
     # Do the operation
     if method == "services":
+        error = False
+
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0])
         elif operation == "edit":
