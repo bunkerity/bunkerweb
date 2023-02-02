@@ -1674,8 +1674,8 @@ elif distro == "fedora":
         sys.exit(1)
 
 elif distro == "rhel":
-    print("RHEL not supported yet.")
-
+    echo("RHEL not supported yet")
+    exit(1)
 elif distro == "centos":
     test_results = {
         "Installation test": None,

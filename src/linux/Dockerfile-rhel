@@ -3,8 +3,14 @@ FROM redhat/ubi8:8.6
 ENV OS=rhel
 ENV NGINX_VERSION 1.22.1
 
+# Resolving problems
+RUN subscription-manager remove --all && \
+  subscription-manager clean 
+
 # RHEL subscription
-RUN subscription-manager register --username=username --password=password --auto-attach
+RUN subscription-manager register --username=username --password=password && \
+  pool_id=$(subscription-manager list --available | awk '/^Pool ID:/ {print $3}' | head -1) && \
+  subscription-manager attach --pool=$pool_id
 
 # Install fpm
 RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && \
@@ -30,7 +36,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y wget python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
+RUN dnf install -y readline readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
     pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \
