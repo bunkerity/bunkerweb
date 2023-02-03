@@ -827,6 +827,14 @@ h6 {
   top: 60px;
 }
 
+.right-12 {
+  right: 3rem;
+}
+
+.right-16 {
+  right: 4rem;
+}
+
 .z-100 {
   z-index: 100;
 }
@@ -1491,11 +1499,6 @@ h6 {
 
 .-translate-y-7 {
   --tw-translate-y: -1.75rem;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.translate-y-12 {
-  --tw-translate-y: 3rem;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -3090,6 +3093,34 @@ h6 {
     right: 1rem;
   }
 
+  .sm\:right-16 {
+    right: 4rem;
+  }
+
+  .sm\:right-28 {
+    right: 7rem;
+  }
+
+  .sm\:right-34 {
+    right: 8.5rem;
+  }
+
+  .sm\:right-36 {
+    right: 9rem;
+  }
+
+  .sm\:right-24 {
+    right: 6rem;
+  }
+
+  .sm\:right-40 {
+    right: 10rem;
+  }
+
+  .sm\:right-6 {
+    right: 1.5rem;
+  }
+
   .sm\:col-span-6 {
     grid-column: span 6 / span 6;
   }
@@ -3422,6 +3453,18 @@ h6 {
 
   .xl\:right-4 {
     right: 1rem;
+  }
+
+  .xl\:right-5 {
+    right: 1.25rem;
+  }
+
+  .xl\:right-24 {
+    right: 6rem;
+  }
+
+  .xl\:right-6 {
+    right: 1.5rem;
   }
 
   .xl\:mx-4 {
