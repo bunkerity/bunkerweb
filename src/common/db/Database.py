@@ -9,7 +9,7 @@ from os import _exit, getenv, listdir, makedirs
 from os.path import dirname, exists
 from pymysql import install_as_MySQLdb
 from re import compile as re_compile
-from sys import modules, path as sys_path
+from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import (
@@ -72,7 +72,6 @@ class Database:
         try:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
-                encoding="utf-8",
                 future=True,
             )
         except ArgumentError:
@@ -145,7 +144,6 @@ class Database:
             _exit(1)
 
         session = self.__sql_session()
-
         session.expire_on_commit = False
 
         try:
@@ -858,7 +856,7 @@ class Database:
         file_name: str,
         data: bytes,
         *,
-        checksum: str = None,
+        checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
         with self.__db_session() as session:
