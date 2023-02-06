@@ -433,7 +433,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            'sudo apt-get install -y nginx=1.20.2-1~jammy',
+            'apt-get install -y nginx=1.20.2-1~jammy',
         ]
     )
     subprocess.run(
@@ -455,7 +455,7 @@ if distro == "ubuntu":
             "systemd-ubuntu", 
             "bash", 
             "-c", 
-            "sudo apt update"
+            "apt update"
         ]
     )
     subprocess.run(
@@ -466,7 +466,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "sudo apt install -y bunkerweb=1.4.5",
+            "apt install -y bunkerweb=1.4.5",
         ]
     )
 
@@ -494,7 +494,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "sudo apt remove -y nginx",
+            "apt remove -y nginx",
         ]
     )
     subprocess.run(
@@ -505,7 +505,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "sudo apt purge -y nginx",
+            "apt purge -y nginx",
         ]
     )
     subprocess.run(
@@ -516,7 +516,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "sudo apt autoremove -y",
+            "apt autoremove -y",
         ]
     )
     subprocess.run(
@@ -527,7 +527,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "sudo apt install -y /data/bunkerweb.deb",
+            "apt install -y /data/bunkerweb.deb",
         ]
     )
 
@@ -1674,8 +1674,506 @@ elif distro == "fedora":
         sys.exit(1)
 
 elif distro == "rhel":
-    echo("RHEL not supported yet")
-    exit(1)
+    test_results = {
+        "Installation test": None,
+        "Reloading test": None,
+        "Removing test": None,
+        "Upgrading test": None,
+    }
+    subprocess.run(
+        [
+            "sudo",
+            "docker",
+            "build",
+            "-t",
+            "rhel-image",
+            "-f",
+            "src/linux/Dockerfile-rhel",
+            ".",
+        ]
+    )
+    subprocess.run(
+        [
+            "sudo",
+            "docker",
+            "run",
+            "-it",
+            "--name",
+            "rhel-container",
+            "-v",
+            "deb:/data",
+            "rhel-image",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            "systemd-rhel",
+            "-v",
+            "deb:/data",
+            "--privileged",
+            "-v",
+            "/sys/fs/cgroup:/sys/fs/cgroup",
+            "registry.access.redhat.com/ubi8/ubi-init:8.7-10",
+        ]
+    )
+
+    # Installing test
+    print("Installing bunkerweb...")
+    bash_script = """
+    dnf install yum-utils wget sudo -y
+    wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-1.22.1-1.el8.ngx.x86_64.rpm
+    dnf install nginx-1.22.1-1.el8.ngx.x86_64.rpm -y
+    dnf install /data/bunkerweb.rpm -y
+    """
+
+    with tempfile.NamedTemporaryFile(mode="w") as f:
+        f.write(bash_script)
+        f.flush()
+        subprocess.run(
+            ["docker", "cp", f.name, "systemd-rhel:/data/install_nginx.sh"]
+        )
+        result = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-rhel",
+                "bash",
+                "/data/install_nginx.sh",
+            ]
+        )
+    if result.returncode != 0:
+        bunkerweb_logs = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-rhel",
+                "bash",
+                "-c",
+                "systemctl status bunkerweb.service",
+            ],
+            capture_output=True,
+        )
+        print("Logs from bunkerweb:", bunkerweb_logs.stdout.decode())
+
+        bunkerweb_ui_logs = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-rhel",
+                "bash",
+                "-c",
+                "systemctl status bunkerweb-ui.service",
+            ],
+            capture_output=True,
+        )
+        print("Logs from bunkerweb-ui:", bunkerweb_ui_logs.stdout.decode())
+        sys.exit(result.returncode)
+        exit(result.returncode)
+    else:
+        print("✔️ Installation successful ✔️")
+    # Checking Installation test
+    try:
+        if result.returncode == 0:
+            test_results["Installation test"] = "OK"
+        else:
+            test_results["Installation test"] = "KO"
+            sys.exit(1)
+    except:
+        test_results["Installation test"] = "KO"
+        sys.exit(1)
+
+    # Reloading test
+    print("Reloading bunkerweb...")
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "echo 'HTTPS_PORT=8443' >> /etc/bunkerweb/variables.env",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "echo 'new_value=1' >> /etc/bunkerweb/ui.env",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "systemctl reload bunkerweb",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "systemctl reload bunkerweb-ui",
+        ]
+    )
+
+    bunkerweb_state = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "systemctl is-active bunkerweb.service",
+        ],
+        capture_output=True,
+    )
+    if bunkerweb_state.stdout.decode().strip() != "active":
+        bunkerweb_logs = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-rhel",
+                "bash",
+                "-c",
+                "journalctl -u bunkerweb.service",
+            ],
+            capture_output=True,
+        )
+        print(
+            "❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode()
+        )
+
+    bunkerweb_ui_state = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "systemctl is-active bunkerweb-ui.service",
+        ],
+        capture_output=True,
+    )
+    if bunkerweb_ui_state.stdout.decode().strip() != "active":
+        bunkerweb_ui_logs = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-rhel",
+                "bash",
+                "-c",
+                "journalctl -u bunkerweb-ui.service",
+            ],
+            capture_output=True,
+        )
+        print(
+            "❌ bunkerweb-ui.service is not running. Logs:",
+            bunkerweb_ui_logs.stdout.decode(),
+        )
+    else:
+        print("✔️ bunkerweb.service and bunkerweb-ui.service are running ✔️")
+    # Checking Reloading test
+    try:
+        if bunkerweb_state.stdout.decode().strip() == "active":
+            test_results["Reloading test"] = "OK"
+        else:
+            test_results["Reloading test"] = "KO"
+    except:
+        test_results["Reloading test"] = "KO"
+
+    # Removing test
+    print("Removing bunkerweb...")
+    subprocess.run(
+        [
+            "sudo",
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "dnf remove -y bunkerweb",
+        ]
+    )
+
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "[ -d /usr/share/bunkerweb ]",
+        ],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        print("✔️ /usr/share/bunkerweb not found.")
+    else:
+        print("❌ /usr/share/bunkerweb found.")
+
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "[ -d /var/tmp/bunkerweb ]",
+        ],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        print("✔️ /var/tmp/bunkerweb not found.")
+    else:
+        print("❌ /var/tmp/bunkerweb found.")
+
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "[ -d /var/cache/bunkerweb ]",
+        ],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        print("✔️ /var/cache/bunkerweb not found.")
+    else:
+        print("❌ /var/cache/bunkerweb found.")
+
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "[ -f /usr/bin/bwcli ]",
+        ],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        print("✔️ /usr/bin/bwcli not found.")
+    else:
+        print("❌ /usr/bin/bwcli found.")
+
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "[ -d /var/lib/bunkerweb ]",
+        ],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        print("✔️ /var/lib/bunkerweb not found.")
+    else:
+        print("❌ /var/lib/bunkerweb found.")
+
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "[ -d /etc/bunkerweb ]",
+        ],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        print("✔️ /etc/bunkerweb not found.")
+    else:
+        print("❌ /etc/bunkerweb found.")
+    # Checking Removing test
+    try:
+        if (
+            os.path.exists("/usr/share/bunkerweb")
+            or os.path.exists("/var/tmp/bunkerweb")
+            or os.path.exists("/var/cache/bunkerweb")
+            or os.path.exists("/usr/bin/bwcli")
+            or os.path.isdir("/var/lib/bunkerweb")
+            or os.path.isdir("/etc/bunkerweb")
+        ):
+            test_results["Removing test"] = "KO"
+        else:
+            test_results["Removing test"] = "OK"
+    except:
+        test_results["Removing test"] = "KO"
+
+    # Upgrading test
+    print("Upgrading bunkerweb...")
+    subprocess.run(
+        [
+            "docker",
+            "rm",
+            "-f",
+            "systemd-rhel",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            "systemd-rhel",
+            "-v",
+            "deb:/data",
+            "--privileged",
+            "-v",
+            "/sys/fs/cgroup:/sys/fs/cgroup",
+            "registry.access.redhat.com/ubi8/ubi-init:8.7-10",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "sudo dnf check-update",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "sudo dnf install -y bunkerweb-1.4.5",
+        ]
+    )
+
+    # Checking version
+    old_version = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "cat /opt/bunkerweb/VERSION",
+        ],
+        capture_output=True,
+    )
+    print("Old version:", old_version.stdout.decode().strip())
+
+    # Upgrading package
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "sudo dnf remove -y nginx",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "sudo dnf autoremove -y",
+        ]
+    )
+    subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "sudo dnf install -y /data/bunkerweb.rpm",
+        ]
+    )
+
+    # Checking version
+    new_version = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-it",
+            "systemd-rhel",
+            "bash",
+            "-c",
+            "cat /usr/share/bunkerweb/VERSION",
+        ],
+        capture_output=True,
+    )
+    print("New version:", new_version.stdout.decode().strip())
+    try:
+        if old_version.stdout.decode().strip() != new_version.stdout.decode().strip():
+            test_results["Upgrading test"] = "OK"
+        else:
+            test_results["Upgrading test"] = "KO"
+    except:
+        test_results["Upgrading test"] = "KO"
+
+    # Print summary
+    for key, value in test_results.items():
+        print(f"{key}: {value}")
+    if "KO" in test_results.values():
+        sys.exit(1)
+
 elif distro == "centos":
     test_results = {
         "Installation test": None,

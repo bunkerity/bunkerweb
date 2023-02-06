@@ -100,9 +100,13 @@ if [ $(id -u) -ne 0 ] ; then
     exit 1
 fi
 
-# Detect OS
-OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
-if ! [[ "$OS" =~ (debian|ubuntu|centos|fedora) ]]; then
+if [ -f /etc/redhat-release ]; then
+  OS="redhat"
+else
+  OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+fi
+
+if ! [[ "$OS" =~ (centos|fedora|redhat) ]]; then
     echo "❌ Unsupported Operating System"
     exit 1
 fi

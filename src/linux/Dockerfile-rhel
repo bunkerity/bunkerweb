@@ -1,16 +1,25 @@
-FROM redhat/ubi8:8.6
+FROM redhat/ubi8:8.7
 
 ENV OS=rhel
 ENV NGINX_VERSION 1.22.1
 
-# Resolving problems
-RUN subscription-manager remove --all && \
-  subscription-manager clean 
+# # Resolving problems
+# RUN subscription-manager remove --all && \
+#   subscription-manager clean 
 
-# RHEL subscription
-RUN subscription-manager register --username=username --password=password && \
-  pool_id=$(subscription-manager list --available | awk '/^Pool ID:/ {print $3}' | head -1) && \
-  subscription-manager attach --pool=$pool_id
+# # RHEL subscription
+# RUN subscription-manager register --username=bunkerfrsq --password=RiIlOTHgUHbDthY2aLEJ && \
+#   pool_id=$(subscription-manager list --available | awk '/^Pool ID:/ {print $3}' | head -1) && \
+#   subscription-manager attach --pool=$pool_id
+
+# Copy centos repo
+COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
+
+# Copy RPM-GPG-KEY-CentOS-Official
+COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+# Import RPM-GPG-KEY-CentOS-Official
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 # Install fpm
 RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && \
@@ -22,7 +31,9 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && 
 # Nginx
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install yum-utils -y && \
-  dnf install nginx-1.22.1 -y 
+  wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-1.22.1-1.el8.ngx.x86_64.rpm && \
+  dnf install nginx-1.22.1-1.el8.ngx.x86_64.rpm -y && \
+  rm -rf nginx-1.22.1-1.el8.ngx.x86_64.rpm
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
@@ -36,7 +47,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y readline readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
+RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
     pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \

@@ -102,7 +102,7 @@ fi
 
 # Detect OS
 OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
-if ! [[ "$OS" =~ (debian|ubuntu|centos|fedora) ]]; then
+if ! [[ "$OS" =~ (debian|ubuntu) ]]; then
     echo "❌ Unsupported Operating System"
     exit 1
 fi
