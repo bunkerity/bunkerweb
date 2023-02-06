@@ -414,10 +414,8 @@ class Modal {
   }
 
   init() {
-    console.log("init modal");
     this.container.addEventListener("click", (e) => {
       //DELETE HANDLER
-      console.log("click");
       try {
         if (
           e.target.closest("button").getAttribute(`${this.prefix}-action`) ===

@@ -46,7 +46,6 @@ class ServiceModal {
       //actions
       try {
         if (e.target.closest("button").hasAttribute("services-action")) {
-          console.log("click");
           //do nothing if same btn and service as before
           const isLastSame = this.isLastServAndAct(e.target);
           if (isLastSame) return;
@@ -57,13 +56,10 @@ class ServiceModal {
           const serviceName = e.target
             .closest("button")
             .getAttribute("services-name");
-          console.log(action);
-          console.log(serviceName);
 
           if (action === "edit" || action === "new") {
             this.setForm(action, serviceName, this.formNewEdit);
             this.setDefaultValue();
-            console.log("set default");
           }
 
           if (action === "delete")
@@ -75,10 +71,7 @@ class ServiceModal {
               .closest("[services-service]")
               .querySelector("[services-settings]")
               .getAttribute("value");
-            console.log(servicesSettings);
             const obj = JSON.parse(servicesSettings);
-            console.log(obj);
-            console.log("start update");
             this.updateModalData(obj);
           }
           //open modal when all done
@@ -133,8 +126,6 @@ class ServiceModal {
       }
     });
 
-    console.log("input default");
-
     this.selects.forEach((select) => {
       let defaultVal = "";
       try {
@@ -170,7 +161,6 @@ class ServiceModal {
         .click();
     });
 
-    console.log("default select");
     //server name always enabled for default
     this.setNameSetting("ui", "");
   }

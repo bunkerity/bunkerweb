@@ -68,7 +68,7 @@
     <button
     tab-handler="{{ plugin['id'] }}"
     type="button"
-    class="z-1000 {% if current_endpoint == 'service' and loop.first %} brightness-90 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
+    class="z-1000 {% if current_endpoint != 'global-config' and loop.first %} brightness-90 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
   >
     <div class="w-full flex justify-between items-center">
       <!-- text and icon -->

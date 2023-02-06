@@ -29,7 +29,7 @@
 <div
   plugin-item="{{plugin['id']}}"
   id="{{plugin['id']}}"
-  class="hidden w-full"
+  class="{% if current_endpoint == "global-config" or current_endpoint != "global-config" and loop.index != 1 %}hidden{%endif%} w-full"
 >
   <!-- title and desc -->
   <div class="col-span-12" setting-header>

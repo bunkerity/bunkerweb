@@ -37,9 +37,7 @@ class News {
           }
         );
         return await this.render(res);
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     });
   }
 

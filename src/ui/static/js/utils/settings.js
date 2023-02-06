@@ -50,7 +50,6 @@ class Tabs {
           e.target.closest("button").hasAttribute("tab-handler") ||
           e.target.closest("button").hasAttribute("tab-handler-mobile")
         ) {
-          console.log("tab clicked");
           //get needed data
           const tab = e.target.closest("button");
           const tabAtt =
