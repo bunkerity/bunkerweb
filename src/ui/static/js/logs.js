@@ -1,5 +1,4 @@
 import { Checkbox } from "./utils/form.js";
-import Datepicker from "./datepicker/datepicker.js";
 
 class Dropdown {
   constructor(prefix = "logs") {
@@ -256,6 +255,7 @@ class FetchLogs {
     this.fromDate = Date.parse(this.fromDateInp.value)
       ? Date.parse(this.fromDateInp.value)
       : Date.now() - 86400000;
+
     this.toDate = Date.parse(this.toDateInp.value)
       ? Date.parse(this.toDateInp.value)
       : false;
@@ -421,21 +421,14 @@ class Filter {
   }
 }
 
-class LogsDate {
-  constructor(el, options = {}) {
-    this.el = el;
-    this.options = options;
-    this.init();
-  }
-
-  init() {
-    this.datepicker = new Datepicker(this.el, this.options);
-  }
-}
-
 const setCheckbox = new Checkbox();
 const dropdown = new Dropdown("logs");
 const setLogs = new FetchLogs();
 const setFilter = new Filter("logs");
-const fromDatepicker = new LogsDate(document.querySelector("input#from-date"));
-const toDatepicker = new LogsDate(document.querySelector("input#to-date"));
+
+const dateOptions = {
+  locale: "en",
+  dateFormat: "m/d/Y",
+};
+const fromDate = flatpickr("input#from-date", dateOptions);
+const toDate = flatpickr("input#to-date", dateOptions);
