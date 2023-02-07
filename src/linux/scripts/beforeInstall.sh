@@ -22,20 +22,20 @@ if [ -f /etc/os-release ]; then
     if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
         # Get the version of the package
         VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
-        if dpkg --compare-versions "$VERSION" lt "1.5.0"; then
-            echo "ℹ️ Copy /var/tmp/bunkerweb/variables.env to /etc/bunkerweb/variables.env"
-            do_and_check_cmd cp -f /opt/bunkerweb/variables.env /var/tmp/variables.env
-            echo "ℹ️ Copy /var/tmp/bunkerweb/variables.env to /etc/bunkerweb/variables.env"
-            do_and_check_cmd cp -f /opt/bunkerweb/ui.env /var/tmp/ui.env
+        if dpkg --compare-versions "$VERSION" lt "1.5.0" && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
+            echo "ℹ️ Copy /var/tmp/variables.env to /etc/bunkerweb/variables.env"
+            do_and_check_cmd cp -f /var/tmp/variables.env /etc/bunkerweb/variables.env
+            echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"
+            do_and_check_cmd cp -f /var/tmp/ui.env /etc/bunkerweb/ui.env
         fi
     elif [[ "$OS" == "CentOS Linux" || "$OS" == "Fedora" ]]; then
         # Get the version of the package
         VERSION=$(rpm -q --queryformat '%{VERSION}' bunkerweb)
-        if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.0' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ]; then
-            echo "ℹ️ Copy /var/tmp/bunkerweb/variables.env to /etc/bunkerweb/variables.env"
-            do_and_check_cmd cp -f /opt/bunkerweb/variables.env /var/tmp/variables.env
-            echo "ℹ️ Copy /var/tmp/bunkerweb/variables.env to /etc/bunkerweb/variables.env"
-            do_and_check_cmd cp -f /opt/bunkerweb/ui.env /var/tmp/ui.env
+        if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.0' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ] && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
+            echo "ℹ️ Copy /var/tmp/variables.env to /etc/bunkerweb/variables.env"
+            do_and_check_cmd cp -f /var/tmp/variables.env /etc/bunkerweb/variables.env
+            echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"
+            do_and_check_cmd cp -f /var/tmp/ui.env /etc/bunkerweb/ui.env
         fi
     fi
 else

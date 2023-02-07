@@ -3,15 +3,6 @@ FROM redhat/ubi8:8.7
 ENV OS=rhel
 ENV NGINX_VERSION 1.22.1
 
-# # Resolving problems
-# RUN subscription-manager remove --all && \
-#   subscription-manager clean 
-
-# # RHEL subscription
-# RUN subscription-manager register --username=bunkerfrsq --password=RiIlOTHgUHbDthY2aLEJ && \
-#   pool_id=$(subscription-manager list --available | awk '/^Pool ID:/ {print $3}' | head -1) && \
-#   subscription-manager attach --pool=$pool_id
-
 # Copy centos repo
 COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
 

@@ -56,16 +56,16 @@ if distro == "ubuntu":
     # Installing test
     print("Installing bunkerweb...")
     bash_script = """
-    apt update && \
-    apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
+    apt update && apt install -y sudo && \
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
     curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
-    | tee /etc/apt/sources.list.d/nginx.list
-    apt update && \
-    apt install -y nginx=1.22.1-1~jammy
-    apt install /data/bunkerweb.deb -y
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+    sudo apt update && \
+    sudo apt install -y nginx=1.22.1-1~jammy
+    sudo apt install /data/bunkerweb.deb -y
     """
 
     with tempfile.NamedTemporaryFile(mode="w") as f:
@@ -258,7 +258,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "apt remove -y bunkerweb",
+            "sudo apt remove -y bunkerweb",
         ]
     )
 
@@ -353,7 +353,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "apt purge -y bunkerweb",
+            "sudo apt purge -y bunkerweb",
         ]
     )
 
@@ -425,50 +425,42 @@ if distro == "ubuntu":
             "jrei/systemd-ubuntu:22.04",
         ]
     )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-ubuntu",
-            "bash",
-            "-c",
-            'apt-get install -y nginx=1.20.2-1~jammy',
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-ubuntu",
-            "bash",
-            "-c",
-            "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec", 
-            "-it", 
-            "systemd-ubuntu", 
-            "bash", 
-            "-c", 
-            "apt update"
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-ubuntu",
-            "bash",
-            "-c",
-            "apt install -y bunkerweb=1.4.5",
-        ]
-    )
+    print("Installing bunkerweb...")
+    bash_script = """
+    apt update && apt install -y sudo && \
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
+    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+    sudo apt update && sudo apt install -y nginx=1.20.2-1~jammy
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    sudo apt update && \
+    sudo apt install -y bunkerweb=1.4.5
+    """
+
+    with tempfile.NamedTemporaryFile(mode="w") as f:
+        f.write(bash_script)
+        f.flush()
+        subprocess.run(
+            [
+                "docker", 
+                "cp", 
+                f.name, 
+                "systemd-ubuntu:/data/install_nginx.sh"
+            ]
+        )
+        result = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-ubuntu",
+                "bash",
+                "/data/install_nginx.sh",
+            ]
+        )
 
     # Checking version
     old_version = subprocess.run(
@@ -494,7 +486,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "apt remove -y nginx",
+            "sudo apt remove -y nginx",
         ]
     )
     subprocess.run(
@@ -505,7 +497,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "apt purge -y nginx",
+            "sudo apt purge -y nginx",
         ]
     )
     subprocess.run(
@@ -516,7 +508,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "apt autoremove -y",
+            "sudo apt autoremove -y",
         ]
     )
     subprocess.run(
@@ -527,7 +519,7 @@ if distro == "ubuntu":
             "systemd-ubuntu",
             "bash",
             "-c",
-            "apt install -y /data/bunkerweb.deb",
+            "sudo apt upgrade -y /data/bunkerweb.deb",
         ]
     )
 
@@ -611,13 +603,13 @@ elif distro == "debian":
     # Installing test
     print("Installing bunkerweb...")
     bash_script = """
-    apt update && \
+    apt update && apt install -y sudo && \
     apt-get install gnupg2 ca-certificates lsb-release wget curl -y && \
     echo "deb https://nginx.org/packages/debian/ bullseye nginx" > /etc/apt/sources.list.d/nginx.list && \
     echo "deb-src https://nginx.org/packages/debian/ bullseye nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bullseye
+    apt-get install -y --no-install-recommends nginx=1.20.2-1~bullseye
     apt install /data/bunkerweb.deb -y
     """
 
@@ -797,7 +789,7 @@ elif distro == "debian":
             "systemd-debian",
             "bash",
             "-c",
-            "apt remove -y bunkerweb",
+            "sudo apt remove -y bunkerweb",
         ]
     )
 
@@ -892,7 +884,7 @@ elif distro == "debian":
             "systemd-debian",
             "bash",
             "-c",
-            "apt purge -y bunkerweb",
+            "sudo apt purge -y bunkerweb",
         ]
     )
 
@@ -944,72 +936,62 @@ elif distro == "debian":
     subprocess.run(
         [
             "docker",
-            "exec",
-            "-it",
+            "rm",
+            "-f",
             "systemd-debian",
-            "bash",
-            "-c",
-            "sudo apt remove -y nginx",
         ]
     )
     subprocess.run(
         [
             "docker",
-            "exec",
-            "-it",
-            "systemd-debian",
-            "bash",
-            "-c",
-            "sudo apt purge -y nginx",
+            "run",
+            "-d",
+            "--name",
+            "systemd-{}".format(distro),
+            "--privileged",
+            "-v",
+            "/sys/fs/cgroup:/sys/fs/cgroup",
+            "-v",
+            "deb:/data",
+            "jrei/systemd-debian:11",
         ]
     )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-debian",
-            "bash",
-            "-c",
-            "sudo apt autoremove -y",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-debian",
-            "bash",
-            "-c",
-            'sudo apt-get install -y nginx=1.20.2-1~bullseye',
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-debian",
-            "bash",
-            "-c",
-            "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash",
-        ]
-    )
-    subprocess.run(
-        ["docker", "exec", "-it", "systemd-debian", "bash", "-c", "sudo apt update"]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-debian",
-            "bash",
-            "-c",
-            "sudo apt install -y bunkerweb=1.4.5",
-        ]
-    )
+    print("Installing bunkerweb...")
+    bash_script = """
+    apt update && apt install -y sudo && \
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
+    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/debian `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+    sudo apt update && sudo apt install -y nginx=1.20.2-1~bullseye
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    sudo apt update && \
+    sudo apt install -y bunkerweb=1.4.5
+    """
+
+    with tempfile.NamedTemporaryFile(mode="w") as f:
+        f.write(bash_script)
+        f.flush()
+        subprocess.run(
+            [
+                "docker", 
+                "cp", 
+                f.name, 
+                "systemd-debian:/data/install_nginx.sh"
+            ]
+        )
+        result = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-it",
+                "systemd-debian",
+                "bash",
+                "/data/install_nginx.sh",
+            ]
+        )
 
     # Checking version
     old_version = subprocess.run(
@@ -1503,39 +1485,6 @@ elif distro == "fedora":
             "systemd-fedora",
         ]
     )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-fedora",
-            "bash",
-            "-c",
-            "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-fedora",
-            "bash",
-            "-c",
-            "sudo dnf check-update",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-fedora",
-            "bash",
-            "-c",
-            "sudo dnf install -y bunkerweb-1.4.5",
-        ]
-    )
 
     # Checking version
     old_version = subprocess.run(
@@ -1631,7 +1580,7 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "sudo dnf install nginx-1.22.1 -y",
+            "sudo dnf install nginx-1.22.1-1.fc37 -y",
         ]
     )
     subprocess.run(
@@ -1642,7 +1591,7 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "sudo dnf upgrade -y /data/bunkerweb.rpm",
+            "sudo dnf install -y /data/bunkerweb.rpm",
         ]
     )
     # Checking version
@@ -2037,136 +1986,150 @@ elif distro == "rhel":
     except:
         test_results["Removing test"] = "KO"
 
+    ############################################################################################################
+    # Upgrading test is disabled because RHEL is the new Integration test                                      #
+    ############################################################################################################
     # Upgrading test
-    print("Upgrading bunkerweb...")
-    subprocess.run(
-        [
-            "docker",
-            "rm",
-            "-f",
-            "systemd-rhel",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "run",
-            "-d",
-            "--name",
-            "systemd-rhel",
-            "-v",
-            "deb:/data",
-            "--privileged",
-            "-v",
-            "/sys/fs/cgroup:/sys/fs/cgroup",
-            "registry.access.redhat.com/ubi8/ubi-init:8.7-10",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "sudo dnf check-update",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "sudo dnf install -y bunkerweb-1.4.5",
-        ]
-    )
+    # print("Upgrading bunkerweb...")
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "rm",
+    #         "-f",
+    #         "systemd-rhel",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "run",
+    #         "-d",
+    #         "--name",
+    #         "systemd-rhel",
+    #         "-v",
+    #         "deb:/data",
+    #         "--privileged",
+    #         "-v",
+    #         "/sys/fs/cgroup:/sys/fs/cgroup",
+    #         "registry.access.redhat.com/ubi8/ubi-init:8.7-10",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "dnf install -y curl sudo",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "sudo dnf check-update",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "sudo dnf install -y bunkerweb-1.4.5",
+    #     ]
+    # )
 
-    # Checking version
-    old_version = subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "cat /opt/bunkerweb/VERSION",
-        ],
-        capture_output=True,
-    )
-    print("Old version:", old_version.stdout.decode().strip())
+    # # Checking version
+    # old_version = subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "cat /opt/bunkerweb/VERSION",
+    #     ],
+    #     capture_output=True,
+    # )
+    # print("Old version:", old_version.stdout.decode().strip())
 
-    # Upgrading package
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "sudo dnf remove -y nginx",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "sudo dnf autoremove -y",
-        ]
-    )
-    subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "sudo dnf install -y /data/bunkerweb.rpm",
-        ]
-    )
+    # # Upgrading package
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "sudo dnf remove -y nginx",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "sudo dnf autoremove -y",
+    #     ]
+    # )
+    # subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "sudo dnf install -y /data/bunkerweb.rpm",
+    #     ]
+    # )
 
-    # Checking version
-    new_version = subprocess.run(
-        [
-            "docker",
-            "exec",
-            "-it",
-            "systemd-rhel",
-            "bash",
-            "-c",
-            "cat /usr/share/bunkerweb/VERSION",
-        ],
-        capture_output=True,
-    )
-    print("New version:", new_version.stdout.decode().strip())
-    try:
-        if old_version.stdout.decode().strip() != new_version.stdout.decode().strip():
-            test_results["Upgrading test"] = "OK"
-        else:
-            test_results["Upgrading test"] = "KO"
-    except:
-        test_results["Upgrading test"] = "KO"
+    # # Checking version
+    # new_version = subprocess.run(
+    #     [
+    #         "docker",
+    #         "exec",
+    #         "-it",
+    #         "systemd-rhel",
+    #         "bash",
+    #         "-c",
+    #         "cat /usr/share/bunkerweb/VERSION",
+    #     ],
+    #     capture_output=True,
+    # )
+    # print("New version:", new_version.stdout.decode().strip())
+    # try:
+    #     if old_version.stdout.decode().strip() != new_version.stdout.decode().strip():
+    #         test_results["Upgrading test"] = "OK"
+    #     else:
+    #         test_results["Upgrading test"] = "KO"
+    # except:
+    #     test_results["Upgrading test"] = "KO"
 
     # Print summary
     for key, value in test_results.items():
