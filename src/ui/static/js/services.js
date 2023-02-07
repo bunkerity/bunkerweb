@@ -98,31 +98,32 @@ class ServiceModal {
   }
 
   setDefaultValue() {
-    this.inputs.forEach((inpt) => {
+    this.inputs.forEach((inp) => {
       let defaultVal = "";
       try {
-        defaultVal = inpt.getAttribute("default-value");
+        defaultVal = inp.getAttribute("default-value");
       } catch (err) {
         defaultVal = "";
       }
 
       let defaultMethod = "ui";
       try {
-        defaultMethod = inpt.getAttribute("default-method");
+        defaultMethod = inp.getAttribute("default-method");
       } catch (err) {
         defaultMethod = "ui";
       }
       //SET METHOD
-      this.setDisabled(inpt, defaultMethod);
+      this.setDisabled(inp, defaultMethod);
 
       //SET VALUE
-      if (inpt.getAttribute("type") === "checkbox") {
-        inpt.checked = defaultVal === "yes" ? true : false;
-        inpt.setAttribute("value", defaultVal);
+      if (inp.getAttribute("type") === "checkbox") {
+        inp.checked = defaultVal === "yes" ? true : false;
+        inp.setAttribute("value", defaultVal);
+        inp.value = defaultVal;
       }
 
-      if (inpt.getAttribute("type") !== "checkbox") {
-        inpt.setAttribute("value", defaultVal);
+      if (inp.getAttribute("type") !== "checkbox") {
+        inp.setAttribute("value", defaultVal);
       }
     });
 
@@ -273,6 +274,7 @@ class ServiceModal {
           inpt.getAttribute("type") !== "checkbox"
         ) {
           inpt.setAttribute("value", value);
+          inpt.value = value;
         }
         //for checkbox
         if (
@@ -611,6 +613,7 @@ class Multiple {
 
       if (inp.getAttribute("type") !== "checkbox") {
         inp.setAttribute("value", data["value"]);
+        inp.value = data["value"];
         inp.setAttribute("default-method", data["method"]);
       }
     } catch (err) {}

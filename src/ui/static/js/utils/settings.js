@@ -149,13 +149,14 @@ class Tabs {
 
 class FormatValue {
   constructor() {
-    this.inputs = document.querySelectorAll("[value]");
+    this.inputs = document.querySelectorAll("input");
     this.init();
   }
 
   init() {
     this.inputs.forEach((inp) => {
       inp.setAttribute("value", inp.getAttribute("value").trim());
+      inp.value = inp.value.trim();
     });
   }
 }
