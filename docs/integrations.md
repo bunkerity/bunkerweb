@@ -760,7 +760,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
   curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
   sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
   sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
-  sudo dnf check-update && \
+  sudo dnf makecache && \
   sudo dnf install -y bunkerweb-1.4.4
   ```
 
