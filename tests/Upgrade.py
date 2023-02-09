@@ -609,7 +609,7 @@ elif distro == "debian":
     echo "deb-src https://nginx.org/packages/debian/ bullseye nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=1.20.2-1~bullseye
+    apt-get install -y --no-install-recommends nginx=1.22.1-1~bullseye
     apt install /data/bunkerweb.deb -y
     """
 
