@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.4.6
+
+- Fix error in the UI when a service have multiple domains
+- Fix bwcli bans command
+- Fix documentation about Linux Fedora install
+- Fix DISABLE_DEFAULT_SERVER=yes not working with HTTPS
+- Add INTERCEPTED_ERROR_CODES setting
+
 ## v1.4.5 - 2022/11/26
 
 - Fix bwcli syntax error
