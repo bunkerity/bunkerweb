@@ -31,7 +31,7 @@ try :
         if not os.path.isfile("/opt/bunkerweb/cache/default-server-cert/cert.pem") :
             cmd = "openssl req -nodes -x509 -newkey rsa:4096 -keyout /opt/bunkerweb/cache/default-server-cert/cert.key -out /opt/bunkerweb/cache/default-server-cert/cert.pem -days 3650".split(" ")
             cmd.extend(["-subj", "\"/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/\""])
-            proc = subprocess.run(cmd.split(" "), stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            proc = subprocess.run(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             if proc.returncode != 0 :
                 logger.log("DEFAULT-SERVER-CERT", "❌", "Self-signed certificate generation failed for default server")
                 status = 2
