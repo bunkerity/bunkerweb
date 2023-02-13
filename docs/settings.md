@@ -159,9 +159,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Errors
 
-|Setting |Default| Context |Multiple|                                           Description                                           |
-|--------|-------|---------|--------|-------------------------------------------------------------------------------------------------|
-|`ERRORS`|       |multisite|no      |List of HTTP error code and corresponding error pages (404=/my404.html 403=/errors/403.html ...).|
+|         Setting         |                     Default                     | Context |Multiple|                                           Description                                           |
+|-------------------------|-------------------------------------------------|---------|--------|-------------------------------------------------------------------------------------------------|
+|`ERRORS`                 |                                                 |multisite|no      |List of HTTP error code and corresponding error pages (404=/my404.html 403=/errors/403.html ...).|
+|`INTERCEPTED_ERROR_CODES`|`400 401 403 404 405 413 429 500 501 502 503 504`|multisite|no      |List of HTTP error code intercepted by Bunkerweb                                                 |
 
 ### Greylist
 
