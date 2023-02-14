@@ -428,7 +428,7 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            config = app.config["CONFIG"].get_config(methods=False)
+            config = app.config["CONFIG"].get_config(methods=True)
             for variable, value in deepcopy(variables).items():
                 variable_splitted = variable.split("_")
                 if "SCHEMA" in variable_splitted:
@@ -442,13 +442,16 @@ def services():
                 elif value == "off":
                     value = "no"
 
+                config_setting = config.get(
+                    f"{variables['SERVER_NAME'].split(' ')[0]}_{variable}", None
+                )
+
                 if variable in variables and (
                     request.form["operation"] == "edit"
                     and variable != "SERVER_NAME"
-                    and value
-                    == config.get(
-                        f"{variables['SERVER_NAME'].split(' ')[0]}_{variable}", None
-                    )
+                    and config_setting is not None
+                    and config_setting["method"] == "default"
+                    and value == config_setting["value"]
                     or not value.strip()
                 ):
                     del variables[variable]
