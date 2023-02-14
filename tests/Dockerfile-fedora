@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM fedora:36
 
 ENV container docker
 
@@ -19,10 +19,14 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 
 # Nginx
 RUN dnf update -y && \
-    dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
-    dnf install nginx-1.20.2 -y
+    dnf install -y nginx-1.20.2
 
-COPY ./packages/fedora/*.rpm /opt
+RUN curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh \
+    | sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' \
+    | sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' \
+    | sudo bash && \
+    sudo dnf makecache && \
+    sudo dnf install -y bunkerweb-1.4.5
 
 VOLUME ["/sys/fs/cgroup"]
 

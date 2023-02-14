@@ -25,17 +25,14 @@ function remove_systemd_service {
     service=$1
     service_file="/lib/systemd/system/$service.service"
     echo "checking service $service with $service_file file "
-    if test -f "$service_file"; then
+    if [ -f "$service_file" ]; then
         echo "ℹ️ Remove $service service"
         do_and_check_cmd systemctl stop $service
         do_and_check_cmd systemctl disable $service
         do_and_check_cmd rm -f "$service_file"
         reload_systemd
     else
-        echo "❌ Error: $service file not found"
-        do_and_check_cmd systemctl stop $service
-        do_and_check_cmd systemctl disable $service
-        reload_systemd
+        echo "$service_file not found"
     fi
 }
 
@@ -105,7 +102,7 @@ fi
 
 # Detect OS
 OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
-if ! [[ "$OS" =~ (debian|ubuntu|centos|fedora) ]]; then
+if ! [[ "$OS" =~ (debian|ubuntu) ]]; then
     echo "❌ Unsupported Operating System"
     exit 1
 fi
@@ -119,5 +116,14 @@ elif [ "$1" = "purge" ]; then
     purge
 else 
     echo "Package is being upgraded"
+    # Check the version of the package and if it's inferior to 1.5.0, we need to copy the variables.env file
+    VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
+    if [ "$VERSION" <= "1.5.0" ]; then
+        echo "ℹ️ Copyenv variables to /var/tmp/bunkerweb/*.env"
+        do_and_check_cmd cp -f /opt/bunkerweb/variables.env /var/tmp/variables.env
+        do_and_check_cmd cp -f /opt/bunkerweb/ui.env /var/tmp/ui.env
+    fi
+    cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
+    cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
     exit 0
 fi

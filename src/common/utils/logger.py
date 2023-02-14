@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import (
     CRITICAL,
     DEBUG,
@@ -5,7 +6,6 @@ from logging import (
     INFO,
     WARNING,
     Logger,
-    _levelToName,
     _nameToLevel,
     addLevelName,
     basicConfig,
@@ -13,13 +13,12 @@ from logging import (
     setLoggerClass,
 )
 from os import getenv
-from threading import Lock
+from typing import Optional, Union
 
 
 class BWLogger(Logger):
     def __init__(self, name, level=INFO):
         self.name = name
-        self.db_lock = Lock()
         return super(BWLogger, self).__init__(name, level)
 
     def _log(
@@ -32,6 +31,10 @@ class BWLogger(Logger):
         stack_info=False,
         stacklevel=1,
     ):
+        if self.name == "UI":
+            with open("/var/log/nginx/ui.log", "a") as f:
+                f.write(f"[{datetime.now().replace(microsecond=0)}] {msg}\n")
+
         return super(BWLogger, self)._log(
             level, msg, args, exc_info, extra, stack_info, stacklevel
         )
@@ -73,10 +76,15 @@ addLevelName(INFO, "ℹ️ ")
 addLevelName(WARNING, "⚠️ ")
 
 
-def setup_logger(title: str, level=INFO) -> Logger:
+def setup_logger(title: str, level: Optional[Union[str, int]] = None) -> Logger:
     """Set up local logger"""
     title = title.upper()
     logger = getLogger(title)
-    logger.setLevel(_nameToLevel.get(level, _levelToName.get(level, INFO)))
+    level = level or default_level
+
+    if isinstance(level, str):
+        logger.setLevel(_nameToLevel.get(level.upper(), default_level))
+    else:
+        logger.setLevel(level)
 
     return logger

@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
 from io import BytesIO
-from os import getenv, listdir, makedirs, chmod, stat, _exit
-from os.path import isfile, dirname
+from os import getenv, listdir, makedirs, chmod, stat, _exit, walk
+from os.path import join, isfile, dirname
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from uuid import uuid4
 from glob import glob
 from json import load, loads
-from shutil import copytree, rmtree
+from shutil import chown, copytree, rmtree
 from traceback import format_exc
 from zipfile import ZipFile
 
@@ -97,6 +97,7 @@ try:
             continue
 
     external_plugins = []
+    external_plugins_ids = []
     for plugin in listdir("/etc/bunkerweb/plugins"):
         with open(
             f"/etc/bunkerweb/plugins/{plugin}/plugin.json",
@@ -105,6 +106,18 @@ try:
             plugin_file = load(f)
 
         external_plugins.append(plugin_file)
+        external_plugins_ids.append(plugin_file["id"])
+
+    db_plugins = db.get_plugins()
+    for plugin in db_plugins:
+        if plugin["external"] is True and plugin["id"] not in external_plugins_ids:
+            external_plugins.append(plugin)
+
+    # Fix permissions for the certificates
+    for root, dirs, files in walk("/data/plugins", topdown=False):
+        for name in files + dirs:
+            chown(join(root, name), "root", 101)
+            chmod(join(root, name), 0o770)
 
     if external_plugins:
         err = db.update_external_plugins(external_plugins)

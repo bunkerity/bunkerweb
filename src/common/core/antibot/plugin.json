@@ -38,7 +38,7 @@
       "id": "antibot-session-secret",
       "label": "Antibot Session secret",
       "regex": "^(random|\\w+)$",
-      "type": "text"
+      "type": "password"
     },
     "ANTIBOT_SESSION_NAME": {
       "context": "global",
@@ -74,7 +74,7 @@
       "id": "antibot-recaptcha-secret",
       "label": "reCAPTCHA secret",
       "regex": "^[\\w-]*$",
-      "type": "text"
+      "type": "password"
     },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
       "context": "multisite",
@@ -92,7 +92,7 @@
       "id": "antibot-hcaptcha-secret",
       "label": "hCaptcha secret",
       "regex": "^(0x[a-zA-Z0-9]+)?$",
-      "type": "text"
+      "type": "password"
     }
   }
 }

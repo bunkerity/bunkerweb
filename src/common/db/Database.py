@@ -5,12 +5,11 @@ from hashlib import sha256
 from logging import (
     Logger,
 )
-import oracledb
 from os import _exit, getenv, listdir, makedirs
 from os.path import dirname, exists
 from pymysql import install_as_MySQLdb
 from re import compile as re_compile
-from sys import modules, path as sys_path
+from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import (
@@ -45,9 +44,6 @@ if "/usr/share/bunkerweb/utils" not in sys_path:
 
 from jobs import file_hash
 
-oracledb.version = "8.3.0"
-modules["cx_Oracle"] = oracledb
-
 install_as_MySQLdb()
 
 
@@ -71,22 +67,33 @@ class Database:
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
 
         self.database_uri = sqlalchemy_string
+        error = False
 
         try:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
-                encoding="utf-8",
                 future=True,
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            error = True
         except SQLAlchemyError:
             self.__logger.error(
                 f"Error when trying to create the engine: {format_exc()}"
             )
+            error = True
+        finally:
+            if error:
+                _exit(1)
+
+        try:
+            assert self.__sql_engine is not None
+        except AssertionError:
+            self.__logger.error("The database engine is not initialized")
+            _exit(1)
 
         not_connected = True
-        retries = 5
+        retries = 15
 
         while not_connected:
             try:
@@ -98,12 +105,12 @@ class Database:
                         f"Can't connect to database : {format_exc()}",
                     )
                     _exit(1)
-                else:
-                    self.__logger.warning(
-                        "Can't connect to database, retrying in 5 seconds ...",
-                    )
-                    retries -= 1
-                    sleep(5)
+
+                self.__logger.warning(
+                    "Can't connect to database, retrying in 5 seconds ...",
+                )
+                retries -= 1
+                sleep(5)
             except SQLAlchemyError:
                 self.__logger.error(
                     f"Error when trying to connect to the database: {format_exc()}"
@@ -130,8 +137,13 @@ class Database:
 
     @contextmanager
     def __db_session(self):
-        session = self.__sql_session()
+        try:
+            assert self.__sql_session is not None
+        except AssertionError:
+            self.__logger.error("The database session is not initialized")
+            _exit(1)
 
+        session = self.__sql_session()
         session.expire_on_commit = False
 
         try:
@@ -218,7 +230,7 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_settings: List[Dict[str, str]]) -> Tuple[bool, str]:
+    def init_tables(self, default_settings: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
         if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
@@ -721,7 +733,7 @@ class Database:
                 for key, value in deepcopy(config).items():
                     original_key = key
                     if self.suffix_rx.search(key):
-                        key = key[: -len(str(suffix)) - 1]
+                        key = key[: -len(str(key.split("_")[-1])) - 1]
 
                     if key not in multisite:
                         continue
@@ -844,7 +856,7 @@ class Database:
         file_name: str,
         data: bytes,
         *,
-        checksum: str = None,
+        checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
         with self.__db_session() as session:
@@ -1111,10 +1123,14 @@ class Database:
                                     Jobs.name == job["name"]
                                 ).update(updates)
 
-                    if exists(f"/usr/share/bunkerweb/core/{plugin['id']}/ui"):
-                        if {"template.html", "actions.py"}.issubset(
-                            listdir(f"/usr/share/bunkerweb/core/{plugin['id']}/ui")
-                        ):
+                    path_ui = (
+                        f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui"
+                        if exists(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
+                        else f"/etc/bunkerweb/plugins/{plugin['id']}/ui"
+                    )
+
+                    if exists(path_ui):
+                        if {"template.html", "actions.py"}.issubset(listdir(path_ui)):
                             db_plugin_page = (
                                 session.query(Plugin_pages)
                                 .with_entities(
@@ -1127,12 +1143,12 @@ class Database:
 
                             if db_plugin_page is None:
                                 with open(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html",
+                                    f"{path_ui}/template.html",
                                     "r",
                                 ) as file:
                                     template = file.read().encode("utf-8")
                                 with open(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py",
+                                    f"{path_ui}/actions.py",
                                     "r",
                                 ) as file:
                                     actions = file.read().encode("utf-8")
@@ -1149,18 +1165,16 @@ class Database:
                             else:  # TODO test this
                                 updates = {}
                                 template_checksum = file_hash(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html"
+                                    f"{path_ui}/template.html"
                                 )
-                                actions_checksum = file_hash(
-                                    f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py"
-                                )
+                                actions_checksum = file_hash(f"{path_ui}/actions.py")
 
                                 if (
                                     template_checksum
                                     != db_plugin_page.template_checksum
                                 ):
                                     with open(
-                                        f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html",
+                                        f"{path_ui}/template.html",
                                         "r",
                                     ) as file:
                                         updates.update(
@@ -1174,7 +1188,7 @@ class Database:
 
                                 if actions_checksum != db_plugin_page.actions_checksum:
                                     with open(
-                                        f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py",
+                                        f"{path_ui}/actions.py",
                                         "r",
                                     ) as file:
                                         updates.update(
@@ -1258,6 +1272,79 @@ class Database:
 
         return ""
 
+    def get_plugins(self) -> List[Dict[str, Any]]:
+        """Get plugins."""
+        plugins = []
+        with self.__db_session() as session:
+            for plugin in (
+                session.query(Plugins)
+                .with_entities(
+                    Plugins.id,
+                    Plugins.order,
+                    Plugins.name,
+                    Plugins.description,
+                    Plugins.version,
+                    Plugins.external,
+                )
+                .order_by(Plugins.order)
+                .all()
+            ):
+                page = (
+                    session.query(Plugin_pages)
+                    .with_entities(Plugin_pages.id)
+                    .filter_by(plugin_id=plugin.id)
+                    .first()
+                )
+                data = {
+                    "id": plugin.id,
+                    "order": plugin.order,
+                    "name": plugin.name,
+                    "description": plugin.description,
+                    "version": plugin.version,
+                    "external": plugin.external,
+                    "page": page is not None,
+                    "settings": {},
+                }
+
+                for setting in (
+                    session.query(Settings)
+                    .with_entities(
+                        Settings.id,
+                        Settings.context,
+                        Settings.default,
+                        Settings.help,
+                        Settings.name,
+                        Settings.label,
+                        Settings.regex,
+                        Settings.type,
+                        Settings.multiple,
+                    )
+                    .filter_by(plugin_id=plugin.id)
+                    .all()
+                ):
+                    data["settings"][setting.id] = {
+                        "context": setting.context,
+                        "default": setting.default,
+                        "help": setting.help,
+                        "id": setting.name,
+                        "label": setting.label,
+                        "regex": setting.regex,
+                        "type": setting.type,
+                    } | ({"multiple": setting.multiple} if setting.multiple else {})
+
+                    if setting.type == "select":
+                        data["settings"][setting.id]["select"] = [
+                            select.value
+                            for select in session.query(Selects)
+                            .with_entities(Selects.value)
+                            .filter_by(setting_id=setting.id)
+                            .all()
+                        ]
+
+                plugins.append(data)
+
+        return plugins
+
     def get_plugins_errors(self) -> int:
         """Get plugins errors."""
         with self.__db_session() as session:
@@ -1316,6 +1403,27 @@ class Database:
                 .filter_by(job_name=job_name, file_name=file_name)
                 .first()
             )
+
+    def get_jobs_cache_files(self) -> List[Dict[str, Any]]:
+        """Get jobs cache files."""
+        with self.__db_session() as session:
+            return [
+                {
+                    "job_name": cache.job_name,
+                    "service_id": cache.service_id,
+                    "file_name": cache.file_name,
+                    "data": "Download file to view content",
+                }
+                for cache in (
+                    session.query(Jobs_cache)
+                    .with_entities(
+                        Jobs_cache.job_name,
+                        Jobs_cache.service_id,
+                        Jobs_cache.file_name,
+                    )
+                    .all()
+                )
+            ]
 
     def add_instance(self, hostname: str, port: int, server_name: str) -> str:
         """Add instance."""
@@ -1381,3 +1489,33 @@ class Database:
                     .all()
                 )
             ]
+
+    def get_plugin_actions(self, plugin: str) -> Optional[Any]:
+        """get actions file for the plugin"""
+        with self.__db_session() as session:
+            page = (
+                session.query(Plugin_pages)
+                .with_entities(Plugin_pages.actions_file)
+                .filter_by(plugin_id=plugin)
+                .first()
+            )
+
+            if page is None:
+                return None
+
+            return page.actions_file
+
+    def get_plugin_template(self, plugin: str) -> Optional[Any]:
+        """get template file for the plugin"""
+        with self.__db_session() as session:
+            page = (
+                session.query(Plugin_pages)
+                .with_entities(Plugin_pages.template_file)
+                .filter_by(plugin_id=plugin)
+                .first()
+            )
+
+            if page is None:
+                return None
+
+            return page.template_file

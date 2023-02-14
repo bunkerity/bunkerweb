@@ -125,6 +125,8 @@ class ApiCaller:
                     )
 
         if response:
+            if isinstance(resp, dict):
+                return ret, resp
             return ret, resp.json()
         return ret
 

@@ -161,6 +161,12 @@ api.do_api_call = function(self)
 				if status ~= ngx.HTTP_OK then
 					ret = false
 				end
+				if (#resp["msg"] == 0) then
+					resp["msg"] = ""
+				elseif (type(resp["msg"]) == "table") then
+					resp["data"] = resp["msg"]
+					resp["msg"] = resp["status"]
+				end
 				return ret, resp["msg"], status, cjson.encode(resp)
 			end
 		end

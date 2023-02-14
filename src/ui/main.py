@@ -1,7 +1,10 @@
 from contextlib import suppress
+from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from pathlib import Path
 from signal import SIGINT, signal, SIGTERM
+from subprocess import PIPE, Popen, call
+from tempfile import NamedTemporaryFile
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -33,7 +36,7 @@ from os.path import exists, isdir, isfile, join
 from re import match as re_match
 from requests import get
 from shutil import rmtree, copytree, chown
-from sys import path as sys_path, exit as sys_exit, modules as sys_modules
+from sys import path as sys_path, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from time import time
@@ -63,23 +66,39 @@ from utils import (
 from logger import setup_logger
 from Database import Database
 
+if not exists("/var/log/nginx/ui.log"):
+    Path("/var/log/nginx").mkdir(parents=True, exist_ok=True)
+    Path("/var/log/nginx/ui.log").touch()
+
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
 
-def stop(status):
-    remove("/var/tmp/bunkerweb/ui.pid")
+def stop_gunicorn():
+    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+    out, _ = p.communicate()
+    pid = out.strip().decode().split("\n")[0]
+    call(["kill", "-SIGTERM", pid])
+
+
+def stop(status, stop=True):
+    if exists("/var/tmp/bunkerweb/ui.pid"):
+        remove("/var/tmp/bunkerweb/ui.pid")
+    if stop is True:
+        stop_gunicorn()
     _exit(status)
 
 
 def handle_stop(signum, frame):
     logger.info("Catched stop operation")
     logger.info("Stopping web ui ...")
-    stop(0)
+    stop(0, False)
 
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
+
+Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 # Flask app
 app = Flask(
@@ -95,28 +114,25 @@ vars = get_variables()
 
 if "ABSOLUTE_URI" not in vars:
     logger.error("ABSOLUTE_URI is not set")
-    sys_exit(1)
+    stop(1)
 elif "ADMIN_USERNAME" not in vars:
     logger.error("ADMIN_USERNAME is not set")
-    sys_exit(1)
+    stop(1)
 elif "ADMIN_PASSWORD" not in vars:
     logger.error("ADMIN_PASSWORD is not set")
-    sys_exit(1)
+    stop(1)
 
-if not vars["FLASK_ENV"] == "development" and vars["ADMIN_PASSWORD"] == "changeme":
+if not vars.get("FLASK_DEBUG", False) and vars["ADMIN_PASSWORD"] == "changeme":
     logger.error("Please change the default admin password.")
-    sys_exit(1)
+    stop(1)
 
 if not vars["ABSOLUTE_URI"].endswith("/"):
     vars["ABSOLUTE_URI"] += "/"
 
-if not vars["FLASK_ENV"] == "development" and vars["ABSOLUTE_URI"].endswith(
-    "/changeme/"
-):
+if not vars.get("FLASK_DEBUG", False) and vars["ABSOLUTE_URI"].endswith("/changeme/"):
     logger.error("Please change the default URL.")
-    sys_exit(1)
+    stop(1)
 
-Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -180,7 +196,7 @@ try:
     )
 except FileNotFoundError as e:
     logger.error(repr(e), e.filename)
-    sys_exit(1)
+    stop(1)
 
 # Declare functions for jinja2
 app.jinja_env.globals.update(check_settings=check_settings)
@@ -189,6 +205,8 @@ app.jinja_env.globals.update(check_settings=check_settings)
 def manage_bunkerweb(method: str, operation: str = "reloads", *args):
     # Do the operation
     if method == "services":
+        error = False
+
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0])
         elif operation == "edit":
@@ -414,7 +432,7 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            config = app.config["CONFIG"].get_config(methods=False)
+            config = app.config["CONFIG"].get_config(methods=True)
             for variable, value in deepcopy(variables).items():
                 variable_splitted = variable.split("_")
                 if "SCHEMA" in variable_splitted:
@@ -428,13 +446,16 @@ def services():
                 elif value == "off":
                     value = "no"
 
+                config_setting = config.get(
+                    f"{variables['SERVER_NAME'].split(' ')[0]}_{variable}", None
+                )
+
                 if variable in variables and (
                     request.form["operation"] == "edit"
                     and variable != "SERVER_NAME"
-                    and value
-                    == config.get(
-                        f"{variables['SERVER_NAME'].split(' ')[0]}_{variable}", None
-                    )
+                    and config_setting is not None
+                    and config_setting["method"] == "default"
+                    and value == config_setting["value"]
                     or not value.strip()
                 ):
                     del variables[variable]
@@ -659,14 +680,12 @@ def configs():
 
         return redirect(url_for("loading", next=url_for("configs")))
 
-    db_configs = db.get_custom_configs()
     return render_template(
         "configs.html",
         folders=[
             path_to_dict(
                 "/etc/bunkerweb/configs",
-                db_configs=db_configs,
-                integration=integration,
+                db_data=db.get_custom_configs(),
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
                 .split(" "),
@@ -688,25 +707,40 @@ def plugins():
             variables = deepcopy(request.form.to_dict())
             del variables["csrf_token"]
 
-            if variables["external"] == "false":
+            if variables["external"] != "True":
                 flash(f"Can't delete internal plugin {variables['name']}", "error")
                 return redirect(url_for("loading", next=url_for("plugins"))), 500
 
-            variables["path"] = f"/etc/bunkerweb/plugins/{variables['name']}"
+            if not exists("/usr/sbin/nginx"):
+                plugins = app.config["CONFIG"].get_plugins()
+                for plugin in deepcopy(plugins):
+                    if plugin["external"] is False or plugin["id"] == variables["name"]:
+                        del plugins[plugins.index(plugin)]
 
-            operation = app.config["CONFIGFILES"].check_path(
-                variables["path"], "/etc/bunkerweb/plugins/"
-            )
+                err = db.update_external_plugins(plugins)
+                if err:
+                    flash(
+                        f"Couldn't update external plugins to database: {err}",
+                        "error",
+                    )
+            else:
+                variables["path"] = f"/etc/bunkerweb/plugins/{variables['name']}"
 
-            if operation:
-                flash(operation, "error")
-                return redirect(url_for("loading", next=url_for("plugins"))), 500
+                operation = app.config["CONFIGFILES"].check_path(
+                    variables["path"], "/etc/bunkerweb/plugins/"
+                )
 
-            operation, error = app.config["CONFIGFILES"].delete_path(variables["path"])
+                if operation:
+                    flash(operation, "error")
+                    return redirect(url_for("loading", next=url_for("plugins"))), 500
 
-            if error:
-                flash(operation, "error")
-                return redirect(url_for("loading", next=url_for("plugins")))
+                operation, error = app.config["CONFIGFILES"].delete_path(
+                    variables["path"]
+                )
+
+                if error:
+                    flash(operation, "error")
+                    return redirect(url_for("loading", next=url_for("plugins")))
         else:
             if not exists("/var/tmp/bunkerweb/ui") or not listdir(
                 "/var/tmp/bunkerweb/ui"
@@ -758,13 +792,33 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if exists(f"/etc/bunkerweb/plugins/{folder_name}"):
-                                        raise FileExistsError
+                                    if not exists("/usr/sbin/nginx"):
+                                        plugins = app.config["CONFIG"].get_plugins()
+                                        for plugin in deepcopy(plugins):
+                                            if plugin["id"] == folder_name:
+                                                raise FileExistsError
+                                            elif plugin["external"] is False:
+                                                del plugins[plugins.index(plugin)]
 
-                                    copytree(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                        f"/etc/bunkerweb/plugins/{folder_name}",
-                                    )
+                                        plugins.append(plugin_file)
+                                        err = db.update_external_plugins(plugins)
+                                        if err:
+                                            error = 1
+                                            flash(
+                                                f"Couldn't update external plugins to database: {err}",
+                                                "error",
+                                            )
+                                            raise Exception
+                                    else:
+                                        if exists(
+                                            f"/etc/bunkerweb/plugins/{folder_name}"
+                                        ):
+                                            raise FileExistsError
+
+                                        copytree(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
+                                            f"/etc/bunkerweb/plugins/{folder_name}",
+                                        )
                                 except KeyError:
                                     zip_file.extractall(
                                         f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
@@ -812,13 +866,33 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if exists(f"/etc/bunkerweb/plugins/{folder_name}"):
-                                        raise FileExistsError
+                                    if not exists("/usr/sbin/nginx"):
+                                        plugins = app.config["CONFIG"].get_plugins()
+                                        for plugin in deepcopy(plugins):
+                                            if plugin["id"] == folder_name:
+                                                raise FileExistsError
+                                            elif plugin["external"] is False:
+                                                del plugins[plugins.index(plugin)]
 
-                                    copytree(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}",
-                                        f"/etc/bunkerweb/plugins/{folder_name}",
-                                    )
+                                        plugins.append(plugin_file)
+                                        err = db.update_external_plugins(plugins)
+                                        if err:
+                                            error = 1
+                                            flash(
+                                                f"Couldn't update external plugins to database: {err}",
+                                                "error",
+                                            )
+                                            raise Exception
+                                    else:
+                                        if exists(
+                                            f"/etc/bunkerweb/plugins/{folder_name}"
+                                        ):
+                                            raise FileExistsError
+
+                                        copytree(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}",
+                                            f"/etc/bunkerweb/plugins/{folder_name}",
+                                        )
                         except BadZipFile:
                             errors += 1
                             error = 1
@@ -861,13 +935,33 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if exists(f"/etc/bunkerweb/plugins/{folder_name}"):
-                                        raise FileExistsError
+                                    if not exists("/usr/sbin/nginx"):
+                                        plugins = app.config["CONFIG"].get_plugins()
+                                        for plugin in deepcopy(plugins):
+                                            if plugin["id"] == folder_name:
+                                                raise FileExistsError
+                                            elif plugin["external"] is False:
+                                                del plugins[plugins.index(plugin)]
 
-                                    copytree(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                        f"/etc/bunkerweb/plugins/{folder_name}",
-                                    )
+                                        plugins.append(plugin_file)
+                                        err = db.update_external_plugins(plugins)
+                                        if err:
+                                            error = 1
+                                            flash(
+                                                f"Couldn't update external plugins to database: {err}",
+                                                "error",
+                                            )
+                                            raise Exception
+                                    else:
+                                        if exists(
+                                            f"/etc/bunkerweb/plugins/{folder_name}"
+                                        ):
+                                            raise FileExistsError
+
+                                        copytree(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
+                                            f"/etc/bunkerweb/plugins/{folder_name}",
+                                        )
                                 except KeyError:
                                     tar_file.extractall(
                                         f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
@@ -915,13 +1009,33 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if exists(f"/etc/bunkerweb/plugins/{folder_name}"):
-                                        raise FileExistsError
+                                    if not exists("/usr/sbin/nginx"):
+                                        plugins = app.config["CONFIG"].get_plugins()
+                                        for plugin in deepcopy(plugins):
+                                            if plugin["id"] == folder_name:
+                                                raise FileExistsError
+                                            elif plugin["external"] is False:
+                                                del plugins[plugins.index(plugin)]
 
-                                    copytree(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}",
-                                        f"/etc/bunkerweb/plugins/{folder_name}",
-                                    )
+                                        plugins.append(plugin_file)
+                                        err = db.update_external_plugins(plugins)
+                                        if err:
+                                            error = 1
+                                            flash(
+                                                f"Couldn't update external plugins to database: {err}",
+                                                "error",
+                                            )
+                                            raise Exception
+                                    else:
+                                        if exists(
+                                            f"/etc/bunkerweb/plugins/{folder_name}"
+                                        ):
+                                            raise FileExistsError
+
+                                        copytree(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}",
+                                            f"/etc/bunkerweb/plugins/{folder_name}",
+                                        )
                         except ReadError:
                             errors += 1
                             error = 1
@@ -993,13 +1107,11 @@ def plugins():
             # Fix permissions for plugins folders
             for root, dirs, files in walk("/etc/bunkerweb/plugins", topdown=False):
                 for name in files + dirs:
-                    chown(join(root, name), 101, 101)
+                    chown(join(root, name), "root", 101)
                     chmod(join(root, name), 0o770)
 
         if operation:
             flash(operation)
-
-        app.config["CONFIG"].reload_plugins()
 
         # Reload instances
         app.config["RELOADING"] = True
@@ -1023,19 +1135,28 @@ def plugins():
 
     if request.args.get("plugin_id", False):
         plugin_id = request.args.get("plugin_id")
-        page_path = ""
+        template = None
 
-        if exists(f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"):
-            page_path = f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"
-        elif exists(f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"):
-            page_path = f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"
+        if not exists("/usr/sbin/nginx"):
+            page = db.get_plugin_template(plugin_id)
+
+            if page is not None:
+                template = Template(page.decode("utf-8"))
         else:
-            flash(f"Plugin {plugin_id} not found", "error")
+            page_path = ""
 
-        if page_path:
-            with open(page_path, "r") as f:
-                template = Template(f.read())
+            if exists(f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"):
+                page_path = f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"
+            elif exists(f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"):
+                page_path = f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"
+            else:
+                flash(f"Plugin {plugin_id} not found", "error")
 
+            if page_path:
+                with open(page_path, "r") as f:
+                    template = Template(f.read())
+
+        if template is not None:
             return template.render(
                 csrf_token=generate_csrf,
                 url_for=url_for,
@@ -1047,7 +1168,6 @@ def plugins():
                 ),
             )
 
-    app.config["CONFIG"].reload_plugins()
     plugins = app.config["CONFIG"].get_plugins()
     plugins_internal = 0
     plugins_external = 0
@@ -1096,33 +1216,66 @@ def custom_plugin(plugin):
         )
         return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
-    if not exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py") and not exists(
-        f"/usr/share/bunkerweb/core/{plugin}/ui/actions.py"
-    ):
-        flash(
-            f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
-            "error",
-        )
-        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+    if not exists("/usr/sbin/nginx"):
+        module = db.get_plugin_actions(plugin)
 
-    # Add the custom plugin to sys.path
-    sys_path.append(
-        (
-            "/etc/bunkerweb/plugins"
-            if exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py")
-            else "/usr/share/bunkerweb/core"
+        if module is None:
+            flash(
+                f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
+                "error",
+            )
+            return redirect(
+                url_for("loading", next=url_for("plugins", plugin_id=plugin))
+            )
+
+        try:
+            # Try to import the custom plugin
+            with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
+                temp.write(module)
+                temp.flush()
+                temp.seek(0)
+                loader = SourceFileLoader("actions", temp.name)
+                actions = loader.load_module()
+        except:
+            flash(
+                f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
+                "error",
+            )
+            return redirect(
+                url_for("loading", next=url_for("plugins", plugin_id=plugin))
+            )
+    else:
+        if not exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py") and not exists(
+            f"/usr/share/bunkerweb/core/{plugin}/ui/actions.py"
+        ):
+            flash(
+                f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
+                "error",
+            )
+            return redirect(
+                url_for("loading", next=url_for("plugins", plugin_id=plugin))
+            )
+
+        # Add the custom plugin to sys.path
+        sys_path.append(
+            (
+                "/etc/bunkerweb/plugins"
+                if exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py")
+                else "/usr/share/bunkerweb/core"
+            )
+            + f"/{plugin}/ui/"
         )
-        + f"/{plugin}/ui/"
-    )
-    try:
-        # Try to import the custom plugin
-        import actions
-    except:
-        flash(
-            f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
-            "error",
-        )
-        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+        try:
+            # Try to import the custom plugin
+            import actions
+        except:
+            flash(
+                f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
+                "error",
+            )
+            return redirect(
+                url_for("loading", next=url_for("plugins", plugin_id=plugin))
+            )
 
     error = False
     res = None
@@ -1145,10 +1298,11 @@ def custom_plugin(plugin):
         )
         error = True
     finally:
-        # Remove the custom plugin from the shared library
-        sys_path.pop()
-        sys_modules.pop("actions")
-        del actions
+        if exists("/usr/sbin/nginx"):
+            # Remove the custom plugin from the shared library
+            sys_path.pop()
+            sys_modules.pop("actions")
+            del actions
 
         if (
             request.method != "POST"
@@ -1171,7 +1325,16 @@ def custom_plugin(plugin):
 def cache():
     return render_template(
         "cache.html",
-        folders=[path_to_dict("/var/cache/bunkerweb", is_cache=True)],
+        folders=[
+            path_to_dict(
+                "/var/cache/bunkerweb",
+                is_cache=True,
+                db_data=db.get_jobs_cache_files(),
+                services=app.config["CONFIG"]
+                .get_config(methods=False)["SERVER_NAME"]
+                .split(" "),
+            )
+        ],
         dark_mode=app.config["DARK_MODE"],
     )
 

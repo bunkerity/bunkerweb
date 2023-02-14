@@ -23,7 +23,6 @@ sys_path.extend(
 )
 
 from docker import DockerClient
-from kubernetes import client as kube_client
 
 from logger import setup_logger
 from Database import Database
@@ -31,7 +30,7 @@ from Configurator import Configurator
 from API import API
 
 custom_confs_rx = re_compile(
-    r"^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$"
+    r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
 )
 
 
@@ -145,6 +144,18 @@ if __name__ == "__main__":
         db = None
         apis = []
 
+        plugins = args.plugins
+        plugins_settings = None
+        if not exists("/usr/sbin/nginx") and args.method == "ui":
+            db = Database(logger)
+            plugins = {}
+            plugins_settings = []
+            for plugin in db.get_plugins():
+                del plugin["page"]
+                del plugin["external"]
+                plugins_settings.append(plugin)
+                plugins.update(plugin["settings"])
+
         # Check existences and permissions
         logger.info("Checking arguments ...")
         files = [args.settings] + ([args.variables] if args.variables else [])
@@ -200,7 +211,12 @@ if __name__ == "__main__":
             # Compute the config
             logger.info("Computing config ...")
             config = Configurator(
-                args.settings, core_settings, args.plugins, args.variables, logger
+                args.settings,
+                core_settings,
+                plugins,
+                args.variables,
+                logger,
+                plugins_settings=plugins_settings,
             )
             config_files = config.get_config()
             custom_confs = [
@@ -288,7 +304,12 @@ if __name__ == "__main__":
         if config_files is None:
             logger.info("Computing config ...")
             config = Configurator(
-                args.settings, core_settings, args.plugins, tmp_config, logger
+                args.settings,
+                core_settings,
+                plugins,
+                tmp_config,
+                logger,
+                plugins_settings=plugins_settings,
             )
             config_files = config.get_config()
 

@@ -22,7 +22,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
 
 # Nginx
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
-RUN dnf install yum-utils -y && \
+RUN dnf install yum-utils redhat-lsb-core -y && \
     dnf install nginx-1.22.1 -y 
 
 # Compile and install dependencies

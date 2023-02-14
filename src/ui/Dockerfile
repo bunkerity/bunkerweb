@@ -29,7 +29,7 @@ COPY src/ui /usr/share/bunkerweb/ui
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
 # Add ui user
-RUN apk add --no-cache bash file && \
+RUN apk add --no-cache bash && \
     addgroup -g 101 ui && \
     adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
     echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
@@ -37,14 +37,15 @@ RUN apk add --no-cache bash file && \
     mkdir -p /etc/bunkerweb && \
     mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
     mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
+    mkdir -p /var/log/nginx/ && touch /var/log/nginx/ui.log && \
     for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
     chown -R root:ui /data && \
     chmod -R 770 /data && \
-    chown -R root:ui /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
+    chown -R root:ui /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/log/nginx && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
-    chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb && \
+    chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/log/nginx/ui.log && \
     chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/deps/python/bin/* && \
     chmod 660 /usr/share/bunkerweb/INTEGRATION
 
@@ -60,4 +61,4 @@ WORKDIR /usr/share/bunkerweb/ui
 USER ui:ui
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
-CMD ["python3", "-m", "gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]
+CMD ["python3", "-m", "gunicorn", "--graceful-timeout=0", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]

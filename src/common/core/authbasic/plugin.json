@@ -39,7 +39,7 @@
       "id": "auth-basic-password",
       "label": "Password",
       "regex": "^.+",
-      "type": "text"
+      "type": "password"
     },
     "AUTH_BASIC_TEXT": {
       "context": "multisite",

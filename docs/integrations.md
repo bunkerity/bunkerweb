@@ -755,17 +755,20 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf install -y nginx-1.20.2
 	```
 
-    ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-	sudo dnf check-update && \
-	sudo dnf install -y bunkerweb-1.4.4
-    ```
+	And finally install BunkerWeb 1.4.4 :
+  ```shell
+  curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
+  sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
+  sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
+  sudo dnf makecache && \
+  sudo dnf install -y bunkerweb-1.4.4
+  ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-	```shell
-	sudo dnf versionlock add nginx && \
-	sudo dnf versionlock add bunkerweb
-	```
+  ```shell
+  sudo dnf versionlock add nginx && \
+  sudo dnf versionlock add bunkerweb
+  ```
 
 === "CentOS Stream"
 
