@@ -66,6 +66,10 @@ from utils import (
 from logger import setup_logger
 from Database import Database
 
+if not exists("/var/log/nginx/ui.log"):
+    Path("/var/log/nginx").mkdir(parents=True, exist_ok=True)
+    Path("/var/log/nginx/ui.log").touch()
+
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
 
@@ -682,7 +686,6 @@ def configs():
             path_to_dict(
                 "/etc/bunkerweb/configs",
                 db_data=db.get_custom_configs(),
-                integration=integration,
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
                 .split(" "),
@@ -1325,8 +1328,8 @@ def cache():
         folders=[
             path_to_dict(
                 "/var/cache/bunkerweb",
+                is_cache=True,
                 db_data=db.get_jobs_cache_files(),
-                integration=integration,
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
                 .split(" "),

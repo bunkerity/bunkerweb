@@ -1,6 +1,4 @@
-from datetime import datetime
 from typing import List
-import magic
 import os
 
 
@@ -20,80 +18,14 @@ def get_variables():
     return vars
 
 
-def log(event):
-    with open("/var/log/nginx/ui.log", "a") as f:
-        f.write("[" + str(datetime.now().replace(microsecond=0)) + "] " + event + "\n")
-
-
 def path_to_dict(
     path,
     *,
-    level: int = 0,
     is_cache: bool = False,
     db_data: List[dict] = [],
-    integration: str = "Linux",
     services: List[str] = [],
 ) -> dict:
-    if integration == "Linux":
-        d = {"name": os.path.basename(path)}
-
-        if os.path.isdir(path):
-            d.update(
-                {
-                    "type": "folder",
-                    "path": path,
-                    "can_create_files": level > 0 and not is_cache,
-                    "can_create_folders": level > 0 and not is_cache,
-                    "can_edit": level > 1 and not is_cache,
-                    "can_delete": False,
-                    "children": [
-                        path_to_dict(
-                            os.path.join(path, x),
-                            level=level + 1,
-                            is_cache=is_cache,
-                            db_data=db_data,
-                        )
-                        for x in sorted(os.listdir(path))
-                    ],
-                }
-            )
-
-            if level > 1 and not is_cache and not d["children"]:
-                d["can_delete"] = True
-        else:
-            d.update(
-                {
-                    "type": "file",
-                    "path": path,
-                    "can_download": True,
-                }
-            )
-
-            can_edit = False
-            if level > 1 and not is_cache:
-                exploded_path = path.split("/")
-                for conf in db_data:
-                    if exploded_path[-1].replace(".conf", "") == conf["name"]:
-                        if level > 2 and exploded_path[-2] != conf["service_id"]:
-                            continue
-
-                        can_edit = True
-                        break
-
-            d["can_edit"] = can_edit
-
-            magic_file = magic.from_file(path, mime=True)
-
-            if (
-                not is_cache
-                or magic_file.startswith("text/")
-                or magic_file.startswith("application/json")
-            ):
-                with open(path, "rb") as f:
-                    d["content"] = f.read().decode("utf-8")
-            else:
-                d["content"] = "Download file to view content"
-    elif path.startswith("/etc/bunkerweb/configs"):
+    if not is_cache:
         config_types = [
             "http",
             "stream",
