@@ -1404,6 +1404,27 @@ class Database:
                 .first()
             )
 
+    def get_jobs_cache_files(self) -> List[Dict[str, Any]]:
+        """Get jobs cache files."""
+        with self.__db_session() as session:
+            return [
+                {
+                    "job_name": cache.job_name,
+                    "service_id": cache.service_id,
+                    "file_name": cache.file_name,
+                    "data": "Download file to view content",
+                }
+                for cache in (
+                    session.query(Jobs_cache)
+                    .with_entities(
+                        Jobs_cache.job_name,
+                        Jobs_cache.service_id,
+                        Jobs_cache.file_name,
+                    )
+                    .all()
+                )
+            ]
+
     def add_instance(self, hostname: str, port: int, server_name: str) -> str:
         """Add instance."""
         with self.__db_session() as session:

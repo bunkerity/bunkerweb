@@ -30,7 +30,7 @@ def path_to_dict(
     *,
     level: int = 0,
     is_cache: bool = False,
-    db_configs: List[dict] = [],
+    db_data: List[dict] = [],
     integration: str = "Linux",
     services: List[str] = [],
 ) -> dict:
@@ -51,7 +51,7 @@ def path_to_dict(
                             os.path.join(path, x),
                             level=level + 1,
                             is_cache=is_cache,
-                            db_configs=db_configs,
+                            db_data=db_data,
                         )
                         for x in sorted(os.listdir(path))
                     ],
@@ -72,7 +72,7 @@ def path_to_dict(
             can_edit = False
             if level > 1 and not is_cache:
                 exploded_path = path.split("/")
-                for conf in db_configs:
+                for conf in db_data:
                     if exploded_path[-1].replace(".conf", "") == conf["name"]:
                         if level > 2 and exploded_path[-2] != conf["service_id"]:
                             continue
@@ -93,7 +93,7 @@ def path_to_dict(
                     d["content"] = f.read().decode("utf-8")
             else:
                 d["content"] = "Download file to view content"
-    else:
+    elif path.startswith("/etc/bunkerweb/configs"):
         config_types = [
             "http",
             "stream",
@@ -103,6 +103,7 @@ def path_to_dict(
             "modsec",
             "modsec-crs",
         ]
+
         d = {
             "name": "configs",
             "type": "folder",
@@ -138,7 +139,7 @@ def path_to_dict(
             ],
         }
 
-        for conf in db_configs:
+        for conf in db_data:
             type_lower = conf["type"].replace("_", "-")
             file_info = {
                 "name": f"{conf['name']}.conf",
@@ -163,6 +164,47 @@ def path_to_dict(
                 d["children"][config_types.index(type_lower)]["children"].append(
                     file_info
                 )
+    else:
+        d = {
+            "name": "cache",
+            "type": "folder",
+            "path": path,
+            "can_create_files": False,
+            "can_create_folders": False,
+            "can_edit": False,
+            "can_delete": False,
+            "children": [
+                {
+                    "name": service,
+                    "type": "folder",
+                    "path": f"{path}/{service}",
+                    "can_create_files": False,
+                    "can_create_folders": False,
+                    "can_edit": False,
+                    "can_delete": False,
+                    "children": [],
+                }
+                for service in services
+            ],
+        }
+
+        for conf in db_data:
+            file_info = {
+                "name": f"{conf['job_name']}/{conf['file_name']}",
+                "type": "file",
+                "path": f"{path}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['file_name']}",
+                "can_edit": False,
+                "can_delete": False,
+                "can_download": True,
+                "content": conf["data"],
+            }
+
+            if conf["service_id"]:
+                d["children"][
+                    [x["file_name"] for x in d["children"]].index(conf["service_id"])
+                ]["children"].append(file_info)
+            else:
+                d["children"].append(file_info)
 
     return d
 

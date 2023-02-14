@@ -673,13 +673,12 @@ def configs():
 
         return redirect(url_for("loading", next=url_for("configs")))
 
-    db_configs = db.get_custom_configs()
     return render_template(
         "configs.html",
         folders=[
             path_to_dict(
                 "/etc/bunkerweb/configs",
-                db_configs=db_configs,
+                db_data=db.get_custom_configs(),
                 integration=integration,
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
@@ -1320,7 +1319,16 @@ def custom_plugin(plugin):
 def cache():
     return render_template(
         "cache.html",
-        folders=[path_to_dict("/var/cache/bunkerweb", is_cache=True)],
+        folders=[
+            path_to_dict(
+                "/var/cache/bunkerweb",
+                db_data=db.get_jobs_cache_files(),
+                integration=integration,
+                services=app.config["CONFIG"]
+                .get_config(methods=False)["SERVER_NAME"]
+                .split(" "),
+            )
+        ],
         dark_mode=app.config["DARK_MODE"],
     )
 
