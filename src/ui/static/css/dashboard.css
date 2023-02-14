@@ -1929,10 +1929,6 @@ h6 {
   fill: #fff;
 }
 
-.fill-sky-500 {
-  fill: #0ea5e9;
-}
-
 .fill-yellow-500 {
   fill: #fbb140;
 }
@@ -1953,24 +1949,8 @@ h6 {
   fill: #f53939;
 }
 
-.fill-blue-400 {
-  fill: #60a5fa;
-}
-
-.fill-orange-500 {
-  fill: #fb6340;
-}
-
-.fill-blue-500 {
-  fill: #5e72e4;
-}
-
-.fill-pink-600 {
-  fill: #db2777;
-}
-
-.fill-emerald-600 {
-  fill: #059669;
+.fill-sky-500 {
+  fill: #0ea5e9;
 }
 
 .fill-amber-500 {
@@ -1981,6 +1961,14 @@ h6 {
   fill: #3a416f;
 }
 
+.fill-blue-500 {
+  fill: #5e72e4;
+}
+
+.stroke-gray-100 {
+  stroke: #ebeff4;
+}
+
 .stroke-green-700 {
   stroke: #15803d;
 }
@@ -1989,32 +1977,12 @@ h6 {
   stroke: #fb6340;
 }
 
-.stroke-red-500 {
-  stroke: #f53939;
-}
-
-.stroke-gray-300 {
-  stroke: #d2d6da;
-}
-
-.stroke-gray-500 {
-  stroke: #adb5bd;
-}
-
-.stroke-white {
-  stroke: #fff;
-}
-
-.stroke-gray-50 {
-  stroke: #f8f9fa;
-}
-
-.stroke-gray-100 {
-  stroke: #ebeff4;
-}
-
 .stroke-sky-500 {
   stroke: #0ea5e9;
+}
+
+.stroke-red-500 {
+  stroke: #f53939;
 }
 
 .stroke-blue-400 {
@@ -3475,14 +3443,6 @@ h6 {
 
   .xl\:hidden {
     display: none;
-  }
-
-  .xl\:h-6 {
-    height: 1.5rem;
-  }
-
-  .xl\:w-6 {
-    width: 1.5rem;
   }
 
   .xl\:translate-x-0 {

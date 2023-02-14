@@ -190,6 +190,7 @@
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
+       <input type="hidden" name="{{setting}}" value="no" default-value="no" default-method="default" />
         <input id="{{setting}}" name="{{setting}}"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
@@ -411,6 +412,8 @@
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
+        <input type="hidden" name="{{setting}}_SCHEMA" value="no" default-value="no" default-method="default" />
+
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
