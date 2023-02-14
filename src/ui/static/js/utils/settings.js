@@ -1,141 +1,92 @@
 class Popover {
-  constructor(container, prefix) {
-    this.prefix = prefix;
-    this.container = container;
-    this.popoverContainer = document.querySelector(`${this.container}`);
+  constructor() {
     this.init();
   }
 
   init() {
-    let popoverCount = 0; //for auto hide
-    let btnPopoverAtt = ""; //to manage info btn clicked
-
-    this.popoverContainer.addEventListener("click", (e) => {
+    window.addEventListener("pointerover", (e) => {
       //POPOVER LOGIC
       try {
-        if (e.target.closest("svg").hasAttribute(`${this.prefix}-info-btn`)) {
-          const btnPop = e.target.closest("svg");
-          //toggle curr popover
-          const popover = btnPop.parentElement.querySelector(
-            `[${this.prefix}-info-popover]`
-          );
-          popover.classList.toggle("hidden");
-
-          //get a btn att if none
-          if (btnPopoverAtt === "")
-            btnPopoverAtt = btnPop.getAttribute(`${this.prefix}-info-btn`);
-
-          //compare prev btn and curr
-          //hide prev popover if not the same
-          if (
-            btnPopoverAtt !== "" &&
-            btnPopoverAtt !== btnPop.getAttribute(`${this.prefix}-info-btn`)
-          ) {
-            const prevPopover = document.querySelector(
-              `[${this.prefix}-info-popover="${btnPopoverAtt}"]`
-            );
-            prevPopover.classList.add("hidden");
-            btnPopoverAtt = btnPop.getAttribute(`${this.prefix}-info-btn`);
-          }
-
-          //hide popover after an amount of time
-          popoverCount++;
-          const currCount = popoverCount;
-          setTimeout(() => {
-            //if another click on same infoBtn, restart hidden
-            if (currCount === popoverCount) popover.classList.add("hidden");
-          }, 3000);
+        if (e.target.closest("svg").hasAttribute(`popover-btn`)) {
+          this.showPopover(e.target);
         }
       } catch (err) {}
     });
+
+    window.addEventListener("pointerout", (e) => {
+      //POPOVER LOGIC
+      try {
+        if (e.target.closest("svg").hasAttribute(`popover-btn`)) {
+          this.hidePopover(e.target);
+        }
+      } catch (err) {}
+    });
+  }
+
+  showPopover(el) {
+    const btn = el.closest("svg");
+    //toggle curr popover
+    const popover = btn.parentElement.querySelector(`[popover-content]`);
+    popover.classList.remove("hidden");
+  }
+
+  hidePopover(el) {
+    const btn = el.closest("svg");
+    //toggle curr popover
+    const popover = btn.parentElement.querySelector(`[popover-content]`);
+    popover.classList.add("hidden");
   }
 }
 
 class Tabs {
-  constructor(container, prefix) {
-    this.prefix = prefix;
-    this.container = container;
-    this.tabsContainer = document.querySelector(`${this.container}`);
-    //DESKTOP
-    this.desktopBtns = document.querySelectorAll(
-      `[${this.prefix}-tabs-desktop] button`
-    );
-    //MOBILE
-    this.mobileBtn = document.querySelector(`[${this.prefix}-mobile-select]`);
-    this.mobileBtnTxt = this.mobileBtn.querySelector(`span`);
-    this.mobileBtnSVG = document.querySelector(
-      `[${this.prefix}-mobile-chevron]`
-    );
-    this.mobileDropdown = document.querySelector(
-      `[${this.prefix}-mobile-dropdown]`
-    );
-    this.mobileDropdownEls = this.mobileDropdown.querySelectorAll(`button`);
-    this.mobileBtn.addEventListener(`click`, this.toggleDropdown.bind(this));
-    //FORM
-    this.settingContainers = document.querySelectorAll(`[${this.prefix}-item]`);
-    this.generalSettings = document.querySelector(
-      `[${this.prefix}-item='general']`
-    );
-    this.initTabs();
-    this.initDisplay();
+  constructor() {
+    this.init();
   }
 
-  initTabs() {
-    //show first element
-    window.addEventListener("load", () => {
-      try {
-        document.querySelector("button[services-item-handler]").click();
-        document.querySelector("button[services-mobile-item-handler]").click();
-      } catch (err) {}
-    });
-
-    this.tabsContainer.addEventListener("click", (e) => {
-      //MOBILE TABS LOGIC
+  init() {
+    window.addEventListener("click", (e) => {
       try {
         if (
-          !e.target.hasAttribute(`${this.prefix}-mobile-info-btn`) &&
-          e.target.hasAttribute(`${this.prefix}-mobile-item-handler`)
+          e.target.closest("button").hasAttribute("tab-handler") ||
+          e.target.closest("button").hasAttribute("tab-handler-mobile")
         ) {
-          //change text to select btn
+          //get needed data
           const tab = e.target.closest("button");
-          const tabAtt = tab.getAttribute(`${this.prefix}-mobile-item-handler`);
-          this.mobileBtnTxt.textContent = tab.childNodes[0].textContent;
-          //reset all tabs style
-          this.resetMobTabStyle();
-          //highlight chosen one
-          this.highlightMobClicked(tab);
-          //show settings
-          this.showRightSetting(tabAtt);
-          //close dropdown
-          this.toggleDropdown();
-        }
-      } catch (err) {}
-      //DESKTOP TABS LOGIC
-      try {
-        if (
-          !e.target.hasAttribute(`${this.prefix}-info-btn`) &&
-          e.target.closest("button").hasAttribute(`${this.prefix}-item-handler`)
-        ) {
-          const tab = e.target.closest("button");
-          const tabAtt = tab.getAttribute(`${this.prefix}-item-handler`);
-          //style
-          this.resetDeskStyle();
-          tab.classList.add("brightness-90", "z-10");
+          const tabAtt =
+            tab.getAttribute("tab-handler") ||
+            tab.getAttribute("tab-handler-mobile");
+          const container = tab.closest("div[service-content]");
+          // change style
+          this.resetTabsStyle(container);
+          this.highlightClicked(container, tabAtt);
           //show content
-          this.showRightSetting(tabAtt);
+          this.hideAllSettings(container);
+          this.showSettingClicked(container, tabAtt);
+          //close dropdown and change btn textcontent on mobile
+          this.setDropBtnText(container, tabAtt);
+          this.closeDropdown(container);
+        }
+      } catch (err) {}
+
+      try {
+        if (e.target.closest("button").hasAttribute("tab-dropdown-btn")) {
+          const dropBtn = e.target.closest("button");
+          const container = dropBtn.closest("div[service-content]");
+          this.toggleDropdown(container);
         }
       } catch (err) {}
     });
   }
 
-  resetDeskStyle() {
-    this.desktopBtns.forEach((tab) => {
+  resetTabsStyle(container) {
+    //reset desktop style
+    const tabsDesktop = container.querySelectorAll("button[tab-handler]");
+    tabsDesktop.forEach((tab) => {
       tab.classList.remove("brightness-90", "z-10");
     });
-  }
-
-  resetMobTabStyle() {
-    this.mobileDropdownEls.forEach((tab) => {
+    //reset mobile style
+    const tabsMobile = container.querySelectorAll("button[tab-handler-mobile]");
+    tabsMobile.forEach((tab) => {
       tab.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
       tab.classList.remove(
         "dark:bg-primary",
@@ -147,59 +98,154 @@ class Tabs {
     });
   }
 
-  highlightMobClicked(tabEl) {
-    tabEl.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
-    tabEl.classList.remove("bg-white", "dark:bg-slate-700", "text-gray-700");
+  highlightClicked(container, tabAtt) {
+    //desktop case
+    const tabDesktop = container.querySelector(
+      `button[tab-handler='${tabAtt}']`
+    );
+    tabDesktop.classList.add("brightness-90", "z-10");
+
+    //mobile case
+    const tabMobile = container.querySelector(
+      `button[tab-handler-mobile='${tabAtt}']`
+    );
+    tabMobile.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
+    tabMobile.classList.remove(
+      "bg-white",
+      "dark:bg-slate-700",
+      "text-gray-700"
+    );
   }
 
-  initDisplay() {
-    //show general setting or
-    //first setting list if doesn't exist (like in services)
-    //on mobile and desktop
-    if (this.generalSettings === null) {
-      //desktop
-      document
-        .querySelector(
-          `[${this.prefix}-tabs-desktop] [${this.prefix}-item-handler]`
-        )
-        .click();
-      //mobile
-      document
-        .querySelector(
-          `[${this.prefix}-tabs-mobile] [${this.prefix}-mobile-item-handler]`
-        )
-        .click();
-      this.toggleDropdown();
-    }
-  }
-
-  showRightSetting(tabAtt) {
-    this.settingContainers.forEach((container) => {
-      if (container.getAttribute(`${this.prefix}-item`) === tabAtt)
-        container.classList.remove("hidden");
-      if (container.getAttribute(`${this.prefix}-item`) !== tabAtt)
-        container.classList.add("hidden");
+  hideAllSettings(container) {
+    const plugins = container.querySelectorAll("[plugin-item]");
+    plugins.forEach((plugin) => {
+      plugin.classList.add("hidden");
     });
   }
 
-  toggleDropdown() {
-    this.mobileDropdown.classList.toggle("hidden");
-    this.mobileDropdown.classList.toggle("flex");
-    this.mobileBtnSVG.classList.toggle("rotate-180");
+  showSettingClicked(container, tabAtt) {
+    const plugin = container.querySelector(`[plugin-item='${tabAtt}']`);
+    plugin.classList.remove("hidden");
+  }
+
+  setDropBtnText(container, tabAtt) {
+    const dropBtn = container.querySelector("[tab-dropdown-btn]");
+    dropBtn.querySelector("span").textContent = tabAtt;
+  }
+
+  closeDropdown(container) {
+    const dropdown = container.querySelector("[tab-dropdown]");
+    dropdown.classList.add("hidden");
+    dropdown.classList.remove("flex");
+  }
+
+  toggleDropdown(container) {
+    const dropdown = container.querySelector("[tab-dropdown]");
+    dropdown.classList.toggle("hidden");
+    dropdown.classList.toggle("flex");
   }
 }
 
 class FormatValue {
   constructor() {
-    this.inputs = document.querySelectorAll("[value]");
+    this.inputs = document.querySelectorAll("input");
     this.init();
   }
 
   init() {
     this.inputs.forEach((inp) => {
-      inp.setAttribute("value", inp.getAttribute("value").trim());
+      try {
+        inp.setAttribute("value", inp.getAttribute("value").trim());
+        inp.value = inp.value.trim();
+
+      }catch(err) {
+
+      }
     });
   }
 }
 
-export { Popover, Tabs, FormatValue };
+class FilterSettings {
+  constructor(inputID, container) {
+    this.input = document.querySelector(`input#${inputID}`);
+    //DESKTOP
+    this.container = document.querySelector(container);
+    this.deskTabs = this.container.querySelectorAll(`[tab-handler]`);
+    this.init();
+  }
+
+  init() {
+    this.input.addEventListener("input", () => {
+      this.resetFilter();
+      //get inp format
+      const inpValue = this.input.value.trim().toLowerCase();
+      //loop all tabs
+      this.deskTabs.forEach((tab) => {
+        //get settings of tabs except multiples
+        const settings = this.getSettingsFromTab(tab);
+
+        //compare total count to currCount to determine
+        //if tabs need to be hidden
+        const settingCount = settings.length;
+        let hiddenCount = 0;
+        settings.forEach((setting) => {
+          try {
+            const title = setting
+              .querySelector("h5")
+              .textContent.trim()
+              .toLowerCase();
+            if (!title.includes(inpValue)) {
+              setting.classList.add("hidden");
+              hiddenCount++;
+            }
+          } catch (err) {}
+        });
+        //case no setting match, hidden tab and content
+        if (settingCount === hiddenCount) {
+          const tabName = tab.getAttribute(`tab-handler`);
+          //hide mobile and desk tabs
+          tab.classList.add("hidden");
+          this.container
+            .querySelector(`[tab-handler-mobile="${tabName}"]`)
+            .classList.add("hidden");
+          this.container
+            .querySelector(`[plugin-item=${tabName}]`)
+            .querySelector("[setting-header]")
+
+            .classList.add("hidden");
+        }
+      });
+    });
+  }
+
+  resetFilter() {
+    this.deskTabs.forEach((tab) => {
+      const tabName = tab.getAttribute(`tab-handler`);
+      //hide mobile and desk tabs
+      tab.classList.remove("hidden");
+      this.container
+        .querySelector(`[tab-handler-mobile="${tabName}"]`)
+        .classList.remove("hidden");
+      this.container
+        .querySelector(`[plugin-item=${tabName}]`)
+        .querySelector("[setting-header]")
+        .classList.remove("hidden");
+      const settings = this.getSettingsFromTab(tab);
+      settings.forEach((setting) => {
+        setting.classList.remove("hidden");
+      });
+    });
+  }
+
+  getSettingsFromTab(tabEl) {
+    const tabName = tabEl.getAttribute(`tab-handler`);
+    const settingContainer = this.container
+      .querySelector(`[plugin-item="${tabName}"]`)
+      .querySelector(`[plugin-settings]`);
+    const settings = settingContainer.querySelectorAll("[setting-container]");
+    return settings;
+  }
+}
+
+export { Popover, Tabs, FormatValue, FilterSettings };

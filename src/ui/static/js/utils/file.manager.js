@@ -135,6 +135,7 @@ class FolderNav {
 
   //hidden all folders
   hiddenConfEls() {
+    this.els = document.querySelectorAll(`div[${this.prefix}-element]`);
     this.els.forEach((el) => {
       el.classList.add("hidden");
       el.removeAttribute("current-el");
