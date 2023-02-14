@@ -1,5 +1,6 @@
 import requests, traceback
 from os import getenv
+from os.path import exists
 
 
 def request(method, url, _id=None):
@@ -50,13 +51,16 @@ def get_version():
 
 def get_integration():
     try:
-        if getenv("KUBERNETES_MODE") == "yes":
-            return "kubernetes"
+        if getenv("AUTOCONF_MODE") == "yes":
+            return "autoconf"
         if getenv("SWARM_MODE") == "yes":
             return "swarm"
-        with open("/etc/os-release", "r") as f:
-            if f.read().contains("Alpine"):
-                return "docker"
+        elif getenv("KUBERNETES_MODE") == "yes":
+            return "kubernetes"
+        elif exists("/usr/share/bunkerweb/INTEGRATION"):
+            with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
+                return f.read().strip().lower()
+
         return "linux"
     except:
         return "unknown"
