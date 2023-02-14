@@ -23,7 +23,6 @@ sys_path.extend(
 )
 
 from docker import DockerClient
-from kubernetes import client as kube_client
 
 from logger import setup_logger
 from Database import Database
@@ -31,7 +30,7 @@ from Configurator import Configurator
 from API import API
 
 custom_confs_rx = re_compile(
-    r"^([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$"
+    r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
 )
 
 
