@@ -299,7 +299,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
           type="button"
           value="download"
           {{current_endpoint}}-download="{{child['name'].split('/')[0]}}"
-          {{current_endpoint}}-file="{{child['name'].split('/')[1] or child['name'].split('/')[0]}}"
+          {{current_endpoint}}-file="{{child['name'].split('/')[1]}}"
           {{current_endpoint}}-setting-select-dropdown-btn="{{child['name'].split('/')[0]}}"
           class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100"
         >

@@ -155,8 +155,13 @@ class FormatValue {
 
   init() {
     this.inputs.forEach((inp) => {
-      inp.setAttribute("value", inp.getAttribute("value").trim());
-      inp.value = inp.value.trim();
+      try {
+        inp.setAttribute("value", inp.getAttribute("value").trim());
+        inp.value = inp.value.trim();
+
+      }catch(err) {
+
+      }
     });
   }
 }

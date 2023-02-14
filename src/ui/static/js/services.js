@@ -75,10 +75,23 @@ class ServiceModal {
             this.updateModalData(obj);
           }
           //open modal when all done
+
+          if(action === 'new') this.addOneMultGroup()
           this.openModal();
         }
       } catch (err) {}
     });
+  }
+
+  addOneMultGroup() {
+    const settings = document.querySelector('[services-modal-form]')
+    const multAddBtns = settings.querySelectorAll('[services-multiple-add]');
+    multAddBtns.forEach(btn => {
+      //check if already one (SCHEMA exclude so length >= 2)
+      const plugin = btn.closest('[plugin-item]');
+      if(plugin.querySelectorAll('[services-settings-multiple]').length >= 2) return;
+      btn.click()
+    })
   }
 
   isLastServAndAct(target) {
