@@ -253,6 +253,13 @@ def load_user(user_id):
     return User(user_id, vars["ADMIN_PASSWORD"])
 
 
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    if request.path == "/":
+        return redirect(url_for("login"))
+    return "Unauthorized", 401
+
+
 # CSRF protection
 csrf = CSRFProtect()
 csrf.init_app(app)
