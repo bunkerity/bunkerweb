@@ -1,3 +1,4 @@
-sqlalchemy==2.0.1
+sqlalchemy==2.0.3
 psycopg2-binary==2.9.5
 PyMySQL==1.0.2
+cryptography==39.0.1

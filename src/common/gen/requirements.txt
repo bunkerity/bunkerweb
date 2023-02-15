@@ -274,15 +274,15 @@ urllib3==1.26.14 \
     #   docker
     #   kubernetes
     #   requests
-websocket-client==1.5.0 \
-    --hash=sha256:561ca949e5bbb5d33409a37235db55c279235c78ee407802f1d2314fff8a8536 \
-    --hash=sha256:fb5d81b95d350f3a54838ebcb4c68a5353bbd1412ae8f068b1e5280faeb13074
+websocket-client==1.5.1 \
+    --hash=sha256:3f09e6d8230892547132177f575a4e3e73cfdf06526e20cc02aa1c3b47184d40 \
+    --hash=sha256:cdf5877568b7e83aa7cf2244ab56a3213de587bbe0ce9d8b9600fc77b455d89e
     # via
     #   docker
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==67.1.0 \
-    --hash=sha256:a7687c12b444eaac951ea87a9627c4f904ac757e7abdc5aac32833234af90378 \
-    --hash=sha256:e261cdf010c11a41cb5cb5f1bf3338a7433832029f559a6a7614bd42a967c300
+setuptools==67.3.1 \
+    --hash=sha256:23c86b4e44432bfd8899384afc08872ec166a24f48a3f99f293b0a557e6a6b5d \
+    --hash=sha256:daec07fd848d80676694d6bf69c009d28910aeece68a38dbe88b7e1bb6dba12e
     # via kubernetes
