@@ -97,7 +97,8 @@ class DockerController(Controller, ConfigCaller):
                     continue
                 real_variable = variable.replace("bunkerweb.", "", 1)
                 result = search(
-                    r"^CUSTOM_CONF_(SERVER_HTTP|MODSEC|MODSEC_CRS)_(.+)$", real_variable
+                    r"^CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$",
+                    real_variable,
                 )
                 if result is None:
                     continue
