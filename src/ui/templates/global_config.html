@@ -35,10 +35,6 @@ config["CONFIG"].get_config() %}
     >
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
   
-        <!-- general container -->
-        {% include "settings_general.html" %}
-        <!-- end general container -->
-    
         <!-- plugin item -->
         {% include "settings_plugins.html" %}
         <!-- end plugin item -->

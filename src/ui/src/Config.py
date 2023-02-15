@@ -139,6 +139,15 @@ class Config:
         if not exists("/usr/sbin/nginx"):
             plugins = self.__db.get_plugins()
             plugins.sort(key=lambda x: x["name"])
+
+            general_plugin = None
+            for x, plugin in enumerate(plugins):
+                if plugin["name"] == "General":
+                    general_plugin = plugin
+                    del plugins[x]
+                    break
+            plugins.insert(0, general_plugin)
+
             return plugins
 
         plugins = []
@@ -167,6 +176,22 @@ class Config:
             plugins.append(plugin)
 
         plugins.sort(key=lambda x: x["name"])
+
+        with open("/usr/share/bunkerweb/settings.json", "r") as f:
+            plugins.insert(
+                0,
+                {
+                    "id": "general",
+                    "order": 999,
+                    "name": "General",
+                    "description": "The general settings for the server",
+                    "version": "0.1",
+                    "external": False,
+                    "page": False,
+                    "settings": json_load(f),
+                },
+            )
+
         return plugins
 
     def get_settings(self) -> dict:

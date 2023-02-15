@@ -1,35 +1,14 @@
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
 {% set global_config = config["CONFIG"].get_config() %}
-{% if current_endpoint == "services"%}
-  {% set plugins = [{
-    "id": "general",
-    "order": 999,
-    "name": "General",
-    "description": "The general settings for the server",
-    "version": "0.1",
-    "settings": {
-      "SERVER_NAME": {
-        "context": "multisite",
-        "default": "",
-        "help": "List of the virtual hosts served by bunkerweb.",
-        "id": "SERVER_NAME",
-        "label": "Server name",
-        "regex": ".*",
-        "type": "text",
-      }
-    }
-  }] + config["CONFIG"].get_plugins() %}
-{% else %}
-  {% set plugins = config["CONFIG"].get_plugins() %}
-{%endif%}
+{% set plugins = config["CONFIG"].get_plugins() %}
 <!-- plugin item -->
 {% for plugin in plugins %}
 
 <div
   plugin-item="{{plugin['id']}}"
   id="{{plugin['id']}}"
-  class="{% if current_endpoint == "global-config" or current_endpoint != "global-config" and loop.index != 1 %}hidden{%endif%} w-full"
+  class="{% if loop.index != 1 %}hidden{%endif%} w-full"
 >
   <!-- title and desc -->
   <div class="col-span-12" setting-header>
@@ -190,7 +169,6 @@
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
-       <input type="hidden" name="{{setting}}" value="no" default-value="no" default-method="default" />
         <input id="{{setting}}" name="{{setting}}"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
@@ -212,6 +190,7 @@
         value="{% if global_config[setting]['value'] %}
         {{global_config[setting]['value']}} {% else %} {{value['default']}} {% endif
         %}" />
+        <input type="hidden" name="{{setting}}" value="no" default-value="no" default-method="default" />
         <svg
           checkbox-handler="{{value['id']}}"
           class="pointer-events-none	{% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default' %} pointer-events-none {% else %} cursor-pointer {% endif %} absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
@@ -412,8 +391,6 @@
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
-        <input type="hidden" name="{{setting}}_SCHEMA" value="no" default-value="no" default-method="default" />
-
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
@@ -435,6 +412,7 @@
         value="{% if global_config[setting]['value'] %}
         {{global_config[setting]['value']}} {% else %} {{value['default']}} {% endif
         %}" />
+        <input type="hidden" name="{{setting}}_SCHEMA" value="no" default-value="no" default-method="default" />
         <svg
           checkbox-handler="{{value['id']}}"
           class="pointer-events-none	{% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default' %} pointer-events-none {% else %} cursor-pointer {% endif %} absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"

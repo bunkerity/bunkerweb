@@ -258,11 +258,12 @@ class Database:
                     if "id" not in plugin:
                         settings = plugin
                         plugin = {
-                            "id": "default",
+                            "id": "general",
                             "order": 999,
-                            "name": "Default",
-                            "description": "Default settings",
+                            "name": "General",
+                            "description": "The general settings for the server",
                             "version": "0.1",
+                            "external": False,
                         }
                     else:
                         settings = plugin.pop("settings", {})

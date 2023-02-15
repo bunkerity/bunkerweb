@@ -1,66 +1,10 @@
 
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
-{% if current_endpoint == "services"%}
-  {% set plugins = [{
-    "id": "general",
-    "order": 999,
-    "name": "General",
-    "description": "The general settings for the server",
-    "version": "0.1",
-    "settings": {
-      "SERVER_NAME": {
-        "context": "multisite",
-        "default": "",
-        "help": "List of the virtual hosts served by bunkerweb.",
-        "id": "SERVER_NAME",
-        "label": "Server name",
-        "regex": ".*",
-        "type": "text",
-      }
-    }
-  }] + config["CONFIG"].get_plugins() %}
-{% else %}
-  {% set plugins = config["CONFIG"].get_plugins() %}
-{%endif%}
+{% set plugins = config["CONFIG"].get_plugins() %}
 <div {{current_endpoint}}-tabs class="col-span-12 grid grid-cols-12 {% if current_endpoint == 'services' %}mb-4{% endif %}">
   <!-- desktop tabs -->
   <div {{current_endpoint}}-tabs-desktop class="hidden md:block col-span-12">
-    {% if current_endpoint != "services" %}
-    <!-- general tab -->
-    <button
-      tab-handler="general"
-      type="button"
-      class="brightness-90 border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
-    >
-      <div class="w-full flex justify-between items-center">
-        <!-- text and icon -->
-        <span class="text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300">general</span>
-        <svg
-          popover-btn="general"
-          class="z-20 fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path
-            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-          />
-        </svg>
-        <!-- end text and icon -->
-        <!-- popover -->
-        <div
-          popover-content="general"
-          class="top-[60px] hidden transition z-50 rounded-md p-3 left-0 absolute bg-blue-500"
-        >
-          <p class="font-bold text-sm text-white m-0">
-            General config : HTTP, DNS, LOG, API...
-          </p>
-        </div>
-        <!-- end popover -->
-      </div>
-    </button>
-    <!-- end general tab-->
-    {% endif %}
     <!-- tabs -->
     {% for plugin in plugins %} {% if current_endpoint == "services" and plugin["settings"]
     and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" and plugin["settings"]
@@ -68,7 +12,7 @@
     <button
     tab-handler="{{ plugin['id'] }}"
     type="button"
-    class="z-1000 {% if current_endpoint != 'global-config' and loop.first %} brightness-90 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
+    class="z-1000 {% if loop.first %} brightness-90 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
   >
     <div class="w-full flex justify-between items-center">
       <!-- text and icon -->
