@@ -159,5 +159,13 @@
       "type": "select",
       "select": ["403", "444"]
     }
-  }
+  },
+	"jobs": [
+		{
+			"name": "default-server-cert",
+			"file": "default-server-cert.py",
+			"every": "once",
+			"reload": false
+		}
+	]
 }
