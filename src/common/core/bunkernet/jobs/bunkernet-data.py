@@ -78,6 +78,11 @@ try:
             "BunkerNet API is rate limiting us, trying again later...",
         )
         _exit(0)
+    elif status == 403:
+        logger.warning(
+            "BunkerNet has banned this instance, retrying a register later...",
+        )
+        _exit(0)
     elif data["result"] != "ok":
         logger.error(
             f"Received error from BunkerNet API while sending db request : {data['data']}, removing instance ID",
