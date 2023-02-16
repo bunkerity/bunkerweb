@@ -54,7 +54,7 @@ RUN apk add --no-cache bash && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt
 
 # Fix CVEs
-RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "git>=2.32.3-r0" "libxml2>=2.9.14-r1" "expat>=2.5.0-r0"
+RUN apk add "libssl1.1>=1.1.1q-r0" "libcrypto1.1>=1.1.1q-r0" "libxml2>=2.9.14-r1" "expat>=2.5.0-r0" "git>=2.36.5-r0"
 
 VOLUME /data /etc/nginx
 

@@ -352,7 +352,7 @@
       </button>
 
     
-      {% if service["SERVER_NAME"]['method'] != "scheduler" %}
+      {% if service["SERVER_NAME"]['method'] == "ui" %}
       <button
       services-action="delete"
       type="button"

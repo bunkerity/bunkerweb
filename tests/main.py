@@ -11,7 +11,6 @@ from subprocess import run
 
 path.extend((f"{Path.cwd()}/utils", f"{Path.cwd()}/tests"))
 
-from Test import Test
 from DockerTest import DockerTest
 from AutoconfTest import AutoconfTest
 from SwarmTest import SwarmTest

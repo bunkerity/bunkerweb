@@ -19,6 +19,7 @@ class Test(ABC):
         self.__tests = tests
         self._no_copy_container = no_copy_container
         self.__delay = delay
+        self._domains = {}
         self.__logger = setup_logger("Test", getenv("LOG_LEVEL", "INFO"))
         self.__logger.info(
             f"instantiated with {len(tests)} tests and timeout of {timeout}s for {self._name}",
@@ -143,11 +144,13 @@ class Test(ABC):
                 f"Can't replace file {path}"
             )
 
+    @staticmethod
     def replace_in_files(path, old, new):
-        for root, dirs, files in walk(path):
+        for root, _, files in walk(path):
             for name in files:
                 Test.replace_in_file(join(root, name), old, new)
 
+    @staticmethod
     def rename(path, old, new):
         for root, dirs, files in walk(path):
             for name in dirs + files:

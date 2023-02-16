@@ -66,14 +66,19 @@ try:
                 "BunkerNet API is rate limiting us, trying again later...",
             )
             _exit(0)
+        elif status == 403:
+            logger.warning(
+                "BunkerNet has banned this instance, retrying a register later...",
+            )
+            _exit(0)
         elif status != 200:
             logger.error(
                 f"Error {status} from BunkerNet API : {data['data']}",
             )
             _exit(1)
-        elif data["result"] != "ok":
+        elif data.get("result", "ko") != "ok":
             logger.error(
-                f"Received error from BunkerNet API while sending register request : {data['data']}"
+                f"Received error from BunkerNet API while sending register request : {data.get('data', {})}"
             )
             _exit(1)
         bunkernet_id = data["data"]
@@ -98,15 +103,19 @@ try:
                 "BunkerNet API is rate limiting us, trying again later...",
             )
             retry = True
+        elif status == 403:
+            logger.warning(
+                "BunkerNet has banned this instance, retrying a register later...",
+            )
         elif status == 401:
             logger.warning(
                 "Instance ID is not registered, removing it and retrying a register later...",
             )
             remove("/var/cache/bunkerweb/bunkernet/instance.id")
             _exit(2)
-        elif data["result"] != "ok":
+        elif data.get("result", "ko") != "ok":
             logger.error(
-                f"Received error from BunkerNet API while sending ping request : {data['data']}, removing instance ID",
+                f"Received error from BunkerNet API while sending ping request : {data.get('data', {})}, removing instance ID",
             )
             retry = True
         if not retry:
@@ -115,7 +124,7 @@ try:
         logger.warning("Waiting 1s and trying again ...")
         sleep(1)
 
-    if bunkernet_ping:
+    if bunkernet_ping and status != 403:
         logger.info("Connectivity with BunkerWeb is successful !")
         status = 1
         if not isfile("/var/cache/bunkerweb/bunkernet/instance.id"):

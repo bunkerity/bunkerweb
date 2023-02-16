@@ -33,12 +33,14 @@ class SwarmTest(Test):
             copytree("./integrations/swarm", "/tmp/swarm")
             compose = "/tmp/swarm/stack.yml"
             Test.replace_in_file(
-                compose, r"bunkerity/bunkerweb:.*$", "10.20.1.1:5000/bw-tests:latest"
+                compose,
+                r"bunkerity/bunkerweb:.*$",
+                "192.168.42.100:5000/bw-tests:latest",
             )
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-autoconf:.*$",
-                "10.20.1.1:5000/bw-autoconf-tests:latest",
+                "192.168.42.100:5000/bw-autoconf-tests:latest",
             )
             Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run(
@@ -50,19 +52,28 @@ class SwarmTest(Test):
                 raise (Exception("docker stack deploy failed (swarm stack)"))
             i = 0
             healthy = False
-            while i < 45:
+            while i < 90:
                 proc = run(
                     'docker stack ps --no-trunc --format "{{ .CurrentState }}" bunkerweb | grep -v "Running"',
                     cwd="/tmp/swarm",
                     shell=True,
                     capture_output=True,
                 )
-                if "" == proc.stdout.decode():
+                if not proc.stdout.decode():
                     healthy = True
                     break
                 sleep(1)
                 i += 1
             if not healthy:
+                proc = run(
+                    "docker service logs bunkerweb_mybunker ; docker service logs bunkerweb_myautoconf",
+                    cwd="/tmp/swarm",
+                    shell=True,
+                    capture_output=True,
+                )
+                logger = setup_logger("Swarm_test", getenv("LOGLEVEL", "INFO"))
+                logger.error(f"stdout logs = {proc.stdout.decode()}")
+                logger.error(f"stderr logs = {proc.stderr.decode()}")
                 raise (Exception("swarm stack is not healthy"))
             sleep(60)
         except:

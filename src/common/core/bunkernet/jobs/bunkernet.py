@@ -1,9 +1,12 @@
-import requests, traceback
+from typing import Literal, Optional, Tuple, Union
+import requests
 from os import getenv
 from os.path import exists
 
 
-def request(method, url, _id=None):
+def request(
+    method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optional[str] = None
+) -> Tuple[bool, Optional[int], Union[str, dict]]:
     data = {"integration": get_integration(), "version": get_version()}
     headers = {"User-Agent": f"BunkerWeb/{get_version()}"}
     if _id is not None:
@@ -19,11 +22,17 @@ def request(method, url, _id=None):
         status = resp.status_code
         if status == 429:
             return True, 429, "rate limited"
-        raw_data = resp.json()
+        elif status == 403:
+            return True, 403, "forbidden"
+
+        raw_data: dict = resp.json()
+
         assert "result" in raw_data
         assert "data" in raw_data
+    except requests.ReadTimeout:
+        return False, None, "request timed out"
     except Exception as e:
-        return False, None, traceback.format_exc()
+        return False, None, f"request failed: {e}"
     return True, status, raw_data
 
 

@@ -1,6 +1,44 @@
 # Changelog
 
-## v1.4.3 -
+## v1.4.6
+
+- Fix error in the UI when a service have multiple domains
+- Fix bwcli bans command
+- Fix documentation about Linux Fedora install
+- Fix DISABLE_DEFAULT_SERVER=yes not working with HTTPS
+- Add INTERCEPTED_ERROR_CODES setting
+
+## v1.4.5 - 2022/11/26
+
+- Fix bwcli syntax error
+- Fix UI not working using Linux integration
+- Fix missing openssl dep in autoconf
+- Fix typo in selfsigned job
+
+## v1.4.4 - 2022/11/10
+
+- Fix k8s controller not watching the events when there is an exception
+- Fix python dependencies bug in CentOS and Fedora
+- Fix incorrect log when reloading nginx using Linux integration
+- Fix UI dev mode, production mode is now the default
+- Fix wrong exposed port in the UI container
+- Fix endless loading in the UI
+- Fix \*_CUSTOM_CONF_\* dissapear when jobs are executed
+- Fix various typos in documentation
+- Fix warning about StartLimitIntervalSec directive when using Linux
+- Fix incorrect log when issuing certbot renew
+- Fix certbot renew error when using Linux or Docker integration
+- Add greylist core feature
+- Add BLACKLIST_IGNORE_\* settings
+- Add automatic change of SecRequestBodyLimit modsec directive based on MAX_CLIENT_SIZE setting
+- Add MODSECURITY_SEC_RULE_ENGINE and MODSECURITY_SEC_AUDIT_LOG_PARTS settings
+- Add manual ban and get bans to the API/CLI
+- Add Brawdunoir community example
+- Improve core plugins order and add documentation about it
+- Improve overall documentation
+- Improve CI/CD
+
+## v1.4.3 - 2022/08/26
 
 - Fix various documentation errors/typos and add various enhancements
 - Fix ui.env not read when using Linux integration

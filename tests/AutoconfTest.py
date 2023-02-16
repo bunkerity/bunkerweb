@@ -48,7 +48,11 @@ class AutoconfTest(Test):
                 "10.20.1.1:5000/bw-autoconf-tests:latest",
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
-            proc = run("docker-compose pull", cwd="/tmp/autoconf", shell=True)
+            proc = run(
+                "docker-compose pull --ignore-pull-failures",
+                cwd="/tmp/autoconf",
+                shell=True,
+            )
             if proc.returncode != 0:
                 raise (Exception("docker-compose pull failed (autoconf stack)"))
             proc = run("docker-compose up -d", cwd="/tmp/autoconf", shell=True)
@@ -123,7 +127,11 @@ class AutoconfTest(Test):
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
-            proc = run("docker-compose -f autoconf.yml pull", shell=True, cwd=test)
+            proc = run(
+                "docker-compose -f autoconf.yml pull --ignore-pull-failures",
+                shell=True,
+                cwd=test,
+            )
             if proc.returncode != 0:
                 raise (Exception("docker-compose pull failed"))
             proc = run("docker-compose -f autoconf.yml up -d", shell=True, cwd=test)
@@ -153,6 +161,10 @@ class AutoconfTest(Test):
 
     def _debug_fail(self):
         autoconf = "/tmp/autoconf"
-        run("docker-compose logs", shell=True, cwd=autoconf)
+        proc = run("docker-compose logs", shell=True, cwd=autoconf)
+        if proc.returncode != 0:
+            raise (Exception("docker-compose logs failed"))
         test = f"/tmp/tests/{self._name}"
-        run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)
+        proc = run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)
+        if proc.returncode != 0:
+            raise (Exception("docker-compose -f autoconf.yml logs failed"))

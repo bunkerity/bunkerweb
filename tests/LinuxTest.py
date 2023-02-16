@@ -1,7 +1,6 @@
 from Test import Test
-from os.path import isdir, isfile
-from os import getenv, mkdir, chmod
-from shutil import rmtree
+from os.path import isfile
+from os import getenv
 from traceback import format_exc
 from subprocess import run
 from time import sleep
@@ -28,15 +27,7 @@ class LinuxTest(Test):
         try:
             if not Test.init():
                 return False
-            # TODO : find the nginx uid/gid on Docker images
-            proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
-            if proc.returncode != 0:
-                raise Exception("chown failed (autoconf stack)")
-            if isdir("/tmp/linux"):
-                rmtree("/tmp/linux")
-            mkdir("/tmp/linux")
-            chmod("/tmp/linux", 0o0777)
-            cmd = f"docker run -p 80:80 -p 443:443 --rm --name linux-{distro} -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro bw-{distro}"
+            cmd = f"docker run -p 80:80 -p 443:443 --rm --name linux-{distro} -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host --tty local/bw-{distro}:latest"
             proc = run(cmd, shell=True)
             if proc.returncode != 0:
                 raise Exception("docker run failed (linux stack)")
@@ -50,20 +41,6 @@ class LinuxTest(Test):
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl start failed (linux stack)")
-            cp_dirs = {
-                "/tmp/bw-data/letsencrypt": "/etc/letsencrypt",
-                "/tmp/bw-data/cache": "/var/cache/bunkerweb",
-            }
-            for src, dst in cp_dirs.items():
-                proc = LinuxTest.docker_cp(distro, src, dst)
-                if proc.returncode != 0:
-                    raise Exception(f"docker cp failed for {src} (linux stack)")
-                proc = LinuxTest.docker_exec(distro, f"chown -R nginx:nginx {dst}/*")
-                if proc.returncode != 0:
-                    raise Exception(
-                        f"docker exec failed for directory {src} (linux stack)"
-                    )
-
             if distro in ("ubuntu", "debian"):
                 LinuxTest.docker_exec(
                     distro,
@@ -128,22 +105,28 @@ class LinuxTest(Test):
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
-            proc = LinuxTest.docker_cp(self.__distro, test, f"/opt/{self._name}")
+            proc = self.docker_cp(self.__distro, test, f"/opt/{self._name}")
             if proc.returncode != 0:
                 raise Exception("docker cp failed (test)")
             setup = test + "/setup-linux.sh"
             if isfile(setup):
-                proc = LinuxTest.docker_exec(
+                proc = self.docker_exec(
                     self.__distro, f"cd /opt/{self._name} && ./setup-linux.sh"
                 )
                 if proc.returncode != 0:
                     raise Exception("docker exec setup failed (test)")
-            proc = LinuxTest.docker_exec(
+            proc = self.docker_exec(
                 self.__distro, f"cp /opt/{self._name}/variables.env /etc/bunkerweb/"
             )
             if proc.returncode != 0:
                 raise Exception("docker exec cp variables.env failed (test)")
-            proc = LinuxTest.docker_exec(
+            proc = self.docker_exec(
+                self.__distro,
+                "echo '' >> /opt/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /opt/bunkerweb/variables.env",
+            )
+            if proc.returncode != 0:
+                raise (Exception("docker exec append variables.env failed (test)"))
+            proc = self.docker_exec(
                 self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb"
             )
             if proc.returncode != 0:
@@ -159,7 +142,7 @@ class LinuxTest(Test):
 
     def _cleanup_test(self):
         try:
-            proc = LinuxTest.docker_exec(
+            proc = self.docker_exec(
                 self.__distro,
                 f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/*",
             )
@@ -174,16 +157,18 @@ class LinuxTest(Test):
         return True
 
     def _debug_fail(self):
-        LinuxTest.docker_exec(
+        self.docker_exec(
             self.__distro,
             "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager",
         )
 
+    @staticmethod
     def docker_exec(distro, cmd_linux):
         return run(
             f'docker exec linux-{distro} /bin/bash -c "{cmd_linux}"',
             shell=True,
         )
 
+    @staticmethod
     def docker_cp(distro, src, dst):
         return run(f"sudo docker cp {src} linux-{distro}:{dst}", shell=True)
