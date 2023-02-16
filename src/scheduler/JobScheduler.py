@@ -1,8 +1,8 @@
-from copy import deepcopy
+from functools import partial
 from glob import glob
 from json import loads
 from logging import Logger
-from os import environ, getenv
+from os import cpu_count, environ, getenv
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from threading import Lock, Thread
 from schedule import (
@@ -190,27 +190,34 @@ class JobScheduler(ApiCaller):
         return success
 
     def run_once(self):
-        ret = True
         threads = []
         for plugin, jobs in self.__jobs.items():
+            jobs_jobs = []
+
             for job in jobs:
                 path = job["path"]
                 name = job["name"]
                 file = job["file"]
 
-                if job["name"].startswith("bunkernet"):
-                    self.__job_wrapper(path, plugin, name, file)
-                else:
-                    thread = Thread(
-                        target=self.__job_wrapper, args=(path, plugin, name, file)
-                    )
-                    threads.append(thread)
+                # Add job to the list of jobs to run in the order they are defined
+                jobs_jobs.append(partial(self.__job_wrapper, path, plugin, name, file))
 
-        for thread in threads:
-            thread.start()
+            # Create a thread for each plugin
+            threads.append(
+                Thread(
+                    target=lambda jobs_jobs: [job() for job in jobs_jobs],
+                    args=(jobs_jobs,),
+                )
+            )
 
-        for thread in threads:
-            thread.join()
+        # Split the list of threads into sublists of the max cpu count
+        nbr_cpu = cpu_count() or 1
+        for i in range(0, len(threads), nbr_cpu):
+            sublist = threads[i : i + nbr_cpu]
+            for t in sublist:
+                t.start()
+            for t in sublist:
+                t.join()
 
         ret = self.__job_success
         self.__job_success = True
