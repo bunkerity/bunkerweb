@@ -51,31 +51,34 @@ class ApiCaller:
                             host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                         )
                     )
-        elif bw_integration == "Swarm":
-            for instance in docker_client.services.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
-                api_http_port = None
-                api_server_name = None
-
-                for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
-                    "Env"
-                ]:
-                    if var.startswith("API_HTTP_PORT="):
-                        api_http_port = var.replace("API_HTTP_PORT=", "", 1)
-                    elif var.startswith("API_SERVER_NAME="):
-                        api_server_name = var.replace("API_SERVER_NAME=", "", 1)
-
-                self.__apis.append(
-                    API(
-                        f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
-                        host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
-                    )
-                )
         else:
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
             )
+
+            if bw_integration == "Swarm":
+                for instance in docker_client.services.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                ):
+                    api_http_port = None
+                    api_server_name = None
+
+                    for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
+                        "Env"
+                    ]:
+                        if var.startswith("API_HTTP_PORT="):
+                            api_http_port = var.replace("API_HTTP_PORT=", "", 1)
+                        elif var.startswith("API_SERVER_NAME="):
+                            api_server_name = var.replace("API_SERVER_NAME=", "", 1)
+
+                    self.__apis.append(
+                        API(
+                            f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                        )
+                    )
+                return
+
             for instance in docker_client.containers.list(
                 filters={"label": "bunkerweb.INSTANCE"}
             ):
