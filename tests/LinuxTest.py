@@ -109,7 +109,7 @@ class LinuxTest(Test) :
             proc = LinuxTest.docker_exec(self.__distro, "cp /opt/" + self._name + "/variables.env /opt/bunkerweb")
             if proc.returncode != 0 :
                 raise(Exception("docker exec cp variables.env failed (test)"))
-            proc = LinuxTest.docker_exec(self.__distro, "echo '' >> /opt/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /opt/bunkerweb/variables.env")
+            proc = LinuxTest.docker_exec(self.__distro, "echo '' >> /opt/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /opt/bunkerweb/variables.env ; echo 'DISABLE_DEFAULT_SERVER=no' >> /opt/bunkerweb/variables.env")
             if proc.returncode != 0 :
                 raise(Exception("docker exec append variables.env failed (test)"))
             proc = LinuxTest.docker_exec(self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb")
