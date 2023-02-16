@@ -1,0 +1,72 @@
+{
+  "id": "redis",
+  "order": 999,
+  "name": "Redis",
+  "description": "Redis server configuration when using BunkerWeb in cluster mode.",
+  "version": "0.1",
+  "settings": {
+    "USE_REDIS": {
+      "context": "global",
+      "default": "no",
+      "help": "Activate Redis.",
+      "id": "use-redis",
+      "label": "Activate Redis",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REDIS_HOST": {
+      "context": "global",
+      "default": "",
+      "help": "Redis server IP or hostname.",
+      "id": "redis-host",
+      "label": "Redis server",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "REDIS_PORT": {
+      "context": "global",
+      "default": "6379",
+      "help": "Redis server port.",
+      "id": "redis-port",
+      "label": "Redis port",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "REDIS_SSL": {
+      "context": "global",
+      "default": "no",
+      "help": "Use SSL/TLS connection with Redis server.",
+      "id": "redis-ssl",
+      "label": "Redis SSL/TLS",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REDIS_TIMEOUT": {
+      "context": "global",
+      "default": "1000",
+      "help": "Redis server timeout (in ms) for connect, read and write.",
+      "id": "redis-timeout",
+      "label": "Redis timeout (ms)",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "REDIS_KEEPALIVE_IDLE": {
+      "context": "global",
+      "default": "30000",
+      "help": "Max idle time (in ms) before closing redis connection in the pool.",
+      "id": "redis-keepalive-idle",
+      "label": "Redis keepalive idle (ms)",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "REDIS_KEEPALIVE_POOL": {
+      "context": "global",
+      "default": "10",
+      "help": "Max number of redis connection(s) kept in the pool.",
+      "id": "redis-keepalive-pool",
+      "label": "Redis keepalive pool",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    }
+  }
+}
