@@ -4,22 +4,22 @@ FROM nginx:1.22.1-alpine AS builder
 COPY src/deps /tmp/bunkerweb/deps
 
 # Compile and install dependencies
-RUN apk add --no-cache --virtual build bash build autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
+RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
 	mkdir -p /usr/share/bunkerweb/deps && \
 	chmod +x /tmp/bunkerweb/deps/install.sh && \
 	bash /tmp/bunkerweb/deps/install.sh && \
-	apk del build
+	apk del .build-deps
 
 # Copy python requirements
 COPY src/common/gen/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
 
 # Install python requirements
-RUN apk add --no-cache --virtual build py3-pip && \
+RUN apk add --no-cache --virtual .build-deps py3-pip && \
 	pip install --no-cache-dir --upgrade pip && \
 	pip install wheel && \
 	mkdir -p /usr/share/bunkerweb/deps/python && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
-	apk del build
+	apk del .build-deps
 
 FROM nginx:1.22.1-alpine
 
@@ -75,7 +75,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-RUN apk add "openssl>=1.1.1q-r0" "curl>=7.87.0-r2" "libcurl>=7.87.0-r2" "git>=2.36.5-r0"
+RUN apk add "openssl>=1.1.1q-r0" "curl>=7.83.1-r6" "libcurl>=7.83.1-r6" "git>=2.36.5-r0"
 
 VOLUME /data /etc/nginx
 
