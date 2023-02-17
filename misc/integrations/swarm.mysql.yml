@@ -17,6 +17,8 @@ services:
       - DATABASE_URI=mysql+pymysql://bunkerweb:changeme@bw-db:3306/db
       - SWARM_MODE=yes
       - MULTISITE=yes
+      - USE_REDIS=yes
+      - REDIS_HOST=bw-redis
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     networks:
       - bw-universe
@@ -77,6 +79,11 @@ services:
       - bw-data:/var/lib/mysql
     networks:
       - bw-docker
+
+  bw-redis:
+    image: redis:7-alpine
+    networks:
+      - bw-universe
 
 volumes:
   bw-data:

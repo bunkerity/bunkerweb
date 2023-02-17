@@ -18,7 +18,6 @@ services:
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin
       - www.example.com_INTERCEPTED_ERROR_CODES=400 401 405 413 429 500 501 502 503 504
-      - www.example.com_CUSTOM_CONF_MODSEC_CRS_remove_ui_false_positives=SecRule REQUEST_FILENAME "@rx /global_config$$" "id:999,ctl:ruleRemoveByTag=platform-pgsql,nolog"
     networks:
       - bw-universe
       - bw-services

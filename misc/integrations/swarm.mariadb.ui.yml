@@ -14,7 +14,7 @@ services:
         protocol: tcp
     environment:
       - SERVER_NAME=
-      - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
       - SWARM_MODE=yes
       - MULTISITE=yes
       - USE_REDIS=yes
@@ -36,7 +36,7 @@ services:
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
     networks:
       - bw-universe
       - bw-docker
@@ -63,19 +63,20 @@ services:
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
     networks:
       - bw-universe
       - bw-docker
 
   bw-db:
-    image: postgres:15.1
+    image: mariadb:10.10
     environment:
-      - POSTGRES_USER=bunkerweb
-      - POSTGRES_PASSWORD=changeme
-      - POSTGRES_DB=db
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=changeme
     volumes:
-      - bw-data:/var/lib/postgresql/data
+      - bw-data:/var/lib/mysql
     networks:
       - bw-docker
 
@@ -83,6 +84,27 @@ services:
     image: redis:7-alpine
     networks:
       - bw-universe
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:1.5.0
+    environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the admin user
+      - ABSOLUTE_URI=http://www.example.com/admin
+    networks:
+      - bw-universe
+      - bw-docker
+    deploy:
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.USE_UI=yes
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/admin
+        - bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000
+        - bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /admin
+        - bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 413 429 500 501 502 503 504
 
 volumes:
   bw-data:
