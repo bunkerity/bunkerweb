@@ -4,7 +4,6 @@ from traceback import format_exc
 from kubernetes import client, config, watch
 from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
-from sys import exit as sys_exit
 
 from Controller import Controller
 from ConfigCaller import ConfigCaller
@@ -173,16 +172,7 @@ class IngressController(Controller, ConfigCaller):
 
     def get_configs(self):
         configs = {}
-        supported_config_types = [
-            "http",
-            "stream",
-            "server-http",
-            "server-stream",
-            "default-server-http",
-            "modsec",
-            "modsec-crs",
-        ]
-        for config_type in supported_config_types:
+        for config_type in self._supported_config_types:
             configs[config_type] = {}
         for configmap in self.__corev1.list_config_map_for_all_namespaces(
             watch=False
@@ -193,7 +183,7 @@ class IngressController(Controller, ConfigCaller):
             ):
                 continue
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
-            if config_type not in supported_config_types:
+            if config_type not in self._supported_config_types:
                 self.__logger.warning(
                     f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}",
                 )
