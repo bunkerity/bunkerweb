@@ -5,7 +5,7 @@
     dest: /etc/apt/sources.list
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
 
 - name: Update APT cache and install dependencies
   shell: apt update && apt autoclean && apt install -y unattended-upgrades python3-apt rename python3-pip
@@ -16,7 +16,7 @@
     dest: /etc/apt/apt.conf.d/50unattended-upgrades
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
 
 - name: copy 20auto-upgrades
   copy:
@@ -24,4 +24,4 @@
     dest: /etc/apt/apt.conf.d/20auto-upgrades
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"

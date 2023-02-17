@@ -72,12 +72,7 @@ if distro == "ubuntu":
         f.write(bash_script)
         f.flush()
         subprocess.run(
-            [
-                "docker", 
-                "cp", 
-                f.name, 
-                "systemd-ubuntu:/data/install_nginx.sh"
-            ]
+            ["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"]
         )
         result = subprocess.run(
             [
@@ -444,12 +439,7 @@ if distro == "ubuntu":
         f.write(bash_script)
         f.flush()
         subprocess.run(
-            [
-                "docker", 
-                "cp", 
-                f.name, 
-                "systemd-ubuntu:/data/install_nginx.sh"
-            ]
+            ["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"]
         )
         result = subprocess.run(
             [
@@ -975,12 +965,7 @@ elif distro == "debian":
         f.write(bash_script)
         f.flush()
         subprocess.run(
-            [
-                "docker", 
-                "cp", 
-                f.name, 
-                "systemd-debian:/data/install_nginx.sh"
-            ]
+            ["docker", "cp", f.name, "systemd-debian:/data/install_nginx.sh"]
         )
         result = subprocess.run(
             [
@@ -1551,7 +1536,9 @@ elif distro == "fedora":
         subprocess.run(["docker", "start", "systemd-fedora"])
 
     def check_container_status():
-        result = subprocess.run(["docker", "inspect", "systemd-fedora"], stdout=subprocess.PIPE)
+        result = subprocess.run(
+            ["docker", "inspect", "systemd-fedora"], stdout=subprocess.PIPE
+        )
         return "running" in str(result.stdout)
 
     while True:
@@ -1682,9 +1669,7 @@ elif distro == "rhel":
     with tempfile.NamedTemporaryFile(mode="w") as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(
-            ["docker", "cp", f.name, "systemd-rhel:/data/install_nginx.sh"]
-        )
+        subprocess.run(["docker", "cp", f.name, "systemd-rhel:/data/install_nginx.sh"])
         result = subprocess.run(
             [
                 "docker",

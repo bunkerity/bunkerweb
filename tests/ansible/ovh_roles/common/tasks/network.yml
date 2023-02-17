@@ -5,7 +5,7 @@
     dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
 
 - name: Update /etc/network/interfaces.d/50-cloud-init
   template:
@@ -13,9 +13,9 @@
     dest: /etc/network/interfaces.d/50-cloud-init
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify:
-  - Restart networking
+    - Restart networking
 
 - name: Update /etc/sysctl.d/70-disable-ipv6.conf
   copy:
@@ -23,7 +23,6 @@
     dest: /etc/sysctl.d/70-disable-ipv6.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify:
-  - Reload sysctl
-
+    - Reload sysctl
