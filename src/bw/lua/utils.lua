@@ -353,8 +353,8 @@ utils.rand = function(nb)
 	return result
 end
 
-utils.get_deny_status = function(stream)
-	if stream then
+utils.get_deny_status = function()
+	if ngx.var.is_stream == "yes" then
 		return 403
 	end
 	local status, err = datastore:get("variable_DENY_HTTP_STATUS")

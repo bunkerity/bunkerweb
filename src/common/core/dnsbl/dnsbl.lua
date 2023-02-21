@@ -97,6 +97,10 @@ function _M:access()
 
 end
 
+function _M:preread()
+	return self:access()
+end
+
 function _M:is_in_dnsbl(dnsbl, ip)
 	local request = resolver.arpa_str(ip) .. "." .. dnsbl
 	local ips, err = utils.get_ips(request)
