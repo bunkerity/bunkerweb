@@ -6,6 +6,7 @@ local datastore = require "datastore"
 local logger    = require "logger"
 local cjson     = require "cjson"
 local ipmatcher = require "resty.ipmatcher"
+local env		= require "resty.env"
 
 function _M.new()
 	local self = setmetatable({}, _M)
@@ -46,6 +47,48 @@ function _M:init()
 		return false, "can't store Whitelist list into datastore : " .. err
 	end
 	return true, "successfully loaded " .. tostring(i) .. " whitelisted IP/network/rDNS/ASN/User-Agent/URI"
+end
+
+function _M:set()
+
+	-- Set default value
+	ngx.var.is_whitelisted = "no"
+	env.set("is_whitelisted", "no")
+
+	-- Check if access is needed
+	local set_needed, err = utils.get_variable("USE_WHITELIST")
+	if set_needed == nil then
+		return false, err
+	end
+	if set_needed ~= "yes" then
+		return true, "whitelist not enabled"
+	end
+
+	-- Check the cache
+	local cached_ip, err = self:is_in_cache("ip" .. ngx.var.remote_addr)
+	if cached_ip and cached_ip ~= "ok" then
+		ngx.var.is_whitelisted = "yes"
+		env.set("is_whitelisted", "yes")
+		return true, "ip whitelisted"
+	end
+	local cached_uri, err = self:is_in_cache("uri" .. ngx.var.uri)
+	if cached_uri and cached_uri ~= "ok" then
+		ngx.var.is_whitelisted = "yes"
+		env.set("is_whitelisted", "yes")
+		return true, "uri whitelisted"
+	end
+	local cached_ua = true
+	if ngx.var.http_user_agent then
+		cached_ua, err = self:is_in_cache("ua" .. ngx.var.http_user_agent)
+		if cached_ua and cached_ua ~= "ok" then
+			ngx.var.is_whitelisted = "yes"
+			env.set("is_whitelisted", "yes")
+			return true, "ua whitelisted"
+		end
+	end
+
+	-- Not whitelisted
+	return true, "not whitelisted"
 end
 
 function _M:access()

@@ -103,6 +103,7 @@ class Templator:
                 "access-lua.conf",
                 "init-lua.conf",
                 "log-lua.conf",
+                "set-lua.conf"
             ]
             for root_conf in root_confs:
                 if template.endswith(f"/{root_conf}"):

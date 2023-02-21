@@ -94,11 +94,16 @@ SecAction \
   pass,\
   t:none,\
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
-
 {% endif +%}
+
+# Check if client is whitelisted
+{% if USE_WHITELIST == "yes" +%}
+SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,pass,nolog,ctl:ruleEngine=Off"
+{% endif +%}
+
 # include OWASP CRS rules
 include /usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/*.conf
-{% endif %}
+{% endif +%}
 
 # custom rules after loading the CRS
 {% if is_custom_conf("/etc/bunkerweb/configs/modsec") %}
