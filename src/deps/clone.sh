@@ -288,3 +288,7 @@ git_secure_clone "https://github.com/google/ngx_brotli.git" "6e975bcb015f62e1f30
 # ngx_devel_kit
 echo "ℹ️ Downloading ngx_devel_kit"
 git_secure_clone "https://github.com/vision5/ngx_devel_kit.git" "b4642d6ca01011bd8cd30b253f5c3872b384fd21"
+
+# stream-lua-nginx-module
+echo "ℹ️ Downloading stream-lua-nginx-module"
+git_secure_clone "https://github.com/openresty/stream-lua-nginx-module.git" "2ef14f373b991b911c4eb5d09aa333352be9a756"

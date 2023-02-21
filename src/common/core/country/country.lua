@@ -81,6 +81,10 @@ function _M:access()
 	return true, "client IP " .. ngx.var.remote_addr .. " is not blacklisted (country = " .. country .. ")", nil, nil
 end
 
+function _M:preread()
+	return self:access()
+end
+
 function _M:is_in_cache(ip)
 	local data, err = datastore:get("plugin_country_cache_" .. ip)
 	if not data then
