@@ -326,7 +326,7 @@ jobs:
       - name: Install ansible
         run: pip install ansible
       - name: Install ansible libs
-        run: ansible-galaxy install monolithprojects.github_actions_runner && ansible-galaxy collection install community.general
+        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
       # Create Docker infra
       - run: ./tests/create.sh docker
         env:
@@ -359,7 +359,7 @@ jobs:
       - name: Install ansible
         run: pip install ansible
       - name: Install ansible libs
-        run: ansible-galaxy install monolithprojects.github_actions_runner && ansible-galaxy collection install community.general
+        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
       # Create Autoconf infra
       - run: ./tests/create.sh autoconf
         env:
@@ -392,7 +392,7 @@ jobs:
       - name: Install ansible
         run: pip install ansible
       - name: Install ansible libs
-        run: ansible-galaxy install monolithprojects.github_actions_runner && ansible-galaxy collection install community.general
+        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
       # Create Swarm infra
       - run: ./tests/create.sh swarm
         env:
@@ -449,7 +449,7 @@ jobs:
       - name: Install ansible
         run: pip install ansible
       - name: Install ansible libs
-        run: ansible-galaxy install monolithprojects.github_actions_runner && ansible-galaxy collection install community.general
+        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
       # Create Linux infra
       - run: ./tests/create.sh linux
         env:

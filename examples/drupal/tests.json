@@ -8,8 +8,8 @@
 		"linux"
 	],
 	"no_copy_container": true,
-	"timeout": 60,
-	"delay": 60,
+	"timeout": 120,
+	"delay": 120,
 	"tests": [
 		{
 			"type": "string",
