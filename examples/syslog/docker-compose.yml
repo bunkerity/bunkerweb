@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.4.7
     logging:
       driver: syslog
       options:

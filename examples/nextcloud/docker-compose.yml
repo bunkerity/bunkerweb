@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.4.7
     ports:
       - 80:8080
       - 443:8443
@@ -25,7 +25,7 @@ services:
       - ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
       - X_FRAME_OPTIONS=SAMEORIGIN
       - USE_GZIP=yes
-      - BAD_BEHAVIOR_STATUS_CODES=400 401.4.6 405 444
+      - BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://mync

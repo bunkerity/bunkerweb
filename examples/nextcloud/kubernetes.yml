@@ -7,7 +7,7 @@ metadata:
     bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "10G"
     bunkerweb.io/www.example.com_ALLOWED_METHODS: "GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS"
     bunkerweb.io/www.example.com_X_FRAME_OPTIONS: "SAMEORIGIN"
-    bunkerweb.io/www.example.com_BAD_BEHAVIOR_STATUS_CODES: "400 401.4.6 405 444"
+    bunkerweb.io/www.example.com_BAD_BEHAVIOR_STATUS_CODES: "400 401 403 405 444"
     bunkerweb.io/www.example.com_LIMIT_REQ_URL_1: "/apps"
     bunkerweb.io/www.example.com_LIMIT_REQ_RATE_1: "5r/s"
     bunkerweb.io/www.example.com_LIMIT_REQ_URL_2: "/apps/text/session/sync"
