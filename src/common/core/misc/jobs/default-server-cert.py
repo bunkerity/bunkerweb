@@ -24,11 +24,16 @@ try:
     need_default_cert = False
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
+<<<<<<< HEAD
             for check_var in [
                 "USE_CUSTOM_SSL",
+=======
+            for check_var in (
+                "USE_CUSTOM_HTTPS",
+>>>>>>> 6bf59b59a25691c6c6dbafc4ffb3051bc1519f34
                 "AUTO_LETS_ENCRYPT",
                 "GENERATE_SELF_SIGNED_SSL",
-            ]:
+            ):
                 if (
                     getenv(f"{first_server}_{check_var}", getenv(check_var, "no"))
                     == "yes"
@@ -38,9 +43,12 @@ try:
             if need_default_cert:
                 break
     elif getenv("DISABLE_DEFAULT_SERVER", "no") == "yes" and (
-        getenv("USE_CUSTOM_SSL", "no") == "yes"
-        or getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
-        or getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
+        "yes"
+        in (
+            getenv("USE_CUSTOM_SSL", "no"),
+            getenv("AUTO_LETS_ENCRYPT", "no"),
+            getenv("GENERATE_SELF_SIGNED_SSL", "no"),
+        )
     ):
         need_default_cert = True
 

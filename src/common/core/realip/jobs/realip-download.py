@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
-from os import _exit, getenv, makedirs
+from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -46,7 +46,12 @@ try:
     realip_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME").split(" "):
+        servers = getenv("SERVER_NAME", [])
+
+        if isinstance(servers, str):
+            servers = servers.split(" ")
+
+        for first_server in servers:
             if (
                 getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no"))
                 == "yes"
@@ -58,12 +63,12 @@ try:
     elif getenv("USE_REAL_IP", "no") == "yes":
         realip_activated = True
 
-    if realip_activated is False:
+    if not realip_activated:
         logger.info("RealIP is not activated, skipping download...")
         _exit(0)
 
     # Create directory if it doesn't exist
-    makedirs("/var/cache/bunkerweb/realip", exist_ok=True)
+    Path("/var/cache/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
 
     # Don't go further if the cache is fresh
     if is_cached_file("/var/cache/bunkerweb/realip/combined.list", "hour"):

@@ -2,7 +2,8 @@
 
 from io import BytesIO
 from os import getenv, listdir, makedirs, chmod, stat, _exit, walk
-from os.path import join, isfile, dirname
+from os.path import dirname, join
+from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from uuid import uuid4
@@ -39,7 +40,7 @@ def install_plugin(plugin_dir):
     with open(f"{plugin_dir}plugin.json", "rb") as f:
         metadata = loads(f.read())
     # Don't go further if plugin is already installed
-    if isfile(f"/data/plugins/{metadata['id']}/plugin.json"):
+    if Path(f"/data/plugins/{metadata['id']}/plugin.json").is_file():
         logger.info(
             f"Skipping installation of plugin {metadata['id']} (already installed)",
         )

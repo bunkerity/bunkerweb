@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-from os import getenv, remove
-from os.path import exists, isfile
+from os import getenv
+from os.path import isfile
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -34,7 +35,7 @@ try:
         bw_integration = "Kubernetes"
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
-    elif exists("/usr/share/bunkerweb/INTEGRATION"):
+    elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
         with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
             bw_integration = f.read().strip()
     token = getenv("CERTBOT_TOKEN", "")
@@ -69,7 +70,7 @@ try:
             f"/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/{token}"
         )
         if isfile(challenge_path):
-            remove(challenge_path)
+            Path(challenge_path).unlink()
 except:
     status = 1
     logger.error(f"Exception while running certbot-cleanup.py :\n{format_exc()}")

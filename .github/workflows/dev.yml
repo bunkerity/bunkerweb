@@ -47,7 +47,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          trivyignores: .trivyignore
+          # trivyignores: .trivyignore
 
   # BW scheduler tests
   scheduler:
@@ -91,7 +91,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          trivyignores: .trivyignore
+          # trivyignores: .trivyignore
 
   # BW autoconf tests
   autoconf:
@@ -135,7 +135,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          trivyignores: .trivyignore
+          # trivyignores: .trivyignore
 
   # BW UI tests
   ui:
@@ -180,7 +180,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          trivyignores: .trivyignore
+          # trivyignores: .trivyignore
 
   # Python code security
   code-security:

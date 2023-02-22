@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-from os import getenv, makedirs, remove
-from os.path import isfile
+from os import getenv, makedirs
 from pathlib import Path
 from shutil import copy
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from typing import Optional
 
 sys_path.extend(
     (
@@ -26,19 +26,19 @@ db = Database(
 )
 
 
-def check_cert(cert_path, key_path, first_server: str = None) -> bool:
+def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
     try:
         if not cert_path or not key_path:
             logger.warning(
                 "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
             )
             return False
-        elif not isfile(cert_path):
+        elif not Path(cert_path).is_file():
             logger.warning(
                 f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate"
             )
             return False
-        elif not isfile(key_path):
+        elif not Path(key_path).is_file():
             logger.warning(
                 f"Key file {key_path} is not a valid file, ignoring the custom certificate"
             )
@@ -49,7 +49,7 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
         )
         cert_hash = file_hash(cert_path)
 
-        if not isfile(cert_cache_path):
+        if not Path(cert_cache_path).is_file():
             Path(cert_cache_path).write_text(cert_hash)
 
         old_hash = file_hash(cert_cache_path)
@@ -59,12 +59,12 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
         Path(cert_cache_path).write_text(cert_hash)
         copy(cert_path, cert_cache_path.replace(".hash", ""))
 
-        if not isfile(key_path):
+        if not Path(key_path).is_file():
             logger.warning(
                 f"Key file {key_path} is not a valid file, removing the custom certificate ..."
             )
-            remove(cert_path)
-            remove(cert_cache_path)
+            Path(cert_path).unlink()
+            Path(cert_cache_path).unlink()
             return False
 
         key_cache_path = (
@@ -72,7 +72,7 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
         )
         key_hash = file_hash(key_path)
 
-        if not isfile(key_cache_path):
+        if not Path(key_cache_path).is_file():
             Path(key_cache_path).write_text(key_hash)
 
         old_hash = file_hash(key_cache_path)
@@ -122,7 +122,12 @@ try:
 
     # Multisite case
     if getenv("MULTISITE") == "yes":
-        for first_server in getenv("SERVER_NAME").split(" "):
+        servers = getenv("SERVER_NAME", [])
+
+        if isinstance(servers, str):
+            servers = servers.split(" ")
+
+        for first_server in servers:
             if not first_server or (
                 getenv(
                     f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")

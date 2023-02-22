@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-from os import environ, getcwd, getenv
-from os.path import exists
+from os import environ, getenv
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
@@ -71,7 +70,7 @@ try:
                 " ", ","
             )
 
-            if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
+            if Path(f"/etc/letsencrypt/live/{first_server}/cert.pem").exists():
                 logger.info(
                     f"Certificates already exists for domain(s) {domains}",
                 )
@@ -97,7 +96,7 @@ try:
                     f"Certificate generation succeeded for domain(s) : {domains}"
                 )
 
-                if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
+                if Path(f"/etc/letsencrypt/live/{first_server}/cert.pem").exists():
                     cert = Path(
                         f"/etc/letsencrypt/live/{first_server}/cert.pem"
                     ).read_bytes()
@@ -113,11 +112,11 @@ try:
                         logger.warning(f"Couldn't update db cache: {err}")
 
     # Singlesite case
-    elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME", ""):
+    elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME"):
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
         domains = getenv("SERVER_NAME", "").replace(" ", ",")
 
-        if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
+        if Path(f"/etc/letsencrypt/live/{first_server}/cert.pem").exists():
             logger.info(f"Certificates already exists for domain(s) {domains}")
         else:
             real_email = getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}")
@@ -135,7 +134,7 @@ try:
                     f"Certificate generation succeeded for domain(s) : {domains}"
                 )
 
-                if exists(f"/etc/letsencrypt/live/{first_server}/cert.pem"):
+                if Path(f"/etc/letsencrypt/live/{first_server}/cert.pem").exists():
                     cert = Path(
                         f"/etc/letsencrypt/live/{first_server}/cert.pem"
                     ).read_bytes()
