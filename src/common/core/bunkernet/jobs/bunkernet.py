@@ -1,7 +1,7 @@
-from typing import Literal, Optional, Tuple, Union
-import requests
 from os import getenv
-from os.path import exists
+from pathlib import Path
+from requests import request as requests_request, ReadTimeout
+from typing import Literal, Optional, Tuple, Union
 
 
 def request(
@@ -12,7 +12,7 @@ def request(
     if _id is not None:
         data["id"] = _id
     try:
-        resp = requests.request(
+        resp = requests_request(
             method,
             f"{getenv('BUNKERNET_SERVER', 'https://api.bunkerweb.io')}{url}",
             json=data,
@@ -29,7 +29,7 @@ def request(
 
         assert "result" in raw_data
         assert "data" in raw_data
-    except requests.ReadTimeout:
+    except ReadTimeout:
         return False, None, "request timed out"
     except Exception as e:
         return False, None, f"request failed: {e}"
@@ -66,7 +66,7 @@ def get_integration():
             return "swarm"
         elif getenv("KUBERNETES_MODE") == "yes":
             return "kubernetes"
-        elif exists("/usr/share/bunkerweb/INTEGRATION"):
+        elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
             with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
                 return f.read().strip().lower()
 

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-from os import _exit, getenv, makedirs
-from os.path import isfile
+from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -44,15 +43,15 @@ try:
     elif getenv("USE_BUNKERNET", "yes") == "yes":
         bunkernet_activated = True
 
-    if bunkernet_activated is False:
+    if not bunkernet_activated:
         logger.info("BunkerNet is not activated, skipping download...")
         _exit(0)
 
     # Create directory if it doesn't exist
-    makedirs("/var/cache/bunkerweb/bunkernet", exist_ok=True)
+    Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
 
     # Check if ID is present
-    if not isfile("/var/cache/bunkerweb/bunkernet/instance.id"):
+    if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
         logger.error(
             "Not downloading BunkerNet data because instance is not registered",
         )
@@ -83,7 +82,16 @@ try:
             "BunkerNet has banned this instance, retrying a register later...",
         )
         _exit(0)
-    elif data["result"] != "ok":
+
+    try:
+        assert isinstance(data, dict)
+    except AssertionError:
+        logger.error(
+            f"Received invalid data from BunkerNet API while sending db request : {data}",
+        )
+        _exit(1)
+
+    if data["result"] != "ok":
         logger.error(
             f"Received error from BunkerNet API while sending db request : {data['data']}, removing instance ID",
         )

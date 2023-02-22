@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
-from os import _exit, getenv, makedirs
+from os import _exit, getenv
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
@@ -80,13 +80,13 @@ try:
     elif getenv("USE_GREYLIST", "no") == "yes":
         greylist_activated = True
 
-    if greylist_activated is False:
+    if not greylist_activated:
         logger.info("Greylist is not activated, skipping downloads...")
         _exit(0)
 
     # Create directories if they don't exist
-    makedirs("/var/cache/bunkerweb/greylist", exist_ok=True)
-    makedirs("/var/tmp/bunkerweb/greylist", exist_ok=True)
+    Path("/var/cache/bunkerweb/greylist").mkdir(parents=True, exist_ok=True)
+    Path("/var/tmp/bunkerweb/greylist").mkdir(parents=True, exist_ok=True)
 
     # Our urls data
     urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
@@ -111,7 +111,7 @@ try:
             logger.info(
                 f"Greylist for {kind} is already in cache, skipping downloads...",
             )
-    if all_fresh is True:
+    if all_fresh:
         _exit(0)
 
     # Get URLs
@@ -123,7 +123,7 @@ try:
 
     # Loop on kinds
     for kind, urls_list in urls.items():
-        if kinds_fresh[kind] is True:
+        if kinds_fresh[kind]:
             continue
         # Write combined data of the kind to a single temp file
         for url in urls_list:
@@ -145,7 +145,7 @@ try:
                         line = line.split(b" ")[0]
 
                     ok, data = check_line(kind, line)
-                    if ok is True:
+                    if ok:
                         content += data + b"\n"
                         i += 1
 

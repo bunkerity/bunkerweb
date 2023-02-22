@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from os import getenv, makedirs
-from os.path import isfile
+from os import getenv
+from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -25,7 +25,7 @@ db = Database(
 
 
 def generate_cert(first_server, days, subj):
-    if isfile(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem"):
+    if Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem").is_file():
         cmd = f"openssl x509 -checkend 86400 -noout -in /var/cache/bunkerweb/selfsigned/{first_server}.pem"
         proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
         if proc.returncode == 0:
@@ -67,12 +67,16 @@ def generate_cert(first_server, days, subj):
 status = 0
 
 try:
-
-    makedirs("/var/cache/bunkerweb/selfsigned/", exist_ok=True)
+    Path("/var/cache/bunkerweb/selfsigned/").mkdir(parents=True, exist_ok=True)
 
     # Multisite case
     if getenv("MULTISITE") == "yes":
-        for first_server in getenv("SERVER_NAME").split(" "):
+        servers = getenv("SERVER_NAME", [])
+
+        if isinstance(servers, str):
+            servers = servers.split(" ")
+
+        for first_server in servers:
             if (
                 not first_server
                 or getenv(
@@ -80,7 +84,7 @@ try:
                     getenv("GENERATE_SELF_SIGNED_SSL", "no"),
                 )
                 != "yes"
-                or isfile(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem")
+                or Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem").is_file()
             ):
                 continue
 
@@ -101,9 +105,7 @@ try:
                 status = 1
 
     # Singlesite case
-    elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv(
-        "SERVER_NAME", ""
-    ):
+    elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
         ret, ret_status = generate_cert(
             first_server,

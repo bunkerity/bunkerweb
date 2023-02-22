@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-from os import _exit, getenv, makedirs, remove
-from os.path import isfile
+from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
@@ -33,7 +32,12 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME").split(" "):
+        servers = getenv("SERVER_NAME", [])
+
+        if isinstance(servers, str):
+            servers = servers.split(" ")
+
+        for first_server in servers:
             if (
                 getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
                 == "yes"
@@ -44,16 +48,16 @@ try:
     elif getenv("USE_BUNKERNET", "yes") == "yes":
         bunkernet_activated = True
 
-    if bunkernet_activated is False:
+    if not bunkernet_activated:
         logger.info("BunkerNet is not activated, skipping registration...")
         _exit(0)
 
     # Create directory if it doesn't exist
-    makedirs("/var/cache/bunkerweb/bunkernet", exist_ok=True)
+    Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
 
     # Ask an ID if needed
     bunkernet_id = None
-    if not isfile("/var/cache/bunkerweb/bunkernet/instance.id"):
+    if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
         logger.info("Registering instance on BunkerNet API ...")
         ok, status, data = register()
         if not ok:
@@ -71,7 +75,16 @@ try:
                 "BunkerNet has banned this instance, retrying a register later...",
             )
             _exit(0)
-        elif status != 200:
+
+        try:
+            assert isinstance(data, dict)
+        except AssertionError:
+            logger.error(
+                f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
+            )
+            _exit(1)
+
+        if status != 200:
             logger.error(
                 f"Error {status} from BunkerNet API : {data['data']}",
             )
@@ -111,9 +124,18 @@ try:
             logger.warning(
                 "Instance ID is not registered, removing it and retrying a register later...",
             )
-            remove("/var/cache/bunkerweb/bunkernet/instance.id")
+            Path("/var/cache/bunkerweb/bunkernet/instance.id").unlink()
             _exit(2)
-        elif data.get("result", "ko") != "ok":
+
+        try:
+            assert isinstance(data, dict)
+        except AssertionError:
+            logger.error(
+                f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
+            )
+            _exit(1)
+
+        if data.get("result", "ko") != "ok":
             logger.error(
                 f"Received error from BunkerNet API while sending ping request : {data.get('data', {})}, removing instance ID",
             )
@@ -127,7 +149,7 @@ try:
     if bunkernet_ping and status != 403:
         logger.info("Connectivity with BunkerWeb is successful !")
         status = 1
-        if not isfile("/var/cache/bunkerweb/bunkernet/instance.id"):
+        if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
             Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
 
             # Update db
