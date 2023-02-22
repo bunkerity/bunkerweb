@@ -68,7 +68,7 @@
       "regex": "^(/[\\w. -]+)*/?$",
       "type": "text"
     },
-    "HTTPS_PROTOCOLS": {
+    "SSL_PROTOCOLS": {
       "context": "multisite",
       "default": "TLSv1.2 TLSv1.3",
       "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",

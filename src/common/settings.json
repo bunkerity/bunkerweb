@@ -188,5 +188,54 @@
     "label": "Kubernetes mode",
     "regex": "^(yes|no)$",
     "type": "check"
+  },
+  "SERVER_TYPE": {
+    "context": "multisite",
+    "default": "http",
+    "help": "Server type : http or stream.",
+    "id": "server-type",
+    "label": "Server type",
+    "regex": "^(http|stream)$",
+    "type": "select",
+    "select": [
+      "http",
+      "stream"
+    ]
+  },
+  "LISTEN_STREAM": {
+    "context": "multisite",
+    "default": "yes",
+    "help": "Enable listening for non-ssl (passthrough).",
+    "id": "listen-stream",
+    "label": "Listen stream",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "LISTEN_STREAM_PORT": {
+    "context": "multisite",
+    "default": "1337",
+    "help": "Listening port for non-ssl (passthrough).",
+    "id": "listen-stream-port",
+    "label": "Listen stream port",
+    "regex": "^[0-9]+$",
+    "type": "text"
+  },
+  "LISTEN_STREAM_PORT_SSL": {
+    "context": "multisite",
+    "default": "4242",
+    "help": "Listening port for ssl (passthrough).",
+    "id": "listen-stream-port-ssl",
+    "label": "Listen stream port ssl",
+    "regex": "^[0-9]+$",
+    "type": "text"
+  },
+  "USE_UDP": {
+    "context": "multisite",
+    "default": "no",
+    "help": "UDP listen instead of TCP (stream).",
+    "id": "use-udp",
+    "label": "Listen UDP",
+    "regex": "^(yes|no)$",
+    "type": "check"
   }
 }

@@ -275,6 +275,128 @@ function _M:access()
 	return ret, "IP is not in list (error = " .. ret_err .. ")", false, nil
 end
 
+function _M:preread()
+	-- Check if preread is needed
+	local preread_needed, err = utils.get_variable("USE_WHITELIST")
+	if preread_needed == nil then
+		return false, err, nil, nil
+	end
+	if preread_needed ~= "yes" then
+		return true, "Whitelist not activated", nil, nil
+	end
+
+	-- Check the cache
+	local cached_ip, err = self:is_in_cache("ip" .. ngx.var.remote_addr)
+	if cached_ip and cached_ip ~= "ok" then
+		ngx.var.is_whitelisted = "yes"
+		return true, "IP is in whitelist cache (info = " .. cached_ip .. ")", true, ngx.OK
+	end
+	if cached_ip then
+		return true, "full request is in whitelist cache (not whitelisted)", nil, nil
+	end
+
+	-- Get list
+	local data, err = datastore:get("plugin_whitelist_list")
+	if not data then
+		return false, "can't get Whitelist list : " .. err, false, nil
+	end
+	local ok, whitelists = pcall(cjson.decode, data)
+	if not ok then
+		return false, "error while decoding whitelists : " .. whitelists, false, nil
+	end
+
+	-- Return value
+	local ret, ret_err = true, "success"
+
+	-- Check if IP is in IP/net whitelist
+	local ip_net, err = utils.get_variable("WHITELIST_IP")
+	if ip_net and ip_net ~= "" then
+		for element in ip_net:gmatch("%S+") do
+			table.insert(whitelists["IP"], element)
+		end
+	end
+	if not cached_ip then
+		local ipm, err = ipmatcher.new(whitelists["IP"])
+		if not ipm then
+			ret = false
+			ret_err = "can't instantiate ipmatcher " .. err
+		else
+			if ipm:match(ngx.var.remote_addr) then
+				self:add_to_cache("ip" .. ngx.var.remote_addr, "ip/net")
+				ngx.var.is_whitelisted = "yes"
+				return ret, "client IP " .. ngx.var.remote_addr .. " is in whitelist", true, ngx.OK
+			end
+		end
+	end
+
+	-- Check if rDNS is in whitelist
+	local rdns_global, err = utils.get_variable("WHITELIST_RDNS_GLOBAL")
+	local check = true
+	if not rdns_global then
+		logger.log(ngx.ERR, "WHITELIST", "Error while getting WHITELIST_RDNS_GLOBAL variable : " .. err)
+	elseif rdns_global == "yes" then
+		check, err = utils.ip_is_global(ngx.var.remote_addr)
+		if check == nil then
+			logger.log(ngx.ERR, "WHITELIST", "Error while getting checking if IP is global : " .. err)
+		end
+	end
+	if not cached_ip and check then
+		local rdns, err = utils.get_rdns(ngx.var.remote_addr)
+		if not rdns then
+			ret = false
+			ret_err = "error while trying to get reverse dns : " .. err
+		else
+			local rdns_list, err = utils.get_variable("WHITELIST_RDNS")
+			if rdns_list and rdns_list ~= "" then
+				for element in rdns_list:gmatch("%S+") do
+					table.insert(whitelists["RDNS"], element)
+				end
+			end
+			for i, suffix in ipairs(whitelists["RDNS"]) do
+				if rdns:sub(- #suffix) == suffix then
+					self:add_to_cache("ip" .. ngx.var.remote_addr, "rDNS " .. suffix)
+					ngx.var.is_whitelisted = "yes"
+					return ret, "client IP " .. ngx.var.remote_addr .. " is in whitelist (info = rDNS " .. suffix .. ")", true, ngx.OK
+				end
+			end
+		end
+	end
+
+	-- Check if ASN is in whitelist
+	if not cached_ip then
+		if utils.ip_is_global(ngx.var.remote_addr) then
+			local asn, err = utils.get_asn(ngx.var.remote_addr)
+			if not asn then
+				ret = false
+				ret_err = "error while trying to get asn number : " .. err
+			else
+				local asn_list, err = utils.get_variable("WHITELIST_ASN")
+				if asn_list and asn_list ~= "" then
+					for element in asn_list:gmatch("%S+") do
+						table.insert(whitelists["ASN"], element)
+					end
+				end
+				for i, asn_bl in ipairs(whitelists["ASN"]) do
+					if tostring(asn) == asn_bl then
+						self:add_to_cache("ip" .. ngx.var.remote_addr, "ASN " .. tostring(asn))
+						ngx.var.is_whitelisted = "yes"
+						return ret, "client IP " .. ngx.var.remote_addr .. " is in whitelist (kind = ASN " .. tostring(asn) .. ")", true,
+								ngx.OK
+					end
+				end
+			end
+		end
+	end
+
+	-- IP is not whitelisted
+	local ok, err = self:add_to_cache("ip" .. ngx.var.remote_addr, "ok")
+	if not ok then
+		ret = false
+		ret_err = err
+	end
+	return ret, "IP is not in list (error = " .. ret_err .. ")", false, nil
+end
+
 function _M:is_in_cache(ele)
 	local kind, err = datastore:get("plugin_whitelist_cache_" .. ngx.var.server_name .. ele)
 	if not kind then

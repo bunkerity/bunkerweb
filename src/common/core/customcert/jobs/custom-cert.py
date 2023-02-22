@@ -30,7 +30,7 @@ def check_cert(cert_path, key_path, first_server: str = None) -> bool:
     try:
         if not cert_path or not key_path:
             logger.warning(
-                "Both variables CUSTOM_HTTPS_CERT and CUSTOM_HTTPS_KEY have to be set to use custom certificates"
+                "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
             )
             return False
         elif not isfile(cert_path):
@@ -125,17 +125,17 @@ try:
         for first_server in getenv("SERVER_NAME").split(" "):
             if not first_server or (
                 getenv(
-                    f"{first_server}_USE_CUSTOM_HTTPS", getenv("USE_CUSTOM_HTTPS", "no")
+                    f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")
                 )
                 != "yes"
             ):
                 continue
 
             cert_path = getenv(
-                f"{first_server}_CUSTOM_HTTPS_CERT", getenv("CUSTOM_HTTPS_CERT", "")
+                f"{first_server}_CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")
             )
             key_path = getenv(
-                f"{first_server}_CUSTOM_HTTPS_KEY", getenv("CUSTOM_HTTPS_KEY", "")
+                f"{first_server}_CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")
             )
 
             logger.info(
@@ -152,9 +152,9 @@ try:
                     f"No change for certificate {cert_path}",
                 )
     # Singlesite case
-    elif getenv("USE_CUSTOM_HTTPS") == "yes" and getenv("SERVER_NAME") != "":
-        cert_path = getenv("CUSTOM_HTTPS_CERT", "")
-        key_path = getenv("CUSTOM_HTTPS_KEY", "")
+    elif getenv("USE_CUSTOM_SSL") == "yes" and getenv("SERVER_NAME") != "":
+        cert_path = getenv("CUSTOM_SSL_CERT", "")
+        key_path = getenv("CUSTOM_SSL_KEY", "")
 
         logger.info(f"Checking certificate {cert_path} ...")
         need_reload = check_cert(cert_path, key_path)

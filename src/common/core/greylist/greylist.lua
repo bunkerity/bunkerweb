@@ -224,6 +224,124 @@ function _M:access()
 	return ret, "IP is not in list (error = " .. ret_err .. ")", true, utils.get_deny_status()
 end
 
+function _M:preread()
+	-- Check if preread is needed
+	local preread_needed, err = utils.get_variable("USE_GREYLIST")
+	if preread_needed == nil then
+		return false, err, false, nil
+	end
+	if preread_needed ~= "yes" then
+		return true, "Greylist not activated", false, nil
+	end
+
+	-- Check the cache
+	local cached_ip, err = self:is_in_cache("ip" .. ngx.var.remote_addr)
+	if cached_ip and cached_ip ~= "ok" then
+		return true, "IP is in greylist cache (info = " .. cached_ip .. ")", false, ngx.OK
+	end
+	if cached_ip then
+		return true, "full request is in greylist cache (not greylisted)", false, nil
+	end
+
+	-- Get list
+	local data, err = datastore:get("plugin_greylist_list")
+	if not data then
+		return false, "can't get Greylist list : " .. err, false, nil
+	end
+	local ok, greylists = pcall(cjson.decode, data)
+	if not ok then
+		return false, "error while decoding greylists : " .. greylists, false, nil
+	end
+
+	-- Return value
+	local ret, ret_err = true, "success"
+
+	-- Check if IP is in IP/net greylist
+	local ip_net, err = utils.get_variable("GREYLIST_IP")
+	if ip_net and ip_net ~= "" then
+		for element in ip_net:gmatch("%S+") do
+			table.insert(greylists["IP"], element)
+		end
+	end
+	if not cached_ip then
+		local ipm, err = ipmatcher.new(greylists["IP"])
+		if not ipm then
+			ret = false
+			ret_err = "can't instantiate ipmatcher " .. err
+		else
+			if ipm:match(ngx.var.remote_addr) then
+				self:add_to_cache("ip" .. ngx.var.remote_addr, "ip/net")
+				return ret, "client IP " .. ngx.var.remote_addr .. " is in greylist", false, ngx.OK
+			end
+		end
+	end
+
+	-- Check if rDNS is in greylist
+	local rdns_global, err = utils.get_variable("GREYLIST_RDNS_GLOBAL")
+	local check = true
+	if not rdns_global then
+		logger.log(ngx.ERR, "GREYLIST", "Error while getting GREYLIST_RDNS_GLOBAL variable : " .. err)
+	elseif rdns_global == "yes" then
+		check, err = utils.ip_is_global(ngx.var.remote_addr)
+		if check == nil then
+			logger.log(ngx.ERR, "GREYLIST", "Error while getting checking if IP is global : " .. err)
+		end
+	end
+	if not cached_ip and check then
+		local rdns, err = utils.get_rdns(ngx.var.remote_addr)
+		if not rdns then
+			ret = false
+			ret_err = "error while trying to get reverse dns : " .. err
+		else
+			local rdns_list, err = utils.get_variable("GREYLIST_RDNS")
+			if rdns_list and rdns_list ~= "" then
+				for element in rdns_list:gmatch("%S+") do
+					table.insert(greylists["RDNS"], element)
+				end
+			end
+			for i, suffix in ipairs(greylists["RDNS"]) do
+				if rdns:sub(- #suffix) == suffix then
+					self:add_to_cache("ip" .. ngx.var.remote_addr, "rDNS " .. suffix)
+					return ret, "client IP " .. ngx.var.remote_addr .. " is in greylist (info = rDNS " .. suffix .. ")", false, ngx.OK
+				end
+			end
+		end
+	end
+
+	-- Check if ASN is in greylist
+	if not cached_ip then
+		if utils.ip_is_global(ngx.var.remote_addr) then
+			local asn, err = utils.get_asn(ngx.var.remote_addr)
+			if not asn then
+				ret = false
+				ret_err = "error while trying to get asn number : " .. err
+			else
+				local asn_list, err = utils.get_variable("GREYLIST_ASN")
+				if asn_list and asn_list ~= "" then
+					for element in asn_list:gmatch("%S+") do
+						table.insert(greylists["ASN"], element)
+					end
+				end
+				for i, asn_bl in ipairs(greylists["ASN"]) do
+					if tostring(asn) == asn_bl then
+						self:add_to_cache("ip" .. ngx.var.remote_addr, "ASN " .. tostring(asn))
+						return ret, "client IP " .. ngx.var.remote_addr .. " is in greylist (kind = ASN " .. tostring(asn) .. ")", false,
+								ngx.OK
+					end
+				end
+			end
+		end
+	end
+
+	-- IP is not greylisted
+	local ok, err = self:add_to_cache("ip" .. ngx.var.remote_addr, "ok")
+	if not ok then
+		ret = false
+		ret_err = err
+	end
+	return ret, "IP is not in list (error = " .. ret_err .. ")", true, utils.get_deny_status()
+end
+
 function _M:is_in_cache(ele)
 	local kind, err = datastore:get("plugin_greylist_cache_" .. ngx.var.server_name .. ele)
 	if not kind then
