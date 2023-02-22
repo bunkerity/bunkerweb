@@ -9,13 +9,9 @@ from os import (
     getenv,
     getpid,
     listdir,
-    makedirs,
-    path,
-    remove,
-    unlink,
     walk,
 )
-from os.path import dirname, exists, isdir, isfile, islink, join
+from os.path import dirname, join
 from pathlib import Path
 from shutil import chown, copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
@@ -85,7 +81,7 @@ signal(SIGHUP, handle_reload)
 
 
 def stop(status):
-    remove("/var/tmp/bunkerweb/scheduler.pid")
+    Path("/var/tmp/bunkerweb/scheduler.pid").unlink(missing_ok=True)
     _exit(status)
 
 
@@ -96,7 +92,7 @@ def generate_custom_configs(
     *,
     original_path: str = "/data/configs",
 ):
-    makedirs(original_path, exist_ok=True)
+    Path(original_path).mkdir(parents=True, exist_ok=True)
     for custom_config in custom_configs:
         tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
         if custom_config["service_id"]:
@@ -124,7 +120,7 @@ def generate_custom_configs(
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
-        if path.isfile("/var/tmp/bunkerweb/scheduler.pid"):
+        if Path("/var/tmp/bunkerweb/scheduler.pid").is_file():
             logger.error(
                 "Scheduler is already running, skipping execution ...",
             )
@@ -174,7 +170,7 @@ if __name__ == "__main__":
         else:
             # Read from database
             integration = "Docker"
-            if exists("/usr/share/bunkerweb/INTEGRATION"):
+            if Path("/usr/share/bunkerweb/INTEGRATION").exists():
                 with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
                     integration = f.read().strip()
 
@@ -202,7 +198,7 @@ if __name__ == "__main__":
                     )
                     sleep(5)
             elif integration == "Docker" and (
-                not exists("/var/tmp/bunkerweb/variables.env")
+                not Path("/var/tmp/bunkerweb/variables.env").exists()
                 or db.get_config() != dotenv_values("/var/tmp/bunkerweb/variables.env")
             ):
                 # run the config saver
@@ -279,16 +275,16 @@ if __name__ == "__main__":
 
         logger.info("Executing scheduler ...")
 
-        generate = not exists(
+        generate = not Path(
             "/var/tmp/bunkerweb/variables.env"
-        ) or env != dotenv_values("/var/tmp/bunkerweb/variables.env")
+        ).exists() or env != dotenv_values("/var/tmp/bunkerweb/variables.env")
 
-        if generate is False:
+        if not generate:
             logger.warning(
                 "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
             )
 
-        if exists("/var/lib/bunkerweb/db.sqlite3"):
+        if Path("/var/lib/bunkerweb/db.sqlite3").exists():
             chmod("/var/lib/bunkerweb/db.sqlite3", 0o760)
 
         while True:
@@ -306,7 +302,7 @@ if __name__ == "__main__":
             else:
                 logger.info("All jobs in run_once() were successful")
 
-            if generate is True:
+            if generate:
                 # run the generator
                 proc = subprocess_run(
                     [
@@ -410,11 +406,9 @@ if __name__ == "__main__":
                         logger.info("Removing old custom configs files ...")
                         files = glob(f"{original_path}/*")
                         for file in files:
-                            if islink(file):
-                                unlink(file)
-                            elif isfile(file):
-                                remove(file)
-                            elif isdir(file):
+                            if Path(file).is_symlink() or Path(file).is_file():
+                                Path(file).unlink()
+                            elif Path(file).is_dir():
                                 rmtree(file, ignore_errors=False)
 
                         logger.info("Generating new custom configs ...")
