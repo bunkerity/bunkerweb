@@ -31,7 +31,7 @@ def check_line(line):
         with suppress(ValueError):
             ip_address(line)
             return True, line
-    return False, ""
+    return False, b""
 
 
 logger = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
@@ -71,7 +71,7 @@ try:
         _exit(0)
 
     # Get URLs
-    urls = [url for url in getenv("REALIP_FROM_URLS", "").split(" ") if url]
+    urls = [url for url in getenv("REAL_IP_FROM_URLS", "").split(" ") if url]
 
     # Download and write data to temp file
     i = 0
