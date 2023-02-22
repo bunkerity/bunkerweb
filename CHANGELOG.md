@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.4.6
+## v1.4.7 - 
+
+- Fix DISABLE_DEFAULT_SERVER=yes not working with HTTPS (again)
+- Fix wrong setting name in realip job
+
+## v1.4.6 - 2023/02/14
 
 - Fix error in the UI when a service have multiple domains
 - Fix bwcli bans command
