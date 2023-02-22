@@ -1,11 +1,5 @@
-from contextlib import suppress
-from importlib.machinery import SourceFileLoader
-from io import BytesIO
-from pathlib import Path
-from signal import SIGINT, signal, SIGTERM
-from subprocess import PIPE, Popen, call
-from tempfile import NamedTemporaryFile
 from bs4 import BeautifulSoup
+from contextlib import suppress
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
@@ -27,18 +21,24 @@ from flask import (
 )
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+from importlib.machinery import SourceFileLoader
+from io import BytesIO
 from json import JSONDecodeError, dumps, load as json_load
 from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes.client.exceptions import ApiException as kube_ApiException
-from os import _exit, chmod, getenv, getpid, listdir, mkdir, remove, walk
-from os.path import exists, isdir, isfile, join
+from os import _exit, chmod, getenv, getpid, listdir, walk
+from os.path import join
+from pathlib import Path
 from re import match as re_match
 from requests import get
 from shutil import rmtree, copytree, chown
+from signal import SIGINT, signal, SIGTERM
+from subprocess import PIPE, Popen, call
 from sys import path as sys_path, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
+from tempfile import NamedTemporaryFile
 from time import time
 from traceback import format_exc
 from typing import Optional
@@ -66,7 +66,7 @@ from utils import (
 from logger import setup_logger
 from Database import Database
 
-if not exists("/var/log/nginx/ui.log"):
+if not Path("/var/log/nginx/ui.log").exists():
     Path("/var/log/nginx").mkdir(parents=True, exist_ok=True)
     Path("/var/log/nginx/ui.log").touch()
 
@@ -81,8 +81,8 @@ def stop_gunicorn():
 
 
 def stop(status, stop=True):
-    if exists("/var/tmp/bunkerweb/ui.pid"):
-        remove("/var/tmp/bunkerweb/ui.pid")
+    if Path("/var/tmp/bunkerweb/ui.pid").exists():
+        Path("/var/tmp/bunkerweb/ui.pid").unlink()
     if stop is True:
         stop_gunicorn()
     _exit(status)
@@ -154,7 +154,7 @@ elif getenv("SWARM_MODE", "no") == "yes":
     integration = "Swarm"
 elif getenv("AUTOCONF_MODE", "no") == "yes":
     integration = "Autoconf"
-elif exists("/usr/share/bunkerweb/INTEGRATION"):
+elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
     with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
         integration = f.read().strip()
 
@@ -718,7 +718,7 @@ def plugins():
                 flash(f"Can't delete internal plugin {variables['name']}", "error")
                 return redirect(url_for("loading", next=url_for("plugins"))), 500
 
-            if not exists("/usr/sbin/nginx"):
+            if not Path("/usr/sbin/nginx").is_file():
                 plugins = app.config["CONFIG"].get_plugins()
                 for plugin in deepcopy(plugins):
                     if plugin["external"] is False or plugin["id"] == variables["name"]:
@@ -749,7 +749,7 @@ def plugins():
                     flash(operation, "error")
                     return redirect(url_for("loading", next=url_for("plugins")))
         else:
-            if not exists("/var/tmp/bunkerweb/ui") or not listdir(
+            if not Path("/var/tmp/bunkerweb/ui").exists() or not listdir(
                 "/var/tmp/bunkerweb/ui"
             ):
                 flash("Please upload new plugins to reload plugins", "error")
@@ -759,7 +759,7 @@ def plugins():
             files_count = 0
 
             for file in listdir("/var/tmp/bunkerweb/ui"):
-                if not isfile(f"/var/tmp/bunkerweb/ui/{file}"):
+                if not Path(f"/var/tmp/bunkerweb/ui/{file}").is_file():
                     continue
 
                 files_count += 1
@@ -799,7 +799,7 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if not exists("/usr/sbin/nginx"):
+                                    if not Path("/usr/sbin/nginx").is_file():
                                         plugins = app.config["CONFIG"].get_plugins()
                                         for plugin in deepcopy(plugins):
                                             if plugin["id"] == folder_name:
@@ -817,9 +817,9 @@ def plugins():
                                             )
                                             raise Exception
                                     else:
-                                        if exists(
+                                        if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
-                                        ):
+                                        ).exists():
                                             raise FileExistsError
 
                                         copytree(
@@ -835,17 +835,17 @@ def plugins():
                                         for d in listdir(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
                                         )
-                                        if isdir(
+                                        if Path(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{d}"
-                                        )
+                                        ).is_dir()
                                     ]
 
                                     if (
                                         not dirs
                                         or len(dirs) > 1
-                                        or not exists(
+                                        or not Path(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/plugin.json"
-                                        )
+                                        ).is_file()
                                     ):
                                         raise KeyError
 
@@ -873,7 +873,7 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if not exists("/usr/sbin/nginx"):
+                                    if not Path("/usr/sbin/nginx").is_file():
                                         plugins = app.config["CONFIG"].get_plugins()
                                         for plugin in deepcopy(plugins):
                                             if plugin["id"] == folder_name:
@@ -891,9 +891,9 @@ def plugins():
                                             )
                                             raise Exception
                                     else:
-                                        if exists(
+                                        if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
-                                        ):
+                                        ).exists():
                                             raise FileExistsError
 
                                         copytree(
@@ -942,7 +942,7 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if not exists("/usr/sbin/nginx"):
+                                    if not Path("/usr/sbin/nginx").is_file():
                                         plugins = app.config["CONFIG"].get_plugins()
                                         for plugin in deepcopy(plugins):
                                             if plugin["id"] == folder_name:
@@ -960,9 +960,9 @@ def plugins():
                                             )
                                             raise Exception
                                     else:
-                                        if exists(
+                                        if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
-                                        ):
+                                        ).exists():
                                             raise FileExistsError
 
                                         copytree(
@@ -978,17 +978,17 @@ def plugins():
                                         for d in listdir(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
                                         )
-                                        if isdir(
+                                        if Path(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{d}"
-                                        )
+                                        ).is_dir()
                                     ]
 
                                     if (
                                         not dirs
                                         or len(dirs) > 1
-                                        or not exists(
+                                        or not Path(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/plugin.json"
-                                        )
+                                        ).is_file()
                                     ):
                                         raise KeyError
 
@@ -1016,7 +1016,7 @@ def plugins():
                                         )
                                         raise Exception
 
-                                    if not exists("/usr/sbin/nginx"):
+                                    if not Path("/usr/sbin/nginx").is_file():
                                         plugins = app.config["CONFIG"].get_plugins()
                                         for plugin in deepcopy(plugins):
                                             if plugin["id"] == folder_name:
@@ -1034,9 +1034,9 @@ def plugins():
                                             )
                                             raise Exception
                                     else:
-                                        if exists(
+                                        if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
-                                        ):
+                                        ).exists():
                                             raise FileExistsError
 
                                         copytree(
@@ -1129,7 +1129,7 @@ def plugins():
         ).start()
 
         # Remove tmp folder
-        if exists("/var/tmp/bunkerweb/ui"):
+        if Path("/var/tmp/bunkerweb/ui").exists():
             with suppress(OSError):
                 rmtree("/var/tmp/bunkerweb/ui")
 
@@ -1144,7 +1144,7 @@ def plugins():
         plugin_id = request.args.get("plugin_id")
         template = None
 
-        if not exists("/usr/sbin/nginx"):
+        if not Path("/usr/sbin/nginx").is_file():
             page = db.get_plugin_template(plugin_id)
 
             if page is not None:
@@ -1152,9 +1152,11 @@ def plugins():
         else:
             page_path = ""
 
-            if exists(f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"):
+            if Path(f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html").exists():
                 page_path = f"/etc/bunkerweb/plugins/{plugin_id}/ui/template.html"
-            elif exists(f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"):
+            elif Path(
+                f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"
+            ).exists():
                 page_path = f"/usr/share/bunkerweb/core/{plugin_id}/ui/template.html"
             else:
                 flash(f"Plugin {plugin_id} not found", "error")
@@ -1201,8 +1203,7 @@ def upload_plugin():
     if not request.files:
         return {"status": "ko"}, 400
 
-    if not exists("/var/tmp/bunkerweb/ui"):
-        mkdir("/var/tmp/bunkerweb/ui")
+    Path("/var/tmp/bunkerweb/ui").mkdir(parents=True, exist_ok=True)
 
     for file in request.files.values():
         if not file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
@@ -1223,7 +1224,7 @@ def custom_plugin(plugin):
         )
         return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
-    if not exists("/usr/sbin/nginx"):
+    if not Path("/usr/sbin/nginx").is_file():
         module = db.get_plugin_actions(plugin)
 
         if module is None:
@@ -1252,8 +1253,9 @@ def custom_plugin(plugin):
                 url_for("loading", next=url_for("plugins", plugin_id=plugin))
             )
     else:
-        if not exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py") and not exists(
-            f"/usr/share/bunkerweb/core/{plugin}/ui/actions.py"
+        if (
+            not Path(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py").exists()
+            and not Path(f"/usr/share/bunkerweb/core/{plugin}/ui/actions.py").exists()
         ):
             flash(
                 f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
@@ -1267,7 +1269,7 @@ def custom_plugin(plugin):
         sys_path.append(
             (
                 "/etc/bunkerweb/plugins"
-                if exists(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py")
+                if Path(f"/etc/bunkerweb/plugins/{plugin}/ui/actions.py").exists()
                 else "/usr/share/bunkerweb/core"
             )
             + f"/{plugin}/ui/"
@@ -1305,7 +1307,7 @@ def custom_plugin(plugin):
         )
         error = True
     finally:
-        if exists("/usr/sbin/nginx"):
+        if Path("/usr/sbin/nginx").is_file():
             # Remove the custom plugin from the shared library
             sys_path.pop()
             sys_modules.pop("actions")
@@ -1359,7 +1361,7 @@ def logs():
 @app.route("/logs/local", methods=["GET"])
 @login_required
 def logs_linux():
-    if not exists("/usr/sbin/nginx"):
+    if not Path("/usr/sbin/nginx").is_file():
         return (
             jsonify(
                 {
@@ -1375,21 +1377,21 @@ def logs_linux():
     raw_logs_error = []
 
     if last_update:
-        if exists("/var/log/nginx/error.log"):
+        if Path("/var/log/nginx/error.log").exists():
             with open("/var/log/nginx/error.log", "r") as f:
                 raw_logs_error = f.read().splitlines()[int(last_update.split(".")[0]) :]
 
-        if exists("/var/log/nginx/access.log"):
+        if Path("/var/log/nginx/access.log").exists():
             with open("/var/log/nginx/access.log", "r") as f:
                 raw_logs_access = f.read().splitlines()[
                     int(last_update.split(".")[1]) :
                 ]
     else:
-        if exists("/var/log/nginx/error.log"):
+        if Path("/var/log/nginx/error.log").exists():
             with open("/var/log/nginx/error.log", "r") as f:
                 raw_logs_error = f.read().splitlines()
 
-        if exists("/var/log/nginx/access.log"):
+        if Path("/var/log/nginx/access.log").exists():
             with open("/var/log/nginx/access.log", "r") as f:
                 raw_logs_access = f.read().splitlines()
 
@@ -1515,6 +1517,7 @@ def logs_container(container_id):
     to_date = int(to_date) // 1000 if to_date else None
 
     logs = []
+    tmp_logs = []
     if docker_client:
         try:
             if getenv("SWARM_MODE", "no") == "no":

@@ -1,5 +1,5 @@
-from os import listdir, remove, replace, walk
-from os.path import dirname, exists, join, isfile
+from os import listdir, replace, walk
+from os.path import dirname, join
 from pathlib import Path
 from re import compile as re_compile
 from shutil import rmtree, move as shutil_move
@@ -52,7 +52,7 @@ class ConfigFiles:
         return ""
 
     def check_name(self, name: str) -> bool:
-        return self.__name_regex.match(name)
+        return self.__name_regex.match(name) is not None
 
     def check_path(self, path: str, root_path: str = "/etc/bunkerweb/configs/") -> str:
         root_dir: str = path.split("/")[4]
@@ -75,17 +75,17 @@ class ConfigFiles:
             dirs = "/".join(dirs)
             if len(dirs) > 1:
                 for x in range(nbr_children - 1):
-                    if not exists(
+                    if not Path(
                         f"{root_path}{root_dir}/{'/'.join(dirs.split('/')[0:-x])}"
-                    ):
+                    ).exists():
                         return f"{root_path}{root_dir}/{'/'.join(dirs.split('/')[0:-x])} doesn't exist"
 
         return ""
 
     def delete_path(self, path: str) -> Tuple[str, int]:
         try:
-            if isfile(path) or isfile(f"{path}.conf"):
-                remove(f"{path}.conf")
+            if Path(path).is_file() or Path(f"{path}.conf").is_file():
+                Path(f"{path}.conf").unlink()
             else:
                 rmtree(path)
         except OSError:
@@ -154,7 +154,7 @@ class ConfigFiles:
             new_path = old_path
         else:
             try:
-                remove(old_path)
+                Path(old_path).unlink()
             except OSError:
                 return f"Could not remove {old_path}", 1
 

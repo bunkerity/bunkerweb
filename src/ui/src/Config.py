@@ -1,15 +1,14 @@
 from copy import deepcopy
-from os import listdir, remove
-from pathlib import Path
-from time import sleep
 from flask import flash
-from os.path import exists, isfile
-from typing import List, Tuple
-from json import load as json_load
-from uuid import uuid4
 from glob import iglob
+from json import load as json_load
+from os import listdir
+from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
+from time import sleep
+from typing import List, Tuple
+from uuid import uuid4
 
 
 class Config:
@@ -20,7 +19,7 @@ class Config:
         self.__logger = logger
         self.__db = db
 
-        if not exists("/usr/sbin/nginx"):
+        if not Path("/usr/sbin/nginx").exists():
             while not self.__db.is_initialized():
                 self.__logger.warning(
                     "Database is not initialized, retrying in 5s ...",
@@ -48,7 +47,7 @@ class Config:
         dict
             The values of the file converted to dict
         """
-        if not isfile(filename):
+        if not Path(filename).is_file():
             return {}
 
         data = {}
@@ -94,7 +93,7 @@ class Config:
         plugins_settings = self.get_plugins_settings()
         for service in services_conf:
             server_name = service["SERVER_NAME"].split(" ")[0]
-            for k in service.keys():
+            for k in service:
                 key_without_server_name = k.replace(f"{server_name}_", "")
                 if (
                     plugins_settings[key_without_server_name]["context"] != "global"
@@ -127,7 +126,7 @@ class Config:
         if proc.returncode != 0:
             raise Exception(f"Error from generator (return code = {proc.returncode})")
 
-        remove(env_file)
+        Path(env_file).unlink()
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -136,7 +135,7 @@ class Config:
         }
 
     def get_plugins(self) -> List[dict]:
-        if not exists("/usr/sbin/nginx"):
+        if not Path("/usr/sbin/nginx").exists():
             plugins = self.__db.get_plugins()
             plugins.sort(key=lambda x: x["name"])
 
@@ -205,9 +204,9 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        if exists("/usr/sbin/nginx"):
+        if Path("/usr/sbin/nginx").exists():
             return {
-                k: ({"value": v, "method": "ui"} if methods is True else v)
+                k: ({"value": v, "method": "ui"} if methods else v)
                 for k, v in self.__env_to_dict("/etc/nginx/variables.env").items()
             }
 
@@ -221,17 +220,17 @@ class Config:
         list
             The services
         """
-        if exists("/usr/sbin/nginx"):
+        if Path("/usr/sbin/nginx").exists():
             services = []
             plugins_settings = self.get_plugins_settings()
             for filename in iglob("/etc/nginx/**/variables.env"):
                 service = filename.split("/")[3]
                 env = {
                     k.replace(f"{service}_", ""): (
-                        {"value": v, "method": "ui"} if methods is True else v
+                        {"value": v, "method": "ui"} if methods else v
                     )
                     for k, v in self.__env_to_dict(filename).items()
-                    if k.startswith(f"{service}_") or k in plugins_settings.keys()
+                    if k.startswith(f"{service}_") or k in plugins_settings
                 }
                 services.append(env)
 
@@ -314,7 +313,7 @@ class Config:
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service[
                 "SERVER_NAME"
             ] in variables["SERVER_NAME"].split(" "):
-                if edit is False:
+                if not edit:
                     return (
                         f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
                         1,
