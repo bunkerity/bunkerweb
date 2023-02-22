@@ -1,7 +1,8 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
-from os import getcwd, listdir
+from os import listdir
 from os.path import join
+from pathlib import Path
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
@@ -23,9 +24,9 @@ from selenium.common.exceptions import (
 try:
     ready = False
     retries = 0
-    while ready is False:
+    while not ready:
         with suppress(RequestException):
-            status_code = get("http://www.example.com:8080/admin").status_code
+            status_code = get("http://www.example.com/admin").status_code
 
             if status_code > 500:
                 print("An error occurred with the server, exiting ...", flush=True)
@@ -36,7 +37,7 @@ try:
         if retries > 10:
             print("UI took too long to be ready, exiting ...", flush=True)
             exit(1)
-        elif ready is False:
+        elif not ready:
             retries += 1
             print("Waiting for UI to be ready, retrying in 5s ...", flush=True)
             sleep(5)
@@ -44,7 +45,7 @@ try:
     print("UI is ready, starting tests ...", flush=True)
 
     firefox_options = Options()
-    firefox_options.add_argument("--headless")
+    # firefox_options.add_argument("--headless")
 
     print("Starting Firefox ...", flush=True)
 
@@ -54,11 +55,11 @@ try:
         try:
             return WebDriverWait(driver, 4).until(
                 EC.presence_of_element_located((by, _id))
-                if multiple is False
+                if not multiple
                 else EC.presence_of_all_elements_located((by, _id))
             )
         except TimeoutException as e:
-            if error is True:
+            if error:
                 raise e
 
             print(
@@ -68,7 +69,7 @@ try:
 
     def assert_button_click(driver, button: Union[str, WebElement]):
         clicked = False
-        while clicked is False:
+        while not clicked:
             with suppress(ElementClickInterceptedException):
                 if isinstance(button, str):
                     button = safe_get_element(driver, By.XPATH, button)
@@ -97,7 +98,7 @@ try:
                 )
                 break
             except TimeoutException:
-                if error is True:
+                if error:
                     print("Messages list not found, exiting ...", flush=True)
                     exit(1)
                 error = True
@@ -109,7 +110,7 @@ try:
                 is_in = True
                 break
 
-        if is_in is False:
+        if not is_in:
             print(
                 f'Message "{message}" not found in one of the messages in the list, exiting ...',
                 flush=True,
@@ -147,7 +148,7 @@ try:
             print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
             exit(1)
 
-        if message is True:
+        if message:
             print(
                 f"{name.title()} page loaded successfully",
                 flush=True,
@@ -155,7 +156,7 @@ try:
 
     with webdriver.Firefox(
         service=Service("./geckodriver")
-        if "geckodriver" in listdir(getcwd())
+        if "geckodriver" in listdir(Path.cwd())
         else None,
         options=firefox_options,
     ) as driver:
@@ -163,9 +164,9 @@ try:
         driver.maximize_window()
         driver_wait = WebDriverWait(driver, 15)
 
-        print("Navigating to http://www.example.com:8080/admin ...", flush=True)
+        print("Navigating to http://www.example.com/admin ...", flush=True)
 
-        driver.get("http://www.example.com:8080/admin")
+        driver.get("http://www.example.com/admin")
 
         ### LOGIN PAGE
 
@@ -182,7 +183,7 @@ try:
             flush=True,
         )
 
-        driver.get("http://www.example.com:8080/admin/home")
+        driver.get("http://www.example.com/admin/home")
 
         print("Waiting for toast ...", flush=True)
 
@@ -663,9 +664,9 @@ try:
 
         ready = False
         retries = 0
-        while ready is False:
+        while not ready:
             with suppress(RequestException):
-                status_code = get("http://app1.example.com:8080/").status_code
+                status_code = get("http://app1.example.com/").status_code
 
                 if status_code > 500:
                     print("The service is not working, exiting ...", flush=True)
@@ -676,7 +677,7 @@ try:
             if retries > 10:
                 print("The service took too long to be ready, exiting ...", flush=True)
                 exit(1)
-            elif ready is False:
+            elif not ready:
                 retries += 1
                 print(
                     "Waiting for the service to be ready, retrying in 5s ...",
@@ -783,9 +784,7 @@ try:
 
         sleep(5)
 
-        driver.execute_script(
-            f"window.open('http://www.example.com:8080/hello','_blank');"
-        )
+        driver.execute_script(f"window.open('http://www.example.com/hello','_blank');")
         driver.switch_to.window(driver.window_handles[1])
         driver.switch_to.default_content()
 
@@ -866,7 +865,7 @@ try:
 
         safe_get_element(
             driver, By.XPATH, "//input[@type='file' and @name='file']"
-        ).send_keys(join(getcwd(), "test.zip"))
+        ).send_keys(join(Path.cwd(), "test.zip"))
 
         access_page(
             driver,
@@ -885,7 +884,7 @@ try:
 
         safe_get_element(
             driver, By.XPATH, "//input[@type='file' and @name='file']"
-        ).send_keys(join(getcwd(), "discord.zip"))
+        ).send_keys(join(Path.cwd(), "discord.zip"))
 
         access_page(
             driver,
@@ -1239,7 +1238,7 @@ try:
         sleep(0.3)
 
         resp = get(
-            "http://www.example.com:8080/admin/jobs/download?job_name=mmdb-country&file_name=country.mmdb"
+            "http://www.example.com/admin/jobs/download?job_name=mmdb-country&file_name=country.mmdb"
         )
 
         if resp.status_code != 200:

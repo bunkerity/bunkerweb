@@ -3,6 +3,7 @@ import sys
 import tempfile
 import os
 import time
+import pathlib
 
 distro = sys.argv[1]
 if distro == "ubuntu":
@@ -327,10 +328,10 @@ if distro == "ubuntu":
     # Checking Removing test
     try:
         if (
-            os.path.exists("/usr/share/bunkerweb")
-            or os.path.exists("/var/tmp/bunkerweb")
-            or os.path.exists("/var/cache/bunkerweb")
-            or os.path.exists("/usr/bin/bwcli")
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
         ):
             test_results["Removing test"] = "KO"
         else:
@@ -387,7 +388,10 @@ if distro == "ubuntu":
         print("❌ /etc/bunkerweb found.")
     # Checking Purging test
     try:
-        if os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
+        if (
+            pathlib.Path("/var/lib/bunkerweb").is_dir()
+            or pathlib.Path("/etc/bunkerweb").is_dir()
+        ):
             test_results["Purging test"] = "KO"
         else:
             test_results["Purging test"] = "OK"
@@ -853,10 +857,10 @@ elif distro == "debian":
     # Checking Removing test
     try:
         if (
-            os.path.exists("/usr/share/bunkerweb")
-            or os.path.exists("/var/tmp/bunkerweb")
-            or os.path.exists("/var/cache/bunkerweb")
-            or os.path.exists("/usr/bin/bwcli")
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
         ):
             test_results["Removing test"] = "KO"
         else:
@@ -913,7 +917,10 @@ elif distro == "debian":
         print("❌ /etc/bunkerweb found.")
     # Checking Purging test
     try:
-        if os.path.isdir("/var/lib/bunkerweb") or os.path.isdir("/etc/bunkerweb"):
+        if (
+            pathlib.Path("/var/lib/bunkerweb").is_dir()
+            or pathlib.Path("/etc/bunkerweb").is_dir()
+        ):
             test_results["Purging test"] = "KO"
         else:
             test_results["Purging test"] = "OK"
@@ -1418,12 +1425,12 @@ elif distro == "fedora":
     # Checking Removing test
     try:
         if (
-            os.path.exists("/usr/share/bunkerweb")
-            or os.path.exists("/var/tmp/bunkerweb")
-            or os.path.exists("/var/cache/bunkerweb")
-            or os.path.exists("/usr/bin/bwcli")
-            or os.path.isdir("/var/lib/bunkerweb")
-            or os.path.isdir("/etc/bunkerweb")
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
+            or pathlib.Path("/var/lib/bunkerweb").is_dir()
+            or pathlib.Path("/etc/bunkerweb").is_dir()
         ):
             test_results["Removing test"] = "KO"
         else:
@@ -1958,12 +1965,12 @@ elif distro == "rhel":
     # Checking Removing test
     try:
         if (
-            os.path.exists("/usr/share/bunkerweb")
-            or os.path.exists("/var/tmp/bunkerweb")
-            or os.path.exists("/var/cache/bunkerweb")
-            or os.path.exists("/usr/bin/bwcli")
-            or os.path.isdir("/var/lib/bunkerweb")
-            or os.path.isdir("/etc/bunkerweb")
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
+            or pathlib.Path("/var/lib/bunkerweb").is_dir()
+            or pathlib.Path("/etc/bunkerweb").is_dir()
         ):
             test_results["Removing test"] = "KO"
         else:
@@ -2481,12 +2488,12 @@ elif distro == "centos":
     # Checking Removing test
     try:
         if (
-            os.path.exists("/usr/share/bunkerweb")
-            or os.path.exists("/var/tmp/bunkerweb")
-            or os.path.exists("/var/cache/bunkerweb")
-            or os.path.exists("/usr/bin/bwcli")
-            or os.path.isdir("/var/lib/bunkerweb")
-            or os.path.isdir("/etc/bunkerweb")
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
+            or pathlib.Path("/var/lib/bunkerweb").is_dir()
+            or pathlib.Path("/etc/bunkerweb").is_dir()
         ):
             test_results["Removing test"] = "KO"
         else:
