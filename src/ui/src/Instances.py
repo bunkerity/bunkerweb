@@ -1,6 +1,6 @@
-from os.path import exists
+from pathlib import Path
 from subprocess import run
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from API import API
 from ApiCaller import ApiCaller
@@ -23,7 +23,7 @@ class Instance:
         _type: str,
         status: str,
         data: Any = None,
-        apiCaller: ApiCaller = ApiCaller(),
+        apiCaller: Optional[ApiCaller] = None,
     ) -> None:
         self._id = _id
         self.name = name
@@ -39,7 +39,7 @@ class Instance:
             else True
         )
         self.env = data
-        self.apiCaller = apiCaller
+        self.apiCaller = apiCaller or ApiCaller()
 
     def get_id(self) -> str:
         return self._id
@@ -122,7 +122,7 @@ class Instances:
                         "service",
                         status,
                         instance,
-                        apiCaller,
+                        None,
                     )
                 )
         elif self.__integration == "Kubernetes":
@@ -172,7 +172,7 @@ class Instances:
         )
 
         # Local instance
-        if exists("/usr/sbin/nginx"):
+        if Path("/usr/sbin/nginx").exists():
             instances.insert(
                 0,
                 Instance(
@@ -180,23 +180,11 @@ class Instances:
                     "local",
                     "127.0.0.1",
                     "local",
-                    "up" if exists("/var/tmp/bunkerweb/nginx.pid") else "down",
+                    "up" if Path("/var/tmp/bunkerweb/nginx.pid").exists() else "down",
                 ),
             )
 
         return instances
-
-    def send_custom_configs_to_instances(self) -> Union[list[str], str]:
-        failed_to_send: list[str] = []
-        for instance in self.get_instances():
-            if instance.health is False:
-                failed_to_send.append(instance.name)
-                continue
-
-            if not instance.send_custom_configs():
-                failed_to_send.append(instance.name)
-
-        return failed_to_send or "Successfully sent custom configs to instances"
 
     def reload_instances(self) -> Union[list[str], str]:
         not_reloaded: list[str] = []
@@ -210,7 +198,9 @@ class Instances:
 
         return not_reloaded or "Successfully reloaded instances"
 
-    def reload_instance(self, id: int = None, instance: Instance = None) -> str:
+    def reload_instance(
+        self, id: Optional[int] = None, instance: Optional[Instance] = None
+    ) -> str:
         if instance is None:
             instance = self.__instance_from_id(id)
 
