@@ -119,6 +119,10 @@ do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/luajit-geoip/geoip /opt/bunkerweb
 echo "ℹ️ Install lbase64"
 do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lbase64/base64.lua /opt/bunkerweb/deps/lib/lua
 
+# Installing lua-resty-env
+echo "ℹ️ Installing lua-resty-env"
+do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lua-resty-env/src/resty/env.lua /opt/bunkerweb/deps/lib/lua/resty
+
 # Compile dynamic modules
 echo "ℹ️ Compile and install dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
@@ -127,7 +131,7 @@ if [ "$OS" = "fedora" ] ; then
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'//" | sed "s/--with-cc-opt='.*'//")"
 fi
 echo '#!/bin/bash' > "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
-echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli" >> "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
+echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/ModSecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit" >> "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
 do_and_check_cmd chmod +x "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
 CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}" LUAJIT_LIB="/opt/bunkerweb/deps/lib -Wl,-rpath,/opt/bunkerweb/deps/lib" LUAJIT_INC="/opt/bunkerweb/deps/include/luajit-2.1" MODSECURITY_LIB="/opt/bunkerweb/deps/lib" MODSECURITY_INC="/opt/bunkerweb/deps/include" do_and_check_cmd ./configure-fix.sh
 CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules

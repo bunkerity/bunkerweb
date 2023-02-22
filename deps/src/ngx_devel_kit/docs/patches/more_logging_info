@@ -1,0 +1,48 @@
+When tracking down some potential issues in the nginx constellation,
+we've found it useful to understand where particular error messages
+are coming from, since many of the same messages are repeated in
+various places. This patch will write the source file from which the
+message originated, the function name, and the line number if you're
+using GCC to compile nginx. Here's an example:
+
+Old Output:
+2010/01/12 14:43:10 [notice] 67772#0: nginx/0.7.64
+2010/01/12 14:43:10 [notice] 67772#0: built by gcc 4.0.1 (Apple Inc. build 5490)
+2010/01/12 14:43:10 [notice] 67772#0: OS: Darwin 9.8.0
+2010/01/12 14:43:10 [notice] 67772#0: hw.ncpu: 2
+2010/01/12 14:43:10 [notice] 67772#0: net.inet.tcp.sendspace: 65536
+2010/01/12 14:43:10 [notice] 67772#0: kern.ipc.somaxconn: 128
+2010/01/12 14:43:10 [notice] 67772#0: getrlimit(RLIMIT_NOFILE):
+256:9223372036854775807
+2010/01/12 14:43:10 [notice] 67772#0: start worker processes
+2010/01/12 14:43:10 [notice] 67772#0: start worker process 67785
+2010/01/12 14:43:16 [notice] 67772#0: signal 20 (SIGCHLD) received
+
+New Output:
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_posix_init.c
+ngx_os_status(   80) nginx/0.7.64
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_posix_init.c
+ngx_os_status(   83) built by gcc 4.0.1 (Apple Inc. build 5490)
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_darwin_init.c
+ngx_os_specific_status(  153) OS: Darwin 9.8.0
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_darwin_init.c
+ngx_os_specific_status(  166) hw.ncpu: 2
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_darwin_init.c
+ngx_os_specific_status(  166) net.inet.tcp.sendspace: 65536
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_darwin_init.c
+ngx_os_specific_status(  166) kern.ipc.somaxconn: 128
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_posix_init.c
+ngx_os_status(   92) getrlimit(RLIMIT_NOFILE):
+2560:9223372036854775807
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_process_cycle.c
+ngx_start_worker_processes(  337) start worker processes
+2010/01/14 16:35:09 [notice] 27241#0: src/os/unix/ngx_process.c
+ngx_spawn_process(  201) start worker process 27254
+2010/01/14 16:35:14 [notice] 27241#0: src/os/unix/ngx_process.c
+ngx_signal_handler(  420) signal 20 (SIGCHLD) received
+
+Formatting the filename and function name fields into fixed-width
+fields would be nicer, however that would require further changes in
+src/core/ngx_string.c
+
+(C) Brian Moran - bmoran@onehub.com  (posted to nginx-devel mailing list on 15/01/10)

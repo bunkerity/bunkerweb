@@ -82,7 +82,7 @@ class Templator :
                 server_key = server + "_SERVER_NAME"
                 if server_key not in self.__config :
                     config["SERVER_NAME"] = server
-            root_confs = ["server.conf", "access-lua.conf", "init-lua.conf", "log-lua.conf"]
+            root_confs = ["server.conf", "access-lua.conf", "init-lua.conf", "log-lua.conf", "set-lua.conf"]
             for root_conf in root_confs :
                 if template.endswith("/" + root_conf) :
                     name = os.path.basename(template)

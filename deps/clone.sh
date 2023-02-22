@@ -238,6 +238,10 @@ fi
 echo "ℹ️ Download lbase64"
 git_secure_clone "https://github.com/iskolbin/lbase64.git" "c261320edbdf82c16409d893a96c28c704aa0ab8"
 
+# lua-resty-env v0.4.0
+echo "ℹ️ Downloading lua-resty-env"
+git_secure_clone "https://github.com/3scale/lua-resty-env.git" "adb294def823dd910ffa11972d2c61eab7cfce3e"
+
 # ModSecurity v3.0.4 (looks like v3.0.5 has a memleak on reload)
 # TODO : test v3.0.6
 echo "ℹ️ Download ModSecurity"
@@ -272,18 +276,6 @@ git_secure_clone "https://github.com/maxmind/libmaxminddb.git" "2d0e6b7360b88f64
 echo "ℹ️ Download headers-more-nginx-module"
 git_secure_clone "https://github.com/openresty/headers-more-nginx-module.git" "a4a0686605161a6777d7d612d5aef79b9e7c13e0"
 
-# ngx_http_geoip2_module v3.3
-#echo "ℹ️ Download ngx_http_geoip2_module"
-#dosed="no"
-#if [ ! -d "deps/src/ngx_http_geoip2_module" ] ; then
-#	dosed="yes"
-#fi
-#git_secure_clone "https://github.com/leev/ngx_http_geoip2_module.git" "5a83b6f958c67ea88d2899d0b3c2a5db8e36b211"
-#if [ "$dosed" = "yes" ] ; then
-#	do_and_check_cmd sed -i '1s:^:ngx_feature_path=/opt/bunkerweb/deps/include\n:' deps/src/ngx_http_geoip2_module/config
-#	do_and_check_cmd sed -i 's:^ngx_feature_libs=.*$:ngx_feature_libs="-Wl,-rpath,/opt/bunkerweb/deps/lib -L/opt/bunkerweb/deps/lib -lmaxminddb":' deps/src/ngx_http_geoip2_module/config
-#fi
-
 # nginx_cookie_flag_module v1.1.0
 echo "ℹ️ Download nginx_cookie_flag_module"
 git_secure_clone "https://github.com/AirisX/nginx_cookie_flag_module.git" "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
@@ -291,3 +283,7 @@ git_secure_clone "https://github.com/AirisX/nginx_cookie_flag_module.git" "4e48a
 # ngx_brotli v?
 echo "ℹ️ Download ngx_brotli"
 git_secure_clone "https://github.com/google/ngx_brotli.git" "9aec15e2aa6feea2113119ba06460af70ab3ea62"
+
+# ngx_devel_kit
+echo "ℹ️ Downloading ngx_devel_kit"
+git_secure_clone "https://github.com/vision5/ngx_devel_kit.git" "b4642d6ca01011bd8cd30b253f5c3872b384fd21"

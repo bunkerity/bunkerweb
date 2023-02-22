@@ -4,6 +4,7 @@
 
 - Fix DISABLE_DEFAULT_SERVER=yes not working with HTTPS (again)
 - Fix wrong setting name in realip job
+- Fix whitelisting not working with modsecurity
 
 ## v1.4.6 - 2023/02/14
 
