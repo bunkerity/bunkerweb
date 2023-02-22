@@ -24,13 +24,8 @@ try:
     need_default_cert = False
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
-<<<<<<< HEAD
-            for check_var in [
-                "USE_CUSTOM_SSL",
-=======
             for check_var in (
-                "USE_CUSTOM_HTTPS",
->>>>>>> 6bf59b59a25691c6c6dbafc4ffb3051bc1519f34
+                "USE_CUSTOM_SSL",
                 "AUTO_LETS_ENCRYPT",
                 "GENERATE_SELF_SIGNED_SSL",
             ):
