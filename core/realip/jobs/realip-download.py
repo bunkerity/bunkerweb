@@ -51,7 +51,7 @@ try :
 
     # Get URLs
     urls = []
-    for url in os.getenv("REALIP_FROM_URLS", "").split(" ") :
+    for url in os.getenv("REAL_IP_FROM_URLS", "").split(" ") :
         if url != "" and url not in urls :
             urls.append(url)
 
