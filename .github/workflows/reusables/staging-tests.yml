@@ -1,0 +1,111 @@
+name: Perform staging tests (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TYPE:
+        required: true
+        type: string
+    secrets:
+      PRIVATE_REGISTRY:
+        required: true
+      PRIVATE_REGISTRY_TOKEN:
+        required: true
+      TEST_DOMAINS:
+        required: true
+      ROOT_DOMAIN:
+        required: true
+
+jobs:
+  tests:
+    runs-on: [self-hosted, bw-${{ inputs.TYPE }}]
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      - name: Pull BW image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging local/bunkerweb-tests:latest
+        if: ! contains(fromJSON('["linux", "k8s"]'), inputs.TYPE)
+      - name: Pull Scheduler image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging local/scheduler-tests:latest
+        if: ! contains(fromJSON('["linux", "k8s"]'), inputs.TYPE)
+      - name: Pull Autoconf image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:staging local/scheduler-tests:latest
+        if: contains(fromJSON('["autoconf", "swarm"]'), inputs.TYPE)
+      - name: Push images to local repo
+        run: docker tag local/bunkerweb-tests:latest 192.168.42.100:5000/bunkerweb-tests:latest && docker push 192.168.42.100:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest 192.168.42.100:5000/scheduler-tests:latest && docker push 192.168.42.100:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest 192.168.42.100:5000/autoconf-tests:latest && docker push 192.168.42.100:5000/autoconf-tests:latest
+        if: inputs.TYPE == 'swarm'
+      - name: Install test dependencies
+        run: pip3 install -r tests/requirements.txt
+      - uses: actions/download-artifact@v3
+        with:
+          name: tf-k8s
+          path: /tmp
+        if: inputs.TYPE == 'k8s'
+      - run: tar xvf /tmp/terraform.tar -C /
+        if: inputs.TYPE == 'k8s'
+      - uses: azure/setup-kubectl@v3
+        if: inputs.TYPE == 'k8s'
+      - uses: azure/setup-helm@v3
+        if: inputs.TYPE == 'k8s'
+      - name: Pull BW linux ubuntu test image
+        if: inputs.TYPE == "linux"
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:staging local/ubuntu:latest
+      - name: Pull BW linux debian test image
+        if: inputs.TYPE == "linux"
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging local/debian:latest
+      - name: Pull BW linux centos test image
+        if: inputs.TYPE == "linux"
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging local/centos:latest
+      - name: Pull BW linux fedora test image
+        if: inputs.TYPE == "linux"
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging local/fedora:latest
+      - name: Pull BW linux redhat test image
+        if: inputs.TYPE == "linux"
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/redhat-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/redhat-tests:staging local/redhat:latest
+      # Do tests
+      - name: Run tests
+        if: contains(fromJSON('["docker", "autoconf", "swarm"]'), inputs.TYPE)
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "${{ inputs.TYPE }}"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run tests
+        if: inputs.TYPE == "k8s"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+          KUBECONFIG: "/tmp/k8s/kubeconfig"
+          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+          IMAGE_TAG: "latest"
+      - name: Run Linux ubuntu tests
+        if: inputs.TYPE == "linux"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux debian tests
+        if: inputs.TYPE == "linux"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux centos tests
+        if: inputs.TYPE == "linux"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux fedora tests
+        if: inputs.TYPE == "linux"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

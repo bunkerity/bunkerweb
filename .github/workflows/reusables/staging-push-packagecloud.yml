@@ -1,0 +1,89 @@
+name: Push staging packagecloud (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      SEPARATOR:
+        required: true
+        type: string
+      SUFFIX:
+        required: true
+        type: string
+      REPO:
+        required: true
+        type: string
+      LINUX:
+        required: true
+        type: string
+      VERSION:
+        required: true
+        type: string
+      PACKAGE:
+        required: true
+        type: string
+    secrets:
+      PACKAGECLOUD_TOKEN:
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set variables
+        run: |
+          VER=$(cat src/VERSION | tr -d '\n')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+      - name: Install ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+      - name: Install packagecloud
+        run: gem install package_cloud
+      # Download packages
+      - uses: actions/download-artifact@v3
+        with:
+          name: package-${{ inputs.LINUX }}
+          path: /tmp/${{ inputs.LINUX }}
+      # Remove existing packages
+      - name: Remove existing package
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ env.VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      # TODO : push
+      # Push packages
+      - name: Push Ubuntu DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /tmp/ubuntu/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push Debian DEB to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /tmp/debian/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: debian/bullseye
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push CentOS RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /tmp/centos/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: el/8
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push Fedora RPM to packagecloud
+        uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: /tmp/fedora/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: bunkerweb-dev
+          PACKAGECLOUD-DISTRIB: fedora/36
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
