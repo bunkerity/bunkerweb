@@ -30,17 +30,22 @@ class SwarmTest(Test):
                 raise (Exception("chown failed (swarm stack)"))
             if isdir("/tmp/swarm"):
                 rmtree("/tmp/swarm")
-            copytree("./integrations/swarm", "/tmp/swarm")
-            compose = "/tmp/swarm/stack.yml"
+            copytree("./misc/integrations", "/tmp/integrations")
+            compose = "/tmp/integrations/swarm.mariadb.yml"
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",
-                "192.168.42.100:5000/bw-tests:latest",
+                "192.168.42.100:5000/bunkerweb-tests:latest",
             )
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-autoconf:.*$",
-                "192.168.42.100:5000/bw-autoconf-tests:latest",
+                "192.168.42.100:5000/autoconf-tests:latest",
+            )
+            Test.replace_in_file(
+                compose,
+                r"bunkerity/bunkerweb-scheduler:.*$",
+                "192.168.42.100:5000/scheduler-tests:latest",
             )
             Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run(
