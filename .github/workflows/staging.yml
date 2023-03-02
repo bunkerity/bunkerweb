@@ -214,35 +214,35 @@ jobs:
       ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
   # Delete infrastructures
- delete-infra-docker:
+  delete-infra-docker:
     needs: [tests-docker]
     uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: docker
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
- delete-infra-autoconf:
+  delete-infra-autoconf:
     needs: [tests-autoconf]
     uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: autoconf
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
- delete-infra-swarm:
+  delete-infra-swarm:
     needs: [tests-swarm]
     uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: swarm
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
- delete-infra-k8s:
+  delete-infra-k8s:
     needs: [tests-k8s]
     uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: k8s
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
- delete-infra-linux:
+  delete-infra-linux:
     needs: [tests-linux]
     uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
     with:
