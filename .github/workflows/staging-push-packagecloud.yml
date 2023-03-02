@@ -53,37 +53,12 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      # TODO : push
-      # Push packages
-      - name: Push Ubuntu DEB to packagecloud
+      # Push package
+      - name: Push package to packagecloud
         uses: danielmundi/upload-packagecloud@v1
         with:
-          PACKAGE-NAME: /tmp/ubuntu/bunkerweb_${{ env.VERSION }}-1_amd64.deb
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/bunkerweb${{ inputs.SEPARATOR }}${{ env.VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: bunkerweb-dev
-          PACKAGECLOUD-DISTRIB: ubuntu/jammy
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push Debian DEB to packagecloud
-        uses: danielmundi/upload-packagecloud@v1
-        with:
-          PACKAGE-NAME: /tmp/debian/bunkerweb_${{ env.VERSION }}-1_amd64.deb
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: bunkerweb-dev
-          PACKAGECLOUD-DISTRIB: debian/bullseye
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push CentOS RPM to packagecloud
-        uses: danielmundi/upload-packagecloud@v1
-        with:
-          PACKAGE-NAME: /tmp/centos/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: bunkerweb-dev
-          PACKAGECLOUD-DISTRIB: el/8
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push Fedora RPM to packagecloud
-        uses: danielmundi/upload-packagecloud@v1
-        with:
-          PACKAGE-NAME: /tmp/fedora/bunkerweb-${{ env.VERSION }}-1.x86_64.rpm
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: bunkerweb-dev
-          PACKAGECLOUD-DISTRIB: fedora/36
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ input.VERSION }}
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

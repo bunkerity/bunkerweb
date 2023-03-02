@@ -1,5 +1,6 @@
 name: Create staging infra (REUSABLE)
 
+on:
   workflow_call:
     inputs:
       TYPE:

@@ -1,5 +1,6 @@
 name: Build staging Linux package (REUSABLE)
 
+on:
   workflow_call:
     inputs:
       LINUX:
