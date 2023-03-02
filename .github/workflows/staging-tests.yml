@@ -18,7 +18,6 @@ on:
 
 jobs:
   tests:
-    runs-on: [self-hosted, bw-${{ inputs.TYPE }}]
     steps:
       # Prepare
       - name: Checkout source code
