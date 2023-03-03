@@ -1,0 +1,17 @@
+FROM redhat/ubi8-init:8.7
+
+# Copy centos repo
+COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
+
+# Copy RPM-GPG-KEY-CentOS-Official
+COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+# Import RPM-GPG-KEY-CentOS-Official
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
+
+RUN dnf install php-fpm curl yum-utils epel-release -y && \
+	dnf install nginx-1.22.1 -y
+
+COPY ./package-rhel/*.rpm /opt

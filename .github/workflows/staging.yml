@@ -154,7 +154,7 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-linux:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
+    needs: [code-security, build-ubuntu, build-debian, build-centos, build-fedora, build-rhel]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
       TYPE: k8s
