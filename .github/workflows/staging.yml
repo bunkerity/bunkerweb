@@ -164,7 +164,6 @@ jobs:
   # Perform tests
   tests-docker:
     needs: [create-infra-docker]
-    runs-on: [self-hosted, bw-docker]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: docker
@@ -172,7 +171,6 @@ jobs:
     secrets: inherit
   tests-autoconf:
     needs: [create-infra-autoconf]
-    runs-on: [self-hosted, bw-autoconf]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: autoconf
@@ -180,7 +178,6 @@ jobs:
     secrets: inherit
   tests-swarm:
     needs: [create-infra-swarm]
-    runs-on: [self-hosted, bw-swarm]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: swarm
@@ -188,7 +185,6 @@ jobs:
     secrets: inherit
   tests-k8s:
     needs: [create-infra-k8s]
-    runs-on: [ubuntu-latest]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: k8s
@@ -196,7 +192,6 @@ jobs:
     secrets: inherit
   tests-linux:
     needs: [create-infra-linux]
-    runs-on: [self-hosted, bw-linux]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: linux
