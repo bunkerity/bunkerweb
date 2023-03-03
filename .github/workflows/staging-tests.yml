@@ -58,19 +58,19 @@ jobs:
       - uses: azure/setup-helm@v3
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:staging local/ubuntu:latest
       - name: Pull BW linux debian test image
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging local/debian:latest
       - name: Pull BW linux centos test image
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging local/centos:latest
       - name: Pull BW linux fedora test image
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging local/fedora:latest
       - name: Pull BW linux redhat test image
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/redhat-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/redhat-tests:staging local/redhat:latest
       # Do tests
       - name: Run tests
@@ -80,7 +80,7 @@ jobs:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
-        if: inputs.TYPE == "k8s"
+        if: inputs.TYPE == 'k8s'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS }}
@@ -89,25 +89,25 @@ jobs:
           PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
           IMAGE_TAG: "latest"
       - name: Run Linux ubuntu tests
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux debian tests
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux centos tests
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux fedora tests
-        if: inputs.TYPE == "linux"
+        if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
