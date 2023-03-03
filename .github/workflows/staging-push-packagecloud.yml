@@ -60,5 +60,5 @@ jobs:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/bunkerweb${{ inputs.SEPARATOR }}${{ env.VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ input.VERSION }}
+          PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
