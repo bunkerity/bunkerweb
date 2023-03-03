@@ -164,64 +164,59 @@ jobs:
   # Perform tests
   tests-docker:
     needs: [infra-create-docker]
-    runs-on: [self-hosted, bw-docker]
-    steps:
-      - uses: ./.github/workflows/staging-tests.yml
-        with:
-          TYPE: docker
-        secrets:
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: docker
+      RUNS_ON: [self-hosted, bw-docker]
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-autoconf:
     needs: [infra-create-autoconf]
-    runs-on: [self-hosted, bw-autoconf]
-    steps:
-      - uses: ./.github/workflows/staging-tests.yml
-        with:
-          TYPE: autoconf
-        secrets:
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: autoconf
+      RUNS_ON: [self-hosted, bw-autoconf]
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-swarm:
     needs: [infra-create-swarm]
-    runs-on: [self-hosted, bw-swarm]
-    steps:
-      - uses: ./.github/workflows/staging-tests.yml
-        with:
-          TYPE: swarm
-        secrets:
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: swarm
+      RUNS_ON: [self-hosted, bw-swarm]
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-k8s:
     needs: [infra-create-k8s]
-    runs-on: [ubuntu-latest]
-    steps:
-      - uses: ./.github/workflows/staging-tests.yml
-        with:
-          TYPE: k8s
-        secrets:
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: k8s
+      RUNS_ON: [ubuntu-latest]
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-linux:
     needs: [infra-create-k8s]
-    runs-on: [self-hosted, bw-linux]
-    steps:
-      - uses: ./.github/workflows/staging-tests.yml
-        with:
-          TYPE: linux
-        secrets:
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: linux
+      RUNS_ON: [self-hosted, bw-linux]
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
   # Delete infrastructures
   delete-infra-docker:
