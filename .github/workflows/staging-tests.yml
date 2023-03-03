@@ -6,6 +6,9 @@ on:
       TYPE:
         required: true
         type: string
+      RUNS_ON:
+        required: true
+        type: string
     secrets:
       PRIVATE_REGISTRY:
         required: true
