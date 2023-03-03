@@ -170,11 +170,7 @@ jobs:
       with:
         TYPE: docker
         RUNS_ON: '["self-hosted", "bw-docker"]'
-      secrets:
-        PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-        PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-        TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
-        ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      secrets: inherit
   tests-autoconf:
     needs: [create-infra-autoconf]
     runs-on: [self-hosted, bw-autoconf]

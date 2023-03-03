@@ -9,15 +9,15 @@ on:
       RUNS_ON:
         required: true
         type: string
-    secrets:
-      PRIVATE_REGISTRY:
-        required: true
-      PRIVATE_REGISTRY_TOKEN:
-        required: true
-      TEST_DOMAINS:
-        required: true
-      ROOT_DOMAIN:
-        required: true
+    # secrets:
+    #   PRIVATE_REGISTRY:
+    #     required: true
+    #   PRIVATE_REGISTRY_TOKEN:
+    #     required: true
+    #   TEST_DOMAINS:
+    #     required: true
+    #   ROOT_DOMAIN:
+    #     required: true
 
 jobs:
   tests:
@@ -72,18 +72,33 @@ jobs:
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:staging local/rhel:latest
+      - name: Extract docker domains
+        run: echo "EXTRACTED_DOMAINS=$TEST_DOMAINS_DOCKER" >> $GITHUB_ENV
+        if: inputs.TYPE == 'docker'
+      - name: Extract autoconf domains
+        run: echo "EXTRACTED_DOMAINS=$TEST_DOMAINS_AUTOCONF" >> $GITHUB_ENV
+        if: inputs.TYPE == 'autoconf'
+      - name: Extract swarm domains
+        run: echo "EXTRACTED_DOMAINS=$TEST_DOMAINS_SWARM" >> $GITHUB_ENV
+        if: inputs.TYPE == 'swarm'
+      - name: Extract k8s domains
+        run: echo "EXTRACTED_DOMAINS=$TEST_DOMAINS_KUBERNETES" >> $GITHUB_ENV
+        if: inputs.TYPE == 'k8s'
+      - name: Extract linux domains
+        run: echo "EXTRACTED_DOMAINS=$TEST_DOMAINS_LINUX" >> $GITHUB_ENV
+        if: inputs.TYPE == 'linux'
       # Do tests
       - name: Run tests
         if: contains(fromJSON('["docker", "autoconf", "swarm"]'), inputs.TYPE)
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "${{ inputs.TYPE }}"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS }}
+          TEST_DOMAINS: ${{ env.EXTRACTED_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
         if: inputs.TYPE == 'k8s'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS }}
+          TEST_DOMAINS: ${{ env.EXTRACTED_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
           KUBECONFIG: "/tmp/k8s/kubeconfig"
           PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
@@ -92,23 +107,23 @@ jobs:
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          TEST_DOMAINS: ${{ env.EXTRACTED_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux debian tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          TEST_DOMAINS: ${{ env.EXTRACTED_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux centos tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          TEST_DOMAINS: ${{ env.EXTRACTED_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux fedora tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
         env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          TEST_DOMAINS: ${{ env.EXTRACTED_DOMAINS }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
