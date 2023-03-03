@@ -26,10 +26,10 @@ jobs:
           path: /tmp
       - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
       - uses: azure/setup-kubectl@v3
-        if: inputs.TYPE == "k8s"
+        if: inputs.TYPE == 'k8s'
       # Remove infra
       - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
-        if: inputs.TYPE == "k8s"
+        if: inputs.TYPE == 'k8s'
         continue-on-error: true
         env:
           KUBECONFIG: /tmp/k8s/kubeconfig
