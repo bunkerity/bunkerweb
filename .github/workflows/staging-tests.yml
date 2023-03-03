@@ -69,9 +69,9 @@ jobs:
       - name: Pull BW linux fedora test image
         if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging local/fedora:latest
-      - name: Pull BW linux redhat test image
+      - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/redhat-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/redhat-tests:staging local/redhat:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:staging local/rhel:latest
       # Do tests
       - name: Run tests
         if: contains(fromJSON('["docker", "autoconf", "swarm"]'), inputs.TYPE)

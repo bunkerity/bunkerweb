@@ -89,10 +89,10 @@ jobs:
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-redhat:
+  build-rhel:
     uses: ./.github/workflows/staging-linux-build.yml
     with:
-      LINUX: redhat
+      LINUX: rhel
       PACKAGE: rpm
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -326,7 +326,7 @@ jobs:
       PACKAGE: deb
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-redhat:
+  push-rhel:
     needs: [tests-linux]
     uses: ./.github/workflows/staging-push-packagecloud.yml
     with:
