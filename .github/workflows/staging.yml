@@ -165,64 +165,43 @@ jobs:
   tests-docker:
     needs: [create-infra-docker]
     runs-on: [self-hosted, bw-docker]
-    steps:
-    - uses: ./.github/workflows/staging-tests.yml
-      with:
-        TYPE: docker
-        RUNS_ON: '["self-hosted", "bw-docker"]'
-      secrets: inherit
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: docker
+      RUNS_ON: '["self-hosted", "bw-docker"]'
+    secrets: inherit
   tests-autoconf:
     needs: [create-infra-autoconf]
     runs-on: [self-hosted, bw-autoconf]
-    steps:
-    - uses: ./.github/workflows/staging-tests.yml
-      with:
-        TYPE: autoconf
-        RUNS_ON: '["self-hosted", "bw-autoconf"]'
-      secrets:
-        PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-        PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-        TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-        ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: autoconf
+      RUNS_ON: '["self-hosted", "bw-autoconf"]'
+    secrets: inherit
   tests-swarm:
     needs: [create-infra-swarm]
     runs-on: [self-hosted, bw-swarm]
-    steps:
-    - uses: ./.github/workflows/staging-tests.yml
-      with:
-        TYPE: swarm
-        RUNS_ON: '["self-hosted", "bw-swarm"]'
-      secrets:
-        PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-        PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-        TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
-        ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: swarm
+      RUNS_ON: '["self-hosted", "bw-swarm"]'
+    secrets: inherit
   tests-k8s:
     needs: [create-infra-k8s]
     runs-on: [ubuntu-latest]
-    steps:
-    - uses: ./.github/workflows/staging-tests.yml
-      with:
-        TYPE: k8s
-        RUNS_ON: '["ubuntu-latest"]'
-      secrets:
-        PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-        PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-        TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-        ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: k8s
+      RUNS_ON: '["ubuntu-latest"]'
+    secrets: inherit
   tests-linux:
     needs: [create-infra-linux]
     runs-on: [self-hosted, bw-linux]
-    steps:
-    - uses: ./.github/workflows/staging-tests.yml
-      with:
-        TYPE: linux
-        RUNS_ON: '["self-hosted", "bw-linux"]'
-      secrets:
-        PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-        PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-        TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-        ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: linux
+      RUNS_ON: '["self-hosted", "bw-linux"]'
+    secrets: inherit
 
   # Delete infrastructures
   delete-infra-docker:
