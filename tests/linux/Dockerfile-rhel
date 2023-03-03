@@ -11,7 +11,8 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
-RUN dnf install php-fpm curl yum-utils epel-release -y && \
+RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    dnf install php-fpm curl yum-utils -y && \
 	dnf install nginx-1.22.1 -y
 
 COPY ./package-rhel/*.rpm /opt
