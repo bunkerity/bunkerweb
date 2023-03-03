@@ -163,7 +163,7 @@ jobs:
 
   # Perform tests
   tests-docker:
-    needs: [infra-create-docker]
+    needs: [create-infra-docker]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: docker
@@ -174,7 +174,7 @@ jobs:
       TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
       ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-autoconf:
-    needs: [infra-create-autoconf]
+    needs: [create-infra-autoconf]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: autoconf
@@ -185,7 +185,7 @@ jobs:
       TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
       ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-swarm:
-    needs: [infra-create-swarm]
+    needs: [create-infra-swarm]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: swarm
@@ -196,7 +196,7 @@ jobs:
       TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
       ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-k8s:
-    needs: [infra-create-k8s]
+    needs: [create-infra-k8s]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: k8s
@@ -207,7 +207,7 @@ jobs:
       TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
       ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
   tests-linux:
-    needs: [infra-create-k8s]
+    needs: [create-infra-linux]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: linux
