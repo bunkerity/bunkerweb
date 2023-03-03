@@ -18,7 +18,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ${{ github.event.inputs.RUNS_ON }}
+    runs-on: ${{ fromJSON(github.event.inputs.RUNS_ON) }}
     steps:
       # Prepare
       - name: Checkout source code

@@ -167,7 +167,7 @@ jobs:
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: docker
-      RUNS_ON: [self-hosted, bw-docker]
+      RUNS_ON: '["self-hosted", "bw-docker"]'
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
@@ -178,7 +178,7 @@ jobs:
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: autoconf
-      RUNS_ON: [self-hosted, bw-autoconf]
+      RUNS_ON: '["self-hosted", "bw-autoconf"]'
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
@@ -189,7 +189,7 @@ jobs:
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: swarm
-      RUNS_ON: [self-hosted, bw-swarm]
+      RUNS_ON: '["self-hosted", "bw-swarm"]'
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
@@ -200,7 +200,7 @@ jobs:
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: k8s
-      RUNS_ON: [ubuntu-latest]
+      RUNS_ON: '["ubuntu-latest"]'
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
@@ -211,7 +211,7 @@ jobs:
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: linux
-      RUNS_ON: [self-hosted, bw-linux]
+      RUNS_ON: '["self-hosted", "bw-linux"]'
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
