@@ -8,7 +8,7 @@ jobs:
 
   # Containers
   build-bw:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-container-build.yml@staging
+    uses: ./.github/workflows/staging-container-build.yml@staging
     with:
       IMAGE: bunkerweb
       DOCKERFILE: src/bw/Dockerfile
@@ -18,7 +18,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-scheduler:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-container-build.yml@staging
+    uses: ./.github/workflows/staging-container-build.yml@staging
     with:
       IMAGE: scheduler
       DOCKERFILE: src/scheduler/Dockerfile
@@ -28,7 +28,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-autoconf:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-container-build.yml@staging
+    uses: ./.github/workflows/staging-container-build.yml@staging
     with:
       IMAGE: autoconf
       DOCKERFILE: src/autoconf/Dockerfile
@@ -38,7 +38,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-ui:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-container-build.yml@staging
+    uses: ./.github/workflows/staging-container-build.yml@staging
     with:
       IMAGE: ui
       DOCKERFILE: src/ui/Dockerfile
@@ -50,7 +50,7 @@ jobs:
 
   # Linux
   build-ubuntu:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-linux-build.yml@staging
+    uses: ./.github/workflows/staging-linux-build.yml@staging
     with:
       LINUX: ubuntu
       PACKAGE: deb
@@ -60,7 +60,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-debian:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-linux-build.yml@staging
+    uses: ./.github/workflows/staging-linux-build.yml@staging
     with:
       LINUX: debian
       PACKAGE: deb
@@ -70,7 +70,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-centos:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-linux-build.yml@staging
+    uses: ./.github/workflows/staging-linux-build.yml@staging
     with:
       LINUX: centos
       PACKAGE: rpm
@@ -80,7 +80,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-fedora:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-linux-build.yml@staging
+    uses: ./.github/workflows/staging-linux-build.yml@staging
     with:
       LINUX: fedora
       PACKAGE: rpm
@@ -90,7 +90,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-redhat:
-    uses: bunkerity/bunkerweb/.github/workflows/staging-linux-build.yml@staging
+    uses: ./.github/workflows/staging-linux-build.yml@staging
     with:
       LINUX: redhat
       PACKAGE: rpm
@@ -127,35 +127,35 @@ jobs:
   # Create infrastructures
   create-infra-docker:
     needs: [code-security, build-bw, build-scheduler]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-create-infra.yml@staging
+    uses: ./.github/workflows/staging-create-infra.yml@staging
     with:
       TYPE: docker
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-autoconf:
     needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-create-infra.yml@staging
+    uses: ./.github/workflows/staging-create-infra.yml@staging
     with:
       TYPE: autoconf
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-swarm:
     needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-create-infra.yml@staging
+    uses: ./.github/workflows/staging-create-infra.yml@staging
     with:
       TYPE: swarm
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-k8s:
     needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-create-infra.yml@staging
+    uses: ./.github/workflows/staging-create-infra.yml@staging
     with:
       TYPE: k8s
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-linux:
     needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-create-infra.yml@staging
+    uses: ./.github/workflows/staging-create-infra.yml@staging
     with:
       TYPE: k8s
     secrets:
@@ -166,7 +166,7 @@ jobs:
     needs: [infra-create-docker]
     runs-on: [self-hosted, bw-docker]
     steps:
-      - uses: bunkerity/bunkerweb/.github/workflows/staging-tests.yml@staging
+      - uses: ./.github/workflows/staging-tests.yml@staging
         with:
           TYPE: docker
         secrets:
@@ -178,7 +178,7 @@ jobs:
     needs: [infra-create-autoconf]
     runs-on: [self-hosted, bw-autoconf]
     steps:
-      - uses: bunkerity/bunkerweb/.github/workflows/staging-tests.yml@staging
+      - uses: ./.github/workflows/staging-tests.yml@staging
         with:
           TYPE: autoconf
         secrets:
@@ -190,7 +190,7 @@ jobs:
     needs: [infra-create-swarm]
     runs-on: [self-hosted, bw-swarm]
     steps:
-      - uses: bunkerity/bunkerweb/.github/workflows/staging-tests.yml@staging
+      - uses: ./.github/workflows/staging-tests.yml@staging
         with:
           TYPE: swarm
         secrets:
@@ -202,7 +202,7 @@ jobs:
     needs: [infra-create-k8s]
     runs-on: [ubuntu-latest]
     steps:
-      - uses: bunkerity/bunkerweb/.github/workflows/staging-tests.yml@staging
+      - uses: ./.github/workflows/staging-tests.yml@staging
         with:
           TYPE: k8s
         secrets:
@@ -214,7 +214,7 @@ jobs:
     needs: [infra-create-k8s]
     runs-on: [self-hosted, bw-linux]
     steps:
-      - uses: bunkerity/bunkerweb/.github/workflows/staging-tests.yml@staging
+      - uses: ./.github/workflows/staging-tests.yml@staging
         with:
           TYPE: linux
         secrets:
@@ -226,35 +226,35 @@ jobs:
   # Delete infrastructures
   delete-infra-docker:
     needs: [tests-docker]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
+    uses: ./.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: docker
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-autoconf:
     needs: [tests-autoconf]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
+    uses: ./.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: autoconf
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-swarm:
     needs: [tests-swarm]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
+    uses: ./.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: swarm
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-k8s:
     needs: [tests-k8s]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
+    uses: ./.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: k8s
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-linux:
     needs: [tests-linux]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-delete-infra.yml@staging
+    uses: ./.github/workflows/staging-delete-infra.yml@staging
     with:
       TYPE: linux
     secrets:
@@ -263,7 +263,7 @@ jobs:
   # Push containers
   push-bunkerweb:
     needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-docker.yml@staging
+    uses: ./.github/workflows/staging-push-docker.yml@staging
     with:
       PRIVATE_IMAGE: bunkerweb-tests:staging
       PUBLIC_IMAGE: bunkerweb:beta
@@ -274,7 +274,7 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   push-scheduler:
     needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-docker.yml@staging
+    uses: ./.github/workflows/staging-push-docker.yml@staging
     with:
       PRIVATE_IMAGE: scheduler-tests:staging
       PUBLIC_IMAGE: bunkerweb-scheduler:beta
@@ -285,7 +285,7 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   push-autoconf:
     needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-docker.yml@staging
+    uses: ./.github/workflows/staging-push-docker.yml@staging
     with:
       PRIVATE_IMAGE: autoconf-tests:staging
       PUBLIC_IMAGE: bunkerweb-autoconf:beta
@@ -296,7 +296,7 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   push-ui:
     needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-docker.yml@staging
+    uses: ./.github/workflows/staging-push-docker.yml@staging
     with:
       PRIVATE_IMAGE: ui-tests:staging
       PUBLIC_IMAGE: bunkerweb-ui:beta
@@ -309,7 +309,7 @@ jobs:
   # Push Linux packages
   push-ubuntu:
     needs: [tests-linux]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-packagecloud.yml@staging
+    uses: ./.github/workflows/staging-push-packagecloud.yml@staging
     with:
       SEPARATOR: _
       SUFFIX: amd64
@@ -321,7 +321,7 @@ jobs:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-debian:
     needs: [tests-linux]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-packagecloud.yml@staging
+    uses: ./.github/workflows/staging-push-packagecloud.yml@staging
     with:
       SEPARATOR: _
       SUFFIX: amd64
@@ -333,7 +333,7 @@ jobs:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-redhat:
     needs: [tests-linux]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-packagecloud.yml@staging
+    uses: ./.github/workflows/staging-push-packagecloud.yml@staging
     with:
       SEPARATOR: "-"
       SUFFIX: 1.x86_64
@@ -345,7 +345,7 @@ jobs:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-fedora:
     needs: [tests-linux]
-    uses: bunkerity/bunkerweb/.github/workflows/staging-push-packagecloud.yml@staging
+    uses: ./.github/workflows/staging-push-packagecloud.yml@staging
     with:
       SEPARATOR: "-"
       SUFFIX: 1.x86_64
