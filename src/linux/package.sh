@@ -32,7 +32,7 @@ do_and_check_cmd mkdir "$package_dir"
 # Generate package
 version="$(cat VERSION | tr -d '\n')"
 type="deb"
-if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] ; then
+if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
 	type="rpm"
 fi
 do_and_check_cmd docker run --rm -v "${package_dir}:/data" "local/bunkerweb-${linux}:latest" "$type"

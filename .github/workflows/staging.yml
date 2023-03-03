@@ -220,6 +220,7 @@ jobs:
 
   # Delete infrastructures
   delete-infra-docker:
+    if: ${{ always() }}
     needs: [tests-docker]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
@@ -227,6 +228,7 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-autoconf:
+    if: ${{ always() }}
     needs: [tests-autoconf]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
@@ -234,6 +236,7 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-swarm:
+    if: ${{ always() }}
     needs: [tests-swarm]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
@@ -241,6 +244,7 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-k8s:
+    if: ${{ always() }}
     needs: [tests-k8s]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
@@ -248,6 +252,7 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   delete-infra-linux:
+    if: ${{ always() }}
     needs: [tests-linux]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
