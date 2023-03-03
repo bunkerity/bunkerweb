@@ -31,10 +31,10 @@ jobs:
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       - name: Pull BW image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging local/bunkerweb-tests:latest
-        if: ! contains(fromJSON('["linux", "k8s"]'), inputs.TYPE)
+        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - name: Pull Scheduler image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging local/scheduler-tests:latest
-        if: ! contains(fromJSON('["linux", "k8s"]'), inputs.TYPE)
+        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - name: Pull Autoconf image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:staging local/scheduler-tests:latest
         if: contains(fromJSON('["autoconf", "swarm"]'), inputs.TYPE)
