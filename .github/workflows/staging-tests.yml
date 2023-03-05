@@ -21,7 +21,10 @@ on:
 
 jobs:
   tests:
-    runs-on: ${{ fromJSON(github.event.inputs.RUNS_ON) }}
+    strategy:
+      matrix:
+        runs-on: ${{ fromJSON(inputs.RUNS_ON) }}
+    runs-on: ${{ matrix.runs-on }}
     steps:
       # Prepare
       - name: Checkout source code
