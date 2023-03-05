@@ -16,22 +16,20 @@ from AutoconfTest import AutoconfTest
 from SwarmTest import SwarmTest
 from KubernetesTest import KubernetesTest
 from LinuxTest import LinuxTest
-from logger import setup_logger
-
-logger = setup_logger("Tests", getenv("LOG_LEVEL", "INFO"))
+from logger import log
 
 if len(argv) <= 1:
-    logger.error("Missing type argument")
+    log("TESTS", "❌", "Missing type argument")
     exit(1)
 
 test_type = argv[1]
 if not test_type in ("linux", "docker", "autoconf", "swarm", "kubernetes", "ansible"):
-    logger.error(f"Wrong type argument {test_type}")
+    log("TESTS", "❌", "Wrong type argument " + test_type)
     exit(1)
 
 run("docker system prune", shell=True)
 
-logger.info(f"Starting tests for {test_type} ...")
+log("TESTS", "ℹ️", "Starting tests for " + test_type + " ...")
 ret = False
 end_fun = None
 if test_type == "docker":
@@ -51,7 +49,7 @@ elif test_type == "linux":
     ret = LinuxTest.init(distro)
     end_fun = LinuxTest.end
 if not ret:
-    logger.error("Test.init() failed")
+    log("TESTS", "❌", "Test.init() failed")
     exit(1)
 
 for example in glob("./examples/*"):
@@ -60,9 +58,7 @@ for example in glob("./examples/*"):
             with open(f"{example}/tests.json") as f:
                 tests = loads(f.read())
             if not test_type in tests["kinds"]:
-                logger.info(
-                    f"Skipping tests for {tests['name']} (not in kinds)",
-                )
+                log("TESTS", "ℹ️", "Skipping tests for " + tests["name"] + " (not in kinds)")
                 continue
             test_obj = None
             no_copy_container = False
@@ -100,16 +96,14 @@ for example in glob("./examples/*"):
                     tests["name"], tests["timeout"], tests["tests"], distro
                 )
             if not test_obj.run_tests():
-                logger.error(f"Tests failed for {tests['name']}")
+                log("TESTS", "❌", "Tests failed for " + tests["name"])
                 if test_type == "linux":
                     ret = end_fun(distro)
                 else:
                     ret = end_fun()
                 _exit(1)
         except:
-            logger.error(
-                f"Exception while executing test for example {example} :\n{format_exc()}",
-            )
+            log("TESTS", "❌", "Exception while executing test for example " + example + " : " + format_exc())
             if test_type == "linux":
                 ret = end_fun(distro)
             else:
@@ -121,9 +115,9 @@ if test_type == "linux":
 else:
     ret = end_fun()
 if not ret:
-    logger.error("Test.end() failed")
+    log("TESTS", "❌", "Test.end() failed")
     exit(1)
 
-logger.info(f"All tests finished for {test_type} !")
+log("TESTS", "ℹ️", "All tests finished for " + test_type + " !")
 
 run("docker system prune", shell=True)

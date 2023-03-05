@@ -4,7 +4,7 @@ from os import getenv
 from traceback import format_exc
 from subprocess import run
 from time import sleep
-from logger import setup_logger
+from logger import log
 
 
 class LinuxTest(Test):
@@ -17,10 +17,9 @@ class LinuxTest(Test):
             r"app2\.example\.com": getenv("TEST_DOMAIN1_2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN1_3"),
         }
-        if not distro in ("ubuntu", "debian", "fedora", "centos"):
+        if not distro in ("ubuntu", "debian", "fedora", "centos", "rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
-        self.__logger = setup_logger("Linux_test", getenv("LOGLEVEL", "INFO"))
 
     @staticmethod
     def init(distro):
@@ -75,9 +74,7 @@ class LinuxTest(Test):
                 )
             sleep(60)
         except:
-            setup_logger("Linux_test", getenv("LOGLEVEL", "INFO")).error(
-                f"exception while running LinuxTest.init()\n{format_exc()}",
-            )
+            log("LINUX", "❌", "exception while running LinuxTest.init()\n" + format_exc())
             return False
         return True
 
@@ -91,9 +88,7 @@ class LinuxTest(Test):
             if proc.returncode != 0:
                 ret = False
         except:
-            setup_logger("Linux_test", getenv("LOGLEVEL", "INFO")).error(
-                f"exception while running LinuxTest.end()\n{format_exc()}"
-            )
+            log("LINUX", "❌", "exception while running LinuxTest.end()\n" + format_exc())
             return False
         return ret
 
@@ -132,9 +127,7 @@ class LinuxTest(Test):
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl restart failed (linux stack)")
         except:
-            self.__logger.error(
-                f"exception while running LinuxTest._setup_test()\n{format_exc()}",
-            )
+            log("LINUX", "❌", "exception while running LinuxTest._setup_test()\n" + format_exc())
             self._debug_fail()
             self._cleanup_test()
             return False
@@ -150,9 +143,7 @@ class LinuxTest(Test):
                 raise Exception("docker exec rm failed (cleanup)")
             super()._cleanup_test()
         except:
-            self.__logger.error(
-                f"exception while running LinuxTest._cleanup_test()\n{format_exc()}",
-            )
+            log("DOCKER", "❌", "exception while running LinuxTest._cleanup_test()\n" + format_exc())
             return False
         return True
 

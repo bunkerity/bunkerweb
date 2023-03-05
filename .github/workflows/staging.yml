@@ -167,35 +167,35 @@ jobs:
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: docker
-      RUNS_ON: '["self-hosted", "bw-docker"]'
+      RUNS_ON: "['self-hosted', 'bw-docker']"
     secrets: inherit
   tests-autoconf:
     needs: [create-infra-autoconf]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: autoconf
-      RUNS_ON: '["self-hosted", "bw-autoconf"]'
+      RUNS_ON: "['self-hosted', 'bw-autoconf']"
     secrets: inherit
   tests-swarm:
     needs: [create-infra-swarm]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: swarm
-      RUNS_ON: '["self-hosted", "bw-swarm"]'
+      RUNS_ON: "['self-hosted', 'bw-swarm']"
     secrets: inherit
   tests-k8s:
     needs: [create-infra-k8s]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: k8s
-      RUNS_ON: '["ubuntu-latest"]'
+      RUNS_ON: "['ubuntu-latest']"
     secrets: inherit
   tests-linux:
     needs: [create-infra-linux]
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: linux
-      RUNS_ON: '["self-hosted", "bw-linux"]'
+      RUNS_ON: "['self-hosted', 'bw-linux']"
     secrets: inherit
 
   # Delete infrastructures

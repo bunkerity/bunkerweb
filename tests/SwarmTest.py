@@ -5,7 +5,7 @@ from shutil import copytree, rmtree
 from traceback import format_exc
 from subprocess import run
 from time import sleep
-from logger import setup_logger
+from logger import log
 
 
 class SwarmTest(Test):
@@ -18,7 +18,6 @@ class SwarmTest(Test):
             r"app2\.example\.com": getenv("TEST_DOMAIN2"),
             r"app3\.example\.com": getenv("TEST_DOMAIN3"),
         }
-        self.__logger = setup_logger("Swarm_test", getenv("LOGLEVEL", "INFO"))
 
     @staticmethod
     def init():
@@ -76,15 +75,12 @@ class SwarmTest(Test):
                     shell=True,
                     capture_output=True,
                 )
-                logger = setup_logger("Swarm_test", getenv("LOGLEVEL", "INFO"))
-                logger.error(f"stdout logs = {proc.stdout.decode()}")
-                logger.error(f"stderr logs = {proc.stderr.decode()}")
+                log("SWARM", "❌", "stdout logs = " + proc.stdout.decode())
+                log("SWARM", "❌", "stderr logs = " + proc.stderr.decode())
                 raise (Exception("swarm stack is not healthy"))
             sleep(60)
         except:
-            setup_logger("Swarm_test", getenv("LOGLEVEL", "INFO")).error(
-                f"exception while running SwarmTest.init()\n{format_exc()}",
-            )
+            log("SWARM", "❌", "exception while running SwarmTest.init()\n" + format_exc())
             return False
         return True
 
@@ -99,9 +95,7 @@ class SwarmTest(Test):
                 ret = False
             rmtree("/tmp/swarm")
         except:
-            setup_logger("Swarm_test", getenv("LOGLEVEL", "INFO")).error(
-                f"exception while running SwarmTest.end()\n{format_exc()}"
-            )
+            log("SWARM", "❌", "exception while running SwarmTest.end()\n" + format_exc())
             return False
         return ret
 
@@ -157,9 +151,7 @@ class SwarmTest(Test):
             if not healthy:
                 raise (Exception("swarm stack is not healthy"))
         except:
-            self.__logger.error(
-                f"exception while running SwarmTest._setup_test()\n{format_exc()}",
-            )
+            log("SWARM", "❌", "exception while running SwarmTest._setup_test()\n" + format_exc())
             self._cleanup_test()
             return False
         return True
@@ -190,9 +182,7 @@ class SwarmTest(Test):
                 raise (Exception("docker pruner rm failed"))
             super()._cleanup_test()
         except:
-            self.__logger.error(
-                f"exception while running SwarmTest._cleanup_test()\n{format_exc()}",
-            )
+            log("SWARM", "❌", "exception while running SwarmTest._cleanup_test()\n" + format_exc())
             return False
         return True
 

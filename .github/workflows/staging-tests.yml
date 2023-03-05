@@ -21,10 +21,7 @@ on:
 
 jobs:
   tests:
-    strategy:
-      matrix:
-        runs-on: ${{ fromJSON(inputs.RUNS_ON) }}
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ fromJSON(inputs.RUNS_ON) }}
     steps:
       # Prepare
       - name: Checkout source code

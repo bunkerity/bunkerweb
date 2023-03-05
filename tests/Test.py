@@ -8,7 +8,7 @@ from os.path import isdir, join
 from os import getenv, mkdir, walk, rename
 from re import sub, search, MULTILINE
 from subprocess import run
-from logger import setup_logger
+from logger import log
 
 
 class Test(ABC):
@@ -20,10 +20,7 @@ class Test(ABC):
         self._no_copy_container = no_copy_container
         self.__delay = delay
         self._domains = {}
-        self.__logger = setup_logger("Test", getenv("LOG_LEVEL", "INFO"))
-        self.__logger.info(
-            f"instantiated with {len(tests)} tests and timeout of {timeout}s for {self._name}",
-        )
+        log("TEST", "ℹ️", "instiantiated with " + str(len(tests)) + " tests and timeout of " + str(timeout) + "s for " + self._name)
 
     # called once before running all the different tests for a given integration
     @staticmethod
@@ -39,9 +36,7 @@ class Test(ABC):
             if not isdir("/tmp/tests"):
                 mkdir("/tmp/tests")
         except:
-            setup_logger("Test", getenv("LOG_LEVEL", "INFO")).error(
-                f"exception while running Test.init()\n{format_exc()}"
-            )
+            log("TEST", "❌", "exception while running Test.init()\n" + format_exc())
             return False
         return True
 
@@ -65,9 +60,7 @@ class Test(ABC):
                 run(f"sudo rm -rf /tmp/tests/{self._name}", shell=True)
             copytree(f"./examples/{self._name}", f"/tmp/tests/{self._name}")
         except:
-            self.__logger.error(
-                f"exception while running Test._setup_test()\n{format_exc()}",
-            )
+            log("TEST", "❌", "exception while running Test._setup_test()\n" + format_exc())
             return False
         return True
 
@@ -76,9 +69,7 @@ class Test(ABC):
         try:
             run(f"sudo rm -rf /tmp/tests/{self._name}", shell=True)
         except:
-            self.__logger.error(
-                f"exception while running Test._cleanup_test()\n{format_exc()}",
-            )
+            log("TEST", "❌", "exception while running Test._cleanup_test()\n" + format_exc())
             return False
         return True
 
@@ -88,7 +79,7 @@ class Test(ABC):
             self._debug_fail()
             return False
         if self.__delay != 0:
-            self.__logger.info(f"delay is set, sleeping {self.__delay}s")
+            log("TEST", "ℹ️", "delay is set, sleeping " + str(self.__delay) + "s")
             sleep(self.__delay)
         start = time()
         while time() < start + self._timeout:
@@ -101,14 +92,12 @@ class Test(ABC):
                     break
             if all_ok:
                 elapsed = str(int(time() - start))
-                self.__logger.info(
-                    f"success ({elapsed}/{self._timeout}s)",
-                )
+                log("TEST", "ℹ️", "success (" + elapsed + "/" + str(self._timeout) + "s)")
                 return self._cleanup_test()
             self.__logger.warning("tests not ok, retrying in 1s ...")
         self._debug_fail()
         self._cleanup_test()
-        self.__logger.error(f"failed (timeout = {self._timeout}s)")
+        log("TEST", "❌", "failed (timeout = " + str(self._timeout) + "s)")
         return False
 
     # run a single test
@@ -140,9 +129,7 @@ class Test(ABC):
                 sub(old, new, Path(path).read_text(), flags=MULTILINE)
             )
         except:
-            setup_logger("Test", getenv("LOG_LEVEL", "INFO")).warning(
-                f"Can't replace file {path}"
-            )
+            log("TEST", "⚠️", "can't replace file " + path + " : " + format_exc())
 
     @staticmethod
     def replace_in_files(path, old, new):
