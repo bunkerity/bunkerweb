@@ -1,7 +1,7 @@
 from Test import Test
 from os.path import isdir, isfile
-from os import getenv
-from shutil import copytree, rmtree
+from os import getenv, mkdir
+from shutil import rmtree, copy
 from traceback import format_exc
 from subprocess import run
 from time import sleep
@@ -29,8 +29,9 @@ class SwarmTest(Test):
                 raise (Exception("chown failed (swarm stack)"))
             if isdir("/tmp/swarm"):
                 rmtree("/tmp/swarm")
-            copytree("./misc/integrations", "/tmp/integrations")
-            compose = "/tmp/integrations/swarm.mariadb.yml"
+            mkdir("/tmp/swarm")
+            copy("./misc/integrations/swarm.mariadb.yml", "/tmp/swarm/stack.yml")
+            compose = "/tmp/swarm/stack.yml"
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",

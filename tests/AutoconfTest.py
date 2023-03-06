@@ -1,7 +1,7 @@
 from Test import Test
-from os.path import isdir, join, isfile
-from os import chown, walk, getenv, listdir
-from shutil import copytree, rmtree
+from os.path import isdir, isfile
+from os import getenv, mkdir
+from shutil import rmtree, copy
 from traceback import format_exc
 from subprocess import run
 from time import sleep
@@ -29,8 +29,9 @@ class AutoconfTest(Test) :
                 raise(Exception("chown failed (autoconf stack)"))
             if isdir("/tmp/autoconf") :
                 rmtree("/tmp/autoconf")
-            copytree("./misc/integrations", "/tmp/integrations")
-            compose = "/tmp/integrations/autoconf.yml"
+            mkdir("/tmp/autoconf")
+            copy("./misc/integrations/autoconf.yml", "/tmp/autoconf/docker-compose.yml")
+            compose = "/tmp/autoconf/docker-compose.yml"
             Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest")
             Test.replace_in_file(compose, r"bunkerity/bunkerweb-autoconf:.*$", "local/autoconf-tests:latest")
             Test.replace_in_file(compose, r"bunkerity/bunkerweb-scheduler:.*$", "local/scheduler-tests:latest")

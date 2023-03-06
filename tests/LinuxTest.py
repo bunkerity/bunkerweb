@@ -26,7 +26,7 @@ class LinuxTest(Test):
         try:
             if not Test.init():
                 return False
-            cmd = f"docker run -p 80:80 -p 443:443 --rm --name linux-{distro} -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host --tty local/bw-{distro}:latest"
+            cmd = f"docker run -p 80:80 -p 443:443 --rm --name linux-{distro} -d --tmpfs /tmp --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host --tty local/{distro}:latest"
             proc = run(cmd, shell=True)
             if proc.returncode != 0:
                 raise Exception("docker run failed (linux stack)")
