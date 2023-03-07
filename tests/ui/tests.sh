@@ -9,7 +9,7 @@ sed -i "s@bunkerity/bunkerweb-scheduler:.*@local/scheduler-tests:$MODE@" docker-
 sed -i "s@bunkerity/bunkerweb-ui:.*@local/scheduler-tests:$MODE@" docker-compose.yml
 
 # Start stack
-docker-compose pull --ignore-pull-failures
+docker-compose pull docker-proxy app1
 if [ $? -ne 0 ] ; then
     echo "❌ Pull failed"
     exit 1
