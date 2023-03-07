@@ -8,7 +8,7 @@ use t::TestCore;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 6);
+plan tests => repeat_each() * (blocks() * 6 - 3);
 
 #no_diff();
 #no_long_string();
@@ -117,3 +117,33 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):4 loop\]/
 [error]
  -- NYI:
  stitch
+
+
+
+=== TEST 5: ngx.worker.pids
+--- config
+    location /lua {
+        content_by_lua_block {
+            local pids = ngx.worker.pids()
+            local pid = ngx.worker.pid()
+            ngx.say("worker pid: ", pid)
+            local count = ngx.worker.count()
+            if count ~= #pids then
+                ngx.say("worker pids is wrong.")
+            end
+            for i = 1, count do
+                if pids[i] == pid then
+                    ngx.say("worker pid is correct.")
+                    return
+                end
+            end
+            ngx.say("worker pid is wrong.")
+        }
+    }
+--- request
+GET /lua
+--- response_body_like
+worker pid: \d+
+worker pid is correct\.
+--- no_error_log
+[error]

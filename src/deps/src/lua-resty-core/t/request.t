@@ -8,7 +8,7 @@ use t::TestCore;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 5 + 2);
+plan tests => repeat_each() * (blocks() * 4 + 19);
 
 #no_diff();
 #no_long_string();
@@ -612,3 +612,70 @@ hello
 [error]
 --- skip_nginx
 2: < 1.21.1
+
+
+
+=== TEST 20: get_uri_args allows to reuse table
+--- config
+    location = /t {
+        set $foo hello;
+        content_by_lua_block {
+            local base = require "resty.core.base"
+            local args = base.new_tab(0, 3)
+            local id = tostring(args)
+            for i = 1, 5 do
+                base.clear_tab(args)
+                args = ngx.req.get_uri_args(-1, args)
+                assert(tostring(args) == id)
+            end
+            local keys = {}
+            for k, _ in pairs(args) do
+                keys[#keys + 1] = k
+            end
+            table.sort(keys)
+            for _, k in ipairs(keys) do
+                local v = args[k]
+                if type(v) == "table" then
+                    ngx.say(k, ": ", table.concat(v, ", "))
+                else
+                    ngx.say(k, ": ", v)
+                end
+            end
+        }
+    }
+--- request
+GET /t?a=3%200&foo%20bar=&a=hello&blah
+--- response_body
+a: 3 0, hello
+blah: true
+foo bar: 
+--- no_error_log
+[error]
+
+
+
+=== TEST 21: get_uri_args allows to reuse table (empty)
+--- config
+    location = /t {
+        set $foo hello;
+        content_by_lua_block {
+            local base = require "resty.core.base"
+            local args = base.new_tab(0, 3)
+            local id = tostring(args)
+            for i = 1, 5 do
+                args = ngx.req.get_uri_args(-1, args)
+                assert(tostring(args) == id)
+            end
+            local n_key = 0
+            for k, _ in pairs(args) do
+                n_key = n_key + 1
+            end
+            ngx.say(n_key)
+        }
+    }
+--- request
+GET /t
+--- response_body
+0
+--- no_error_log
+[error]

@@ -49,11 +49,11 @@ stitch
         end
         ngx.say(t > 1400960598)
         local diff = os.time() - t
-        ngx.say(diff <= 1)
+        ngx.say("<= 1: ", diff <= 1)
     }
 --- stream_response
 true
-true
+<= 1: true
 
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):3 loop\]/
@@ -134,6 +134,70 @@ stitch
 --- stream_response_like: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):3 loop\]/
+--- no_error_log
+[error]
+bad argument type
+stitch
+
+
+
+=== TEST 7: "resty.core.time".monotonic_msec
+--- stream_server_config
+    content_by_lua_block {
+        local cur_msec = require "resty.core.time".monotonic_msec
+        local proc = io.open("/proc/uptime", "r")
+        local content = proc:read()
+        proc:close()
+        local idx = string.find(content, " ", 1, true)
+        local uptime = 1000 * tonumber(string.sub(content, 1, idx - 1))
+        ngx.update_time()
+
+        local t
+        for i = 1, 500 do
+            t = cur_msec()
+        end
+        ngx.say(t >= uptime)
+        local diff = t - uptime
+        ngx.say("< 10: ", diff < 10)
+    }
+--- stream_response
+true
+< 10: true
+
+--- error_log eval
+qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):11 loop\]/
+--- no_error_log
+[error]
+bad argument type
+stitch
+
+
+
+=== TEST 8: "resty.core.time".monotonic_time
+--- stream_server_config
+    content_by_lua_block {
+        local cur_time = require "resty.core.time".monotonic_time
+        local proc = io.open("/proc/uptime", "r")
+        local content = proc:read()
+        proc:close()
+        local idx = string.find(content, " ", 1, true)
+        local uptime = tonumber(string.sub(content, 1, idx - 1))
+        ngx.update_time()
+
+        local t
+        for i = 1, 500 do
+            t = cur_time()
+        end
+        ngx.say(t >= uptime)
+        local diff = t - uptime
+        ngx.say("< 0.1: ", diff < 0.1)
+    }
+--- stream_response
+true
+< 0.1: true
+
+--- error_log eval
+qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):11 loop\]/
 --- no_error_log
 [error]
 bad argument type

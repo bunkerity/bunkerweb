@@ -67,20 +67,20 @@ GET /t
 --- response_body
 process type: single
 --- grep_error_log eval
-qr/\[TRACE\s+\d+ init_by_lua:\d+ loop\]|\[TRACE\s+\d+ init_worker_by_lua:\d loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d loop\]|process type in init_by_lua\*: \w+|init_worker_by_lua:\d+: process type: \w+/
+qr/\[TRACE\s+\d+ init_by_lua\(nginx.conf:\d+\):\d+ loop\]|\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d loop\]|process type in init_by_lua\*: \w+|init_worker_by_lua\(nginx.conf:\d+\):\d+: process type: \w+/
 --- grep_error_log_out eval
 [
-qr/\[TRACE\s+\d+ init_by_lua:\d+ loop\]
-\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
+qr/\[TRACE\s+\d+ init_by_lua\(nginx.conf:\d+\):\d+ loop\]
+\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
 \[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):4 loop\]
 process type in init_by_lua\*: single
-init_worker_by_lua:10: process type: single
+init_worker_by_lua\(nginx.conf:\d+\):10: process type: single
 /,
-qr/\[TRACE\s+\d+ init_by_lua:\d+ loop\]
-\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
+qr/\[TRACE\s+\d+ init_by_lua\(nginx.conf:\d+\):\d+ loop\]
+\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
 \[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):4 loop\]
 process type in init_by_lua\*: single
-init_worker_by_lua:10: process type: single
+init_worker_by_lua\(nginx.conf:\d+\):10: process type: single
 /
 ]
 --- no_error_log

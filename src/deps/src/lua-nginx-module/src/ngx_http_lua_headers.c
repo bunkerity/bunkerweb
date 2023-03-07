@@ -84,6 +84,12 @@ ngx_http_lua_ngx_req_http_version(lua_State *L)
         break;
 #endif
 
+#ifdef NGX_HTTP_VERSION_30
+    case NGX_HTTP_VERSION_30:
+        lua_pushnumber(L, 3.0);
+        break;
+#endif
+
     default:
         lua_pushnil(L);
         break;
@@ -166,6 +172,12 @@ ngx_http_lua_ngx_req_raw_header(lua_State *L)
 
     size = 0;
     b = c->buffer;
+
+    if (mr->request_line.len == 0) {
+        /* return empty string on invalid request */
+        lua_pushlstring(L, "", 0);
+        return 1;
+    }
 
     if (mr->request_line.data[mr->request_line.len] == CR) {
         line_break_len = 2;
@@ -1068,6 +1080,7 @@ ngx_http_lua_ffi_get_resp_header(ngx_http_request_t *r,
 {
     int                  found;
     u_char               c, *p;
+    time_t               last_modified;
     ngx_uint_t           i;
     ngx_table_elt_t     *h;
     ngx_list_part_t     *part;
@@ -1130,6 +1143,28 @@ ngx_http_lua_ffi_get_resp_header(ngx_http_request_t *r,
             values[0].data = r->headers_out.content_type.data;
             values[0].len = r->headers_out.content_type.len;
             return 1;
+        }
+
+        break;
+
+    case 13:
+        if (ngx_strncasecmp(key_buf, (u_char *) "Last-Modified", 13) == 0) {
+            last_modified = r->headers_out.last_modified_time;
+            if (last_modified >= 0) {
+                p = ngx_palloc(r->pool,
+                               sizeof("Mon, 28 Sep 1970 06:00:00 GMT"));
+                if (p == NULL) {
+                    *errmsg = "no memory";
+                    return NGX_ERROR;
+                }
+
+                values[0].data = p;
+                values[0].len = ngx_http_time(p, last_modified) - p;
+
+                return 1;
+            }
+
+            return 0;
         }
 
         break;
@@ -1207,6 +1242,18 @@ ngx_http_lua_ngx_raw_header_cleanup(void *data)
         ngx_free(lmcf->busy_buf_ptrs);
         lmcf->busy_buf_ptrs = NULL;
     }
+}
+#endif
+
+
+#if (NGX_DARWIN)
+int
+ngx_http_lua_ffi_set_resp_header_macos(ngx_http_lua_set_resp_header_params_t *p)
+{
+    return ngx_http_lua_ffi_set_resp_header(p->r, p->key_data, p->key_len,
+                                            p->is_nil, p->sval, p->sval_len,
+                                            p->mvals, p->mvals_len,
+                                            p->override, p->errmsg);
 }
 #endif
 

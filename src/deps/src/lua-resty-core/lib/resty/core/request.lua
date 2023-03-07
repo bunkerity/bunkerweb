@@ -10,6 +10,7 @@ local subsystem = ngx.config.subsystem
 local FFI_BAD_CONTEXT = base.FFI_BAD_CONTEXT
 local FFI_DECLINED = base.FFI_DECLINED
 local FFI_OK = base.FFI_OK
+local clear_tab = base.clear_tab
 local new_tab = base.new_tab
 local C = ffi.C
 local ffi_cast = ffi.cast
@@ -192,7 +193,7 @@ function ngx.req.get_headers(max_headers, raw)
 end
 
 
-function ngx.req.get_uri_args(max_args)
+function ngx.req.get_uri_args(max_args, tab)
     local r = get_request()
     if not r then
         error("no request found")
@@ -202,13 +203,17 @@ function ngx.req.get_uri_args(max_args)
         max_args = -1
     end
 
+    if tab then
+        clear_tab(tab)
+    end
+
     local n = C.ngx_http_lua_ffi_req_get_uri_args_count(r, max_args, truncated)
     if n == FFI_BAD_CONTEXT then
         error("API disabled in the current context", 2)
     end
 
     if n == 0 then
-        return {}
+        return tab or {}
     end
 
     local args_len = C.ngx_http_lua_ffi_req_get_querystring_len(r)
@@ -218,7 +223,7 @@ function ngx.req.get_uri_args(max_args)
 
     local nargs = C.ngx_http_lua_ffi_req_get_uri_args(r, strbuf, kvbuf, n)
 
-    local args = new_tab(0, nargs)
+    local args = tab or new_tab(0, nargs)
     for i = 0, nargs - 1 do
         local arg = kvbuf[i]
 

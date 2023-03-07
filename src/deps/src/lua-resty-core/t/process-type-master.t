@@ -53,12 +53,12 @@ GET /t
 --- response_body
 process type: master
 --- grep_error_log eval
-qr/\[TRACE\s+\d+ init_by_lua:\d+ loop\]/
+qr/\[TRACE\s+\d+ init_by_lua\(nginx.conf:\d+\):\d+ loop\]/
 --- grep_error_log_out eval
 [
-qr/\A\[TRACE\s+\d+ init_by_lua:\d+ loop\]
+qr/\A\[TRACE\s+\d+ init_by_lua\(nginx.conf:\d+\):\d+ loop\]
 \z/,
-qr/\A\[TRACE\s+\d+ init_by_lua:\d+ loop\]
+qr/\A\[TRACE\s+\d+ init_by_lua\(nginx.conf:\d+\):\d+ loop\]
 \z/
 ]
 --- no_error_log

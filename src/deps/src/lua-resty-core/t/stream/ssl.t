@@ -2034,3 +2034,109 @@ client certificate subject: nil
 [error]
 [alert]
 [emerg]
+
+
+
+=== TEST 26: private key protected by passphrase
+--- stream_config
+    lua_package_path "$TEST_NGINX_LUA_PACKAGE_PATH";
+
+    server {
+        listen unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
+        ssl_certificate_by_lua_block {
+            local ssl = require "ngx.ssl"
+
+            ssl.clear_certs()
+
+            local f = assert(io.open("t/cert/test_passphrase.crt"))
+            local cert_data = f:read("*a")
+            f:close()
+
+            local cert, err = ssl.cert_pem_to_der(cert_data)
+            if not cert then
+                ngx.log(ngx.ERR, "failed to convert pem cert to der cert: ", err)
+                return
+            end
+
+            local ok, err = ssl.set_der_cert(cert)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set DER cert: ", err)
+                return
+            end
+
+            local f = assert(io.open("t/cert/test_passphrase.key"))
+            local pkey_data = f:read("*a")
+            f:close()
+
+            pkey_data, err = ssl.priv_key_pem_to_der(pkey_data, "123456")
+            if not pkey_data then
+                ngx.log(ngx.ERR, "failed to convert pem key to der key: ", err)
+                return
+            end
+
+            local ok, err = ssl.set_der_priv_key(pkey_data)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set DER private key: ", err)
+                return
+            end
+        }
+        ssl_certificate ../../cert/test2.crt;
+        ssl_certificate_key ../../cert/test2.key;
+
+        return 'it works!\n';
+    }
+--- stream_server_config
+    lua_ssl_trusted_certificate ../../cert/chain/root-ca.crt;
+    lua_ssl_verify_depth 3;
+
+    content_by_lua_block {
+        do
+            local sock = ngx.socket.tcp()
+
+            sock:settimeout(3000)
+
+            local ok, err = sock:connect("unix:$TEST_NGINX_HTML_DIR/nginx.sock")
+            if not ok then
+                ngx.say("failed to connect: ", err)
+                return
+            end
+
+            ngx.say("connected: ", ok)
+
+            local sess, err = sock:sslhandshake(nil, "test.com")
+            if not sess then
+                ngx.say("failed to do SSL handshake: ", err)
+                return
+            end
+
+            ngx.say("ssl handshake: ", type(sess))
+
+            while true do
+                local line, err = sock:receive()
+                if not line then
+                    -- ngx.say("failed to receive response status line: ", err)
+                    break
+                end
+
+                ngx.say("received: ", line)
+            end
+
+            local ok, err = sock:close()
+            ngx.say("close: ", ok, " ", err)
+        end  -- do
+        -- collectgarbage()
+    }
+
+--- stream_response
+connected: 1
+ssl handshake: userdata
+received: it works!
+close: 1 nil
+
+--- error_log
+lua ssl server name: "test.com"
+
+--- no_error_log
+[error]
+[alert]
+[emerg]

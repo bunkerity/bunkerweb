@@ -91,18 +91,18 @@ GET /t
 --- response_body
 type: worker
 --- grep_error_log eval
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d+ loop\]|init_worker_by_lua:\d+: process type: \w+/
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d+ loop\]|init_worker_by_lua\(nginx.conf:\d+\):\d+: process type: \w+/
 --- grep_error_log_out eval
 [
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
-(?:\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
+(?:\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
 )?\[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):\d+ loop\]
-init_worker_by_lua:10: process type: privileged
+init_worker_by_lua\(nginx.conf:\d+\):10: process type: privileged
 /,
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
-(?:\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
+(?:\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
 )?\[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):\d+ loop\]
-init_worker_by_lua:10: process type: privileged
+init_worker_by_lua\(nginx.conf:\d+\):10: process type: privileged
 /
 ]
 --- no_error_log

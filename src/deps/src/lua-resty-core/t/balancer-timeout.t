@@ -205,7 +205,7 @@ event timer add: \d+: 7689:
 --- response_body_like: 500 Internal Server Error
 --- error_code: 500
 --- error_log eval
-qr/\[error\] .*? balancer_by_lua:4: bad connect timeout/
+qr/\[error\] .*? balancer_by_lua\(nginx.conf:\d+\):4: bad connect timeout/
 --- no_error_log
 [warn]
 
@@ -236,7 +236,7 @@ qr/\[error\] .*? balancer_by_lua:4: bad connect timeout/
 --- response_body_like: 500 Internal Server Error
 --- error_code: 500
 --- error_log eval
-qr/\[error\] .*? balancer_by_lua:4: bad connect timeout/
+qr/\[error\] .*? balancer_by_lua\(nginx.conf:\d+\):4: bad connect timeout/
 --- no_error_log
 [warn]
 
@@ -267,7 +267,7 @@ qr/\[error\] .*? balancer_by_lua:4: bad connect timeout/
 --- response_body_like: 500 Internal Server Error
 --- error_code: 500
 --- error_log eval
-qr/\[error\] .*? balancer_by_lua:4: bad send timeout/
+qr/\[error\] .*? balancer_by_lua\(nginx.conf:\d+\):4: bad send timeout/
 --- no_error_log
 [warn]
 
@@ -298,7 +298,7 @@ qr/\[error\] .*? balancer_by_lua:4: bad send timeout/
 --- response_body_like: 500 Internal Server Error
 --- error_code: 500
 --- error_log eval
-qr/\[error\] .*? balancer_by_lua:4: bad send timeout/
+qr/\[error\] .*? balancer_by_lua\(nginx.conf:\d+\):4: bad send timeout/
 --- no_error_log
 [warn]
 
@@ -329,7 +329,7 @@ qr/\[error\] .*? balancer_by_lua:4: bad send timeout/
 --- response_body_like: 500 Internal Server Error
 --- error_code: 500
 --- error_log eval
-qr/\[error\] .*? balancer_by_lua:4: bad read timeout/
+qr/\[error\] .*? balancer_by_lua\(nginx.conf:\d+\):4: bad read timeout/
 --- no_error_log
 [warn]
 

@@ -106,6 +106,24 @@ So this function can only be called in the context of [ssl_client_hello_by_lua*]
 
 [Back to TOC](#table-of-contents)
 
+get_supported_versions
+--------------
+**syntax:** *types, err = ssl_clt.get_supported_versions()*
+
+**context:** *ssl_client_hello_by_lua&#42;*
+
+Returns the table of ssl hello supported versions set by the client.
+
+Return `nil` when then the extension does not exist.
+
+In case of errors, it returns `nil` and a string describing the error.
+
+Note that the types is gotten from the raw extensions of the client hello message associated with the current downstream SSL connection.
+
+So this function can only be called in the context of [ssl_client_hello_by_lua*](https://github.com/openresty/lua-nginx-module/#ssl_client_hello_by_lua_block).
+
+[Back to TOC](#table-of-contents)
+
 get_client_hello_ext
 ----------------------
 **syntax:** *ext, err = ssl_clt.get_client_hello_ext(ext_type)*

@@ -78,3 +78,94 @@ GET /t
 ["[error]",
 qr/ -- NYI: (?!FastFunc coroutine.yield)/,
 " bad argument"]
+
+
+
+=== TEST 3: accepts NGX_OK
+--- config
+    location = /t {
+        content_by_lua_block {
+            ngx.exit(ngx.OK)
+        }
+    }
+--- request
+GET /t
+--- response_body
+--- no_error_log eval
+["[error]",
+qr/ -- NYI: (?!FastFunc coroutine.yield)/,
+" bad argument"]
+
+
+
+=== TEST 4: accepts NGX_ERROR
+--- config
+    location = /t {
+        content_by_lua_block {
+            ngx.exit(ngx.ERROR)
+        }
+    }
+--- request
+GET /t
+--- error_code:
+--- response_body
+--- no_error_log eval
+["[error]",
+qr/ -- NYI: (?!FastFunc coroutine.yield)/,
+" bad argument"]
+
+
+
+=== TEST 5: accepts NGX_DECLINED
+--- config
+    location = /t {
+        content_by_lua_block {
+            ngx.exit(ngx.DECLINED)
+        }
+    }
+--- request
+GET /t
+--- error_code:
+--- response_body
+--- no_error_log eval
+["[error]",
+qr/ -- NYI: (?!FastFunc coroutine.yield)/,
+" bad argument"]
+
+
+
+=== TEST 6: refuses NGX_AGAIN
+--- config
+    location = /t {
+        content_by_lua_block {
+            ngx.exit(ngx.AGAIN)
+        }
+    }
+--- request
+GET /t
+--- response_body_like: 500 Internal Server Error
+--- error_code: 500
+--- error_log eval
+qr/\[error\] .*? bad argument to 'ngx.exit': does not accept NGX_AGAIN or NGX_DONE/
+--- no_error_log eval
+qr/ -- NYI: (?!FastFunc coroutine.yield)/
+[crit]
+
+
+
+=== TEST 7: refuses NGX_DONE
+--- config
+    location = /t {
+        content_by_lua_block {
+            ngx.exit(ngx.DONE)
+        }
+    }
+--- request
+GET /t
+--- response_body_like: 500 Internal Server Error
+--- error_code: 500
+--- error_log eval
+qr/\[error\] .*? bad argument to 'ngx.exit': does not accept NGX_AGAIN or NGX_DONE/
+--- no_error_log eval
+qr/ -- NYI: (?!FastFunc coroutine.yield)/
+[crit]

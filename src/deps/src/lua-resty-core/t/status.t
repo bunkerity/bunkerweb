@@ -40,7 +40,7 @@ GET /t
  bad argument
 --- error_log eval
 ["sum: 6030,",
-qr/\[TRACE\s+\d+\s+header_filter_by_lua:3 loop\]/
+qr/\[TRACE\s+\d+\s+header_filter_by_lua\(nginx.conf:\d+\):3 loop\]/
 ]
 
 
@@ -65,5 +65,5 @@ GET /t
  bad argument
 --- error_log eval
 ["status: 200,",
-qr/\[TRACE\s+\d+\s+header_filter_by_lua:2 loop\]/
+qr/\[TRACE\s+\d+\s+header_filter_by_lua\(nginx.conf:\d+\):2 loop\]/
 ]

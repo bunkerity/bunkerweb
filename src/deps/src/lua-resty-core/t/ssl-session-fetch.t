@@ -89,17 +89,17 @@ __DATA__
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 close: 1 nil
 
 --- grep_error_log eval
-qr/ssl_session_fetch_by_lua_block:\d+: session id: [a-fA-f\d]+/s
+qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-f\d]+/s
 
 --- grep_error_log_out eval
 [
 '',
-qr/ssl_session_fetch_by_lua_block:4: session id: [a-fA-f\d]+/s,
-qr/ssl_session_fetch_by_lua_block:4: session id: [a-fA-f\d]+/s,
+qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-f\d]+/s,
+qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-f\d]+/s,
 ]
 
 --- no_error_log
@@ -176,7 +176,7 @@ qr/ssl_session_fetch_by_lua_block:4: session id: [a-fA-f\d]+/s,
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 close: 1 nil
 
 --- grep_error_log eval
@@ -279,17 +279,17 @@ In practice, never store session in plaintext on persistent storage.
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 close: 1 nil
 
 --- grep_error_log eval
-qr/ssl_session_(fetch|store)_by_lua_block:\d+: session id: [a-fA-F\d]+/s
+qr/ssl_session_(fetch|store)_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+/s
 
 --- grep_error_log_out eval
 [
-qr/ssl_session_store_by_lua_block:5: session id: [a-fA-F\d]+/s,
-qr/ssl_session_fetch_by_lua_block:4: session id: [a-fA-F\d]+/s,
-qr/ssl_session_fetch_by_lua_block:4: session id: [a-fA-F\d]+/s,
+qr/ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+/s,
+qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-F\d]+/s,
+qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-F\d]+/s,
 ]
 
 --- no_error_log
@@ -375,22 +375,22 @@ able to carry on and negotiate a new session.
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 close: 1 nil
 
 --- grep_error_log eval
-qr/failed to resume session: failed to de-serialize session|ssl_session_(fetch|store)_by_lua_block:\d+: session id: [a-fA-F\d]+/s
+qr/failed to resume session: failed to de-serialize session|ssl_session_(fetch|store)_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+/s
 
 --- grep_error_log_out eval
 [
-qr/^ssl_session_store_by_lua_block:5: session id: [a-fA-F\d]+$/s,
-qr/^ssl_session_fetch_by_lua_block:4: session id: [a-fA-F\d]+
+qr/^ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+$/s,
+qr/^ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-F\d]+
 failed to resume session: failed to de-serialize session
-ssl_session_store_by_lua_block:5: session id: [a-fA-F\d]+
+ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+
 $/s,
-qr/ssl_session_fetch_by_lua_block:4: session id: [a-fA-F\d]+
+qr/ssl_session_fetch_by_lua:4: session id: [a-fA-F\d]+
 failed to resume session: failed to de-serialize session
-ssl_session_store_by_lua_block:5: session id: [a-fA-F\d]+
+ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+
 $/s,
 ]
 
@@ -489,20 +489,20 @@ ok
 --- error_log eval
 qr/content_by_lua\(nginx\.conf:\d+\):\d+: CONNECTED/
 --- grep_error_log eval
-qr/failed to resume session: failed to de-serialize session|ssl_session_(fetch|store)_by_lua_block:\d+: session id: [a-fA-F\d]+/s
+qr/failed to resume session: failed to de-serialize session|ssl_session_(fetch|store)_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+/s
 --- grep_error_log_out eval
 [
-qr/^ssl_session_fetch_by_lua_block:\d+: session id: [a-fA-F\d]+
+qr/^ssl_session_fetch_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+
 failed to resume session: failed to de-serialize session
-ssl_session_store_by_lua_block:\d+: session id: [a-fA-F\d]+
+ssl_session_store_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+
 $/s,
-qr/^ssl_session_fetch_by_lua_block:\d+: session id: [a-fA-F\d]+
+qr/^ssl_session_fetch_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+
 failed to resume session: failed to de-serialize session
-ssl_session_store_by_lua_block:\d+: session id: [a-fA-F\d]+
+ssl_session_store_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+
 $/s,
-qr/^ssl_session_fetch_by_lua_block:\d+: session id: [a-fA-F\d]+
+qr/^ssl_session_fetch_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+
 failed to resume session: failed to de-serialize session
-ssl_session_store_by_lua_block:\d+: session id: [a-fA-F\d]+
+ssl_session_store_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-F\d]+
 $/s,
 ]
 
@@ -582,7 +582,7 @@ $/s,
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 close: 1 nil
 --- no_error_log
 [alert]

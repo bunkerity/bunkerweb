@@ -3,6 +3,7 @@
 
 local ffi = require 'ffi'
 local ffi_new = ffi.new
+local pcall = pcall
 local error = error
 local select = select
 local ceil = math.ceil
@@ -18,22 +19,22 @@ local FREE_LIST_REF = 0
 if subsystem == 'http' then
     if not ngx.config
        or not ngx.config.ngx_lua_version
-       or ngx.config.ngx_lua_version ~= 10022
+       or ngx.config.ngx_lua_version ~= 10023
     then
-        error("ngx_http_lua_module 0.10.22 required")
+        error("ngx_http_lua_module 0.10.23 required")
     end
 
 elseif subsystem == 'stream' then
     if not ngx.config
        or not ngx.config.ngx_lua_version
-       or ngx.config.ngx_lua_version ~= 11
+       or ngx.config.ngx_lua_version ~= 12
     then
-        error("ngx_stream_lua_module 0.0.11 required")
+        error("ngx_stream_lua_module 0.0.12 required")
     end
 
 else
-    error("ngx_http_lua_module 0.10.22 or "
-          .. "ngx_stream_lua_module 0.0.11 required")
+    error("ngx_http_lua_module 0.10.23 or "
+          .. "ngx_stream_lua_module 0.0.12 required")
 end
 
 
@@ -68,9 +69,17 @@ end
 do
     local orig_require = require
     local pkg_loaded = package.loaded
+    -- the key_sentinel is inserted into package.loaded before
+    -- the chunk is executed and replaced if the chunk completes normally.
+    local key_sentinel = pkg_loaded[...]
+
     local function my_require(name)
         local mod = pkg_loaded[name]
         if mod then
+            if mod == key_sentinel then
+                error("loop or previous error loading module '" .. name .. "'")
+            end
+
             return mod
         end
         return orig_require(name)
@@ -132,7 +141,7 @@ local c_buf_type = ffi.typeof("char[?]")
 local _M = new_tab(0, 18)
 
 
-_M.version = "0.1.24"
+_M.version = "0.1.25"
 _M.new_tab = new_tab
 _M.clear_tab = clear_tab
 
@@ -181,7 +190,8 @@ end
 function _M.get_string_buf(size, must_alloc)
     -- ngx.log(ngx.ERR, "str buf size: ", str_buf_size)
     if size > str_buf_size or must_alloc then
-        return ffi_new(c_buf_type, size)
+        local buf = ffi_new(c_buf_type, size)
+        return buf
     end
 
     if not str_buf then

@@ -152,13 +152,13 @@ fi
 echo "ℹ️ Downloading LuaJIT"
 git_secure_clone "https://github.com/openresty/luajit2.git" "8384278b14988390cf030b787537aa916a9709bb"
 
-# lua-nginx-module v0.10.22
+# lua-nginx-module v0.10.23
 echo "ℹ️ Downloading lua-nginx-module"
-git_secure_clone "https://github.com/openresty/lua-nginx-module.git" "8d9032298ef542aef058fa02940a6ecd9cf25423"
+git_secure_clone "https://github.com/openresty/lua-nginx-module.git" "5e05fa3adb0d2492ecaaf2cb76498e23765aa6ab"
 
-# lua-resty-core v0.1.24
+# lua-resty-core v0.1.25
 echo "ℹ️ Downloading lua-resty-core"
-git_secure_clone "https://github.com/openresty/lua-resty-core.git" "c48e90a8fc9d974d8a6a369e031940cedf473789"
+git_secure_clone "https://github.com/openresty/lua-resty-core.git" "0173d96c9eb77b513b989b765716fd2498f09dd9"
 
 # lua-resty-lrucache v0.13
 echo "ℹ️ Downloading lua-resty-lrucache"

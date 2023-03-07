@@ -42,7 +42,7 @@ __DATA__
 --- error_code: 502
 --- error_log eval
 [
-'[lua] balancer_by_lua:2: hello from balancer by lua! while connecting to upstream,',
+'[lua] balancer_by_lua(nginx.conf:29):2: hello from balancer by lua! while connecting to upstream,',
 qr{connect\(\) failed .*?, upstream: "http://127\.0\.0\.3:12345/t"},
 ]
 --- no_error_log
@@ -419,7 +419,7 @@ last peer failure: failed 502
 --- error_code: 502
 --- error_log eval
 [
-'[lua] balancer_by_lua:2: hello from balancer by lua! while connecting to upstream,',
+'[lua] balancer_by_lua(nginx.conf:29):2: hello from balancer by lua! while connecting to upstream,',
 qr{connect\(\) failed .*?, upstream: "http://127\.0\.0\.3:12345/t"},
 ]
 --- no_error_log
@@ -457,7 +457,7 @@ qr{connect\(\) failed .*?, upstream: "http://127\.0\.0\.3:12345/t"},
 --- error_code: 502
 --- error_log eval
 [
-'[lua] balancer_by_lua:2: hello from balancer by lua! while connecting to upstream,',
+'[lua] balancer_by_lua(nginx.conf:30):2: hello from balancer by lua! while connecting to upstream,',
 qr{connect\(\) failed .*?, upstream: "http://127\.0\.0\.3:12345/t"},
 ]
 --- no_error_log
@@ -716,13 +716,13 @@ qr/\[error] .*? upstream prematurely closed connection while reading response he
         balancer_by_lua_block {
             local b = require "ngx.balancer"
             print("hello from balancer by lua!")
-            assert(b.set_current_peer("127.0.0.1", 1234))
+            assert(b.set_current_peer("127.0.0.1", $TEST_NGINX_RAND_PORT_1))
         }
         keepalive 1;
     }
 
     server {
-        listen 1234 ssl;
+        listen $TEST_NGINX_RAND_PORT_1 ssl;
         ssl_certificate ../../cert/test.crt;
         ssl_certificate_key ../../cert/test.key;
 
@@ -762,12 +762,12 @@ hello from balancer by lua!
         balancer_by_lua_block {
             local b = require "ngx.balancer"
             print("hello from balancer by lua!")
-            assert(b.set_current_peer("127.0.0.1", 12347))
+            assert(b.set_current_peer("127.0.0.1", $TEST_NGINX_RAND_PORT_2))
         }
     }
 
     server {
-        listen 12347 ssl;
+        listen $TEST_NGINX_RAND_PORT_2 ssl;
         ssl_certificate ../../cert/test.crt;
         ssl_certificate_key ../../cert/test.key;
 

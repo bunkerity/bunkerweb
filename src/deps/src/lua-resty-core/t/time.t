@@ -61,14 +61,14 @@ stitch
             end
             ngx.say(t > 1400960598)
             local diff = os.time() - t
-            ngx.say(diff <= 1)
+            ngx.say("<= 1: ", diff <= 1)
         }
     }
 --- request
 GET /t
 --- response_body
 true
-true
+<= 1: true
 
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):3 loop\]/
@@ -322,5 +322,79 @@ not ok: string argument only
 --- no_error_log
 [error]
 [alert]
+bad argument type
+stitch
+
+
+
+=== TEST 13: "resty.core.time".monotonic_msec
+--- config
+    location = /t {
+        access_log off;
+        content_by_lua_block {
+            local cur_msec = require "resty.core.time".monotonic_msec
+            local proc = io.open("/proc/uptime", "r")
+            local content = proc:read()
+            proc:close()
+            local idx = string.find(content, " ", 1, true)
+            local uptime = 1000 * tonumber(string.sub(content, 1, idx - 1))
+            ngx.update_time()
+
+            local t
+            for i = 1, 30 do
+                t = cur_msec()
+            end
+            ngx.say(t >= uptime)
+            local diff = t - uptime
+            ngx.say("< 10: ", diff < 10)
+        }
+    }
+--- request
+GET /t
+--- response_body
+true
+< 10: true
+
+--- error_log eval
+qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):11 loop\]/
+--- no_error_log
+[error]
+bad argument type
+stitch
+
+
+
+=== TEST 14: "resty.core.time".monotonic_time
+--- config
+    location = /t {
+        access_log off;
+        content_by_lua_block {
+            local cur_time = require "resty.core.time".monotonic_time
+            local proc = io.open("/proc/uptime", "r")
+            local content = proc:read()
+            proc:close()
+            local idx = string.find(content, " ", 1, true)
+            local uptime = tonumber(string.sub(content, 1, idx - 1))
+            ngx.update_time()
+
+            local t
+            for i = 1, 30 do
+                t = cur_time()
+            end
+            ngx.say(t >= uptime)
+            local diff = t - uptime
+            ngx.say("< 0.01: ", diff < 0.01)
+        }
+    }
+--- request
+GET /t
+--- response_body
+true
+< 0.01: true
+
+--- error_log eval
+qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):11 loop\]/
+--- no_error_log
+[error]
 bad argument type
 stitch

@@ -55,16 +55,16 @@ GET /t
 --- response_body
 process type: worker
 --- grep_error_log eval
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d loop\]|init_worker_by_lua:\d: process type: \w+/
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d loop\]|init_worker_by_lua\(nginx.conf:\d+\):\d: process type: \w+/
 --- grep_error_log_out eval
 [
-qr/\[TRACE\s+\d+ init_worker_by_lua:4 loop\]
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):4 loop\]
 \[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):4 loop\]
-init_worker_by_lua:8: process type: worker
+init_worker_by_lua\(nginx.conf:\d+\):8: process type: worker
 /,
-qr/\[TRACE\s+\d+ init_worker_by_lua:4 loop\]
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):4 loop\]
 \[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):4 loop\]
-init_worker_by_lua:8: process type: worker
+init_worker_by_lua\(nginx.conf:\d+\):8: process type: worker
 /
 ]
 --- no_error_log

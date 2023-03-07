@@ -9,7 +9,7 @@ log_level('warn');
 #repeat_each(120);
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 6 - 2);
+plan tests => repeat_each() * (blocks() * 6);
 
 #no_diff();
 #no_long_string();
@@ -36,11 +36,10 @@ GET /t
 --- error_code: 201
 --- no_error_log
 [error]
- -- NYI:
  bad argument
 --- error_log eval
 ["is subrequest: false,",
-qr/\[TRACE\s+\d+\s+header_filter_by_lua:3 loop\]/
+qr/\[TRACE\s+\d+\s+header_filter_by_lua\(nginx.conf:58\):3 loop\]/
 ]
 
 
@@ -111,6 +110,7 @@ GET /t
 ok
 --- no_error_log
 [error]
+[crit]
  -- NYI:
  bad argument
 
@@ -130,7 +130,95 @@ ok
 GET /t
 --- error_code: 500
 --- no_error_log
+[alert]
+[crit]
  -- NYI:
  bad argument
 --- error_log
 unsupported subsystem: http
+
+
+
+=== TEST 6: not internal request
+--- http_config eval: $::HttpConfig
+--- config
+    location /test {
+        rewrite ^/test$ /lua last;
+    }
+    location /lua {
+        content_by_lua_block {
+            if ngx.req.is_internal() then
+                ngx.say("internal")
+            else
+                ngx.say("not internal")
+            end
+        }
+    }
+--- request
+GET /lua
+--- response_body
+not internal
+--- no_error_log
+[error]
+[alert]
+[crit]
+ -- NYI:
+
+
+
+=== TEST 7: internal request
+--- http_config eval: $::HttpConfig
+--- config
+    location /test {
+        rewrite ^/test$ /lua last;
+    }
+    location /lua {
+        content_by_lua_block {
+            if ngx.req.is_internal() then
+                ngx.say("internal")
+            else
+                ngx.say("not internal")
+            end
+        }
+    }
+--- request
+GET /test
+--- response_body
+internal
+--- no_error_log
+[error]
+[alert]
+[crit]
+ -- NYI:
+
+
+
+=== TEST 8: bad context
+--- http_config eval: $::HttpConfig
+--- config
+    location /lua {
+        content_by_lua_block {
+            local function test()
+                local ok, err = pcall(ngx.req.is_internal)
+                package.loaded.bad_context = {ok, err}
+            end
+
+            ngx.timer.at(0, test)
+            ngx.sleep(0.02)
+
+            local ctx = package.loaded.bad_context
+            ngx.say(ctx[1])
+            local i = string.find(ctx[2], "API disabled in the current context")
+            ngx.say(i > 1)
+        }
+    }
+--- request
+GET /lua
+--- response_body
+false
+true
+--- no_error_log
+[error]
+[alert]
+[crit]
+ -- NYI:

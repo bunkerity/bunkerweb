@@ -60,13 +60,13 @@ GET /t
 --- response_body
 type: worker
 --- grep_error_log eval
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d loop\]/
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]|\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):\d loop\]/
 --- grep_error_log_out eval
 [
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
 \[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):\d+ loop\]
 /,
-qr/\[TRACE\s+\d+ init_worker_by_lua:\d+ loop\]
+qr/\[TRACE\s+\d+ init_worker_by_lua\(nginx.conf:\d+\):\d+ loop\]
 \[TRACE\s+\d+ content_by_lua\(nginx.conf:\d+\):\d+ loop\]
 /
 ]

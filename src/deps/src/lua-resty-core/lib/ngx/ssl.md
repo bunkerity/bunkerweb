@@ -89,8 +89,9 @@ server {
         -- assuming the user already defines the my_load_private_key()
         -- function herself.
         local pem_pkey = assert(my_load_private_key())
+        local passphrase = "password" -- or nil
 
-        local der_pkey, err = ssl.priv_key_pem_to_der(pem_pkey)
+        local der_pkey, err = ssl.priv_key_pem_to_der(pem_pkey, passphrase)
         if not der_pkey then
             ngx.log(ngx.ERR, "failed to convert private key ",
                     "from PEM to DER: ", err)
@@ -188,13 +189,15 @@ function to do the conversion first.
 
 priv_key_pem_to_der
 -------------------
-**syntax:** *der_priv_key, err = ssl.priv_key_pem_to_der(pem_priv_key)*
+**syntax:** *der_priv_key, err = ssl.priv_key_pem_to_der(pem_priv_key, passphrase)*
 
 **context:** *any*
 
 Converts the PEM-formatted SSL private key data into the DER format (for later uses
 in the [set_der_priv_key](#set_der_priv_key)
 function, for example).
+
+The `passphrase` is the passphrase for `pem_priv_key` if the private key is password protected.
 
 In case of failures, returns `nil` and a string describing the error.
 

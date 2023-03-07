@@ -29,9 +29,11 @@ Table of Contents
     * [resty.core.phase](#restycorephase)
     * [resty.core.ndk](#restycorendk)
     * [resty.core.socket](#restycoresocket)
+    * [resty.core.param](#restycoreparam)
     * [ngx.semaphore](#ngxsemaphore)
     * [ngx.balancer](#ngxbalancer)
     * [ngx.ssl](#ngxssl)
+    * [ngx.ssl.clienthello](#ngxsslclienthello)
     * [ngx.ssl.session](#ngxsslsession)
     * [ngx.re](#ngxre)
     * [ngx.resp](#ngxresp)
@@ -228,6 +230,7 @@ in the current request before you reusing the `ctx` table in some other place.
 * [ngx.status](https://github.com/openresty/lua-nginx-module#ngxstatus)
 * [ngx.is_subrequest](https://github.com/openresty/lua-nginx-module#ngxis_subrequest)
 * [ngx.headers_sent](https://github.com/openresty/lua-nginx-module#ngxheaders_sent)
+* [ngx.req.is_internal](https://github.com/openresty/lua-nginx-module#ngxreqis_internal)
 
 [Back to TOC](#table-of-contents)
 
@@ -241,6 +244,8 @@ in the current request before you reusing the `ctx` table in some other place.
 * [ngx.cookie_time](https://github.com/openresty/lua-nginx-module#ngxcookie_time)
 * [ngx.http_time](https://github.com/openresty/lua-nginx-module#ngxhttp_time)
 * [ngx.parse_http_time](https://github.com/openresty/lua-nginx-module#ngxparse_http_time)
+* [monotonic_msec](./lib/resty/core/time.md#monotonic_msec)
+* [monotonic_time](./lib/resty/core/time.md#monotonic_time)
 
 [Back to TOC](#table-of-contents)
 
@@ -268,6 +273,14 @@ in the current request before you reusing the `ctx` table in some other place.
 ## resty.core.socket
 
 * [socket.setoption](https://github.com/openresty/lua-nginx-module#tcpsocksetoption)
+* [socket.setclientcert](https://github.com/openresty/lua-nginx-module#tcpsocksetclientcert)
+* [socket.sslhandshake](https://github.com/openresty/lua-nginx-module#tcpsocksslhandshake)
+
+[Back to TOC](#table-of-contents)
+
+## resty.core.param
+
+* [ngx.arg](https://github.com/openresty/lua-nginx-module#ngxarg) (getter only)
 
 [Back to TOC](#table-of-contents)
 
@@ -294,6 +307,15 @@ This Lua module provides a Lua API for controlling SSL certificates, private key
 SSL protocol versions, and etc in NGINX downstream SSL handshakes.
 
 See the [documentation](./lib/ngx/ssl.md) for this Lua module for more details.
+
+[Back to TOC](#table-of-contents)
+
+## ngx.ssl.clienthello
+
+This Lua module provides a Lua API for post-processing SSL client hello message
+for NGINX downstream SSL connections.
+
+See the [documentation](./lib/ngx/ssl/clienthello.md) for this Lua module for more details.
 
 [Back to TOC](#table-of-contents)
 

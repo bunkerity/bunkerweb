@@ -30,6 +30,7 @@ local context_names = {
     [0x1000] = "ssl_session_fetch",
     [0x2000] = "exit_worker",
     [0x4000] = "ssl_client_hello",
+    [0x8000] = "server_rewrite",
 }
 
 
@@ -52,6 +53,16 @@ function ngx.get_phase()
     end
 
     return phase
+end
+
+
+function ngx.get_raw_phase(r)
+    local context = C.ngx_http_lua_ffi_get_phase(r, errmsg)
+    if context == FFI_ERROR then -- NGX_ERROR
+        error(errmsg, 2)
+    end
+
+    return context
 end
 
 

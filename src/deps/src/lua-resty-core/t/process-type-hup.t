@@ -82,8 +82,7 @@ GET /t
 --- response_body
 type: worker
 --- error_log
-init_worker_by_lua:6: process type: privileged
+init_worker_by_lua(nginx.conf:48):6: process type: privileged
 --- no_error_log
 [error]
 --- skip_nginx: 4: < 1.11.2
---- wait: 0.1

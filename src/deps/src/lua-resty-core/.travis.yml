@@ -1,3 +1,4 @@
+---
 sudo: required
 dist: bionic
 
@@ -18,6 +19,7 @@ addons:
     - cpanminus
     - axel
     - luarocks
+    - daemonize
 
 cache:
   directories:
@@ -32,7 +34,7 @@ env:
     - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
     - LUA_INCLUDE_DIR=$LUAJIT_INC
     - LUA_CMODULE_DIR=/lib
-    - PCRE_VER=8.40
+    - PCRE_VER=8.45
     - PCRE_PREFIX=/opt/pcre
     - PCRE_LIB=$PCRE_PREFIX/lib
     - PCRE_INC=$PCRE_PREFIX/include
@@ -44,14 +46,14 @@ env:
     - TEST_NGINX_RANDOMIZE=1
     - LUACHECK_VER=0.21.1
   matrix:
-    - NGINX_VERSION=1.21.4 OPENSSL_VER=1.1.1l OPENSSL_PATCH_VER=1.1.1f
+    - NGINX_VERSION=1.21.4 OPENSSL_VER=1.1.1s OPENSSL_PATCH_VER=1.1.1f
 
 services:
   - memcache
 
 before_install:
   - sudo luarocks install luacheck $LUACHECK_VER
-  - luacheck -q .
+  - luacheck --globals coroutine -q .
   - '! grep -n -P ''(?<=.{80}).+'' --color `find . -name ''*.lua''` || (echo "ERROR: Found Lua source lines exceeding 80 columns." > /dev/stderr; exit 1)'
   - '! grep -n -P ''\t+'' --color `find . -name ''*.lua''` || (echo "ERROR: Cannot use tabs." > /dev/stderr; exit 1)'
   - sudo cpanm --notest Test::Nginx IPC::Run > build.log 2>&1 || (cat build.log && exit 1)

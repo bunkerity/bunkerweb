@@ -94,7 +94,7 @@ END
     case "$NGX_PLATFORM" in
         Darwin:*)
             case "$NGX_MACHINE" in
-                amd64 | x86_64 | i386)
+                amd64 | arm64 | x86_64 | i386)
                     echo "adding extra linking options needed by LuaJIT on $NGX_MACHINE"
                     luajit_ld_opt="$luajit_ld_opt -pagezero_size 10000 -image_base 100000000"
                     ngx_feature_libs="$ngx_feature_libs -pagezero_size 10000 -image_base 100000000"
@@ -261,6 +261,7 @@ HTTP_LUA_SRCS=" \
             $ngx_addon_dir/src/ngx_http_lua_util.c \
             $ngx_addon_dir/src/ngx_http_lua_cache.c \
             $ngx_addon_dir/src/ngx_http_lua_contentby.c \
+            $ngx_addon_dir/src/ngx_http_lua_server_rewriteby.c \
             $ngx_addon_dir/src/ngx_http_lua_rewriteby.c \
             $ngx_addon_dir/src/ngx_http_lua_accessby.c \
             $ngx_addon_dir/src/ngx_http_lua_setby.c \
@@ -325,6 +326,7 @@ HTTP_LUA_DEPS=" \
             $ngx_addon_dir/src/ngx_http_lua_util.h \
             $ngx_addon_dir/src/ngx_http_lua_cache.h \
             $ngx_addon_dir/src/ngx_http_lua_contentby.h \
+            $ngx_addon_dir/src/ngx_http_lua_server_rewriteby.c \
             $ngx_addon_dir/src/ngx_http_lua_rewriteby.h \
             $ngx_addon_dir/src/ngx_http_lua_accessby.h \
             $ngx_addon_dir/src/ngx_http_lua_setby.h \

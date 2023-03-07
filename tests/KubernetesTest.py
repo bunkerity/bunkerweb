@@ -48,6 +48,8 @@ class KubernetesTest(Test) :
             Test.replace_in_file(deploy, r"bunkerity/bunkerweb:.*$", getenv("PRIVATE_REGISTRY") + "/infra/bunkerweb-tests:" + getenv("IMAGE_TAG"))
             Test.replace_in_file(deploy, r"bunkerity/bunkerweb-autoconf:.*$", getenv("PRIVATE_REGISTRY") + "/infra/autoconf-tests:" + getenv("IMAGE_TAG"))
             Test.replace_in_file(deploy, r"bunkerity/bunkerweb-scheduler:.*$", getenv("PRIVATE_REGISTRY") + "/infra/scheduler-tests:" + getenv("IMAGE_TAG"))
+            Test.replace_in_file(deploy, r"#i", "i")
+            Test.replace_in_file(deploy, r"#-", "-")
             proc = run("kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
             if proc.returncode != 0 :
                 raise(Exception("kubectl apply bunkerweb failed (k8s stack)"))

@@ -65,7 +65,8 @@ if subsystem == 'http' then
         size_t pem_len, unsigned char *der, char **err);
 
     int ngx_http_lua_ffi_priv_key_pem_to_der(const unsigned char *pem,
-        size_t pem_len, unsigned char *der, char **err);
+        size_t pem_len, const unsigned char *passphrase,
+        unsigned char *der, char **err);
 
     int ngx_http_lua_ffi_ssl_get_tls1_version(ngx_http_request_t *r,
         char **err);
@@ -135,7 +136,8 @@ elseif subsystem == 'stream' then
         size_t pem_len, unsigned char *der, char **err);
 
     int ngx_stream_lua_ffi_priv_key_pem_to_der(const unsigned char *pem,
-        size_t pem_len, unsigned char *der, char **err);
+        size_t pem_len, const unsigned char *passphrase,
+        unsigned char *der, char **err);
 
     int ngx_stream_lua_ffi_ssl_get_tls1_version(ngx_stream_lua_request_t *r,
         char **err);
@@ -330,10 +332,11 @@ function _M.cert_pem_to_der(pem)
 end
 
 
-function _M.priv_key_pem_to_der(pem)
+function _M.priv_key_pem_to_der(pem, passphrase)
     local outbuf = get_string_buf(#pem)
 
-    local sz = ngx_lua_ffi_priv_key_pem_to_der(pem, #pem, outbuf, errmsg)
+    local sz = ngx_lua_ffi_priv_key_pem_to_der(pem, #pem,
+                                               passphrase, outbuf, errmsg)
     if sz > 0 then
         return ffi_str(outbuf, sz)
     end

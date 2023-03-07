@@ -20,6 +20,7 @@ local subsystem = ngx.config.subsystem
 
 local ngx_lua_ffi_now
 local ngx_lua_ffi_time
+local ngx_lua_ffi_monotonic_msec
 local ngx_lua_ffi_today
 local ngx_lua_ffi_localtime
 local ngx_lua_ffi_utctime
@@ -30,6 +31,7 @@ if subsystem == 'http' then
     ffi.cdef[[
 double ngx_http_lua_ffi_now(void);
 long ngx_http_lua_ffi_time(void);
+long ngx_http_lua_ffi_monotonic_msec(void);
 void ngx_http_lua_ffi_today(unsigned char *buf);
 void ngx_http_lua_ffi_localtime(unsigned char *buf);
 void ngx_http_lua_ffi_utctime(unsigned char *buf);
@@ -42,6 +44,7 @@ void ngx_http_lua_ffi_parse_http_time(const unsigned char *str, size_t len,
 
     ngx_lua_ffi_now = C.ngx_http_lua_ffi_now
     ngx_lua_ffi_time = C.ngx_http_lua_ffi_time
+    ngx_lua_ffi_monotonic_msec = C.ngx_http_lua_ffi_monotonic_msec
     ngx_lua_ffi_today = C.ngx_http_lua_ffi_today
     ngx_lua_ffi_localtime = C.ngx_http_lua_ffi_localtime
     ngx_lua_ffi_utctime = C.ngx_http_lua_ffi_utctime
@@ -51,6 +54,7 @@ elseif subsystem == 'stream' then
     ffi.cdef[[
 double ngx_stream_lua_ffi_now(void);
 long ngx_stream_lua_ffi_time(void);
+long ngx_stream_lua_ffi_monotonic_msec(void);
 void ngx_stream_lua_ffi_today(unsigned char *buf);
 void ngx_stream_lua_ffi_localtime(unsigned char *buf);
 void ngx_stream_lua_ffi_utctime(unsigned char *buf);
@@ -59,6 +63,7 @@ void ngx_stream_lua_ffi_update_time(void);
 
     ngx_lua_ffi_now = C.ngx_stream_lua_ffi_now
     ngx_lua_ffi_time = C.ngx_stream_lua_ffi_time
+    ngx_lua_ffi_monotonic_msec = C.ngx_stream_lua_ffi_monotonic_msec
     ngx_lua_ffi_today = C.ngx_stream_lua_ffi_today
     ngx_lua_ffi_localtime = C.ngx_stream_lua_ffi_localtime
     ngx_lua_ffi_utctime = C.ngx_stream_lua_ffi_utctime
@@ -73,6 +78,20 @@ end
 
 function ngx.time()
     return tonumber(ngx_lua_ffi_time())
+end
+
+
+local function monotonic_msec()
+    local msec = tonumber(ngx_lua_ffi_monotonic_msec())
+    return msec
+end
+
+
+local function monotonic_time()
+    local msec = tonumber(ngx_lua_ffi_monotonic_msec())
+    local time = msec / 1000
+
+    return time
 end
 
 
@@ -155,5 +174,7 @@ end
 end
 
 return {
-    version = base.version
+    version = base.version,
+    monotonic_msec = monotonic_msec,
+    monotonic_time = monotonic_time
 }

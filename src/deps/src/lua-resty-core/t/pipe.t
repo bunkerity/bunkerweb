@@ -1361,7 +1361,10 @@ lua pipe kill process:
     }
 --- response_body
 ok
---- shutdown_error_log
+--- error_log
+lua pipe destroy process:
+lua pipe kill process:
+--- no_shutdown_error_log
 lua pipe destroy process:
 lua pipe kill process:
 

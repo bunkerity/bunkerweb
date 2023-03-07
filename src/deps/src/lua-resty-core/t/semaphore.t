@@ -304,10 +304,10 @@ GET /test
 sem count: [12]
 waited successfully.
 --- grep_error_log eval
-qr/\[lua\] init_by_lua:\d+: sema created: table: 0x[a-f0-9]+/
+qr/\[lua\] init_by_lua\(nginx.conf:\d+\):\d+: sema created: table: 0x[a-f0-9]+/
 --- grep_error_log_out eval
 [
-qr/\[lua\] init_by_lua:\d+: sema created: table: 0x[a-f0-9]+/,
+qr/\[lua\] init_by_lua\(nginx.conf:\d+\):\d+: sema created: table: 0x[a-f0-9]+/,
 "",
 ]
 
@@ -348,10 +348,10 @@ GET /test
 sem count: [12]
 waited successfully.
 --- grep_error_log eval
-qr/\[lua\] init_by_lua:\d+: sema created: table: 0x[a-f0-9]+/
+qr/\[lua\] init_by_lua\(nginx.conf:\d+\):\d+: sema created: table: 0x[a-f0-9]+/
 --- grep_error_log_out eval
 [
-qr/\[lua\] init_by_lua:\d+: sema created: table: 0x[a-f0-9]+/,
+qr/\[lua\] init_by_lua\(nginx.conf:\d+\):\d+: sema created: table: 0x[a-f0-9]+/,
 "",
 ]
 

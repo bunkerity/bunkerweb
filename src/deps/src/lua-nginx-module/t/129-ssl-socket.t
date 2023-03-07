@@ -39,7 +39,7 @@ run_tests();
 
 __DATA__
 
-=== TEST 1: www.google.com
+=== TEST 1: www.bing.com
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER ipv6=off;
@@ -48,7 +48,7 @@ __DATA__
         set $port $TEST_NGINX_MEMCACHED_PORT;
 
         content_by_lua '
-            -- avoid flushing google in "check leak" testing mode:
+            -- avoid flushing bing in "check leak" testing mode:
             local counter = package.loaded.counter
             if not counter then
                 counter = 1
@@ -62,7 +62,7 @@ __DATA__
             do
                 local sock = ngx.socket.tcp()
                 sock:settimeout(2000)
-                local ok, err = sock:connect("www.google.com", 443)
+                local ok, err = sock:connect("www.bing.com", 443)
                 if not ok then
                     ngx.say("failed to connect: ", err)
                     return
@@ -78,7 +78,7 @@ __DATA__
 
                 ngx.say("ssl handshake: ", type(sess))
 
-                local req = "GET / HTTP/1.1\\r\\nHost: www.google.com\\r\\nConnection: close\\r\\n\\r\\n"
+                local req = "GET / HTTP/1.1\\r\\nHost: www.bing.com\\r\\nConnection: close\\r\\n\\r\\n"
                 local bytes, err = sock:send(req)
                 if not bytes then
                     ngx.say("failed to send http request: ", err)
@@ -106,8 +106,8 @@ __DATA__
 GET /t
 --- response_body_like chop
 \Aconnected: 1
-ssl handshake: userdata
-sent http request: 59 bytes.
+ssl handshake: cdata
+sent http request: 57 bytes.
 received: HTTP/1.1 (?:200 OK|302 Found)
 close: 1 nil
 \z
@@ -190,7 +190,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 53 bytes.
 received: HTTP/1.1 201 Created
 close: 1 nil
@@ -271,7 +271,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 58 bytes.
 received: HTTP/1.1 302 Moved Temporarily
 close: 1 nil
@@ -355,12 +355,12 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 56 bytes.
 received: HTTP/1.1 200 OK
 close: 1 nil
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 56 bytes.
 received: HTTP/1.1 200 OK
 close: 1 nil
@@ -603,7 +603,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 80 bytes.
 received: HTTP/1.1 404 Not Found
 close: 1 nil
@@ -688,7 +688,7 @@ $::DSTRootCertificate"
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 58 bytes.
 received: HTTP/1.1 302 Moved Temporarily
 close: 1 nil
@@ -1008,7 +1008,7 @@ $::DSTRootCertificate"
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 58 bytes.
 received: HTTP/1.1 302 Moved Temporarily
 close: 1 nil
@@ -1087,7 +1087,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 58 bytes.
 received: HTTP/1.1 302 Moved Temporarily
 close: 1 nil
@@ -1179,7 +1179,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 53 bytes.
 received: HTTP/1.1 200 OK
 close: 1 nil
@@ -1269,7 +1269,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 53 bytes.
 received: HTTP/1.1 200 OK
 close: 1 nil
@@ -1418,13 +1418,13 @@ $::DSTRootCertificate"
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 set keepalive: 1 nil
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 set keepalive: 1 nil
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 set keepalive: 1 nil
 
 --- log_level: debug
@@ -1494,13 +1494,13 @@ $::DSTRootCertificate"
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 set keepalive: 1 nil
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 set keepalive: 1 nil
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 set keepalive: 1 nil
 
 --- log_level: debug
@@ -1637,7 +1637,7 @@ attempt to call method 'sslhandshake' (a nil value)
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 56 bytes.
 received: HTTP/1.1 201 Created
 received: Server: nginx
@@ -1742,7 +1742,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 56 bytes.
 received: HTTP/1.1 201 Created
 received: Server: nginx
@@ -2031,8 +2031,8 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
-ssl handshake: userdata
+ssl handshake: cdata
+ssl handshake: cdata
 sent http request: 58 bytes.
 received: HTTP/1.1 302 Moved Temporarily
 close: 1 nil
@@ -2232,7 +2232,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 
 --- user_files eval
 ">>> test.key
@@ -2405,7 +2405,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 56 bytes.
 received: HTTP/1.1 201 Created
 received: Server: nginx
@@ -2529,7 +2529,7 @@ SSL reused session
 
 
 
-=== TEST 31: handshake, too many arguments
+=== TEST 31: handshake, too few arguments
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER ipv6=off;
@@ -2633,7 +2633,7 @@ qr/\[error\] .* ngx.socket sslhandshake: expecting 1 ~ 5 arguments \(including t
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 53 bytes.
 received: HTTP/1.1 200 OK
 close: 1 nil
@@ -2726,7 +2726,7 @@ SSL reused session
 GET /t
 --- response_body
 connected: 1
-ssl handshake: userdata
+ssl handshake: cdata
 sent http request: 53 bytes.
 received: HTTP/1.1 200 OK
 close: 1 nil

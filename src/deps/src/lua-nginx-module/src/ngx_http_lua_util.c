@@ -119,7 +119,6 @@ static int ngx_http_lua_thread_traceback(lua_State *L, lua_State *co,
 static void ngx_http_lua_inject_ngx_api(lua_State *L,
     ngx_http_lua_main_conf_t *lmcf, ngx_log_t *log);
 static void ngx_http_lua_inject_arg_api(lua_State *L);
-static int ngx_http_lua_param_get(lua_State *L);
 static int ngx_http_lua_param_set(lua_State *L);
 static ngx_int_t ngx_http_lua_output_filter(ngx_http_request_t *r,
     ngx_chain_t *in);
@@ -281,7 +280,6 @@ ngx_http_lua_new_state(lua_State *parent_vm, ngx_cycle_t *cycle,
 
         lua_pushliteral(L, LUA_DEFAULT_CPATH ";"); /* package default */
         lua_getfield(L, -2, "cpath"); /* package default old */
-        old_cpath = lua_tolstring(L, -1, &old_cpath_len);
         lua_concat(L, 2); /* package new */
         lua_setfield(L, -2, "cpath"); /* package */
 #endif
@@ -827,7 +825,7 @@ static void
 ngx_http_lua_inject_ngx_api(lua_State *L, ngx_http_lua_main_conf_t *lmcf,
     ngx_log_t *log)
 {
-    lua_createtable(L, 0 /* narr */, 113 /* nrec */);    /* ngx.* */
+    lua_createtable(L, 0 /* narr */, 115 /* nrec */);    /* ngx.* */
 
     lua_pushcfunction(L, ngx_http_lua_get_raw_phase_context);
     lua_setfield(L, -2, "_phase_ctx");
@@ -1005,6 +1003,7 @@ ngx_http_lua_reset_ctx(ngx_http_request_t *r, lua_State *L,
 
     ctx->entry_co_ctx.co_ref = LUA_NOREF;
 
+    ctx->entered_server_rewrite_phase = 0;
     ctx->entered_rewrite_phase = 0;
     ctx->entered_access_phase = 0;
     ctx->entered_content_phase = 0;
@@ -3100,9 +3099,6 @@ ngx_http_lua_inject_arg_api(lua_State *L)
 
     lua_createtable(L, 0 /* narr */, 2 /* nrec */);    /*  the metatable */
 
-    lua_pushcfunction(L, ngx_http_lua_param_get);
-    lua_setfield(L, -2, "__index");
-
     lua_pushcfunction(L, ngx_http_lua_param_set);
     lua_setfield(L, -2, "__newindex");
 
@@ -3111,35 +3107,6 @@ ngx_http_lua_inject_arg_api(lua_State *L)
     dd("top: %d, type -1: %s", lua_gettop(L), luaL_typename(L, -1));
 
     lua_rawset(L, -3);    /*  set ngx.arg table */
-}
-
-
-static int
-ngx_http_lua_param_get(lua_State *L)
-{
-    ngx_http_lua_ctx_t          *ctx;
-    ngx_http_request_t          *r;
-
-    r = ngx_http_lua_get_req(L);
-    if (r == NULL) {
-        return 0;
-    }
-
-    ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
-    if (ctx == NULL) {
-        return luaL_error(L, "ctx not found");
-    }
-
-    ngx_http_lua_check_context(L, ctx, NGX_HTTP_LUA_CONTEXT_SET
-                               | NGX_HTTP_LUA_CONTEXT_BODY_FILTER);
-
-    if (ctx->context & (NGX_HTTP_LUA_CONTEXT_SET)) {
-        return ngx_http_lua_setby_param_get(L, r);
-    }
-
-    /* ctx->context & (NGX_HTTP_LUA_CONTEXT_BODY_FILTER) */
-
-    return ngx_http_lua_body_filter_param_get(L, r);
 }
 
 
@@ -4428,5 +4395,78 @@ ngx_http_lua_copy_escaped_header(ngx_http_request_t *r,
 
     return NGX_OK;
 }
+
+
+ngx_addr_t *
+ngx_http_lua_parse_addr(lua_State *L, u_char *text, size_t len)
+{
+    ngx_addr_t           *addr;
+    size_t                socklen;
+    in_addr_t             inaddr;
+    ngx_uint_t            family;
+    struct sockaddr_in   *sin;
+#if (NGX_HAVE_INET6)
+    struct in6_addr       inaddr6;
+    struct sockaddr_in6  *sin6;
+
+    /*
+     * prevent MSVC8 warning:
+     *    potentially uninitialized local variable 'inaddr6' used
+     */
+    ngx_memzero(&inaddr6, sizeof(struct in6_addr));
+#endif
+
+    inaddr = ngx_inet_addr(text, len);
+
+    if (inaddr != INADDR_NONE) {
+        family = AF_INET;
+        socklen = sizeof(struct sockaddr_in);
+
+#if (NGX_HAVE_INET6)
+
+    } else if (ngx_inet6_addr(text, len, inaddr6.s6_addr) == NGX_OK) {
+        family = AF_INET6;
+        socklen = sizeof(struct sockaddr_in6);
+#endif
+
+    } else {
+        return NULL;
+    }
+
+    addr = lua_newuserdata(L, sizeof(ngx_addr_t) + socklen + len);
+    if (addr == NULL) {
+        luaL_error(L, "no memory");
+        return NULL;
+    }
+
+    addr->sockaddr = (struct sockaddr *) ((u_char *) addr + sizeof(ngx_addr_t));
+
+    ngx_memzero(addr->sockaddr, socklen);
+
+    addr->sockaddr->sa_family = (u_char) family;
+    addr->socklen = socklen;
+
+    switch (family) {
+
+#if (NGX_HAVE_INET6)
+    case AF_INET6:
+        sin6 = (struct sockaddr_in6 *) addr->sockaddr;
+        ngx_memcpy(sin6->sin6_addr.s6_addr, inaddr6.s6_addr, 16);
+        break;
+#endif
+
+    default: /* AF_INET */
+        sin = (struct sockaddr_in *) addr->sockaddr;
+        sin->sin_addr.s_addr = inaddr;
+        break;
+    }
+
+    addr->name.data = (u_char *) addr->sockaddr + socklen;
+    addr->name.len = len;
+    ngx_memcpy(addr->name.data, text, len);
+
+    return addr;
+}
+
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

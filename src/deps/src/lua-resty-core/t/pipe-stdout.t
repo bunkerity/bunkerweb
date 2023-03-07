@@ -920,12 +920,12 @@ exit
             else
 
                 -- so just return the expected data in repeated tests.
-                ngx.say("hello world")
+                ngx.say("closed")
             end
         }
     }
 --- response_body
-hello world
+closed
 
 
 
@@ -1003,5 +1003,27 @@ stderr err: closed
 stdout err: timeout
 --- error_log
 lua pipe add timer for reading: 100(ms)
+--- no_error_log
+[error]
+
+
+
+=== TEST 35: start a daemon process
+--- config
+    location = /t {
+        content_by_lua_block {
+            local ngx_pipe = require "ngx.pipe"
+            local proc = ngx_pipe.spawn({"sh", "-c", "daemonize /usr/bin/sleep 30 >/dev/null 2>&1"})
+
+            local data, err = proc:stdout_read_all()
+            if not data then
+                ngx.say(err)
+            end
+
+            ngx.say("OK")
+        }
+    }
+--- response_body
+OK
 --- no_error_log
 [error]

@@ -93,6 +93,8 @@ spec:
           periodSeconds: 1
           timeoutSeconds: 1
           failureThreshold: 3
+      #imagePullSecrets:
+        #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -120,6 +122,8 @@ spec:
           value: "yes"
         - name: "DATABASE_URI"
           value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+      #imagePullSecrets:
+        #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -146,6 +150,8 @@ spec:
           value: "yes"
         - name: "DATABASE_URI"
           value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+      #imagePullSecrets:
+        #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment

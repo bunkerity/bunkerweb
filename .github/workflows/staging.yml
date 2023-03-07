@@ -201,7 +201,7 @@ jobs:
     needs: [code-security, build-ui]
     uses: ./.github/workflows/staging-tests-ui.yml
     with:
-      MODE: STAGING
+      MODE: staging
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
