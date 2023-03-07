@@ -32,7 +32,7 @@ class LinuxTest(Test):
                 raise Exception("docker run failed (linux stack)")
             if distro in ("ubuntu", "debian"):
                 cmd = "apt install -y /opt/\$(ls /opt | grep deb)"
-            elif distro in ("centos", "fedora"):
+            elif distro in ("centos", "fedora", "rhel"):
                 cmd = "dnf install -y /opt/\$(ls /opt | grep rpm)"
             proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0:
@@ -117,7 +117,7 @@ class LinuxTest(Test):
                 raise Exception("docker exec cp variables.env failed (test)")
             proc = self.docker_exec(
                 self.__distro,
-                "echo '' >> /opt/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /opt/bunkerweb/variables.env",
+                "echo '' >> /etc/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /etc/bunkerweb/variables.env",
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))

@@ -64,7 +64,7 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /var/cache/bunkerweb/ && \
     mkdir -p /etc/bunkerweb/plugins && \
     mkdir -p /var/tmp/bunkerweb/ && \
-    mkdir -p /var/www/ && \
+    mkdir -p /var/www/html && \
     mkdir -p /var/lib/bunkerweb && \
     mkdir -p /etc/letsencrypt && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \

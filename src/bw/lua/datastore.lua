@@ -1,4 +1,9 @@
+
 local datastore = { dict = ngx.shared.datastore }
+
+if not datastore.dict then
+	datastore.dict = ngx.shared.datastore_stream
+end
 
 datastore.get = function(self, key)
 	local value, err = self.dict:get(key)

@@ -71,7 +71,7 @@ class SwarmTest(Test):
                 i += 1
             if not healthy:
                 proc = run(
-                    "docker service logs bunkerweb_mybunker ; docker service logs bunkerweb_myautoconf",
+                    "docker service logs bunkerweb_bunkerweb ; docker service logs bunkerweb_bw-autoconf ; docker service logs bunkerweb_bw-scheduler",
                     cwd="/tmp/swarm",
                     shell=True,
                     capture_output=True,
@@ -188,8 +188,9 @@ class SwarmTest(Test):
         return True
 
     def _debug_fail(self):
-        run("docker service logs bunkerweb_mybunker", shell=True)
-        run("docker service logs bunkerweb_myautoconf", shell=True)
+        run("docker service logs bunkerweb_bunkerweb", shell=True)
+        run("docker service logs bunkerweb_bw-autoconf", shell=True)
+        run("docker service logs bunkerweb_bw-scheduler", shell=True)
         proc = run(
             'docker stack services --format "{{ .Name }}" "' + self._name + '"',
             shell=True,
