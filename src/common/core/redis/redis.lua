@@ -14,11 +14,11 @@ end
 
 function _M:init()
 	-- Check if init is needed
-	local init_needed, err = utils.get_variable("USE_REDIS", "yes")
-	if init_needed == nil then
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if use_redis == nil then
 		return false, "can't check USE_REDIS variable : " .. err
 	end
-	if not init_needed then
+	if use_redis ~= "yes" then
 		return true, "redis not used"
 	end
 	-- TODO : check redis connectivity

@@ -346,7 +346,7 @@ function _M:preread()
 		logger.log(ngx.NOTICE, "BLACKLIST", "IP is in cached ignore blacklist (info: " .. cached_ignored_ip .. ")")
 	elseif cached_ip and cached_ip ~= "ok" then
 		return true, "IP is in blacklist cache (info = " .. cached_ip .. ")", true, utils.get_deny_status()
-	elseif cached_ip
+	elseif cached_ip then
 		return true, "IP is in blacklist cache (not blacklisted)", false, nil
 	end
 

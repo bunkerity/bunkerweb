@@ -8,7 +8,16 @@ sed -i "s@bunkerity/bunkerweb:.*@local/bunkerweb-tests:$MODE@" docker-compose.ym
 sed -i "s@bunkerity/bunkerweb:.*@local/scheduler-tests:$MODE@" docker-compose.yml
 
 # Start stack
+docker-compose pull --ignore-pull-failures
+if [ $? -ne 0 ] ; then
+    echo "❌ Pull failed"
+    exit 1
+fi
 docker-compose up -d
+if [ $? -ne 0 ] ; then
+    echo "❌ Up failed"
+    exit 1
+fi
 i=0
 while [ $i -lt 120 ] ; do
     containers=("ui-bw-1" "ui-bw-scheduler-1" "ui-bw-ui-1" "ui-docker-proxy-1" "ui-app1-1")
@@ -33,6 +42,12 @@ if [ $i -ge 120 ] ; then
 fi
 
 # Start tests
+docker-compose -f docker-compose.tests.yml build
+if [ $? -ne 0 ] ; then
+    echo "❌ Build failed"
+    exit 1
+fi
 docker-compose -f docker-compose.tests.yml up
 
+# Exit
 exit $?
