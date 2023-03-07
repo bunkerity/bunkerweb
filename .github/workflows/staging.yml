@@ -197,6 +197,11 @@ jobs:
       TYPE: linux
       RUNS_ON: "['self-hosted', 'bw-linux']"
     secrets: inherit
+  tests-ui:
+    needs: [code-security, build-ui]
+    uses: ./.github/workflows/staging-tests-ui.yml
+    with:
+      MODE: STAGING
 
   # Delete infrastructures
   delete-infra-docker:
@@ -242,7 +247,7 @@ jobs:
 
   # Push containers
   push-bunkerweb:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
+    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
     uses: ./.github/workflows/staging-push-docker.yml
     with:
       PRIVATE_IMAGE: bunkerweb-tests:staging
@@ -253,7 +258,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   push-scheduler:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
+    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
     uses: ./.github/workflows/staging-push-docker.yml
     with:
       PRIVATE_IMAGE: scheduler-tests:staging
@@ -264,7 +269,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   push-autoconf:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
+    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
     uses: ./.github/workflows/staging-push-docker.yml
     with:
       PRIVATE_IMAGE: autoconf-tests:staging
@@ -275,7 +280,7 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   push-ui:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s]
+    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
     uses: ./.github/workflows/staging-push-docker.yml
     with:
       PRIVATE_IMAGE: ui-tests:staging
@@ -288,7 +293,7 @@ jobs:
 
   # Push Linux packages
   push-ubuntu:
-    needs: [tests-linux]
+    needs: [tests-linux, tests-ui]
     uses: ./.github/workflows/staging-push-packagecloud.yml
     with:
       SEPARATOR: _
@@ -300,7 +305,7 @@ jobs:
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-debian:
-    needs: [tests-linux]
+    needs: [tests-linux, tests-ui]
     uses: ./.github/workflows/staging-push-packagecloud.yml
     with:
       SEPARATOR: _
@@ -312,7 +317,7 @@ jobs:
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-rhel:
-    needs: [tests-linux]
+    needs: [tests-linux, tests-ui]
     uses: ./.github/workflows/staging-push-packagecloud.yml
     with:
       SEPARATOR: "-"
@@ -324,7 +329,7 @@ jobs:
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-fedora:
-    needs: [tests-linux]
+    needs: [tests-linux, tests-ui]
     uses: ./.github/workflows/staging-push-packagecloud.yml
     with:
       SEPARATOR: "-"

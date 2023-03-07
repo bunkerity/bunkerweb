@@ -1,11 +1,8 @@
 version: "3.5"
 
 services:
-  mybunker:
-    # image: bunkerity/bunkerweb:1.4.3
-    build:
-      context: ../..
-      dockerfile: src/bw/Dockerfile
+  bw:
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - 80:8080
       - 443:8443
@@ -26,8 +23,6 @@ services:
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
       www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
       www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
-      www.example.com_CUSTOM_CONF_MODSEC_CRS_config: 'SecRule REQUEST_FILENAME "@rx /global_config$$" "id:999,ctl:ruleRemoveByTag=platform-pgsql,nolog"'
-      CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
     labels:
       - "bunkerweb.INSTANCE"
     networks:
@@ -36,9 +31,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    build:
-      context: ../..
-      dockerfile: src/scheduler/Dockerfile
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     depends_on:
       - mybunker
     environment:
@@ -50,10 +43,7 @@ services:
       - net-docker
 
   bw-ui:
-    # image: bunkerity/bunkerweb-ui:1.4.3
-    build:
-      context: ../..
-      dockerfile: src/ui/Dockerfile
+    image: bunkerity/bunkerweb-ui:1.5.0-beta
     depends_on:
       - mybunker
       - docker-proxy
@@ -82,19 +72,6 @@ services:
     networks:
       bw-services:
         ipv4_address: 192.168.0.4
-
-  ui-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-    extra_hosts:
-      - "www.example.com:192.168.0.2"
-      - "app1.example.com:192.168.0.2"
-    networks:
-      bw-services:
-        ipv4_address: 192.168.0.3
 
 volumes:
   bw-data:
