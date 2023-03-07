@@ -61,8 +61,11 @@ class KubernetesTest(Test) :
                 sleep(1)
                 i += 1
             if not healthy :
+                run("kubectl describe daemonset/bunkerweb", cwd="/tmp/kubernetes", shell=True)
                 run("kubectl logs daemonset/bunkerweb", cwd="/tmp/kubernetes", shell=True)
+                run("kubectl describe deployment/bunkerweb-controller", cwd="/tmp/kubernetes", shell=True)
                 run("kubectl logs deployment/bunkerweb-controller", cwd="/tmp/kubernetes", shell=True)
+                run("kubectl describe deployment/bunkerweb-scheduler", cwd="/tmp/kubernetes", shell=True)
                 run("kubectl logs deployment/bunkerweb-scheduler", cwd="/tmp/kubernetes", shell=True)
                 run("kubectl logs deployment/bunkerweb-db", cwd="/tmp/kubernetes", shell=True)
                 run("kubectl logs deployment/bunkerweb-redis", cwd="/tmp/kubernetes", shell=True)

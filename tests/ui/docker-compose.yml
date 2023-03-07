@@ -33,7 +33,7 @@ services:
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     depends_on:
-      - mybunker
+      - bw
     environment:
       DOCKER_HOST: "tcp://docker-proxy:2375"
     volumes:
@@ -45,7 +45,7 @@ services:
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.5.0-beta
     depends_on:
-      - mybunker
+      - bw
       - docker-proxy
     environment:
       ABSOLUTE_URI: "http://www.example.com:8080/admin/"
