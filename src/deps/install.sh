@@ -128,6 +128,7 @@ echo "ℹ️ Compiling and installing dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
 CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt=-Wl/--with-ld-opt='-lpcre -Wl'/")"
+CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='-Wl/--with-ld-opt='-lpcre -Wl/")"
 if [ "$OS" = "fedora" ] ; then
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'/--with-ld-opt=-lpcre/" | sed "s/--with-cc-opt='.*'//")"
 fi

@@ -6,7 +6,11 @@ on:
       MODE:
         required: true
         type: string
-
+    secrets:
+      PRIVATE_REGISTRY:
+        required: true
+      PRIVATE_REGISTRY_TOKEN:
+        required: true
 jobs:
   tests:
     runs-on: ubuntu-latest

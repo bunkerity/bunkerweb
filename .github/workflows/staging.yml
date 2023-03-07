@@ -202,6 +202,9 @@ jobs:
     uses: ./.github/workflows/staging-tests-ui.yml
     with:
       MODE: STAGING
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
   delete-infra-docker:
