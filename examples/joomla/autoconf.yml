@@ -8,7 +8,7 @@ services:
         aliases:
           - myjoomla
     volumes:
-      - ./joomla-files:/var/www/html
+      - joomla-data:/var/www/html
     environment:
       - JOOMLA_DB_HOST=mydb
       - JOOMLA_DB_NAME=joomla_db
@@ -24,7 +24,23 @@ services:
       - bunkerweb.LIMIT_REQ_URL_2=/installation/index.php
       - bunkerweb.LIMIT_REQ_RATE_2=8r/s
 
-  # For the database, you can refer to the autoconf integration example including a database
+  mydb:
+    image: mariadb
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      bw-services:
+        aliases:
+          - mydb
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=joomla_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
+
+volumes:
+  joomla-data:
+  db-data:
 
 networks:
   bw-services:

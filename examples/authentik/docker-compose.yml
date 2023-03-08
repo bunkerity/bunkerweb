@@ -2,10 +2,7 @@ version: "3.4"
 
 services:
   mybunker:
-    # image: bunkerity/bunkerweb:1.5.0
-    build:
-      context: ../..
-      dockerfile: src/bw/Dockerfile
+    image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
@@ -14,12 +11,6 @@ services:
     networks:
       - bw-universe
       - bw-services
-    # ⚠️ read this if you use local folders for volumes ⚠️
-    # bunkerweb runs as an unprivileged user with UID/GID 101
-    # don't forget to edit the permissions of the files and folders accordingly
-    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
-    # or for an existing one : chown -R root:101 folder && chmod -R 770 folder
-    # more info at https://docs.bunkerweb.io
     environment:
       - MULTISITE=yes
       - SERVER_NAME=auth.example.com app1.example.com app2.example.com # replace with your domains
@@ -62,17 +53,25 @@ services:
       - app2.example.com_REVERSE_PROXY_HEADERS=X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid
 
   bw-scheduler:
-    # image: bunkerity/bunkerweb-scheduler:1.5.0
-    build:
-      context: ../..
-      dockerfile: src/scheduler/Dockerfile
+    image: bunkerity/bunkerweb-scheduler:1.5.0
     depends_on:
       - mybunker
+    environment:
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
     networks:
       - bw-universe
+      - bw-docker
     volumes:
       - bw-data:/data
+
+  bw-docker-proxy:
+    image: tecnativa/docker-socket-proxy:0.1
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - bw-docker
 
   # APPLICATIONS
   app1:
@@ -191,3 +190,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
+  bw-docker:

@@ -22,9 +22,9 @@ class DockerTest(Test) :
         try :
             if not Test.init() :
                 return False
-            proc = run("sudo chown -R 101:101 /tmp/bw-data", shell=True)
-            if proc.returncode != 0 :
-                raise(Exception("chown failed (autoconf stack)"))
+            # proc = run("sudo chown -R 101:101 /tmp/bw-data", shell=True)
+            # if proc.returncode != 0 :
+            #     raise(Exception("chown failed (autoconf stack)"))
         except :
             log("DOCKER", "❌", "exception while running DockerTest.init()\n" + format_exc())
             return False

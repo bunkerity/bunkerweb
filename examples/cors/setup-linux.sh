@@ -13,7 +13,7 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-cp -r ./bw-data/www/* /var/www/html
+cp -r ./www/* /var/www/html
 chown -R $user:nginx /var/www/html
 find /var/www/html -type f -exec chmod 0640 {} \;
 find /var/www/html -type d -exec chmod 0750 {} \;

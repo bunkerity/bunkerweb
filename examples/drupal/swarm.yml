@@ -23,7 +23,21 @@ services:
         - bunkerweb.LIMIT_REQ_URL_1=/core/install.php
         - bunkerweb.LIMIT_REQ_RATE_1=5r/s
 
-  # For the database, you can refer to the swarm example including a database
+  mydb:
+    image: mariadb:10.10
+    networks:
+      - bw-services
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=drupaldb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
 
 networks:
   bw-services:

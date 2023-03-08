@@ -48,11 +48,10 @@ RUN apk add --no-cache pcre bash python3 && \
 	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 	echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
 	mkdir -p /var/tmp/bunkerweb && \
-	mkdir -p /var/www && \
+	mkdir -p /var/www/html && \
 	mkdir -p /etc/bunkerweb && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
 	mkdir -p /data/cache/letsencrypt && ln -s /data/cache/letsencrypt /etc/letsencrypt && \
-	mkdir -p /data/www && ln -s /data/www /var/www/html && \
 	for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
 	for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
 	chown -R root:nginx /data && \

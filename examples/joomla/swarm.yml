@@ -6,7 +6,7 @@ services:
     networks:
       - bw-services
     volumes:
-      - joomla_files:/var/www/html
+      - joomla-files:/var/www/html
     environment:
       - JOOMLA_DB_HOST=mydb
       - JOOMLA_DB_NAME=joomla_db
@@ -26,7 +26,22 @@ services:
         - bunkerweb.LIMIT_REQ_URL_2=/installation/index.php
         - bunkerweb.LIMIT_REQ_RATE_2=8r/s
 
-  # For the database, you can refer to the swarm integration example including a database
+  mydb:
+    image: mariadb
+    networks:
+      - bw-services
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=joomla_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match JOOMLA_DB_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
 
 networks:
   bw-services:
@@ -34,5 +49,5 @@ networks:
       name: bw-services
 
 volumes:
-  joomla_files:
-  db_data:
+  joomla-files:
+  db-data:

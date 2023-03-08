@@ -23,7 +23,22 @@ services:
       - |
         CUSTOM_CONF_MODSEC_CRS_drupal=SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"
 
-  # For the database, you can refer to the example of the autoconf including a database
+  mydb:
+    image: mariadb:10.10
+    networks:
+      bw-services:
+        aliases:
+          - mydb
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=drupaldb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password
+
+volumes:
+  db-data:
 
 networks:
   bw-services:

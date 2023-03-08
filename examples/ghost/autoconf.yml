@@ -4,7 +4,7 @@ services:
   myghost:
     image: ghost:5.25-alpine
     volumes:
-      - ./ghost_data:/var/lib/ghost/content
+      - ghost-data:/var/lib/ghost/content
     networks:
       bw-services:
         aliases:
@@ -17,6 +17,9 @@ services:
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://myghost:2368
+
+volumes:
+  ghost-data:
 
 networks:
   bw-services:

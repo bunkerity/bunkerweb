@@ -48,7 +48,7 @@ services:
   authelia:
     image: authelia/authelia:4
     networks:
-      - bw-universe
+      - bw-services
     configs:
       - source: config_authelia_configuration
         target: /config/configuration.yml
@@ -78,7 +78,7 @@ services:
   redis:
     image: redis:7-alpine
     networks:
-      - bw-universe
+      - bw-services
     volumes:
       - redis:/data
     environment:
@@ -89,13 +89,6 @@ services:
           - "node.role==worker"
 
 networks:
-  bw-universe:
-    external:
-      name: bw-universe
-      ipam:
-        driver: default
-        config:
-          - subnet: 10.20.30.0/24
   bw-services:
     external:
       name: bw-services

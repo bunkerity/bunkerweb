@@ -13,7 +13,7 @@ services:
     # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
     # more info at https://docs.bunkerweb.io
     volumes:
-      - ./bw-data:/data # contains web files (PHP, assets, ...), don't forget to rename the subfolders
+      - ./www:/var/www/html
     environment:
       - SERVER_NAME=app1.example.com app2.example.com app3.example.com # replace with your domains
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -35,63 +35,61 @@ services:
       - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     networks:
       - bw-universe
-      - net_app1
-      - net_app2
-      - net_app3
+      - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.0
     depends_on:
       - mybunker
     environment:
-      - DOCKER_HOST=tcp://docker-proxy:2375
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
     volumes:
-      - ./bw-data:/data
+      - bw-data:/data
     networks:
       - bw-universe
-      - net-docker
+      - bw-docker
 
-  docker-proxy:
+  bw-docker-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
     networks:
-      - net-docker
+      - bw-docker
 
   myapp1:
-    image: php:fpm-alpine3.17
-    # ⚠️ UID and GID of mywww (101:101) and php:fpm-alpine3.17 (82:82) are not the same ⚠️
+    image: php:fpm
+    # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly
-    # example : chown -R 82:101 ./bw-data/www && find ./bw-data/www -type f -exec chmod 0640 {} \; && find ./bw-data/www -type d -exec chmod 0750 {} \;
+    # example : chown -R 33:101 ./www && find ./www -type f -exec chmod 0640 {} \; && find ./www -type d -exec chmod 0750 {} \;
     volumes:
-      - ./bw-data/www/app1.example.com:/app # folder containing PHP app1 (don't forget to rename it)
+      - ./www/app1.example.com:/app # folder containing PHP app1 (don't forget to rename it)
     networks:
-      - net_app1
+      - bw-services
 
   myapp2:
-    image: php:fpm-alpine3.17
-    # ⚠️ UID and GID of bunkerweb (101:101) and php:fpm-alpine3.17 (82:82) are not the same ⚠️
+    image: php:fpm
+    # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly
-    # example : chown -R 82:101 ./bw-data/www && find ./bw-data/www -type f -exec chmod 0640 {} \; && find ./bw-data/www -type d -exec chmod 0750 {} \;
+    # example : chown -R 33:101 ./www && find ./www -type f -exec chmod 0640 {} \; && find ./www -type d -exec chmod 0750 {} \;
     volumes:
-      - ./bw-data/www/app2.example.com:/app # folder containing PHP app2 (don't forget to rename it)
+      - ./www/app2.example.com:/app # folder containing PHP app2 (don't forget to rename it)
     networks:
-      - net_app2
+      - bw-services
 
   myapp3:
-    image: php:fpm-alpine3.17
-    # ⚠️ UID and GID of bunkerweb (101:101) and php:fpm-alpine3.17 (82:82) are not the same ⚠️
+    image: php:fpm
+    # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly
-    # example : chown -R 82:101 ./bw-data/www && find ./bw-data/www -type f -exec chmod 0640 {} \; && find ./bw-data/www -type d -exec chmod 0750 {} \;
+    # example : chown -R 33:101 ./www && find ./www -type f -exec chmod 0640 {} \; && find ./www -type d -exec chmod 0750 {} \;
     volumes:
-      - ./bw-data/www/app3.example.com:/app # folder containing PHP app3 (don't forget to rename it)
+      - ./www/app3.example.com:/app # folder containing PHP app3 (don't forget to rename it)
     networks:
-      - net_app3
+      - bw-services
 
 networks:
   bw-universe:
@@ -99,7 +97,5 @@ networks:
       driver: default
       config:
         - subnet: 10.20.30.0/24
-  net-docker:
-  net_app1:
-  net_app2:
-  net_app3:
+  bw-docker:
+  bw-services:

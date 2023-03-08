@@ -25,9 +25,11 @@ jobs:
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging local/bunkerweb-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging bunkerweb-tests
       - name: Pull Scheduler image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging local/scheduler-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging scheduler-tests
+      - name: Pull UI image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:staging ui-tests
       # Do tests
       - name: Run tests
         run: ./tests/ui/tests.sh
