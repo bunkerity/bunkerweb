@@ -276,4 +276,4 @@ class Metadata(Base):
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(5), default="1.5.0", nullable=False)
+    version = Column(String(32), default="1.5.0", nullable=False)
