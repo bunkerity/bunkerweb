@@ -7,21 +7,21 @@ from subprocess import run
 from time import sleep
 from logger import log
 
-class KubernetesTest(Test) :
 
-    def __init__(self, name, timeout, tests, delay=0) :
+class KubernetesTest(Test):
+    def __init__(self, name, timeout, tests, delay=0):
         super().__init__(name, "kubernetes", timeout, tests, delay=delay)
         self._domains = {
             r"www\.example\.com": getenv("TEST_DOMAIN1_1"),
             r"auth\.example\.com": getenv("TEST_DOMAIN1_2"),
             r"app1\.example\.com": getenv("TEST_DOMAIN1"),
             r"app2\.example\.com": getenv("TEST_DOMAIN2"),
-            r"app3\.example\.com": getenv("TEST_DOMAIN3")
+            r"app3\.example\.com": getenv("TEST_DOMAIN3"),
         }
 
-    def init() :
-        try :
-            if not Test.init() :
+    def init():
+        try:
+            if not Test.init():
                 return False
             # proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
             # if proc.returncode != 0 :
@@ -45,99 +45,178 @@ class KubernetesTest(Test) :
             mkdir("/tmp/kubernetes")
             copy("./misc/integrations/k8s.mariadb.yml", "/tmp/kubernetes/bunkerweb.yml")
             deploy = "/tmp/kubernetes/bunkerweb.yml"
-            Test.replace_in_file(deploy, r"bunkerity/bunkerweb:.*$", getenv("PRIVATE_REGISTRY") + "/infra/bunkerweb-tests:" + getenv("IMAGE_TAG"))
-            Test.replace_in_file(deploy, r"bunkerity/bunkerweb-autoconf:.*$", getenv("PRIVATE_REGISTRY") + "/infra/autoconf-tests:" + getenv("IMAGE_TAG"))
-            Test.replace_in_file(deploy, r"bunkerity/bunkerweb-scheduler:.*$", getenv("PRIVATE_REGISTRY") + "/infra/scheduler-tests:" + getenv("IMAGE_TAG"))
+            Test.replace_in_file(
+                deploy,
+                r"bunkerity/bunkerweb:.*$",
+                getenv("PRIVATE_REGISTRY")
+                + "/infra/bunkerweb-tests:"
+                + getenv("IMAGE_TAG"),
+            )
+            Test.replace_in_file(
+                deploy,
+                r"bunkerity/bunkerweb-autoconf:.*$",
+                getenv("PRIVATE_REGISTRY")
+                + "/infra/autoconf-tests:"
+                + getenv("IMAGE_TAG"),
+            )
+            Test.replace_in_file(
+                deploy,
+                r"bunkerity/bunkerweb-scheduler:.*$",
+                getenv("PRIVATE_REGISTRY")
+                + "/infra/scheduler-tests:"
+                + getenv("IMAGE_TAG"),
+            )
             Test.replace_in_file(deploy, r"#i", "i")
             Test.replace_in_file(deploy, r"#-", "-")
-            proc = run("kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
-            if proc.returncode != 0 :
-                raise(Exception("kubectl apply bunkerweb failed (k8s stack)"))
+            proc = run(
+                "kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True
+            )
+            if proc.returncode != 0:
+                raise (Exception("kubectl apply bunkerweb failed (k8s stack)"))
             healthy = False
             i = 0
-            while i < 30 :
-                proc = run('kubectl get pods | grep bunkerweb | grep -v Running', shell=True, capture_output=True)
-                if "" == proc.stdout.decode() :
+            while i < 30:
+                proc = run(
+                    "kubectl get pods | grep bunkerweb | grep -v Running",
+                    shell=True,
+                    capture_output=True,
+                )
+                if "" == proc.stdout.decode():
                     healthy = True
                     break
                 sleep(1)
                 i += 1
-            if not healthy :
-                run("kubectl describe daemonset/bunkerweb", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl logs daemonset/bunkerweb", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl describe deployment/bunkerweb-controller", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl logs deployment/bunkerweb-controller", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl describe deployment/bunkerweb-scheduler", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl logs deployment/bunkerweb-scheduler", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl logs deployment/bunkerweb-db", cwd="/tmp/kubernetes", shell=True)
-                run("kubectl logs deployment/bunkerweb-redis", cwd="/tmp/kubernetes", shell=True)
-                raise(Exception("k8s stack is not healthy"))
+            if not healthy:
+                run(
+                    "kubectl describe daemonset/bunkerweb",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl logs daemonset/bunkerweb",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl describe deployment/bunkerweb-controller",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl logs deployment/bunkerweb-controller",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl describe deployment/bunkerweb-scheduler",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl logs deployment/bunkerweb-scheduler",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl logs deployment/bunkerweb-db",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl logs deployment/bunkerweb-redis",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                raise (Exception("k8s stack is not healthy"))
             sleep(60)
-        except :
-            log("KUBERNETES", "❌", "exception while running KubernetesTest.init()\n" + format_exc())
+        except:
+            log(
+                "KUBERNETES",
+                "❌",
+                "exception while running KubernetesTest.init()\n" + format_exc(),
+            )
             return False
         return True
 
-    def end() :
+    def end():
         ret = True
-        try :
-            if not Test.end() :
+        try:
+            if not Test.end():
                 return False
-            proc = run("kubectl delete -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
-            if proc.returncode != 0 :
+            proc = run(
+                "kubectl delete -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True
+            )
+            if proc.returncode != 0:
                 ret = False
             rmtree("/tmp/kubernetes")
-        except :
-            log("KUBERNETES", "❌", "exception while running KubernetesTest.end()\n" + format_exc())
+        except:
+            log(
+                "KUBERNETES",
+                "❌",
+                "exception while running KubernetesTest.end()\n" + format_exc(),
+            )
             return False
         return ret
 
-    def _setup_test(self) :
-        try :
+    def _setup_test(self):
+        try:
             super()._setup_test()
             test = "/tmp/tests/" + self._name
             deploy = "/tmp/tests/" + self._name + "/kubernetes.yml"
             example_data = "./examples/" + self._name + "/bw-data"
-            for ex_domain, test_domain in self._domains.items() :
+            for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
             setup = test + "/setup-kubernetes.sh"
-            if isfile(setup) :
+            if isfile(setup):
                 proc = run("./setup-kubernetes.sh", cwd=test, shell=True)
-                if proc.returncode != 0 :
-                    raise(Exception("setup-kubernetes failed"))
+                if proc.returncode != 0:
+                    raise (Exception("setup-kubernetes failed"))
             # if isdir(example_data) :
-                # for cp_dir in listdir(example_data) :
-                    # if isdir(join(example_data, cp_dir)) :
-                        # copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
+            # for cp_dir in listdir(example_data) :
+            # if isdir(join(example_data, cp_dir)) :
+            # copytree(join(example_data, cp_dir), join("/tmp/bw-data", cp_dir))
             proc = run("kubectl apply -f kubernetes.yml", shell=True, cwd=test)
-            if proc.returncode != 0 :
-                raise(Exception("kubectl apply failed"))
-        except :
-            log("KUBERNETES", "❌", "exception while running KubernetesTest._setup_test()\n" + format_exc())
+            if proc.returncode != 0:
+                raise (Exception("kubectl apply failed"))
+        except:
+            log(
+                "KUBERNETES",
+                "❌",
+                "exception while running KubernetesTest._setup_test()\n" + format_exc(),
+            )
             self._cleanup_test()
             return False
         return True
 
-    def _cleanup_test(self) :
-        try :
+    def _cleanup_test(self):
+        try:
             test = "/tmp/tests/" + self._name
             cleanup = test + "/cleanup-kubernetes.sh"
-            if isfile(cleanup) :
+            if isfile(cleanup):
                 proc = run("./cleanup-kubernetes.sh", cwd=test, shell=True)
-                if proc.returncode != 0 :
-                    raise(Exception("cleanup-kubernetes failed"))
+                if proc.returncode != 0:
+                    raise (Exception("cleanup-kubernetes failed"))
             proc = run("kubectl delete -f kubernetes.yml", shell=True, cwd=test)
-            if proc.returncode != 0 :
-                raise(Exception("kubectl delete failed"))
+            if proc.returncode != 0:
+                raise (Exception("kubectl delete failed"))
             super()._cleanup_test()
-        except :
-            log("KUBERNETES", "❌", "exception while running KubernetesTest._cleanup_test()\n" + format_exc())
+        except:
+            log(
+                "KUBERNETES",
+                "❌",
+                "exception while running KubernetesTest._cleanup_test()\n"
+                + format_exc(),
+            )
             return False
         return True
 
-    def _debug_fail(self) :
-        proc = run('kubectl get pods --no-headers -o custom-columns=":metadata.name"', shell=True, capture_output=True)
-        for pod in proc.stdout.decode().splitlines() :
+    def _debug_fail(self):
+        proc = run(
+            'kubectl get pods --no-headers -o custom-columns=":metadata.name"',
+            shell=True,
+            capture_output=True,
+        )
+        for pod in proc.stdout.decode().splitlines():
             run("kubectl logs " + pod, shell=True)

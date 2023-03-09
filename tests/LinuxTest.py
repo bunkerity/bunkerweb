@@ -74,7 +74,11 @@ class LinuxTest(Test):
                 )
             sleep(60)
         except:
-            log("LINUX", "❌", "exception while running LinuxTest.init()\n" + format_exc())
+            log(
+                "LINUX",
+                "❌",
+                "exception while running LinuxTest.init()\n" + format_exc(),
+            )
             return False
         return True
 
@@ -88,7 +92,9 @@ class LinuxTest(Test):
             if proc.returncode != 0:
                 ret = False
         except:
-            log("LINUX", "❌", "exception while running LinuxTest.end()\n" + format_exc())
+            log(
+                "LINUX", "❌", "exception while running LinuxTest.end()\n" + format_exc()
+            )
             return False
         return ret
 
@@ -127,7 +133,11 @@ class LinuxTest(Test):
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl restart failed (linux stack)")
         except:
-            log("LINUX", "❌", "exception while running LinuxTest._setup_test()\n" + format_exc())
+            log(
+                "LINUX",
+                "❌",
+                "exception while running LinuxTest._setup_test()\n" + format_exc(),
+            )
             self._debug_fail()
             self._cleanup_test()
             return False
@@ -143,7 +153,11 @@ class LinuxTest(Test):
                 raise Exception("docker exec rm failed (cleanup)")
             super()._cleanup_test()
         except:
-            log("DOCKER", "❌", "exception while running LinuxTest._cleanup_test()\n" + format_exc())
+            log(
+                "DOCKER",
+                "❌",
+                "exception while running LinuxTest._cleanup_test()\n" + format_exc(),
+            )
             return False
         return True
 

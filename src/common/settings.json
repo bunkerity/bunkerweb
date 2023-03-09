@@ -197,10 +197,7 @@
     "label": "Server type",
     "regex": "^(http|stream)$",
     "type": "select",
-    "select": [
-      "http",
-      "stream"
-    ]
+    "select": ["http", "stream"]
   },
   "LISTEN_STREAM": {
     "context": "multisite",

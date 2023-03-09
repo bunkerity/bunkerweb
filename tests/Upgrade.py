@@ -1538,6 +1538,7 @@ elif distro == "fedora":
             "sudo dnf system-upgrade reboot",
         ]
     )
+
     # Checking container is running
     def start_container():
         subprocess.run(["docker", "start", "systemd-fedora"])

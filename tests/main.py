@@ -58,7 +58,11 @@ for example in glob("./examples/*"):
             with open(f"{example}/tests.json") as f:
                 tests = loads(f.read())
             if not test_type in tests["kinds"]:
-                log("TESTS", "ℹ️", "Skipping tests for " + tests["name"] + " (not in kinds)")
+                log(
+                    "TESTS",
+                    "ℹ️",
+                    "Skipping tests for " + tests["name"] + " (not in kinds)",
+                )
                 continue
             test_obj = None
             no_copy_container = False
@@ -103,7 +107,14 @@ for example in glob("./examples/*"):
                     ret = end_fun()
                 _exit(1)
         except:
-            log("TESTS", "❌", "Exception while executing test for example " + example + " : " + format_exc())
+            log(
+                "TESTS",
+                "❌",
+                "Exception while executing test for example "
+                + example
+                + " : "
+                + format_exc(),
+            )
             if test_type == "linux":
                 ret = end_fun(distro)
             else:

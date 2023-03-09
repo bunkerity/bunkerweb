@@ -47,7 +47,6 @@ class Config(ConfigCaller):
         return False
 
     def apply(self, instances, services, configs=None) -> bool:
-
         success = True
 
         # update values

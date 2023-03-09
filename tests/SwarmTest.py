@@ -81,7 +81,11 @@ class SwarmTest(Test):
                 raise (Exception("swarm stack is not healthy"))
             sleep(60)
         except:
-            log("SWARM", "❌", "exception while running SwarmTest.init()\n" + format_exc())
+            log(
+                "SWARM",
+                "❌",
+                "exception while running SwarmTest.init()\n" + format_exc(),
+            )
             return False
         return True
 
@@ -96,7 +100,9 @@ class SwarmTest(Test):
                 ret = False
             rmtree("/tmp/swarm")
         except:
-            log("SWARM", "❌", "exception while running SwarmTest.end()\n" + format_exc())
+            log(
+                "SWARM", "❌", "exception while running SwarmTest.end()\n" + format_exc()
+            )
             return False
         return ret
 
@@ -152,7 +158,11 @@ class SwarmTest(Test):
             if not healthy:
                 raise (Exception("swarm stack is not healthy"))
         except:
-            log("SWARM", "❌", "exception while running SwarmTest._setup_test()\n" + format_exc())
+            log(
+                "SWARM",
+                "❌",
+                "exception while running SwarmTest._setup_test()\n" + format_exc(),
+            )
             self._cleanup_test()
             return False
         return True
@@ -183,7 +193,11 @@ class SwarmTest(Test):
                 raise (Exception("docker pruner rm failed"))
             super()._cleanup_test()
         except:
-            log("SWARM", "❌", "exception while running SwarmTest._cleanup_test()\n" + format_exc())
+            log(
+                "SWARM",
+                "❌",
+                "exception while running SwarmTest._cleanup_test()\n" + format_exc(),
+            )
             return False
         return True
 

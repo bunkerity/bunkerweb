@@ -19,7 +19,13 @@ from flask import (
     send_file,
     url_for,
 )
-from flask_login import LoginManager, login_required, login_user, logout_user
+from flask_login import (
+    current_user,
+    LoginManager,
+    login_required,
+    login_user,
+    logout_user,
+)
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -253,13 +259,6 @@ def load_user(user_id):
     return User(user_id, vars["ADMIN_PASSWORD"])
 
 
-@login_manager.unauthorized_handler
-def unauthorized_callback():
-    if request.path == "/":
-        return redirect(url_for("login"))
-    return "Unauthorized", 401
-
-
 # CSRF protection
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -410,7 +409,6 @@ def instances():
 @login_required
 def services():
     if request.method == "POST":
-
         # Check operation
         if not "operation" in request.form or not request.form["operation"] in (
             "new",
@@ -548,7 +546,6 @@ def services():
 @login_required
 def global_config():
     if request.method == "POST":
-
         # Check variables
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
@@ -1669,6 +1666,9 @@ def login():
             render_template("login.html", error="Invalid username or password"),
             401,
         )
+
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
     return render_template("login.html")
 
 

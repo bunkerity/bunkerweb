@@ -39,7 +39,7 @@ jobs:
       - name: Install ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.0'
+          ruby-version: "3.0"
       - name: Install packagecloud
         run: gem install package_cloud
       # Download packages

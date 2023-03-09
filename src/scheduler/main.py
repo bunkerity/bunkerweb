@@ -236,7 +236,7 @@ if __name__ == "__main__":
         # Checking if any custom config has been created by the user
         custom_confs = []
         root_dirs = listdir("/etc/bunkerweb/configs")
-        for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
+        for root, dirs, files in walk("/etc/bunkerweb/configs", topdown=True):
             if (
                 root != "configs"
                 and (dirs and not root.split("/")[-1] in root_dirs)

@@ -106,7 +106,7 @@ class Templator:
                 "set-lua.conf",
                 "log-stream-lua.conf",
                 "preread-stream-lua.conf",
-                "server-stream.conf"
+                "server-stream.conf",
             ]
             for root_conf in root_confs:
                 if template.endswith(f"/{root_conf}"):

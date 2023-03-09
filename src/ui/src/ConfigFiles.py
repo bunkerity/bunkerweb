@@ -22,7 +22,7 @@ class ConfigFiles:
     def save_configs(self) -> str:
         custom_configs = []
         root_dirs = listdir("/etc/bunkerweb/configs")
-        for (root, dirs, files) in walk("/etc/bunkerweb/configs", topdown=True):
+        for root, dirs, files in walk("/etc/bunkerweb/configs", topdown=True):
             if (
                 root != "configs"
                 and (dirs and not root.split("/")[-1] in root_dirs)

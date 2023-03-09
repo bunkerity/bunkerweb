@@ -29,8 +29,8 @@ jobs:
         uses: actions/setup-python@v4
         if: inputs.TYPE != 'k8s'
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
       - name: Install ansible
         run: pip install ansible
         if: inputs.TYPE != 'k8s'

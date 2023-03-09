@@ -5,7 +5,6 @@ on:
     branches: [staging]
 
 jobs:
-
   # Containers
   build-bw:
     uses: ./.github/workflows/staging-container-build.yml
@@ -123,7 +122,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
         with:
           category: "/language:${{matrix.language}}"
-    
+
   # Create infrastructures
   create-infra-docker:
     needs: [code-security, build-bw, build-scheduler]
@@ -154,7 +153,15 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-linux:
-    needs: [code-security, build-ubuntu, build-debian, build-centos, build-fedora, build-rhel]
+    needs:
+      [
+        code-security,
+        build-ubuntu,
+        build-debian,
+        build-centos,
+        build-fedora,
+        build-rhel,
+      ]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
       TYPE: linux

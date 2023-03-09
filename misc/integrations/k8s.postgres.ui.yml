@@ -3,12 +3,12 @@ kind: ClusterRole
 metadata:
   name: cr-bunkerweb
 rules:
-- apiGroups: [""]
-  resources: ["services", "pods", "configmaps"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["ingresses"]
-  verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["services", "pods", "configmaps"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -20,10 +20,10 @@ kind: ClusterRoleBinding
 metadata:
   name: crb-bunkerweb
 subjects:
-- kind: ServiceAccount
-  name: sa-bunkerweb
-  namespace: default
-  apiGroup: ""
+  - kind: ServiceAccount
+    name: sa-bunkerweb
+    namespace: default
+    apiGroup: ""
 roleRef:
   kind: ClusterRole
   name: cr-bunkerweb
@@ -46,53 +46,53 @@ spec:
         bunkerweb.io/AUTOCONF: "yes"
     spec:
       containers:
-      - name: bunkerweb
-        image: bunkerity/bunkerweb:1.4.6
-        imagePullPolicy: Always
-        securityContext:
-          runAsUser: 101
-          runAsGroup: 101
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-        ports:
-        - containerPort: 8080
-          hostPort: 80
-        - containerPort: 8443
-          hostPort: 443
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        # replace with your DNS resolvers
-        # e.g. : kube-dns.kube-system.svc.cluster.local
-        - name: DNS_RESOLVERS
-          value: "coredns.kube-system.svc.cluster.local"
-        - name: USE_API
-          value: "yes"
-        # 10.0.0.0/8 is the cluster internal subnet
-        - name: API_WHITELIST_IP
-          value: "127.0.0.0/8 10.0.0.0/8"
-        - name: SERVER_NAME
-          value: ""
-        - name: MULTISITE
-          value: "yes"
-        livenessProbe:
-          exec:
-            command:
-            - /usr/share/bunkerweb/helpers/healthcheck.sh
-          initialDelaySeconds: 30
-          periodSeconds: 5
-          timeoutSeconds: 1
-          failureThreshold: 3
-        readinessProbe:
-          exec:
-            command:
-            - /usr/share/bunkerweb/helpers/healthcheck.sh
-          initialDelaySeconds: 30
-          periodSeconds: 1
-          timeoutSeconds: 1
-          failureThreshold: 3
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.4.6
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+              hostPort: 80
+            - containerPort: 8443
+              hostPort: 443
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            # replace with your DNS resolvers
+            # e.g. : kube-dns.kube-system.svc.cluster.local
+            - name: DNS_RESOLVERS
+              value: "coredns.kube-system.svc.cluster.local"
+            - name: USE_API
+              value: "yes"
+            # 10.0.0.0/8 is the cluster internal subnet
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8"
+            - name: SERVER_NAME
+              value: ""
+            - name: MULTISITE
+              value: "yes"
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -112,14 +112,14 @@ spec:
     spec:
       serviceAccountName: sa-bunkerweb
       containers:
-      - name: bunkerweb-controller
-        image: bunkerity/bunkerweb-autoconf:1.4.6
-        imagePullPolicy: Always
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        - name: "DATABASE_URI"
-          value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+        - name: bunkerweb-controller
+          image: bunkerity/bunkerweb-autoconf:1.4.6
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            - name: "DATABASE_URI"
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -138,14 +138,14 @@ spec:
         app: bunkerweb-scheduler
     spec:
       containers:
-      - name: bunkerweb-controller
-        image: bunkerity/bunkerweb-autoconf:1.4.6
-        imagePullPolicy: Always
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        - name: "DATABASE_URI"
-          value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+        - name: bunkerweb-controller
+          image: bunkerity/bunkerweb-autoconf:1.4.6
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            - name: "DATABASE_URI"
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -164,9 +164,9 @@ spec:
         app: bunkerweb-redis
     spec:
       containers:
-      - name: bunkerweb-redis
-        image: redis:7-alpine
-        imagePullPolicy: Always
+        - name: bunkerweb-redis
+          image: redis:7-alpine
+          imagePullPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -185,19 +185,19 @@ spec:
         app: bunkerweb-db
     spec:
       containers:
-      - name: bunkerweb-db
-        image: postgres:15.1
-        imagePullPolicy: Always
-        env:
-        - name: "POSTGRES_DB"
-          value: "db"
-        - name: "POSTGRES_USER"
-          value: "bunkerweb"
-        - name: "POSTGRES_PASSWORD"
-          value: "changeme"
-        volumeMounts:
-        - mountPath: "/var/lib/postgresql/data"
-          name: vol-db
+        - name: bunkerweb-db
+          image: postgres:15.1
+          imagePullPolicy: Always
+          env:
+            - name: "POSTGRES_DB"
+              value: "db"
+            - name: "POSTGRES_USER"
+              value: "bunkerweb"
+            - name: "POSTGRES_PASSWORD"
+              value: "changeme"
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql/data"
+              name: vol-db
       volumes:
         - name: vol-db
           persistentVolumeClaim:
@@ -220,16 +220,16 @@ spec:
         app: bunkerweb-ui
     spec:
       containers:
-      - name: bunkerweb-ui
-        image: bunkerity/bunkerweb-ui:1.5.0
-        imagePullPolicy: Always
-        env:
-        - name: ADMIN_USERNAME
-          value: "admin"
-        - name: "ADMIN_PASSWORD"
-          value: "changeme"
-        - name: "ABSOLUTE_URI"
-          value: "http://www.example.com/admin"
+        - name: bunkerweb-ui
+          image: bunkerity/bunkerweb-ui:1.5.0
+          imagePullPolicy: Always
+          env:
+            - name: ADMIN_USERNAME
+              value: "admin"
+            - name: "ADMIN_PASSWORD"
+              value: "changeme"
+            - name: "ABSOLUTE_URI"
+              value: "http://www.example.com/admin"
 ---
 apiVersion: v1
 kind: Service
@@ -249,10 +249,10 @@ spec:
   selector:
     app: bunkerweb-db
   ports:
-  - name: sql
-    protocol: TCP
-    port: 5432
-    targetPort: 5432
+    - name: sql
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
 ---
 apiVersion: v1
 kind: Service
@@ -263,10 +263,10 @@ spec:
   selector:
     app: bunkerweb-redis
   ports:
-  - name: redis
-    protocol: TCP
-    port: 6379
-    targetPort: 6379
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
 ---
 apiVersion: v1
 kind: Service
@@ -277,10 +277,10 @@ spec:
   selector:
     app: bunkerweb-ui
   ports:
-  - name: http
-    protocol: TCP
-    port: 7000
-    targetPort: 7000
+    - name: http
+      protocol: TCP
+      port: 7000
+      targetPort: 7000
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -288,7 +288,7 @@ metadata:
   name: pvc-bunkerweb
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
@@ -301,7 +301,7 @@ metadata:
   name: pvc-bunkerweb
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
@@ -317,13 +317,13 @@ metadata:
     bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
 spec:
   rules:
-  - host: www.example.com
-    http:
-      paths:
-      - path: /admin
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-bunkerweb-ui
-            port:
-              number: 7000
+    - host: www.example.com
+      http:
+        paths:
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-bunkerweb-ui
+                port:
+                  number: 7000
