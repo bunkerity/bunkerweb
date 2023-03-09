@@ -11,7 +11,7 @@ from pymysql import install_as_MySQLdb
 from re import compile as re_compile
 from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -97,24 +97,39 @@ class Database:
 
         while not_connected:
             try:
-                self.__sql_engine.connect()
+                with self.__sql_engine.connect() as conn:
+                    conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
+                    conn.execute(text("DROP TABLE test"))
                 not_connected = False
-            except (OperationalError, DatabaseError):
+            except (OperationalError, DatabaseError) as e:
                 if retries <= 0:
                     self.__logger.error(
                         f"Can't connect to database : {format_exc()}",
                     )
                     _exit(1)
 
-                self.__logger.warning(
-                    "Can't connect to database, retrying in 5 seconds ...",
-                )
+                if "attempt to write a readonly database" in str(e):
+                    self.__logger.warning(
+                        "The database is read-only, waiting for it to become writable. Retrying in 5 seconds ..."
+                    )
+                    self.__sql_engine.dispose(close=True)
+                    self.__sql_engine = create_engine(
+                        sqlalchemy_string,
+                        future=True,
+                    )
+                else:
+                    self.__logger.warning(
+                        "Can't connect to database, retrying in 5 seconds ...",
+                    )
                 retries -= 1
                 sleep(5)
-            except SQLAlchemyError:
+            except BaseException:
                 self.__logger.error(
                     f"Error when trying to connect to the database: {format_exc()}"
                 )
+                exit(1)
+
+        self.__logger.info("Database connection established")
 
         self.__session = sessionmaker()
         self.__sql_session = scoped_session(self.__session)
