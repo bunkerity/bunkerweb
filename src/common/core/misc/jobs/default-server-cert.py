@@ -19,7 +19,6 @@ logger = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-
     # Check if we need to generate a self-signed default cert for non-SNI "clients"
     need_default_cert = False
     if getenv("MULTISITE", "no") == "yes":

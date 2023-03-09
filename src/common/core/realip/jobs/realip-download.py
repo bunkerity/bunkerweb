@@ -5,6 +5,7 @@ from ipaddress import ip_address, ip_network
 from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -39,6 +40,7 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 try:
@@ -125,13 +127,15 @@ try:
         _exit(2)
 
     # Update db
-    err = db.update_job_cache(
-        "realip-download",
-        None,
-        "combined.list",
-        content,
-        checksum=new_hash,
-    )
+    with lock:
+        err = db.update_job_cache(
+            "realip-download",
+            None,
+            "combined.list",
+            content,
+            checksum=new_hash,
+        )
+
     if err:
         logger.warning(f"Couldn't update db cache: {err}")
 

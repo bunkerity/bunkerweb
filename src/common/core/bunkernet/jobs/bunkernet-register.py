@@ -3,6 +3,7 @@
 from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from time import sleep
 from traceback import format_exc
 
@@ -24,10 +25,10 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 try:
-
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
     # Multisite case
@@ -153,12 +154,14 @@ try:
             Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
 
             # Update db
-            err = db.update_job_cache(
-                "bunkernet-register",
-                None,
-                "instance.id",
-                bunkernet_id.encode("utf-8"),
-            )
+            with lock:
+                err = db.update_job_cache(
+                    "bunkernet-register",
+                    None,
+                    "instance.id",
+                    bunkernet_id.encode("utf-8"),
+                )
+
             if err:
                 logger.warning(f"Couldn't update db cache: {err}")
     else:

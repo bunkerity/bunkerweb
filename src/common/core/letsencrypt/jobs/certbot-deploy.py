@@ -8,6 +8,7 @@ from shutil import chown
 from subprocess import run, DEVNULL, STDOUT
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
+from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -28,6 +29,7 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 try:
@@ -62,7 +64,10 @@ try:
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 
-        for instance in db.get_instances():
+        with lock:
+            instances = db.get_instances()
+
+        for instance in instances:
             endpoint = f"http://{instance['hostname']}:{instance['port']}"
             host = instance["server_name"]
             api = API(endpoint, host=host)

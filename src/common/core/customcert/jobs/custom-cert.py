@@ -4,6 +4,7 @@ from os import getenv, makedirs
 from pathlib import Path
 from shutil import copy
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from traceback import format_exc
 from typing import Optional
 
@@ -24,6 +25,7 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 
 
 def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
@@ -80,13 +82,14 @@ def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
             copy(key_path, key_cache_path.replace(".hash", ""))
 
             with open(key_path, "r") as f:
-                err = db.update_job_cache(
-                    "custom-cert",
-                    first_server,
-                    key_cache_path.replace(".hash", "").split("/")[-1],
-                    f.read().encode("utf-8"),
-                    checksum=key_hash,
-                )
+                with lock:
+                    err = db.update_job_cache(
+                        "custom-cert",
+                        first_server,
+                        key_cache_path.replace(".hash", "").split("/")[-1],
+                        f.read().encode("utf-8"),
+                        checksum=key_hash,
+                    )
 
             if err:
                 logger.warning(
@@ -94,13 +97,14 @@ def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
                 )
 
         with open(cert_path, "r") as f:
-            err = db.update_job_cache(
-                "custom-cert",
-                first_server,
-                cert_cache_path.replace(".hash", "").split("/")[-1],
-                f.read().encode("utf-8"),
-                checksum=cert_hash,
-            )
+            with lock:
+                err = db.update_job_cache(
+                    "custom-cert",
+                    first_server,
+                    cert_cache_path.replace(".hash", "").split("/")[-1],
+                    f.read().encode("utf-8"),
+                    checksum=cert_hash,
+                )
 
         if err:
             logger.warning(
@@ -129,9 +133,7 @@ try:
 
         for first_server in servers:
             if not first_server or (
-                getenv(
-                    f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")
-                )
+                getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no"))
                 != "yes"
             ):
                 continue

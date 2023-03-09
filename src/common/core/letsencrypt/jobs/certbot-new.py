@@ -4,6 +4,7 @@ from os import environ, getenv
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -22,6 +23,7 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 
@@ -102,12 +104,14 @@ try:
                     ).read_bytes()
 
                     # Update db
-                    err = db.update_job_cache(
-                        "certbot-new",
-                        first_server,
-                        "cert.pem",
-                        cert,
-                    )
+                    with lock:
+                        err = db.update_job_cache(
+                            "certbot-new",
+                            first_server,
+                            "cert.pem",
+                            cert,
+                        )
+
                     if err:
                         logger.warning(f"Couldn't update db cache: {err}")
 
@@ -140,12 +144,14 @@ try:
                     ).read_bytes()
 
                     # Update db
-                    err = db.update_job_cache(
-                        "certbot-new",
-                        first_server,
-                        "cert.pem",
-                        cert,
-                    )
+                    with lock:
+                        err = db.update_job_cache(
+                            "certbot-new",
+                            first_server,
+                            "cert.pem",
+                            cert,
+                        )
+
                     if err:
                         logger.warning(f"Couldn't update db cache: {err}")
 except:

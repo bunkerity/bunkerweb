@@ -4,6 +4,7 @@ from os import getenv
 from os.path import isfile
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -24,6 +25,7 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 try:
@@ -42,7 +44,10 @@ try:
 
     # Cluster case
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
-        for instance in db.get_instances():
+        with lock:
+            instances = db.get_instances()
+
+        for instance in instances:
             endpoint = f"http://{instance['hostname']}:{instance['port']}"
             host = instance["server_name"]
             api = API(endpoint, host=host)

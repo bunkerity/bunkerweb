@@ -6,6 +6,7 @@ from os import _exit, getenv
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from traceback import format_exc
 from typing import Tuple
 
@@ -61,10 +62,10 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 try:
-
     # Check if at least a server has Whitelist activated
     whitelist_activated = False
     # Multisite case
@@ -175,13 +176,14 @@ try:
                         status = 2
                     else:
                         # Update db
-                        err = db.update_job_cache(
-                            "whitelist-download",
-                            None,
-                            f"{kind}.list",
-                            content,
-                            checksum=new_hash,
-                        )
+                        with lock:
+                            err = db.update_job_cache(
+                                "whitelist-download",
+                                None,
+                                f"{kind}.list",
+                                content,
+                                checksum=new_hash,
+                            )
 
                         if err:
                             logger.warning(f"Couldn't update db cache: {err}")

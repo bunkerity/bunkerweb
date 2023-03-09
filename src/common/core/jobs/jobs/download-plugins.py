@@ -6,6 +6,7 @@ from os.path import dirname, join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from uuid import uuid4
 from glob import glob
 from json import load, loads
@@ -32,6 +33,7 @@ db = Database(
     logger,
     sqlalchemy_string=getenv("DATABASE_URI", None),
 )
+lock = Lock()
 status = 0
 
 
@@ -54,7 +56,6 @@ def install_plugin(plugin_dir):
 
 
 try:
-
     # Check if we have plugins to download
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "")
     if not plugin_urls:
@@ -109,7 +110,9 @@ try:
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])
 
-    db_plugins = db.get_plugins()
+    with lock:
+        db_plugins = db.get_plugins()
+
     for plugin in db_plugins:
         if plugin["external"] is True and plugin["id"] not in external_plugins_ids:
             external_plugins.append(plugin)
@@ -121,7 +124,9 @@ try:
             chmod(join(root, name), 0o770)
 
     if external_plugins:
-        err = db.update_external_plugins(external_plugins)
+        with lock:
+            err = db.update_external_plugins(external_plugins)
+
         if err:
             logger.error(
                 f"Couldn't update external plugins to database: {err}",
