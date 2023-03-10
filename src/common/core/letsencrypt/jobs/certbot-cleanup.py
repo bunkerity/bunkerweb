@@ -32,9 +32,9 @@ try:
     # Get env vars
     bw_integration = None
     if getenv("KUBERNETES_MODE") == "yes":
-        bw_integration = "Swarm"
-    elif getenv("SWARM_MODE") == "yes":
         bw_integration = "Kubernetes"
+    elif getenv("SWARM_MODE") == "yes":
+        bw_integration = "Swarm"
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
     elif Path("/usr/share/bunkerweb/INTEGRATION").exists():

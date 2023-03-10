@@ -48,7 +48,7 @@ function log() {
 	category="$1"
 	severity="$2"
 	message="$3"
-	echo "$when $category - $severity - $message"
+	echo "$when - $category - $severity - $message"
 }
 
 # get only interesting env (var=value)

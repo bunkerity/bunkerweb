@@ -3,6 +3,7 @@ from os import environ, getenv
 from os.path import sep
 from sys import path as sys_path
 from tarfile import open as taropen
+from typing import Optional
 
 if "/usr/share/bunkerweb/utils" not in sys_path:
     sys_path.append("/usr/share/bunkerweb/utils")
@@ -22,7 +23,7 @@ class ApiCaller:
         self.__apis = apis
         self.__logger = setup_logger("Api", environ.get("LOG_LEVEL", "INFO"))
 
-    def auto_setup(self, bw_integration: str = None):
+    def auto_setup(self, bw_integration: Optional[str] = None):
         if bw_integration is None:
             if getenv("KUBERNETES_MODE", "no") == "yes":
                 bw_integration = "Kubernetes"
