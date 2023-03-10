@@ -5,8 +5,9 @@ from hashlib import sha256
 from logging import (
     Logger,
 )
-from os import _exit, getenv, listdir, makedirs
-from os.path import dirname, exists
+from os import _exit, getenv
+from os.path import dirname
+from pathlib import Path
 from pymysql import install_as_MySQLdb
 from re import compile as re_compile
 from sys import path as sys_path
@@ -61,7 +62,9 @@ class Database:
 
         if sqlalchemy_string.startswith("sqlite"):
             with suppress(FileExistsError):
-                makedirs(dirname(sqlalchemy_string.split("///")[1]), exist_ok=True)
+                Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(
+                    parents=True, exist_ok=True
+                )
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
@@ -117,6 +120,9 @@ class Database:
                         sqlalchemy_string,
                         future=True,
                     )
+                if "Unknown table" in str(e):
+                    not_connected = False
+                    continue
                 else:
                     self.__logger.warning(
                         "Can't connect to database, retrying in 5 seconds ...",
@@ -270,6 +276,7 @@ class Database:
                 for plugin in plugins:
                     settings = {}
                     jobs = []
+                    page = False
                     if "id" not in plugin:
                         settings = plugin
                         plugin = {
@@ -283,6 +290,7 @@ class Database:
                     else:
                         settings = plugin.pop("settings", {})
                         jobs = plugin.pop("jobs", [])
+                        page = plugin.pop("page", False)
 
                     to_put.append(Plugins(**plugin))
 
@@ -298,40 +306,37 @@ class Database:
                         for select in value.pop("select", []):
                             to_put.append(Selects(setting_id=value["id"], value=select))
 
-                        to_put.append(
-                            Settings(
-                                **value,
-                            )
-                        )
+                        to_put.append(Settings(**value))
 
                     for job in jobs:
                         job["file_name"] = job.pop("file")
                         to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
-                    if exists(f"/usr/share/bunkerweb/core/{plugin['id']}/ui"):
-                        if {"template.html", "actions.py"}.issubset(
-                            listdir(f"/usr/share/bunkerweb/core/{plugin['id']}/ui")
-                        ):
-                            with open(
-                                f"/usr/share/bunkerweb/core/{plugin['id']}/ui/template.html",
-                                "r",
-                            ) as file:
-                                template = file.read().encode("utf-8")
-                            with open(
-                                f"/usr/share/bunkerweb/core/{plugin['id']}/ui/actions.py",
-                                "r",
-                            ) as file:
-                                actions = file.read().encode("utf-8")
+                    if page:
+                        path_ui = (
+                            Path(f"/usr/share/bunkerweb/core/{plugin['id']}/ui")
+                            if Path(
+                                f"/usr/share/bunkerweb/core/{plugin['id']}/ui"
+                            ).exists()
+                            else Path(f"/etc/bunkerweb/plugins/{plugin['id']}/ui")
+                        )
 
-                            to_put.append(
-                                Plugin_pages(
-                                    plugin_id=plugin["id"],
-                                    template_file=template,
-                                    template_checksum=sha256(template).hexdigest(),
-                                    actions_file=actions,
-                                    actions_checksum=sha256(actions).hexdigest(),
+                        if path_ui.exists():
+                            if {"template.html", "actions.py"}.issubset(
+                                path_ui.iterdir()
+                            ):
+                                template = Path(f"{path_ui}/template.html").read_bytes()
+                                actions = Path(f"{path_ui}/actions.py").read_bytes()
+
+                                to_put.append(
+                                    Plugin_pages(
+                                        plugin_id=plugin["id"],
+                                        template_file=template,
+                                        template_checksum=sha256(template).hexdigest(),
+                                        actions_file=actions,
+                                        actions_checksum=sha256(actions).hexdigest(),
+                                    )
                                 )
-                            )
 
             try:
                 session.add_all(to_put)
@@ -907,7 +912,9 @@ class Database:
 
         return ""
 
-    def update_external_plugins(self, plugins: List[Dict[str, Any]]) -> str:
+    def update_external_plugins(
+        self, plugins: List[Dict[str, Any]], *, delete_missing: bool = True
+    ) -> str:
         """Update external plugins from the database"""
         to_put = []
         with self.__db_session() as session:
@@ -919,7 +926,7 @@ class Database:
             )
 
             db_ids = []
-            if db_plugins:
+            if delete_missing and db_plugins:
                 db_ids = [plugin.id for plugin in db_plugins]
                 ids = [plugin["id"] for plugin in plugins]
                 missing_ids = [plugin for plugin in db_ids if plugin not in ids]
@@ -931,7 +938,7 @@ class Database:
             for plugin in plugins:
                 settings = plugin.pop("settings", {})
                 jobs = plugin.pop("jobs", [])
-                pages = plugin.pop("pages", [])
+                page = plugin.pop("page", False)
                 plugin["external"] = True
                 db_plugin = (
                     session.query(Plugins)
@@ -966,6 +973,15 @@ class Database:
 
                     if plugin["version"] != db_plugin.version:
                         updates[Plugins.version] = plugin["version"]
+
+                    if plugin["method"] != db_plugin.method:
+                        updates[Plugins.method] = plugin["method"]
+
+                    if plugin.get("data") != db_plugin.data:
+                        updates[Plugins.data] = plugin["data"]
+
+                    if plugin.get("checksum") != db_plugin.checksum:
+                        updates[Plugins.checksum] = plugin["checksum"]
 
                     if updates:
                         session.query(Plugins).filter(
@@ -1140,13 +1156,13 @@ class Database:
                                 ).update(updates)
 
                     path_ui = (
-                        f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui"
-                        if exists(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
-                        else f"/etc/bunkerweb/plugins/{plugin['id']}/ui"
+                        Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
+                        if Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui").exists()
+                        else Path(f"/etc/bunkerweb/plugins/{plugin['id']}/ui")
                     )
 
-                    if exists(path_ui):
-                        if {"template.html", "actions.py"}.issubset(listdir(path_ui)):
+                    if path_ui.exists():
+                        if {"template.html", "actions.py"}.issubset(path_ui.iterdir()):
                             db_plugin_page = (
                                 session.query(Plugin_pages)
                                 .with_entities(
@@ -1158,16 +1174,8 @@ class Database:
                             )
 
                             if db_plugin_page is None:
-                                with open(
-                                    f"{path_ui}/template.html",
-                                    "r",
-                                ) as file:
-                                    template = file.read().encode("utf-8")
-                                with open(
-                                    f"{path_ui}/actions.py",
-                                    "r",
-                                ) as file:
-                                    actions = file.read().encode("utf-8")
+                                template = Path(f"{path_ui}/template.html").read_bytes()
+                                actions = Path(f"{path_ui}/actions.py").read_bytes()
 
                                 to_put.append(
                                     Plugin_pages(
@@ -1178,7 +1186,7 @@ class Database:
                                         actions_checksum=sha256(actions).hexdigest(),
                                     )
                                 )
-                            else:  # TODO test this
+                            else:
                                 updates = {}
                                 template_checksum = file_hash(
                                     f"{path_ui}/template.html"
@@ -1189,32 +1197,24 @@ class Database:
                                     template_checksum
                                     != db_plugin_page.template_checksum
                                 ):
-                                    with open(
-                                        f"{path_ui}/template.html",
-                                        "r",
-                                    ) as file:
-                                        updates.update(
-                                            {
-                                                Plugin_pages.template_file: file.read().encode(
-                                                    "utf-8"
-                                                ),
-                                                Plugin_pages.template_checksum: template_checksum,
-                                            }
-                                        )
+                                    updates.update(
+                                        {
+                                            Plugin_pages.template_file: Path(
+                                                f"{path_ui}/template.html"
+                                            ).read_bytes(),
+                                            Plugin_pages.template_checksum: template_checksum,
+                                        }
+                                    )
 
                                 if actions_checksum != db_plugin_page.actions_checksum:
-                                    with open(
-                                        f"{path_ui}/actions.py",
-                                        "r",
-                                    ) as file:
-                                        updates.update(
-                                            {
-                                                Plugin_pages.actions_file: file.read().encode(
-                                                    "utf-8"
-                                                ),
-                                                Plugin_pages.actions_checksum: actions_checksum,
-                                            }
-                                        )
+                                    updates.update(
+                                        {
+                                            Plugin_pages.actions_file: Path(
+                                                f"{path_ui}/actions.py"
+                                            ).read_bytes(),
+                                            Plugin_pages.actions_checksum: actions_checksum,
+                                        }
+                                    )
 
                                 if updates:
                                     session.query(Plugin_pages).filter(
@@ -1269,17 +1269,72 @@ class Database:
                     job["reload"] = job.get("reload", False)
                     to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
-                for page in pages:
-                    to_put.append(
-                        Plugin_pages(
-                            plugin_id=plugin["id"],
-                            template_file=page["template_file"],
-                            template_checksum=sha256(page["template_file"]).hexdigest(),
-                            actions_file=page["actions_file"],
-                            actions_checksum=sha256(page["actions_file"]).hexdigest(),
-                        )
+                if page:
+                    path_ui = (
+                        Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
+                        if Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui").exists()
+                        else Path(f"/etc/bunkerweb/plugins/{plugin['id']}/ui")
                     )
 
+                    if path_ui.exists():
+                        if {"template.html", "actions.py"}.issubset(path_ui.iterdir()):
+                            db_plugin_page = (
+                                session.query(Plugin_pages)
+                                .with_entities(
+                                    Plugin_pages.template_checksum,
+                                    Plugin_pages.actions_checksum,
+                                )
+                                .filter_by(plugin_id=plugin["id"])
+                                .first()
+                            )
+
+                            if db_plugin_page is None:
+                                template = Path(f"{path_ui}/template.html").read_bytes()
+                                actions = Path(f"{path_ui}/actions.py").read_bytes()
+
+                                to_put.append(
+                                    Plugin_pages(
+                                        plugin_id=plugin["id"],
+                                        template_file=template,
+                                        template_checksum=sha256(template).hexdigest(),
+                                        actions_file=actions,
+                                        actions_checksum=sha256(actions).hexdigest(),
+                                    )
+                                )
+                            else:
+                                updates = {}
+                                template_checksum = file_hash(
+                                    f"{path_ui}/template.html"
+                                )
+                                actions_checksum = file_hash(f"{path_ui}/actions.py")
+
+                                if (
+                                    template_checksum
+                                    != db_plugin_page.template_checksum
+                                ):
+                                    updates.update(
+                                        {
+                                            Plugin_pages.template_file: Path(
+                                                f"{path_ui}/template.html"
+                                            ).read_bytes(),
+                                            Plugin_pages.template_checksum: template_checksum,
+                                        }
+                                    )
+
+                                if actions_checksum != db_plugin_page.actions_checksum:
+                                    updates.update(
+                                        {
+                                            Plugin_pages.actions_file: Path(
+                                                f"{path_ui}/actions.py"
+                                            ).read_bytes(),
+                                            Plugin_pages.actions_checksum: actions_checksum,
+                                        }
+                                    )
+
+                                if updates:
+                                    session.query(Plugin_pages).filter(
+                                        Plugin_pages.plugin_id == plugin["id"]
+                                    ).update(updates)
             try:
                 session.add_all(to_put)
                 session.commit()
@@ -1288,8 +1343,10 @@ class Database:
 
         return ""
 
-    def get_plugins(self) -> List[Dict[str, Any]]:
-        """Get plugins."""
+    def get_plugins(
+        self, *, external: bool = False, with_data: bool = False
+    ) -> List[Dict[str, Any]]:
+        """Get all plugins from the database."""
         plugins = []
         with self.__db_session() as session:
             for plugin in (
@@ -1301,10 +1358,29 @@ class Database:
                     Plugins.description,
                     Plugins.version,
                     Plugins.external,
+                    Plugins.method,
+                    Plugins.data,
+                    Plugins.checksum,
+                )
+                .order_by(Plugins.order)
+                .all()
+                if with_data
+                else session.query(Plugins)
+                .with_entities(
+                    Plugins.id,
+                    Plugins.order,
+                    Plugins.name,
+                    Plugins.description,
+                    Plugins.version,
+                    Plugins.external,
+                    Plugins.method,
                 )
                 .order_by(Plugins.order)
                 .all()
             ):
+                if external and not plugin.external:
+                    continue
+
                 page = (
                     session.query(Plugin_pages)
                     .with_entities(Plugin_pages.id)
@@ -1318,9 +1394,14 @@ class Database:
                     "description": plugin.description,
                     "version": plugin.version,
                     "external": plugin.external,
+                    "method": plugin.method,
                     "page": page is not None,
                     "settings": {},
-                }
+                } | (
+                    {"data": plugin.data, "checksum": plugin.checksum}
+                    if with_data
+                    else {}
+                )
 
                 for setting in (
                     session.query(Settings)

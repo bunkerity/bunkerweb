@@ -1,24 +1,24 @@
-local datastore = require "datastore"
-local utils     = require "utils"
-local cjson     = require "cjson"
-local plugins   = require "plugins"
-local upload    = require "resty.upload"
-local logger    = require "logger"
+local datastore                      = require "datastore"
+local utils                          = require "utils"
+local cjson                          = require "cjson"
+local plugins                        = require "plugins"
+local upload                         = require "resty.upload"
+local logger                         = require "logger"
 
-local api = { global = { GET = {}, POST = {}, PUT = {}, DELETE = {} } }
+local api                            = { global = { GET = {}, POST = {}, PUT = {}, DELETE = {} } }
 
-api.response = function(self, http_status, api_status, msg)
+api.response                         = function(self, http_status, api_status, msg)
 	local resp = {}
 	resp["status"] = api_status
 	resp["msg"] = msg
 	return http_status, resp
 end
 
-api.global.GET["^/ping$"] = function(api)
+api.global.GET["^/ping$"]            = function(api)
 	return api:response(ngx.HTTP_OK, "success", "pong")
 end
 
-api.global.POST["^/reload$"] = function(api)
+api.global.POST["^/reload$"]         = function(api)
 	local status = os.execute("nginx -s reload")
 	if status == 0 then
 		return api:response(ngx.HTTP_OK, "success", "reload successful")
@@ -26,7 +26,7 @@ api.global.POST["^/reload$"] = function(api)
 	return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
 end
 
-api.global.POST["^/stop$"] = function(api)
+api.global.POST["^/stop$"]           = function(api)
 	local status = os.execute("nginx -s quit")
 	if status == 0 then
 		return api:response(ngx.HTTP_OK, "success", "stop successful")
@@ -34,7 +34,7 @@ api.global.POST["^/stop$"] = function(api)
 	return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
 end
 
-api.global.POST["^/confs$"] = function(api)
+api.global.POST["^/confs$"]          = function(api)
 	local tmp = "/var/tmp/bunkerweb/api_" .. ngx.var.uri:sub(2) .. ".tar.gz"
 	local destination = "/usr/share/bunkerweb/" .. ngx.var.uri:sub(2)
 	if ngx.var.uri == "/confs" then
@@ -45,6 +45,8 @@ api.global.POST["^/confs$"] = function(api)
 		destination = "/data/cache"
 	elseif ngx.var.uri == "/custom_configs" then
 		destination = "/data/configs"
+	elseif ngx.var.uri == "/plugins" then
+		destination = "/data/plugins"
 	end
 	local form, err = upload:new(4096)
 	if not form then
@@ -78,13 +80,15 @@ api.global.POST["^/confs$"] = function(api)
 	return api:response(ngx.HTTP_OK, "success", "saved data at " .. destination)
 end
 
-api.global.POST["^/data$"] = api.global.POST["^/confs$"]
+api.global.POST["^/data$"]           = api.global.POST["^/confs$"]
 
-api.global.POST["^/cache$"] = api.global.POST["^/confs$"]
+api.global.POST["^/cache$"]          = api.global.POST["^/confs$"]
 
 api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 
-api.global.POST["^/unban$"] = function(api)
+api.global.POST["^/plugins$"]        = api.global.POST["^/confs$"]
+
+api.global.POST["^/unban$"]          = function(api)
 	ngx.req.read_body()
 	local data = ngx.req.get_body_data()
 	if not data then
@@ -103,7 +107,7 @@ api.global.POST["^/unban$"] = function(api)
 	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
 end
 
-api.global.POST["^/ban$"] = function(api)
+api.global.POST["^/ban$"]            = function(api)
 	ngx.req.read_body()
 	local data = ngx.req.get_body_data()
 	if not data then
@@ -122,17 +126,19 @@ api.global.POST["^/ban$"] = function(api)
 	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
 end
 
-api.global.GET["^/bans$"] = function(api)
+api.global.GET["^/bans$"]            = function(api)
 	local data = {}
 	for i, k in ipairs(datastore:keys()) do
 		if k:find("^bans_ip_") then
 			local ret, reason = datastore:get(k)
 			if not ret then
-				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access " .. k .. " from datastore : " + reason)
+				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
+					"can't access " .. k .. " from datastore : " + reason)
 			end
 			local ret, exp = datastore:exp(k)
 			if not ret then
-				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access exp " .. k .. " from datastore : " + exp)
+				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
+					"can't access exp " .. k .. " from datastore : " + exp)
 			end
 			local ban = { ip = k:sub(9, #k), reason = reason, exp = exp }
 			table.insert(data, ban)
@@ -141,7 +147,7 @@ api.global.GET["^/bans$"] = function(api)
 	return api:response(ngx.HTTP_OK, "success", data)
 end
 
-api.is_allowed_ip = function(self)
+api.is_allowed_ip                    = function(self)
 	local data, err = datastore:get("api_whitelist_ip")
 	if not data then
 		return false, "can't access api_allowed_ips in datastore"
@@ -152,7 +158,7 @@ api.is_allowed_ip = function(self)
 	return false, "IP is not in API_WHITELIST_IP"
 end
 
-api.do_api_call = function(self)
+api.do_api_call                      = function(self)
 	if self.global[ngx.var.request_method] ~= nil then
 		for uri, api_fun in pairs(self.global[ngx.var.request_method]) do
 			if string.match(ngx.var.uri, uri) then

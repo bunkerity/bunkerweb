@@ -61,6 +61,9 @@ class Plugins(Base):
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
     external = Column(Boolean, default=False, nullable=False)
+    method = Column(METHODS_ENUM, default="manual", nullable=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
+    checksum = Column(String(128), nullable=True)
 
     settings = relationship(
         "Settings", back_populates="plugin", cascade="all, delete-orphan"
@@ -164,7 +167,7 @@ class Jobs(Base):
     )
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
-    reload = Column(Boolean, nullable=False)
+    reload = Column(Boolean, default=False, nullable=False)
     success = Column(Boolean, nullable=True)
     last_run = Column(DateTime, nullable=True)
 

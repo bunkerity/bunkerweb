@@ -17,6 +17,7 @@ from shutil import chown, copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
+from tarfile import open as tar_open
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List
@@ -114,6 +115,38 @@ def generate_custom_configs(
         if not ret:
             logger.error(
                 "Sending custom configs failed, configuration will not work as expected...",
+            )
+
+
+def generate_external_plugins(
+    plugins: List[Dict[str, Any]],
+    integration: str,
+    api_caller: ApiCaller,
+    *,
+    original_path: str = "/data/plugins",
+):
+    Path(original_path).mkdir(parents=True, exist_ok=True)
+    for plugin in plugins:
+        tmp_path = f"{original_path}/{plugin['id']}/{plugin['name']}.tar.gz"
+        Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
+        Path(tmp_path).write_bytes(plugin["data"])
+        with tar_open(tmp_path, "r:gz") as tar:
+            tar.extractall(original_path)
+        Path(tmp_path).unlink()
+
+    # Fix permissions for the plugins folder
+    for root, dirs, files in walk("/data/plugins", topdown=False):
+        for name in files + dirs:
+            chown(join(root, name), "root", 101)
+            chmod(join(root, name), 0o770)
+
+    if integration != "Linux":
+        logger.info("Sending plugins to BunkerWeb")
+        ret = api_caller._send_files("/data/plugins", "/plugins")
+
+        if not ret:
+            logger.error(
+                "Sending plugins failed, configuration will not work as expected...",
             )
 
 
@@ -273,6 +306,14 @@ if __name__ == "__main__":
         if old_configs != custom_configs:
             generate_custom_configs(custom_configs, integration, api_caller)
 
+        external_plugins = db.get_plugins(external=True)
+        if external_plugins:
+            generate_external_plugins(
+                db.get_plugins(external=True, with_data=True),
+                integration,
+                api_caller,
+            )
+
         logger.info("Executing scheduler ...")
 
         generate = not Path(
@@ -384,11 +425,13 @@ if __name__ == "__main__":
                     f"Exception while reloading after running jobs once scheduling : {format_exc()}",
                 )
 
-            # infinite schedule for the jobs
             generate = True
             scheduler.setup()
+            need_reload = False
+
+            # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
-            while run:
+            while run and not need_reload:
                 scheduler.run_pending()
                 sleep(1)
 
@@ -397,15 +440,13 @@ if __name__ == "__main__":
                     tmp_custom_configs = db.get_custom_configs()
                     if custom_configs != tmp_custom_configs:
                         logger.info("Custom configs changed, generating ...")
-                        logger.debug(f"{tmp_custom_configs}")
-                        logger.debug(f"{custom_configs}")
-                        custom_configs = tmp_custom_configs
-                        original_path = "/data/configs"
+                        logger.debug(f"{tmp_custom_configs=}")
+                        logger.debug(f"{custom_configs=}")
+                        custom_configs = deepcopy(tmp_custom_configs)
 
                         # Remove old custom configs files
                         logger.info("Removing old custom configs files ...")
-                        files = glob(f"{original_path}/*")
-                        for file in files:
+                        for file in glob("/data/configs/*"):
                             if Path(file).is_symlink() or Path(file).is_file():
                                 Path(file).unlink()
                             elif Path(file).is_dir():
@@ -437,6 +478,30 @@ if __name__ == "__main__":
                             else:
                                 logger.error("Error while reloading nginx")
 
+                    # check if the plugins have changed since last time
+                    tmp_external_plugins = db.get_plugins(external=True)
+                    if external_plugins != tmp_external_plugins:
+                        logger.info("External plugins changed, generating ...")
+                        logger.debug(f"{tmp_external_plugins=}")
+                        logger.debug(f"{external_plugins=}")
+                        external_plugins = deepcopy(tmp_external_plugins)
+
+                        # Remove old external plugins files
+                        logger.info("Removing old external plugins files ...")
+                        for file in glob("/data/plugins/*"):
+                            if Path(file).is_symlink() or Path(file).is_file():
+                                Path(file).unlink()
+                            elif Path(file).is_dir():
+                                rmtree(file, ignore_errors=False)
+
+                        logger.info("Generating new external plugins ...")
+                        generate_external_plugins(
+                            db.get_plugins(external=True, with_data=True),
+                            integration,
+                            api_caller,
+                        )
+                        need_reload = True
+
                     # check if the config have changed since last time
                     tmp_env = db.get_config()
                     if env != tmp_env:
@@ -444,7 +509,7 @@ if __name__ == "__main__":
                         logger.debug(f"{tmp_env=}")
                         logger.debug(f"{env=}")
                         env = deepcopy(tmp_env)
-                        break
+                        need_reload = True
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

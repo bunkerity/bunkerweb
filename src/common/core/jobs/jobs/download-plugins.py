@@ -1,16 +1,18 @@
 #!/usr/bin/python3
 
+from hashlib import sha256
 from io import BytesIO
 from os import getenv, listdir, makedirs, chmod, stat, _exit, walk
-from os.path import dirname, join
+from os.path import basename, dirname, join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
 from glob import glob
-from json import load, loads
+from json import loads
 from shutil import chown, copytree, rmtree
+from tarfile import open as tar_open
 from traceback import format_exc
 from zipfile import ZipFile
 
@@ -18,6 +20,7 @@ sys_path.extend(
     (
         "/usr/share/bunkerweb/deps/python",
         "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/api",
         "/usr/share/bunkerweb/db",
     )
 )
@@ -28,31 +31,29 @@ from Database import Database
 from logger import setup_logger
 
 
-logger = setup_logger("Jobs", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
+logger = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
 lock = Lock()
 status = 0
 
 
-def install_plugin(plugin_dir):
+def install_plugin(plugin_dir) -> bool:
     # Load plugin.json
-    with open(f"{plugin_dir}plugin.json", "rb") as f:
+    with open(f"{plugin_dir}/plugin.json", "rb") as f:
         metadata = loads(f.read())
     # Don't go further if plugin is already installed
     if Path(f"/data/plugins/{metadata['id']}/plugin.json").is_file():
-        logger.info(
+        logger.warning(
             f"Skipping installation of plugin {metadata['id']} (already installed)",
         )
-        return
+        return False
     # Copy the plugin
     copytree(plugin_dir, f"/data/plugins/{metadata['id']}")
     # Add u+x permissions to jobs files
     for job_file in glob(f"{plugin_dir}jobs/*"):
         st = stat(job_file)
         chmod(job_file, st.st_mode | S_IEXEC)
+    logger.info(f"Plugin {metadata['id']} installed")
+    return True
 
 
 try:
@@ -62,7 +63,15 @@ try:
         logger.info("No external plugins to download")
         _exit(0)
 
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI"),
+    )
+
+    plugin_nbr = 0
+
     # Loop on URLs
+    logger.info(f"Downloading external plugins from {plugin_urls}...")
     for plugin_url in plugin_urls.split(" "):
         # Download ZIP file
         try:
@@ -75,9 +84,9 @@ try:
             continue
 
         # Extract it to tmp folder
-        temp_dir = f"/var/tmp/bunkerweb/plugins-{uuid4()}/"
+        temp_dir = f"/var/tmp/bunkerweb/plugins-{uuid4()}"
         try:
-            makedirs(temp_dir, exist_ok=True)
+            Path(temp_dir).mkdir(parents=True, exist_ok=True)
             with ZipFile(BytesIO(req.content)) as zf:
                 zf.extractall(path=temp_dir)
         except:
@@ -89,48 +98,76 @@ try:
 
         # Install plugins
         try:
-            for plugin_dir in glob(f"{temp_dir}**/plugin.json", recursive=True):
-                install_plugin(f"{dirname(plugin_dir)}/")
+            for plugin_dir in glob(f"{temp_dir}/**/plugin.json", recursive=True):
+                try:
+                    if install_plugin(dirname(plugin_dir)):
+                        plugin_nbr += 1
+                except FileExistsError:
+                    logger.warning(
+                        f"Skipping installation of plugin {basename(dirname(plugin_dir))} (already installed)",
+                    )
         except:
             logger.error(
                 f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}",
             )
             status = 2
-            continue
 
-    external_plugins = []
-    external_plugins_ids = []
-    for plugin in listdir("/etc/bunkerweb/plugins"):
-        with open(
-            f"/etc/bunkerweb/plugins/{plugin}/plugin.json",
-            "r",
-        ) as f:
-            plugin_file = load(f)
-
-        external_plugins.append(plugin_file)
-        external_plugins_ids.append(plugin_file["id"])
-
-    with lock:
-        db_plugins = db.get_plugins()
-
-    for plugin in db_plugins:
-        if plugin["external"] is True and plugin["id"] not in external_plugins_ids:
-            external_plugins.append(plugin)
-
-    # Fix permissions for the certificates
+    # Fix permissions on plugins
     for root, dirs, files in walk("/data/plugins", topdown=False):
         for name in files + dirs:
             chown(join(root, name), "root", 101)
             chmod(join(root, name), 0o770)
 
-    if external_plugins:
-        with lock:
-            err = db.update_external_plugins(external_plugins)
+    if not plugin_nbr:
+        logger.info("No external plugins to update to database")
+        _exit(0)
 
-        if err:
-            logger.error(
-                f"Couldn't update external plugins to database: {err}",
-            )
+    external_plugins = []
+    external_plugins_ids = []
+    for plugin in listdir("/data/plugins"):
+        path = f"/data/plugins/{plugin}"
+        if not Path(f"{path}/plugin.json").is_file():
+            logger.warning(f"Plugin {plugin} is not valid, deleting it...")
+            rmtree(path)
+            continue
+
+        plugin_file = loads(Path(f"{path}/plugin.json").read_text())
+
+        plugin_content = BytesIO()
+        with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
+            tar.add(path, arcname=basename(path))
+        plugin_content.seek(0)
+        value = plugin_content.getvalue()
+
+        plugin_file.update(
+            {
+                "external": True,
+                "page": False,
+                "method": "scheduler",
+                "data": value,
+                "checksum": sha256(value).hexdigest(),
+            }
+        )
+
+        if "ui" in listdir(path):
+            plugin_file["ui"] = True
+
+        external_plugins.append(plugin_file)
+        external_plugins_ids.append(plugin_file["id"])
+
+    for plugin in db.get_plugins(external=True, with_data=True):
+        if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
+            external_plugins.append(plugin)
+
+    with lock:
+        err = db.update_external_plugins(external_plugins)
+
+    if err:
+        logger.error(
+            f"Couldn't update external plugins to database: {err}",
+        )
+
+    logger.info("External plugins downloaded and installed")
 
 except:
     status = 2

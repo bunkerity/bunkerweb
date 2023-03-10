@@ -1,3 +1,4 @@
+from hashlib import sha256
 from bs4 import BeautifulSoup
 from contextlib import suppress
 from copy import deepcopy
@@ -38,7 +39,7 @@ from os.path import join
 from pathlib import Path
 from re import match as re_match
 from requests import get
-from shutil import rmtree, copytree, chown
+from shutil import move, rmtree, copytree, chown
 from signal import SIGINT, signal, SIGTERM
 from subprocess import PIPE, Popen, call
 from sys import path as sys_path, modules as sys_modules
@@ -754,6 +755,8 @@ def plugins():
 
             errors = 0
             files_count = 0
+            new_plugins = []
+            new_plugins_ids = []
 
             for file in listdir("/var/tmp/bunkerweb/ui"):
                 if not Path(f"/var/tmp/bunkerweb/ui/{file}").is_file():
@@ -797,22 +800,32 @@ def plugins():
                                         raise Exception
 
                                     if not Path("/usr/sbin/nginx").is_file():
-                                        plugins = app.config["CONFIG"].get_plugins()
-                                        for plugin in deepcopy(plugins):
-                                            if plugin["id"] == folder_name:
-                                                raise FileExistsError
-                                            elif plugin["external"] is False:
-                                                del plugins[plugins.index(plugin)]
-
-                                        plugins.append(plugin_file)
-                                        err = db.update_external_plugins(plugins)
-                                        if err:
-                                            error = 1
-                                            flash(
-                                                f"Couldn't update external plugins to database: {err}",
-                                                "error",
+                                        plugin_content = BytesIO()
+                                        with tar_open(
+                                            fileobj=plugin_content, mode="w:gz"
+                                        ) as tar:
+                                            tar.add(
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
+                                                arcname=temp_folder_name,
+                                                recursive=True,
                                             )
-                                            raise Exception
+                                        plugin_content.seek(0)
+                                        value = plugin_content.getvalue()
+
+                                        new_plugins.append(
+                                            plugin_file
+                                            | {
+                                                "external": True,
+                                                "page": "ui"
+                                                in listdir(
+                                                    f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
+                                                ),
+                                                "method": "ui",
+                                                "data": value,
+                                                "checksum": sha256(value).hexdigest(),
+                                            }
+                                        )
+                                        new_plugins_ids.append(folder_name)
                                     else:
                                         if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
@@ -871,22 +884,43 @@ def plugins():
                                         raise Exception
 
                                     if not Path("/usr/sbin/nginx").is_file():
-                                        plugins = app.config["CONFIG"].get_plugins()
-                                        for plugin in deepcopy(plugins):
-                                            if plugin["id"] == folder_name:
-                                                raise FileExistsError
-                                            elif plugin["external"] is False:
-                                                del plugins[plugins.index(plugin)]
-
-                                        plugins.append(plugin_file)
-                                        err = db.update_external_plugins(plugins)
-                                        if err:
-                                            error = 1
-                                            flash(
-                                                f"Couldn't update external plugins to database: {err}",
-                                                "error",
+                                        for file_name in listdir(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
+                                        ):
+                                            move(
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/{file_name}",
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{file_name}",
                                             )
-                                            raise Exception
+                                        rmtree(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
+                                        )
+
+                                        plugin_content = BytesIO()
+                                        with tar_open(
+                                            fileobj=plugin_content, mode="w:gz"
+                                        ) as tar:
+                                            tar.add(
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
+                                                arcname=temp_folder_name,
+                                                recursive=True,
+                                            )
+                                        plugin_content.seek(0)
+                                        value = plugin_content.getvalue()
+
+                                        new_plugins.append(
+                                            plugin_file
+                                            | {
+                                                "external": True,
+                                                "page": "ui"
+                                                in listdir(
+                                                    f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
+                                                ),
+                                                "method": "ui",
+                                                "data": value,
+                                                "checksum": sha256(value).hexdigest(),
+                                            }
+                                        )
+                                        new_plugins_ids.append(folder_name)
                                     else:
                                         if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
@@ -940,22 +974,32 @@ def plugins():
                                         raise Exception
 
                                     if not Path("/usr/sbin/nginx").is_file():
-                                        plugins = app.config["CONFIG"].get_plugins()
-                                        for plugin in deepcopy(plugins):
-                                            if plugin["id"] == folder_name:
-                                                raise FileExistsError
-                                            elif plugin["external"] is False:
-                                                del plugins[plugins.index(plugin)]
-
-                                        plugins.append(plugin_file)
-                                        err = db.update_external_plugins(plugins)
-                                        if err:
-                                            error = 1
-                                            flash(
-                                                f"Couldn't update external plugins to database: {err}",
-                                                "error",
+                                        plugin_content = BytesIO()
+                                        with tar_open(
+                                            fileobj=plugin_content, mode="w:gz"
+                                        ) as tar:
+                                            tar.add(
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
+                                                arcname=temp_folder_name,
+                                                recursive=True,
                                             )
-                                            raise Exception
+                                        plugin_content.seek(0)
+                                        value = plugin_content.getvalue()
+
+                                        new_plugins.append(
+                                            plugin_file
+                                            | {
+                                                "external": True,
+                                                "page": "ui"
+                                                in listdir(
+                                                    f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
+                                                ),
+                                                "method": "ui",
+                                                "data": value,
+                                                "checksum": sha256(value).hexdigest(),
+                                            }
+                                        )
+                                        new_plugins_ids.append(folder_name)
                                     else:
                                         if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
@@ -1014,22 +1058,43 @@ def plugins():
                                         raise Exception
 
                                     if not Path("/usr/sbin/nginx").is_file():
-                                        plugins = app.config["CONFIG"].get_plugins()
-                                        for plugin in deepcopy(plugins):
-                                            if plugin["id"] == folder_name:
-                                                raise FileExistsError
-                                            elif plugin["external"] is False:
-                                                del plugins[plugins.index(plugin)]
-
-                                        plugins.append(plugin_file)
-                                        err = db.update_external_plugins(plugins)
-                                        if err:
-                                            error = 1
-                                            flash(
-                                                f"Couldn't update external plugins to database: {err}",
-                                                "error",
+                                        for file_name in listdir(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
+                                        ):
+                                            move(
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/{file_name}",
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{file_name}",
                                             )
-                                            raise Exception
+                                        rmtree(
+                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
+                                        )
+
+                                        plugin_content = BytesIO()
+                                        with tar_open(
+                                            fileobj=plugin_content, mode="w:gz"
+                                        ) as tar:
+                                            tar.add(
+                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
+                                                arcname=temp_folder_name,
+                                                recursive=True,
+                                            )
+                                        plugin_content.seek(0)
+                                        value = plugin_content.getvalue()
+
+                                        new_plugins.append(
+                                            plugin_file
+                                            | {
+                                                "external": True,
+                                                "page": "ui"
+                                                in listdir(
+                                                    f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
+                                                ),
+                                                "method": "ui",
+                                                "data": value,
+                                                "checksum": sha256(value).hexdigest(),
+                                            }
+                                        )
+                                        new_plugins_ids.append(folder_name)
                                     else:
                                         if Path(
                                             f"/etc/bunkerweb/plugins/{folder_name}"
@@ -1105,7 +1170,7 @@ def plugins():
 
                     error = 0
 
-            if errors < files_count:
+            if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
             # Fix permissions for plugins folders
@@ -1113,6 +1178,19 @@ def plugins():
                 for name in files + dirs:
                     chown(join(root, name), "root", 101)
                     chmod(join(root, name), 0o770)
+
+            plugins = app.config["CONFIG"].get_plugins(external=True, with_data=True)
+            for plugin in deepcopy(plugins):
+                if plugin["id"] in new_plugins_ids:
+                    flash(f"Plugin {plugin['id']} already exists", "error")
+                    del new_plugins[new_plugins_ids.index(plugin["id"])]
+
+            err = db.update_external_plugins(new_plugins, delete_missing=False)
+            if err:
+                flash(
+                    f"Couldn't update external plugins to database: {err}",
+                    "error",
+                )
 
         if operation:
             flash(operation)

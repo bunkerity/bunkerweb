@@ -1,10 +1,15 @@
 from glob import glob
+from hashlib import sha256
+from io import BytesIO
 from json import loads
 from logging import Logger
+from os import listdir
+from os.path import basename, dirname
 from re import search as re_search
 from sys import path as sys_path
+from tarfile import open as tar_open
 from traceback import format_exc
-from typing import Union
+from typing import Optional, Union
 
 sys_path.append("/usr/share/bunkerweb/utils")
 
@@ -18,7 +23,7 @@ class Configurator:
         variables: Union[str, dict],
         logger: Logger,
         *,
-        plugins_settings: list = None,
+        plugins_settings: Optional[list] = None,
     ):
         self.__logger = logger
         self.__settings = self.__load_settings(settings)
@@ -88,7 +93,26 @@ class Configurator:
                     data = loads(f.read())
 
                     if type == "plugins":
-                        self.__plugins_settings.append(data)
+                        plugin_content = BytesIO()
+                        with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
+                            tar.add(
+                                dirname(file),
+                                arcname=basename(dirname(file)),
+                                recursive=True,
+                            )
+                        plugin_content.seek(0)
+                        value = plugin_content.getvalue()
+
+                        self.__plugins_settings.append(
+                            data
+                            | {
+                                "external": path.startswith("/etc/bunkerweb/plugins"),
+                                "page": "ui" in listdir(dirname(file)),
+                                "method": "manual",
+                                "data": value,
+                                "checksum": sha256(value).hexdigest(),
+                            }
+                        )
 
                     plugins.update(data["settings"])
             except:

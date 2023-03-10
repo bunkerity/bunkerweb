@@ -151,8 +151,6 @@ if __name__ == "__main__":
             plugins = {}
             plugins_settings = []
             for plugin in db.get_plugins():
-                del plugin["page"]
-                del plugin["external"]
                 plugins_settings.append(plugin)
                 plugins.update(plugin["settings"])
 

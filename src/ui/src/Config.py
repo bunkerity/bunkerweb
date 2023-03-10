@@ -1,11 +1,15 @@
 from copy import deepcopy
+from hashlib import sha256
+from io import BytesIO
 from flask import flash
 from glob import iglob
 from json import load as json_load
 from os import listdir
+from os.path import basename
 from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
+from tarfile import open as tar_open
 from time import sleep
 from typing import List, Tuple
 from uuid import uuid4
@@ -134,25 +138,28 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self) -> List[dict]:
+    def get_plugins(
+        self, *, external: bool = False, with_data: bool = False
+    ) -> List[dict]:
         if not Path("/usr/sbin/nginx").exists():
-            plugins = self.__db.get_plugins()
+            plugins = self.__db.get_plugins(external=external, with_data=with_data)
             plugins.sort(key=lambda x: x["name"])
 
-            general_plugin = None
-            for x, plugin in enumerate(plugins):
-                if plugin["name"] == "General":
-                    general_plugin = plugin
-                    del plugins[x]
-                    break
-            plugins.insert(0, general_plugin)
+            if not external:
+                general_plugin = None
+                for x, plugin in enumerate(plugins):
+                    if plugin["name"] == "General":
+                        general_plugin = plugin
+                        del plugins[x]
+                        break
+                plugins.insert(0, general_plugin)
 
             return plugins
 
         plugins = []
 
-        for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + list(
-            iglob("/usr/share/bunkerweb/core/*")
+        for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + (
+            list(iglob("/usr/share/bunkerweb/core/*") if not external else [])
         ):
             content = listdir(foldername)
             if "plugin.json" not in content:
@@ -168,9 +175,25 @@ class Config:
                 }
             )
 
+            plugin["method"] = "ui" if plugin["external"] else "manual"
+
             if "ui" in content:
                 if "template.html" in listdir(f"{foldername}/ui"):
                     plugin["page"] = True
+
+            if with_data:
+                plugin_content = BytesIO()
+                with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
+                    tar.add(
+                        foldername,
+                        arcname=basename(foldername),
+                        recursive=True,
+                    )
+                plugin_content.seek(0)
+                value = plugin_content.getvalue()
+
+                plugin["data"] = value
+                plugin["checksum"] = sha256(value).hexdigest()
 
             plugins.append(plugin)
 
@@ -186,6 +209,7 @@ class Config:
                     "description": "The general settings for the server",
                     "version": "0.1",
                     "external": False,
+                    "method": "manual",
                     "page": False,
                     "settings": json_load(f),
                 },
