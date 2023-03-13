@@ -1,36 +1,24 @@
 version: "3"
 
-x-bunkerweb-env: &bunkerweb-env
-  DATABASE_URI: "mariadb+pymysql://${PASSBOLT_USER:-user}:${PASSBOLT_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
-
 services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
-    # ⚠️ read this if you use local folders for volumes ⚠️
-    # bunkerweb runs as an unprivileged user with UID/GID 101
-    # don't forget to edit the permissions of the files and folders accordingly
-    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
-    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
-    # more info at https://docs.bunkerweb.io
-    volumes:
-      - bw-data:/data
     environment:
-      <<: *bunkerweb-env
-      SERVER_NAME: "www.example.com" # replace with your domain
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-      AUTO_LETS_ENCRYPT: "yes"
-      COOKIE_FLAGS: "* SameSite=Lax"
-      DISABLE_DEFAULT_SERVER: "yes"
-      ALLOWED_METHODS: "GET|POST|HEAD|PUT|DELETE"
-      SERVE_FILES: "no"
-      USE_CLIENT_CACHE: "yes"
-      USE_GZIP: "yes"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_URL: "/"
-      REVERSE_PROXY_HOST: "https://mypassbolt"
+      - SERVER_NAME=www.example.com                  # replace with your domain
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - AUTO_LETS_ENCRYPT=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - COOKIE_FLAGS=* SameSite=Lax
+      - ALLOWED_METHODS=GET|POST|HEAD|PUT|DELETE
+      - SERVE_FILES=no
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=https://mypassbolt
     labels:
       - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     networks:
@@ -42,22 +30,21 @@ services:
     depends_on:
       - mybunker
     environment:
-      <<: *bunkerweb-env
-      DOCKER_HOST: "tcp://docker-proxy:2375"
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
     volumes:
       - bw-data:/data
     networks:
       - bw-universe
-      - net-docker
+      - bw-docker
 
-  docker-proxy:
+  bw-docker-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
     networks:
-      - net-docker
+      - bw-docker
 
   # you will need to add a user by hand
   # example : docker-compose exec mypassbolt su -m -c "/usr/share/php/passbolt/bin/cake passbolt register_user -u <your@email.com> -f <yourname> -l <surname> -r admin" -s /bin/sh www-data
@@ -70,14 +57,13 @@ services:
       - mydb
     environment:
       - APP_FULL_BASE_URL=https://www.example.com # replace with your URL
-      - PASSBOLT_SSL_FORCE=false
       - DATASOURCES_DEFAULT_HOST=mydb
-      - DATASOURCES_DEFAULT_DATABASE=${PASSBOLT_DATABASE:-passboltdb}
-      - DATASOURCES_DEFAULT_USERNAME=${PASSBOLT_USER:-user}
-      - DATASOURCES_DEFAULT_PASSWORD=${PASSBOLT_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd     # replace with a stronger password (must match MYSQL_PASSWORD)
+      - DATASOURCES_DEFAULT_USERNAME=user
+      - DATASOURCES_DEFAULT_DATABASE=passbolt
     volumes:
-      - gpg_volume:/etc/passbolt/gpg
-      - jwt_volume:/etc/passbolt/jwt
+      - gpg-data:/etc/passbolt/gpg
+      - jwt-data:/etc/passbolt/jwt
     command:
       [
         "/usr/bin/wait-for.sh",
@@ -95,15 +81,16 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     environment:
-      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
-    entrypoint: sh -c "echo 'DROP USER IF EXISTS \"${PASSBOLT_USER:-user}\"; CREATE USER \"${PASSBOLT_USER:-user}\"@\"%\"; CREATE DATABASE IF NOT EXISTS ${PASSBOLT_DATABASE:-passboltdb}; CREATE DATABASE IF NOT EXISTS ${BUNKERWEB_DATABASE:-bunkerweb}; GRANT ALL PRIVILEGES ON ${PASSBOLT_DATABASE:-passboltdb}.* TO \"${PASSBOLT_USER:-user}\"@\"%\" IDENTIFIED BY \"${PASSBOLT_PASSWORD:-secret}\"; GRANT ALL PRIVILEGES ON ${BUNKERWEB_DATABASE:-bunkerweb}.* TO \"${PASSBOLT_USER:-user}\"@\"%\" IDENTIFIED BY \"${PASSBOLT_PASSWORD:-secret}\"; FLUSH PRIVILEGES;' > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+      - MYSQL_ROOT_PASSWORD=db-root-pwd              # replace with a stronger password
+      - MYSQL_DATABASE=passbolt
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd                   # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)
     networks:
-      - bw-universe
       - bw-services
 
 volumes:
-  gpg_volume:
-  jwt_volume:
+  gpg-data:
+  jwt-data:
   db-data:
   bw-data:
 
@@ -114,4 +101,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  net-docker:
+  bw-docker:

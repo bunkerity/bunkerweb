@@ -6,7 +6,7 @@ services:
     networks:
       - bw-services
     volumes:
-      - db:/data/db
+      - db-data:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root # replace with a less obvious username
       - MONGO_INITDB_ROOT_PASSWORD=toor # replace with a better password
@@ -48,4 +48,4 @@ networks:
       name: bw-services
 
 volumes:
-  db:
+  db-data:

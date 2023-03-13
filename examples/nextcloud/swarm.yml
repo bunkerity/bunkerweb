@@ -4,7 +4,7 @@ services:
   mync:
     image: nextcloud:24-apache
     volumes:
-      - nc_files:/var/www/html
+      - nc-files:/var/www/html
     networks:
       - bw-services
     environment:
@@ -37,7 +37,22 @@ services:
         - bunkerweb.LIMIT_REQ_URL_3=/core/preview
         - bunkerweb.LIMIT_REQ_RATE_3=5r/s
 
-  # For the database, you can refer to the swarm integration example including a database
+  mydb:
+    image: mariadb:10.9
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - bw-services
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MYSQL_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
 
 networks:
   bw-services:
@@ -45,4 +60,5 @@ networks:
       name: bw-services
 
 volumes:
-  nc_files:
+  nc-files:
+  db-data:

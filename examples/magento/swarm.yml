@@ -6,7 +6,7 @@ services:
     networks:
       - bw-services
     volumes:
-      - magento_data:/bitnami/magento
+      - magento-data:/bitnami/magento
     environment:
       - MAGENTO_USERNAME=admin # replace with admin username
       - MAGENTO_PASSWORD=changeme42 # replace with a stronger password
@@ -34,13 +34,27 @@ services:
     networks:
       - bw-services
     volumes:
-      - elasticsearch_data:/bitnami/elasticsearch/data
+      - elasticsearch-data:/bitnami/elasticsearch/data
     deploy:
       placement:
         constraints:
           - "node.role==worker"
 
-  # For the database, you can refer to the swarm integration example including a database
+  mydb:
+    image: mariadb:10.2
+    networks:
+      - bw-services
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=magentodb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
 
 networks:
   bw-services:
@@ -48,6 +62,6 @@ networks:
       name: bw-services
 
 volumes:
-  db_data:
-  elasticsearch_data:
-  magento_data:
+  db-data:
+  elasticsearch-data:
+  magento-data:

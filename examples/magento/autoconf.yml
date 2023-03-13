@@ -8,7 +8,7 @@ services:
         aliases:
           - mymagento
     volumes:
-      - ./magento-data:/bitnami/magento
+      - magento-data:/bitnami/magento
     environment:
       - MAGENTO_USERNAME=admin # replace with admin username
       - MAGENTO_PASSWORD=changeme42 # replace with a stronger password
@@ -41,9 +41,26 @@ services:
     # ⚠️ you need to create the directory and fix permissions ⚠️
     # see setup-autoconf.sh
     volumes:
-      - ./elasticsearch-data:/bitnami/elasticsearch/data
+      - elasticsearch-data:/bitnami/elasticsearch/data
 
-  # For the database, you can refer to the autoconf integration example including a database
+  mydb:
+    image: mariadb:10.2
+    networks:
+      bw-services:
+        aliases:
+          - mydb
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=magentodb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
+
+volumes:
+  magento-data:
+  elasticsearch-data:
+  db-data:
 
 networks:
   bw-services:

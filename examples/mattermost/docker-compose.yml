@@ -1,54 +1,41 @@
 version: "3"
 
-x-bunkerweb-env: &bunkerweb-env
-  DATABASE_URI: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${BUNKERWEB_DATABASE:-bunkerweb}"
-
 services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
-    # ⚠️ read this if you use local folders for volumes ⚠️
-    # bunkerweb runs as an unprivileged user with UID/GID 101
-    # don't forget to edit the permissions of the files and folders accordingly
-    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
-    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
-    # more info at https://docs.bunkerweb.io
-    volumes:
-      - bw-data:/data
     environment:
-      <<: *bunkerweb-env
-      SERVER_NAME: "${DOMAIN}" # set your domain name in the .env file, for additional domains, just add them separated by a space
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-      AUTO_LETS_ENCRYPT: "yes"
-      DISABLE_DEFAULT_SERVER: "yes"
-      USE_CLIENT_CACHE: "yes"
-      SERVE_FILES: "no"
-      MAX_CLIENT_SIZE: "50m"
-      USE_GZIP: "yes"
+      - SERVER_NAME=www.example.com # replace with your domain
+      - AUTO_LETS_ENCRYPT=yes
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - SERVE_FILES=no
+      - MAX_CLIENT_SIZE=50m
+      - USE_GZIP=yes
       # Methods used to query the api
       # more info at https://api.mattermost.com/
-      ALLOWED_METHODS: "GET|POST|HEAD|DELETE|PUT"
+      - ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT
       # Reverse proxy to Mattermost
       # second endpoint needs websocket enabled
       # more info at https://docs.mattermost.com/install/config-proxy-nginx.html
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_INTERCEPT_ERRORS: "no"
-      REVERSE_PROXY_URL_1: "/"
-      REVERSE_PROXY_HOST_1: "http://mattermost:8065"
-      REVERSE_PROXY_URL_2: "~ /api/v[0-9]+/(users/)?websocket$$"
-      REVERSE_PROXY_HOST_2: "http://mattermost:8065"
-      REVERSE_PROXY_WS_2: "yes"
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_INTERCEPT_ERRORS=no
+      - REVERSE_PROXY_URL_1=/
+      - REVERSE_PROXY_HOST_1=http://mattermost:8065
+      - REVERSE_PROXY_URL_2=~ /api/v[0-9]+/(users/)?websocket$$
+      - REVERSE_PROXY_HOST_2=http://mattermost:8065
+      - REVERSE_PROXY_WS_2=yes
       # Default limit rate for URLs
-      LIMIT_REQ_URL_1: "/"
-      LIMIT_REQ_RATE_1: "3r/s"
+      - LIMIT_REQ_URL_1=/
+      - LIMIT_REQ_RATE_1=3r/s
       # Limit rate for api endpoints
-      LIMIT_REQ_URL_2: "^/api/"
-      LIMIT_REQ_RATE_2: "10r/s"
+      - LIMIT_REQ_URL_2=^/api/
+      - LIMIT_REQ_RATE_2=10r/s
       # Limit rate for static resources
-      LIMIT_REQ_URL_3: "^/static/"
-      LIMIT_REQ_RATE_3: "10r/s"
+      - LIMIT_REQ_URL_3=^/static/
+      - LIMIT_REQ_RATE_3=10r/s
     labels:
       - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     networks:
@@ -60,22 +47,21 @@ services:
     depends_on:
       - mybunker
     environment:
-      <<: *bunkerweb-env
-      DOCKER_HOST: "tcp://docker-proxy:2375"
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
     volumes:
       - bw-data:/data
     networks:
       - bw-universe
-      - net-docker
+      - bw-docker
 
-  docker-proxy:
+  bw-docker-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
     networks:
-      - net-docker
+      - bw-docker
 
   mattermost:
     depends_on:
@@ -124,16 +110,14 @@ services:
       - /var/run/postgresql
     volumes:
       - ${POSTGRES_DATA_PATH}:/var/lib/postgresql/data
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     environment:
       # timezone inside container
       - TZ
       # necessary Postgres options/variables
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - POSTGRES_MULTIPLE_DATABASES=${POSTGRES_DB},${BUNKERWEB_DATABASE:-bunkerweb}
+      - POSTGRES_DB
     networks:
-      - bw-universe
       - bw-services
 
 volumes:
@@ -146,4 +130,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  net-docker:
+  bw-docker:

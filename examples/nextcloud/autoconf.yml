@@ -4,7 +4,7 @@ services:
   mync:
     image: nextcloud:stable-apache
     volumes:
-      - ./nc-files:/var/www/html
+      - nc-files:/var/www/html
     networks:
       bw-services:
         aliases:
@@ -56,7 +56,25 @@ services:
         bunkerweb.CUSTOM_CONF_MODSEC_nextcloud=
         SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:1000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
 
-  # For the database, you can refer to the autoconf integration example including a database
+
+  mydb:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      bw-services:
+        aliases:
+          - mydb
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MYSQL_PASSWORD)
+
+volumes:
+  nc-files:
+  db-data:
 
 networks:
   bw-services:

@@ -8,8 +8,8 @@ services:
     depends_on:
       - mydb
     volumes:
-      - moodle_files:/bitnami/moodle
-      - moodle_data:/bitnami/moodledata
+      - moodle-files:/bitnami/moodle
+      - moodle-data:/bitnami/moodledata
     environment:
       - MOODLE_USERNAME=admin # replace with your moodle admin username
       - MOODLE_PASSWORD=password # replace with your moodle admin password
@@ -29,10 +29,23 @@ services:
         - bunkerweb.REVERSE_PROXY_URL=/
         - bunkerweb.REVERSE_PROXY_HOST=https://mymoodle:8443
 
-  # For the database, you can refer to the swarm integration example including a database
-  # In this example, you will need to add the following lines to the mydb service:
-  # - MARIADB_CHARACTER_SET=utf8mb4
-  # - MARIADB_COLLATE=utf8mb4_unicode_ci
+  mydb:
+    image: mariadb:10.5
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - bw-services
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_DATABASE=moodle
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
 
 networks:
   bw-services:
@@ -40,6 +53,6 @@ networks:
       name: bw-services
 
 volumes:
-  db_data:
-  moodle_files:
-  moodle_data:
+  db-data:
+  moodle-files:
+  moodle-data:
