@@ -22,14 +22,14 @@ from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
-    )
-)
+if "/usr/share/bunkerweb/deps/python" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/deps/python")
+if "/usr/share/bunkerweb/utils" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/utils")
+if "/usr/share/bunkerweb/api" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/api")
+if "/usr/share/bunkerweb/db" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/db")
 
 from dotenv import dotenv_values
 

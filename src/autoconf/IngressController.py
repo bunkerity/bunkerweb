@@ -25,7 +25,7 @@ class IngressController(Controller, ConfigCaller):
             pod
             for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items
             if (
-                pod.metadata.annotations != None
+                pod.metadata.annotations
                 and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
             )
         ]
@@ -35,20 +35,18 @@ class IngressController(Controller, ConfigCaller):
         instance["name"] = controller_instance.metadata.name
         instance["hostname"] = controller_instance.status.pod_ip
         health = False
-        if controller_instance.status.conditions is not None:
+        if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:
                 if condition.type == "Ready" and condition.status == "True":
                     health = True
                     break
         instance["health"] = health
-        instance["env"] = {}
-        for env in controller_instance.spec.containers[0].env:
-            if env.value is not None:
-                instance["env"][env.name] = env.value
-            else:
-                instance["env"][env.name] = ""
+        instance["env"] = {
+            env.name: env.value or ""
+            for env in controller_instance.spec.containers[0].env
+        }
         for controller_service in self._get_controller_services():
-            if controller_service.metadata.annotations is not None:
+            if controller_service.metadata.annotations:
                 for (
                     annotation,
                     value,
@@ -64,65 +62,73 @@ class IngressController(Controller, ConfigCaller):
         return self.__networkingv1.list_ingress_for_all_namespaces(watch=False).items
 
     def _to_services(self, controller_service):
-        if controller_service.spec is None or controller_service.spec.rules is None:
+        if not controller_service.spec or not controller_service.spec.rules:
             return []
+
         services = []
         # parse rules
         for rule in controller_service.spec.rules:
-            if rule.host is None:
+            if not rule.host:
                 self.__logger.warning(
                     "Ignoring unsupported ingress rule without host.",
                 )
                 continue
             service = {}
             service["SERVER_NAME"] = rule.host
-            if rule.http is None:
+            if not rule.http:
                 services.append(service)
                 continue
             location = 1
             for path in rule.http.paths:
-                if path.path is None:
+                if not path.path:
                     self.__logger.warning(
                         "Ignoring unsupported ingress rule without path.",
                     )
                     continue
-                if path.backend.service is None:
+                elif not path.backend.service:
                     self.__logger.warning(
                         "Ignoring unsupported ingress rule without backend service.",
                     )
                     continue
-                if path.backend.service.port is None:
+                elif not path.backend.service.port:
                     self.__logger.warning(
                         "Ignoring unsupported ingress rule without backend service port.",
                     )
                     continue
-                if path.backend.service.port.number is None:
+                elif not path.backend.service.port.number:
                     self.__logger.warning(
                         "Ignoring unsupported ingress rule without backend service port number.",
                     )
                     continue
+
                 service_list = self.__corev1.list_service_for_all_namespaces(
                     watch=False,
                     field_selector=f"metadata.name={path.backend.service.name}",
                 ).items
-                if len(service_list) == 0:
+
+                if not service_list:
                     self.__logger.warning(
                         f"Ignoring ingress rule with service {path.backend.service.name} : service not found.",
                     )
                     continue
+
                 reverse_proxy_host = f"http://{path.backend.service.name}.{service_list[0].metadata.namespace}.svc.cluster.local:{path.backend.service.port.number}"
-                service["USE_REVERSE_PROXY"] = "yes"
-                service[f"REVERSE_PROXY_HOST_{location}"] = reverse_proxy_host
-                service[f"REVERSE_PROXY_URL_{location}"] = path.path
+                service.update(
+                    {
+                        "USE_REVERSE_PROXY": "yes",
+                        f"REVERSE_PROXY_HOST_{location}": reverse_proxy_host,
+                        f"REVERSE_PROXY_URL_{location}": path.path,
+                    }
+                )
                 location += 1
             services.append(service)
 
         # parse tls
-        if controller_service.spec.tls is not None:
+        if controller_service.spec.tls:  # TODO: support tls
             self.__logger.warning("Ignoring unsupported tls.")
 
         # parse annotations
-        if controller_service.metadata.annotations is not None:
+        if controller_service.metadata.annotations:
             for service in services:
                 for (
                     annotation,
@@ -130,14 +136,12 @@ class IngressController(Controller, ConfigCaller):
                 ) in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
+
                     variable = annotation.replace("bunkerweb.io/", "", 1)
-                    if not variable.startswith(
-                        f"{service['SERVER_NAME'].split(' ')[0]}_"
-                    ):
+                    server_name = service["SERVER_NAME"].split(" ")[0]
+                    if not variable.startswith(f"{server_name}_"):
                         continue
-                    variable = variable.replace(
-                        f"{service['SERVER_NAME'].split(' ')[0]}_", "", 1
-                    )
+                    variable = variable.replace(f"{server_name}_", "", 1)
                     if self._is_multisite_setting(variable):
                         service[variable] = value
         return services
@@ -147,48 +151,46 @@ class IngressController(Controller, ConfigCaller):
         variables = {}
         for instance in self.__corev1.list_pod_for_all_namespaces(watch=False).items:
             if (
-                instance.metadata.annotations is None
+                not instance.metadata.annotations
                 or not "bunkerweb.io/INSTANCE" in instance.metadata.annotations
             ):
                 continue
-            for env in instance.spec.containers[0].env:
-                if env.value is None:
-                    variables[env.name] = ""
-                else:
-                    variables[env.name] = env.value
-        server_names = []
-        if "SERVER_NAME" in variables and variables["SERVER_NAME"] != "":
-            server_names = variables["SERVER_NAME"].split(" ")
-        for server_name in server_names:
-            service = {}
-            service["SERVER_NAME"] = server_name
-            for variable, value in variables.items():
-                prefix = variable.split("_")[0]
-                real_variable = variable.replace(f"{prefix}_", "", 1)
-                if prefix == server_name and self._is_multisite_setting(real_variable):
-                    service[real_variable] = value
-            services.append(service)
+
+            variables = {
+                env.name: env.value or "" for env in instance.spec.containers[0].env
+            }
+
+        if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
+            for server_name in variables["SERVER_NAME"].strip().split(" "):
+                service = {"SERVER_NAME": server_name}
+                for variable, value in variables.items():
+                    prefix = variable.split("_")[0]
+                    real_variable = variable.replace(f"{prefix}_", "", 1)
+                    if prefix == server_name and self._is_multisite_setting(
+                        real_variable
+                    ):
+                        service[real_variable] = value
+                services.append(service)
         return services
 
     def get_configs(self):
-        configs = {}
-        for config_type in self._supported_config_types:
-            configs[config_type] = {}
+        configs = {config_type: {} for config_type in self._supported_config_types}
         for configmap in self.__corev1.list_config_map_for_all_namespaces(
             watch=False
         ).items:
             if (
-                configmap.metadata.annotations is None
+                not configmap.metadata.annotations
                 or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations
             ):
                 continue
+
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
             if config_type not in self._supported_config_types:
                 self.__logger.warning(
                     f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}",
                 )
                 continue
-            if not configmap.data:
+            elif not configmap.data:
                 self.__logger.warning(
                     f"Ignoring blank ConfigMap {configmap.metadata.name}",
                 )
@@ -212,7 +214,8 @@ class IngressController(Controller, ConfigCaller):
         elif watch_type == "configmap":
             what = self.__corev1.list_config_map_for_all_namespaces
         else:
-            raise Exception(f"unsupported watch_type {watch_type}")
+            raise Exception(f"Unsupported watch_type {watch_type}")
+
         while True:
             locked = False
             error = False
@@ -274,11 +277,12 @@ class IngressController(Controller, ConfigCaller):
                     sleep(10)
 
     def apply_config(self):
-        ret = self._config.apply(self._instances, self._services, configs=self._configs)
-        return ret
+        return self._config.apply(
+            self._instances, self._services, configs=self._configs
+        )
 
     def process_events(self):
-        watch_types = ["pod", "ingress", "configmap"]
+        watch_types = ("pod", "ingress", "configmap")
         threads = [
             Thread(target=self.__watch, args=(watch_type,))
             for watch_type in watch_types

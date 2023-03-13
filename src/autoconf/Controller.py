@@ -21,16 +21,17 @@ class Controller(ABC):
             "modsec",
             "modsec-crs",
         ]
-        self._configs = {}
-        for config_type in self._supported_config_types:
-            self._configs[config_type] = {}
+        self._configs = {
+            config_type: {} for config_type in self._supported_config_types
+        }
         self._config = Config(ctrl_type, lock)
         self.__logger = setup_logger("Controller", getenv("LOG_LEVEL", "INFO"))
 
     def wait(self, wait_time):
-        while True:
+        all_ready = False
+        while not all_ready:
             self._instances = self.get_instances()
-            if len(self._instances) == 0:
+            if not self._instances:
                 self.__logger.warning(
                     f"No instance found, waiting {wait_time}s ...",
                 )
@@ -45,8 +46,6 @@ class Controller(ABC):
                     sleep(wait_time)
                     all_ready = False
                     break
-            if all_ready:
-                break
         return self._instances
 
     @abstractmethod

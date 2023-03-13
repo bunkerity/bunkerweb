@@ -10,9 +10,10 @@ from stat import (
     S_IXOTH,
     S_IXUSR,
 )
+from typing import List
 
 
-def has_permissions(path, need_permissions):
+def has_permissions(path: str, need_permissions: List[str]):
     uid = geteuid()
     gid = getegid()
     statinfo = stat(path)
@@ -37,8 +38,7 @@ def has_permissions(path, need_permissions):
         permissions["W"] = True
     if statinfo.st_mode & S_IXOTH:
         permissions["X"] = True
-    list_permissions = [permission for permission in need_permissions]
-    for need_permission in list_permissions:
+    for need_permission in need_permissions:
         if not permissions[need_permission]:
             return False
     return True

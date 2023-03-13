@@ -1,7 +1,7 @@
 from copy import deepcopy
 from glob import glob
 from importlib import import_module
-from os.path import basename, dirname, isdir
+from os.path import basename, dirname
 from pathlib import Path
 from random import choice
 from string import ascii_letters, digits
@@ -34,7 +34,7 @@ class Templator:
     def __load_jinja_env(self):
         searchpath = [self.__templates]
         for subpath in glob(f"{self.__core}/*") + glob(f"{self.__plugins}/*"):
-            if isdir(subpath):
+            if Path(subpath).is_dir():
                 searchpath.append(f"{subpath}/confs")
         return Environment(
             loader=FileSystemLoader(searchpath=searchpath),
@@ -135,9 +135,11 @@ class Templator:
         Path(dirname(f"{real_output}{real_name}")).mkdir(parents=True, exist_ok=True)
         Path(f"{real_output}{real_name}").write_text(jinja_template.render(real_config))
 
+    @staticmethod
     def is_custom_conf(path):
         return glob(f"{path}/*.conf")
 
+    @staticmethod
     def has_variable(all_vars, variable, value):
         if variable in all_vars and all_vars[variable] == value:
             return True
@@ -150,10 +152,12 @@ class Templator:
                     return True
         return False
 
+    @staticmethod
     def random(nb):
         characters = ascii_letters + digits
         return "".join(choice(characters) for _ in range(nb))
 
+    @staticmethod
     def read_lines(file):
         try:
             with open(file, "r") as f:

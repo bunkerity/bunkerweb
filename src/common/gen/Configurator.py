@@ -5,13 +5,15 @@ from json import loads
 from logging import Logger
 from os import listdir
 from os.path import basename, dirname
+from pathlib import Path
 from re import search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
 from typing import Optional, Union
 
-sys_path.append("/usr/share/bunkerweb/utils")
+if "/usr/share/bunkerweb/utils" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/utils")
 
 
 class Configurator:
@@ -80,41 +82,39 @@ class Configurator:
             servers[server_name] = names
         return servers
 
-    def __load_settings(self, path):
-        with open(path) as f:
-            return loads(f.read())
+    def __load_settings(self, path) -> dict:
+        return loads(Path(path).read_text())
 
-    def __load_plugins(self, path, type: str = "other"):
+    def __load_plugins(self, path, _type: str = "other"):
         plugins = {}
         files = glob(f"{path}/*/plugin.json")
         for file in files:
             try:
-                with open(file) as f:
-                    data = loads(f.read())
+                data = self.__load_settings(file)
 
-                    if type == "plugins":
-                        plugin_content = BytesIO()
-                        with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
-                            tar.add(
-                                dirname(file),
-                                arcname=basename(dirname(file)),
-                                recursive=True,
-                            )
-                        plugin_content.seek(0)
-                        value = plugin_content.getvalue()
-
-                        self.__plugins_settings.append(
-                            data
-                            | {
-                                "external": path.startswith("/etc/bunkerweb/plugins"),
-                                "page": "ui" in listdir(dirname(file)),
-                                "method": "manual",
-                                "data": value,
-                                "checksum": sha256(value).hexdigest(),
-                            }
+                if _type == "plugins":
+                    plugin_content = BytesIO()
+                    with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
+                        tar.add(
+                            dirname(file),
+                            arcname=basename(dirname(file)),
+                            recursive=True,
                         )
+                    plugin_content.seek(0)
+                    value = plugin_content.getvalue()
 
-                    plugins.update(data["settings"])
+                    self.__plugins_settings.append(
+                        data
+                        | {
+                            "external": path.startswith("/etc/bunkerweb/plugins"),
+                            "page": "ui" in listdir(dirname(file)),
+                            "method": "manual",
+                            "data": value,
+                            "checksum": sha256(value).hexdigest(),
+                        }
+                    )
+
+                plugins.update(data["settings"])
             except:
                 self.__logger.error(
                     f"Exception while loading JSON from {file} : {format_exc()}",
@@ -128,7 +128,7 @@ class Configurator:
             lines = f.readlines()
             for line in lines:
                 line = line.strip()
-                if line.startswith("#") or line == "" or not "=" in line:
+                if not line or line.startswith("#") or not "=" in line:
                     continue
                 var = line.split("=")[0]
                 value = line[len(var) + 1 :]
@@ -182,9 +182,9 @@ class Configurator:
             where, real_var = self.__find_var(variable)
             if not where:
                 return False, f"variable name {variable} doesn't exist"
-            if not "regex" in where[real_var]:
+            elif not "regex" in where[real_var]:
                 return False, f"missing regex for variable {variable}"
-            if not re_search(where[real_var]["regex"], value):
+            elif not re_search(where[real_var]["regex"], value):
                 return (
                     False,
                     f"value {value} doesn't match regex {where[real_var]['regex']}",

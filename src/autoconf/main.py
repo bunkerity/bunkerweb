@@ -24,7 +24,13 @@ logger = setup_logger("Autoconf", getenv("LOG_LEVEL", "INFO"))
 swarm = getenv("SWARM_MODE", "no") == "yes"
 kubernetes = getenv("KUBERNETES_MODE", "no") == "yes"
 docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-wait_retry_interval = int(getenv("WAIT_RETRY_INTERVAL", "5"))
+wait_retry_interval = getenv("WAIT_RETRY_INTERVAL", "5")
+
+if not wait_retry_interval.isdigit():
+    logger.error("Invalid WAIT_RETRY_INTERVAL value, must be an integer")
+    _exit(1)
+
+wait_retry_interval = int(wait_retry_interval)
 
 
 def exit_handler(signum, frame):

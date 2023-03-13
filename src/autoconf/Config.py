@@ -8,7 +8,7 @@ from logger import setup_logger
 
 class Config(ConfigCaller):
     def __init__(self, ctrl_type, lock=None):
-        ConfigCaller.__init__(self)
+        super().__init__()
         self.__ctrl_type = ctrl_type
         self.__lock = lock
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
@@ -20,29 +20,25 @@ class Config(ConfigCaller):
         self._db = Database(self.__logger)
 
     def __get_full_env(self) -> dict:
-        env_instances = {}
+        env_instances = {"SERVER_NAME": ""}
         for instance in self.__instances:
             for variable, value in instance["env"].items():
                 env_instances[variable] = value
         env_services = {}
-        if not "SERVER_NAME" in env_instances:
-            env_instances["SERVER_NAME"] = ""
         for service in self.__services:
+            server_name = service["SERVER_NAME"].split(" ")[0]
             for variable, value in service.items():
-                env_services[
-                    f"{service['SERVER_NAME'].split(' ')[0]}_{variable}"
-                ] = value
-            if env_instances["SERVER_NAME"] != "":
-                env_instances["SERVER_NAME"] += " "
-            env_instances["SERVER_NAME"] += service["SERVER_NAME"].split(" ")[0]
+                env_services[f"{server_name}_{variable}"] = value
+            env_instances["SERVER_NAME"] += f" {server_name}"
+        env_instances["SERVER_NAME"] = env_instances["SERVER_NAME"].strip()
         return self._full_env(env_instances, env_services)
 
     def update_needed(self, instances, services, configs=None) -> bool:
         if instances != self.__instances:
             return True
-        if services != self.__services:
+        elif services != self.__services:
             return True
-        if not configs is None and configs != self.__configs:
+        elif not configs is None and configs != self.__configs:
             return True
         return False
 
@@ -86,7 +82,7 @@ class Config(ConfigCaller):
         if err:
             success = False
             self.__logger.error(
-                f"Can't save autoconf config in database: {err}",
+                f"Can't save config in database: {err}, config may not work as expected",
             )
 
         # save custom configs to database
@@ -94,7 +90,7 @@ class Config(ConfigCaller):
         if err:
             success = False
             self.__logger.error(
-                f"Can't save autoconf custom configs in database: {err}",
+                f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected",
             )
 
         return success

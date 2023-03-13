@@ -1,6 +1,6 @@
 from os import getenv
 from docker import DockerClient
-from re import search
+from re import compile as re_compile
 from traceback import format_exc
 
 from Controller import Controller
@@ -10,13 +10,19 @@ from logger import setup_logger
 
 class DockerController(Controller, ConfigCaller):
     def __init__(self, docker_host):
-        super().__init__("docker")
+        Controller.__init__(self, "docker")
         ConfigCaller.__init__(self)
         self.__client = DockerClient(base_url=docker_host)
         self.__logger = setup_logger("docker-controller", getenv("LOG_LEVEL", "INFO"))
+        self.__custom_confs_rx = re_compile(
+            r"^bunkerweb.CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
+        )
 
     def _get_controller_instances(self):
         return self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
+
+    def _get_controller_services(self):
+        return self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
     def _to_instances(self, controller_instance):
         instance = {}
@@ -33,9 +39,6 @@ class DockerController(Controller, ConfigCaller):
             if self._is_setting(variable):
                 instance["env"][variable] = value
         return [instance]
-
-    def _get_controller_services(self):
-        return self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
     def _to_services(self, controller_service):
         service = {}
@@ -54,62 +57,59 @@ class DockerController(Controller, ConfigCaller):
         for instance in self.__client.containers.list(
             filters={"label": "bunkerweb.INSTANCE"}
         ):
+            if not instance.attrs or not instance.attrs.get("Config", {}).get("Env"):
+                continue
+
             for env in instance.attrs["Config"]["Env"]:
                 variable = env.split("=")[0]
                 value = env.replace(f"{variable}=", "", 1)
                 variables[variable] = value
-        server_names = []
-        if "SERVER_NAME" in variables and variables["SERVER_NAME"] != "":
-            server_names = variables["SERVER_NAME"].split(" ")
-        for server_name in server_names:
-            service = {}
-            service["SERVER_NAME"] = server_name
-            for variable, value in variables.items():
-                prefix = variable.split("_")[0]
-                real_variable = variable.replace(f"{prefix}_", "", 1)
-                if prefix == server_name and self._is_multisite_setting(real_variable):
-                    service[real_variable] = value
-            services.append(service)
+
+        if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
+            for server_name in variables["SERVER_NAME"].strip().split(" "):
+                service = {"SERVER_NAME": server_name}
+                for variable, value in variables.items():
+                    prefix = variable.split("_")[0]
+                    real_variable = variable.replace(f"{prefix}_", "", 1)
+                    if prefix == server_name and self._is_multisite_setting(
+                        real_variable
+                    ):
+                        service[real_variable] = value
+                services.append(service)
         return services
 
     def get_configs(self):
-        configs = {}
-        for config_type in self._supported_config_types:
-            configs[config_type] = {}
+        configs = {config_type: {} for config_type in self._supported_config_types}
         # get site configs from labels
         for container in self.__client.containers.list(
             filters={"label": "bunkerweb.SERVER_NAME"}
         ):
+            labels = container.labels  # type: ignore (labels is inside a container)
+            if isinstance(labels, list):
+                labels = {label: "" for label in labels}
+
             # extract server_name
-            server_name = ""
-            for variable, value in container.labels.items():
-                if not variable.startswith("bunkerweb."):
-                    continue
-                real_variable = variable.replace("bunkerweb.", "", 1)
-                if real_variable == "SERVER_NAME":
-                    server_name = value.split(" ")[0]
-                    break
+            server_name = labels.get("bunkerweb.SERVER_NAME", "").split(" ")[0]
+
             # extract configs
-            if server_name == "":
+            if not server_name:
                 continue
-            for variable, value in container.labels.items():
+
+            for variable, value in labels.items():
                 if not variable.startswith("bunkerweb."):
                     continue
-                real_variable = variable.replace("bunkerweb.", "", 1)
-                result = search(
-                    r"^CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$",
-                    real_variable,
-                )
+                result = self.__custom_confs_rx.search(variable)
                 if result is None:
                     continue
-                cfg_type = result.group(1).lower().replace("_", "-")
-                cfg_name = result.group(2)
-                configs[cfg_type][f"{server_name}/{cfg_name}"] = value
+                configs[result.group(1).lower().replace("_", "-")][
+                    f"{server_name}/{result.group(2)}"
+                ] = value
         return configs
 
     def apply_config(self):
-        ret = self._config.apply(self._instances, self._services, configs=self._configs)
-        return ret
+        return self._config.apply(
+            self._instances, self._services, configs=self._configs
+        )
 
     def process_events(self):
         for _ in self.__client.events(decode=True, filters={"type": "container"}):
@@ -122,10 +122,9 @@ class DockerController(Controller, ConfigCaller):
                 ):
                     continue
                 self.__logger.info(
-                    "Catched Docker event, deploying new configuration ..."
+                    "Caught Docker event, deploying new configuration ..."
                 )
-                ret = self.apply_config()
-                if not ret:
+                if not self.apply_config():
                     self.__logger.error("Error while deploying new configuration")
                 else:
                     self.__logger.info(

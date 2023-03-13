@@ -2,7 +2,7 @@ from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
 from json import dumps, loads
-from os import path, remove
+from pathlib import Path
 from shutil import copy
 from traceback import format_exc
 
@@ -18,13 +18,11 @@ from traceback import format_exc
 def is_cached_file(file, expire):
     is_cached = False
     try:
-        if not path.isfile(file):
+        if not Path(f"{file}.md").is_file():
             return False
-        if not path.isfile(f"{file}.md"):
-            return False
-        with open(f"{file}.md", "r") as f:
-            cached_time = loads(f.read())["date"]
-        current_time = datetime.timestamp(datetime.now())
+
+        cached_time = loads(Path(f"{file}.md").read_text())["date"]
+        current_time = datetime.now().timestamp()
         if current_time < cached_time:
             return False
         diff_time = current_time - cached_time
@@ -52,8 +50,7 @@ def file_hash(file):
 
 def cache_hash(cache):
     with suppress(BaseException):
-        with open(f"{cache}.md", "r") as f:
-            return loads(f.read())["checksum"]
+        return loads(Path(f"{cache}.md").read_text())["checksum"]
     return None
 
 
@@ -61,10 +58,9 @@ def cache_file(file, cache, _hash):
     ret, err = True, "success"
     try:
         copy(file, cache)
-        remove(file)
-        with open(f"{cache}.md", "w") as f:
-            md = {"date": datetime.timestamp(datetime.now()), "checksum": _hash}
-            f.write(dumps(md))
+        Path(file).unlink()
+        md = {"date": datetime.timestamp(datetime.now()), "checksum": _hash}
+        Path(cache).write_text(dumps(md))
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err

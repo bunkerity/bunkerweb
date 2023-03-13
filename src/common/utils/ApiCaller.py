@@ -1,6 +1,5 @@
 from io import BytesIO
 from os import environ, getenv
-from os.path import sep
 from sys import path as sys_path
 from tarfile import open as taropen
 from typing import Optional

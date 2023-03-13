@@ -3,6 +3,7 @@ from glob import glob
 from json import loads
 from logging import Logger
 from os import cpu_count, environ, getenv
+from pathlib import Path
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from threading import Lock, Thread
 from schedule import (
@@ -48,13 +49,12 @@ class JobScheduler(ApiCaller):
             plugin_name = plugin.split("/")[-2]
             jobs[plugin_name] = []
             try:
-                with open(f"{plugin}/plugin.json") as f:
-                    plugin_data = loads(f.read())
-                    if not "jobs" in plugin_data:
-                        continue
-                    for job in plugin_data["jobs"]:
-                        job["path"] = plugin
-                    jobs[plugin_name] = plugin_data["jobs"]
+                plugin_data = loads(Path(f"{plugin}/plugin.json").read_text())
+                if not "jobs" in plugin_data:
+                    continue
+                for job in plugin_data["jobs"]:
+                    job["path"] = plugin
+                jobs[plugin_name] = plugin_data["jobs"]
             except FileNotFoundError:
                 pass
             except:
@@ -171,7 +171,7 @@ class JobScheduler(ApiCaller):
                 success = False
         if reload:
             try:
-                if len(self._get_apis()) > 0:
+                if self._get_apis():
                     self.__logger.info("Sending /data/cache folder ...")
                     if not self._send_files("/data/cache", "/cache"):
                         success = False

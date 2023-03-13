@@ -4,8 +4,9 @@ from argparse import ArgumentParser
 from glob import glob
 from itertools import chain
 from json import loads
-from os import R_OK, X_OK, access, environ, getenv, listdir, path, walk
-from os.path import exists, join
+from os import R_OK, X_OK, access, environ, getenv, listdir, walk
+from os.path import join
+from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
@@ -30,7 +31,7 @@ from Configurator import Configurator
 from API import API
 
 custom_confs_rx = re_compile(
-    r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
+    r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
 )
 
 
@@ -57,7 +58,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
         else:
             tmp_config[splitted[0]] = splitted[1]
 
-            if db is None and splitted[0] == "DATABASE_URI":
+            if not db and splitted[0] == "DATABASE_URI":
                 db = Database(
                     logger,
                     sqlalchemy_string=splitted[1],
@@ -79,7 +80,13 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
 
 if __name__ == "__main__":
     logger = setup_logger("Generator", getenv("LOG_LEVEL", "INFO"))
-    wait_retry_interval = int(getenv("WAIT_RETRY_INTERVAL", "5"))
+    wait_retry_interval = getenv("WAIT_RETRY_INTERVAL", "5")
+
+    if not wait_retry_interval.isdigit():
+        logger.error("Invalid WAIT_RETRY_INTERVAL value, must be an integer")
+        sys_exit(1)
+
+    wait_retry_interval = int(wait_retry_interval)
 
     try:
         # Parse arguments
@@ -133,9 +140,8 @@ if __name__ == "__main__":
             integration = "Swarm"
         elif getenv("AUTOCONF_MODE", "no") == "yes":
             integration = "Autoconf"
-        elif exists("/usr/share/bunkerweb/INTEGRATION"):
-            with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-                integration = f.read().strip()
+        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
+            integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
 
         if args.init:
             logger.info(f"Detected {integration} integration")
@@ -146,7 +152,7 @@ if __name__ == "__main__":
 
         plugins = args.plugins
         plugins_settings = None
-        if not exists("/usr/sbin/nginx") and args.method == "ui":
+        if not Path("/usr/sbin/nginx").exists() and args.method == "ui":
             db = Database(logger)
             plugins = {}
             plugins_settings = []
@@ -159,19 +165,19 @@ if __name__ == "__main__":
         files = [args.settings] + ([args.variables] if args.variables else [])
         paths_rx = [args.core, args.plugins]
         for file in files:
-            if not path.exists(file):
+            if not Path(file).is_file():
                 logger.error(f"Missing file : {file}")
                 sys_exit(1)
             if not access(file, R_OK):
                 logger.error(f"Can't read file : {file}")
                 sys_exit(1)
-        for _path in paths_rx:
-            if not path.isdir(_path):
-                logger.error(f"Missing directory : {_path}")
+        for path in paths_rx:
+            if not Path(path).is_dir():
+                logger.error(f"Missing directory : {path}")
                 sys_exit(1)
-            if not access(_path, R_OK | X_OK):
+            if not access(path, R_OK | X_OK):
                 logger.error(
-                    f"Missing RX rights on directory : {_path}",
+                    f"Missing RX rights on directory : {path}",
                 )
                 sys_exit(1)
 
@@ -181,13 +187,12 @@ if __name__ == "__main__":
         files = glob(f"{args.core}/*/plugin.json")
         for file in files:
             try:
-                with open(file) as f:
-                    core_plugin = loads(f.read())
+                core_plugin = loads(Path(file).read_text())
 
-                    if core_plugin["order"] not in core_plugins:
-                        core_plugins[core_plugin["order"]] = []
+                if core_plugin["order"] not in core_plugins:
+                    core_plugins[core_plugin["order"]] = []
 
-                    core_plugins[core_plugin["order"]].append(core_plugin)
+                core_plugins[core_plugin["order"]].append(core_plugin)
             except:
                 logger.error(
                     f"Exception while loading JSON from {file} : {format_exc()}",
@@ -218,7 +223,7 @@ if __name__ == "__main__":
             )
             config_files = config.get_config()
             custom_confs = [
-                {"value": v, "exploded": custom_confs_rx.search(k).groups()}
+                {"value": v, "exploded": custom_confs_rx.search(k).groups()}  # type: ignore
                 for k, v in environ.items()
                 if custom_confs_rx.match(k)
             ]
@@ -231,19 +236,18 @@ if __name__ == "__main__":
                 ):
                     path_exploded = root.split("/")
                     for file in files:
-                        with open(join(root, file), "r") as f:
-                            custom_confs.append(
-                                {
-                                    "value": f.read(),
-                                    "exploded": (
-                                        f"{path_exploded.pop()}"
-                                        if path_exploded[-1] not in root_dirs
-                                        else "",
-                                        path_exploded[-1],
-                                        file.replace(".conf", ""),
-                                    ),
-                                }
-                            )
+                        custom_confs.append(
+                            {
+                                "value": Path(join(root, file)).read_text(),
+                                "exploded": (
+                                    f"{path_exploded.pop()}"
+                                    if path_exploded[-1] not in root_dirs
+                                    else "",
+                                    path_exploded[-1],
+                                    file.replace(".conf", ""),
+                                ),
+                            }
+                        )
         else:
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
@@ -278,7 +282,7 @@ if __name__ == "__main__":
                     else:
                         tmp_config[splitted[0]] = splitted[1]
 
-                        if db is None and splitted[0] == "DATABASE_URI":
+                        if not db and splitted[0] == "DATABASE_URI":
                             db = Database(
                                 logger,
                                 sqlalchemy_string=splitted[1],
@@ -295,11 +299,11 @@ if __name__ == "__main__":
                 )
             )
 
-        if db is None:
+        if not db:
             db = Database(logger)
 
         # Compute the config
-        if config_files is None:
+        if not config_files:
             logger.info("Computing config ...")
             config = Configurator(
                 args.settings,
@@ -329,17 +333,17 @@ if __name__ == "__main__":
                     f"Exception while initializing database : {err}",
                 )
                 sys_exit(1)
-            elif ret is False:
+            elif not ret:
                 logger.info(
                     "Database tables are already initialized, skipping creation ...",
                 )
             else:
                 logger.info("Database tables initialized")
 
-            with open("/usr/share/bunkerweb/VERSION", "r") as f:
-                version = f.read().strip()
-
-            err = db.initialize_db(version=version, integration=integration)
+            err = db.initialize_db(
+                version=Path("/usr/share/bunkerweb/VERSION").read_text().strip(),
+                integration=integration,
+            )
 
             if err:
                 logger.error(
@@ -391,7 +395,7 @@ if __name__ == "__main__":
             if err:
                 logger.warning(err)
     except SystemExit as e:
-        sys_exit(e)
+        raise e
     except:
         logger.error(
             f"Exception while executing config saver : {format_exc()}",

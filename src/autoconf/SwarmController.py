@@ -11,7 +11,7 @@ from logger import setup_logger
 
 class SwarmController(Controller, ConfigCaller):
     def __init__(self, docker_host):
-        super().__init__("swarm")
+        Controller.__init__(self, "swarm")
         ConfigCaller.__init__(self)
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
@@ -19,6 +19,9 @@ class SwarmController(Controller, ConfigCaller):
 
     def _get_controller_instances(self):
         return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
+
+    def _get_controller_services(self):
+        return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
     def _to_instances(self, controller_instance):
         instances = []
@@ -30,19 +33,17 @@ class SwarmController(Controller, ConfigCaller):
             value = env.replace(f"{variable}=", "", 1)
             if self._is_setting(variable):
                 instance_env[variable] = value
-        for task in controller_instance.tasks():
-            instance = {}
-            instance["name"] = task["ID"]
-            instance[
-                "hostname"
-            ] = f"{controller_instance.name}.{task['NodeID']}.{task['ID']}"
-            instance["health"] = task["Status"]["State"] == "running"
-            instance["env"] = instance_env
-            instances.append(instance)
-        return instances
 
-    def _get_controller_services(self):
-        return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
+        for task in controller_instance.tasks():
+            instances.append(
+                {
+                    "name": task["ID"],
+                    "hostname": f"{controller_instance.name}.{task['NodeID']}.{task['ID']}",
+                    "health": task["Status"]["State"] == "running",
+                    "env": instance_env,
+                }
+            )
+        return instances
 
     def _to_services(self, controller_service):
         service = {}
@@ -61,22 +62,27 @@ class SwarmController(Controller, ConfigCaller):
         for instance in self.__client.services.list(
             filters={"label": "bunkerweb.INSTANCE"}
         ):
+            if not instance.attrs or not instance.attrs.get("Spec", {}).get(
+                "TaskTemplate", {}
+            ).get("ContainerSpec", {}).get("Env"):
+                continue
+
             for env in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
                 variable = env.split("=")[0]
                 value = env.replace(f"{variable}=", "", 1)
                 variables[variable] = value
-        server_names = []
-        if "SERVER_NAME" in variables and variables["SERVER_NAME"] != "":
-            server_names = variables["SERVER_NAME"].split(" ")
-        for server_name in server_names:
-            service = {}
-            service["SERVER_NAME"] = server_name
-            for variable, value in variables.items():
-                prefix = variable.split("_")[0]
-                real_variable = variable.replace(f"{prefix}_", "", 1)
-                if prefix == server_name and self._is_multisite_setting(real_variable):
-                    service[real_variable] = value
-            services.append(service)
+        if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
+            for server_name in variables["SERVER_NAME"].strip().split(" "):
+                service = {}
+                service["SERVER_NAME"] = server_name
+                for variable, value in variables.items():
+                    prefix = variable.split("_")[0]
+                    real_variable = variable.replace(f"{prefix}_", "", 1)
+                    if prefix == server_name and self._is_multisite_setting(
+                        real_variable
+                    ):
+                        service[real_variable] = value
+                services.append(service)
         return services
 
     def get_configs(self):
@@ -86,6 +92,13 @@ class SwarmController(Controller, ConfigCaller):
         for config in self.__client.configs.list(
             filters={"label": "bunkerweb.CONFIG_TYPE"}
         ):
+            if (
+                not config.name
+                or not config.attrs
+                or not config.attrs.get("Spec", {}).get("Labels", {})
+            ):
+                continue
+
             config_type = config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_TYPE"]
             config_name = config.name
             if config_type not in self._supported_config_types:
@@ -104,11 +117,12 @@ class SwarmController(Controller, ConfigCaller):
         return configs
 
     def apply_config(self):
-        ret = self._config.apply(self._instances, self._services, configs=self._configs)
-        return ret
+        return self._config.apply(
+            self._instances, self._services, configs=self._configs
+        )
 
     def __event(self, event_type):
-        for event in self.__client.events(decode=True, filters={"type": event_type}):
+        for _ in self.__client.events(decode=True, filters={"type": event_type}):
             self.__internal_lock.acquire()
             try:
                 self._instances = self.get_instances()
@@ -121,8 +135,7 @@ class SwarmController(Controller, ConfigCaller):
                 self.__logger.info(
                     "Catched Swarm event, deploying new configuration ..."
                 )
-                ret = self.apply_config()
-                if not ret:
+                if not self.apply_config():
                     self.__logger.error("Error while deploying new configuration")
                 else:
                     self.__logger.info(
@@ -142,7 +155,7 @@ class SwarmController(Controller, ConfigCaller):
             self.__internal_lock.release()
 
     def process_events(self):
-        event_types = ["service", "config"]
+        event_types = ("service", "config")
         threads = [
             Thread(target=self.__event, args=(event_type,))
             for event_type in event_types

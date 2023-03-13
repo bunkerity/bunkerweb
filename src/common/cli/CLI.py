@@ -1,4 +1,4 @@
-from os.path import isfile
+from pathlib import Path
 from dotenv import dotenv_values
 from docker import DockerClient
 from kubernetes import client, config
@@ -34,16 +34,15 @@ class CLI(ApiCaller):
         super().__init__(self.__get_apis())
 
     def __detect_integration(self):
-        ret = "unknown"
         distrib = ""
-        if isfile("/etc/os-release"):
+        if Path("/etc/os-release").is_file():
             with open("/etc/os-release", "r") as f:
                 if "Alpine" in f.read():
                     distrib = "alpine"
                 else:
                     distrib = "other"
         # Docker case
-        if distrib == "alpine" and isfile("/usr/sbin/nginx"):
+        if distrib == "alpine" and Path("/usr/sbin/nginx").is_file():
             return "docker"
         # Linux case
         if distrib == "other":
@@ -58,7 +57,7 @@ class CLI(ApiCaller):
         if distrib == "alpine":
             return "autoconf"
 
-        raise Exception("can't detect integration")
+        raise Exception("Can't detect integration")
 
     def __get_apis(self):
         # Docker case

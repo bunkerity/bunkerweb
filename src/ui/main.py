@@ -1,3 +1,21 @@
+from sys import path as sys_path, modules as sys_modules
+from pathlib import Path
+
+if Path("/etc/os-release").is_file():
+    with open("/etc/os-release", "r") as f:
+        if (
+            "/usr/share/bunkerweb/deps/python" not in sys_path
+            and "Alpine" not in f.read()
+        ):
+            sys_path.append("/usr/share/bunkerweb/deps/python")
+
+if "/usr/share/bunkerweb/utils" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/utils")
+if "/usr/share/bunkerweb/api" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/api")
+if "/usr/share/bunkerweb/db" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/db")
+
 from hashlib import sha256
 from bs4 import BeautifulSoup
 from contextlib import suppress
@@ -36,13 +54,11 @@ from kubernetes import client as kube_client
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, chmod, getenv, getpid, listdir, walk
 from os.path import join
-from pathlib import Path
 from re import match as re_match
 from requests import get
 from shutil import move, rmtree, copytree, chown
 from signal import SIGINT, signal, SIGTERM
 from subprocess import PIPE, Popen, call
-from sys import path as sys_path, modules as sys_modules
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from tempfile import NamedTemporaryFile
@@ -50,14 +66,6 @@ from time import time
 from traceback import format_exc
 from typing import Optional
 from zipfile import BadZipFile, ZipFile
-
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
-    )
-)
 
 from src.Instances import Instances
 from src.ConfigFiles import ConfigFiles

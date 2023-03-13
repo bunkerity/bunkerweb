@@ -2,22 +2,20 @@
 
 from argparse import ArgumentParser
 from glob import glob
-from os import R_OK, W_OK, X_OK, access, getenv, path, remove, unlink
-from os.path import exists, isdir, isfile, islink
+from os import R_OK, W_OK, X_OK, access, getenv
+from pathlib import Path
 from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
 
-
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-    )
-)
+if "/usr/share/bunkerweb/deps/python" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/deps/python")
+if "/usr/share/bunkerweb/utils" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/utils")
+if "/usr/share/bunkerweb/api" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/api")
 
 from logger import setup_logger
 from Configurator import Configurator
@@ -89,9 +87,8 @@ if __name__ == "__main__":
             integration = "Swarm"
         elif getenv("AUTOCONF_MODE", "no") == "yes":
             integration = "Autoconf"
-        elif exists("/usr/share/bunkerweb/INTEGRATION"):
-            with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-                integration = f.read().strip()
+        elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
+            integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
 
         if args.variables:
             logger.info(f"Variables : {args.variables}")
@@ -102,25 +99,25 @@ if __name__ == "__main__":
             paths_rx = [args.core, args.plugins, args.templates]
             paths_rwx = [args.output]
             for file in files:
-                if not path.exists(file):
+                if not Path(file).is_file():
                     logger.error(f"Missing file : {file}")
                     sys_exit(1)
-                if not access(file, R_OK):
+                elif not access(file, R_OK):
                     logger.error(f"Can't read file : {file}")
                     sys_exit(1)
-            for _path in paths_rx + paths_rwx:
-                if not path.isdir(_path):
-                    logger.error(f"Missing directory : {_path}")
+            for path in paths_rx + paths_rwx:
+                if not Path(path).is_dir():
+                    logger.error(f"Missing directory : {path}")
                     sys_exit(1)
-                if not access(_path, R_OK | X_OK):
+                elif not access(path, R_OK | X_OK):
                     logger.error(
-                        f"Missing RX rights on directory : {_path}",
+                        f"Missing RX rights on directory : {path}",
                     )
                     sys_exit(1)
-            for _path in paths_rwx:
-                if not access(_path, W_OK):
+            for path in paths_rwx:
+                if not access(path, W_OK):
                     logger.error(
-                        f"Missing W rights on directory : {_path}",
+                        f"Missing W rights on directory : {path}",
                     )
                     sys_exit(1)
 
@@ -131,7 +128,9 @@ if __name__ == "__main__":
             )
             config = config.get_config()
         else:
-            sys_path.append("/usr/share/bunkerweb/db")
+            if "/usr/share/bunkerweb/db" not in sys_path:
+                sys_path.append("/usr/share/bunkerweb/db")
+
             from Database import Database
 
             db = Database(
@@ -144,11 +143,9 @@ if __name__ == "__main__":
         logger.info("Removing old files ...")
         files = glob(f"{args.output}/*")
         for file in files:
-            if islink(file):
-                unlink(file)
-            elif isfile(file):
-                remove(file)
-            elif isdir(file):
+            if Path(file).is_symlink() or Path(file).is_file():
+                Path(file).unlink()
+            elif Path(file).is_dir():
                 rmtree(file, ignore_errors=False)
 
         # Render the templates
@@ -165,7 +162,7 @@ if __name__ == "__main__":
 
         if integration == "Linux":
             retries = 0
-            while not exists("/var/tmp/bunkerweb/nginx.pid"):
+            while not Path("/var/tmp/bunkerweb/nginx.pid").exists():
                 if retries == 5:
                     logger.error(
                         "BunkerWeb's nginx didn't start in time.",
@@ -186,7 +183,7 @@ if __name__ == "__main__":
                 logger.info("Successfully reloaded nginx")
 
     except SystemExit as e:
-        sys_exit(e)
+        raise e
     except:
         logger.error(
             f"Exception while executing generator : {format_exc()}",

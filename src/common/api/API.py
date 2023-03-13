@@ -17,7 +17,7 @@ class API:
             headers = {}
             headers["User-Agent"] = "bwapi"
             headers["Host"] = self.__host
-            if type(data) is dict:
+            if isinstance(data, dict):
                 resp = request(
                     method,
                     f"{self.__endpoint}{url}",
@@ -25,7 +25,7 @@ class API:
                     timeout=timeout,
                     headers=headers,
                 )
-            elif type(data) is bytes:
+            elif isinstance(data, bytes):
                 resp = request(
                     method,
                     f"{self.__endpoint}{url}",
@@ -33,7 +33,7 @@ class API:
                     timeout=timeout,
                     headers=headers,
                 )
-            elif files is not None:
+            elif files:
                 resp = request(
                     method,
                     f"{self.__endpoint}{url}",
@@ -41,7 +41,7 @@ class API:
                     timeout=timeout,
                     headers=headers,
                 )
-            elif data is None:
+            elif not data:
                 resp = request(
                     method, f"{self.__endpoint}{url}", timeout=timeout, headers=headers
                 )
