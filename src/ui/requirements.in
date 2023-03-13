@@ -1,4 +1,4 @@
-Flask==2.2.2
+Flask==2.2.3
 Flask_Login==0.6.2
 Flask_WTF==1.1.1
 beautifulsoup4==4.11.2
