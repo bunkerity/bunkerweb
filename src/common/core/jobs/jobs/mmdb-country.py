@@ -24,11 +24,6 @@ from logger import setup_logger
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("JOBS", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -70,6 +65,12 @@ try:
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+    lock = Lock()
 
     # Update db
     with lock:

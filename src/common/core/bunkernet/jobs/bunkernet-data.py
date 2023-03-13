@@ -21,11 +21,6 @@ from logger import setup_logger
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -47,6 +42,12 @@ try:
     if not bunkernet_activated:
         logger.info("BunkerNet is not activated, skipping download...")
         _exit(0)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+    lock = Lock()
 
     # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)

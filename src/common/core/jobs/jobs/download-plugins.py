@@ -32,7 +32,6 @@ from logger import setup_logger
 
 
 logger = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
-lock = Lock()
 status = 0
 
 
@@ -67,6 +66,7 @@ try:
         logger,
         sqlalchemy_string=getenv("DATABASE_URI"),
     )
+    lock = Lock()
 
     plugin_nbr = 0
 

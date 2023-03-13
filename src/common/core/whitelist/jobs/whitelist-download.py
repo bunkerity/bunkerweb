@@ -58,11 +58,6 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 
 
 logger = setup_logger("WHITELIST", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -175,6 +170,11 @@ try:
                         logger.error(f"Error while caching whitelist : {err}")
                         status = 2
                     else:
+                        db = Database(
+                            logger,
+                            sqlalchemy_string=getenv("DATABASE_URI", None),
+                        )
+                        lock = Lock()
                         # Update db
                         with lock:
                             err = db.update_job_cache(

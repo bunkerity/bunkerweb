@@ -36,11 +36,6 @@ def check_line(line):
 
 
 logger = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -125,6 +120,12 @@ try:
     if not cached:
         logger.error(f"Error while caching list : {err}")
         _exit(2)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+    lock = Lock()
 
     # Update db
     with lock:

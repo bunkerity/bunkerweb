@@ -58,11 +58,6 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 
 
 logger = setup_logger("GREYLIST", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -84,6 +79,12 @@ try:
     if not greylist_activated:
         logger.info("Greylist is not activated, skipping downloads...")
         _exit(0)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+    lock = Lock()
 
     # Create directories if they don't exist
     Path("/var/cache/bunkerweb/greylist").mkdir(parents=True, exist_ok=True)

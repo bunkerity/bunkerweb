@@ -20,11 +20,6 @@ from logger import setup_logger
 from API import API
 
 logger = setup_logger("Lets-encrypt", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -37,13 +32,18 @@ try:
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
     elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
-        with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-            bw_integration = f.read().strip()
+        bw_integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
     token = getenv("CERTBOT_TOKEN", "")
     validation = getenv("CERTBOT_VALIDATION", "")
 
     # Cluster case
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
+        db = Database(
+            logger,
+            sqlalchemy_string=getenv("DATABASE_URI", None),
+        )
+        lock = Lock()
+
         with lock:
             instances = db.get_instances()
 

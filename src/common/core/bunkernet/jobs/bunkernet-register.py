@@ -21,11 +21,6 @@ from Database import Database
 from logger import setup_logger
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -152,6 +147,12 @@ try:
         status = 1
         if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
             Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
+
+            db = Database(
+                logger,
+                sqlalchemy_string=getenv("DATABASE_URI", None),
+            )
+            lock = Lock()
 
             # Update db
             with lock:

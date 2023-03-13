@@ -25,11 +25,6 @@ from logger import setup_logger
 from API import API
 
 logger = setup_logger("Lets-encrypt", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -63,6 +58,12 @@ try:
             tf.add("/data/cache/letsencrypt", arcname=".")
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
+
+        db = Database(
+            logger,
+            sqlalchemy_string=getenv("DATABASE_URI", None),
+        )
+        lock = Lock()
 
         with lock:
             instances = db.get_instances()

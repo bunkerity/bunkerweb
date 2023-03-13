@@ -58,11 +58,6 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 
 
 logger = setup_logger("BLACKLIST", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 try:
@@ -84,6 +79,12 @@ try:
     if not blacklist_activated:
         logger.info("Blacklist is not activated, skipping downloads...")
         _exit(0)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+    lock = Lock()
 
     # Create directories if they don't exist
     Path("/var/cache/bunkerweb/blacklist").mkdir(parents=True, exist_ok=True)
