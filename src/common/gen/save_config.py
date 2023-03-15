@@ -376,24 +376,25 @@ if __name__ == "__main__":
         else:
             logger.info("Config successfully saved to database")
 
-        if apis:
-            for api in apis:
-                endpoint_data = api.get_endpoint().replace("http://", "").split(":")
+        if args.method != "ui":
+            if apis:
+                for api in apis:
+                    endpoint_data = api.get_endpoint().replace("http://", "").split(":")
+                    err = db.add_instance(
+                        endpoint_data[0], endpoint_data[1], api.get_host()
+                    )
+
+                    if err:
+                        logger.warning(err)
+            else:
                 err = db.add_instance(
-                    endpoint_data[0], endpoint_data[1], api.get_host()
+                    "localhost",
+                    config_files.get("API_HTTP_PORT", 5000),
+                    config_files.get("API_SERVER_NAME", "bwapi"),
                 )
 
                 if err:
                     logger.warning(err)
-        else:
-            err = db.add_instance(
-                "localhost",
-                config_files.get("API_HTTP_PORT", 5000),
-                config_files.get("API_SERVER_NAME", "bwapi"),
-            )
-
-            if err:
-                logger.warning(err)
     except SystemExit as e:
         raise e
     except:
