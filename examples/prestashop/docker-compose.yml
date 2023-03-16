@@ -1,24 +1,12 @@
 version: "3"
 
-x-bunkerweb-env: &bunkerweb-env
-  DATABASE_URI: "mariadb+pymysql://${PRESTASHOP_USER:-user}:${PRESTASHOP_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
-
 services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
-    # ⚠️ read this if you use local folders for volumes ⚠️
-    # bunkerweb runs as an unprivileged user with UID/GID 101
-    # don't forget to edit the permissions of the files and folders accordingly
-    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
-    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
-    # more info at https://docs.bunkerweb.io
-    volumes:
-      - bw-data:/data
     environment:
-      <<: *bunkerweb-env
       SERVER_NAME: "www.example.com" # replace with your domain
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       SERVE_FILES: "no"
@@ -44,33 +32,32 @@ services:
     depends_on:
       - mybunker
     environment:
-      <<: *bunkerweb-env
-      DOCKER_HOST: "tcp://docker-proxy:2375"
+      DOCKER_HOST: "tcp://bw-docker-proxy:2375"
     volumes:
       - bw-data:/data
     networks:
       - bw-universe
-      - net-docker
+      - bw-docker
 
-  docker-proxy:
+  bw-docker-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
     networks:
-      - net-docker
+      - bw-docker
 
   myps:
     image: prestashop/prestashop:1.7
     volumes:
-      - ./ps-data:/var/www/html
+      - ps-data:/var/www/html
     environment:
       - DB_SERVER=mydb
-      - DB_USER=${PRESTASHOP_USER:-user}
-      - DB_PASSWD=${PRESTASHOP_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - DB_USER=user
+      - DB_PASSWD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
       - DB_PREFIX=prefix_ # replace with a random prefix (good security practice)
-      - DB_NAME=${PRESTASHOP_DATABASE:-prestashop}
+      - DB_NAME=prestashop
       - PS_ENABLE_SSL=1
       - ADMIN_MAIL=admin@example.com # change to the prestashop admin email
       - ADMIN_PASSWD=changeme # change to the prestashop admin password
@@ -78,19 +65,22 @@ services:
     networks:
       - bw-services
 
-  mydb:
-    image: mariadb:10.10
+  image: mariadb
     volumes:
       - db-data:/var/lib/mysql
-    environment:
-      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
-    entrypoint: sh -c "echo 'DROP USER IF EXISTS \"${PRESTASHOP_USER:-user}\"; CREATE USER \"${PRESTASHOP_USER:-user}\"@\"%\"; CREATE DATABASE IF NOT EXISTS ${PRESTASHOP_DATABASE:-prestashop}; CREATE DATABASE IF NOT EXISTS ${BUNKERWEB_DATABASE:-bunkerweb}; GRANT ALL PRIVILEGES ON ${PRESTASHOP_DATABASE:-prestashop}.* TO \"${PRESTASHOP_USER:-user}\"@\"%\" IDENTIFIED BY \"${PRESTASHOP_PASSWORD:-secret}\"; GRANT ALL PRIVILEGES ON ${BUNKERWEB_DATABASE:-bunkerweb}.* TO \"${PRESTASHOP_USER:-user}\"@\"%\" IDENTIFIED BY \"${PRESTASHOP_PASSWORD:-secret}\"; FLUSH PRIVILEGES;' > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
     networks:
-      - bw-universe
-      - bw-services
+      bw-services:
+        aliases:
+          - mydb
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=prestashop
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match DB_PASSWD)
 
 volumes:
   bw-data:
+  ps-data:
   db-data:
 
 networks:
@@ -100,4 +90,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  net-docker:
+  bw-docker:

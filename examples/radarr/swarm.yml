@@ -10,9 +10,9 @@ services:
       - PGID=1000
       - TZ=Europe/London
     volumes:
-      - rr_config:/config
-      - rr_movies:/movies #optional
-      - rr_downloads:/downloads #optional
+      - rr-config:/config
+      - rr-movies:/movies #optional
+      - rr-downloads:/downloads #optional
     deploy:
       placement:
         constraints:
@@ -39,6 +39,6 @@ networks:
       name: bw-services
 
 volumes:
-  rr_config:
-  rr_downloads:
-  rr_movies:
+  rr-config:
+  rr-downloads:
+  rr-movies:

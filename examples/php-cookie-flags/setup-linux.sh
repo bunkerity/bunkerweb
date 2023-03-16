@@ -14,9 +14,7 @@ else
 	exit 1
 fi
 
-chown -R root:101 bw-data
-chmod -R 770 bw-data
-cp -r ./bw-data/www/* /var/www/html
+cp -r ./www/* /var/www/html
 chown -R $user:nginx /var/www/html
 find /var/www/html -type f -exec chmod 0640 {} \;
 find /var/www/html -type d -exec chmod 0750 {} \;

@@ -4,7 +4,7 @@ services:
   myps:
     image: prestashop/prestashop:1.7
     volumes:
-      - ps_data:/var/www/html
+      - ps-data:/var/www/html
     networks:
       - bw-services
     environment:
@@ -33,7 +33,7 @@ services:
   mydb:
     image: mariadb
     volumes:
-      - db_data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     networks:
       - bw-services
     environment:
@@ -52,5 +52,5 @@ networks:
       name: bw-services
 
 volumes:
-  ps_data:
-  db_data:
+  ps-data:
+  db-data:

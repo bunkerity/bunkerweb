@@ -5,8 +5,6 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 1
 fi
 
-chown -R root:101 bw-data
-chmod -R 770 bw-data
-chown -R 82:101 ./bw-data/www
-find ./bw-data/www -type f -exec chmod 0640 {} \;
-find ./bw-data/www -type d -exec chmod 0750 {} \;
+chown -R 33:101 ./www
+find ./www -type f -exec chmod 0640 {} \;
+find ./www -type d -exec chmod 0750 {} \;
