@@ -1,22 +1,11 @@
 version: "3"
 
-x-bunkerweb-env: &bunkerweb-env
-  DATABASE_URI: "mariadb+pymysql://${REDMINE_USER:-user}:${REDMINE_PASSWORD:-secret}@mydb:3306/${BUNKERWEB_DATABASE:-bunkerweb}"
-
 services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0
     ports:
       - 80:8080
       - 443:8443
-    # ⚠️ read this if you use local folders for volumes ⚠️
-    # bunkerweb runs as an unprivileged user with UID/GID 101
-    # don't forget to edit the permissions of the files and folders accordingly
-    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
-    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
-    # more info at https://docs.bunkerweb.io
-    volumes:
-      - bw-data:/data
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -39,27 +28,27 @@ services:
     depends_on:
       - mybunker
     environment:
-      - DOCKER_HOST=tcp://docker-proxy:2375
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
     volumes:
       - bw-data:/data
     networks:
       - bw-universe
-      - net-docker
+      - bw-docker
 
-  docker-proxy:
+  bw-docker-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
     networks:
-      - net-docker
+      - bw-docker
 
   myredmine:
     image: redmine:5.0.4-alpine
     restart: always
     volumes:
-      - ./redmine-data:/usr/src/redmine/files
+      - redmine-data:/usr/src/redmine/files
     environment:
       - REDMINE_DB_MYSQL=mydb
       - REDMINE_DB_DATABASE=${REDMINE_DATABASE:-redminedb}
@@ -69,18 +58,21 @@ services:
       - bw-services
 
   mydb:
-    image: mariadb:10.10
+    image: mysql
     volumes:
       - db-data:/var/lib/mysql
     environment:
-      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
-    entrypoint: sh -c "echo 'DROP USER IF EXISTS \"${REDMINE_USER:-user}\"; CREATE USER \"${REDMINE_USER:-user}\"@\"%\"; CREATE DATABASE IF NOT EXISTS ${REDMINE_DATABASE:-redminedb}; CREATE DATABASE IF NOT EXISTS ${BUNKERWEB_DATABASE:-bunkerweb}; GRANT ALL PRIVILEGES ON ${REDMINE_DATABASE:-redminedb}.* TO \"${REDMINE_USER:-user}\"@\"%\" IDENTIFIED BY \"${REDMINE_PASSWORD:-secret}\"; GRANT ALL PRIVILEGES ON ${BUNKERWEB_DATABASE:-bunkerweb}.* TO \"${REDMINE_USER:-user}\"@\"%\" IDENTIFIED BY \"${REDMINE_PASSWORD:-secret}\"; FLUSH PRIVILEGES;' > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=redminedb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match REDMINE_DB_PASSWORD)
     networks:
       - bw-universe
       - bw-services
 
 volumes:
   bw-data:
+  redmine-data:
   db-data:
 
 networks:
@@ -90,4 +82,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  net-docker:
+  bw-docker:

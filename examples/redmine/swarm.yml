@@ -5,7 +5,7 @@ services:
     image: redmine
     restart: always
     volumes:
-      - redmine_data:/usr/src/redmine/files
+      - redmine-data:/usr/src/redmine/files
     networks:
       - bw-services
     environment:
@@ -23,7 +23,21 @@ services:
         - bunkerweb.REVERSE_PROXY_URL=/
         - bunkerweb.REVERSE_PROXY_HOST=http://myredmine:3000
 
-  # For the database, you can refer to the swarm example including a database
+  mydb:
+    image: mysql
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - bw-services
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=redminedb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
 
 networks:
   bw-services:
@@ -31,5 +45,5 @@ networks:
       name: bw-services
 
 volumes:
-  redmine_data:
-  db_data:
+  redmine-data:
+  db-data:

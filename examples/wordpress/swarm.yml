@@ -4,7 +4,7 @@ services:
   mywp:
     image: wordpress:5-apache
     volumes:
-      - wp_data:/var/www/html
+      - wp-data:/var/www/html
     networks:
       - bw-services
     environment:
@@ -24,7 +24,21 @@ services:
         - bunkerweb.REVERSE_PROXY_URL=/
         - bunkerweb.REVERSE_PROXY_HOST=http://mywp
 
-  # For the database, you can refer to the swarm integration example including a database
+  mydb:
+    image: mariadb
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - bw-services
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=wp
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
 
 networks:
   bw-services:
@@ -32,5 +46,5 @@ networks:
       name: bw-services
 
 volumes:
-  wp_data:
-  db_data:
+  wp-data:
+  db-data:
