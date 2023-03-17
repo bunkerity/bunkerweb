@@ -37,6 +37,9 @@ class AutoconfTest(Test):
             if isdir("/tmp/autoconf"):
                 rmtree("/tmp/autoconf")
             mkdir("/tmp/autoconf")
+            if isdir("/tmp/www"):
+                rmtree("/tmp/www")
+            mkdir("/tmp/www")
             copy("./misc/integrations/autoconf.yml", "/tmp/autoconf/docker-compose.yml")
             compose = "/tmp/autoconf/docker-compose.yml"
             Test.replace_in_file(

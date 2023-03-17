@@ -60,7 +60,7 @@ def cache_file(file, cache, _hash):
         copy(file, cache)
         Path(file).unlink()
         md = {"date": datetime.timestamp(datetime.now()), "checksum": _hash}
-        Path(cache).write_text(dumps(md))
+        Path(f"{cache}.md").write_text(dumps(md))
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err
