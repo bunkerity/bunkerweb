@@ -31,11 +31,11 @@ try :
     # Multisite case
     if os.getenv("MULTISITE") == "yes" :
         for first_server in os.getenv("SERVER_NAME").split(" ") :
-            if os.getenv(first_server + "_USE_REALIP", os.getenv("USE_REALIP")) == "yes" :
+            if os.getenv(first_server + "_USE_REAL_IP", os.getenv("USE_REAL_IP")) == "yes" :
                 blacklist_activated = True
                 break
     # Singlesite case
-    elif os.getenv("USE_REALIP") == "yes" :
+    elif os.getenv("USE_REAL_IP") == "yes" :
         blacklist_activated = True
     if not blacklist_activated :
         logger.log("REALIP", "ℹ️", "RealIP is not activated, skipping download...")
