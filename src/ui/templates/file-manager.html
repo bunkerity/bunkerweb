@@ -66,7 +66,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       >
         <button type="button">
           <svg
-            class="relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary stroke-gray-100"
+            class="relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary stroke-gray-100 dark:stroke-gray-600"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -94,7 +94,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       >
         <button type="button">
           <svg
-              class="-translate-x-1 relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary stroke-gray-100"
+              class="-translate-x-1 relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary stroke-gray-100 dark:stroke-gray-600"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -147,7 +147,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         <!-- service root-->
          {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth == 1 %}
          <svg
-            class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:brightness-150"
+            class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -171,23 +171,23 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 
         <!-- services folder -->
          {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 %}
-         <svg class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" /></svg>         {% endif %}
+         <svg class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" /></svg>         {% endif %}
           <!-- end services folder-->
           <!-- services files -->
           {% if child['type'] == "file" and current_endpoint == "configs" and loop.depth != 1 %}
-          <svg class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          <svg class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
           {% endif %}
           <!-- end services files-->
         <!-- cache folder-->
         {% if child['type'] == "folder" and current_endpoint == "cache" and loop.depth == 1 %}
-        <svg  class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <svg  class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
         </svg>
         {% endif %}
         <!-- end cache folder -->
         <!-- cache file -->
          {% if child['type'] == "file" and current_endpoint == "cache" %}
-         <svg             class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:brightness-150"
+         <svg             class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150"
          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 13.5H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
         </svg>
