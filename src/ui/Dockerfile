@@ -61,4 +61,4 @@ WORKDIR /usr/share/bunkerweb/ui
 USER ui:ui
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
-CMD ["python3", "-m", "gunicorn", "--graceful-timeout=0", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]
+CMD ["python3", "-m", "gunicorn", "--access-logfile=-", "--graceful-timeout=0", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]
