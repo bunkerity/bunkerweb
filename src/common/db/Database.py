@@ -5,7 +5,7 @@ from hashlib import sha256
 from logging import (
     Logger,
 )
-from os import _exit, getenv
+from os import _exit, getenv, listdir
 from os.path import dirname
 from pathlib import Path
 from pymysql import install_as_MySQLdb
@@ -323,7 +323,7 @@ class Database:
 
                         if path_ui.exists():
                             if {"template.html", "actions.py"}.issubset(
-                                path_ui.iterdir()
+                                listdir(str(path_ui))
                             ):
                                 template = Path(f"{path_ui}/template.html").read_bytes()
                                 actions = Path(f"{path_ui}/actions.py").read_bytes()
@@ -1162,7 +1162,9 @@ class Database:
                     )
 
                     if path_ui.exists():
-                        if {"template.html", "actions.py"}.issubset(path_ui.iterdir()):
+                        if {"template.html", "actions.py"}.issubset(
+                            listdir(str(path_ui))
+                        ):
                             db_plugin_page = (
                                 session.query(Plugin_pages)
                                 .with_entities(
@@ -1277,7 +1279,9 @@ class Database:
                     )
 
                     if path_ui.exists():
-                        if {"template.html", "actions.py"}.issubset(path_ui.iterdir()):
+                        if {"template.html", "actions.py"}.issubset(
+                            listdir(str(path_ui))
+                        ):
                             db_plugin_page = (
                                 session.query(Plugin_pages)
                                 .with_entities(
