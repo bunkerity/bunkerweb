@@ -9,12 +9,14 @@ from os import (
     getenv,
     getpid,
     listdir,
+    stat,
     walk,
 )
 from os.path import dirname, join
 from pathlib import Path
-from shutil import chown, copy, rmtree
+from shutil import copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
+from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import open as tar_open
@@ -102,12 +104,6 @@ def generate_custom_configs(
         Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
         Path(tmp_path).write_bytes(custom_config["data"])
 
-    # Fix permissions for the custom configs folder
-    for root, dirs, files in walk("/data/configs", topdown=False):
-        for name in files + dirs:
-            chown(join(root, name), "root", 101)
-            chmod(join(root, name), 0o770)
-
     if integration != "Linux":
         logger.info("Sending custom configs to BunkerWeb")
         ret = api_caller._send_files("/data/configs", "/custom_configs")
@@ -128,17 +124,16 @@ def generate_external_plugins(
     Path(original_path).mkdir(parents=True, exist_ok=True)
     for plugin in plugins:
         tmp_path = f"{original_path}/{plugin['id']}/{plugin['name']}.tar.gz"
-        Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
+        plugin_dir = dirname(tmp_path)
+        Path(plugin_dir).mkdir(parents=True, exist_ok=True)
         Path(tmp_path).write_bytes(plugin["data"])
         with tar_open(tmp_path, "r:gz") as tar:
             tar.extractall(original_path)
         Path(tmp_path).unlink()
 
-    # Fix permissions for the plugins folder
-    for root, dirs, files in walk("/data/plugins", topdown=False):
-        for name in files + dirs:
-            chown(join(root, name), "root", 101)
-            chmod(join(root, name), 0o770)
+        for job_file in glob(f"{plugin_dir}/jobs/*"):
+            st = stat(job_file)
+            chmod(job_file, st.st_mode | S_IEXEC)
 
     if integration != "Linux":
         logger.info("Sending plugins to BunkerWeb")
@@ -366,12 +361,6 @@ if __name__ == "__main__":
                         "Config generator failed, configuration will not work as expected...",
                     )
                 else:
-                    # Fix permissions for the nginx folder
-                    for root, dirs, files in walk("/etc/nginx", topdown=False):
-                        for name in files + dirs:
-                            chown(join(root, name), "root", 101)
-                            chmod(join(root, name), 0o770)
-
                     copy("/etc/nginx/variables.env", "/var/tmp/bunkerweb/variables.env")
 
                     if len(api_caller._get_apis()) > 0:
@@ -382,12 +371,6 @@ if __name__ == "__main__":
                             logger.error(
                                 "Sending nginx configs failed, configuration will not work as expected...",
                             )
-
-            # Fix permissions for the cache folders
-            for root, dirs, files in walk("/data/cache", topdown=False):
-                for name in files + dirs:
-                    chown(join(root, name), "root", 101)
-                    chmod(join(root, name), 0o770)
 
             try:
                 if len(api_caller._get_apis()) > 0:

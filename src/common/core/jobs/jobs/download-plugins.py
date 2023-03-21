@@ -2,8 +2,8 @@
 
 from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, makedirs, chmod, stat, _exit, walk
-from os.path import basename, dirname, join
+from os import getenv, listdir, chmod, stat, _exit
+from os.path import basename, dirname
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
@@ -11,7 +11,7 @@ from threading import Lock
 from uuid import uuid4
 from glob import glob
 from json import loads
-from shutil import chown, copytree, rmtree
+from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
 from zipfile import ZipFile
@@ -48,7 +48,7 @@ def install_plugin(plugin_dir) -> bool:
     # Copy the plugin
     copytree(plugin_dir, f"/data/plugins/{metadata['id']}")
     # Add u+x permissions to jobs files
-    for job_file in glob(f"{plugin_dir}jobs/*"):
+    for job_file in glob(f"{plugin_dir}/jobs/*"):
         st = stat(job_file)
         chmod(job_file, st.st_mode | S_IEXEC)
     logger.info(f"Plugin {metadata['id']} installed")
@@ -112,12 +112,6 @@ try:
             )
             status = 2
 
-    # Fix permissions on plugins
-    for root, dirs, files in walk("/data/plugins", topdown=False):
-        for name in files + dirs:
-            chown(join(root, name), "root", 101)
-            chmod(join(root, name), 0o770)
-
     if not plugin_nbr:
         logger.info("No external plugins to update to database")
         _exit(0)
@@ -150,7 +144,7 @@ try:
         )
 
         if "ui" in listdir(path):
-            plugin_file["ui"] = True
+            plugin_file["page"] = True
 
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])

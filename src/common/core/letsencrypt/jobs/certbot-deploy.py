@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 
 from io import BytesIO
-from os import chmod, getenv, walk
-from os.path import join
+from os import getenv
 from pathlib import Path
-from shutil import chown
 from subprocess import run, DEVNULL, STDOUT
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
@@ -47,12 +45,6 @@ try:
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
         # Create tarball of /data/cache/letsencrypt
         tgz = BytesIO()
-
-        # Fix permissions for the certificates
-        for root, dirs, files in walk("/data/cache/letsencrypt", topdown=False):
-            for name in files + dirs:
-                chown(join(root, name), "root", 101)
-                chmod(join(root, name), 0o770)
 
         with tar_open(mode="w:gz", fileobj=tgz) as tf:
             tf.add("/data/cache/letsencrypt", arcname=".")
