@@ -93,6 +93,7 @@
         font-size: 20px;
         color:#363636;
         padding: 0.5rem;
+        margin-top: 10px;
       }
       .captcha:focus {
         outline-width: 1;
@@ -130,7 +131,7 @@
         <h1>Please prove that you are Human before accessing this website</h1>
         <p class="lead">
       <form class="form" method="POST" action="%s">
-        <img src="data:image/jpeg;base64,%s"/><br>
+        <img src="data:image/jpeg;base64,%s"/>
         <input class="captcha" type="text" name="captcha" /> <input class="btn" type="submit" value="Submit" />
       </form>
         </p>
