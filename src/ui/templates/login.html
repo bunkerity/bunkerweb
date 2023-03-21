@@ -51,7 +51,7 @@
           ></path>
         </svg>
       </button>
-      {% if category == 'error' %}
+      {% if category == 'error' or (message|safe).startswith("Please log in") %}
       <h5 class="text-lg mb-0 text-red-500">Error</h5>
       <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">
         {{ message|safe }}
