@@ -14,16 +14,13 @@
       html {
         width: 100%%;
         height: 100%%;
-        background-color: #042a3a;
+        background-color: #125678;
       }
       body {
         color: #fff;
         text-align: center;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         padding: 0;
         min-height: 100%%;
-        -webkit-box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
-        box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
         display: table;
         font-family: "Open Sans", Arial, sans-serif;
         margin: 0;
@@ -31,33 +28,25 @@
         -webkit-text-size-adjust: 100%%;
       }
       h1 {
+        display: flex;
+        flex-direction: column;
         font-family: inherit;
-        font-weight: 500;
-        line-height: 1.1;
-        color: inherit;
-        font-size: 36px;
-      }
-      h1 small {
-        font-size: 68%%;
-        font-weight: 400;
-        line-height: 1;
-        color: #777;
-      }
-      a {
-        text-decoration: none;
-        color: #fff;
-        font-size: inherit;
-        border-bottom: dotted 1px #979797;
-      }
-      .lead {
-        color: silver;
-        font-size: 21px;
+        font-weight: bold;
         line-height: 1.4;
+        letter-spacing: 0.05rem;
+        color: inherit;
+        font-size: 30px;
+        padding: 0 1rem;
       }
       .cover {
-        display: table-cell;
-        vertical-align: middle;
-        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+        align-items: center;
+        padding: 0;
+        transform: translateY(-10vh);
       }
       img {
         width: 175px;
@@ -65,37 +54,70 @@
       footer {
         position: fixed;
         width: 100%%;
+        letter-spacing: 1px;
         left: 0;
         bottom: 0;
-        color: #a0a0a0;
+        color: #b3b2b2;
         font-size: 14px;
       }
-    </style>
-    <style type="text/css">
+      .conditions {
+        color: #b3b2b2;
+      }
+      a {
+        text-decoration: none;
+        color: #fff;
+        border-bottom: 1px solid #fff;
+      }
+      a:hover {
+        text-decoration: none;
+        color: #e5e5e5;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      .btn {
+        margin-top: 1rem;
+        cursor: pointer;
+        color: white;
+        background-color: #2fac68;
+        border-radius: 6px;
+        border-width: 0;
+        font-size: 20px;
+        padding: 0.5rem 1rem;
+        max-width: 360px;
+      }
+      .btn:hover {
+        filter: brightness(0.9);
+      }
+      .form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      @media (max-width: 640px) {
+        h1 {
+          font-size: 24px;
+        }
+
+        .conditions {
+          font-size: 14px;
+        }
+
+        .btn {
+          margin-top: 1rem;
+          font-size: 16px;
+          padding: 0.5rem 0.5rem;
+          max-width: 180px;
+        }
+      }
+
+      @media (max-width: 320px) {
+        h1 {
+          font-size: 16px;
+        }
+      }
+
       .grecaptcha-badge {
         visibility: hidden;
-      }
-    </style>
-    <style type="text/css">
-      .myButton {
-        background-color: #40bb6b;
-        border-radius: 28px;
-        border: 1px solid #40bb6b;
-        display: inline-block;
-        cursor: pointer;
-        color: #fff;
-        font-family: Arial;
-        font-size: 17px;
-        padding: 16px 31px;
-        text-decoration: none;
-        text-shadow: 0 1px 0 #2f6627;
-      }
-      .myButton:hover {
-        background-color: #40bb6b;
-      }
-      .myButton:active {
-        position: relative;
-        top: 1px;
       }
     </style>
     <script src="https://www.google.com/recaptcha/api.js?render=%s"></script>
@@ -108,8 +130,9 @@
           JavaScript needs to be enabled in order to visit this website.
         </p>
       </noscript>
-      <p class="lead">
-        <button onclick="check_robot();">I'm not a robot</button><br /><br />
+      <p class="conditions">
+        <button class="btn" onclick="check_robot();">I'm not a robot</button
+        ><br /><br />
         This site is protected by reCAPTCHA and the Google
         <a href="https://policies.google.com/privacy">Privacy Policy</a> and
         <a href="https://policies.google.com/terms">Terms of Service</a> apply.

@@ -82,7 +82,7 @@
       "help": "Sitekey for hCaptcha challenge.",
       "id": "antibot-hcaptcha-sitekey",
       "label": "hCaptcha sitekey",
-      "regex": "^[a-zA-Z0-9]*$",
+      "regex": "^[a-zA-Z0-9-]*$",
       "type": "text"
     },
     "ANTIBOT_HCAPTCHA_SECRET": {

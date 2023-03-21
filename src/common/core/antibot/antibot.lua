@@ -1,5 +1,5 @@
-local _M = {}
-_M.__index = _M
+local _M        = {}
+_M.__index      = _M
 
 local utils     = require "utils"
 local datastore = require "datastore"
@@ -128,7 +128,6 @@ function _M:access()
 
 	-- Method is suspicious, let's deny the request
 	return true, "unsupported HTTP method for Antibot", true, utils.get_deny_status()
-
 end
 
 function _M:challenge_resolved(antibot)
@@ -232,7 +231,6 @@ function _M:display_challenge(antibot, challenge_uri)
 	ngx.say(html)
 
 	return true, "displayed challenge"
-
 end
 
 function _M:check_challenge(antibot)
