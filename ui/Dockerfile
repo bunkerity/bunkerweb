@@ -57,4 +57,4 @@ EXPOSE 7000
 WORKDIR /opt/bunkerweb/ui
 USER nginx:nginx
 
-CMD ["gunicorn", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "main:app"]
+CMD ["gunicorn", "--access-logfile=-", "--graceful-timeout=0", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "nginx", "--group", "nginx", "main:app"]
