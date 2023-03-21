@@ -50,11 +50,13 @@ try:
     if need_default_cert:
         makedirs("/var/cache/bunkerweb/default-server-cert", exist_ok=True)
         if not isfile("/var/cache/bunkerweb/default-server-cert/cert.pem"):
+            logger.info("Generating self-signed certificate for default server")
+
             cmd = "openssl req -nodes -x509 -newkey rsa:4096 -keyout /var/cache/bunkerweb/default-server-cert/cert.key -out /var/cache/bunkerweb/default-server-cert/cert.pem -days 3650".split(
                 " "
             )
             cmd.extend(["-subj", "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/"])
-            proc = run(cmd, stdin=DEVNULL, stderr=STDOUT)
+            proc = run(cmd, stdin=DEVNULL, stderr=DEVNULL)
             if proc.returncode != 0:
                 logger.error(
                     "Self-signed certificate generation failed for default server",

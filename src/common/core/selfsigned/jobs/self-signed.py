@@ -36,7 +36,7 @@ def generate_cert(first_server, days, subj):
 
     logger.info(f"Generating self-signed certificate for {first_server}")
     cmd = f"openssl req -nodes -x509 -newkey rsa:4096 -keyout /var/cache/bunkerweb/selfsigned/{first_server}.key -out /var/cache/bunkerweb/selfsigned/{first_server}.pem -days {days} -subj {subj}"
-    proc = run(cmd.split(" "), stdin=DEVNULL, stderr=STDOUT)
+    proc = run(cmd.split(" "), stdin=DEVNULL, stderr=DEVNULL)
     if proc.returncode != 0:
         logger.error(f"Self-signed certificate generation failed for {first_server}")
         return False, 2
