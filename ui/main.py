@@ -33,7 +33,7 @@ from docker.errors import (
     DockerException,
 )
 from uuid import uuid4
-from time import time
+from time import sleep, time
 import tarfile
 import zipfile
 
@@ -282,40 +282,46 @@ def home():
         version = f.read().strip()
 
     headers = default_headers()
-    headers.update({"User-Agent": "bunkerweb-ui"})
-
-    r = get(
-        "https://www.bunkerity.com/wp-json/wp/v2/posts",
-        headers=headers,
-    )
+    headers.update({"User-Agent": "bunkerweb-ui", "Host": "www.bunkerweb.io"})
 
     formatted_posts = None
-    if r.status_code == 200:
-        posts = r.json()
-        formatted_posts = []
+    try:
+        posts_nbr = 3
+        r = get(
+            f"https://www.bunkerweb.io/api/posts/0/{posts_nbr}",
+            headers=headers,
+        )
 
-        for post in posts[:5]:
-            formatted_posts.append(
-                {
-                    "link": post["link"],
-                    "title": post["title"]["rendered"],
-                    "description": BeautifulSoup(
-                        post["content"]["rendered"][
-                            post["content"]["rendered"].index("<em>")
-                            + 4 : post["content"]["rendered"].index("</em>")
-                        ],
-                        features="html.parser",
-                    ).get_text()[:256]
-                    + ("..." if len(post["content"]["rendered"]) > 256 else ""),
-                    "date": dateutil_parse(post["date"]).strftime("%B %d, %Y"),
-                    "image_url": post["yoast_head_json"]["og_image"][0]["url"].replace(
-                        "wwwdev", "www"
-                    ),
-                    "reading_time": post["yoast_head_json"]["twitter_misc"][
-                        "Est. reading time"
-                    ],
-                }
+        while r.status_code != 200 and posts_nbr > 0:
+            sleep(2)
+            posts_nbr -= 1
+            r = get(
+                f"https://www.bunkerweb.io/api/posts/0/{posts_nbr}",
+                headers=headers,
             )
+
+        if r.status_code == 200:
+            posts = r.json()
+            formatted_posts = []
+
+            for post in posts["data"]:
+                formatted_posts.append(
+                    {
+                        "link": f"https://www.bunkerweb.io/blog/post/{post['slug']}",
+                        "title": post["title"],
+                        "description": f"{post['content'][:256]}..."
+                        if len(post["content"]) > 256
+                        else post["content"],
+                        "date": datetime.strptime(post["date"], "%Y-%m-%d")
+                        .astimezone(timezone.utc)
+                        .strftime("%B %d, %Y"),
+                        "image_url": post["photo"]["url"].replace("\n", ""),
+                    }
+                )
+        elif r.status_code == 403:
+            flash("You are not allowed to access the bunkerweb.io API", "error")
+    except Exception as e:
+        flash(f"Error while fetching posts: {e}", "error")
 
     instances_number = len(app.config["INSTANCES"].get_instances())
     services_number = len(app.config["CONFIG"].get_services())
