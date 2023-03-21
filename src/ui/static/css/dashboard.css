@@ -997,6 +997,11 @@ h6 {
   margin-right: 1rem;
 }
 
+.my-1\.5 {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -1123,6 +1128,10 @@ h6 {
 
 .mr-4 {
   margin-right: 1rem;
+}
+
+.mb-1\.5 {
+  margin-bottom: 0.375rem;
 }
 
 .block {
@@ -1489,6 +1498,16 @@ h6 {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.translate-y-0\.5 {
+  --tw-translate-y: 0.125rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.translate-y-0 {
+  --tw-translate-y: 0px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .rotate-12 {
   --tw-rotate: 12deg;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -1525,6 +1544,16 @@ h6 {
 .scale-110 {
   --tw-scale-x: 1.1;
   --tw-scale-y: 1.1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.scale-y-110 {
+  --tw-scale-y: 1.1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.scale-y-125 {
+  --tw-scale-y: 1.25;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -1767,6 +1796,10 @@ h6 {
   border-style: solid;
 }
 
+.\!border-solid {
+  border-style: solid !important;
+}
+
 .border-dashed {
   border-style: dashed;
 }
@@ -1860,6 +1893,10 @@ h6 {
 
 .bg-slate-800\/10 {
   background-color: rgb(58 65 111 / 0.1);
+}
+
+.bg-slate-700\/50 {
+  background-color: rgb(52 71 103 / 0.5);
 }
 
 .bg-none {
@@ -2714,6 +2751,11 @@ h6 {
   background-color: rgb(8 85 119 / 0.05);
 }
 
+.hover\:bg-gray-200:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(233 236 239 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-blue-500\/80:hover {
   background-color: rgb(94 114 228 / 0.8);
 }
@@ -2822,6 +2864,10 @@ h6 {
   opacity: 0.85;
 }
 
+.disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed;
+}
+
 .disabled\:border-gray-400:disabled {
   --tw-border-opacity: 1;
   border-color: rgb(206 212 218 / var(--tw-border-opacity));
@@ -2839,6 +2885,11 @@ h6 {
 
 .disabled\:opacity-75:disabled {
   opacity: 0.75;
+}
+
+.disabled\:hover\:translate-y-0:hover:disabled {
+  --tw-translate-y: 0px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .dark .dark\:inline {
@@ -2901,6 +2952,10 @@ h6 {
   background-color: rgb(37 47 64 / var(--tw-bg-opacity));
 }
 
+.dark .dark\:bg-slate-700\/50 {
+  background-color: rgb(52 71 103 / 0.5);
+}
+
 .dark .dark\:bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
@@ -2930,6 +2985,26 @@ h6 {
 
 .dark .dark\:fill-gray-700 {
   fill: #495057;
+}
+
+.dark .dark\:stroke-slate-700 {
+  stroke: #344767;
+}
+
+.dark .dark\:stroke-gray-400 {
+  stroke: #ced4da;
+}
+
+.dark .dark\:stroke-gray-700 {
+  stroke: #495057;
+}
+
+.dark .dark\:stroke-gray-500 {
+  stroke: #adb5bd;
+}
+
+.dark .dark\:stroke-gray-600 {
+  stroke: #6c757d;
 }
 
 .dark .dark\:text-white {
@@ -3040,6 +3115,15 @@ h6 {
 
 .dark .dark\:hover\:bg-primary\/20:hover {
   background-color: rgb(8 85 119 / 0.2);
+}
+
+.dark .dark\:hover\:bg-slate-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(52 71 103 / var(--tw-bg-opacity));
+}
+
+.dark .dark\:hover\:bg-slate-700\/50:hover {
+  background-color: rgb(52 71 103 / 0.5);
 }
 
 .dark .dark\:hover\:brightness-100:hover {
@@ -3428,11 +3512,6 @@ h6 {
     right: 1.5rem;
   }
 
-  .xl\:mx-4 {
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-
   .xl\:ml-68 {
     margin-left: 17rem;
   }
@@ -3470,11 +3549,6 @@ h6 {
 
   .\32xl\:col-span-6 {
     grid-column: span 6 / span 6;
-  }
-
-  .\32xl\:my-2 {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
   }
 
   .\32xl\:mx-6 {

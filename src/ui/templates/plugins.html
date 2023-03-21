@@ -70,7 +70,7 @@ include "plugins-modal.html" %}
     <form
       id="dropzone-form"
       action="#"
-      class="cursor-pointer col-span-12 border-2 rounded-lg p-2 border-dashed border-primary dark:brightness-125 drop-zone"
+      class="hover:bg-gray-100 dark:hover:bg-slate-700/50 cursor-pointer col-span-12 border-2 rounded-lg p-2 border-dashed border-primary dark:brightness-125 drop-zone"
     >
       <input
         type="hidden"
@@ -94,21 +94,18 @@ include "plugins-modal.html" %}
     <section class="col-span-12 uploaded-area"></section>
 
     <!-- end dropzone -->
-    <div class="col-span-12 flex flex-col justify-center items-center">
-      <p
-        class="dark:text-gray-300 mx-4 my-3 font-sans font-semibold leading-normal uppercase text-sm"
-      >
-        or
-      </p>
+    <div class="col-span-12 flex flex-col justify-center items-center mt-2">
       <form
         method="post"
-        class="col-span-12 flex flex-col justify-center align-middle items-center"
+        class="col-span-12 flex flex-col justify-center align-middle items-cente"
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
         <button
+          plugin-reload-btn
+          disabled
           type="submit"
-          class="tracking-wide dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+          class="disabled:hover:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 tracking-wide dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >
           Reload
         </button>
@@ -214,12 +211,12 @@ include "plugins-modal.html" %}
 <div
   class="min-h-[55vh] max-h-80 overflow-hidden overflow-y-auto p-4 col-span-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="col-mb-2 font-bold dark:text-white">LIST</h5>
+  <h5 class="mb-4 mt-2 font-bold dark:text-white mx-2">LIST</h5>
 
   <div {{current_endpoint}}-list class="grid grid-cols-12 gap-3">
     {% for plugin in plugins %} {% if plugin['external'] %}
     <div
-      {{current_endpoint}}-external="{% if plugin['external'] %} external {%else%} internal {%endif%}"
+      {{current_endpoint}}-external="{% if plugin['external'] %} external {% else %} internal {% endif %}"
       class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
       <p

@@ -193,7 +193,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 <div
   class="w-full overflow-hidden overflow-y-auto overflow-x-auto max-h-100 sm:max-h-125 min-h-50-screen col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-2 font-bold dark:text-white">{{current_endpoint}}</h5>
+  <h5 class="mb-4 mt-2 font-bold dark:text-white mx-2">JOBS</h5>
   <!-- list container-->
   <div class="min-w-[900px] w-full grid grid-cols-12 rounded p-2">
     <!-- header-->
@@ -232,28 +232,30 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <ul class="col-span-12 w-full" {{current_endpoint}}-list>
       {% for job_name, value in jobs.items() %}
       <!-- job item-->
-      <li class="grid grid-cols-12 border-b border-gray-300 py-2.5">
+      <li
+        class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
+      >
         <p
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0"
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
           {{current_endpoint}}-name
         >
           {{job_name}}
         </p>
         <p
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0"
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
           {{current_endpoint}}-last_run
         >
           {{value['last_run']}}
         </p>
         <p
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           {{current_endpoint}}-every
         >
           {{value["every"]}}
         </p>
         {% if value["reload"] %}
         <p
-          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           {{current_endpoint}}-reload="true"
         >
           <svg
@@ -269,7 +271,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 
         {%endif %} {% if not value["reload"] %}
         <p
-          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           {{current_endpoint}}-reload="false"
         >
           <svg
@@ -284,7 +286,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% endif %} {% if value["success"] %}
         <p
-          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           {{current_endpoint}}-success="true"
         >
           <svg
@@ -299,7 +301,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% elif not value["success"] %}
         <p
-          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0"
+          class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           {{current_endpoint}}-success="false"
         >
           <svg
@@ -314,20 +316,20 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% endif %}
         <div
-          class="relative dark:text-gray-400 text-sm col-span-3 m-0"
+          class="relative dark:text-gray-400 text-sm col-span-3 m-0 my-1"
           {{current_endpoint}}-files
         >
           {% if value['cache']%}
           <button
             {{current_endpoint}}-setting-select="{{job_name}}"
             type="button"
-            class="text-sm disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left leading-6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+            class="py-1 text-sm disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left leading-6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500"
           >
             <span
               id="{{current_endpoint}}-{{job_name}}"
               name="{{current_endpoint}}-{{job_name}}"
               {{current_endpoint}}-setting-select-text="{{job_name}}"
-              >list</span
+              >files</span
             >
             <!-- chevron -->
             <svg
@@ -345,7 +347,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           <!-- dropdown-->
           <div
             {{current_endpoint}}-setting-select-dropdown="{{job_name}}"
-            class="hidden z-100 absolute h-full flex-col w-full"
+            class="hidden z-100 absolute h-full flex-col w-full translate-y-0.5"
           >
             {% for file in value['cache'] %}
             <button
