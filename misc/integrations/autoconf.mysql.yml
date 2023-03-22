@@ -25,6 +25,7 @@ services:
       - bw-docker
     environment:
       - DATABASE_URI=mysql+pymysql://bunkerweb:changeme@bw-db:3306/db
+      - AUTOCONF_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
     networks:
       - bw-universe
