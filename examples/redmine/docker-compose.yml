@@ -51,9 +51,9 @@ services:
       - redmine-data:/usr/src/redmine/files
     environment:
       - REDMINE_DB_MYSQL=mydb
-      - REDMINE_DB_DATABASE=${REDMINE_DATABASE:-redminedb}
-      - REDMINE_DB_USERNAME=${REDMINE_USER:-user}
-      - REDMINE_DB_PASSWORD=${REDMINE_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - REDMINE_DB_DATABASE=redminedb
+      - REDMINE_DB_USERNAME=user
+      - REDMINE_DB_PASSWORD=db-user-pwd # set a stronger password in a .env file (must match MYSQL_PASSWORD)
     networks:
       - bw-services
 

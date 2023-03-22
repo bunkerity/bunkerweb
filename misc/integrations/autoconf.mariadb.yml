@@ -27,7 +27,6 @@ services:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
       - AUTOCONF_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
-      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker
