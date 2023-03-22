@@ -38,6 +38,7 @@ while [ $i -lt 120 ] ; do
     i=$((i+1))
 done
 if [ $i -ge 120 ] ; then
+    docker-compose logs
     echo "❌ Docker stack is not healthy"
     exit 1
 fi

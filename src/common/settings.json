@@ -144,6 +144,15 @@
     "regex": "^\\d+$",
     "type": "text"
   },
+  "API_LISTEN_IP": {
+    "context": "global",
+    "default": "0.0.0.0",
+    "help": "Listen IP address for the API.",
+    "id": "api-ip-listen",
+    "label": "API listen IP",
+    "regex": "^.*$",
+    "type": "text"
+  },
   "API_SERVER_NAME": {
     "context": "global",
     "default": "bwapi",

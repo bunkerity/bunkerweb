@@ -118,6 +118,11 @@ class KubernetesTest(Test):
                     shell=True,
                 )
                 run(
+                    "kubectl describe deployment/bunkerweb-db",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
                     "kubectl logs deployment/bunkerweb-db",
                     cwd="/tmp/kubernetes",
                     shell=True,

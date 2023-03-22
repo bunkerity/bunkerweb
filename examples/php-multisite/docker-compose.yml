@@ -40,7 +40,7 @@ services:
     environment:
       - DOCKER_HOST=tcp://bw-docker-proxy:2375
     volumes:
-      - ./bw-data:/data
+      - bw-data:/data
     networks:
       - bw-universe
       - bw-docker
@@ -85,3 +85,6 @@ networks:
   bw-docker:
   net-app1:
   net-app2:
+
+volumes:
+  bw-data:

@@ -33,14 +33,16 @@ function start() {
     # Setup and check /data folder
     /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
-    # Init database
+    # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
-    echo -e "IS_LOADING=yes\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT:-7000}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}" > /etc/bunkerweb/variables.env
+        echo -ne "\# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n" > /etc/bunkerweb/variables.env
+    fi
+
+    # Update database
     /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env --init
     if [ "$?" -ne 0 ] ; then
         log "ENTRYPOINT" "❌" "Scheduler generator failed"
         exit 1
-        fi
     fi
 
     # Execute jobs
