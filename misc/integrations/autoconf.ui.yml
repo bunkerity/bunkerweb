@@ -26,6 +26,7 @@ services:
       - bw-data:/data
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker
@@ -39,6 +40,7 @@ services:
       - bw-data:/data
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker
@@ -63,6 +65,7 @@ services:
       - bw-data:/data
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme
       - ABSOLUTE_URI=http://www.example.com/changeme

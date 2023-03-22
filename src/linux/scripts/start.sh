@@ -39,7 +39,11 @@ function start() {
     fi
 
     # Update database
-    /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env --init
+    if [ ! -f /var/lib/bunkerweb/db.sqlite3 ]; then
+        /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env --init
+    else
+        /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env
+    fi
     if [ "$?" -ne 0 ] ; then
         log "ENTRYPOINT" "❌" "Scheduler generator failed"
         exit 1

@@ -26,6 +26,7 @@ services:
     environment:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker
@@ -38,6 +39,7 @@ services:
     environment:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker
@@ -73,6 +75,7 @@ services:
     environment:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme
       - ABSOLUTE_URI=http://www.example.com/changeme

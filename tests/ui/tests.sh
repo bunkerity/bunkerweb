@@ -6,7 +6,7 @@ cd ./tests/ui
 # Prepare environment
 sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" docker-compose.yml
 sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" docker-compose.yml
-sed -i "s@bunkerity/bunkerweb-ui:.*@scheduler-tests@" docker-compose.yml
+sed -i "s@bunkerity/bunkerweb-ui:.*@ui-tests@" docker-compose.yml
 
 # Start stack
 docker-compose pull docker-proxy app1

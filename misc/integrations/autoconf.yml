@@ -24,6 +24,7 @@ services:
       - bw-docker
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     volumes:
       - bw-data:/data
     networks:
@@ -39,6 +40,7 @@ services:
       - bw-data:/data
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker

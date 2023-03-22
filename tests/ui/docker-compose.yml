@@ -24,6 +24,7 @@ services:
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
       www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
       www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+      www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
     labels:
       - "bunkerweb.INSTANCE"
     networks:
@@ -37,38 +38,38 @@ services:
     depends_on:
       - bw
     environment:
-      DOCKER_HOST: "tcp://docker-proxy:2375"
+      DOCKER_HOST: "tcp://bw-docker-proxy:2375"
     volumes:
       - bw-data:/data
     networks:
       - bw-universe
-      - net-docker
+      - bw-docker
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.5.0-beta
     pull_policy: never
     depends_on:
       - bw
-      - docker-proxy
+      - bw-docker-proxy
     environment:
       ABSOLUTE_URI: "http://www.example.com:8080/admin/"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "admin"
-      DOCKER_HOST: "tcp://docker-proxy:2375"
+      DOCKER_HOST: "tcp://bw-docker-proxy:2375"
     volumes:
       - bw-data:/data
     networks:
-      - net-docker
+      - bw-docker
       - bw-universe
 
-  docker-proxy:
+  bw-docker-proxy:
     image: tecnativa/docker-socket-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
     networks:
-      - net-docker
+      - bw-docker
 
   app1:
     image: tutum/hello-world
@@ -78,7 +79,6 @@ services:
 
 volumes:
   bw-data:
-  mariadb:
 
 networks:
   bw-universe:
@@ -93,4 +93,4 @@ networks:
       driver: default
       config:
         - subnet: 192.168.0.0/24
-  net-docker:
+  bw-docker:

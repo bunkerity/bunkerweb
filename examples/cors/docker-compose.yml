@@ -99,3 +99,6 @@ networks:
         - subnet: 10.20.30.0/24
   bw-docker:
   bw-services:
+
+volumes:
+  bw-data:
