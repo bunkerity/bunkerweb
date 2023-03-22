@@ -23,7 +23,7 @@ from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
-logger = setup_logger("JOBS", getenv("LOG_LEVEL", "INFO"))
+logger = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
