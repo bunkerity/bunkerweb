@@ -52,6 +52,10 @@ try:
     # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
 
+    # Create empty file in case it doesn't exist
+    if not Path("/var/tmp/bunkerweb/bunkernet-ip.list").is_file():
+        Path("/var/tmp/bunkerweb/bunkernet-ip.list").write_bytes(b"")
+
     # Check if ID is present
     if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
         logger.error(
