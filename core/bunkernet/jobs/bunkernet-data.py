@@ -31,6 +31,11 @@ try :
     # Create directory if it doesn't exist
     os.makedirs("/opt/bunkerweb/cache/bunkernet", exist_ok=True)
     
+    # Create empty file in case it doesn't exist
+    if not os.path.isfile("/opt/bunkerweb/tmp/bunkernet-ip.list") :
+        with open("/opt/bunkerweb/tmp/bunkernet-ip.list", "w") as f :
+            pass
+    
     # Check if ID is present
     if not os.path.isfile("/opt/bunkerweb/cache/bunkernet/instance.id") :
         logger.log("BUNKERNET", "❌", "Not downloading BunkerNet data because instance is not registered")
