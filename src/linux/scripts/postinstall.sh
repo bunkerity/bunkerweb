@@ -16,24 +16,24 @@ function do_and_check_cmd() {
 }
 
 #Start the nginx service if it is not already running
-if ! systemctl is-active nginx; then
-    echo "Starting nginx service..."
-    do_and_check_cmd systemctl start nginx
-fi
+# if ! systemctl is-active nginx; then
+#     echo "Starting nginx service..."
+#     do_and_check_cmd systemctl start nginx
+# fi
 
-#Give all the permissions to the nginx user
+# Give all the permissions to the nginx user
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb
 
-#Start bunkerweb service as nginx user and enable it to start on boot
+# Auto start BW service on boot and start it now
 echo "Enabling and starting bunkerweb service..."
 do_and_check_cmd systemctl enable bunkerweb
 do_and_check_cmd systemctl start bunkerweb
 
-#Start and enable bunkerweb-ui service
-echo "Enabling and starting bunkerweb-ui service..."
-do_and_check_cmd systemctl enable bunkerweb-ui
-do_and_check_cmd systemctl start bunkerweb-ui
+# Start and enable bunkerweb-ui service
+# echo "Enabling and starting bunkerweb-ui service..."
+# do_and_check_cmd systemctl enable bunkerweb-ui
+# do_and_check_cmd systemctl start bunkerweb-ui
 
 # Copy old line from environment file to new one
 # Check if old environment file exists
@@ -46,9 +46,10 @@ if [ -f /var/tmp/variables.env ]; then
     # Remove old environment files
     echo "Removing old environment files..."
     do_and_check_cmd rm -f /var/tmp/variables.env
+    do_and_check_cmd chown root:nginx /etc/bunkerweb/variables.env
+    do_and_check_cmd chmod 740 /etc/bunkerweb/variables.env
 else
-    echo "Old environment file not found!"
-    exit 0
+    echo "Old environment file not found. Skipping copy..."
 fi
 
 # Copy old line from ui environment file to new one
@@ -62,9 +63,10 @@ if [ -f /var/tmp/ui.env ]; then
     # Remove old environment files
     echo "Removing old environment files..."
     do_and_check_cmd rm -f /var/tmp/ui.env
+    do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env
+    do_and_check_cmd chmod 740 /etc/bunkerweb/ui.env
 else
-    echo "Old ui environment file not found!"
-    exit 0
+    echo "Old ui environment file not found. Skipping copy..."
 fi
 
 # Check if old db.sqlite3 file exists
@@ -72,9 +74,10 @@ if [ -f /var/tmp/bunkerweb/db.sqlite3 ]; then
     echo "Old db.sqlite3 file found!"
     do_and_check_cmd cp /var/tmp/bunkerweb/db.sqlite3 /var/lib/bunkerweb/db.sqlite3
     do_and_check_cmd rm -f /var/lib/bunkerweb/db.sqlite3
+    do_and_check_cmd chown root:nginx /var/lib/bunkerweb/db.sqlite3
+    do_and_check_cmd chmod 760 /var/lib/bunkerweb/db.sqlite3
 else
-    echo "Old db.sqlite3 file not found!"
-    exit 0
+    echo "Old database file not found. Skipping copy..."
 fi
 
-echo "All services started and enabled successfully!"
+echo "Postinstall successful !"
