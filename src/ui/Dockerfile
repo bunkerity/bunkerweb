@@ -46,7 +46,7 @@ RUN apk add --no-cache bash && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
     for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
     chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/log/nginx/ui.log && \
-    chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/deps/python/bin/* && \
+    chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/src/*.py /usr/share/bunkerweb/deps/python/bin/* && \
     chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs

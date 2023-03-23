@@ -54,10 +54,10 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* && \
-  mkdir /etc/nginx && \
+  mkdir -p /etc/nginx && \
   chown -R scheduler:scheduler /etc/nginx && \
   chmod -R 770 /etc/nginx && \
-  mkdir /var/log/letsencrypt /var/lib/letsencrypt && \
+  mkdir -p /var/log/letsencrypt /var/lib/letsencrypt && \
   chown root:scheduler /var/log/letsencrypt /var/lib/letsencrypt && \
   chmod 770 /var/log/letsencrypt /var/lib/letsencrypt && \
   ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log && \
