@@ -26,7 +26,7 @@
   <!-- end title and desc -->
   <div plugin-settings class="w-full grid grid-cols-12">
     <!-- plugin settings not multiple -->
-    {% for setting, value in plugin["settings"].items() %}{% if current_endpoint
+    {% for setting, value in plugin["settings"].items() %}{% if setting != "IS_LOADING" and current_endpoint
     == "global-config" and value['context'] == "global" and not value['multiple'] or current_endpoint ==
     "services" and value['context'] == "multisite" and not value['multiple'] %}
     <div    setting-container
@@ -172,7 +172,7 @@
         <input id="{{setting}}" name="{{setting}}"
         default-method="{{global_config[setting]['method']}}"
         default-value="{{global_config[setting]['value']}}" {% if
-        global_config[setting]['method'] != 'ui' and global_config[setting]['method']
+        setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
         != 'default' %} disabled {% endif %} {% if global_config[setting]['value'] and
         global_config[setting]['value'] == 'yes' or not
         global_config[setting]['value'] and value['default'] == 'yes' %} checked {%
@@ -190,7 +190,9 @@
         value="{% if global_config[setting]['value'] %}
         {{global_config[setting]['value']}} {% else %} {{value['default']}} {% endif
         %}" />
-        <input type="hidden" name="{{setting}}" value="no" default-value="no" default-method="default" />
+        <input type="hidden" name="{{setting}}" value="{% if
+          setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
+          != 'default' %}{{global_config[setting]['value']}}{% else %}no{% endif %}" default-value="no" default-method="default" />
         <svg
           checkbox-handler="{{value['id']}}"
           class="pointer-events-none	{% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default' %} pointer-events-none {% else %} cursor-pointer {% endif %} absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
