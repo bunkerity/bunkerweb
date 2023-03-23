@@ -21,7 +21,7 @@ if [ $? -ne 0 ] ; then
 fi
 i=0
 while [ $i -lt 120 ] ; do
-    containers=("ui-bw-1" "ui-bw-scheduler-1" "ui-bw-ui-1" "ui-bw-docker-proxy-1" "ui-app1-1")
+    containers=("ui_bw_1" "ui_bw-scheduler_1" "ui_bw-ui_1" "ui_bw-docker-proxy_1" "ui_app1_1")
     healthy="true"
     for container in "${containers[@]}" ; do
         check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"

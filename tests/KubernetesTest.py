@@ -75,7 +75,7 @@ class KubernetesTest(Test):
                 raise (Exception("kubectl apply bunkerweb failed (k8s stack)"))
             healthy = False
             i = 0
-            while i < 30:
+            while i < 120:
                 proc = run(
                     "kubectl get pods | grep bunkerweb | grep -v Running",
                     shell=True,
