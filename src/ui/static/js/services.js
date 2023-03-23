@@ -296,6 +296,10 @@ class ServiceModal {
         ) {
           inpt.checked = value === "yes" ? true : false;
           inpt.setAttribute("value", value);
+          if (inpt.hasAttribute("disabled")) {
+            const hidden_inpt = inpt.closest("div[checkbox-handler]").querySelector("input[type='hidden']");
+            hidden_inpt.setAttribute("value", value);
+          }
         }
         //for select
         if (inpt.tagName === "SELECT") {
@@ -422,12 +426,14 @@ class Multiple {
               ctnr.setAttribute("setting-container", newName);
               //rename input
               try {
-                const inp = ctnr.querySelector("input");
-                const newInpName = inp
-                  .getAttribute("name")
-                  .replace("_SCHEMA", "");
-                inp.setAttribute("name", newInpName);
-                inp.setAttribute("id", newInpName);
+                const inps = ctnr.querySelectorAll("input");
+                inps.forEach((inp) => {
+                  const newInpName = inp
+                    .getAttribute("name")
+                    .replace("_SCHEMA", "");
+                  inp.setAttribute("name", newInpName);
+                  inp.setAttribute("id", newInpName);
+                });
               } catch (err) {}
               //rename select
               try {
@@ -615,20 +621,22 @@ class Multiple {
   setInpInfo(cloneSetting, key, data) {
     //replace input info
     try {
-      const inp = cloneSetting.querySelector("input");
-      this.setNameID(inp, key);
+      const inps = cloneSetting.querySelectorAll("input");
+      inps.forEach((inp) => {
+        this.setNameID(inp, key);
 
-      if (inp.getAttribute("type") === "checkbox") {
-        if (data["value"] === "yes") inp.setAttribute("checked", "");
-        if (data["value"] === "no") inp.removeAttribute("checked");
-        inp.setAttribute("default-method", data["method"]);
-      }
+        if (inp.getAttribute("type") === "checkbox") {
+          inp.checked = data["value"] === "yes" ? true : false;
+          if (inp.hasAttribute("disabled")) {
+            const hidden_inp = inp.closest("div[checkbox-handler]").querySelector("input[type='hidden']");
+            hidden_inp.setAttribute("value", data["value"]);
+          }
+        }
 
-      if (inp.getAttribute("type") !== "checkbox") {
         inp.setAttribute("value", data["value"]);
         inp.value = data["value"];
         inp.setAttribute("default-method", data["method"]);
-      }
+      });
     } catch (err) {}
     //or select
     try {
@@ -701,8 +709,10 @@ class Multiple {
       const newName = setting.getAttribute("setting-container");
       //replace input info
       try {
-        const inp = setting.querySelector("input");
-        this.setNameID(inp, newName);
+        const inps = setting.querySelectorAll("input");
+        inps.forEach((inp) => {
+          this.setNameID(inp, newName);
+        });
       } catch (err) {}
       //or select
       try {
