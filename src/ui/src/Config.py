@@ -38,6 +38,8 @@ class Config:
                 sleep(3)
                 env = self.__db.get_config()
 
+            self.__logger.info("Database is ready")
+
     def __env_to_dict(self, filename: str) -> dict:
         """Converts the content of an env file into a dict
 
@@ -112,7 +114,7 @@ class Config:
             servers.append(server_name)
 
         conf["SERVER_NAME"] = " ".join(servers)
-        env_file = "/tmp/" + str(uuid4()) + ".env"
+        env_file = f"/tmp/{uuid4()}.env"
         self.__dict_to_env(env_file, conf)
         proc = run(
             [
