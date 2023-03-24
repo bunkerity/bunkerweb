@@ -25,6 +25,11 @@ function do_and_check_cmd() {
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb
 
+# Stop and disable nginx on boot
+echo "Stop and disable nginx on boot..."
+do_and_check_cmd systemctl stop bunkerweb
+do_and_check_cmd systemctl disable bunkerweb
+
 # Auto start BW service on boot and start it now
 echo "Enabling and starting bunkerweb service..."
 do_and_check_cmd systemctl enable bunkerweb
@@ -78,6 +83,16 @@ if [ -f /var/tmp/bunkerweb/db.sqlite3 ]; then
     do_and_check_cmd chmod 760 /var/lib/bunkerweb/db.sqlite3
 else
     echo "Old database file not found. Skipping copy..."
+fi
+
+# Create /var/www/html if needed
+if [ ! -d /var/www/html ] ; then
+    echo "Creating /var/www/html directory ..."
+    do_and_check_cmd mkdir -p /var/www/html
+    do_and_check_cmd chmod 750 /var/www/html
+    do_and_check_cmd chown root:nginx /var/www/html
+else
+    echo "/var/www/html directory already exists, skipping copy..."
 fi
 
 echo "Postinstall successful !"

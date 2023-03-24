@@ -388,7 +388,7 @@ if __name__ == "__main__":
                     # Reloading the nginx server.
                     proc = subprocess_run(
                         # Reload nginx
-                        ["/etc/init.d/nginx", "reload"],
+                        ["/usr/sbin/nginx", "-s", "reload"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=deepcopy(env),
@@ -446,7 +446,7 @@ if __name__ == "__main__":
                             # Reloading the nginx server.
                             proc = subprocess_run(
                                 # Reload nginx
-                                ["/etc/init.d/nginx", "reload"],
+                                ["/usr/sbin/nginx", "-s", "reload"],
                                 stdin=DEVNULL,
                                 stderr=STDOUT,
                                 env=deepcopy(env),

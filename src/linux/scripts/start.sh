@@ -28,7 +28,6 @@ function stop_nginx() {
     while [ 1 ] ; do
         pgrep nginx
         if [ $? -ne 0 ] ; then
-            log "SYSTEMCTL" "ℹ️ " "nginx is stopped"
             break
         fi
         log "SYSTEMCTL" "ℹ️ " "Waiting for nginx to stop..."
@@ -84,6 +83,9 @@ function start() {
     # Setup and check /data folder
     /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+    # Stop scheduler if it's running
+    stop_scheduler
+
     # Stop nginx if it's running
     stop_nginx
 
@@ -96,11 +98,29 @@ function start() {
         log "ENTRYPOINT" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
         exit 1
     fi
+
+    # Start nginx
+    log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
     nginx
     if [ $? -ne 0 ] ; then
         log "ENTRYPOINT" "❌" "Error while executing nginx"
         exit 1
     fi
+    count=0
+    while [ $count -lt 10 ] ; do
+        check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
+        if [ $? -eq 0 ] && [ "$check" = "ok" ] ; then
+            break
+        fi
+        count=$(($count + 1))
+        sleep 1
+        log "ENTRYPOINT" "ℹ️" "Waiting for nginx to start ..."
+    done
+    if [ $count -ge 10 ] ; then
+        log "ENTRYPOINT" "❌" "nginx is not started"
+        exit 1
+    fi
+    log "ENTRYPOINT" "ℹ️" "nginx started ..."
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
@@ -119,7 +139,6 @@ function start() {
     fi
 
     # Execute scheduler
-    stop_scheduler
     log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
     /usr/share/bunkerweb/scheduler/main.py --variables /etc/bunkerweb/variables.env
     if [ "$?" -ne 0 ] ; then
