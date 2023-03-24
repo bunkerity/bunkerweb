@@ -39,6 +39,7 @@ class Config:
                 env = self.__db.get_config()
 
             self.__logger.info("Database is ready")
+            Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
 
     def __env_to_dict(self, filename: str) -> dict:
         """Converts the content of an env file into a dict

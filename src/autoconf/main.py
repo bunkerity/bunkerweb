@@ -4,6 +4,7 @@ from os import _exit, getenv
 from signal import SIGINT, SIGTERM, signal
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from pathlib import Path
 
 sys_path.extend(
     (
@@ -69,9 +70,14 @@ try:
         _exit(1)
 
     # Process events
+    Path("/var/tmp/bunkerweb/autoconf.healthy").write_text("ok")
     logger.info("Processing events ...")
     controller.process_events()
 
 except:
     logger.error(f"Exception while running autoconf :\n{format_exc()}")
     sys_exit(1)
+finally:
+    Path("/var/tmp/bunkerweb/autoconf.healthy").unlink(missing_ok=True)
+
+

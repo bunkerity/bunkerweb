@@ -98,6 +98,8 @@ def stop_gunicorn():
 def stop(status, stop=True):
     if Path("/var/tmp/bunkerweb/ui.pid").exists():
         Path("/var/tmp/bunkerweb/ui.pid").unlink()
+    if Path("/var/tmp/bunkerweb/ui.healthy").exists():
+        Path("/var/tmp/bunkerweb/ui.healthy").unlink()
     if stop is True:
         stop_gunicorn()
     _exit(status)

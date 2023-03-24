@@ -62,4 +62,6 @@ WORKDIR /usr/share/bunkerweb/autoconf
 
 USER root:nginx
 
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+
 CMD ["python3", "/usr/share/bunkerweb/autoconf/main.py"]

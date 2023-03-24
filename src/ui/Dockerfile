@@ -60,5 +60,7 @@ WORKDIR /usr/share/bunkerweb/ui
 
 USER ui:ui
 
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-ui.sh
+
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
 CMD ["python3", "-m", "gunicorn", "--access-logfile=-", "--graceful-timeout=0", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]
