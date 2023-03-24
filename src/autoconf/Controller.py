@@ -75,7 +75,7 @@ class Controller(ABC):
     def _get_static_services(self):
         pass
 
-    def _set_autoconf_load_db():
+    def _set_autoconf_load_db(self):
         if not self._config._db.is_autoconf_loaded():
             ret = self._config._db.set_autoconf_load(True)
             if ret:

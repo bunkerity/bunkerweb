@@ -70,6 +70,11 @@ if __name__ == "__main__":
             type=str,
             help="path to the file containing environment variables",
         )
+        parser.add_argument(
+            "--no-linux-reload",
+            action="store_true",
+            help="disable linux reload"
+        )
         args = parser.parse_args()
 
         logger.info("Generator started ...")
@@ -160,7 +165,7 @@ if __name__ == "__main__":
         )
         templator.render()
 
-        if integration == "Linux":
+        if integration == "Linux" and not args.no_linux_reload:
             retries = 0
             while not Path("/var/tmp/bunkerweb/nginx.pid").exists():
                 if retries == 5:

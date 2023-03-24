@@ -91,7 +91,7 @@ function start() {
     if [ ! -f /var/tmp/bunkerweb/tmp.env ] ; then
         echo -ne "IS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n" > /var/tmp/bunkerweb/tmp.env
     fi
-    /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env
+    /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload
     if [ $? -ne 0 ] ; then
         log "ENTRYPOINT" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
         exit 1
