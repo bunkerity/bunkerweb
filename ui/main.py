@@ -286,19 +286,10 @@ def home():
 
     formatted_posts = None
     try:
-        posts_nbr = 3
         r = get(
-            f"https://www.bunkerweb.io/api/posts/0/{posts_nbr}",
+            f"https://www.bunkerweb.io/api/posts/0/2",
             headers=headers,
         )
-
-        while r.status_code != 200 and posts_nbr > 0:
-            sleep(2)
-            posts_nbr -= 1
-            r = get(
-                f"https://www.bunkerweb.io/api/posts/0/{posts_nbr}",
-                headers=headers,
-            )
 
         if r.status_code == 200:
             posts = r.json()
