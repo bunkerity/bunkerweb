@@ -142,12 +142,6 @@ class SwarmController(Controller, ConfigCaller):
                         "Successfully deployed new configuration 🚀",
                     )
 
-                    if not self._config._db.is_autoconf_loaded():
-                        ret = self._config._db.set_autoconf_load(True)
-                        if ret:
-                            self.__logger.warning(
-                                f"Can't set autoconf loaded metadata to true in database: {ret}",
-                            )
             except:
                 self.__logger.error(
                     f"Exception while processing events :\n{format_exc()}"
@@ -155,6 +149,7 @@ class SwarmController(Controller, ConfigCaller):
             self.__internal_lock.release()
 
     def process_events(self):
+        self._set_autoconf_load_db()
         event_types = ("service", "config")
         threads = [
             Thread(target=self.__event, args=(event_type,))

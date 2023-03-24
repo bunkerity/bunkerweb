@@ -72,4 +72,6 @@ WORKDIR /usr/share/bunkerweb/scheduler
 
 USER scheduler:scheduler
 
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-scheduler.sh
+
 ENTRYPOINT ["/usr/share/bunkerweb/scheduler/entrypoint.sh"]

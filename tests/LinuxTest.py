@@ -63,7 +63,7 @@ class LinuxTest(Test):
                     LinuxTest.docker_exec(
                         distro, "systemctl stop php7.4-fpm ; systemctl start php7.4-fpm"
                     )
-            elif distro in ("centos", "fedora"):
+            elif distro in ("centos", "fedora", "rhel"):
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(
                     distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf"

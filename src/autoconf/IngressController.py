@@ -282,6 +282,7 @@ class IngressController(Controller, ConfigCaller):
         )
 
     def process_events(self):
+        self._set_autoconf_load_db()
         watch_types = ("pod", "ingress", "configmap")
         threads = [
             Thread(target=self.__watch, args=(watch_type,))

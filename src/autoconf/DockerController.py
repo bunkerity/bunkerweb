@@ -112,6 +112,7 @@ class DockerController(Controller, ConfigCaller):
         )
 
     def process_events(self):
+        self._set_autoconf_load_db()
         for _ in self.__client.events(decode=True, filters={"type": "container"}):
             try:
                 self._instances = self.get_instances()

@@ -75,6 +75,14 @@ class Controller(ABC):
     def _get_static_services(self):
         pass
 
+    def _set_autoconf_load_db():
+        if not self._config._db.is_autoconf_loaded():
+            ret = self._config._db.set_autoconf_load(True)
+            if ret:
+                self.__logger.warning(
+                    f"Can't set autoconf loaded metadata to true in database: {ret}",
+                )
+
     def get_services(self):
         services = []
         for controller_service in self._get_controller_services():

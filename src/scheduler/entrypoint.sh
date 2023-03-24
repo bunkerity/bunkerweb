@@ -48,5 +48,8 @@ while [ -f /var/tmp/bunkerweb/scheduler.pid ] ; do
     wait "$pid"
 done
 
+if [ -f /var/tmp/bunkerweb/scheduler.healthy ] ; then
+	rm /var/tmp/bunkerweb/scheduler.healthy
+fi
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
 exit 0

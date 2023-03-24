@@ -85,6 +85,7 @@ signal(SIGHUP, handle_reload)
 
 def stop(status):
     Path("/var/tmp/bunkerweb/scheduler.pid").unlink(missing_ok=True)
+    Path("/var/tmp/bunkerweb/scheduler.healthy").unlink(missing_ok=True)
     _exit(status)
 
 
@@ -414,6 +415,7 @@ if __name__ == "__main__":
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
+            Path("/var/tmp/bunkerweb/scheduler.healthy").write_text("ok")
             while run and not need_reload:
                 scheduler.run_pending()
                 sleep(1)
