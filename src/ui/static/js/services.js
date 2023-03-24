@@ -59,7 +59,6 @@ class ServiceModal {
 
           if (action === "edit" || action === "new") {
             this.setForm(action, serviceName, this.formNewEdit);
-            this.setDefaultValue();
           }
 
           if (action === "delete")
@@ -76,7 +75,7 @@ class ServiceModal {
           }
           //open modal when all done
 
-          if(action === 'new') this.addOneMultGroup()
+          if (action === "new") this.addOneMultGroup();
           this.openModal();
         }
       } catch (err) {}
@@ -84,14 +83,15 @@ class ServiceModal {
   }
 
   addOneMultGroup() {
-    const settings = document.querySelector('[services-modal-form]')
-    const multAddBtns = settings.querySelectorAll('[services-multiple-add]');
-    multAddBtns.forEach(btn => {
+    const settings = document.querySelector("[services-modal-form]");
+    const multAddBtns = settings.querySelectorAll("[services-multiple-add]");
+    multAddBtns.forEach((btn) => {
       //check if already one (SCHEMA exclude so length >= 2)
-      const plugin = btn.closest('[plugin-item]');
-      if(plugin.querySelectorAll('[services-settings-multiple]').length >= 2) return;
-      btn.click()
-    })
+      const plugin = btn.closest("[plugin-item]");
+      if (plugin.querySelectorAll("[services-settings-multiple]").length >= 2)
+        return;
+      btn.click();
+    });
   }
 
   isLastServAndAct(target) {
@@ -277,38 +277,43 @@ class ServiceModal {
       const value = data["value"];
       const method = data["method"];
       try {
-        const inpt = this.modal.querySelector(`[id='${key}']`);
-        //SET DISABLED / ENABLED
-        this.setDisabled(inpt, method);
-        //SET VALUE
-        //for regular input
-        if (
-          inpt.tagName === "INPUT" &&
-          inpt.getAttribute("type") !== "checkbox"
-        ) {
-          inpt.setAttribute("value", value);
-          inpt.value = value;
-        }
-        //for checkbox
-        if (
-          inpt.tagName === "INPUT" &&
-          inpt.getAttribute("type") === "checkbox"
-        ) {
-          inpt.checked = value === "yes" ? true : false;
-          inpt.setAttribute("value", value);
-          if (inpt.hasAttribute("disabled")) {
-            const hidden_inpt = inpt.closest("div[checkbox-handler]").querySelector("input[type='hidden']");
-            hidden_inpt.setAttribute("value", value);
+        const inps = this.modal.querySelectorAll(`[name='${key}']`);
+
+        inps.forEach((inp) => {
+          //SET DISABLED / ENABLED
+          this.setDisabled(inp, method);
+          //SET VALUE
+          //for regular input
+          if (
+            inp.tagName === "INPUT" &&
+            inp.getAttribute("type") !== "checkbox"
+          ) {
+            inp.setAttribute("value", value);
+            inp.value = value;
           }
-        }
-        //for select
-        if (inpt.tagName === "SELECT") {
-          inpt.parentElement
-            .querySelector(
-              `button[setting-select-dropdown-btn][value='${value}']`
-            )
-            .click();
-        }
+          //for checkbox
+          if (
+            inp.tagName === "INPUT" &&
+            inp.getAttribute("type") === "checkbox"
+          ) {
+            inp.checked = value === "yes" ? true : false;
+            inp.setAttribute("value", value);
+            if (inpt.hasAttribute("disabled")) {
+              const hidden_inpt = inpt
+                .closest("div[checkbox-handler]")
+                .querySelector("input[type='hidden']");
+              hidden_inpt.setAttribute("value", value);
+            }
+          }
+          //for select
+          if (inp.tagName === "SELECT") {
+            inp.parentElement
+              .querySelector(
+                `button[setting-select-dropdown-btn][value='${value}']`
+              )
+              .click();
+          }
+        });
       } catch (err) {}
     }
     //name setting value
@@ -344,6 +349,38 @@ class Multiple {
     this.init();
   }
 
+  sortMultipleByContainerAndSuffixe(obj) {
+    const sortMultiples = {};
+    for (const [name, value] of Object.entries(obj)) {
+      //split name and check if there is a suffixe
+      const splitName = name.split("_");
+      //suffixe start with number 1, if none give arbitrary 0 value to store on same group
+      const isSuffixe = !isNaN(splitName[splitName.length - 1]) ? true : false;
+      const suffixe = isSuffixe ? splitName[splitName.length - 1] : "0";
+      //remove suffix if exists and query related name_SCHEMA to get container info
+      const nameSuffixLess = isSuffixe
+        ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
+        : name.trim();
+      const relateSetting = document.querySelector(
+        `[setting-container=${nameSuffixLess}_SCHEMA]`
+      );
+      const relateCtnr = relateSetting.closest("[services-settings-multiple]");
+      const relateCtnrName = relateCtnr.getAttribute(
+        "services-settings-multiple"
+      );
+      //then we sort the setting on the right container name by suffixe number
+      if (!(relateCtnrName in sortMultiples)) {
+        sortMultiples[relateCtnrName] = {};
+      }
+
+      if (!(suffixe in sortMultiples[relateCtnrName])) {
+        sortMultiples[relateCtnrName][suffixe] = {};
+      }
+      sortMultiples[relateCtnrName][suffixe][name] = value;
+    }
+    return sortMultiples;
+  }
+
   init() {
     window.addEventListener("load", () => {
       this.hiddenIfNoMultiples();
@@ -363,14 +400,18 @@ class Multiple {
           //else
           this.lastGroup = serviceName;
           //remove all multiples
-          this.removeMultiples();
-          //set multiple service values
+          this.removePrevMultiples();
+          //get multiple service values and parse as obj
           const servicesSettings = e.target
             .closest("[services-service]")
             .querySelector("[services-settings]")
             .getAttribute("value");
           const obj = JSON.parse(servicesSettings);
-          this.updateModalMultiples(obj);
+          //keep only multiple settings value
+          const multipleSettings = this.getMultiplesOnly(obj);
+          const sortMultiples =
+            this.sortMultipleByContainerAndSuffixe(multipleSettings);
+          this.setMultipleToDOM(sortMultiples);
         }
       } catch (err) {}
     });
@@ -392,8 +433,10 @@ class Multiple {
           if (multipleEls.length <= 0) return;
 
           //get the next container number logic
+          //default is 0
           let topNum = 0;
-
+          //loop on curr multiples, get the name suffix for each
+          //and keep the highest num
           multipleEls.forEach((container) => {
             const ctnrName = container.getAttribute(
               "services-settings-multiple"
@@ -401,71 +444,20 @@ class Multiple {
             const num = this.getSuffixNumOrFalse(ctnrName);
             if (!isNaN(num) && num > topNum) topNum = num;
           });
-          //num is total - 1 or nothing if none
-          const setNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
-
+          //the final number is num
+          //num is total - 1 because of hidden SCHEMA container
+          const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
+          const setNum = +currNum === 0 ? `` : `_${currNum}`;
           //the default (schema) group is the last group
           const schema = document.querySelector(
             `[${this.prefix}-settings-multiple="${attName}_SCHEMA"]`
           );
           //clone schema to create a group with new num
-          const clone = schema.cloneNode(true);
-          const name = clone
-            .getAttribute("services-settings-multiple")
-            .replace(`SCHEMA`, `${setNum}`);
-          clone.setAttribute("services-settings-multiple", name);
-          this.showMultiple(clone);
-          try {
-            const cloneContainer = clone.querySelectorAll(
-              "[setting-container]"
-            );
-            cloneContainer.forEach((ctnr) => {
-              const newName = ctnr
-                .getAttribute("setting-container")
-                .replace("SCHEMA", `${setNum}`);
-              ctnr.setAttribute("setting-container", newName);
-              //rename input
-              try {
-                const inps = ctnr.querySelectorAll("input");
-                inps.forEach((inp) => {
-                  const newInpName = inp
-                    .getAttribute("name")
-                    .replace("_SCHEMA", "");
-                  inp.setAttribute("name", newInpName);
-                  inp.setAttribute("id", newInpName);
-                });
-              } catch (err) {}
-              //rename select
-              try {
-                const select = ctnr.querySelector("select");
-                const newInpName = select
-                  .getAttribute("name")
-                  .replace("_SCHEMA", "");
-                select.setAttribute("name", newInpName);
-                select.setAttribute("id", newInpName);
-              } catch (err) {}
-            });
-          } catch (err) {}
+          const schemaClone = schema.cloneNode(true);
+          this.changeCloneSuffix(schemaClone, setNum);
 
-          try {
-            const cloneTitles = clone.querySelectorAll("h5");
-            cloneTitles.forEach((title) => {
-              title.textContent = `${title.textContent} ${
-                multipleEls.length >= 2 ? `#${topNum + 1}` : ``
-              }`;
-            });
-          } catch (err) {}
-
-          const setNameID = ["input", "select"];
-
-          setNameID.forEach((name) => {
-            try {
-              this.setNameIDloop(clone.querySelectorAll(name), setNum);
-            } catch (err) {}
-          });
-
+          this.showClone(schema, schemaClone);
           //insert new group before first one
-          schema.insertAdjacentElement("afterend", clone);
           //show all groups
           this.showMultByAtt(attName);
         }
@@ -527,13 +519,6 @@ class Multiple {
     });
   }
 
-  updateModalMultiples(settings) {
-    //keep only multiple settings value
-    const multipleSettings = this.getMultiplesOnly(settings);
-    //put multiple on the right plugin, on schema container
-    this.setMultipleToDOM(multipleSettings);
-  }
-
   getMultiplesOnly(settings) {
     //get schema settings
     const multiples = {};
@@ -560,171 +545,138 @@ class Multiple {
   }
 
   //put multiple on the right plugin, on schema container
-  setMultipleToDOM(multiples) {
-    const schemaSettings = document.querySelectorAll(
-      `[setting-container$="SCHEMA"]`
-    );
-    schemaSettings.forEach((schema) => {
-      const schemaName = this.getSchemaName(schema);
-      //add all custom settings to DOM on schema container
-      for (const [key, data] of Object.entries(multiples)) {
-        //get num if exists or false
-        const num = this.getSuffixNumOrFalse(key);
-        //clone schema to create custom setting multiple
-        if (key.includes(schemaName)) {
-          const cloneSetting = schema.cloneNode(true);
-          cloneSetting.setAttribute("setting-container", `${key}`);
-          const title = cloneSetting.querySelector("h5");
-          title.textContent = `${title.textContent} ${num ? `#${num}` : ``}`;
-          this.setInpInfo(cloneSetting, key, data);
-          //get the num, check if a container with this num exist
-          //if not create new container and replace schema data by the one
-          //if already exist, just change schema value by new one
-          const schemaContainer = schema.closest(
-            "[services-settings-multiple]"
+  setMultipleToDOM(sortMultObj) {
+    //we loop on each multiple that contains values to render to DOM
+    for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
+      sortMultObj
+    )) {
+      //we need to access the DOM schema container
+      const schemaCtnr = document.querySelector(
+        `[services-settings-multiple="${schemaCtnrName}"]`
+      );
+      //now we have to loop on each multiple settings group
+      for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
+        //we have to clone schema container first
+        const schemaCtnrClone = schemaCtnr.cloneNode(true);
+        //now we replace _SCHEMA by current suffix everywhere we need
+        //unless it is 0 that means no suffix
+        const suffixFormat = +suffix === 0 ? `` : `_${suffix}`;
+        this.changeCloneSuffix(schemaCtnrClone, suffixFormat);
+        //then we have to loop on every settings of current group to change clone values by right ones
+        for (const [name, data] of Object.entries(settings)) {
+          //get setting container of clone container
+          const settingContainer = schemaCtnrClone.querySelector(
+            `[setting-container="${name}"]`
           );
-          const containerName = schemaContainer
-            .getAttribute("services-settings-multiple")
-            .replace("_SCHEMA", "");
-
-          //case no container, create one
-          if (
-            !document.querySelector(
-              `[services-settings-multiple="${containerName}${
-                num ? `_${num}` : ""
-              }"]`
-            )
-          ) {
-            this.createContainer(
-              schemaContainer,
-              schemaName,
-              cloneSetting,
-              containerName,
-              num
-            );
-          } else {
-            //case container, add setting only
-            this.addCustomToContainer(
-              schemaName,
-              containerName,
-              cloneSetting,
-              num
-            );
-          }
+          //replace input info
+          this.setSetting(data["value"], data["method"], settingContainer);
         }
+        //send schema clone to DOM and show it
+        this.showClone(schemaCtnr, schemaCtnrClone);
       }
-      //check enabled/disabled
-      this.setDisabled();
+    }
+
+    //disabled after update values and method
+    this.setDisabled();
+  }
+
+  changeCloneSuffix(schemaCtnrClone, suffix) {
+    //rename multiple container
+    schemaCtnrClone.setAttribute(
+      "services-settings-multiple",
+      schemaCtnrClone
+        .getAttribute("services-settings-multiple")
+        .replace("_SCHEMA", suffix)
+    );
+
+    //rename title
+    const titles = schemaCtnrClone.querySelectorAll("h5");
+    titles.forEach((title) => {
+      const text = title.textContent;
+      title.textContent = `${text} ${
+        suffix ? `#${suffix.replace("_", "")}` : ``
+      }`;
+    });
+
+    //rename setting container
+    const settingCtnrs = schemaCtnrClone.querySelectorAll(
+      "[setting-container]"
+    );
+    settingCtnrs.forEach((settingCtnr) => {
+      settingCtnr.setAttribute(
+        "setting-container",
+        settingCtnr.getAttribute("setting-container").replace("_SCHEMA", suffix)
+      );
+    });
+
+    //rename input
+    try {
+      const inps = schemaCtnrClone.querySelectorAll("input");
+      this.renameLoop(inps, suffix);
+    } catch (err) {}
+
+    //rename select
+    try {
+      const selects = schemaCtnrClone.querySelectorAll("select");
+      this.renameLoop(selects, suffix);
+    } catch (err) {}
+  }
+
+  renameLoop(inps, suffix) {
+    inps.forEach((inp) => {
+      inp.setAttribute(
+        "name",
+        inp.getAttribute("name").replace("_SCHEMA", suffix)
+      );
+      inp.setAttribute("id", inp.getAttribute("id").replace("_SCHEMA", suffix));
     });
   }
 
-  setInpInfo(cloneSetting, key, data) {
-    //replace input info
+  setSetting(value, method, settingContainer) {
+    //update input
     try {
-      const inps = cloneSetting.querySelectorAll("input");
+      const inps = settingContainer.querySelectorAll("input");
       inps.forEach((inp) => {
-        this.setNameID(inp, key);
-
         if (inp.getAttribute("type") === "checkbox") {
-          inp.checked = data["value"] === "yes" ? true : false;
+          inp.checked = value === "yes" ? true : false;
           if (inp.hasAttribute("disabled")) {
-            const hidden_inp = inp.closest("div[checkbox-handler]").querySelector("input[type='hidden']");
-            hidden_inp.setAttribute("value", data["value"]);
+            const hidden_inp = inp
+              .closest("div[checkbox-handler]")
+              .querySelector("input[type='hidden']");
+            hidden_inp.setAttribute("value", value);
           }
         }
 
-        inp.setAttribute("value", data["value"]);
-        inp.value = data["value"];
-        inp.setAttribute("default-method", data["method"]);
+        inp.value = value;
+        inp.setAttribute("default-method", method);
       });
     } catch (err) {}
-    //or select
+    //update select
     try {
-      const select = cloneSetting.querySelector("select");
-      this.setNameID(select, key);
+      const select = settingContainer.querySelector("select");
       const name = select.getAttribute("services-setting-select-default");
       const selTxt = document.querySelector(
         `[services-setting-select-text='${name}']`
       );
 
-      selTxt.textContent = data["value"];
-      selTxt.setAttribute("value", data["value"]);
+      selTxt.textContent = value;
+      selTxt.setAttribute("value", value);
       const options = select.options;
 
       for (let i = 0; i < options.length; i++) {
         const option = options[i];
-        option.value === data["value"]
+        option.value === value
           ? option.setAttribute("selected")
           : option.removeAttribute("selected");
       }
-      inp.setAttribute("default-method", data["method"]);
+      select.setAttribute("default-method", method);
     } catch (err) {}
   }
 
-  addCustomToContainer(schemaName, containerName, cloneSetting, num) {
-    const customContainer = document.querySelector(
-      `[services-settings-multiple="${containerName}${num ? `_${num}` : ""}"]`
-    );
-    const cloneSchema = customContainer.querySelector(
-      `[setting-container*=${schemaName}]`
-    );
-    cloneSchema.insertAdjacentElement("beforebegin", cloneSetting);
-    cloneSchema.remove();
-  }
-
-  createContainer(
-    schemaContainer,
-    schemaName,
-    cloneSetting,
-    containerName,
-    num
-  ) {
-    const cloneSchemaCtnr = schemaContainer.cloneNode(true);
-    cloneSchemaCtnr.setAttribute(
-      "services-settings-multiple",
-      `${containerName}${num ? `_${num}` : ""}`
-    );
-    //get the schema setting clone element and replace it by custom setting
-    const cloneSchema = cloneSchemaCtnr.querySelector(
-      `[setting-container*=${schemaName}]`
-    );
-    cloneSchema.insertAdjacentElement("beforebegin", cloneSetting);
-    cloneSchema.remove();
-    //replace schema suffix by right suffix
-    const settings = cloneSchemaCtnr.querySelectorAll("[setting-container]");
-    settings.forEach((setting) => {
-      //change title
-      const title = setting.querySelector("h5");
-      title.textContent = title.textContent.includes(`${num ? `#${num}` : ``}`)
-        ? title.textContent
-        : `${title.textContent} ${num ? `#${num}` : ``}`;
-      //change att
-      setting.setAttribute(
-        "setting-container",
-        setting
-          .getAttribute("setting-container")
-          .replace("_SCHEMA", `${num ? `_${num}` : ``}`)
-      );
-      //replace name and id att too
-      const newName = setting.getAttribute("setting-container");
-      //replace input info
-      try {
-        const inps = setting.querySelectorAll("input");
-        inps.forEach((inp) => {
-          this.setNameID(inp, newName);
-        });
-      } catch (err) {}
-      //or select
-      try {
-        const select = setting.querySelector("select");
-        this.setNameID(select, newName);
-      } catch (err) {}
-      try {
-      } catch (err) {}
-    });
-    schemaContainer.insertAdjacentElement("afterend", cloneSchemaCtnr);
-    cloneSchemaCtnr.classList.remove("hidden");
-    cloneSchemaCtnr.classList.add("grid");
+  showClone(schemaCtnr, schemaCtnrClone) {
+    schemaCtnr.insertAdjacentElement("afterend", schemaCtnrClone);
+    schemaCtnrClone.classList.remove("hidden");
+    schemaCtnrClone.classList.add("grid");
   }
 
   setDisabled() {
@@ -772,13 +724,6 @@ class Multiple {
     return num;
   }
 
-  getSchemaName(schemaCtnr) {
-    return schemaCtnr
-      .getAttribute("setting-container")
-      .replace("_SCHEMA", "")
-      .trim();
-  }
-
   hiddenIfNoMultiples() {
     //hide multiple btn if no multiple exist on a plugin
     const multiples = document.querySelectorAll(
@@ -792,7 +737,7 @@ class Multiple {
     });
   }
 
-  removeMultiples() {
+  removePrevMultiples() {
     const multiPlugins = document.querySelectorAll(
       `[${this.prefix}-settings-multiple]`
     );
