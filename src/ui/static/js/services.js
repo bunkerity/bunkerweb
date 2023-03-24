@@ -624,11 +624,9 @@ class Multiple {
 
   renameLoop(inps, suffix) {
     inps.forEach((inp) => {
-      inp.setAttribute(
-        "name",
-        inp.getAttribute("name").replace("_SCHEMA", suffix)
-      );
-      inp.setAttribute("id", inp.getAttribute("id").replace("_SCHEMA", suffix));
+      const newName = inp.getAttribute("name").replace("_SCHEMA", suffix);
+      inp.setAttribute("name", newName);
+      if (inp.hasAttribute("id")) inp.setAttribute("id", newName);
     });
   }
 
