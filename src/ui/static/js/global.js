@@ -205,13 +205,17 @@ class FlashMsg {
         }
       } catch (err) {}
     });
-    //remove message after click
+    //remove flash message and change count
     window.addEventListener("click", (e) => {
       try {
         if (e.target.closest("button").hasAttribute("close-flash-message")) {
+          //remove logic
           const closeBtn = e.target.closest("button");
           const flashEl = closeBtn.closest("[flash-message]");
           flashEl.remove();
+          //update count
+          this.flashCount.textContent =
+            document.querySelectorAll("[flash-message]").length;
         }
       } catch (err) {}
     });
