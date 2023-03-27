@@ -58,7 +58,7 @@ class AutoconfTest(Test):
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             with open(compose, "r") as f :
                 data = safe_load(f.read())
-            data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:var/www/html"]
+            data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:/var/www/html"]
             with open(compose, "w") as f :
                 f.write(dump(data))
             proc = run(
