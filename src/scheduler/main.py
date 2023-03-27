@@ -382,22 +382,45 @@ if __name__ == "__main__":
                     else:
                         logger.info("Successfuly sent /data/cache folder")
 
-                # reload nginx
-                logger.info("Reloading nginx ...")
+                # restart nginx
+                logger.info("Stopping temp nginx ...")
                 if integration == "Linux":
-                    # Reloading the nginx server.
+                    # Stop temp nginx
                     proc = subprocess_run(
-                        # Reload nginx
-                        ["/usr/sbin/nginx", "-s", "reload"],
+                        ["/usr/sbin/nginx", "-s", "stop"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=deepcopy(env),
                     )
                     if proc.returncode == 0:
-                        logger.info("Successfuly reloaded nginx")
+                        logger.info("Successfuly sent stop signal to temp nginx")
+                        i = 0
+                        while i < 20 :
+                            if not Path("/var/tmp/bunkerweb/nginx.pid").is_file() :
+                                break
+                            logger.warning("Waiting for temp nginx to stop ...")
+                            sleep(1)
+                            i += 1
+                        if i >= 20 :
+                            logger.error("Timeout error while waiting for temp nginx to stop")
+                        else :
+                            # Start nginx
+                            logger.info("Starting nginx ...")
+                            proc = subprocess_run(
+                                ["/usr/sbin/nginx"],
+                                stdin=DEVNULL,
+                                stderr=STDOUT,
+                                env=deepcopy(env),
+                            )
+                            if proc.returncode == 0:
+                                logger.info("Successfuly started nginx")
+                            else :
+                                logger.error(
+                                    f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                                )
                     else:
                         logger.error(
-                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                            f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
                         )
                 else:
                     if api_caller._send_to_apis("POST", "/reload"):
