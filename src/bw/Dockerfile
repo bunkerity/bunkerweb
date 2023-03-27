@@ -74,7 +74,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-RUN apk add "openssl>=1.1.1q-r0" "curl>=7.83.1-r6" "libcurl>=7.83.1-r6" "git>=2.36.5-r0" "libcrypto1.1>=1.1.1t-r1" "libssl1.1>=1.1.1t-r1"
+# No need to update anything for now, there are no CVE concerning the already installed packages inside this image
 
 VOLUME /data /etc/nginx
 
