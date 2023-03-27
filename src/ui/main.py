@@ -450,12 +450,9 @@ def services():
             # Edit check fields and remove already existing ones
             config = app.config["CONFIG"].get_config(methods=True)
             for variable, value in deepcopy(variables).items():
-                variable_splitted = variable.split("_")
-                if "SCHEMA" in variable_splitted:
+                if variable.endswith("SCHEMA"):
                     del variables[variable]
-                    variable_splitted.pop(variable_splitted.index("SCHEMA"))
-                    variable = "_".join(variable_splitted)
-                    variables[variable] = value
+                    continue
 
                 if value == "on":
                     value = "yes"
@@ -470,7 +467,6 @@ def services():
                     request.form["operation"] == "edit"
                     and variable != "SERVER_NAME"
                     and config_setting is not None
-                    and config_setting["method"] == "default"
                     and value == config_setting["value"]
                     or not value.strip()
                 ):
