@@ -6,7 +6,7 @@ from traceback import format_exc
 from subprocess import run
 from time import sleep
 from logger import log
-
+from yaml import safe_load, dump
 
 class AutoconfTest(Test):
     def __init__(self, name, timeout, tests, no_copy_container=False, delay=0):
@@ -56,6 +56,11 @@ class AutoconfTest(Test):
                 "local/scheduler-tests:latest",
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
+            with open(compose, "r") as f :
+                data = safe_load(f.read())
+            data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:var/www/html"]
+            with open(compose, "w") as f :
+                f.write(dump(data))
             proc = run(
                 "docker-compose pull --ignore-pull-failures",
                 cwd="/tmp/autoconf",
@@ -117,6 +122,7 @@ class AutoconfTest(Test):
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/autoconf.yml"
             example_data = "/tmp/tests/" + self._name + "/bw-data"
+            example_www = "/tmp/tests/" + self._name + "/www"
             Test.replace_in_file(
                 compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest"
             )
@@ -148,6 +154,13 @@ class AutoconfTest(Test):
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
+            if isdir(example_www) :
+                proc = run(
+                    "sudo bash -c 'cp -rp " + example_www + "/* /tmp/www'",
+                    shell=True,
+                )
+                if proc.returncode != 0:
+                    raise (Exception("cp bw-data failed"))
             proc = run(
                 "docker-compose -f autoconf.yml pull --ignore-pull-failures",
                 shell=True,
@@ -174,6 +187,12 @@ class AutoconfTest(Test):
             proc = run("docker-compose -f autoconf.yml down -v", shell=True, cwd=test)
             if proc.returncode != 0:
                 raise (Exception("docker-compose down failed"))
+            proc = run(
+                "sudo bash -c 'rm -rf /tmp/www/*'",
+                shell=True,
+            )
+            if proc.returncode != 0:
+                raise (Exception("cp bw-data failed"))
             super()._cleanup_test()
         except:
             log(
