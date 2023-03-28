@@ -59,6 +59,9 @@ class AutoconfTest(Test):
             with open(compose, "r") as f :
                 data = safe_load(f.read())
             data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:/var/www/html"]
+            if not "AUTO_LETS_ENCRYPT=yes" in data["services"]["bunkerweb"]["environment"] :
+                data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
+            data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
             with open(compose, "w") as f :
                 f.write(dump(data))
             proc = run(
@@ -138,6 +141,7 @@ class AutoconfTest(Test):
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
+            Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)

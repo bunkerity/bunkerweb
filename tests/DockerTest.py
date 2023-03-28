@@ -57,6 +57,7 @@ class DockerTest(Test):
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
+            Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
             Test.replace_in_file(
                 compose,
                 r"AUTO_LETS_ENCRYPT=yes",
