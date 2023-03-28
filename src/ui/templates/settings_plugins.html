@@ -176,9 +176,7 @@
         != 'default' %} disabled {% endif %} {% if global_config[setting]['value'] and
         global_config[setting]['value'] == 'yes' or not
         global_config[setting]['value'] and value['default'] == 'yes' %} checked {%
-        endif %} id="checkbox-{{value['id']}}" class="{% if
-        global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-        != 'default' %} pointer-events-none {% else %} cursor-pointer {% endif %}
+        endif %} id="checkbox-{{value['id']}}" class="cursor-pointer disabled:cursor-default disabled:pointer-events-none
         relative dark:border-slate-600 dark:bg-slate-700 z-10 checked:z-0 w-5 h-5 ease
         text-base rounded-1.4 checked:bg-primary checked:border-primary
         dark:checked:bg-primary dark:checked:border-primary duration-250 float-left
@@ -197,7 +195,7 @@
             != 'default' %}{{global_config[setting]['value']}}{% else %}no{% endif %}" default-method="default" />
         <svg
           checkbox-handler="{{value['id']}}"
-          class="pointer-events-none	{% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default' %} pointer-events-none {% else %} cursor-pointer {% endif %} absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+          class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
         >
@@ -387,7 +385,7 @@
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         default-method="default"
         default-value="{{value['default']}}" {% if value['default'] == 'yes' %} checked {%
-        endif %} id="checkbox-{{value['id']}}" class="relative cursor-pointer
+        endif %} id="checkbox-{{value['id']}}" class="relative cursor-pointer disabled:cursor-default disabled:pointer-events-none
         dark:border-slate-600 dark:bg-slate-700 z-10 checked:z-0 w-5 h-5 ease
         text-base rounded-1.4 checked:bg-primary checked:border-primary
         dark:checked:bg-primary dark:checked:border-primary duration-250 float-left
@@ -400,7 +398,7 @@
         <input type="hidden" name="{{setting}}_SCHEMA" value="no" default-value="no" default-method="default" />
         <svg
           checkbox-handler="{{value['id']}}"
-          class="pointer-events-none cursor-pointer absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+          class="pointer-events-none absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
         >

@@ -21,27 +21,30 @@ class Menu {
 
 class News {
   constructor() {
-    this.BASE_URL = "https://www.staging.bunkerweb.io/";
+    this.BASE_URL = "https://www.bunkerweb.io/";
     this.init();
   }
 
   init() {
-    window.addEventListener("load", async () => {
-      try {
-        const res = await fetch(
-          "https://www.staging.bunkerweb.io/api/posts/0/2",
-          {
-            headers: {
-              method: "GET",
-            },
-          }
-        );
-        return await this.render(res);
-      } catch (err) {}
+    window.addEventListener("load", () => {
+      const res = fetch("https://www.bunkerweb.io/api/posts/0/1", {
+        headers: {
+          method: "GET",
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => {
+          console.log("data");
+          const data = res.data;
+          console.log(data);
+          this.render(res);
+        })
+        .catch((err) => console.log(err));
     });
   }
 
-  async render(lastNews) {
+  render(lastNews) {
     const newsContainer = document.querySelector("[news-container]");
     //remove default message
     newsContainer.textContent = "";
