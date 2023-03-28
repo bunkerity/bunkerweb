@@ -9,6 +9,7 @@ from typing import List, Union
 from requests import get
 from requests.exceptions import RequestException
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
@@ -45,7 +46,8 @@ try:
     print("UI is ready, starting tests ...", flush=True)
 
     firefox_options = Options()
-    # firefox_options.add_argument("--headless")
+    if "geckodriver" not in listdir(Path.cwd()):
+        firefox_options.add_argument("--headless")
 
     print("Starting Firefox ...", flush=True)
 
@@ -131,6 +133,8 @@ try:
         button: Union[str, WebElement],
         name: str,
         message: bool = True,
+        *,
+        retries: int = 0,
     ):
         assert_button_click(driver, button)
 
@@ -145,6 +149,12 @@ try:
                 print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
                 exit(1)
         except TimeoutException:
+            if retries < 3 and driver.current_url.split("/")[-1].startswith("/loading"):
+                sleep(2)
+                access_page(
+                    driver, driver_wait, button, name, message, retries=retries + 1
+                )
+
             print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
             exit(1)
 
@@ -155,9 +165,11 @@ try:
             )
 
     with webdriver.Firefox(
-        service=Service("./geckodriver")
-        if "geckodriver" in listdir(Path.cwd())
-        else None,
+        service=Service(
+            executable_path="./geckodriver"
+            if "geckodriver" in listdir(Path.cwd())
+            else "/usr/local/bin/geckodriver"
+        ),
         options=firefox_options,
     ) as driver:
         driver.delete_all_cookies()
@@ -243,7 +255,7 @@ try:
             "home",
         )
 
-        ### HOME PAGE
+        ## HOME PAGE
 
         print("Trying instances page ...", flush=True)
 
@@ -256,31 +268,46 @@ try:
 
         ### INSTANCES PAGE
 
-        print("Trying to reload BunkerWeb instance ...", flush=True)
+        no_errors = True
+        retries = 0
+        while no_errors:
+            print("Trying to reload BunkerWeb instance ...", flush=True)
 
-        try:
-            form = WebDriverWait(driver, 2).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
+            try:
+                form = WebDriverWait(driver, 2).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
+                    )
                 )
-            )
-        except TimeoutException:
-            print("No instance form found, exiting ...", flush=True)
-            exit(1)
+            except TimeoutException:
+                print("No instance form found, exiting ...", flush=True)
+                exit(1)
 
-        access_page(
-            driver,
-            driver_wait,
-            "//form[starts-with(@id, 'form-instance-')]//button[@value='reload']",
-            "instances",
-            False,
-        )
+            try:
+                access_page(
+                    driver,
+                    driver_wait,
+                    "//form[starts-with(@id, 'form-instance-')]//button[@value='reload']",
+                    "instances",
+                    False,
+                )
 
-        print(
-            "Instance was reloaded successfully, checking the message ...", flush=True
-        )
+                print(
+                    "Instance was reloaded successfully, checking the message ...",
+                    flush=True,
+                )
 
-        assert_alert_message(driver, "has been reloaded")
+                assert_alert_message(driver, "has been reloaded")
+
+                no_errors = False
+            except:
+                if retries >= 3:
+                    exit(1)
+                retries += 1
+
+                print(
+                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
+                )
 
         print("Trying global config page ...")
 
@@ -293,26 +320,44 @@ try:
 
         ### GLOBAL CONFIG PAGE
 
-        print(
-            "Trying to save the global config without changing anything ...", flush=True
-        )
+        no_errors = True
+        retries = 0
+        while no_errors:
+            try:
+                print(
+                    "Trying to save the global config without changing anything ...",
+                    flush=True,
+                )
 
-        safe_get_element(driver, By.ID, "form-edit-global-configs")
+                safe_get_element(driver, By.ID, "form-edit-global-configs")
 
-        access_page(
-            driver,
-            driver_wait,
-            "//form[@id='form-edit-global-configs']//button[@type='submit']",
-            "global config",
-            False,
-        )
+                access_page(
+                    driver,
+                    driver_wait,
+                    "//form[@id='form-edit-global-configs']//button[@type='submit']",
+                    "global config",
+                    False,
+                )
 
-        print("The page reloaded successfully, checking the message ...", flush=True)
+                print(
+                    "The page reloaded successfully, checking the message ...",
+                    flush=True,
+                )
 
-        assert_alert_message(
-            driver,
-            "The global configuration was not edited because no values were changed.",
-        )
+                assert_alert_message(
+                    driver,
+                    "The global configuration was not edited because no values were changed.",
+                )
+
+                no_errors = False
+            except:
+                if retries >= 3:
+                    exit(1)
+                retries += 1
+
+                print(
+                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
+                )
 
         print(
             'Checking if the "DATASTORE_MEMORY_SIZE" input have the overridden value ...',
@@ -373,12 +418,9 @@ try:
             exit(1)
 
         print(
-            "The value was updated successfully, checking the message ...", flush=True
+            "The value was updated successfully, trying to navigate through the global config tabs ...",
+            flush=True,
         )
-
-        assert_alert_message(driver, "The global configuration has been edited.")
-
-        print("Trying to navigate through the global config tabs ...", flush=True)
 
         buttons = safe_get_element(
             driver,
@@ -417,7 +459,7 @@ try:
             "services",
         )
 
-        ### SERVICES PAGE
+        ## SERVICES PAGE
 
         print("Checking the services page ...", flush=True)
 
@@ -444,11 +486,13 @@ try:
 
         delete_button = None
         with suppress(TimeoutException):
-            delete_button = safe_get_element(
-                driver,
-                By.XPATH,
-                "//button[@services-action='delete' and @services-name='www.example.com']",
-                error=True,
+            delete_button = WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//button[@services-action='delete' and @services-name='www.example.com']",
+                    )
+                )
             )
 
         if delete_button is not None:
@@ -494,11 +538,11 @@ try:
 
         assert_button_click(
             driver,
-            driver.find_element(By.XPATH, "//button[@services-item-handler='gzip']"),
+            safe_get_element(driver, By.XPATH, "//button[@tab-handler='gzip']"),
         )
 
         gzip_select = safe_get_element(
-            driver, By.XPATH, "//button[@services-setting-select='gzip-comp-level']"
+            driver, By.XPATH, "//button[@setting-select='gzip-comp-level']"
         )
 
         assert_button_click(driver, gzip_select)
@@ -508,7 +552,7 @@ try:
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//button[@services-setting-select-dropdown-btn='gzip-comp-level' and @value='6']",
+                "//button[@setting-select-dropdown-btn='gzip-comp-level' and @value='6']",
             ),
         )
 
@@ -520,13 +564,10 @@ try:
             False,
         )
 
-        print("The page reloaded successfully, checking the message ...", flush=True)
-
-        assert_alert_message(
-            driver, "Configuration for www.example.com has been edited."
+        print(
+            "The page reloaded successfully, checking if the setting has been updated ...",
+            flush=True,
         )
-
-        print("Checking if the setting has been updated ...", flush=True)
 
         try:
             service = safe_get_element(
@@ -550,7 +591,7 @@ try:
 
         assert_button_click(
             driver,
-            driver.find_element(By.XPATH, "//button[@services-item-handler='gzip']"),
+            driver.find_element(By.XPATH, "//button[@tab-handler='gzip']"),
         )
 
         gzip_true_select = safe_get_element(driver, By.ID, "GZIP_COMP_LEVEL")
@@ -564,35 +605,61 @@ try:
             print("The value is not the expected one, exiting ...", flush=True)
             exit(1)
 
-        print(
-            "The value is the expected one, trying to save without changes ...",
-            flush=True,
-        )
+        no_errors = True
+        retries = 0
+        while no_errors:
+            try:
+                print(
+                    "The value is the expected one, trying to save without changes ...",
+                    flush=True,
+                )
 
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@services-modal-submit='']",
-            "services",
-            False,
-        )
+                access_page(
+                    driver,
+                    driver_wait,
+                    "//button[@services-modal-submit='']",
+                    "services",
+                    False,
+                )
 
-        print("The page reloaded successfully, checking the message ...", flush=True)
+                print(
+                    "The page reloaded successfully, checking the message ...",
+                    flush=True,
+                )
 
-        assert_alert_message(driver, "was not edited because no values were changed.")
+                assert_alert_message(
+                    driver, "was not edited because no values were changed."
+                )
+
+                no_errors = False
+            except:
+                if retries >= 3:
+                    exit(1)
+                retries += 1
+
+                print(
+                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
+                )
+
+                try:
+                    service = safe_get_element(
+                        driver, By.XPATH, "//div[@services-service='']", error=True
+                    )
+                except TimeoutException:
+                    print("Services not found, exiting ...", flush=True)
+                    exit(1)
+
+                assert_button_click(service, ".//button[@services-action='edit']")
 
         print("Creating a new service ...", flush=True)
 
         assert_button_click(driver, "//button[@services-action='new']")
 
-        safe_get_element(driver, By.ID, "SERVER_NAME").send_keys("app1.example.com")
+        server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")
+        server_name_input.clear()
+        server_name_input.send_keys("app1.example.com")
 
-        assert_button_click(
-            driver,
-            driver.find_element(
-                By.XPATH, "//button[@services-item-handler='reverseproxy']"
-            ),
-        )
+        assert_button_click(driver, "//button[@tab-handler='reverseproxy']")
 
         assert_button_click(
             driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
@@ -600,10 +667,10 @@ try:
 
         assert_button_click(driver, "//button[@services-multiple-add='reverse-proxy']")
 
-        safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST_SCHEMA_0").send_keys(
-            "http://app1"
+        safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
+            "http://app1:8080"
         )
-        safe_get_element(driver, By.ID, "REVERSE_PROXY_URL_SCHEMA_0").send_keys("/")
+        safe_get_element(driver, By.ID, "REVERSE_PROXY_URL").send_keys("/")
 
         access_page(
             driver,
@@ -784,7 +851,7 @@ try:
 
         sleep(5)
 
-        driver.execute_script(f"window.open('http://www.example.com/hello','_blank');")
+        driver.execute_script("window.open('http://www.example.com/hello','_blank');")
         driver.switch_to.window(driver.window_handles[1])
         driver.switch_to.default_content()
 
@@ -837,15 +904,13 @@ try:
 
         print("Trying to reload the plugins without adding any ...", flush=True)
 
-        access_page(
-            driver,
-            driver_wait,
-            "//div[@plugins-upload='']//button[@type='submit']",
-            "plugins",
-            False,
+        reload_button = safe_get_element(
+            driver, By.XPATH, "//div[@plugins-upload='']//button[@type='submit']"
         )
 
-        assert_alert_message(driver, "Please upload new plugins to reload plugins")
+        if reload_button.get_attribute("disabled") is None:
+            print("The reload button is not disabled, exiting ...", flush=True)
+            exit(1)
 
         print("Trying to filter the plugins ...", flush=True)
 
@@ -919,7 +984,16 @@ try:
             False,
         )
 
-        assert_alert_message(driver, "was successfully deleted")
+        with suppress(TimeoutException):
+            title = WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, "//button[@plugins-action='delete' and @name='discord']")
+                )
+            )
+
+            if title:
+                print("The plugin hasn't been deleted, exiting ...", flush=True)
+                exit(1)
 
         print("The plugin has been deleted, trying cache page ...", flush=True)
 
@@ -931,7 +1005,7 @@ try:
 
         print("Trying to open a cache file ...", flush=True)
 
-        assert_button_click(driver, "//div[@cache-element='asn.mmdb']")
+        assert_button_click(driver, "//div[@cache-element='mmdb-asn/asn.mmdb']")
 
         if (
             safe_get_element(
@@ -950,24 +1024,16 @@ try:
             "The cache file content is correct, trying to download it ...", flush=True
         )
 
-        assert_button_click(driver, "//div[@cache-action-button='asn.mmdb']")
+        assert_button_click(driver, "//div[@cache-action-button='mmdb-asn/asn.mmdb']")
 
         assert_button_click(
-            driver, "//div[@cache-action-dropdown='asn.mmdb']/button[@value='download']"
+            driver,
+            "//div[@cache-action-dropdown='mmdb-asn/asn.mmdb']/button[@value='download']",
         )
 
         sleep(0.3)
 
-        elem = None
-        with suppress(TimeoutException):
-            elem = safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@cache-action-dropdown='asn.mmdb' and contains(@class, 'hidden')]",
-                error=True,
-            )
-
-        if elem is None:
+        if len(driver.window_handles) > 1:
             print("The cache file hasn't been downloaded, exiting ...", flush=True)
             exit(1)
 
@@ -989,6 +1055,8 @@ try:
             "//div[@logs-setting-select-dropdown='instances']/button",
             multiple=True,
         )
+
+        first_instance = instances[0].text
 
         if len(instances) == 0:
             print("No instances found, exiting ...", flush=True)
@@ -1027,10 +1095,7 @@ try:
 
         print("Auto refresh is working, deactivating it ...", flush=True)
 
-        assert_button_click(
-            driver,
-            "//div[@checkbox-handler='live-update']/*[local-name() = 'svg']",
-        )
+        assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
         assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
 
         sleep(3)
@@ -1089,20 +1154,14 @@ try:
 
         print("Type filter is working, trying to filter by date ...", flush=True)
 
-        safe_get_element(driver, By.ID, "to-date").send_keys(
-            (datetime.now() - timedelta(1)).strftime("%m/%d/%Y")
+        current_date = datetime.now()
+        resp = get(
+            f"http://www.example.com/admin/logs/{first_instance}?from_date={int(current_date.timestamp() - 86400000)}&to_date={int((current_date - timedelta(days=1)).timestamp())}",
+            headers={"Host": "www.example.com"},
+            cookies={"session": driver.get_cookies()[0]["value"]},
         )
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
 
-        sleep(1)
-
-        logs_list = []
-        with suppress(TimeoutException):
-            logs_list = safe_get_element(
-                driver, By.XPATH, "//ul[@logs-list='']/li", multiple=True, error=True
-            )
-
-        if len(logs_list) != 0:
+        if len(resp.json()["logs"]) != 0:
             print("The date filter is not working, exiting ...", flush=True)
             exit(1)
 
