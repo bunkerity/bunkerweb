@@ -47,7 +47,7 @@ class SwarmTest(Test):
                 r"bunkerity/bunkerweb-scheduler:.*$",
                 "192.168.42.100:5000/scheduler-tests:latest",
             )
-            Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
+            #Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run(
                 "docker stack deploy -c stack.yml bunkerweb",
                 cwd="/tmp/swarm",

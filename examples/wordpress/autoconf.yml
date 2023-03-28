@@ -47,7 +47,7 @@ services:
       - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
 
 volumes:
-  bw-data:
+  wp-data:
   db-data:
 
 networks:

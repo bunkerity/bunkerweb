@@ -147,7 +147,7 @@ class LinuxTest(Test):
         try:
             proc = self.docker_exec(
                 self.__distro,
-                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/*",
+                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/* ; rm -rf /var/www/html/*",
             )
             if proc.returncode != 0:
                 raise Exception("docker exec rm failed (cleanup)")
