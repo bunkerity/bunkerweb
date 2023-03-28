@@ -84,7 +84,8 @@ class ServiceModal {
       //delete action
       try {
         if (
-          e.target.closest("button").getAttribute("services-action") === "new"
+          e.target.closest("button").getAttribute("services-action") ===
+          "delete"
         ) {
           //set form info and right form
           const [action, serviceName] = this.getActionAndServName(e.target);
