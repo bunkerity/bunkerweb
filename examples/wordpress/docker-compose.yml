@@ -51,9 +51,9 @@ services:
       - wp-data:/var/www/html
     environment:
       - WORDPRESS_DB_HOST=mydb
-      - WORDPRESS_DB_NAME=${WORDPRESS_DATABASE:-wp}
-      - WORDPRESS_DB_USER=${WORDPRESS_USER:-user}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - WORDPRESS_DB_NAME=wp
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=db-user-pwd # set a stronger password in a .env file (must match MYSQL_PASSWORD)
       - WORDPRESS_TABLE_PREFIX=prefix_ # best practice : replace with a random prefix
     networks:
       - bw-services

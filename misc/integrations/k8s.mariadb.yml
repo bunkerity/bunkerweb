@@ -77,6 +77,10 @@ spec:
               value: ""
             - name: MULTISITE
               value: "yes"
+            - name: USE_REDIS
+              value: "yes"
+            - name: REDIS_HOST
+              value: "svc-bunkerweb-redis"
           livenessProbe:
             exec:
               command:
@@ -142,8 +146,8 @@ spec:
         app: bunkerweb-scheduler
     spec:
       containers:
-        - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.4.6
+        - name: bunkerweb-scheduler
+          image: bunkerity/bunkerweb-scheduler:1.4.6
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
