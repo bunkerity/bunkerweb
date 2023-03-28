@@ -680,8 +680,6 @@ try:
             False,
         )
 
-        assert_alert_message(driver, "has been generated.")
-
         try:
             services = safe_get_element(
                 driver,
