@@ -859,10 +859,6 @@ h6 {
   z-index: -10;
 }
 
-.z-0 {
-  z-index: 0;
-}
-
 .z-10 {
   z-index: 10;
 }
@@ -2242,11 +2238,6 @@ h6 {
   line-height: 1.75rem;
 }
 
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
-}
-
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
@@ -2836,8 +2827,20 @@ h6 {
   opacity: 0.85;
 }
 
+.disabled\:pointer-events-none:disabled {
+  pointer-events: none;
+}
+
 .disabled\:cursor-not-allowed:disabled {
   cursor: not-allowed;
+}
+
+.disabled\:cursor-none:disabled {
+  cursor: none;
+}
+
+.disabled\:cursor-default:disabled {
+  cursor: default;
 }
 
 .disabled\:border-gray-400:disabled {
