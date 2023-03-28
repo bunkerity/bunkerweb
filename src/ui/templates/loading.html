@@ -22,9 +22,14 @@
           alt="main logo"
         />
         {%if message %}
-        <h1 class="text-center absolute mt-6 font-bold text-white text-2xl">
-          {%endif%}
-        </h1>
+        <div class="w-full flex justify-center">
+          <h1
+            class="text-center absolute mt-6 font-bold text-white text-2xl tracking-wide"
+          >
+            {{ message }}
+          </h1>
+        </div>
+        {%endif%}
       </div>
     </div>
   </body>

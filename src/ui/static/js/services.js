@@ -74,6 +74,9 @@ class ServiceModal {
           this.setForm(action, serviceName, this.formNewEdit);
           //set default value with method default
           this.setSettingsDefault();
+          //server name is unset
+          const inpServName = document.querySelector("input#SERVER_NAME");
+          inpServName.value = "";
           //show modal
           this.openModal();
         }
@@ -96,6 +99,17 @@ class ServiceModal {
   setSettingsDefault() {
     const inps = this.modal.querySelectorAll("input");
     inps.forEach((inp) => {
+      //form related values are excludes
+      const inpName = inp.getAttribute("name");
+      if (
+        inpName === "csrf_token" ||
+        inpName === "SERVER_NAME" ||
+        inpName === "OLD_SERVER_NAME" ||
+        inpName === "operation"
+      )
+        return;
+
+      //for all other settings values
       const defaultMethod = "default";
       const defaultVal = inp.getAttribute("default-value") || "";
 
@@ -226,6 +240,16 @@ class ServiceModal {
         const inps = this.modal.querySelectorAll(`[name='${key}']`);
 
         inps.forEach((inp) => {
+          //form related values are excludes
+          const inpName = inp.getAttribute("name");
+          if (
+            inpName === "csrf_token" ||
+            inpName === "SERVER_NAME" ||
+            inpName === "OLD_SERVER_NAME" ||
+            inpName === "operation"
+          )
+            return;
+
           //SET DISABLED / ENABLED
           //for regular input
           if (
@@ -282,6 +306,9 @@ class ServiceModal {
   }
 
   openModal() {
+    //switch to first setting
+    document.querySelector("button[tab-handler]").click();
+    //show modal el
     this.modal.classList.add("flex");
     this.modal.classList.remove("hidden");
   }
@@ -595,6 +622,17 @@ class Multiple {
     try {
       const inps = settingContainer.querySelectorAll("input");
       inps.forEach((inp) => {
+        //form related values are excludes
+        const inpName = inp.getAttribute("name");
+        if (
+          inpName === "csrf_token" ||
+          inpName === "SERVER_NAME" ||
+          inpName === "OLD_SERVER_NAME" ||
+          inpName === "operation"
+        )
+          return;
+
+        //for settings input
         if (inp.getAttribute("type") === "checkbox") {
           inp.checked = value === "yes" ? true : false;
           if (inp.hasAttribute("disabled")) {
