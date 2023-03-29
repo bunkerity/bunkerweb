@@ -38,7 +38,7 @@ class SwarmTest(Test):
                 data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
             data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
             with open(compose, "w") as f :
-                f.write(data)
+                f.write(dump(data))
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",
