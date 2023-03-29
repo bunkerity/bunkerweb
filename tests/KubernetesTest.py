@@ -6,7 +6,7 @@ from traceback import format_exc
 from subprocess import run
 from time import sleep
 from logger import log
-
+from yaml import safe_load_all, dump
 
 class KubernetesTest(Test):
     def __init__(self, name, timeout, tests, delay=0):
@@ -45,6 +45,14 @@ class KubernetesTest(Test):
             mkdir("/tmp/kubernetes")
             copy("./misc/integrations/k8s.mariadb.yml", "/tmp/kubernetes/bunkerweb.yml")
             deploy = "/tmp/kubernetes/bunkerweb.yml"
+            # with open(deploy, "r") as f :
+            #     data = safe_load_all(f.read())
+            # for 
+            # if not "AUTO_LETS_ENCRYPT=yes" in data["services"]["bunkerweb"]["environment"] :
+            #     data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
+            # data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
+            # with open(compose, "w") as f :
+            #     f.write(data)
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb:.*$",

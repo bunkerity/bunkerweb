@@ -6,7 +6,7 @@ from traceback import format_exc
 from subprocess import run
 from time import sleep
 from logger import log
-
+from yaml import safe_load, dump
 
 class SwarmTest(Test):
     def __init__(self, name, timeout, tests, delay=0):
@@ -32,6 +32,13 @@ class SwarmTest(Test):
             mkdir("/tmp/swarm")
             copy("./misc/integrations/swarm.mariadb.yml", "/tmp/swarm/stack.yml")
             compose = "/tmp/swarm/stack.yml"
+            with open(compose, "r") as f :
+                data = safe_load(f.read())
+            if not "AUTO_LETS_ENCRYPT=yes" in data["services"]["bunkerweb"]["environment"] :
+                data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
+            data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
+            with open(compose, "w") as f :
+                f.write(data)
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",
