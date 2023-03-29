@@ -45,7 +45,7 @@ services:
           setvar:'tx.allowed_methods=GET POST HEAD COPY DELETE LOCK MKCOL MOVE PROPFIND PROPPATCH PUT UNLOCK OPTIONS'"
       - |
         CUSTOM_CONF_MODSEC_nextcloud=
-        SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:2000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
+        SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:1,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
     labels:
       - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
     networks:

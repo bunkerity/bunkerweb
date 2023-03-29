@@ -16,7 +16,7 @@ function display_help() {
 }
 
 function stop_nginx() {
-    pgrep nginx
+    pgrep nginx > /dev/null 2>&1
     if [ $? -eq 0 ] ; then
         log "SYSTEMCTL" "ℹ️ " "Stopping nginx..."
         nginx -s stop
@@ -26,7 +26,7 @@ function stop_nginx() {
     fi
     count=0
     while [ 1 ] ; do
-        pgrep nginx
+        pgrep nginx > /dev/null 2>&1
         if [ $? -ne 0 ] ; then
             break
         fi
