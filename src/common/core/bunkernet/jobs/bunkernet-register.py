@@ -98,6 +98,8 @@ try:
         bunkernet_id = Path("/var/cache/bunkerweb/bunkernet/instance.id").read_text()
         logger.info(f"Already registered on BunkerNet API with instance id {get_id()}")
 
+    sleep(1)
+
     # Ping
     logger.info("Checking connectivity with BunkerNet API ...")
     bunkernet_ping = False
