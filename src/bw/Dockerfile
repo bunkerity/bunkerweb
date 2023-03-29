@@ -74,7 +74,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-RUN apk add "curl>=7.83.1-r6" "libcrypto1.1>=1.1.1t-r1" "libcurl>=7.83.1-r6" "libssl1.1>=1.1.1t-r1"
+RUN apk add "curl>=7.83.1-r6" "libcrypto1.1>=1.1.1t-r1" "libcurl>=7.83.1-r6" "libssl1.1>=1.1.1t-r1" "libcrypto3>=3.0.8-r2" "libssl3>=3.0.8-r2"
 
 VOLUME /data /etc/nginx
 

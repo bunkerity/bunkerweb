@@ -54,7 +54,7 @@ RUN apk add --no-cache bash && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt
 
 # Fix CVEs
-# No need to update anything for now, there are no CVE concerning the already installed packages inside this image
+RUN apk add "libcrypto3>=3.0.8-r2" "libssl3>=3.0.8-r2"
 
 VOLUME /data /etc/nginx
 
