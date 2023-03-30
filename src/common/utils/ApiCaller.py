@@ -75,7 +75,7 @@ class ApiCaller:
                     for task in instance.tasks() :
                         self.__apis.append(
                             API(
-                                f"http://{instance.name}.{task["NodeID"]}.{task["ID"]}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                                f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                                 host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                             )
                         )
