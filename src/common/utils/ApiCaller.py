@@ -72,12 +72,13 @@ class ApiCaller:
                         elif var.startswith("API_SERVER_NAME="):
                             api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
-                    self.__apis.append(
-                        API(
-                            f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
-                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                    for task in instance.tasks() :
+                        self.__apis.append(
+                            API(
+                                f"http://{instance.name}.{task["NodeID"]}.{task["ID"]}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                                host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                            )
                         )
-                    )
                 return
 
             for instance in docker_client.containers.list(

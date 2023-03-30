@@ -54,9 +54,9 @@ services:
       - joomla-data:/var/www/html
     environment:
       - JOOMLA_DB_HOST=mydb
-      - JOOMLA_DB_NAME=${JOOMLA_DATABASE:-joomladb}
-      - JOOMLA_DB_USER=${JOOMLA_USER:-user}
-      - JOOMLA_DB_PASSWORD=${JOOMLA_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - JOOMLA_DB_NAME=joomla_db
+      - JOOMLA_DB_USER=user
+      - JOOMLA_DB_PASSWORD=db-user-pwd # set a stronger password in a .env file (must match MYSQL_PASSWORD)
     networks:
       - bw-services
 
