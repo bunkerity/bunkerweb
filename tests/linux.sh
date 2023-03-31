@@ -19,7 +19,7 @@ function gen_package() {
     mode="$1"
     linux="$2"
     version="$(cat VERSION | tr -d '\n')"
-    if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] ; then
+    if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
         type="rpm"
     else
         type="deb"
@@ -51,26 +51,30 @@ do_and_check_cmd mkdir /tmp/packages
 find /opt/packages/ -type f | xargs rm
 
 # Generate packages
-echo "Building ubuntu package ..."
-gen_package "$1" "ubuntu"
-echo "Building debian package ..."
-gen_package "$1" "debian"
-echo "Building centos package ..."
-gen_package "$1" "centos"
+# echo "Building ubuntu package ..."
+# gen_package "$1" "ubuntu"
+# echo "Building debian package ..."
+# gen_package "$1" "debian"
+# echo "Building centos package ..."
+# gen_package "$1" "centos"
 echo "Building fedora package ..."
 gen_package "$1" "fedora"
+echo "Building rhel package ..."
+gen_package "$1" "rhel"
 
 # Copy packages in the Docker context
 do_and_check_cmd cp -r "/opt/packages/$1" ./packages
 
 # Build test images
-echo "Building ubuntu test image ..."
-build_image "ubuntu"
-echo "Building debian test image ..."
-build_image "debian"
-echo "Building centos test image ..."
-build_image "centos"
+# echo "Building ubuntu test image ..."
+# build_image "ubuntu"
+# echo "Building debian test image ..."
+# build_image "debian"
+# echo "Building centos test image ..."
+# build_image "centos"
 echo "Building fedora test image ..."
 build_image "fedora"
+echo "Building rhel test image ..."
+build_image "rhel"
 
 exit 0

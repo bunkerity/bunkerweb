@@ -37,6 +37,7 @@ class SwarmTest(Test):
             if not "AUTO_LETS_ENCRYPT=yes" in data["services"]["bunkerweb"]["environment"] :
                 data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
             data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
+            del data["services"]["bunkerweb"]["deploy"]["placement"]
             with open(compose, "w") as f :
                 f.write(dump(data))
             Test.replace_in_file(

@@ -48,36 +48,36 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Linux
-  build-ubuntu:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: ubuntu
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-debian:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: debian
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-centos:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: centos
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-ubuntu:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: ubuntu
+  #     PACKAGE: deb
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-debian:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: debian
+  #     PACKAGE: deb
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-centos:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: centos
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-fedora:
     uses: ./.github/workflows/staging-linux-build.yml
     with:
@@ -153,15 +153,16 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   create-infra-linux:
-    needs:
-      [
-        code-security,
-        build-ubuntu,
-        build-debian,
-        build-centos,
-        build-fedora,
-        build-rhel,
-      ]
+    # needs:
+    #   [
+    #     code-security,
+    #     build-ubuntu,
+    #     build-debian,
+    #     build-centos,
+    #     build-fedora,
+    #     build-rhel,
+    #   ]
+    needs: [code-security, build-fedora, build-rhel]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
       TYPE: linux
