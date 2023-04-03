@@ -33,7 +33,11 @@ function M:connect()
     if variables["REDIS_SSL"] == "yes" then
         options["ssl"] = true
     end
-    return redis.connect(variables["REDIS_HOST"], tonumber(variables["REDIS_PORT"]), options)
+    local ok, err = redis_client:connect(variables["REDIS_HOST"], tonumber(variables["REDIS_PORT"]), options)
+    if not ok then
+        return false, err
+    end
+    return redis_client
 end
 
 function M:close(redis_client)
