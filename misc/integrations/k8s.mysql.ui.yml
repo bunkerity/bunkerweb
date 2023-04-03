@@ -43,7 +43,7 @@ spec:
         app: bunkerweb
       # mandatory annotation
       annotations:
-        bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/INSTANCE: "yes"
     spec:
       containers:
         - name: bunkerweb

@@ -43,7 +43,7 @@ spec:
         app: bunkerweb
       # mandatory annotation
       annotations:
-        bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/INSTANCE: "yes"
     spec:
       containers:
         - name: bunkerweb
@@ -97,8 +97,6 @@ spec:
             periodSeconds: 1
             timeoutSeconds: 1
             failureThreshold: 3
-      #imagePullSecrets:
-      #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -126,8 +124,6 @@ spec:
               value: "yes"
             - name: "DATABASE_URI"
               value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
-      #imagePullSecrets:
-      #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -145,6 +141,7 @@ spec:
       labels:
         app: bunkerweb-scheduler
     spec:
+      serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
           image: bunkerity/bunkerweb-scheduler:1.4.6
@@ -154,8 +151,6 @@ spec:
               value: "yes"
             - name: "DATABASE_URI"
               value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
-      #imagePullSecrets:
-      #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment

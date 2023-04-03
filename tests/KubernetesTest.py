@@ -48,10 +48,26 @@ class KubernetesTest(Test):
             yamls = []
             with open(deploy, "r") as f :
                 data = safe_load_all(f.read())
+            append_env = {
+                "AUTO_LETS_ENCRYPT": "yes",
+                "USE_LETS_ENCRYPT_STAGING": "yes",
+                "USE_REAL_IP": "yes",
+                "USE_PROXY_PROTOCOL": "yes",
+                "REAL_IP_FROM": "100.64.0.0/16"
+                "REAL_IP_HEADER": "proxy_protocol"
+            }
+            replace_env = {
+                "API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10"
+            }
             for yaml in data :
                 if yaml["metadata"]["name"] == "bunkerweb" :
-                    yaml["spec"]["template"]["spec"]["containers"][0]["env"].append({"name": "AUTO_LETS_ENCRYPT", "value": "yes"})
-                    yaml["spec"]["template"]["spec"]["containers"][0]["env"].append({"name": "USE_LETS_ENCRYPT_STAGING", "value": "yes"})
+                    for k, v in append_env.items() :
+                        yaml["spec"]["template"]["spec"]["containers"][0]["env"].append({"name": k, "value": v})
+                    for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"] :
+                        if ele["name"] in replace_env :
+                            ele["value"] = replace_env[ele["name"]]
+                if yaml["metadata"]["name"] in ["bunkerweb", "bunkerweb-controller", "bunkerweb-scheduler"] :
+                    yaml["spec"]["template"]["spec"]["imagePullSecrets"] = [{"name": "secret-registry"}]
                 yamls.append(yaml)
             with open(deploy, "w") as f :
                 f.write(dump_all(yamls))
@@ -76,8 +92,6 @@ class KubernetesTest(Test):
                 + "/infra/scheduler-tests:"
                 + getenv("IMAGE_TAG"),
             )
-            Test.replace_in_file(deploy, r"#i", "i")
-            Test.replace_in_file(deploy, r"#-", "-")
             proc = run(
                 "kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True
             )
