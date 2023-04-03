@@ -18,7 +18,7 @@ function M:connect()
         ["REDIS_KEEPALIVE_POOL"] = ""
     }
     for k, v in pairs(variables) do
-        local value, err = utils.get_variable(k)
+        local value, err = utils.get_variable(k, false)
         if value == nil then
             return false, err
         end
@@ -47,7 +47,7 @@ function M:close(redis_client)
         ["REDIS_KEEPALIVE_POOL"] = ""
     }
     for k, v in pairs(variables) do
-        local value, err = utils.get_variable(k)
+        local value, err = utils.get_variable(k, false)
         if value == nil then
             return false, err
         end

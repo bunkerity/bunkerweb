@@ -1,9 +1,9 @@
-local datastore = require "datastore"
-local ipmatcher = require "resty.ipmatcher"
-local cjson     = require "cjson"
-local resolver  = require "resty.dns.resolver"
-local mmdb      = require "mmdb"
-local logger    = require "logger"
+local datastore		= require "datastore"
+local ipmatcher		= require "resty.ipmatcher"
+local cjson			= require "cjson"
+local resolver		= require "resty.dns.resolver"
+local mmdb			= require "mmdb"
+local logger		= require "logger"
 
 local utils = {}
 
