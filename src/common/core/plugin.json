@@ -1,0 +1,38 @@
+{
+	"id": "reverse_scan",
+	"order": 999,
+	"name": "ReverseScan",
+	"description": "Scan user when they connect",
+	"version": "0.1",
+	"settings": {
+		"REVERSE_SCAN": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Activate reverse_scan feature.",
+			"id": "use-Reverse-scan",
+			"label": "port scanning",
+			"regex": "^(no|yes)$",
+			"type": "check"
+			
+				
+        },
+		"PORT_SCAN": {
+			"context": "multisite",
+			"default": "22 23 25 80 443 3389 1433 3306",
+			"help": "Choose port to scan",
+			"id": "port_scanning",
+			"label": "port_number",
+			"regex": "^.*$",  
+			"type": "text"
+		},
+		"TIMEOUT": {
+			"context": "multisite",
+			"default": "0.5",
+			"help": "choose maximum timeout when scan a port",
+			"id": "timeout_scanning",
+			"label": "Second",
+			"regex": "^.*$",  
+			"type": "number"
+		}
+	}
+}
