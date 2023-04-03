@@ -145,13 +145,13 @@ jobs:
   #     TYPE: swarm
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  # create-infra-k8s:
-  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
-  #   uses: ./.github/workflows/staging-create-infra.yml
-  #   with:
-  #     TYPE: k8s
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  create-infra-k8s:
+    needs: [code-security, build-bw, build-scheduler, build-autoconf]
+    uses: ./.github/workflows/staging-create-infra.yml
+    with:
+      TYPE: k8s
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # create-infra-linux:
     # needs:
     #   [
