@@ -53,7 +53,7 @@ class KubernetesTest(Test):
                 "USE_LETS_ENCRYPT_STAGING": "yes",
                 "USE_REAL_IP": "yes",
                 "USE_PROXY_PROTOCOL": "yes",
-                "REAL_IP_FROM": "100.64.0.0/16"
+                "REAL_IP_FROM": "100.64.0.0/16",
                 "REAL_IP_HEADER": "proxy_protocol"
             }
             replace_env = {
