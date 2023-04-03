@@ -182,7 +182,7 @@ A file named **plugin.json** and written at the root of the plugin folder must c
 			"regex": "^.*$",
 			"type": "text"
 		}
-	}
+	},
 	"jobs": [
 		{
 			"name": "my-job",
