@@ -1,6 +1,14 @@
 # Changelog
 
-## v1.4.7 - 
+## v1.4.8 -
+
+- Fix Let's Encrypt error when using auth basic
+- Fix wrong setting name in realip job (again)
+- Fix blog posts retrieval in the UI
+- Fix missing logs for UI
+- Fix error log if BunkerNet ip list is empty
+
+## v1.4.7 - 2023/02/27
 
 - Fix DISABLE_DEFAULT_SERVER=yes not working with HTTPS (again)
 - Fix wrong setting name in realip job

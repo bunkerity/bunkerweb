@@ -17,13 +17,13 @@
 	sudo dnf install nginx-1.20.2
 	```
 
-	And finally install BunkerWeb 1.4.7 :
+	And finally install BunkerWeb 1.4.8 :
   ```shell
 	wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
   sudo dnf check-update && \
-  sudo dnf install -y bunkerweb-1.4.7
+  sudo dnf install -y bunkerweb-1.4.8
   ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :

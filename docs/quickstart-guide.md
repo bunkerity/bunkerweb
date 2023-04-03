@@ -54,7 +54,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e USE_REVERSE_PROXY=yes \
     	   -e REVERSE_PROXY_URL=/ \
     	   -e REVERSE_PROXY_HOST=http://myapp \
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
@@ -64,7 +64,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.7
+    	image: bunkerity/bunkerweb:1.4.8
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -379,7 +379,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	   -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
     	   -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
     	   -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
@@ -389,7 +389,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.7
+    	image: bunkerity/bunkerweb:1.4.8
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -981,13 +981,13 @@ REAL_IP_HEADER=X-Forwarded-For
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=X-Forwarded-For \
     	   ...
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1006,13 +1006,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.7
+           bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1031,13 +1031,13 @@ REAL_IP_HEADER=X-Forwarded-For
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=X-Forwarded-For \
            ...
-           bunkerity/bunkerweb:1.4.7
+           bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1062,7 +1062,7 @@ REAL_IP_HEADER=X-Forwarded-For
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.7
+			image: bunkerity/bunkerweb:1.4.8
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1146,13 +1146,13 @@ REAL_IP_HEADER=proxy_protocol
     	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
     	   -e REAL_IP_HEADER=proxy_protocol \
     	   ...
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1173,13 +1173,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.7
+           bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1200,13 +1200,13 @@ REAL_IP_HEADER=proxy_protocol
            -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
            -e REAL_IP_HEADER=proxy_protocol \
            ...
-           bunkerity/bunkerweb:1.4.7
+           bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1232,7 +1232,7 @@ REAL_IP_HEADER=proxy_protocol
 		spec:
 		  containers:
 		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.4.7
+			image: bunkerity/bunkerweb:1.4.8
 			...
 			env:
 			- name: USE_REAL_IP
@@ -1327,7 +1327,7 @@ Some integrations offer a more convenient way of applying configurations such as
     Here is a dummy example using a docker-compose file :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1369,13 +1369,13 @@ Some integrations offer a more convenient way of applying configurations such as
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.7
+      image: bunkerity/bunkerweb:1.4.8
       volumes:
         - ./bw-data:/data
       ...
@@ -1436,13 +1436,13 @@ Some integrations offer a more convenient way of applying configurations such as
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb-autoconf:1.4.7
+    	   bunkerity/bunkerweb-autoconf:1.4.8
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     myautoconf:
-      image: bunkerity/bunkerweb-autoconf:1.4.7
+      image: bunkerity/bunkerweb-autoconf:1.4.8
       volumes:
         - ./bw-data:/data
       ...
@@ -1622,7 +1622,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 		   -e AUTO_LETS_ENCRYPT=yes \
 		   -e REMOTE_PHP=myphp \
 		   -e REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
 	Here is the docker-compose equivalent :
@@ -1632,7 +1632,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.7
+    	image: bunkerity/bunkerweb:1.4.8
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -1674,7 +1674,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "${PWD}/myapp:/app" \
 		   ...
-		   bunkerity/bunkerweb:1.4.7
+		   bunkerity/bunkerweb:1.4.8
 	```
 	
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
@@ -1738,7 +1738,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "/shared/myapp:/app" \
 		   ...
-		   bunkerity/bunkerweb:1.4.7
+		   bunkerity/bunkerweb:1.4.8
 	```
 
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :
@@ -1984,7 +1984,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       -e app2.example.com_REMOTE_PHP_PATH=/app \
 	       -e app3.example.com_REMOTE_PHP=myphp3 \
 	       -e app3.example.com_REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.4.7
+    	   bunkerity/bunkerweb:1.4.8
     ```
 
 	Here is the docker-compose equivalent :
@@ -1994,7 +1994,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     services:
 
       mybunker:
-    	image: bunkerity/bunkerweb:1.4.7
+    	image: bunkerity/bunkerweb:1.4.8
     	ports:
     	  - 80:8080
     	  - 443:8443
@@ -2055,7 +2055,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "${PWD}/myapps:/apps" \
 		   ...
-		   bunkerity/bunkerweb:1.4.7
+		   bunkerity/bunkerweb:1.4.8
 	```
 	
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM containers, mount the right application folder inside each container and configure them using specific labels :
@@ -2179,7 +2179,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	       ...
 		   -v "/shared/myapps:/apps" \
 		   ...
-		   bunkerity/bunkerweb:1.4.7
+		   bunkerity/bunkerweb:1.4.8
 	```
 
 	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM service, mount the application folder inside the container and configure it using specific labels :

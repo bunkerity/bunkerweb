@@ -76,7 +76,7 @@ Because the web UI is a web application, the recommended installation procedure 
        -e "bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
        -e bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no \
        -l bunkerweb.UI \
-       bunkerity/bunkerweb:1.4.7 && \
+       bunkerity/bunkerweb:1.4.8 && \
     docker network connect bw-ui mybunker
     ```
 
@@ -115,7 +115,7 @@ Because the web UI is a web application, the recommended installation procedure 
            -e ADMIN_USERNAME=admin \
            -e ADMIN_PASSWORD=changeme \
            -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/ \
-           bunkerity/bunkerweb-ui:1.4.7 && \
+           bunkerity/bunkerweb-ui:1.4.8 && \
     docker network connect bw-docker myui
     ```
 
@@ -131,7 +131,7 @@ Because the web UI is a web application, the recommended installation procedure 
     services:
 
       mybunker:
-        image: bunkerity/bunkerweb:1.4.7
+        image: bunkerity/bunkerweb:1.4.8
         networks:
           - bw-services
           - bw-ui
@@ -154,7 +154,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - "bunkerweb.UI"
 
       myui:
-        image: bunkerity/bunkerweb-ui:1.4.7
+        image: bunkerity/bunkerweb-ui:1.4.8
         depends_on:
           - mydocker
         networks:

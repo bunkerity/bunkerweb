@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: bunkerweb
-        image: bunkerity/bunkerweb:1.4.7
+        image: bunkerity/bunkerweb:1.4.8
         imagePullPolicy: Always
         securityContext:
           runAsUser: 101
@@ -145,7 +145,7 @@ spec:
           claimName: pvc-bunkerweb
       containers:
       - name: bunkerweb-controller
-        image: bunkerity/bunkerweb-autoconf:1.4.7
+        image: bunkerity/bunkerweb-autoconf:1.4.8
         imagePullPolicy: Always
         env:
         - name: KUBERNETES_MODE

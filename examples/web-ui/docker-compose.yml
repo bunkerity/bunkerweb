@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     ports:
       - 80:8080
       - 443:8443
@@ -42,7 +42,7 @@ services:
       - net_svc
 
   myui:
-    image: bunkerity/bunkerweb-ui:1.4.7
+    image: bunkerity/bunkerweb-ui:1.4.8
     depends_on:
       - myuiproxy
     volumes:

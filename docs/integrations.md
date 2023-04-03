@@ -12,7 +12,7 @@ Using BunkerWeb as a [Docker](https://www.docker.com/) container is a quick and 
 We provide ready-to-use prebuilt images for x64, x86 armv8 and armv7 architectures on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
 
 ```shell
-docker pull bunkerity/bunkerweb:1.4.7
+docker pull bunkerity/bunkerweb:1.4.8
 ```
 
 Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and get a coffee ☕ because it may take a long time depending on your hardware) :
@@ -39,7 +39,7 @@ docker run \
 	   -e MY_SETTING=value \
 	   -e "MY_OTHER_SETTING=value with spaces" \
 	   ...
-	   bunkerity/bunkerweb:1.4.7
+	   bunkerity/bunkerweb:1.4.8
 ```
 
 Here is the docker-compose equivalent :
@@ -48,7 +48,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     environment:
       - MY_SETTING=value
 ```
@@ -73,7 +73,7 @@ docker run \
 	   ...
 	   -v bw_data:/data \
 	   ...
-	   bunkerity/bunkerweb:1.4.7
+	   bunkerity/bunkerweb:1.4.8
 ```
 
 Here is the docker-compose equivalent :
@@ -82,7 +82,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     volumes:
       - bw_data:/data
 ...
@@ -152,7 +152,7 @@ docker run \
        ...
 	   --network mynetwork \
 	   ...
-	   bunkerity/bunkerweb:1.4.7
+	   bunkerity/bunkerweb:1.4.8
 ```
 
 You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.
@@ -163,7 +163,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     networks:
       - bw-net
 ...
@@ -218,7 +218,7 @@ docker run \
 	   -e SERVER_NAME= \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
 	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.4.7 && \
+	   bunkerity/bunkerweb:1.4.8 && \
 
 docker network connect bw-services mybunker
 ```
@@ -235,7 +235,7 @@ docker run \
 	   --network bw-autoconf \
 	   -v bw-data:/data \
 	   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-	   bunkerity/bunkerweb-autoconf:1.4.7
+	   bunkerity/bunkerweb-autoconf:1.4.8
 ```
 
 Here is the docker-compose equivalent for the BunkerWeb autoconf stack :
@@ -246,7 +246,7 @@ version: '3.5'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     ports:
       - 80:8080
 	  - 443:8443
@@ -262,7 +262,7 @@ services:
 	  - bw-services
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.7
+    image: bunkerity/bunkerweb-autoconf:1.4.8
     volumes:
       - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -364,7 +364,7 @@ docker service create \
 	   -e MULTISITE=yes \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
 	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.4.7
+	   bunkerity/bunkerweb:1.4.8
 ```
 
 And the autoconf one :
@@ -378,7 +378,7 @@ docker service \
 	   --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
 	   --mount type=volume,source=bw-data,destination=/data \
 	   -e SWARM_MODE=yes \
-	   bunkerity/bunkerweb-autoconf:1.4.7
+	   bunkerity/bunkerweb-autoconf:1.4.8
 ```
 
 Here is the docker-compose equivalent (using `docker stack deploy`) :
@@ -389,7 +389,7 @@ version: '3.5'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     ports:
       - published: 80
         target: 8080
@@ -416,7 +416,7 @@ services:
         - "bunkerweb.AUTOCONF"
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.7
+    image: bunkerity/bunkerweb-autoconf:1.4.8
     environment:
       - SWARM_MODE=yes
     volumes:
@@ -706,11 +706,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo apt install -y nginx=1.20.2-1~$(lsb_release -cs)
 	```
 
-	And finally install BunkerWeb 1.4.7 :
+	And finally install BunkerWeb 1.4.8 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	sudo apt update && \
-	sudo apt install -y bunkerweb=1.4.7
+	sudo apt install -y bunkerweb=1.4.8
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -736,11 +736,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo apt install -y nginx=1.20.2-1~jammy
 	```
 
-	And finally install BunkerWeb 1.4.7 :
+	And finally install BunkerWeb 1.4.8 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	sudo apt update && \
-	sudo apt install -y bunkerweb=1.4.7
+	sudo apt install -y bunkerweb=1.4.8
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -755,13 +755,13 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf install -y nginx-1.20.2
 	```
 
-    And finally install BunkerWeb 1.4.7 :
+    And finally install BunkerWeb 1.4.8 :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
   	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
   	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
   	sudo dnf makecache && \
-  	sudo dnf install -y bunkerweb-1.4.7
+  	sudo dnf install -y bunkerweb-1.4.8
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -788,12 +788,12 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf install nginx-1.20.2
 	```
 
-	And finally install BunkerWeb 1.4.7 :
+	And finally install BunkerWeb 1.4.8 :
     ```shell
 	dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.4.7
+    sudo dnf install -y bunkerweb-1.4.8
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -928,7 +928,7 @@ Configuration of BunkerWeb is done by using specific role variables :
 
 | Name  | Type  | Description  | Default value  |
 |:-----:|:-----:|--------------|----------------|
-| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.7` |
+| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.8` |
 | `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
 | `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
 | `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |

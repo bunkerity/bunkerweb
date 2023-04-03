@@ -11,7 +11,7 @@ services:
       - SERVICE1_TOR_SERVICE_VERSION=3
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     # ⚠️ read this if you use local folders for volumes ⚠️
     # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly

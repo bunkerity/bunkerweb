@@ -3,7 +3,7 @@ version: '3.4'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.7
+    image: bunkerity/bunkerweb:1.4.8
     ports:
       - 80:8080
       - 443:8443
