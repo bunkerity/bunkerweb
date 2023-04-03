@@ -65,7 +65,8 @@ services:
     networks:
       - bw-services
 
-  image: mariadb
+  mydb:
+    image: mariadb
     volumes:
       - db-data:/var/lib/mysql
     networks:
