@@ -77,6 +77,10 @@ spec:
               value: ""
             - name: MULTISITE
               value: "yes"
+            - name: USE_REDIS
+              value: "yes"
+            - name: REDIS_HOST
+              value: "svc-bunkerweb-redis.default.svc.cluster.local"
           livenessProbe:
             exec:
               command:

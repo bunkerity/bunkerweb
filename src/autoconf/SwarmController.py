@@ -35,6 +35,8 @@ class SwarmController(Controller, ConfigCaller):
                 instance_env[variable] = value
 
         for task in controller_instance.tasks():
+            if task["DesiredState"] != "running" :
+                continue
             instances.append(
                 {
                     "name": task["ID"],
