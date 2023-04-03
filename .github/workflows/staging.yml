@@ -215,14 +215,14 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
-  delete-infra-docker:
-    if: ${{ always() }}
-    needs: [tests-docker]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: docker
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-docker:
+  #   if: ${{ always() }}
+  #   needs: [tests-docker]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: docker
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # delete-infra-autoconf:
   #   if: ${{ always() }}
   #   needs: [tests-autoconf]
