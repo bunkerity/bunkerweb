@@ -52,7 +52,7 @@ function _M:access()
     if cached_ip=="denied"  then
         return true, "client IP " .. ngx.var.remote_addr  .. " is suspicious : port open", true, utils.get_deny_status()
     elseif cached_ip=="clean" then
-        return true , "Ip already scanned and is clean" , nil , nil
+        return true , "Ip already scanned and is safe" , nil , nil
     elseif cached_ip ~= false then
         return false, err , nil , nil
     end
@@ -66,7 +66,7 @@ function _M:access()
     --call scan function
     local sus = nil
     for i = 1, #port_List do
-        if _M:scan(port_List[i]) then
+        if _M:scan(port_List[i])==true then
 
             sus = true
             self:add_to_cache("ip" .. ngx.var.remote_addr, "denied")
@@ -78,25 +78,23 @@ function _M:access()
     return nil, "client IP " .. ngx.var.remote_addr  .. " is safe ", true, nil
 end
 
-function  _M:scan(prt)
-    local time, err = utils.get_variable("TIMEOUT")
-    logger.log(ngx.NOTICE, "REVERSE_SCAN", " scan called on port " .. prt)
-    if prt == nil then
-        return false , "port is null"
-    end
+function _M.scan(port)
     local client = socket.tcp()
-    client:settimeout(time) 
-    local status, err = client:connect(ngx.var.remote_addr, prt)
+    local time, err = utils.get_variable("TIMEOUT")
+    client:settimeout(time)
+
+    local status, err = client:connect(ngx.var.remote_addr, port)
     if not status then
-        if err == "timeout" then
-          return false, "timeout"
-        else
-          return false, err
+        local peername, peerport = client:getpeername()
+        if not peername then
+            -- 
+            return false , err
         end
-      end
-      client:close()
-      return true
+    end
+    client:close()
+    return true , err
 end
+
 
 
 

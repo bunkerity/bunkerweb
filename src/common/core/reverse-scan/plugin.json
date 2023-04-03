@@ -5,10 +5,10 @@
 	"description": "Scan user when they connect",
 	"version": "0.1",
 	"settings": {
-		"REVERSE_SCAN": {
+		"USE_REVERSE_SCAN": {
 			"context": "multisite",
 			"default": "no",
-			"help": "Activate reverse_scan feature.",
+			"help": "Enable the 'reverse_scan' feature to attempt establishing a TCP connection on a list of ports defined in 'PORT_SCAN'.",
 			"id": "use-Reverse-scan",
 			"label": "port scanning",
 			"regex": "^(no|yes)$",
@@ -16,21 +16,21 @@
 			
 				
         },
-		"PORT_SCAN": {
+		"REVERSE_SCAN_PORT_SCAN": {
 			"context": "multisite",
 			"default": "22 23 25 80 443 3389 1433 3306",
-			"help": "Choose port to scan",
+			"help": "Specify a list of ports to scan. Default is '22 23 25 80 443 3389 1433 3306'.",
 			"id": "port_scanning",
-			"label": "port_number",
+			"label": "List of port that will be scanned",
 			"regex": "^.*$",  
 			"type": "text"
 		},
-		"TIMEOUT": {
+		"REVERSE_SCAN_TIMEOUT": {
 			"context": "multisite",
 			"default": "0.5",
-			"help": "choose maximum timeout when scan a port",
+			"help": "Specify the maximum timeout (in seconds) when scanning a port. Default is '0.5'.",
 			"id": "timeout_scanning",
-			"label": "Second",
+			"label": "Time before connection request is aborded",
 			"regex": "^.*$",  
 			"type": "number"
 		}
