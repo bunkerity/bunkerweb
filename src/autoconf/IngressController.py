@@ -213,6 +213,8 @@ class IngressController(Controller, ConfigCaller):
             what = self.__networkingv1.list_ingress_for_all_namespaces
         elif watch_type == "configmap":
             what = self.__corev1.list_config_map_for_all_namespaces
+        elif watch_type == "service":
+            what = self.__corev1.list_service_for_all_namespaces
         else:
             raise Exception(f"Unsupported watch_type {watch_type}")
 
@@ -283,7 +285,7 @@ class IngressController(Controller, ConfigCaller):
 
     def process_events(self):
         self._set_autoconf_load_db()
-        watch_types = ("pod", "ingress", "configmap")
+        watch_types = ("pod", "ingress", "configmap", "service")
         threads = [
             Thread(target=self.__watch, args=(watch_type,))
             for watch_type in watch_types

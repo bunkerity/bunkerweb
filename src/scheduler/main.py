@@ -383,9 +383,9 @@ if __name__ == "__main__":
                         logger.info("Successfuly sent /data/cache folder")
 
                 # restart nginx
-                logger.info("Stopping temp nginx ...")
                 if integration == "Linux":
                     # Stop temp nginx
+                    logger.info("Stopping temp nginx ...")
                     proc = subprocess_run(
                         ["/usr/sbin/nginx", "-s", "stop"],
                         stdin=DEVNULL,
