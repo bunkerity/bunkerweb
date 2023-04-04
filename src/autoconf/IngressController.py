@@ -235,7 +235,7 @@ class IngressController(Controller, ConfigCaller):
                         locked = False
                         continue
                     self.__logger.info(
-                        f"Catched kubernetes event ({what}), deploying new configuration ...",
+                        f"Catched kubernetes event ({watch_type}), deploying new configuration ...",
                     )
                     try:
                         ret = self.apply_config()
@@ -263,8 +263,9 @@ class IngressController(Controller, ConfigCaller):
             except ApiException as e:
                 if e.status != 410:
                     self.__logger.error(
-                        f"Exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
+                        f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                     )
+                    error = True
             except:
                 self.__logger.error(
                     f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
