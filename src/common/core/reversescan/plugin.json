@@ -13,7 +13,7 @@
 			"label": "Reverse scan",
 			"regex": "^(no|yes)$",
 			"type": "check"
-        },
+		},
 		"REVERSE_SCAN_PORTS": {
 			"context": "multisite",
 			"default": "22 80 443 3128 8000 8080",

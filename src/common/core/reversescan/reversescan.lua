@@ -34,7 +34,7 @@ function _M:access()
         return false, "can't get REVERSE_SCAN_TIMEOUT setting from datastore : " .. err, nil, nil
     end
     -- Loop on ports
-    for port in value:gmatch("%S+") do
+    for port in ports:gmatch("%S+") do
         -- Check if the scan is already cached
         local cached, err = self:is_in_cache(ngx.var.remote_addr .. ":" .. port)
         if cached == nil then
@@ -44,7 +44,7 @@ function _M:access()
             return true, "port " .. port .. " is opened for IP " .. ngx.var.remote_addr, true, utils.get_deny_status()
         elseif not cached then
             -- Do the scan
-            local res, err = self:scan(ngx.var.remote_addr, tonumber(port), tonumber(timeout)
+            local res, err = self:scan(ngx.var.remote_addr, tonumber(port), tonumber(timeout))
             -- Cache the result
             local ok, err = self:add_to_cache(ngx.var.remote_addr .. ":" .. port, res)
             if not ok then
