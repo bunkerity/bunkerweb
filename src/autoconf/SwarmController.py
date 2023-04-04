@@ -98,6 +98,7 @@ class SwarmController(Controller, ConfigCaller):
                 not config.name
                 or not config.attrs
                 or not config.attrs.get("Spec", {}).get("Labels", {})
+                or not config.attrs.get("Spec", {}).get("Data", {})
             ):
                 continue
 
