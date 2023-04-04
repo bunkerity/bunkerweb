@@ -2,6 +2,8 @@
 
 ## v1.4.8 -
 
+- Fix UI bug related to multiple settings
+- Increase check reload interval in UI to avoid rate limit
 - Fix Let's Encrypt error when using auth basic
 - Fix wrong setting name in realip job (again)
 - Fix blog posts retrieval in the UI

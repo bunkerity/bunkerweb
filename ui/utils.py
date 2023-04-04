@@ -203,21 +203,23 @@ def form_service_gen_multiple_values(_id, params, service) -> Union[Tag, str]:
         key=lambda x: int(re.search(r"\d+$", x).group()) if x[-1].isdigit() else 0,
     ):
         for param, param_value in params.items():
+            add = env == param or (re.search(r"_\d+$", env) is not None and "_".join(env.split("_")[:-1]) == param)
+            if not add :
+                continue
             suffix = env.replace(param, "")
-            if env.startswith(param):
-                values.append(
-                    {
-                        "default": service.get(
-                            f"{param}{suffix}", param_value["default"]
-                        ),
-                        "env": param,
-                        "help": param_value["help"],
-                        "id": param_value["id"],
-                        "label": param_value["label"],
-                        "selects": param_value.get("selects", []),
-                        "type": param_value["type"],
-                    }
-                )
+            values.append(
+                {
+                    "default": service.get(
+                        f"{param}{suffix}", param_value["default"]
+                    ),
+                    "env": param,
+                    "help": param_value["help"],
+                    "id": param_value["id"],
+                    "label": param_value["label"],
+                    "selects": param_value.get("selects", []),
+                    "type": param_value["type"],
+                }
+            )
 
         if len(values) >= len(params):
             script.append(f"addMultiple('{_id}', '{json.dumps(values)}');")
