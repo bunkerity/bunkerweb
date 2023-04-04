@@ -1,4 +1,5 @@
 from os import getenv
+from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
 from docker import DockerClient
@@ -141,6 +142,7 @@ class SwarmController(Controller, ConfigCaller):
                         ):
                             self.__internal_lock.release()
                             locked = False
+                            continue
                         self.__logger.info(
                             f"Catched Swarm event ({event_type}), deploying new configuration ..."
                         )
