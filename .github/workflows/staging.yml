@@ -138,20 +138,20 @@ jobs:
   #     TYPE: autoconf
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  # create-infra-swarm:
-  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
-  #   uses: ./.github/workflows/staging-create-infra.yml
-  #   with:
-  #     TYPE: swarm
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-k8s:
+  create-infra-swarm:
     needs: [code-security, build-bw, build-scheduler, build-autoconf]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
-      TYPE: k8s
+      TYPE: swarm
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-k8s:
+  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: k8s
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # create-infra-linux:
     # needs:
     #   [
@@ -184,20 +184,20 @@ jobs:
   #     TYPE: autoconf
   #     RUNS_ON: "['self-hosted', 'bw-autoconf']"
   #   secrets: inherit
-  # tests-swarm:
-  #   needs: [create-infra-swarm]
-  #   uses: ./.github/workflows/staging-tests.yml
-  #   with:
-  #     TYPE: swarm
-  #     RUNS_ON: "['self-hosted', 'bw-swarm']"
-  #   secrets: inherit
-  tests-k8s:
-    needs: [create-infra-k8s]
+  tests-swarm:
+    needs: [create-infra-swarm]
     uses: ./.github/workflows/staging-tests.yml
     with:
-      TYPE: k8s
-      RUNS_ON: "['ubuntu-latest']"
+      TYPE: swarm
+      RUNS_ON: "['self-hosted', 'bw-swarm']"
     secrets: inherit
+  # tests-k8s:
+  #   needs: [create-infra-k8s]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: k8s
+  #     RUNS_ON: "['ubuntu-latest']"
+  #   secrets: inherit
   # tests-linux:
   #   needs: [create-infra-linux]
   #   uses: ./.github/workflows/staging-tests.yml
@@ -205,14 +205,14 @@ jobs:
   #     TYPE: linux
   #     RUNS_ON: "['self-hosted', 'bw-linux']"
   #   secrets: inherit
-  tests-ui:
-    needs: [code-security, build-ui]
-    uses: ./.github/workflows/staging-tests-ui.yml
-    with:
-      MODE: staging
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # tests-ui:
+  #   needs: [code-security, build-ui]
+  #   uses: ./.github/workflows/staging-tests-ui.yml
+  #   with:
+  #     MODE: staging
+  #   secrets:
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
   # delete-infra-docker:
@@ -231,22 +231,22 @@ jobs:
   #     TYPE: autoconf
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  # delete-infra-swarm:
-  #   if: ${{ always() }}
-  #   needs: [tests-swarm]
-  #   uses: ./.github/workflows/staging-delete-infra.yml
-  #   with:
-  #     TYPE: swarm
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-k8s:
+  delete-infra-swarm:
     if: ${{ always() }}
-    needs: [tests-k8s]
+    needs: [tests-swarm]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
-      TYPE: k8s
+      TYPE: swarm
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-k8s:
+  #   if: ${{ always() }}
+  #   needs: [tests-k8s]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: k8s
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # delete-infra-linux:
   #   if: ${{ always() }}
   #   needs: [tests-linux]
