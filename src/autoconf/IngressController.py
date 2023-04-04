@@ -197,6 +197,11 @@ class IngressController(Controller, ConfigCaller):
                 continue
             config_site = ""
             if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
+                if not self._is_service_present(configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']) :
+                    self.__logger.warning(
+                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist",
+                    )
+                    continue
                 config_site = (
                     f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
                 )

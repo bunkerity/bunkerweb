@@ -112,6 +112,11 @@ class SwarmController(Controller, ConfigCaller):
                 continue
             config_site = ""
             if "bunkerweb.CONFIG_SITE" in config.attrs["Spec"]["Labels"]:
+                if not self._is_service_present(config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']) :
+                    self.__logger.warning(
+                        f"Ignoring config {config_name} because {config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']} doesn't exist",
+                    )
+                    continue
                 config_site = (
                     f"{config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']}/"
                 )
