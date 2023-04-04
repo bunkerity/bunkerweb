@@ -621,10 +621,16 @@ class Database:
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
+                # config = {
+                #     "data": custom_config["value"].replace("\\\n", "\n").encode("utf-8")
+                #     if isinstance(custom_config["value"], str)
+                #     else custom_config["value"].replace(b"\\\n", b"\n"),
+                #     "method": method,
+                # }
                 config = {
-                    "data": custom_config["value"].replace("\\\n", "\n").encode("utf-8")
+                    "data": custom_config["value"].encode("utf-8")
                     if isinstance(custom_config["value"], str)
-                    else custom_config["value"].replace(b"\\\n", b"\n"),
+                    else custom_config["value"],
                     "method": method,
                 }
                 config["checksum"] = sha256(config["data"]).hexdigest()

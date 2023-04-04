@@ -10,4 +10,4 @@
 docker config rm cfg_me_modsec
 
 # create configs
-docker config create -l bunkerweb.CONFIG_TYPE=modsec -l bunkerweb.CONFIG_SITE=www.example.com cfg_me_modsec ./bw-data/configs/modsec/www.example.com/mongo-express.conf
+docker config create -l bunkerweb.CONFIG_TYPE=modsec -l bunkerweb.CONFIG_SITE=www.example.com cfg_me_modsec ./bw-data/configs/modsec/mongo-express.conf

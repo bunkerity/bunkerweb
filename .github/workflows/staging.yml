@@ -124,13 +124,13 @@ jobs:
           category: "/language:${{matrix.language}}"
 
   # Create infrastructures
-  # create-infra-docker:
-  #   needs: [code-security, build-bw, build-scheduler]
-  #   uses: ./.github/workflows/staging-create-infra.yml
-  #   with:
-  #     TYPE: docker
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  create-infra-docker:
+    needs: [code-security, build-bw, build-scheduler]
+    uses: ./.github/workflows/staging-create-infra.yml
+    with:
+      TYPE: docker
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # create-infra-autoconf:
   #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
   #   uses: ./.github/workflows/staging-create-infra.yml
@@ -170,13 +170,13 @@ jobs:
     #   CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Perform tests
-  # tests-docker:
-  #   needs: [create-infra-docker]
-  #   uses: ./.github/workflows/staging-tests.yml
-  #   with:
-  #     TYPE: docker
-  #     RUNS_ON: "['self-hosted', 'bw-docker']"
-  #   secrets: inherit
+  tests-docker:
+    needs: [create-infra-docker]
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: docker
+      RUNS_ON: "['self-hosted', 'bw-docker']"
+    secrets: inherit
   # tests-autoconf:
   #   needs: [create-infra-autoconf]
   #   uses: ./.github/workflows/staging-tests.yml
@@ -215,14 +215,14 @@ jobs:
   #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
-  # delete-infra-docker:
-  #   if: ${{ always() }}
-  #   needs: [tests-docker]
-  #   uses: ./.github/workflows/staging-delete-infra.yml
-  #   with:
-  #     TYPE: docker
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  delete-infra-docker:
+    if: ${{ always() }}
+    needs: [tests-docker]
+    uses: ./.github/workflows/staging-delete-infra.yml
+    with:
+      TYPE: docker
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # delete-infra-autoconf:
   #   if: ${{ always() }}
   #   needs: [tests-autoconf]

@@ -214,12 +214,12 @@ if __name__ == "__main__":
                 "Kubernetes",
                 "Autoconf",
             ):
-                err = db.set_autoconf_load(False)
-                if err:
-                    success = False
-                    logger.error(
-                        f"Can't set autoconf loaded metadata to false in database: {err}",
-                    )
+                # err = db.set_autoconf_load(False)
+                # if err:
+                #     success = False
+                #     logger.error(
+                #         f"Can't set autoconf loaded metadata to false in database: {err}",
+                #     )
 
                 while not db.is_autoconf_loaded():
                     logger.warning(
@@ -481,10 +481,11 @@ if __name__ == "__main__":
                                     f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
                                 )
                         else:
-                            if api_caller._send_to_apis("POST", "/reload"):
-                                logger.info("Successfuly reloaded nginx")
-                            else:
-                                logger.error("Error while reloading nginx")
+                            need_reload = True
+                            # if api_caller._send_to_apis("POST", "/reload"):
+                            #     logger.info("Successfuly reloaded nginx")
+                            # else:
+                            #     logger.error("Error while reloading nginx")
 
                     # check if the plugins have changed since last time
                     tmp_external_plugins = db.get_plugins(external=True)
