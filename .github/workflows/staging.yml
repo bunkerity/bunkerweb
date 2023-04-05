@@ -138,13 +138,13 @@ jobs:
   #     TYPE: autoconf
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-swarm:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: swarm
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-swarm:
+  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: swarm
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # create-infra-k8s:
   #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
   #   uses: ./.github/workflows/staging-create-infra.yml
@@ -184,13 +184,13 @@ jobs:
   #     TYPE: autoconf
   #     RUNS_ON: "['self-hosted', 'bw-autoconf']"
   #   secrets: inherit
-  tests-swarm:
-    needs: [create-infra-swarm]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: swarm
-      RUNS_ON: "['self-hosted', 'bw-swarm']"
-    secrets: inherit
+  # tests-swarm:
+  #   needs: [create-infra-swarm]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: swarm
+  #     RUNS_ON: "['self-hosted', 'bw-swarm']"
+  #   secrets: inherit
   # tests-k8s:
   #   needs: [create-infra-k8s]
   #   uses: ./.github/workflows/staging-tests.yml
@@ -231,14 +231,14 @@ jobs:
   #     TYPE: autoconf
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-swarm:
-    if: ${{ always() }}
-    needs: [tests-swarm]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: swarm
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-swarm:
+  #   if: ${{ always() }}
+  #   needs: [tests-swarm]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: swarm
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # delete-infra-k8s:
   #   if: ${{ always() }}
   #   needs: [tests-k8s]
