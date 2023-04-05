@@ -9,6 +9,9 @@
 - Fix blog posts retrieval in the UI
 - Fix missing logs for UI
 - Fix error log if BunkerNet ip list is empty
+- Updated python dependencies
+- Gunicorn will now show the logs in the console for the UI
+- BunkerNet job will now create the ip list file at the beginning of the job to avoid errors
 
 ## v1.4.7 - 2023/02/27
 
