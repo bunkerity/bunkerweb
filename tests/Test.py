@@ -10,6 +10,8 @@ from re import sub, search, MULTILINE
 from datetime import datetime
 from subprocess import run
 from logger import log
+from string import ascii_lowercase, digits
+from random import choice
 
 class Test(ABC) :
 
@@ -148,3 +150,7 @@ class Test(ABC) :
                 new_path = sub(old, new, full_path)
                 if full_path != new_path :
                     rename(full_path, new_path)
+
+    def random_string(length) :
+        charset = ascii_lowercase + digits
+        return ''.join(choice(charset) for i in range(length))
