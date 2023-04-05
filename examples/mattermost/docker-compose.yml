@@ -8,6 +8,7 @@ services:
       - 443:8443
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - AUTO_LETS_ENCRYPT=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
