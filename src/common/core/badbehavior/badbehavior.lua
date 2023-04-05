@@ -31,9 +31,9 @@ function _M.increase(premature, use_redis, ip, count_time, ban_time, threshold)
 			return false, "can't get counts from the datastore : " .. err
 		end
 		if local_counter == nil then
-			counter = 0
+			local_counter = 0
 		end
-		counter = counter + 1
+		counter = local_counter + 1
 	end
 	-- Call decrease later
 	local ok, err = ngx.timer.at(count_time, _M.decrease, use_redis, ip)
