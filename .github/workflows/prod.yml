@@ -396,426 +396,427 @@ jobs:
           trivyignores: .trivyignore
 
   # Create Docker infra
-  infra-create-docker:
-    needs: [security]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Generate SSH keypair
-        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-      - name: Install ansible
-        run: pip install ansible
-      - name: Install ansible libs
-        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
-      # Create Docker infra
-      - run: ./tests/create.sh docker
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/docker
-        if: always()
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tf-docker
-          path: terraform.tar
+  # infra-create-docker:
+  #   needs: [security]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Generate SSH keypair
+  #       run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Set up Python 3.10
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #         cache: 'pip'
+  #     - name: Install ansible
+  #       run: pip install ansible
+  #     - name: Install ansible libs
+  #       run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
+  #     # Create Docker infra
+  #     - run: ./tests/create.sh docker
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     - run: tar -cvf terraform.tar /tmp/docker
+  #       if: always()
+  #     - uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: tf-docker
+  #         path: terraform.tar
 
-  # Create autoconf infra
-  infra-create-autoconf:
-    needs: [security]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Generate SSH keypair
-        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-      - name: Install ansible
-        run: pip install ansible
-      - name: Install ansible libs
-        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
-      # Create Autoconf infra
-      - run: ./tests/create.sh autoconf
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/autoconf
-        if: always()
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tf-autoconf
-          path: terraform.tar
+  # # Create autoconf infra
+  # infra-create-autoconf:
+  #   needs: [security]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Generate SSH keypair
+  #       run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Set up Python 3.10
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #         cache: 'pip'
+  #     - name: Install ansible
+  #       run: pip install ansible
+  #     - name: Install ansible libs
+  #       run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
+  #     # Create Autoconf infra
+  #     - run: ./tests/create.sh autoconf
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     - run: tar -cvf terraform.tar /tmp/autoconf
+  #       if: always()
+  #     - uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: tf-autoconf
+  #         path: terraform.tar
 
-  # Create swarm infra
-  infra-create-swarm:
-    needs: [security]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Generate SSH keypair
-        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-      - name: Install ansible
-        run: pip install ansible
-      - name: Install ansible libs
-        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
-      # Create Swarm infra
-      - run: ./tests/create.sh swarm
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/swarm
-        if: always()
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tf-swarm
-          path: terraform.tar
+  # # Create swarm infra
+  # infra-create-swarm:
+  #   needs: [security]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Generate SSH keypair
+  #       run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Set up Python 3.10
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #         cache: 'pip'
+  #     - name: Install ansible
+  #       run: pip install ansible
+  #     - name: Install ansible libs
+  #       run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
+  #     # Create Swarm infra
+  #     - run: ./tests/create.sh swarm
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     - run: tar -cvf terraform.tar /tmp/swarm
+  #       if: always()
+  #     - uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: tf-swarm
+  #         path: terraform.tar
   
-  # Create k8s infra
-  infra-create-k8s:
-    needs: [security]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-      # Create k8s infra
-      - run: ./tests/create.sh k8s
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/k8s
-        if: always()
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tf-k8s
-          path: terraform.tar
+  # # Create k8s infra
+  # infra-create-k8s:
+  #   needs: [security]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Install kubectl
+  #       uses: azure/setup-kubectl@v3
+  #     # Create k8s infra
+  #     - run: ./tests/create.sh k8s
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     - run: tar -cvf terraform.tar /tmp/k8s
+  #       if: always()
+  #     - uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: tf-k8s
+  #         path: terraform.tar
 
-  # Create linux infra
-  infra-create-linux:
-    needs: [build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Generate SSH keypair
-        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-      - name: Install ansible
-        run: pip install ansible
-      - name: Install ansible libs
-        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
-      # Create Linux infra
-      - run: ./tests/create.sh linux
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/linux
-        if: always()
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tf-linux
-          path: terraform.tar
+  # # Create linux infra
+  # infra-create-linux:
+  #   needs: [build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Generate SSH keypair
+  #       run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Set up Python 3.10
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #         cache: 'pip'
+  #     - name: Install ansible
+  #       run: pip install ansible
+  #     - name: Install ansible libs
+  #       run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner && ansible-galaxy collection install --timeout 120 community.general
+  #     # Create Linux infra
+  #     - run: ./tests/create.sh linux
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     - run: tar -cvf terraform.tar /tmp/linux
+  #       if: always()
+  #     - uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: tf-linux
+  #         path: terraform.tar
 
-  # Perform docker tests
-  tests-docker:
-    needs: [infra-create-docker]
-    runs-on: [self-hosted, bw-docker]
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Login to private repository
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest local/bw-tests:latest
-      - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
-      # Do tests
-      - name: Run Docker tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "docker"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  # # Perform docker tests
+  # tests-docker:
+  #   needs: [infra-create-docker]
+  #   runs-on: [self-hosted, bw-docker]
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     - name: Pull BW image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest local/bw-tests:latest
+  #     - name: Install test dependencies
+  #       run: pip3 install -r tests/requirements.txt
+  #     # Do tests
+  #     - name: Run Docker tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "docker"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
-  # Perform autoconf tests
-  tests-autoconf:
-    needs: [infra-create-autoconf]
-    runs-on: [self-hosted, bw-autoconf]
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Login to private repository
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest local/bw-tests:latest
-      - name: Pull autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest local/bw-autoconf-tests:latest
-      - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
-      # Do tests
-      - name: Run Autoconf tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "autoconf"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  # # Perform autoconf tests
+  # tests-autoconf:
+  #   needs: [infra-create-autoconf]
+  #   runs-on: [self-hosted, bw-autoconf]
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     - name: Pull BW image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest local/bw-tests:latest
+  #     - name: Pull autoconf image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest local/bw-autoconf-tests:latest
+  #     - name: Install test dependencies
+  #       run: pip3 install -r tests/requirements.txt
+  #     # Do tests
+  #     - name: Run Autoconf tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "autoconf"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
-  # Perform swarm tests
-  tests-swarm:
-    needs: [infra-create-swarm]
-    runs-on: [self-hosted, bw-swarm]
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Login to private repository
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 192.168.42.100:5000/bw-tests:latest && docker push 192.168.42.100:5000/bw-tests:latest
-      - name: Pull autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 192.168.42.100:5000/bw-autoconf-tests:latest && docker push 192.168.42.100:5000/bw-autoconf-tests:latest
-      - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
-      # Do tests
-      - name: Run Swarm tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "swarm"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  # # Perform swarm tests
+  # tests-swarm:
+  #   needs: [infra-create-swarm]
+  #   runs-on: [self-hosted, bw-swarm]
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     - name: Pull BW image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests-amd64:latest 192.168.42.100:5000/bw-tests:latest && docker push 192.168.42.100:5000/bw-tests:latest
+  #     - name: Pull autoconf image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-autoconf-tests-amd64:latest 192.168.42.100:5000/bw-autoconf-tests:latest && docker push 192.168.42.100:5000/bw-autoconf-tests:latest
+  #     - name: Install test dependencies
+  #       run: pip3 install -r tests/requirements.txt
+  #     # Do tests
+  #     - name: Run Swarm tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "swarm"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
-  # Perform k8s tests
-  tests-k8s:
-    needs: [infra-create-k8s]
-    runs-on: [ubuntu-latest]
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-k8s
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C /
-      - uses: azure/setup-kubectl@v3
-      - uses: azure/setup-helm@v3
-      # Do tests
-      - name: Run Kubernetes tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-          KUBECONFIG: "/tmp/k8s/kubeconfig"
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          IMAGE_TAG: "latest"
+  # # Perform k8s tests
+  # tests-k8s:
+  #   needs: [infra-create-k8s]
+  #   runs-on: [ubuntu-latest]
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install test dependencies
+  #       run: pip3 install -r tests/requirements.txt
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-k8s
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C /
+  #     - uses: azure/setup-kubectl@v3
+  #     - uses: azure/setup-helm@v3
+  #     # Do tests
+  #     - name: Run Kubernetes tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  #         KUBECONFIG: "/tmp/k8s/kubeconfig"
+  #         PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #         IMAGE_TAG: "latest"
 
-  # Perform linux tests
-  tests-linux:
-    needs: [infra-create-linux]
-    runs-on: [self-hosted, bw-linux]
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Login to private repository
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      - name: Pull BW linux ubuntu test image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest local/bw-ubuntu:latest
-      - name: Pull BW linux debian test image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest local/bw-debian:latest
-      - name: Pull BW linux centos test image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest local/bw-centos:latest
-      - name: Pull BW linux fedora test image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest local/bw-fedora:latest
-      - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
-      # Do tests
-      - name: Run Linux ubuntu tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux debian tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux centos tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux fedora tests
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  # # Perform linux tests
+  # tests-linux:
+  #   needs: [infra-create-linux]
+  #   runs-on: [self-hosted, bw-linux]
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Login to private repository
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ secrets.PRIVATE_REGISTRY }}
+  #         username: registry
+  #         password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  #     - name: Pull BW linux ubuntu test image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-ubuntu:latest local/bw-ubuntu:latest
+  #     - name: Pull BW linux debian test image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-debian:latest local/bw-debian:latest
+  #     - name: Pull BW linux centos test image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-centos:latest local/bw-centos:latest
+  #     - name: Pull BW linux fedora test image
+  #       run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-fedora:latest local/bw-fedora:latest
+  #     - name: Install test dependencies
+  #       run: pip3 install -r tests/requirements.txt
+  #     # Do tests
+  #     - name: Run Linux ubuntu tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  #     - name: Run Linux debian tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  #     - name: Run Linux centos tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "centos"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+  #     - name: Run Linux fedora tests
+  #       run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
+  #       env:
+  #         TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+  #         ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
 
-  # Remove docker infra
-  infra-rm-docker:
-    if: ${{ always() }}
-    needs: [tests-docker]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-docker
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
-      # Remove Docker infra
-      - run: ./tests/rm.sh docker
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # # Remove docker infra
+  # infra-rm-docker:
+  #   if: ${{ always() }}
+  #   needs: [tests-docker]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-docker
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+  #     # Remove Docker infra
+  #     - run: ./tests/rm.sh docker
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
-  # Remove docker infra
-  infra-rm-autoconf:
-    if: ${{ always() }}
-    needs: [tests-autoconf]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-autoconf
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
-      # Remove Autoconf infra
-      - run: ./tests/rm.sh autoconf
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # # Remove docker infra
+  # infra-rm-autoconf:
+  #   if: ${{ always() }}
+  #   needs: [tests-autoconf]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-autoconf
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+  #     # Remove Autoconf infra
+  #     - run: ./tests/rm.sh autoconf
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
-  # Remove swarm infra
-  infra-rm-swarm:
-    if: ${{ always() }}
-    needs: [tests-swarm]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-swarm
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
-      # Remove Swarm infra
-      - run: ./tests/rm.sh swarm
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # # Remove swarm infra
+  # infra-rm-swarm:
+  #   if: ${{ always() }}
+  #   needs: [tests-swarm]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-swarm
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+  #     # Remove Swarm infra
+  #     - run: ./tests/rm.sh swarm
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
-  # Remove k8s infra
-  infra-rm-k8s:
-    if: ${{ always() }}
-    needs: [tests-k8s]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - uses: azure/setup-kubectl@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-k8s
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C /
-      # Remove k8s infra
-      - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
-        continue-on-error: true
-        env:
-          KUBECONFIG: /tmp/k8s/kubeconfig
-      - run: ./tests/rm.sh k8s
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # # Remove k8s infra
+  # infra-rm-k8s:
+  #   if: ${{ always() }}
+  #   needs: [tests-k8s]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - uses: azure/setup-kubectl@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-k8s
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C /
+  #     # Remove k8s infra
+  #     - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
+  #       continue-on-error: true
+  #       env:
+  #         KUBECONFIG: /tmp/k8s/kubeconfig
+  #     - run: ./tests/rm.sh k8s
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
-  # Remove linux infra
-  infra-rm-linux:
-    if: ${{ always() }}
-    needs: [tests-linux]
-    runs-on: ubuntu-latest
-    steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - uses: actions/download-artifact@v3
-        with:
-          name: tf-linux
-          path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
-      # Remove Linux infra
-      - run: ./tests/rm.sh linux
-        env:
-          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # # Remove linux infra
+  # infra-rm-linux:
+  #   if: ${{ always() }}
+  #   needs: [tests-linux]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Prepare
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #     - name: Install terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: tf-linux
+  #         path: /tmp
+  #     - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+  #     # Remove Linux infra
+  #     - run: ./tests/rm.sh linux
+  #       env:
+  #         CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Push to docker hub
   push-docker-hub:
-    needs: [tests-linux, tests-docker, tests-autoconf, tests-swarm, tests-k8s, build-bw-386, build-bw-arm]
+    # needs: [tests-linux, tests-docker, tests-autoconf, tests-swarm, tests-k8s, build-bw-386, build-bw-arm]
+    needs: [build-bw-amd64, build-bw-arm, build-bw-386, security]
     runs-on: ubuntu-latest
     steps:
       # Prepare
@@ -890,7 +891,8 @@ jobs:
 
   # Push to packagecloud
   push-packagecloud:
-    needs: [tests-linux, tests-docker, tests-autoconf, tests-swarm, tests-k8s]
+    # needs: [tests-linux, tests-docker, tests-autoconf, tests-swarm, tests-k8s]
+    needs: [build-bw-ubuntu, build-bw-debian, build-bw-centos, build-bw-fedora]
     runs-on: ubuntu-latest
     steps:
       # Prepare
