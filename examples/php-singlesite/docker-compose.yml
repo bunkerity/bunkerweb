@@ -68,4 +68,4 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  net-docker:
+  bw-docker:
