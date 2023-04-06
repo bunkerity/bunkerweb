@@ -86,7 +86,7 @@ services:
       - MYSQL_DATABASE=magentodb
       - MYSQL_USER=user
       - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
-    network:
+    networks:
       - bw-services
 
 volumes:
