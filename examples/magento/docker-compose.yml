@@ -33,7 +33,7 @@ services:
     depends_on:
       - mybunker
     environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375"
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
     volumes:
       - bw-data:/data
     networks:
