@@ -2,6 +2,30 @@
 
 All notable changes to `lua-resty-session` will be documented in this file.
 
+## [4.0.3] - 2023-02-21
+### Fixed
+- fix(*): redis authorization
+
+## [4.0.2] - 2023-02-15
+### Fixed
+- fix(*): hkdf is not approved by FIPS, use PBKDF2 instead on FIPS-mode
+
+
+## [4.0.1] - 2023-02-05
+### Fixed
+- fix(session): clear_request cookie to check remember_meta correctly before using it
+
+### Added
+- feat(opm): add more dependencies in requires
+- feat(opm): add right version number requirements
+- docs(readme): add remark on dependencies on installation section
+
+
+## [4.0.0] - 2023-02-01
+- Full rewrite of the library, and is not backwards compatible. Refer new
+  documentation on this new library.
+
+
 ## [3.10] - 2022-01-14
 ### Fixed
 - 3.9 introduced an issue where calling session:regenerate with flush=true,

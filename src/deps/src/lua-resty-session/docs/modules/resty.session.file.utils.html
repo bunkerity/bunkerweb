@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Session Library for OpenResty Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>resty.session</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/resty.session.html">resty.session</a></li>
+  <li><a href="../modules/resty.session.dshm.html">resty.session.dshm</a></li>
+  <li><a href="../modules/resty.session.file.html">resty.session.file</a></li>
+  <li><a href="../modules/resty.session.file.thread.html">resty.session.file.thread</a></li>
+  <li><strong>resty.session.file.utils</strong></li>
+  <li><a href="../modules/resty.session.memcached.html">resty.session.memcached</a></li>
+  <li><a href="../modules/resty.session.mysql.html">resty.session.mysql</a></li>
+  <li><a href="../modules/resty.session.postgres.html">resty.session.postgres</a></li>
+  <li><a href="../modules/resty.session.redis.html">resty.session.redis</a></li>
+  <li><a href="../modules/resty.session.redis.cluster.html">resty.session.redis.cluster</a></li>
+  <li><a href="../modules/resty.session.redis.common.html">resty.session.redis.common</a></li>
+  <li><a href="../modules/resty.session.redis.sentinel.html">resty.session.redis.sentinel</a></li>
+  <li><a href="../modules/resty.session.shm.html">resty.session.shm</a></li>
+  <li><a href="../modules/resty.session.utils.html">resty.session.utils</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>resty.session.file.utils</code></h1>
+<p>File storage utilities</p>
+<p>
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#file_create">file_create (path, content)</a></td>
+	<td class="summary">Store data in file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#file_append">file_append (path, data)</a></td>
+	<td class="summary">Append data in file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#file_read">file_read (path)</a></td>
+	<td class="summary">Read data from a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_modification">get_modification (path)</a></td>
+	<td class="summary">Get the value modification time of a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#meta_get_key">meta_get_key (audience, subject)</a></td>
+	<td class="summary">Given an audience and a subject, generate a metadata key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#validate_file_name">validate_file_name (prefix, suffix, name, filename)</a></td>
+	<td class="summary">Validate a file name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cleanup">cleanup (path, prefix, suffix, name, current_time)</a></td>
+	<td class="summary">Clean up expired session and metadata files.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "file_create"></a>
+    <strong>file_create (path, content)</strong>
+    </dt>
+    <dd>
+    Store data in file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         file path
+        </li>
+        <li><span class="parameter">content</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         file content
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "file_append"></a>
+    <strong>file_append (path, data)</strong>
+    </dt>
+    <dd>
+    Append data in file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         file path
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         file data
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "file_read"></a>
+    <strong>file_read (path)</strong>
+    </dt>
+    <dd>
+    Read data from a file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         file to read
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        content</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_modification"></a>
+    <strong>get_modification (path)</strong>
+    </dt>
+    <dd>
+    Get the value modification time of a file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the path to the file
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "meta_get_key"></a>
+    <strong>meta_get_key (audience, subject)</strong>
+    </dt>
+    <dd>
+    Given an audience and a subject, generate a metadata key.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">audience</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session audience
+        </li>
+        <li><span class="parameter">subject</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session subject
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        metadata key
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "validate_file_name"></a>
+    <strong>validate_file_name (prefix, suffix, name, filename)</strong>
+    </dt>
+    <dd>
+    Validate a file name.
+ Run a few checks to try to determine if the file is managed by this library
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prefix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the prefix for session files
+        </li>
+        <li><span class="parameter">suffix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the suffix for session files
+        </li>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         cookie name
+        </li>
+        <li><span class="parameter">filename</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the name of the file
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">true</span> or <span class="type">false</span></span>
+        whether the file is managed by the library or not
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cleanup"></a>
+    <strong>cleanup (path, prefix, suffix, name, current_time)</strong>
+    </dt>
+    <dd>
+    Clean up expired session and metadata files.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the path where sessions are stored
+        </li>
+        <li><span class="parameter">prefix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the prefix for session files
+        </li>
+        <li><span class="parameter">suffix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the suffix for session files
+        </li>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         cookie name
+        </li>
+        <li><span class="parameter">current_time</span>
+            <span class="types"><span class="type">number</span></span>
+         current time
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">true</span> or <span class="type">false</span></span>
+        whether clean up completed
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-02-15 16:31:40 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

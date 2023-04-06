@@ -168,9 +168,9 @@ git_secure_clone "https://github.com/openresty/lua-resty-lrucache.git" "2ab2624c
 echo "ℹ️ Downloading lua-resty-dns"
 git_secure_clone "https://github.com/openresty/lua-resty-dns.git" "869d2fbb009b6ada93a5a10cb93acd1cc12bd53f"
 
-# lua-resty-session v3.10
+# lua-resty-session v4.0.3
 echo "ℹ️ Downloading lua-resty-session"
-git_secure_clone "https://github.com/bungle/lua-resty-session.git" "e6bf2630c90df7b3db35e859f0aa7e096af3e918"
+git_secure_clone "https://github.com/bungle/lua-resty-session.git" "3373d8138930b6d1e255bb80d9127503019301d7"
 
 # lua-resty-random v?
 echo "ℹ️ Downloading lua-resty-random"
