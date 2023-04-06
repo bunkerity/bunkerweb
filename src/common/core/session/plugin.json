@@ -22,6 +22,33 @@
       "label": "Session name",
       "regex": "^\\w+$",
       "type": "text"
+    },
+    "SESSION_IDLING_TIMEOUT": {
+      "context": "global",
+      "default": "1800",
+      "help": "Maximum time (in seconds) of inactivity before the session is invalidated.",
+      "id": "session-idling-timeout",
+      "label": "Session idling timeout",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "SESSION_ROLLING_TIMEOUT": {
+      "context": "global",
+      "default": "3600",
+      "help": "Maximum time (in seconds) before a session must be renewed.",
+      "id": "session-rolling-timeout",
+      "label": "Session rolling timeout",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "SESSION_ABSOLUTE_TIMEOUT": {
+      "context": "global",
+      "default": "86400",
+      "help": "Maximum time (in seconds) before a session is destroyed.",
+      "id": "session-absolute-timeout",
+      "label": "Session absolute timeout",
+      "regex": "^\\d+$",
+      "type": "text"
     }
   }
 }

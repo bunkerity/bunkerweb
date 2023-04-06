@@ -64,6 +64,7 @@ function _M:init()
         }
     end
     session.init(config)
+    return true, "session init successful"
 end
 
 function _M:access()
@@ -78,7 +79,9 @@ function _M:access()
         if err then
             return false, "can't refresh session : " .. err, nil, nil
         end
+        return true, "session exists", nil, nil
     end
+    return true, "session doesn't exist", nil, nil
 end
 
 return _M
