@@ -60,7 +60,7 @@ VOLUME /data /etc/nginx
 
 WORKDIR /usr/share/bunkerweb/autoconf
 
-USER root:nginx
+USER nginx:nginx
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 
