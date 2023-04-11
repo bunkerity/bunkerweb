@@ -76,4 +76,8 @@ helpers.call_plugin = function(plugin, method)
     return true, ret
 end
 
+helpers.get_plugins = function()
+
+end
+
 return helpers
