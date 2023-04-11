@@ -12,11 +12,11 @@ end
 function _M:init()
     -- Get vars
     local vars = {
-        ["SESSION_SECRET"] = "",
-        ["SESSION_NAME"] = "",
-        ["SESSION_IDLING_TIMEOUT"] = "",
-        ["SESSION_ROLLING_TIMEOUT"] = "",
-        ["SESSION_ABSOLUTE_TIMEOUT"] = "",
+        ["SESSIONS_SECRET"] = "",
+        ["SESSIONS_NAME"] = "",
+        ["SESSIONS_IDLING_TIMEOUT"] = "",
+        ["SESSIONS_ROLLING_TIMEOUT"] = "",
+        ["SESSIONS_ABSOLUTE_TIMEOUT"] = "",
         ["USE_REDIS"] = "",
         ["REDIS_HOST"] = "",
         ["REDIS_PORT"] = "",
@@ -33,16 +33,16 @@ function _M:init()
     end
     -- Init configuration
     local config = {
-        secret = vars["SESSION_SECRET"],
-        cookie_name = vars["SESSION_NAME"],
-        idling_timeout = tonumber(vars["SESSION_IDLING_TIMEOUT"]),
-        rolling_timeout = tonumber(vars["SESSION_ROLLING_TIMEOUT"]),
-        absolute_timeout = tonumber(vars["SESSION_ABSOLUTE_TIMEOUT"])
+        secret = vars["SESSIONS_SECRET"],
+        cookie_name = vars["SESSIONS_NAME"],
+        idling_timeout = tonumber(vars["SESSIONS_IDLING_TIMEOUT"]),
+        rolling_timeout = tonumber(vars["SESSIONS_ROLLING_TIMEOUT"]),
+        absolute_timeout = tonumber(vars["SESSIONS_ABSOLUTE_TIMEOUT"])
     }
-    if vars["SESSION_SECRET"] == "random" then
+    if vars["SESSIONS_SECRET"] == "random" then
         config.secret = utils.rand(16)
     end
-    if vars["SESSION_NAME"] == "random" then
+    if vars["SESSIONS_NAME"] == "random" then
         config.cookie_name = utils.rand(16)
     end
     if vars["USE_REDIS"] == "no" then
