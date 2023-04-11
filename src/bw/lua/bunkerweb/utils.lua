@@ -1,10 +1,12 @@
-local datastore		= require "datastore"
+local datastore		= require "bunkerweb.datastore"
 local ipmatcher		= require "resty.ipmatcher"
 local cjson			= require "cjson"
 local resolver		= require "resty.dns.resolver"
-local mmdb			= require "mmdb"
-local logger		= require "logger"
+local mmdb			= require "bunkerweb.mmdb"
+local logger		= require "bunkerweb.logger"
 local session		= require "resty.session"
+
+logger:new("UTILS")
 
 local utils = {}
 
@@ -214,7 +216,7 @@ utils.get_integration = function()
 	end
 	local ok, err = datastore:set("misc_integration", integration)
 	if not ok then
-		logger.log(ngx.ERR, "UTILS", "Can't cache integration to datastore : " .. err)
+		logger:log(ngx.ERR, "can't cache integration to datastore : " .. err)
 	end
 	return integration
 end
@@ -226,14 +228,14 @@ utils.get_version = function()
 	end
 	local f, err = io.open("/usr/share/bunkerweb/VERSION", "r")
 	if not f then
-		logger.log(ngx.ERR, "UTILS", "Can't read VERSION file : " .. err)
+		logger:log(ngx.ERR, "can't read VERSION file : " .. err)
 		return "unknown"
 	end
 	version = f:read("*a")
 	f:close()
 	local ok, err = datastore:set("misc_version", version)
 	if not ok then
-		logger.log(ngx.ERR, "UTILS", "Can't cache version to datastore : " .. err)
+		logger:log(ngx.ERR, "can't cache version to datastore : " .. err)
 	end
 	return version
 end
@@ -360,7 +362,7 @@ utils.get_deny_status = function()
 	end
 	local status, err = datastore:get("variable_DENY_HTTP_STATUS")
 	if not status then
-		logger.log(ngx.ERR, "UTILS", "Can't get DENY_HTTP_STATUS variable " .. err)
+		logger:log(ngx.ERR, "can't get DENY_HTTP_STATUS variable " .. err)
 		return 403
 	end
 	return tonumber(status)
@@ -372,7 +374,7 @@ utils.get_session = function()
 	end
 	local _session, err, exists = session.start()
 	if err then
-		logger.log(ngx.ERR, "UTILS", "can't start session : " .. err)
+		logger:log(ngx.ERR, "UTILS", "can't start session : " .. err)
 	end
 	ngx.ctx.session = _session
 	ngx.ctx.session_err = err
@@ -390,7 +392,7 @@ utils.save_session = function()
 		ngx.ctx.session:set_data(ngx.ctx.session_data)
 		local ok, err = ngx.ctx.session:save()
 		if err then
-			logger.log(ngx.ERR, "UTILS", "can't save session : " .. err)
+			logger:log(ngx.ERR, "can't save session : " .. err)
 			return false,  "can't save session : " .. err
 		end
 		ngx.ctx.session_saved = true
@@ -411,7 +413,7 @@ end
 
 utils.get_session = function(key)
 	if ngx.ctx.session and not ngx.ctx.session_err then
-		return true, "value set", ngx.ctx.session_data[key]
+		return true, "value get", ngx.ctx.session_data[key]
 	end
 	return false, "no session"
 end

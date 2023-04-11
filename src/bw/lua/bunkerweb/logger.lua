@@ -1,9 +1,13 @@
-local M			= {}
 local errlog	= require "ngx.errlog"
+local class     = require "middleclass"
+local logger	= class("logger")
 
-function M.log (level, prefix, msg)
-	errlog.raw_log(level, "[" .. prefix .. "] " .. msg) 
+function logger:new(prefix)
+	self.prefix = prefix
 end
 
-return M
+function logger:log(level, msg)
+	errlog.raw_log(level, "[" .. self.prefix .. "] " .. msg) 
+end
 
+return logger

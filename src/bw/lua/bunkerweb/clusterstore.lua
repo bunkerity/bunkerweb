@@ -1,6 +1,6 @@
 local M     = {}
 local redis = require "resty.redis"
-local utils = require "utils"
+local utils = require "bunkerweb.utils"
 
 function M:connect()
     -- Instantiate object
