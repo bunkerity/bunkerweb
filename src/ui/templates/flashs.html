@@ -73,8 +73,7 @@
       class="{% if category == 'error' %}bg-red-500 {%else%} bg-green-500 {%endif %} my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
     >
       <div class="flex justify-between align-top items-start">
-        {% if category == 'error' or "Please log in to access this page." in
-        message|safe %}
+        {% if category == 'error' %}
         <h5 class="text-lg mb-0 text-white">Error</h5>
         {%else%}
         <h5 class="text-lg mb-0 text-white">Success</h5>
@@ -96,9 +95,7 @@
           </svg>
         </button>
       </div>
-      <p class="text-white mt-2 mb-0 text-sm">
-        {{ message|safe }} {%if "log in" in message|safe%} test {%endif%}
-      </p>
+      <p class="text-white mt-2 mb-0 text-sm">{{ message|safe }}</p>
     </div>
     {% endfor %}
     <!-- end flash message-->
