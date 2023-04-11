@@ -38,7 +38,7 @@ try :
                 continue
             if os.path.isfile("/opt/bunkerweb/cache/selfsigned/" + first_server + ".pem") :
                 continue
-            ret, ret_status = generate_cert(first_server, os.getenv(first_server + "_SELF_SIGNED_SSL_EXPIRY"), os.getenv(first_server + "_SELF_SIGNED_SSL_SUBJ"))
+            ret, ret_status = generate_cert(first_server, os.getenv(first_server + "_SELF_SIGNED_SSL_EXPIRY", "365"), os.getenv(first_server + "_SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"))
             if not ret :
                 status = ret_status
             elif ret_status == 1 and ret_status != 2 :
@@ -47,7 +47,7 @@ try :
     # Singlesite case
     elif os.getenv("GENERATE_SELF_SIGNED_SSL") == "yes" and os.getenv("SERVER_NAME") != "" :
         first_server = os.getenv("SERVER_NAME").split(" ")[0]
-        ret, ret_status = generate_cert(first_server, os.getenv("SELF_SIGNED_SSL_EXPIRY"), os.getenv("SELF_SIGNED_SSL_SUBJ"))
+        ret, ret_status = generate_cert(first_server, os.getenv("SELF_SIGNED_SSL_EXPIRY", "365"), os.getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"))
         if not ret :
             status = ret_status
         elif ret_status == 1 and ret_status != 2 :
