@@ -4,6 +4,7 @@ local cjson			= require "cjson"
 local resolver		= require "resty.dns.resolver"
 local mmdb			= require "mmdb"
 local logger		= require "logger"
+local session		= require "resty.session"
 
 local utils = {}
 
@@ -363,6 +364,56 @@ utils.get_deny_status = function()
 		return 403
 	end
 	return tonumber(status)
+end
+
+utils.get_session = function()
+	if ngx.ctx.session then
+		return ngx.ctx.session, ngx.ctx.session_err, ngx.ctx.session_exists
+	end
+	local _session, err, exists = session.start()
+	if err then
+		logger.log(ngx.ERR, "UTILS", "can't start session : " .. err)
+	end
+	ngx.ctx.session = _session
+	ngx.ctx.session_err = err
+	ngx.ctx.session_exists = exists
+	ngx.ctx.session_saved = false
+	ngx.ctx.session_data = _session.get_data()
+	if not ngx.ctx.session_data then
+		ngx.ctx.session_data = {}
+	end
+	return _session, err, exists
+end
+
+utils.save_session = function()
+	if ngx.ctx.session and not ngx.ctx.session_err and not ngx.ctx.session_saved then
+		ngx.ctx.session:set_data(ngx.ctx.session_data)
+		local ok, err = ngx.ctx.session:save()
+		if err then
+			logger.log(ngx.ERR, "UTILS", "can't save session : " .. err)
+			return false,  "can't save session : " .. err
+		end
+		ngx.ctx.session_saved = true
+		return true, "session saved"
+	elseif ngx.ctx.session_saved then
+		return true, "session already saved"
+	end
+	return true, "no session"
+end
+
+utils.set_session = function(key, value)
+	if ngx.ctx.session and not ngx.ctx.session_err then
+		ngx.ctx.session_data[key] = value
+		return true, "value set"
+	end
+	return true, "no session"
+end
+
+utils.get_session = function(key)
+	if ngx.ctx.session and not ngx.ctx.session_err then
+		return true, "value set", ngx.ctx.session_data[key]
+	end
+	return false, "no session"
 end
 
 return utils

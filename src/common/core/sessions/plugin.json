@@ -1,52 +1,52 @@
 {
-  "id": "session",
+  "id": "sessions",
   "order": 999,
-  "name": "Session",
+  "name": "Sessions",
   "description": "Management of session used by other plugins.",
   "version": "0.1",
   "settings": {
-    "SESSION_SECRET": {
+    "SESSIONS_SECRET": {
       "context": "global",
       "default": "random",
       "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
       "id": "session-secret",
-      "label": "Session secret",
+      "label": "Sessions secret",
       "regex": "^\\w+$",
       "type": "password"
     },
-    "SESSION_NAME": {
+    "SESSIONS_NAME": {
       "context": "global",
       "default": "random",
       "help": "Name of the cookie given to clients.",
-      "id": "session-name",
-      "label": "Session name",
+      "id": "sessions-name",
+      "label": "Sessions name",
       "regex": "^\\w+$",
       "type": "text"
     },
-    "SESSION_IDLING_TIMEOUT": {
+    "SESSIONS_IDLING_TIMEOUT": {
       "context": "global",
       "default": "1800",
       "help": "Maximum time (in seconds) of inactivity before the session is invalidated.",
-      "id": "session-idling-timeout",
-      "label": "Session idling timeout",
+      "id": "sessions-idling-timeout",
+      "label": "Sessions idling timeout",
       "regex": "^\\d+$",
       "type": "text"
     },
-    "SESSION_ROLLING_TIMEOUT": {
+    "SESSIONS_ROLLING_TIMEOUT": {
       "context": "global",
       "default": "3600",
       "help": "Maximum time (in seconds) before a session must be renewed.",
-      "id": "session-rolling-timeout",
-      "label": "Session rolling timeout",
+      "id": "sessions-rolling-timeout",
+      "label": "Sessions rolling timeout",
       "regex": "^\\d+$",
       "type": "text"
     },
-    "SESSION_ABSOLUTE_TIMEOUT": {
+    "SESSIONS_ABSOLUTE_TIMEOUT": {
       "context": "global",
       "default": "86400",
       "help": "Maximum time (in seconds) before a session is destroyed.",
-      "id": "session-absolute-timeout",
-      "label": "Session absolute timeout",
+      "id": "sessions-absolute-timeout",
+      "label": "SessionS absolute timeout",
       "regex": "^\\d+$",
       "type": "text"
     }
