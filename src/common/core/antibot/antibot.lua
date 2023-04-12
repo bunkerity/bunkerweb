@@ -1,9 +1,8 @@
-local _M        = {}
-_M.__index      = _M
-
-local utils     = require "utils"
-local datastore = require "datastore"
-local logger    = require "logger"
+local class		= require "middleclass"
+local plugin	= require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
+local datastore = require "bunkerweb.datastore"
+local logger    = require "bunkerweb.logger"
 local cjson     = require "cjson"
 local captcha   = require "antibot.captcha"
 local base64    = require "base64"
@@ -11,103 +10,119 @@ local sha256    = require "resty.sha256"
 local str       = require "resty.string"
 local http      = require "resty.http"
 
-function _M.new()
-	local self = setmetatable({}, _M)
-	return self, nil
+local antibot	= class("antibot", plugin)
+
+function antibot:new()
+	plugin.new(self, "antibot")
 end
 
-function _M:init()
+function antibot:init()
 	-- Check if init is needed
 	local init_needed, err = utils.has_not_variable("USE_ANTIBOT", "no")
 	if init_needed == nil then
-		return false, err
+		return self:ret(false, err)
 	end
 	if not init_needed then
-		return true, "no service uses Antibot, skipping init"
+		return self:ret(true, "no service uses Antibot, skipping init")
 	end
 	-- Load templates
 	local templates = {}
 	for i, template in ipairs({ "javascript", "captcha", "recaptcha", "hcaptcha" }) do
 		local f, err = io.open("/usr/share/bunkerweb/core/antibot/files/" .. template .. ".html")
 		if not f then
-			return false, "error while loading " .. template .. ".html : " .. err
+			return self:ret(false, "error while loading " .. template .. ".html : " .. err)
 		end
 		templates[template] = f:read("*all")
 		f:close()
 	end
 	local ok, err = datastore:set("plugin_antibot_templates", cjson.encode(templates))
 	if not ok then
-		return false, "can't save templates to datastore : " .. err
+		return self:ret(false, "can't save templates to datastore : " .. err)
 	end
-	return true, "success"
+	return self:ret(true, "success")
 end
 
-function _M:access()
+function antibot:access()
 	-- Check if access is needed
 	local antibot, err = utils.get_variable("USE_ANTIBOT")
 	if antibot == nil then
-		return false, err, nil, nil
+		return self:ret(false, err)
 	end
 	if antibot == "no" then
-		return true, "Antibot not activated", nil, nil
+		return self:ret(true, "antibot not activated")
 	end
 
 	-- Get challenge URI
 	local challenge_uri, err = utils.get_variable("ANTIBOT_URI")
 	if not challenge_uri then
-		return false, "can't get Antibot URI from datastore : " .. err, nil, nil
+		return self:ret(false, "can't get antibot URI from datastore : " .. err)
 	end
 
 	-- Prepare challenge
 	local ok, err = self:prepare_challenge(antibot, challenge_uri)
 	if not ok then
-		return false, "can't prepare challenge : " .. err, true, ngx.HTTP_INTERNAL_SERVER_ERROR
+		return self:ret(false, "can't prepare challenge : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 
 	-- Don't go further if client resolved the challenge
 	local resolved, err, original_uri = self:challenge_resolved(antibot)
 	if resolved == nil then
-		return false, "can't check if challenge is resolved : " .. err, nil, nil
+		return self:ret(false, "can't check if challenge is resolved : " .. err)
 	end
 	if resolved then
 		if ngx.var.uri == challenge_uri then
-			return true, "client already resolved the challenge", true, ngx.redirect(original_uri)
+			return self:ret(true, "client already resolved the challenge", nil, original_uri)
 		end
-		return true, "client already resolved the challenge", nil, nil
+		return self:ret(true, "client already resolved the challenge")
 	end
 
 	-- Redirect to challenge page
 	if ngx.var.uri ~= challenge_uri then
-		return true, "redirecting client to the challenge uri", true, ngx.redirect(challenge_uri)
+		return self:ret(true, "redirecting client to the challenge uri", nil, challenge_uri)
 	end
 
-	-- Display challenge
+	-- Display challenge needed
 	if ngx.var.request_method == "GET" then
-		local ok, err = self:display_challenge(antibot, challenge_uri)
-		if not ok then
-			return false, "display challenge error : " .. err, true, ngx.HTTP_INTERNAL_SERVER_ERROR
-		end
-		return true, "displaying challenge to client", true, ngx.HTTP_OK
+		ngx.ctx.antibot_display_content = true
+		return self:ret(true, "displaying challenge to client", ngx.HTTP_OK)
 	end
 
 	-- Check challenge
 	if ngx.var.request_method == "POST" then
 		local ok, err, redirect = self:check_challenge(antibot)
 		if ok == nil then
-			return false, "check challenge error : " .. err, true, ngx.HTTP_INTERNAL_SERVER_ERROR
+			return self:ret(false, "check challenge error : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 		end
 		if redirect then
-			return true, "check challenge redirect : " .. redirect, true, ngx.redirect(redirect)
+			return self:ret(true, "check challenge redirect : " .. redirect, nil, redirect)
 		end
-		local ok, err = self:display_challenge(antibot)
-		if not ok then
-			return false, "display challenge error : " .. err, true, ngx.HTTP_INTERNAL_SERVER_ERROR
-		end
-		return true, "displaying challenge to client", true, ngx.HTTP_OK
+		ngx.ctx.antibot_display_content = true
+		return self:ret(true, "displaying challenge to client", ngx.HTTP_OK)
 	end
 
 	-- Method is suspicious, let's deny the request
-	return true, "unsupported HTTP method for Antibot", true, utils.get_deny_status()
+	return self:ret(true, "unsupported HTTP method for antibot", utils.get_deny_status())
+end
+
+function antibot:content()
+	-- Check if access is needed
+	local antibot, err = utils.get_variable("USE_ANTIBOT")
+	if antibot == nil then
+		return self:ret(false, err)
+	end
+	if antibot == "no" then
+		return self:ret(true, "antibot not activated")
+	end
+	-- Check if display content is needed
+	if not ngx.ctx.antibot_display_content then
+		return self:ret(true, "display content not needed")
+	end
+	-- Display content
+	local ok, err = self:display_challenge(antibot)
+	if not ok then
+		return self:ret(false, "display challenge error : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
+	end
+	
 end
 
 function _M:challenge_resolved(antibot)

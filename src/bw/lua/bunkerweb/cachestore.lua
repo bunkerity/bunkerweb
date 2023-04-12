@@ -1,5 +1,5 @@
 local mlcache		= require "resty.mlcache"
-local clogger		= require "bunkerweb.logger"
+local logger		= require "bunkerweb.logger"
 local class     	= require "middleclass"
 local cachestore	= class("cachestore")
 
@@ -35,7 +35,7 @@ local cache, err = mlcache.new(
 		ipc_shm = ipc_shm
 	}
 )
-local logger = clogger:new("CACHESTORE")
+logger:new("CACHESTORE")
 if not store then
 	logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
 end

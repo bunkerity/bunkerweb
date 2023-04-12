@@ -11,8 +11,8 @@ function plugin:get_id()
     return self.id
 end
 
-function plugin:ret(ret, msg, status)
-    return {ret = ret, msg = msg, status = status}
+function plugin:ret(ret, msg, status, redirect)
+    return {ret = ret, msg = msg, status = status, redirect = redirect}
 end
 
 return plugin
