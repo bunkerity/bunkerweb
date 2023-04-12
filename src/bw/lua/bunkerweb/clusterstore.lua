@@ -1,13 +1,10 @@
-local M     = {}
-local redis = require "resty.redis"
-local utils = require "bunkerweb.utils"
+local class     = require "middleclass"
+local utils     = require "bunkerweb.utils"
+local redis     = require "resty.redis"
 
-function M:connect()
-    -- Instantiate object
-    local redis_client, err = redis:new()
-    if redis_client == nil then
-        return false, err
-    end
+local clusterstore = class("clusterstore")
+
+function clusterstore:new()
     -- Get variables
     local variables = {
         ["REDIS_HOST"] = "",
@@ -18,22 +15,35 @@ function M:connect()
         ["REDIS_KEEPALIVE_IDLE"] = "",
         ["REDIS_KEEPALIVE_POOL"] = ""
     }
+    -- Set them for later user
+    self.variables = {}
     for k, v in pairs(variables) do
         local value, err = utils.get_variable(k, false)
         if value == nil then
             return false, err
         end
-        variables[k] = value
+        self.variables[k] = value
+    end
+    -- Don't instantiate a redis object for now
+    self.redis_client = nil
+    return true, "success"
+end
+
+function clusterstore:connect()
+    -- Instantiate object
+    local redis_client, err = redis:new()
+    if redis_client == nil then
+        return false, err
     end
     -- Set timeouts
-    redis_client:set_timeouts(tonumber(variables["REDIS_TIMEOUT"]), tonumber(variables["REDIS_TIMEOUT"]), tonumber(variables["REDIS_TIMEOUT"]))
+    redis_client:set_timeouts(tonumber(self.variables["REDIS_TIMEOUT"]), tonumber(self.variables["REDIS_TIMEOUT"]), tonumber(self.variables["REDIS_TIMEOUT"]))
     -- Connect
     local options = {
-        ssl = variables["REDIS_SSL"] == "yes",
+        ssl = self.variables["REDIS_SSL"] == "yes",
         pool = "bw",
-        pool_size = tonumber(variables["REDIS_KEEPALIVE_POOL"])
+        pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
     }
-    local ok, err = redis_client:connect(variables["REDIS_HOST"], tonumber(variables["REDIS_PORT"]), options)
+    local ok, err = redis_client:connect(self.variables["REDIS_HOST"], tonumber(self.variables["REDIS_PORT"]), options)
     if not ok then
         return false, err
     end
@@ -48,24 +58,55 @@ function M:connect()
             return false, err
         end
     end
-    return redis_client
+    self.redis_client = redis_client
+    return return true, "success"
 end
 
-function M:close(redis_client)
-    -- Get variables
-    local variables = {
-        ["REDIS_KEEPALIVE_IDLE"] = "",
-        ["REDIS_KEEPALIVE_POOL"] = ""
-    }
-    for k, v in pairs(variables) do
-        local value, err = utils.get_variable(k, false)
-        if value == nil then
-            return false, err
-        end
-        variables[k] = value
+function clusterstore:close()
+    if self.redis_client then
+        -- Equivalent to close but keep a pool of connections
+        return self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
     end
-    -- Equivalent to close but keep a pool of connections
-    return redis_client:set_keepalive(tonumber(variables["REDIS_KEEPALIVE_IDLE"]), tonumber(variables["REDIS_KEEPALIVE_POOL"]))
+    return false, "not connected"
 end
 
-return M
+function clusterstore:call(method, ...)
+    -- Check if we are connected
+    if not self.redis_client then
+        return false, "not connected"
+    end
+    -- Call method
+    return self.redis_client[method](self.redis_client, ...)
+end
+
+function clusterstore:multi(calls)
+    -- Check if we are connected
+    if not self.redis_client then
+        return false, "not connected"
+    end
+    -- Start transaction
+    local ok, err = self.redis_client:multi()
+    if not ok then
+        return false, "multi() failed : " .. err
+    end
+    -- Loop on calls
+    for i, call in ipairs(calls) do
+        local method = call[1]
+        local args = table.unpack(call[2])
+        local ok, err = self.redis_client[method](self.redis_client, args)
+        if not ok then
+            return false, method + "() failed : " .. err
+        end
+    end
+    -- Exec transaction
+    local exec, err = self.redis_client:exec()
+    if not exec then
+        return false, "exec() failed : " .. err
+    end
+    if type(exec) ~= "table" then
+        return false, "exec() result is not a table"
+    end
+    return true, "success", exec
+end
+
+return clusterstore
