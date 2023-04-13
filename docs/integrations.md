@@ -972,9 +972,11 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 
 === "Vagrantfile"
 
-    <pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; overflow-x: auto; white-space: pre; border-radius: 4px;"><code>Vagrant.configure("2") do |config|
+    ```shell
+    Vagrant.configure("2") do |config|
       config.vm.box = "bunkerity/bunkerity"
-    end</code></pre>
+    end
+    ```
 
     Depending on the virtualization provider you choose, you may need to install additional plugins:
 
@@ -984,8 +986,9 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 
 === "New Vagrant Box"
 
-    <pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; white-space: nowrap; border-radius: 4px;"><code>
-    vagrant init bunkerity/bunkerity</code></pre>
+    ```shell
+    vagrant init bunkerity/bunkerity
+    ```
 
     Depending on the virtualization provider you choose, you may need to install additional plugins:
 
@@ -995,21 +998,22 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 
 After installing the necessary plugins for your chosen virtualization provider, run the following command to start the virtual machine and install BunkerWeb:
 
-<pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; white-space: nowrap; border-radius: 4px;"><code>
-vagrant up --provider=virtualbox # or --provider=vmware_desktop or --provider=libvirt</code></pre>
+```shell
+vagrant up --provider=virtualbox # or --provider=vmware_desktop or --provider=libvirt
+```
 
+Finally, to access the virtual machine using SSH, execute the following command:
 
-Finally to access the virtual machine using SSH, execute the following command:
-
-<pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; white-space: nowrap; border-radius: 4px;"><code>
-vagrant ssh</code></pre>
-
+```shell
+vagrant ssh
+```
 
 **Example Vagrantfile**
 
   Here is an example `Vagrantfile` for installing BunkerWeb on Ubuntu 22.04 "Jammy" using the different supported virtualization providers:
 
-<pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; overflow-x: auto; white-space: pre; border-radius: 4px;"><code>Vagrant.configure("2") do |config|
+```shell
+Vagrant.configure("2") do |config|
 
   # Ubuntu 22.04 "Jammy"
   config.vm.box = "bunkerity/bunkerity"
@@ -1019,9 +1023,11 @@ vagrant ssh</code></pre>
   config.vm.provider "virtualbox"
 
   # For VMware
-  # config.vm.provider "vmware_workstation" # Windows/Linux
+  # config.vm.provider "vmware_desktop" # Windows
+  # config.vm.provider "vmware_workstation" # Linux
 
   # For libvirt
   # config.vm.provider "libvirt"
 
-end</code></pre>
+end
+```
