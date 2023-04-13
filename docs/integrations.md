@@ -942,3 +942,86 @@ Configuration of BunkerWeb is done by using specific role variables :
 | `custom_plugins` | string | Path of the plugins directory to upload. | empty value |
 | `custom_www_owner` | string | Default owner for www files and folders. | `nginx` |
 | `custom_www_group` | string | Default group for www files and folders. | `nginx` |
+
+## Vagrant
+
+<figure markdown>
+  ![Overwiew](assets/img/integration-vagrant.svg){ align=center }
+  <figcaption>BunkerWeb integration with Vagrant</figcaption>
+</figure>
+
+List of supported providers :
+
+- vmware_desktop 
+- virtualbox 
+- libvirt
+
+**_Note on Supported Base Images_**  
+
+Please be aware that the provided Vagrant boxes are based **exclusively on Ubuntu 22.04 "Jammy"**. While BunkerWeb supports other Linux distributions, the Vagrant setup currently only supports Ubuntu 22.04 as the base operating system. This ensures a consistent and reliable environment for users who want to deploy BunkerWeb using Vagrant.
+
+Similar to other BunkerWeb integrations, the Vagrant setup uses **NGINX version 1.20.2**. This specific version is required to ensure compatibility and smooth functioning with BunkerWeb. Additionally, the Vagrant box includes **PHP** pre-installed, providing a ready-to-use environment for hosting PHP-based applications alongside BunkerWeb.
+
+By using the provided Vagrant box based on Ubuntu 22.04 "Jammy", you benefit from a well-configured and integrated setup, allowing you to focus on developing and securing your applications with BunkerWeb without worrying about the underlying infrastructure.
+
+Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the supported virtualization providers (VirtualBox, VMware, and libvirt):
+
+
+1. Make sure you have Vagrant and one of the supported virtualization providers (VirtualBox, VMware, or libvirt) installed on your system.
+2. There are two ways to install the Vagrant box with BunkerWeb: either by using a provided Vagrantfile to configure your virtual machine or by creating a new box based on the existing BunkerWeb Vagrant box, offering you flexibility in how you set up your development environment.
+
+=== "Vagrantfile"
+
+    <pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; overflow-x: auto; white-space: pre; border-radius: 4px;"><code>Vagrant.configure("2") do |config|
+      config.vm.box = "bunkerity/bunkerity"
+    end</code></pre>
+
+    Depending on the virtualization provider you choose, you may need to install additional plugins:
+
+    * For **VMware**, install the `vagrant-vmware-desktop` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
+    * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
+    * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
+
+=== "New Vagrant Box"
+
+    <pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; white-space: nowrap; border-radius: 4px;"><code>
+    vagrant init bunkerity/bunkerity</code></pre>
+
+    Depending on the virtualization provider you choose, you may need to install additional plugins:
+
+    * For **VMware**, install the `vagrant-vmware-desktop` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
+    * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
+    * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
+
+After installing the necessary plugins for your chosen virtualization provider, run the following command to start the virtual machine and install BunkerWeb:
+
+<pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; white-space: nowrap; border-radius: 4px;"><code>
+vagrant up --provider=virtualbox # or --provider=vmware_desktop or --provider=libvirt</code></pre>
+
+
+Finally to access the virtual machine using SSH, execute the following command:
+
+<pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; white-space: nowrap; border-radius: 4px;"><code>
+vagrant ssh</code></pre>
+
+
+**Example Vagrantfile**
+
+  Here is an example `Vagrantfile` for installing BunkerWeb on Ubuntu 22.04 "Jammy" using the different supported virtualization providers:
+
+<pre style="border: 1px solid #ccc; padding: 0.5rem; display: block; overflow-x: auto; white-space: pre; border-radius: 4px;"><code>Vagrant.configure("2") do |config|
+
+  # Ubuntu 22.04 "Jammy"
+  config.vm.box = "bunkerity/bunkerity"
+
+  # Uncomment the desired virtualization provider
+  # For VirtualBox (default)
+  config.vm.provider "virtualbox"
+
+  # For VMware
+  # config.vm.provider "vmware_workstation" # Windows/Linux
+
+  # For libvirt
+  # config.vm.provider "libvirt"
+
+end</code></pre>
