@@ -36,7 +36,7 @@ local cache, err = mlcache.new(
 	}
 )
 logger:new("CACHESTORE")
-if not store then
+if not cache then
 	logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
 end
 
@@ -49,40 +49,27 @@ end
 function cachestore:get(key)
 	local function callback(key)
 		-- Connect to redis
-		local clusterstore = require "clusterstore"
-		local redis, err = clusterstore:connect()
-		if not redis then
+		local clusterstore = require "bunkerweb.clusterstore"
+		local ok, err = clusterstore:new()
+		if not ok then
+			return nil, "clusterstore:new() failed : " .. err, nil
+		end
+		local ok, err = clusterstore:connect()
+		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
 		end
-		-- Start transaction
-		local ok, err = redis:multi()
-		if not ok then
-			clusterstore:close(redis)
-			return nil, "multi() failed : " .. err, nil
-		end
-		-- GET
-		local ok, err = redis:get(key)
-		if not ok then
-			clusterstore:close(redis)
-			return nil, "get() failed : " .. err, nil
-		end
-		-- TTL
-		local ok, err = redis:ttl(key)
-		if not ok then
-			clusterstore:close(redis)
-			return nil, "ttl() failed : " .. err, nil
-		end
 		-- Exec transaction
-		local exec, err = redis:exec()
+		local calls = {
+			{"get", {key}},
+			{"ttl", {key}}
+		}
+		-- Exec transaction
+		local exec, err = clusterstore:multi(calls)
 		if err then
-			clusterstore:close(redis)
+			clusterstore:close()
 			return nil, "exec() failed : " .. err, nil
 		end
 		-- Get results
-		if type(exec) ~= "table" then
-			clusterstore:close(redis)
-			return nil, "exec() result is not a table", nil
-		end
 		local value = exec[1]
 		if type(value) == "table" then
 			clusterstore:close(redis)
