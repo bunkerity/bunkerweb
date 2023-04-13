@@ -802,6 +802,38 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf versionlock add bunkerweb
 	```
 
+=== "Redhat"
+
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+	```
+
+    You should now be able to install NGINX 1.20.2 :
+	```shell
+	sudo dnf install nginx-1.20.2
+	```
+
+	And finally install BunkerWeb 1.4.6 :
+    ```shell
+	dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    sudo dnf check-update && \
+    sudo dnf install -y bunkerweb-1.4.6
+    ```
+
+	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+	```shell
+	sudo dnf versionlock add nginx && \
+	sudo dnf versionlock add bunkerweb
+	```
+
 === "From source"
 
     The first step is to install NGINX 1.20.2 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
