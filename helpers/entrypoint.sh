@@ -2,7 +2,8 @@
 
 . /opt/bunkerweb/helpers/utils.sh
 
-cat /opt/bunkerweb/logo.ascii
+ascii_array=($(ls /opt/bunkerweb/*.ascii))
+cat ${ascii_array[$(($RANDOM % ${#ascii_array[@]}))]}
 
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /opt/bunkerweb/VERSION) ..."
 

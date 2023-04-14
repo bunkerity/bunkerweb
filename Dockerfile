@@ -41,7 +41,7 @@ COPY misc /opt/bunkerweb/misc
 COPY utils /opt/bunkerweb/utils
 COPY settings.json /opt/bunkerweb/settings.json
 COPY VERSION /opt/bunkerweb/VERSION
-COPY logo.ascii /opt/bunkerweb/logo.ascii
+COPY *.ascii /opt/bunkerweb
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
