@@ -2,6 +2,9 @@
 
 . /usr/share/bunkerweb/helpers/utils.sh
 
+ascii_array=($(ls /usr/share/bunkerweb/*.ascii))
+cat ${ascii_array[$(($RANDOM % ${#ascii_array[@]}))]}
+
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSION) ..."
 
 # setup and check /data folder
