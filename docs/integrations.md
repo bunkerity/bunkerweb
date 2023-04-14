@@ -804,11 +804,26 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 === "Redhat"
 
-    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+    The first step is to add CentOS official repository. Create the following file at `/etc/yum.repos.d/centos.repo` :
+    ```conf
+    [centos]
+    name=CentOS-$releasever - Base
+    baseurl=http://mirror.centos.org/centos/$releasever/BaseOS/$basearch/os/
+    gpgcheck=1
+    enabled=1
+    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+	```
+
+    The import the official GPG key of CentOS :
+    ```shell
+    rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
+    ```
+
+      Go to NGINX 1.20.2 by first adding the official NGINX repository. Create the following file at /etc/yum.repos.d/nginx.repo :
     ```conf
     [nginx-stable]
     name=nginx stable repo
-    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    baseurl=http://nginx.org/packages/rhel/$releasever/$basearch/
     gpgcheck=1
     enabled=1
     gpgkey=https://nginx.org/keys/nginx_signing.key
@@ -817,7 +832,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
     You should now be able to install NGINX 1.20.2 :
 	```shell
-	sudo dnf install nginx-1.20.2
+	sudo dnf install nginx-1.20.2-1.el8.ngx.x86_64
 	```
 
 	And finally install BunkerWeb 1.4.6 :
