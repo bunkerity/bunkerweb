@@ -7,19 +7,17 @@ local clusterstore	= require "bunkerweb.clusterstore"
 local redis = class("redis", plugin)
 
 function redis:new()
-	plugin.new(self, "redis")
-	-- Store variable for later use
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if use_redis == nil then
-		return self:ret(false, "can't check USE_REDIS variable : " .. err)
+	-- Call parent new
+	local ok, err = plugin.new(self, "redis")
+	if not ok then
+		return false, err
 	end
-	self.use_redis = use_redis == "yes"
-	return self:ret(true, "success")
+	return true, "success"
 end
 
 function redis:init()
 	-- Check if init is needed
-	if not self.use_redis then
+	if self.variables["USE_REDIS"] then
 		return self:ret(true, "redis not used")
 	end
 	-- Check redis connection

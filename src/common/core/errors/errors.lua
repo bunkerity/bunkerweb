@@ -1,17 +1,21 @@
-local _M        = {}
-_M.__index      = _M
+local class			= require "middleclass"
+local plugin		= require "bunkerweb.plugin"
+local utils     	= require "bunkerweb.utils"
+local cachestore	= require "bunkerweb.cachestore"
+local cjson			= require "cjson"
 
-local utils     = require "utils"
-local datastore = require "datastore"
-local logger    = require "logger"
-local cjson     = require "cjson"
+local errors		= class("errors", plugin)
 
-function _M.new()
-	local self = setmetatable({}, _M)
-	return self, nil
+function errors:new()
+	-- Call parent new
+	local ok, err = plugin.new(self, "errors")
+	if not ok then
+		return false, err
+	end
+	return true, "success"
 end
 
-function _M:init()
+function errors:init()
 	-- Save default errors into datastore
 	local default_errors = {
 		["400"] = {
@@ -65,12 +69,12 @@ function _M:init()
 	}
 	local ok, err = datastore:set("plugin_errors_default_errors", cjson.encode(default_errors))
 	if not ok then
-		return false, "can't save default errors to datastore : " .. err
+		return self:ret(false, "can't save default errors to datastore : " .. err)
 	end
 	-- Save generic template into datastore
 	local f, err = io.open("/usr/share/bunkerweb/core/errors/files/error.html", "r")
 	if not f then
-		return false, "can't open error.html : " .. err
+		return self:ret(false, "can't open error.html : " .. err)
 	end
 	local template = f:read("*all")
 	f:close()
@@ -81,7 +85,7 @@ function _M:init()
 	return true, "success"
 end
 
-function _M.error_html(code)
+function errors:error_html(code)
 	-- Load default errors texts
 	local default_errors, err = datastore:get("plugin_errors_default_errors")
 	if not default_errors then
@@ -98,4 +102,4 @@ function _M.error_html(code)
 		default_errors[code].body2), "success"
 end
 
-return _M
+return errors

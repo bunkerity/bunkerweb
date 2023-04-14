@@ -10,7 +10,7 @@ local blacklist = class("blacklist", plugin)
 
 function blacklist:new()
 	-- Call parent new
-	local ok, err = plugin.new(self, "antibot")
+	local ok, err = plugin.new(self, "blacklist")
 	if not ok then
 		return false, err
 	end

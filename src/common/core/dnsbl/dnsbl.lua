@@ -5,11 +5,11 @@ local cachestore	= require "bunkerweb.cachestore"
 local cjson			= require "cjson"
 local resolver		= require "resty.dns.resolver"
 
-local dnsbl			= class("country", plugin)
+local dnsbl			= class("dnsbl", plugin)
 
 local dnsbl:new()
 	-- Call parent new
-	local ok, err = plugin.new(self, "country")
+	local ok, err = plugin.new(self, "dnsbl")
 	if not ok then
 		return false, err
 	end

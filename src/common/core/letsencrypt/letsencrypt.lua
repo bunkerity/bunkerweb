@@ -1,23 +1,27 @@
-local _M = {}
-_M.__index = _M
+local class		= require "middleclass"
+local plugin	= require "bunkerweb.plugin"
+local utils		= require "bunkerweb.utils"
+local cjson		= require "cjson"
 
-local logger = require "logger"
-local cjson  = require "cjson"
+local letsencrypt = class("letsencrypt", plugin)
 
-function _M.new()
-	local self = setmetatable({}, _M)
-	return self, nil
-end
-
-function _M:access()
-	if string.sub(ngx.var.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/" then
-		logger.log(ngx.NOTICE, "LETS-ENCRYPT", "Got a visit from Let's Encrypt, let's whitelist it.")
-		return true, "success", true, ngx.exit(ngx.OK)
+function letsencrypt:new()
+	-- Call parent new
+	local ok, err = plugin.new(self, "letsencrypt")
+	if not ok then
+		return false, err
 	end
-	return true, "success", false, nil
 end
 
-function _M:api()
+function letsencrypt:access()
+	if string.sub(ngx.var.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/" then
+		self.logger:log(ngx.NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
+		return self:ret(true, "visit from LE", ngx.OK)
+	end
+	return self:ret(true, "success")
+end
+
+function letsencrypt:api()
 	if not string.match(ngx.var.uri, "^/lets%-encrypt/challenge$") or
 			(ngx.var.request_method ~= "POST" and ngx.var.request_method ~= "DELETE") then
 		return false, nil, nil
@@ -47,4 +51,4 @@ function _M:api()
 	return true, ngx.HTTP_NOT_FOUND, { status = "error", msg = "unknown request" }
 end
 
-return _M
+return letsencrypt
