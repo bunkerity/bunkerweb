@@ -79,5 +79,3 @@ except:
     sys_exit(1)
 finally:
     Path("/var/tmp/bunkerweb/autoconf.healthy").unlink(missing_ok=True)
-
-

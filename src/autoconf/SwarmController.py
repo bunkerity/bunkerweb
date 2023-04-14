@@ -36,7 +36,7 @@ class SwarmController(Controller, ConfigCaller):
                 instance_env[variable] = value
 
         for task in controller_instance.tasks():
-            if task["DesiredState"] != "running" :
+            if task["DesiredState"] != "running":
                 continue
             instances.append(
                 {
@@ -112,7 +112,9 @@ class SwarmController(Controller, ConfigCaller):
                 continue
             config_site = ""
             if "bunkerweb.CONFIG_SITE" in config.attrs["Spec"]["Labels"]:
-                if not self._is_service_present(config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']) :
+                if not self._is_service_present(
+                    config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_SITE"]
+                ):
                     self.__logger.warning(
                         f"Ignoring config {config_name} because {config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']} doesn't exist",
                     )
@@ -131,11 +133,13 @@ class SwarmController(Controller, ConfigCaller):
         )
 
     def __event(self, event_type):
-        while True :
+        while True:
             locked = False
             error = False
-            try :
-                for _ in self.__client.events(decode=True, filters={"type": event_type}):
+            try:
+                for _ in self.__client.events(
+                    decode=True, filters={"type": event_type}
+                ):
                     self.__internal_lock.acquire()
                     locked = True
                     try:
@@ -152,7 +156,9 @@ class SwarmController(Controller, ConfigCaller):
                             f"Catched Swarm event ({event_type}), deploying new configuration ..."
                         )
                         if not self.apply_config():
-                            self.__logger.error("Error while deploying new configuration")
+                            self.__logger.error(
+                                "Error while deploying new configuration"
+                            )
                         else:
                             self.__logger.info(
                                 "Successfully deployed new configuration 🚀",
@@ -163,7 +169,7 @@ class SwarmController(Controller, ConfigCaller):
                         )
                     self.__internal_lock.release()
                     locked = False
-            except :
+            except:
                 self.__logger.error(
                     f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}",
                 )

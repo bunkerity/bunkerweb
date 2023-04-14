@@ -167,11 +167,11 @@
       "every": "once",
       "reload": false
     },
-		{
-			"name": "update-check",
-			"file": "update-check.py",
-			"every": "day",
-			"reload": false
-		}
+    {
+      "name": "update-check",
+      "file": "update-check.py",
+      "every": "day",
+      "reload": false
+    }
   ]
 }

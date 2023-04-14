@@ -11,11 +11,11 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro):
         super().__init__(name, "linux", timeout, tests)
         self._domains = {
-            r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-            r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-            r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
-            r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-            r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3")
+            r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
+            r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
+            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
+            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
+            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
         }
         if not distro in ("ubuntu", "debian", "fedora", "centos", "rhel"):
             raise Exception(f"unknown distro {distro}")
@@ -77,7 +77,7 @@ class LinuxTest(Test):
             log(
                 "LINUX",
                 "❌",
-                "exception while running LinuxTest.init()\n" + format_exc(),
+                f"exception while running LinuxTest.init()\n{format_exc()}",
             )
             return False
         return True
@@ -93,7 +93,7 @@ class LinuxTest(Test):
                 ret = False
         except:
             log(
-                "LINUX", "❌", "exception while running LinuxTest.end()\n" + format_exc()
+                "LINUX", "❌", f"exception while running LinuxTest.end()\n{format_exc()}"
             )
             return False
         return ret
@@ -109,7 +109,7 @@ class LinuxTest(Test):
             proc = self.docker_cp(self.__distro, test, f"/opt/{self._name}")
             if proc.returncode != 0:
                 raise Exception("docker cp failed (test)")
-            setup = test + "/setup-linux.sh"
+            setup = f"{test}/setup-linux.sh"
             if isfile(setup):
                 proc = self.docker_exec(
                     self.__distro, f"cd /opt/{self._name} && ./setup-linux.sh"
@@ -136,7 +136,7 @@ class LinuxTest(Test):
             log(
                 "LINUX",
                 "❌",
-                "exception while running LinuxTest._setup_test()\n" + format_exc(),
+                f"exception while running LinuxTest._setup_test()\n{format_exc()}",
             )
             self._debug_fail()
             self._cleanup_test()
@@ -156,7 +156,7 @@ class LinuxTest(Test):
             log(
                 "DOCKER",
                 "❌",
-                "exception while running LinuxTest._cleanup_test()\n" + format_exc(),
+                f"exception while running LinuxTest._cleanup_test()\n{format_exc()}",
             )
             return False
         return True

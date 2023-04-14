@@ -56,7 +56,7 @@ class Config(ConfigCaller):
             for file, data in self.__configs[config_type].items():
                 site = None
                 name = file
-                if "/" in file :
+                if "/" in file:
                     exploded = file.split("/")
                     site = exploded[0]
                     name = exploded[1]

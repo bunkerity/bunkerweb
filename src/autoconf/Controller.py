@@ -104,10 +104,10 @@ class Controller(ABC):
     def process_events(self):
         pass
 
-    def _is_service_present(self, server_name) :
-        for service in self._services :
-            if not "SERVER_NAME" in service or service["SERVER_NAME"] == "" :
+    def _is_service_present(self, server_name):
+        for service in self._services:
+            if not "SERVER_NAME" in service or service["SERVER_NAME"] == "":
                 continue
-            if server_name == service["SERVER_NAME"].split(" ")[0] :
+            if server_name == service["SERVER_NAME"].split(" ")[0]:
                 return True
         return False
