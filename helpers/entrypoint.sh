@@ -2,6 +2,8 @@
 
 . /opt/bunkerweb/helpers/utils.sh
 
+cat /opt/bunkerweb/logo.ascii
+
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /opt/bunkerweb/VERSION) ..."
 
 # setup and check /data folder

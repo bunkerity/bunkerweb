@@ -1,7 +1,9 @@
 FROM nginx:1.20.2-alpine AS builder
 
 # Copy dependencies sources folder
-COPY deps /tmp/bunkerweb/deps
+COPY deps/misc /tmp/bunkerweb/deps/misc
+COPY deps/src /tmp/bunkerweb/deps/src
+COPY deps/install.sh /tmp/bunkerweb/deps/install.sh
 
 # Compile and install dependencies
 RUN apk add --no-cache --virtual build bash build autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
@@ -39,6 +41,7 @@ COPY misc /opt/bunkerweb/misc
 COPY utils /opt/bunkerweb/utils
 COPY settings.json /opt/bunkerweb/settings.json
 COPY VERSION /opt/bunkerweb/VERSION
+COPY logo.ascii /opt/bunkerweb/logo.ascii
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache bash python3 libgcc libstdc++ openssl git && \
