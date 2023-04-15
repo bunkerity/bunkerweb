@@ -35,21 +35,18 @@ class Menu {
 
 class News {
   constructor() {
-    this.BASE_URL = "https://www.staging.bunkerweb.io/";
+    this.BASE_URL = "https://bunkerweb.io/";
     this.init();
   }
 
   init() {
     window.addEventListener("load", async () => {
       try {
-        const res = await fetch(
-          "https://www.staging.bunkerweb.io/api/posts/0/2",
-          {
-            headers: {
-              method: "GET",
-            },
-          }
-        );
+        const res = await fetch("https://bunkerweb.io/api/posts/0/2", {
+          headers: {
+            method: "GET",
+          },
+        });
         return await this.render(res);
       } catch (err) {}
     });
