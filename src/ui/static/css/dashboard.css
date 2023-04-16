@@ -3375,6 +3375,11 @@ h6 {
     grid-column: span 8 / span 8;
   }
 
+  .lg\:mx-0 {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
   .lg\:mx-8 {
     margin-left: 2rem;
     margin-right: 2rem;
