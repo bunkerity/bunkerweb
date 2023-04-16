@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.11.3-alpine
 
 # Install firefox and geckodriver
 RUN apk add --no-cache --virtual .build-deps curl grep zip && \

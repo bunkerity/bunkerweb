@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.11.3-alpine
 
 # Copy python requirements
 COPY src/ui/requirements.txt /tmp/req/requirements.txt
@@ -63,4 +63,4 @@ USER ui:ui
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-ui.sh
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
-CMD ["python3", "-m", "gunicorn", "--access-logfile=-", "--graceful-timeout=0", "--bind=0.0.0.0:7000", "--workers=1", "--threads=2", "--user", "ui", "--group", "ui", "main:app"]
+CMD ["python3", "-m", "gunicorn", "--user", "ui", "--group", "ui", "main:app", "--worker-class", "gevent", "--bind", "0.0.0.0:7000", "--graceful-timeout", "0", "--access-logfile", "-", "--error-logfile", "-"]
