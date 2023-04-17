@@ -31,8 +31,27 @@ util.show( conn:getpeercertificate() )
 
 print("----------------------------------------------------------------------")
 
-for k, cert in ipairs( conn:getpeerchain() ) do
+local expectedpeerchain = { "../certs/clientAcert.pem", "../certs/rootA.pem" }
+
+local peerchain = conn:getpeerchain()
+assert(#peerchain == #expectedpeerchain)
+for k, cert in ipairs( peerchain ) do
   util.show(cert)
+  local expectedpem = assert(io.open(expectedpeerchain[k])):read("*a")
+  assert(cert:pem() == expectedpem, "peer chain mismatch @ "..tostring(k))
+end
+
+local expectedlocalchain = { "../certs/serverAcert.pem" }
+
+local localchain = assert(conn:getlocalchain())
+assert(#localchain == #expectedlocalchain)
+for k, cert in ipairs( localchain ) do
+  util.show(cert)
+  local expectedpem = assert(io.open(expectedlocalchain[k])):read("*a")
+  assert(cert:pem() == expectedpem, "local chain mismatch @ "..tostring(k))
+  if k == 1 then
+    assert(cert:pem() == conn:getlocalcertificate():pem())
+  end
 end
 
 local f = io.open(params.certificate)

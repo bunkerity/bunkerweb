@@ -52,7 +52,7 @@ install:
 script:
   - echo ${LUAJIT_COMMON_XCFLAGS}
   - valgrind --version
-  - sudo cpanm IPC::Run3
+  - /usr/bin/env perl $(command -v cpanm) --sudo --notest IPC::Run3 Test::Base Test::LongString Parallel::ForkManager  > build.log 2>&1 || (cat build.log && exit 1)
   - cd ../luajit2
   - make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS="$LUAJIT_XCFLAGS" > build.log 2>&1 || (cat build.log && exit 1)
   - sudo make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)

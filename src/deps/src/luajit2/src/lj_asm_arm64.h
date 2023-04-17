@@ -337,7 +337,8 @@ static int asm_fusemadd(ASMState *as, IRIns *ir, A64Ins ai, A64Ins air)
 {
   IRRef lref = ir->op1, rref = ir->op2;
   IRIns *irm;
-  if (lref != rref &&
+  if ((as->flags & JIT_F_OPT_FMA) &&
+      lref != rref &&
       ((mayfuse(as, lref) && (irm = IR(lref), irm->o == IR_MUL) &&
        ra_noreg(irm->r)) ||
        (mayfuse(as, rref) && (irm = IR(rref), irm->o == IR_MUL) &&
@@ -1250,7 +1251,7 @@ dotypecheck:
       tmp = ra_scratch(as, allow);
       rset_clear(allow, tmp);
     }
-    if (irt_isnum(t) && !(ir->op2 & IRSLOAD_CONVERT))
+    if (ra_hasreg(dest) && tmp != dest)
       emit_dn(as, A64I_FMOV_D_R, (dest & 31), tmp);
     /* Need type check, even if the load result is unused. */
     asm_guardcc(as, irt_isnum(t) ? CC_LS : CC_NE);

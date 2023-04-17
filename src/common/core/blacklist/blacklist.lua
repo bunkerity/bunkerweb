@@ -71,7 +71,7 @@ function blacklist:init()
 		if not ok then
 			return self:ret(false, "can't store blacklist list into datastore : " .. err)
 		end
-		return self:ret(true, "successfully loaded " .. tostring(i) .. " bad IP/network/rDNS/ASN/User-Agent/URI")
+		return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
 	end
 end
 
@@ -96,9 +96,9 @@ function blacklist:access()
 		["UA"] = false
 	}
 	for k, v in pairs(checks) do
-		local cached, err = self:is_in_cache(v)
-		if not cached and err ~= "success" then
-			self.logger:log(ngx.ERR, "error while checking cache : " .. err)
+		local ok, cached = self:is_in_cache(v)
+		if not cached then
+			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
 			return self:ret(true, k + " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
 		end
@@ -113,16 +113,16 @@ function blacklist:access()
 	-- Perform checks
 	for k, v in pairs(checks) do
 		if not already_cached[k] then
-			local blacklisted, err = self:is_blacklisted(k)
-			if blacklisted == nil then
+			local ok, blacklisted = self:is_blacklisted(k)
+			if ok == nil then
 				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is blacklisted : " .. err)
 			else
-				local ok, err = self:add_to_cache(v, blacklisted or "ok")
+				local ok, err = self:add_to_cache(v, blacklisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
 				if blacklisted ~= "ok" then
-					return self:ret(true, k + " is in cached blacklist (info : " .. blacklisted .. ")", utils.get_deny_status())
+					return self:ret(true, k + " is blacklisted (info : " .. blacklisted .. ")", utils.get_deny_status())
 				end
 			end
 		end

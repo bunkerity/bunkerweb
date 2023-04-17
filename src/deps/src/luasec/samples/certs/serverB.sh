@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-openssl req -newkey rsa:2048 -keyout serverBkey.pem -out serverBreq.pem \
+openssl req -newkey rsa:2048 -sha256 -keyout serverBkey.pem -out serverBreq.pem \
    -config ./serverB.cnf -nodes -days 365 -batch
 
 openssl x509 -req -in serverBreq.pem -sha256 -extfile ./serverB.cnf \

@@ -1,4 +1,4 @@
-FROM nginx:1.22.1-alpine AS builder
+FROM nginx:1.24.0-alpine AS builder
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
@@ -21,7 +21,7 @@ RUN apk add --no-cache --virtual .build-deps py3-pip && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del .build-deps
 
-FROM nginx:1.22.1-alpine
+FROM nginx:1.24.0-alpine
 
 # Copy dependencies
 COPY --from=builder /usr/share/bunkerweb /usr/share/bunkerweb

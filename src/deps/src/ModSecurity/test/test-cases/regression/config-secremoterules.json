@@ -36,7 +36,7 @@
     },
     "rules":[
       "SecRuleEngine On",
-      "SecRemoteRules key https://gist.githubusercontent.com/zimmerle/a4c1ec028999f7df71d0cc80f4f271ca/raw/4c74363bf4eae974180f1a82007196e58729dd16/modsecurity-regression-test-secremoterules.txt",
+      "SecRemoteRules key https://gist.githubusercontent.com/martinhsv/20705a36b7cfa8ff6d0dee0d4efce7e7/raw/faa96c7838b1fe972c1f0881efacbb440f9a4a5e/modsecurity-regression-rules.txt",
       "SecRule ARGS \"@contains somethingelse\" \"id:9,pass,t:trim\""
     ]
   },

@@ -803,8 +803,8 @@ failed to connect: connection refused
         }
 --- response_body
 failed to connect: timeout
---- no_error_log
-[alert]
+--- error_log
+lua tcp socket connect timed out
 
 
 
@@ -841,8 +841,8 @@ failed to connect: timeout
 --- response_body
 flushall: OK
 failed to blpop: timeout
---- no_error_log
-[alert]
+--- error_log
+lua tcp socket read timed out
 
 
 
@@ -879,8 +879,8 @@ failed to blpop: timeout
 --- response_body
 flushall: OK
 failed to blpop: timeout
---- no_error_log
-[alert]
+--- error_log
+lua tcp socket read timed out
 
 
 

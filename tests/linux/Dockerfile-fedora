@@ -1,6 +1,7 @@
 FROM fedora:37
 
 ENV container docker
+ENV NGINX_VERSION 1.24.0
 
 RUN dnf -y update \
     && dnf -y install systemd \
@@ -20,7 +21,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 # Nginx
 RUN dnf update -y && \
     dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
-    dnf install nginx-1.22.1 -y
+    dnf install nginx-${NGINX_VERSION} -y
 
 COPY ./package-fedora/*.rpm /opt
 

@@ -129,7 +129,7 @@
     },
     "rules":[
       "SecRuleEngine On",
-      "SecRule REMOTE_ADDR \"@ipMatchFromFile https://www.modsecurity.org/modsecurity-regression-test.txt\" \"id:1,phase:3,pass,t:trim\""
+      "SecRule REMOTE_ADDR \"@ipMatchFromFile https://gist.githubusercontent.com/martinhsv/20705a36b7cfa8ff6d0dee0d4efce7e7/raw/b9321f190eb0e81b98cb65a56db3d7e0a4f59314/modsecurity-regression-ip-list.txt\" \"id:1,phase:3,pass,t:trim\""
     ]
   }
 ]

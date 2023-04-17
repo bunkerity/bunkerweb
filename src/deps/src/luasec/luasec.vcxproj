@@ -61,7 +61,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;libeay32MDd.lib;ssleay32MDd.lib;lua5.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;libssl.lib;libcrypto.lib;lua5.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ssl.dll</OutputFile>
       <AdditionalLibraryDirectories>C:\devel\openssl\lib\VC;C:\devel\lua-dll9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -85,7 +85,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;libssl32MD.lib;libcrypto32MD.lib;lua5.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;libssl.lib;libcrypto.lib;lua5.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>C:\devel\openssl-1.1.0\lib\VC;C:\devel\lua-5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>

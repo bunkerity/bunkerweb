@@ -5,6 +5,8 @@ import os
 import time
 import pathlib
 
+NGINX_VERSION = "1.24.0"
+
 distro = sys.argv[1]
 if distro == "ubuntu":
     test_results = {

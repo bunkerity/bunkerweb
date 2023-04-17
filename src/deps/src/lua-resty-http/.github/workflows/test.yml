@@ -18,8 +18,8 @@ jobs:
     strategy:
       matrix:
         openresty_version:
-          - 1.17.8.1
-          - 1.19.3.1
+          - 1.17.8.2
+          - 1.19.9.1
 
     runs-on: ubuntu-latest
     container:
@@ -28,9 +28,10 @@ jobs:
       options: --init
 
     steps:
+    - uses: actions/checkout@v2
     - name: Install deps
       run: |
-        apk add --no-cache curl perl bash wget git perl-dev libarchive-tools
+        apk add --no-cache curl perl bash wget git perl-dev libarchive-tools nodejs
         ln -s /usr/bin/bsdtar /usr/bin/tar
 
     - name: Install CPAN
@@ -48,14 +49,12 @@ jobs:
       run: cpanm -q -n Test::Nginx
 
     - name: Install Luacov
-      run: luarocks install luacov
+      run: /usr/local/openresty/luajit/bin/luarocks install luacov
 
     - uses: actions/checkout@v2
 
     - name: Run tests
-      env:
-        TEST_COVERAGE: '1'
-      run: /usr/bin/prove -I../test-nginx/lib -r t/
+      run: make coverage
 
     - name: Coverage
       run: |

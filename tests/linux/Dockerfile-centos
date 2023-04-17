@@ -3,6 +3,7 @@ FROM quay.io/centos/centos:stream8
 RUN yum install -y initscripts  # for old "service"
 
 ENV container=docker
+ENV NGINX_VERSION 1.24.0
 
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /lib/systemd/system/multi-user.target.wants/*;\
@@ -16,7 +17,7 @@ rm -f /lib/systemd/system/anaconda.target.wants/*;
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
 RUN dnf install php-fpm curl yum-utils epel-release which -y && \
-	dnf install nginx-1.22.1 -y
+	dnf install nginx-${NGINX_VERSION} -y
 
 COPY ./package-centos/*.rpm /opt
 

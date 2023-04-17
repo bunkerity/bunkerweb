@@ -279,6 +279,7 @@ TESTS+=test/test-cases/regression/variable-variation-count.json
 TESTS+=test/test-cases/regression/variable-variation-exclusion.json
 TESTS+=test/test-cases/regression/variable-WEBAPPID.json
 TESTS+=test/test-cases/regression/variable-WEBSERVER_ERROR_LOG.json
+TESTS+=test/test-cases/regression/variable-XML.json
 TESTS+=test/test-cases/secrules-language-tests/operators/beginsWith.json
 TESTS+=test/test-cases/secrules-language-tests/operators/contains.json
 TESTS+=test/test-cases/secrules-language-tests/operators/containsWord.json

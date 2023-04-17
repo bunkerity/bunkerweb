@@ -319,7 +319,8 @@ using namespace modsecurity::operators;
 %initial-action
 {
   // Initialize the initial location.
-  @$.begin.filename = @$.end.filename = new std::string(driver.file);
+  driver.m_filenames.push_back(driver.file);
+  @$.begin.filename = @$.end.filename = &(driver.m_filenames.back());
 };
 %define parse.trace
 %define parse.error verbose
@@ -680,6 +681,7 @@ using namespace modsecurity::operators;
   RUN_TIME_VAR_TIME_YEAR                       "RUN_TIME_VAR_TIME_YEAR"
   VARIABLE                                     "VARIABLE"
   DICT_ELEMENT                                 "Dictionary element"
+  DICT_ELEMENT_WITH_EQUALS                     "Dictionary element, with equals"
   DICT_ELEMENT_REGEXP                          "Dictionary element, selected by regexp"
 ;
 

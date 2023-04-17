@@ -318,9 +318,7 @@ static GCstr *lj_str_alloc(lua_State *L, const char *str, MSize len,
   s->sid = hash;
 #else
 #ifndef STRID_RESEED_INTERVAL
-  /* s->sid = g->str.id++; */
-  /* if use g->str.id++ as sid, the order of the tab will be indeterminate. */
-  s->sid = hash;
+  s->sid = g->str.id++;
 #elif STRID_RESEED_INTERVAL
   if (!g->str.idreseed--) {
     uint64_t r = lj_prng_u64(&g->prng);

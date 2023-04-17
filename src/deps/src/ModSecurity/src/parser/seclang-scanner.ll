@@ -420,10 +420,8 @@ DICT_ELEMENT                            ([^\"|,\n \t}=]|([^\\]\\\"))+
 DICT_ELEMENT_WITH_PIPE                  [^ =\t"]+
 DICT_ELEMENT_NO_PIPE                    [^ =\|\t"]+
 DICT_ELEMENT_NO_MACRO                   ([^\"|,%{\n \t}=]|([^\\]\\\"))+
+DICT_ELEMENT_WITH_EQUALS                ([^\"|,\n \t}]|([^\\]\\\"))+
 
-DICT_ELEMENT_TWO                        [^\"\=, \t\r\n\\]*
-DICT_ELEMENT_TWO_QUOTED                 [^\"\'\=\r\n\\]*
-DICT_ELEMENT_TWO2                       [A-Za-z_ -\%\{\.\}\-\/]+
 DIRECTIVE                               (?i:SecRule)
 DIRECTIVE_SECRULESCRIPT                 (?i:SecRuleScript)
 FREE_TEXT_NEW_LINE                      [^\"|\n]+
@@ -1068,7 +1066,7 @@ EQUALS_MINUS                            (?i:=\-)
 [\/]{DICT_ELEMENT_NO_PIPE}[\/][|]         { BEGIN_PREVIOUS(); yyless(yyleng - 1); return p::make_DICT_ELEMENT_REGEXP(std::string(yytext, 1, yyleng-2), *driver.loc.back()); }
 ['][\/]{DICT_ELEMENT_WITH_PIPE}[\/][']    { BEGIN_PREVIOUS(); yyless(yyleng - 0); return p::make_DICT_ELEMENT_REGEXP(std::string(yytext, 2, yyleng-4), *driver.loc.back()); }
 ['][\/]{DICT_ELEMENT_WITH_PIPE}[\/]['][|] { BEGIN_PREVIOUS(); yyless(yyleng - 1); return p::make_DICT_ELEMENT_REGEXP(std::string(yytext, 2, yyleng-4), *driver.loc.back()); }
-{DICT_ELEMENT}                            { BEGIN_PREVIOUS(); return p::make_DICT_ELEMENT(yytext, *driver.loc.back()); }
+{DICT_ELEMENT_WITH_EQUALS}                { BEGIN_PREVIOUS(); return p::make_DICT_ELEMENT(yytext, *driver.loc.back()); }
 
 [\/]{DICT_ELEMENT_NO_PIPE}[\/][,]         { BEGIN_PREVIOUS(); yyless(yyleng - 1); return p::make_DICT_ELEMENT_REGEXP(std::string(yytext, 1, yyleng-2), *driver.loc.back()); }
 ['][\/]{DICT_ELEMENT_NO_PIPE}[\/]['][,]   { BEGIN_PREVIOUS(); yyless(yyleng - 1); return p::make_DICT_ELEMENT_REGEXP(std::string(yytext, 2, yyleng-4), *driver.loc.back()); }
@@ -1257,7 +1255,8 @@ EQUALS_MINUS                            (?i:=\-)
         std::string err;
         std::string f = modsecurity::utils::find_resource(s, *driver.loc.back()->end.filename, &err);
         driver.loc.push_back(new yy::location());
-        driver.loc.back()->begin.filename = driver.loc.back()->end.filename = new std::string(f);
+        driver.m_filenames.push_back(f);
+        driver.loc.back()->begin.filename = driver.loc.back()->end.filename = &(driver.m_filenames.back());
         yyin = fopen(f.c_str(), "r" );
         if (!yyin) {
             BEGIN(INITIAL);
@@ -1285,7 +1284,8 @@ EQUALS_MINUS                            (?i:=\-)
     for (auto& s: files) {
         std::string f = modsecurity::utils::find_resource(s, *driver.loc.back()->end.filename, &err);
         driver.loc.push_back(new yy::location());
-        driver.loc.back()->begin.filename = driver.loc.back()->end.filename = new std::string(f);
+        driver.m_filenames.push_back(f);
+        driver.loc.back()->begin.filename = driver.loc.back()->end.filename = &(driver.m_filenames.back());
 
         yyin = fopen(f.c_str(), "r" );
         if (!yyin) {
@@ -1314,7 +1314,8 @@ EQUALS_MINUS                            (?i:=\-)
     c.setKey(key);
 
     driver.loc.push_back(new yy::location());
-    driver.loc.back()->begin.filename = driver.loc.back()->end.filename = new std::string(url);
+    driver.m_filenames.push_back(url);
+    driver.loc.back()->begin.filename = driver.loc.back()->end.filename = &(driver.m_filenames.back());
     YY_BUFFER_STATE temp = YY_CURRENT_BUFFER;
     yypush_buffer_state(temp);
 

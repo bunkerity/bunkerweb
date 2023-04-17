@@ -50,7 +50,7 @@ function _M:init()
     else
         config.storage = "redis"
         config.redis = {
-            prefix = "session_",
+            prefix = "sessions_",
             connect_timeout = tonumber(vars["REDIS_TIMEOUT"]),
             send_timeout = tonumber(vars["REDIS_TIMEOUT"]),
             read_timeout = tonumber(vars["REDIS_TIMEOUT"]),

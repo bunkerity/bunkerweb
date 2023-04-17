@@ -97,7 +97,7 @@ function country:preread()
 end
 
 function country:is_in_cache(ip)
-	local ok, data = cachestore:get("plugin_country_" .. ip)
+	local ok, data = cachestore:get("plugin_country_cache_" .. ip)
 	if not ok then then
 		return false, data
 	end 
@@ -105,7 +105,7 @@ function country:is_in_cache(ip)
 end
 
 function country:add_to_cache(ip, country, result)
-	local ok, err = cachestore:set("plugin_country_" .. ip, cjson.encode({country = country, result = result}))
+	local ok, err = cachestore:set("plugin_country_cache_" .. ip, cjson.encode({country = country, result = result}))
 	if not ok then then
 		return false, err
 	end 

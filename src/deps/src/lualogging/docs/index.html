@@ -65,7 +65,7 @@ as Lua 5.1.
 <h2><a name="status"></a>Status</h2>
 
 <p>
-Current version is 1.8.0. It was developed for Lua 5.1+.
+Current version is 1.8.2. It was developed for Lua 5.1+.
 </p>
 
 <h2><a name="download"></a>Download</h2>
@@ -88,7 +88,7 @@ downloads page or installed via LuaRocks.
         </ul>
     </dd>
 
-    <dt><strong>Socket and Email appenders</strong></dt>
+    <dt><strong>Socket, Rsyslog, and Email appenders</strong></dt>
     <dd>
         <ul>
           <li><a href="http://w3.impa.br/~diego/software/luasocket/">LuaSocket</a></li>
@@ -106,6 +106,13 @@ downloads page or installed via LuaRocks.
 <h2><a name="history"></a>History</h2>
 
 <dl class="history">
+    <dt><strong>1.8.2</strong> [27/Jan/2023]</dt>
+    <dd><strong>Fix</strong>: allow to work without the debug library.</dd>
+
+    <dt><strong>1.8.1</strong> [23/Jan/2023]</dt>
+    <dd><strong>Fix</strong>: use explicit tostring, don't rely on automatic coercion.</dd>
+    <dd><strong>Fix</strong>: rsyslog appender wouldn't properly clear the socket upon an error.</dd>
+
     <dt><strong>1.8.0</strong> [22/Oct/2022]</dt>
     <dd><strong>Added</strong>: new module <code>logging.envconfig</code> to allow log configuration via
     environment variables.</dd>

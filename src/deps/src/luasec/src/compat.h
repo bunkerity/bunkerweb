@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.2.0
+ * LuaSec 1.3.1
  *
- * Copyright (C) 2006-2022 Bruno Silvestre
+ * Copyright (C) 2006-2023 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -50,6 +50,12 @@
 
 #if !defined(LIBRESSL_VERSION_NUMBER) && ((OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x10101000L)
 #define LSEC_OPENSSL_1_1_1
+#endif
+
+//------------------------------------------------------------------------------
+
+#if !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_NO_PSK)
+#define LSEC_ENABLE_PSK
 #endif
 
 //------------------------------------------------------------------------------

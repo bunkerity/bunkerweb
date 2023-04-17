@@ -106,7 +106,7 @@ end
 
 
 local _M = {
-    _VERSION = '0.16.1',
+    _VERSION = '0.17.1',
 }
 _M._USER_AGENT = "lua-resty-http/" .. _M._VERSION .. " (Lua) ngx_lua/" .. ngx.config.ngx_lua_version
 
@@ -165,7 +165,7 @@ end
 do
     local aio_connect = require "resty.http_connect"
     -- Function signatures to support:
-    -- ok, err = httpc:connect(options_table)
+    -- ok, err, ssl_session = httpc:connect(options_table)
     -- ok, err = httpc:connect(host, port, options_table?)
     -- ok, err = httpc:connect("unix:/path/to/unix.sock", options_table?)
     function _M.connect(self, options, ...)
@@ -313,8 +313,10 @@ local function _format_request(self, params)
 
     local query = params.query or ""
     if type(query) == "table" then
-        query = "?" .. ngx_encode_args(query)
-    elseif query ~= "" and str_sub(query, 1, 1) ~= "?" then
+        query = ngx_encode_args(query)
+    end
+
+    if query ~= "" and str_sub(query, 1, 1) ~= "?" then
         query = "?" .. query
     end
 
@@ -362,7 +364,21 @@ local function _receive_status(sock)
         return nil, nil, nil, err
     end
 
-    return tonumber(str_sub(line, 10, 12)), tonumber(str_sub(line, 6, 8)), str_sub(line, 14)
+    local version = tonumber(str_sub(line, 6, 8))
+    if not version then
+        return nil, nil, nil,
+               "couldn't parse HTTP version from response status line: " .. line
+    end
+
+    local status = tonumber(str_sub(line, 10, 12))
+    if not status then
+        return nil, nil, nil,
+               "couldn't parse status code from response status line: " .. line
+    end
+
+    local reason = str_sub(line, 14)
+
+    return status, version, reason
 end
 
 
@@ -621,18 +637,23 @@ end
 local function _handle_continue(sock, body)
     local status, version, reason, err = _receive_status(sock) --luacheck: no unused
     if not status then
-        return nil, nil, err
+        return nil, nil, nil, err
     end
 
     -- Only send body if we receive a 100 Continue
     if status == 100 then
-        local ok, err = sock:receive("*l") -- Read carriage return
-        if not ok then
-            return nil, nil, err
+        -- Read headers
+        local headers, err = _receive_headers(sock)
+        if not headers then
+            return nil, nil, nil, err
         end
-        _send_body(sock, body)
+
+        local ok, err = _send_body(sock, body)
+        if not ok then
+            return nil, nil, nil, err
+        end
     end
-    return status, version, err
+    return status, version, reason, err
 end
 
 
@@ -750,11 +771,11 @@ function _M.read_response(self, params)
     -- If we expect: continue, we need to handle this, sending the body if allowed.
     -- If we don't get 100 back, then status is the actual status.
     if params.headers["Expect"] == "100-continue" then
-        local _status, _version, _err = _handle_continue(sock, params.body)
+        local _status, _version, _reason, _err = _handle_continue(sock, params.body)
         if not _status then
             return nil, _err
         elseif _status ~= 100 then
-            status, version, err = _status, _version, _err -- luacheck: no unused
+            status, version, reason, err = _status, _version, _reason, _err -- luacheck: no unused
         end
     end
 

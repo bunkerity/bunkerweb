@@ -207,7 +207,7 @@ static int carith_int64(lua_State *L, CTState *cts, CDArith *ca, MMS mm)
       else
 	*up = lj_carith_powu64(u0, u1);
       break;
-    case MM_unm: *up = (uint64_t)-(int64_t)u0; break;
+    case MM_unm: *up = ~u0+1u; break;
     default:
       lj_assertL(0, "bad metamethod %d", mm);
       break;

@@ -3,7 +3,7 @@
 --license agpl3
 --version %VERSION%
 --architecture x86_64
---depends bash --depends epel-release --depends python39 --depends 'nginx = 1:1.22.1-1.el8.ngx' --depends libcurl-devel --depends libxml2 --depends lmdb-libs --depends GeoIP-devel --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends brotli --depends openssl
+--depends bash --depends epel-release --depends python39 --depends 'nginx = 1:1.24.0-1.el8.ngx' --depends libcurl-devel --depends libxml2 --depends lmdb-libs --depends GeoIP-devel --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends brotli --depends openssl
 --description "BunkerWeb %VERSION% for CentOS Stream 8"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"

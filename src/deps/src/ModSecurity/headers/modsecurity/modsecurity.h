@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -190,7 +190,7 @@ namespace modsecurity {
 
 #define MODSECURITY_MAJOR "3"
 #define MODSECURITY_MINOR "0"
-#define MODSECURITY_PATCHLEVEL "8"
+#define MODSECURITY_PATCHLEVEL "9"
 #define MODSECURITY_TAG ""
 #define MODSECURITY_TAG_NUM "100"
 
@@ -198,7 +198,7 @@ namespace modsecurity {
     MODSECURITY_MINOR "." MODSECURITY_PATCHLEVEL \
     MODSECURITY_TAG
 
-#define MODSECURITY_VERSION_NUM 3080100
+#define MODSECURITY_VERSION_NUM 3090100
 
 #define MODSECURITY_CHECK_VERSION(a) (MODSECURITY_VERSION_NUM <= a)
 

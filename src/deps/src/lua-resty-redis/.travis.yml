@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: bionic
 
 os: linux
 
@@ -13,7 +13,7 @@ addons:
       - luarocks
 
 services:
- - redis
+ - docker
 
 cache:
   directories:
@@ -30,12 +30,12 @@ env:
     - OPENSSL_PREFIX=/opt/ssl
     - OPENSSL_LIB=$OPENSSL_PREFIX/lib
     - OPENSSL_INC=$OPENSSL_PREFIX/include
-    - OPENSSL_VER=1.1.1f
+    - OPENSSL_VER=1.1.1l
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
     - TEST_NGINX_SLEEP=0.006
     - LUACHECK_VER=0.21.1
   jobs:
-    - NGINX_VERSION=1.19.3
+    - NGINX_VERSION=1.21.4
 
 before_install:
   - sudo luarocks install luacheck $LUACHECK_VER
@@ -74,5 +74,6 @@ script:
   - ngx-build $NGINX_VERSION --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-cc-opt="-I$OPENSSL_INC" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB" --add-module=../echo-nginx-module --add-module=../lua-nginx-module --add-module=../stream-lua-nginx-module --with-stream --with-stream_ssl_module --with-debug > build.log 2>&1 || (cat build.log && exit 1)
   - nginx -V
   - ldd `which nginx`|grep -E 'luajit|ssl|pcre'
-  - TEST_SUBSYSTEM=http prove -r t
-  - TEST_SUBSYSTEM=stream prove -r t
+  - docker run -d -p 6379:6379 --rm --name redis-redisbloom redislabs/rebloom:latest
+  - TEST_SUBSYSTEM=http prove -I. -r t
+  - TEST_SUBSYSTEM=stream prove -I. -r t

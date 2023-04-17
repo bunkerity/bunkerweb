@@ -1504,9 +1504,13 @@ void LJ_FASTCALL recff_cdata_arith(jit_State *J, RecordFFData *rd)
 	if (ctype_isenum(ct->info)) ct = ctype_child(cts, ct);
 	goto ok;
       } else if (ctype_isfunc(ct->info)) {
+	CTypeID id0 = i ? ctype_typeid(cts, s[0]) : 0;
 	tr = emitir(IRT(IR_FLOAD, IRT_PTR), tr, IRFL_CDATA_PTR);
 	ct = ctype_get(cts,
 	  lj_ctype_intern(cts, CTINFO(CT_PTR, CTALIGN_PTR|id), CTSIZE_PTR));
+	if (i) {
+	  s[0] = ctype_get(cts, id0);  /* cts->tab may have been reallocated. */
+	}
 	goto ok;
       } else {
 	tr = emitir(IRT(IR_ADD, IRT_PTR), tr, lj_ir_kintp(J, sizeof(GCcdata)));
@@ -1875,7 +1879,8 @@ TRef recff_bit64_tohex(jit_State *J, RecordFFData *rd, TRef hdr)
   } else {
     n = id ? 16 : 8;
   }
-  if (n < 0) { n = -n; sf |= STRFMT_F_UPPER; }
+  if (n < 0) { n = (int32_t)(~n+1u); sf |= STRFMT_F_UPPER; }
+  if ((uint32_t)n > 254) n = 254;
   sf |= ((SFormat)((n+1)&255) << STRFMT_SH_PREC);
   if (id) {
     tr = crec_ct_tv(J, ctype_get(cts, id), 0, J->base[0], &rd->argv[0]);
