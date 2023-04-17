@@ -133,7 +133,7 @@ def path_to_dict(
 
             if conf["service_id"]:
                 d["children"][
-                    [x["file_name"] for x in d["children"]].index(conf["service_id"])
+                    [x["name"] for x in d["children"]].index(conf["service_id"])
                 ]["children"].append(file_info)
             else:
                 d["children"].append(file_info)
