@@ -1,38 +1,46 @@
+
+local class     = require "middleclass"
 local datastore	= require "bunkerweb.datastore"
 local utils		= require "bunkerweb.utils"
 local cjson		= require "cjson"
 local upload	= require "resty.upload"
 
-local api = { global = { GET = {}, POST = {}, PUT = {}, DELETE = {} } }
+local api = class("api")
 
-api.response = function(self, http_status, api_status, msg)
+api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
+
+function api:initialize()
+	self.datastore = datastore:new()
+end
+
+function api:response(http_status, api_status, msg)
 	local resp = {}
 	resp["status"] = api_status
 	resp["msg"] = msg
 	return http_status, resp
 end
 
-api.global.GET["^/ping$"] = function(api)
-	return api:response(ngx.HTTP_OK, "success", "pong")
+api.global.GET["^/ping$"] = function(self)
+	return self:response(ngx.HTTP_OK, "success", "pong")
 end
 
-api.global.POST["^/reload$"] = function(api)
+api.global.POST["^/reload$"] = function(self)
 	local status = os.execute("nginx -s reload")
 	if status == 0 then
-		return api:response(ngx.HTTP_OK, "success", "reload successful")
+		return self:response(ngx.HTTP_OK, "success", "reload successful")
 	end
-	return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+	return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
 end
 
-api.global.POST["^/stop$"] = function(api)
+api.global.POST["^/stop$"] = function(self)
 	local status = os.execute("nginx -s quit")
 	if status == 0 then
-		return api:response(ngx.HTTP_OK, "success", "stop successful")
+		return self:response(ngx.HTTP_OK, "success", "stop successful")
 	end
-	return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+	return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
 end
 
-api.global.POST["^/confs$"] = function(api)
+api.global.POST["^/confs$"] = function(self)
 	local tmp = "/var/tmp/bunkerweb/api_" .. ngx.var.uri:sub(2) .. ".tar.gz"
 	local destination = "/usr/share/bunkerweb/" .. ngx.var.uri:sub(2)
 	if ngx.var.uri == "/confs" then
@@ -48,7 +56,7 @@ api.global.POST["^/confs$"] = function(api)
 	end
 	local form, err = upload:new(4096)
 	if not form then
-		return api:response(ngx.HTTP_BAD_REQUEST, "error", err)
+		return self:response(ngx.HTTP_BAD_REQUEST, "error", err)
 	end
 	form:set_timeout(1000)
 	local file = io.open(tmp, "w+")
@@ -56,7 +64,7 @@ api.global.POST["^/confs$"] = function(api)
 		local typ, res, err = form:read()
 		if not typ then
 			file:close()
-			return api:response(ngx.HTTP_BAD_REQUEST, "error", err)
+			return self:response(ngx.HTTP_BAD_REQUEST, "error", err)
 		end
 		if typ == "eof" then
 			break
@@ -69,13 +77,13 @@ api.global.POST["^/confs$"] = function(api)
 	file:close()
 	local status = os.execute("rm -rf " .. destination .. "/*")
 	if status ~= 0 then
-		return api:response(ngx.HTTP_BAD_REQUEST, "error", "can't remove old files")
+		return self:response(ngx.HTTP_BAD_REQUEST, "error", "can't remove old files")
 	end
 	status = os.execute("tar xzf " .. tmp .. " -C " .. destination)
 	if status ~= 0 then
-		return api:response(ngx.HTTP_BAD_REQUEST, "error", "can't extract archive")
+		return self:response(ngx.HTTP_BAD_REQUEST, "error", "can't extract archive")
 	end
-	return api:response(ngx.HTTP_OK, "success", "saved data at " .. destination)
+	return self:response(ngx.HTTP_OK, "success", "saved data at " .. destination)
 end
 
 api.global.POST["^/data$"] = api.global.POST["^/confs$"]
@@ -86,7 +94,7 @@ api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/plugins$"] = api.global.POST["^/confs$"]
 
-api.global.POST["^/unban$"] = function(api)
+api.global.POST["^/unban$"] = function(self)
 	ngx.req.read_body()
 	local data = ngx.req.get_body_data()
 	if not data then
@@ -99,13 +107,13 @@ api.global.POST["^/unban$"] = function(api)
 	end
 	local ok, ip = pcall(cjson.decode, data)
 	if not ok then
-		return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
 	end
-	datastore:delete("bans_ip_" .. ip["ip"])
-	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
+	self.datastore:delete("bans_ip_" .. ip["ip"])
+	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
 end
 
-api.global.POST["^/ban$"] = function(api)
+api.global.POST["^/ban$"] = function(self)
 	ngx.req.read_body()
 	local data = ngx.req.get_body_data()
 	if not data then
@@ -118,45 +126,45 @@ api.global.POST["^/ban$"] = function(api)
 	end
 	local ok, ip = pcall(cjson.decode, data)
 	if not ok then
-		return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
 	end
-	datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
-	return api:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
+	self.datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
+	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
 end
 
-api.global.GET["^/bans$"] = function(api)
+api.global.GET["^/bans$"] = function(self)
 	local data = {}
-	for i, k in ipairs(datastore:keys()) do
+	for i, k in ipairs(self.datastore:keys()) do
 		if k:find("^bans_ip_") then
 			local ret, reason = datastore:get(k)
 			if not ret then
-				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
+				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
 					"can't access " .. k .. " from datastore : " + reason)
 			end
-			local ret, exp = datastore:exp(k)
+			local ret, exp = self.datastore:exp(k)
 			if not ret then
-				return api:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
+				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
 					"can't access exp " .. k .. " from datastore : " + exp)
 			end
 			local ban = { ip = k:sub(9, #k), reason = reason, exp = exp }
 			table.insert(data, ban)
 		end
 	end
-	return api:response(ngx.HTTP_OK, "success", data)
+	return self:response(ngx.HTTP_OK, "success", data)
 end
 
-api.is_allowed_ip = function(self)
-	local data, err = datastore:get("api_whitelist_ip")
+function api:is_allowed_ip()
+	local data, err = self.datastore:get("api_whitelist_ip")
 	if not data then
 		return false, "can't access api_allowed_ips in datastore"
 	end
-	if utils.is_ip_in_networks(ngx.var.remote_addr, cjson.decode(data).data) then
+	if utils.is_ip_in_networks(ngx.var.remote_addr, cjson.decode(data)) then
 		return true, "ok"
 	end
 	return false, "IP is not in API_WHITELIST_IP"
 end
 
-api.do_api_call = function(self)
+function api:do_api_call()
 	if self.global[ngx.var.request_method] ~= nil then
 		for uri, api_fun in pairs(self.global[ngx.var.request_method]) do
 			if string.match(ngx.var.uri, uri) then
@@ -175,7 +183,7 @@ api.do_api_call = function(self)
 			end
 		end
 	end
-	local list, err = datastore:get("plugins")
+	local list, err = self.datastore:get("plugins")
 	if not list then
 		local status, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
 		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, resp

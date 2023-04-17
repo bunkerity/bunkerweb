@@ -9,66 +9,65 @@ local env			= require "resty.env"
 
 local whitelist = class("whitelist", plugin)
 
-function whitelist:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "whitelist")
-	if not ok then
-		return false, err
-	end
+function whitelist:initialize()
+	-- Call parent initialize
+    plugin.initialize(self, "whitelist")
 	-- Check if redis is enabled
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
 	-- Check if init is needed
 	if ngx.get_phase() == "init" then
 		local init_needed, err = utils.has_variable("USE_WHITELIST", "yes")
 		if init_needed == nil then
-			return false, err
+			self.logger:log(ngx.ERR, err)
 		end
 		self.init_needed = init_needed
 	-- Decode lists
 	else
-		local lists, err = datastore:get("plugin_whitelist_lists")
+		local lists, err = self.datastore:get("plugin_whitelist_lists")
 		if not lists then
-			return false, err
+			self.logger:log(ngx.ERR, err)
+		else
+			self.lists = cjson.decode(lists)
 		end
-		self.lists = cjson.decode(lists)
 	end
 	-- Instantiate cachestore
-	cachestore:new(use_redis)
-	return true, "success"
+	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function whitelist:init()
-	if self.init_needed then
-		-- Read whitelists
-		local whitelists = {
-			["IP"] = {},
-			["RDNS"] = {},
-			["ASN"] = {},
-			["USER_AGENT"] = {},
-			["URI"] = {}
-		}
-		local i = 0
-		for kind, _ in pairs(whitelists) do
-			local f, err = io.open("/var/cache/bunkerweb/whitelist/" .. kind .. ".list", "r")
-			if f then
-				for line in f:lines() do
-					table.insert(whitelists[kind], line)
-					i = i + 1
-				end
-				f:close()
-			end
-		end
-		-- Load them into datastore
-		local ok, err = datastore:set("plugin_whitelist_lists", cjson.encode(whitelists))
-		if not ok then
-			return self:ret(false, "can't store whitelist list into datastore : " .. err)
-		end
-		return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
+	-- Check if init is needed
+	if not self.init_needed then
+		return self:ret(true, "init not needed")
 	end
+	-- Read whitelists
+	local whitelists = {
+		["IP"] = {},
+		["RDNS"] = {},
+		["ASN"] = {},
+		["USER_AGENT"] = {},
+		["URI"] = {}
+	}
+	local i = 0
+	for kind, _ in pairs(whitelists) do
+		local f, err = io.open("/var/cache/bunkerweb/whitelist/" .. kind .. ".list", "r")
+		if f then
+			for line in f:lines() do
+				table.insert(whitelists[kind], line)
+				i = i + 1
+			end
+			f:close()
+		end
+	end
+	-- Load them into datastore
+	local ok, err = self.datastore:set("plugin_whitelist_lists", cjson.encode(whitelists))
+	if not ok then
+		return self:ret(false, "can't store whitelist list into datastore : " .. err)
+	end
+	return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
 end
 
 function whitelist:set()
@@ -112,7 +111,7 @@ function whitelist:access()
 			if ok == nil then
 				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is whitelisted : " .. err)
 			else
-				local ok, err = self:add_to_cache(v, whitelisted)
+				local ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
@@ -130,6 +129,16 @@ end
 
 function whitelist:preread()
 	return self:access()
+end
+
+function whitelist:kind_to_ele(kind)
+	if kind == "IP" then
+		return "ip" .. ngx.var.remote_addr
+	elseif kind == "UA" then
+		return "ua" .. ngx.var.http_user_agent
+	elseif kind == "URI" then
+		return "uri" .. ngx.var.uri
+	end
 end
 
 function whitelist:check_cache()
@@ -168,16 +177,16 @@ function whitelist:check_cache()
 end
 
 function whitelist:is_in_cache(ele)
-	local ok, data = cachestore:get("plugin_whitelist_" .. ele)
-	if not ok then then
+	local ok, data = self.cachestore:get("plugin_whitelist_" .. ele)
+	if not ok then
 		return false, data
 	end 
 	return true, data
 end
 
 function whitelist:add_to_cache(ele, value)
-	local ok, err = cachestore:set("plugin_whitelist_" .. ele, value)
-	if not ok then then
+	local ok, err = self.cachestore:set("plugin_whitelist_" .. ele, value)
+	if not ok then
 		return false, err
 	end
 	return true
@@ -186,10 +195,11 @@ end
 function whitelist:is_whitelisted(kind)
 	if kind == "IP" then
 		return self:is_whitelisted_ip()
-	elseif kind == "URI"
+	elseif kind == "URI" then
 		return self:is_whitelisted_uri()
-	elseif kind == "UA"
+	elseif kind == "UA" then
 		return self:is_whitelisted_ua()
+	end
 	return false, "unknown kind " .. kind
 end
 

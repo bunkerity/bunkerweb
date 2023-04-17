@@ -6,19 +6,15 @@ local clusterstore	= require "bunkerweb.clusterstore"
 
 local badbehavior = class("badbehavior", plugin)
 
-function badbehavior:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "badbehavior")
-	if not ok then
-		return false, err
-	end
+function badbehavior:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "badbehavior")
 	-- Check if redis is enabled
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
-	return true, "success"
 end
 
 function badbehavior:log()

@@ -5,12 +5,9 @@ local cjson		= require "cjson"
 
 local letsencrypt = class("letsencrypt", plugin)
 
-function letsencrypt:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "letsencrypt")
-	if not ok then
-		return false, err
-	end
+function letsencrypt:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "letsencrypt")
 end
 
 function letsencrypt:access()

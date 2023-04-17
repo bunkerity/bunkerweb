@@ -4,12 +4,9 @@ local utils     = require "bunkerweb.utils"
 
 local cors		= class("cors", plugin)
 
-function cors:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "cors")
-	if not ok then
-		return false, err
-	end
+function cors:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "cors")
 end
 
 function cors:header()
@@ -28,7 +25,7 @@ function cors:header()
 	}
 	for variable, header in pairs(cors_headers) do
 		local value = self.variables[variable]
-		elseif value ~= "" then
+		if value ~= "" then
 			ngx.header[header] = value
 		end
 	end
@@ -36,7 +33,7 @@ function cors:header()
 	ngx.header["Content-Length"] = "0"
 	
 	-- Send CORS policy with a 204 (no content) status
-	return return self:ret(true, "sent CORS policy", ngx.HTTP_NO_CONTENT)
+	return self:ret(true, "sent CORS policy")
 end
 
 return cors

@@ -35,15 +35,15 @@ local cache, err = mlcache.new(
 		ipc_shm = ipc_shm
 	}
 )
-logger:new("CACHESTORE")
+local module_logger = logger:new("CACHESTORE")
 if not cache then
-	logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
+	module_logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
 end
 
-function cachestore:new(use_redis)
+function cachestore:initialize(use_redis)
 	self.cache = cache
 	self.use_redis = use_redis or false
-	self.logger = logger
+	self.logger = module_logger
 end
 
 function cachestore:get(key)
@@ -96,7 +96,7 @@ function cachestore:get(key)
 	else
 		value, err, hit_level = self.cache:get(key)
 	end
-	if err then
+	if value == nil and hit_level == nil then
 		return false, err
 	end
 	self.logger:log(ngx.INFO, "hit level for " .. key .. " = " .. tostring(hit_level))

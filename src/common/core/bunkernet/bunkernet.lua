@@ -7,29 +7,25 @@ local http		= require "resty.http"
 
 local bunkernet = class("bunkernet", plugin)
 
-function bunkernet:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "bunkernet")
-	if not ok then
-		return false, err
-	end
+function bunkernet:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "bunkernet")
 	-- Check if init is needed
 	if ngx.get_phase() == "init" then
 		local init_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
 		if init_needed == nil then
-			return false, err
+			self.logger:log(ngx.ERR, err)
 		end
-		self.init_needed = true
+		self.init_needed = init_needed
 	-- Get BunkerNet ID
 	else
-		local id, err = datastore:get("plugin_bunkernet_id")
+		local id, err = self.datastore:get("plugin_bunkernet_id")
 		if not id then
 			self.bunkernet_id = nil
 		else
 			self.bunkernet_id = id
 		end
 	end
-	return true, "success"
 end
 
 function bunkernet:init()
@@ -46,7 +42,7 @@ function bunkernet:init()
 	id = f:read("*all"):gsub("[\r\n]", "")
 	f:close()
 	-- Store ID in datastore
-	local ok, err = datastore:set("plugin_bunkernet_id", id)
+	local ok, err = self.datastore:set("plugin_bunkernet_id", id)
 	if not ok then
 		return self:ret(false, "can't save instance ID to the datastore : " .. err)
 	end
@@ -71,7 +67,7 @@ function bunkernet:init()
 		return self:ret(false, "error while reading database : " .. err)
 	end
 	f:close()
-	local ok, err = datastore:set("plugin_bunkernet_db", cjson.encode(db))
+	local ok, err = self.datastore:set("plugin_bunkernet_db", cjson.encode(db))
 	if not ok then
 		return self:ret(false, "can't store bunkernet database into datastore : " .. err)
 	end

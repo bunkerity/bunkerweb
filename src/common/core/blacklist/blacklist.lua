@@ -8,71 +8,70 @@ local ipmatcher 	= require "resty.ipmatcher"
 
 local blacklist = class("blacklist", plugin)
 
-function blacklist:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "blacklist")
-	if not ok then
-		return false, err
-	end
+function blacklist:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "blacklist")
 	-- Check if redis is enabled
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
 	-- Check if init is needed
 	if ngx.get_phase() == "init" then
 		local init_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
 		if init_needed == nil then
-			return false, err
+			self.logger:log(ngx.ERR, err)
 		end
 		self.init_needed = init_needed
 	-- Decode lists
 	else
-		local lists, err = datastore:get("plugin_blacklist_lists")
+		local lists, err = self.datastore:get("plugin_blacklist_lists")
 		if not lists then
-			return false, err
+			self.logger:log(ngx.ERR, err)
+		else
+			self.lists = cjson.decode(lists)
 		end
-		self.lists = cjson.decode(lists)
 	end
 	-- Instantiate cachestore
-	cachestore:new(use_redis)
-	return true, "success"
+	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function blacklist:init()
-	if self.init_needed then
-		-- Read blacklists
-		local blacklists = {
-			["IP"] = {},
-			["RDNS"] = {},
-			["ASN"] = {},
-			["USER_AGENT"] = {},
-			["URI"] = {},
-			["IGNORE_IP"] = {},
-			["IGNORE_RDNS"] = {},
-			["IGNORE_ASN"] = {},
-			["IGNORE_USER_AGENT"] = {},
-			["IGNORE_URI"] = {},
-		}
-		local i = 0
-		for kind, _ in pairs(blacklists) do
-			local f, err = io.open("/var/cache/bunkerweb/blacklist/" .. kind .. ".list", "r")
-			if f then
-				for line in f:lines() do
-					table.insert(blacklists[kind], line)
-					i = i + 1
-				end
-				f:close()
-			end
-		end
-		-- Load them into datastore
-		local ok, err = datastore:set("plugin_blacklist_lists", cjson.encode(blacklists))
-		if not ok then
-			return self:ret(false, "can't store blacklist list into datastore : " .. err)
-		end
-		return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
+	-- Check if init is needed
+	if not self.init_needed then
+		return self:ret(true, "init not needed")
 	end
+	-- Read blacklists
+	local blacklists = {
+		["IP"] = {},
+		["RDNS"] = {},
+		["ASN"] = {},
+		["USER_AGENT"] = {},
+		["URI"] = {},
+		["IGNORE_IP"] = {},
+		["IGNORE_RDNS"] = {},
+		["IGNORE_ASN"] = {},
+		["IGNORE_USER_AGENT"] = {},
+		["IGNORE_URI"] = {},
+	}
+	local i = 0
+	for kind, _ in pairs(blacklists) do
+		local f, err = io.open("/var/cache/bunkerweb/blacklist/" .. kind .. ".list", "r")
+		if f then
+			for line in f:lines() do
+				table.insert(blacklists[kind], line)
+				i = i + 1
+			end
+			f:close()
+		end
+	end
+	-- Load them into datastore
+	local ok, err = self.datastore:set("plugin_blacklist_lists", cjson.encode(blacklists))
+	if not ok then
+		return self:ret(false, "can't store blacklist list into datastore : " .. err)
+	end
+	return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
 end
 
 function blacklist:access()
@@ -97,7 +96,7 @@ function blacklist:access()
 	}
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
-		if not cached then
+		if not ok then
 			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
 			return self:ret(true, k + " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
@@ -115,9 +114,9 @@ function blacklist:access()
 		if not already_cached[k] then
 			local ok, blacklisted = self:is_blacklisted(k)
 			if ok == nil then
-				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is blacklisted : " .. err)
+				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is blacklisted : " .. blacklisted)
 			else
-				local ok, err = self:add_to_cache(v, blacklisted)
+				local ok, err = self:add_to_cache(self:kind_to_ele(k), blacklisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
@@ -137,17 +136,27 @@ function blacklist:preread()
 	return self:access()
 end
 
+function blacklist:kind_to_ele(kind)
+	if kind == "IP" then
+		return "ip" .. ngx.var.remote_addr
+	elseif kind == "UA" then
+		return "ua" .. ngx.var.http_user_agent
+	elseif kind == "URI" then
+		return "uri" .. ngx.var.uri
+	end
+end
+
 function blacklist:is_in_cache(ele)
-	local ok, data = cachestore:get("plugin_blacklist_" .. ele)
-	if not ok then then
+	local ok, data = self.cachestore:get("plugin_blacklist_" .. ele)
+	if not ok then
 		return false, data
 	end 
 	return true, data
 end
 
 function blacklist:add_to_cache(ele, value)
-	local ok, err = cachestore:set("plugin_blacklist_" .. ele, value)
-	if not ok then then
+	local ok, err = self.cachestore:set("plugin_blacklist_" .. ele, value)
+	if not ok then
 		return false, err
 	end 
 	return true
@@ -156,10 +165,11 @@ end
 function blacklist:is_blacklisted(kind)
 	if kind == "IP" then
 		return self:is_blacklisted_ip()
-	elseif kind == "URI"
+	elseif kind == "URI" then
 		return self:is_blacklisted_uri()
-	elseif kind == "UA"
+	elseif kind == "UA" then
 		return self:is_blacklisted_ua()
+	end
 	return false, "unknown kind " .. kind
 end
 

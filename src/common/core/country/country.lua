@@ -5,19 +5,16 @@ local cachestore 	= require "bunkerweb.cachestore"
 
 local country	= class("country", plugin)
 
-function country:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "country")
-	if not ok then
-		return false, err
-	end
+function country:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "country")
 	-- Instantiate cachestore
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
-	cachestore:new(use_redis)
-	return true, "success"
+	self.use_redis = use_redis == "yes"
+	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function country:access()
@@ -31,8 +28,7 @@ function country:access()
 		if data.result == "ok" then
 			return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in country cache (not blacklisted, country = " .. data.country .. ")")
 		end
-		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in country cache (blacklisted, country = " .. data.country .. ")", utils.get_deny_status()
-	
+		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in country cache (blacklisted, country = " .. data.country .. ")", utils.get_deny_status())
 	end
 
 	-- Don't go further if IP is not global
@@ -58,14 +54,14 @@ function country:access()
 		for wh_country in self.variables["WHITELIST_COUNTRY"]:gmatch("%S+") do
 			if wh_country == country then
 				local ok, err = self:add_to_cache(ngx.var.remote_addr, country, "ok")
-				if not then
+				if not ok then
 					return self:ret(false, "error while adding item to cache : " .. err)
 				end
 				return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is whitelisted (country = " .. country .. ")")
 			end
 		end
 		local ok, err = self:add_to_cache(ngx.var.remote_addr, country, "ko")
-		if not then
+		if not ok then
 			return self:ret(false, "error while adding item to cache : " .. err)
 		end
 		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is not whitelisted (country = " .. country .. ")", utils.get_deny_status())
@@ -97,16 +93,16 @@ function country:preread()
 end
 
 function country:is_in_cache(ip)
-	local ok, data = cachestore:get("plugin_country_cache_" .. ip)
-	if not ok then then
+	local ok, data = self.cachestore:get("plugin_country_cache_" .. ip)
+	if not ok then
 		return false, data
 	end 
 	return true, cjson.decode(data)
 end
 
 function country:add_to_cache(ip, country, result)
-	local ok, err = cachestore:set("plugin_country_cache_" .. ip, cjson.encode({country = country, result = result}))
-	if not ok then then
+	local ok, err = self.cachestore:set("plugin_country_cache_" .. ip, cjson.encode({country = country, result = result}))
+	if not ok then
 		return false, err
 	end 
 	return true

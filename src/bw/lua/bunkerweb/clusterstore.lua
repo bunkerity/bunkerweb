@@ -1,10 +1,13 @@
 local class     = require "middleclass"
 local utils     = require "bunkerweb.utils"
+local logger    = require "bunkerweb.logger"
 local redis     = require "resty.redis"
 
 local clusterstore = class("clusterstore")
 
-function clusterstore:new()
+function clusterstore:initialize()
+    -- Instantiate logger
+    self.logger = logger:new("CLUSTERSTORE")
     -- Get variables
     local variables = {
         ["REDIS_HOST"] = "",
@@ -20,16 +23,19 @@ function clusterstore:new()
     for k, v in pairs(variables) do
         local value, err = utils.get_variable(k, false)
         if value == nil then
-            return false, err
+            self.logger:log(ngx.ERR, err)
         end
         self.variables[k] = value
     end
     -- Don't instantiate a redis object for now
     self.redis_client = nil
-    return true, "success"
 end
 
 function clusterstore:connect()
+    -- Check if we are already connected
+    if self.redis_client ~= nil then
+        return true, "already connected"
+    end
     -- Instantiate object
     local redis_client, err = redis:new()
     if redis_client == nil then
@@ -47,24 +53,28 @@ function clusterstore:connect()
     if not ok then
         return false, err
     end
+    -- Save client
+    self.redis_client = redis_client
     -- Select database if needed
     local times, err = redis_client:get_reused_times()
     if err then
+        self:close()
         return false, err
     end
     if times == 0 then
         local select, err = redis_client:select(tonumber(variables["REDIS_DATABASE"]))
         if err then
+            self:close()
             return false, err
         end
     end
-    self.redis_client = redis_client
-    return return true, "success"
+    return true, "success"
 end
 
 function clusterstore:close()
     if self.redis_client then
         -- Equivalent to close but keep a pool of connections
+        self.redis_client = nil
         return self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
     end
     return false, "not connected"

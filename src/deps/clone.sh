@@ -254,14 +254,30 @@ git_secure_clone "https://github.com/bungle/lua-resty-template.git" "c08c6bc9e27
 echo "ℹ️ Downloading lua-resty-lock"
 git_secure_clone "https://github.com/openresty/lua-resty-lock.git" "9dc550e56b6f3b1a2f1a31bb270a91813b5b6861"
 
+# lua-pack v2.0.0
+echo "ℹ️ Downloading lua-pack"
+dopatch="no"
+if [ ! -d "deps/src/lua-pack" ] ; then
+	dopatch="yes"
+fi
+git_secure_clone "https://github.com/Kong/lua-pack.git" "495bf30606b9744140258df349862981e3ee7820"
+if [ "$dopatch" = "yes" ] ; then
+	do_and_check_cmd cp deps/misc/lua-pack.Makefile deps/src/lua-pack/Makefile
+fi
+
+# lua-resty-openssl v0.8.21
+echo "ℹ️ Downloading lua-resty-openssl"
+git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "15bc59b97feb5acf25fbdd9426cf73870cf7c838"
+
 # ModSecurity v3.0.9
 echo "ℹ️ Downloading ModSecurity"
+dopatch="no"
 if [ ! -d "deps/src/ModSecurity" ] ; then
-        dopatch="yes"
+	dopatch="yes"
 fi
 git_secure_clone "https://github.com/SpiderLabs/ModSecurity.git" "205dac0e8c675182f96b5c2fb06be7d1cf7af2b2"
 if [ "$dopatch" = "yes" ] ; then
-        do_and_check_cmd patch deps/src/ModSecurity/configure.ac deps/misc/modsecurity.patch
+	do_and_check_cmd patch deps/src/ModSecurity/configure.ac deps/misc/modsecurity.patch
 fi
 
 # libinjection v3.10.0+

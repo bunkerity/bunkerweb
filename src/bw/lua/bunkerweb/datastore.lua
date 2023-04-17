@@ -1,7 +1,7 @@
 local class     = require "middleclass"
 local datastore	= class("datastore")
 
-function datastore:new()
+function datastore:initialize()
 	self.dict = ngx.shared.datastore
 	if not self.dict then
 		self.dict = ngx.shared.datastore_stream
@@ -16,21 +16,21 @@ function datastore:get(key)
 	return value, err
 end
 
-function datastore:set(self, key, value, exptime)
+function datastore:set(key, value, exptime)
 	exptime = exptime or 0
 	return self.dict:safe_set(key, value, exptime)
 end
 
-function datastore:delete(self, key)
+function datastore:delete(key)
 	self.dict:delete(key)
 	return true, "success"
 end
 
-function datastore:keys(self)
+function datastore:keys()
 	return self.dict:get_keys(0)
 end
 
-function datastore:exp(self, key)
+function datastore:exp(key)
 	local ttl, err = self.dict:ttl(key)
 	if not ttl then
 		return false, err
@@ -38,7 +38,7 @@ function datastore:exp(self, key)
 	return true, ttl
 end
 
-function datastore:delete_all(self, pattern)
+function datastore:delete_all(pattern)
 	local keys = self.dict:get_keys(0)
 	for i, key in ipairs(keys) do
 		if key:match(pattern) then

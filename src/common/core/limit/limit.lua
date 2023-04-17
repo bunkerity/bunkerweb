@@ -7,16 +7,13 @@ local cjson			= require "cjson"
 
 local limit = class("limit", plugin)
 
-function limit:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "limit")
-	if not ok then
-		return false, err
-	end
+function limit:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "limit")
 	-- Check if redis is enabled
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
 	-- Load rules if needed
@@ -24,9 +21,10 @@ function limit:new()
 		if self.variables["USE_LIMIT_REQ"] == "yes" then
 			-- Get all rules from datastore
 			local limited = false
-			local all_rules, err = datastore:get("plugin_limit_rules")
+			local all_rules, err = self.datastore:get("plugin_limit_rules")
 			if not all_rules then
-				return false, err
+				self.logger:log(ngx.ERR, err)
+				return
 			end
 			all_rules = cjson.decode(all_rules)
 			self.rules = {}
@@ -44,7 +42,6 @@ function limit:new()
 			end
 		end
 	end
-	return true, "success"
 end
 
 function limit:init()
@@ -77,7 +74,7 @@ function limit:init()
 			end
 		end
 	end
-	local ok, err = datastore:set("plugin_limit_rules", cjson.encode(data))
+	local ok, err = self.datastore:set("plugin_limit_rules", cjson.encode(data))
 	if not ok then
 		return self:ret(false, err)
 	end
@@ -119,11 +116,10 @@ function limit:access()
 	end
 	-- Limit reached
 	if limited then
-		return return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is limited for URL " .. ngx.var.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")", ngx.HTTP_TOO_MANY_REQUESTS)
+		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is limited for URL " .. ngx.var.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")", ngx.HTTP_TOO_MANY_REQUESTS)
 	end
 	-- Limit not reached
-	return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is not limited for URL " .. ngx.var.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")		
-	end
+	return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is not limited for URL " .. ngx.var.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")
 end
 
 function limit:limit_req(rate_max, rate_time)
@@ -136,7 +132,7 @@ function limit:limit_req(rate_max, rate_time)
 		else
 			timestamps = redis_timestamps
 			-- Save the new timestamps
-			local ok, err = datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(timestamps), delay)
+			local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(timestamps), delay)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
 			end
@@ -158,7 +154,7 @@ end
 
 function limit:limit_req_local(rate_max, rate_time)
 	-- Get timestamps
-	local timestamps, err = datastore:get("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri)
+	local timestamps, err = self.datastore:get("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri)
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -169,7 +165,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
 	-- Save new timestamps if needed
 	if updated then
-		local ok, err = datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(timestamps), delay)
+		local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(timestamps), delay)
 		if not ok then
 			return nil, err
 		end

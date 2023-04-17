@@ -6,13 +6,9 @@ local clusterstore	= require "bunkerweb.clusterstore"
 
 local redis = class("redis", plugin)
 
-function redis:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "redis")
-	if not ok then
-		return false, err
-	end
-	return true, "success"
+function redis:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "redis")
 end
 
 function redis:init()

@@ -2,7 +2,6 @@ local class		= require "middleclass"
 local plugin	= require "bunkerweb.plugin"
 local utils     = require "bunkerweb.utils"
 local datastore = require "bunkerweb.datastore"
-local logger    = require "bunkerweb.logger"
 local cjson     = require "cjson"
 local captcha   = require "antibot.captcha"
 local base64    = require "base64"
@@ -12,21 +11,17 @@ local http      = require "resty.http"
 
 local antibot	= class("antibot", plugin)
 
-function antibot:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "antibot")
-	if not ok then
-		return false, err
-	end
+function antibot:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "antibot")
 	-- Check if init is needed
 	if ngx.get_phase() == "init" then
 		local init_needed, err = utils.has_not_variable("USE_ANTIBOT", "no")
 		if init_needed == nil then
-			return false, err
+			self.logger:log(ngx.ERR, err)
 		end
 		self.init_needed = init_needed
 	end
-	return true, "success"
 end
 
 function antibot:init()
@@ -41,7 +36,7 @@ function antibot:init()
 			templates[template] = f:read("*all")
 			f:close()
 		end
-		local ok, err = datastore:set("plugin_antibot_templates", cjson.encode(templates))
+		local ok, err = self.datastore:set("plugin_antibot_templates", cjson.encode(templates))
 		if not ok then
 			return self:ret(false, "can't save templates to datastore : " .. err)
 		end
@@ -201,7 +196,7 @@ function antibot:display_challenge(challenge_uri)
 	end
 
 	-- Load HTML templates
-	local str_templates, err = datastore:get("plugin_antibot_templates")
+	local str_templates, err = self.datastore:get("plugin_antibot_templates")
 	if not str_templates then
 		return false, "can't get templates from datastore : " .. err
 	end
@@ -364,4 +359,4 @@ function antibot:check_challenge()
 	return nil, "unknown", nil
 end
 
-return _M
+return antibot

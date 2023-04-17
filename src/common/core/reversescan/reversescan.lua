@@ -5,19 +5,16 @@ local cachestore 	= require "bunkerweb.cachestore"
 
 local reversescan = class("reversescan", plugin)
 
-function reversescan:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "reversescan")
-	if not ok then
-		return false, err
-	end
+function reversescan:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "reversescan")
 	-- Instantiate cachestore
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
-	cachestore:new(use_redis)
-	return true, "success"
+	self.use_redis = use_redis == "yes"
+	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function reversescan:access()
@@ -64,16 +61,16 @@ function reversescan:scan(ip, port, timeout)
 end
 
 function reversescan:is_in_cache(ip_port)
-	local ok, data = cachestore:get("plugin_reversescan_cache_" .. ip_port)
-	if not ok then then
+	local ok, data = self.cachestore:get("plugin_reversescan_cache_" .. ip_port)
+	if not ok then
 		return false, data
 	end 
 	return true, data
 end
 
 function reversescan:add_to_cache(ip_port, value)
-	local ok, err = cachestore:set("plugin_reversescan_cache_" .. ip_port, value)
-	if not ok then then
+	local ok, err = self.cachestore:set("plugin_reversescan_cache_" .. ip_port, value)
+	if not ok then
 		return false, err
 	end 
 	return true

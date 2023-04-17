@@ -1,12 +1,13 @@
-local datastore		= require "bunkerweb.datastore"
+local cdatastore	= require "bunkerweb.datastore"
 local ipmatcher		= require "resty.ipmatcher"
 local cjson			= require "cjson"
 local resolver		= require "resty.dns.resolver"
 local mmdb			= require "bunkerweb.mmdb"
-local logger		= require "bunkerweb.logger"
+local clogger		= require "bunkerweb.logger"
 local session		= require "resty.session"
 
-logger:new("UTILS")
+local logger = clogger:new("UTILS")
+local datastore = cdatastore:new()
 
 local utils = {}
 
@@ -176,7 +177,7 @@ utils.ip_is_global = function(ip)
 	if not ok then
 		return nil, "can't decode json : " .. reserved_ips
 	end
-	local ipm, err = ipmatcher.new(reserved_ips.data)
+	local ipm, err = ipmatcher.new(reserved_ips)
 	if not ipm then
 		return nil, "can't instantiate ipmatcher : " .. err
 	end

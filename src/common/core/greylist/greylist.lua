@@ -1,71 +1,71 @@
-local class		= require "middleclass"
-local plugin	= require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
-local cjson		= require "cjson"
-local ipmatcher	= require "resty.ipmatcher"
+local class			= require "middleclass"
+local plugin		= require "bunkerweb.plugin"
+local utils     	= require "bunkerweb.utils"
+local cachestore	= require "bunkerweb.cachestore"
+local cjson			= require "cjson"
+local ipmatcher		= require "resty.ipmatcher"
 
-local greylist = class("dnsbl", plugin)
+local greylist = class("greylist", plugin)
 
-function greylist:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "greylist")
-	if not ok then
-		return false, err
-	end
+function greylist:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "greylist")
 	-- Check if redis is enabled
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return false, err
+		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
 	-- Check if init is needed
 	if ngx.get_phase() == "init" then
 		local init_needed, err = utils.has_variable("USE_GREYLIST", "yes")
 		if init_needed == nil then
-			return false, err
+			self.logger:log(ngx.ERR, err)
 		end
 		self.init_needed = init_needed
 	-- Decode lists
-	else
-		local lists, err = datastore:get("plugin_greylist_lists")
+	elseif self.variables["USE_GREYLIST"] == "yes" then
+		local lists, err = self.datastore:get("plugin_greylist_lists")
 		if not lists then
-			return false, err
+			self.logger:log(ngx.ERR, err)
+		else
+			self.lists = cjson.decode(lists)
 		end
-		self.lists = cjson.decode(lists)
 	end
 	-- Instantiate cachestore
-	cachestore:new(use_redis)
-	return true, "success"
+	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function greylist:init()
-	if self.init_needed then
-		-- Read blacklists
-		local greylists = {
-			["IP"] = {},
-			["RDNS"] = {},
-			["ASN"] = {},
-			["USER_AGENT"] = {},
-			["URI"] = {},
-		}
-		local i = 0
-		for kind, _ in pairs(greylists) do
-			local f, err = io.open("/var/cache/bunkerweb/greylist/" .. kind .. ".list", "r")
-			if f then
-				for line in f:lines() do
-					table.insert(greylists[kind], line)
-					i = i + 1
-				end
-				f:close()
-			end
-		end
-		-- Load them into datastore
-		local ok, err = datastore:set("plugin_greylist_lists", cjson.encode(greylists))
-		if not ok then
-			return self:ret(false, "can't store greylist list into datastore : " .. err)
-		end
-		return self:ret(true, "successfully loaded " .. tostring(i) .. " bad IP/network/rDNS/ASN/User-Agent/URI")
+	-- Check if init is needed
+	if not self.init_needed then
+		return self:ret(true, "init not needed")
 	end
+	-- Read blacklists
+	local greylists = {
+		["IP"] = {},
+		["RDNS"] = {},
+		["ASN"] = {},
+		["USER_AGENT"] = {},
+		["URI"] = {},
+	}
+	local i = 0
+	for kind, _ in pairs(greylists) do
+		local f, err = io.open("/var/cache/bunkerweb/greylist/" .. kind .. ".list", "r")
+		if f then
+			for line in f:lines() do
+				table.insert(greylists[kind], line)
+				i = i + 1
+			end
+			f:close()
+		end
+	end
+	-- Load them into datastore
+	local ok, err = self.datastore:set("plugin_greylist_lists", cjson.encode(greylists))
+	if not ok then
+		return self:ret(false, "can't store greylist list into datastore : " .. err)
+	end
+	return self:ret(true, "successfully loaded " .. tostring(i) .. " bad IP/network/rDNS/ASN/User-Agent/URI")
 end
 
 function greylist:access()
@@ -110,7 +110,7 @@ function greylist:access()
 			if greylisted == nil then
 				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is greylisted : " .. err)
 			else
-				local ok, err = self:add_to_cache(v, greylisted or "ok")
+				local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted or "ok")
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
@@ -129,13 +129,24 @@ function greylist:preread()
 	return self:access()
 end
 
+function greylist:kind_to_ele(kind)
+	if kind == "IP" then
+		return "ip" .. ngx.var.remote_addr
+	elseif kind == "UA" then
+		return "ua" .. ngx.var.http_user_agent
+	elseif kind == "URI" then
+		return "uri" .. ngx.var.uri
+	end
+end
+
 function greylist:is_greylisted(kind)
 	if kind == "IP" then
 		return self:is_greylisted_ip()
-	elseif kind == "URI"
+	elseif kind == "URI" then
 		return self:is_greylisted_uri()
-	elseif kind == "UA"
+	elseif kind == "UA" then
 		return self:is_greylisted_ua()
+	end
 	return false, "unknown kind " .. kind
 end
 
@@ -214,16 +225,16 @@ function greylist:is_greylisted_ua()
 end
 
 function greylist:is_in_cache(ele)
-	local ok, data = cachestore:get("plugin_greylist_" .. ele)
-	if not ok then then
+	local ok, data = self.cachestore:get("plugin_greylist_" .. ele)
+	if not ok then
 		return false, data
 	end 
 	return true, data
 end
 
 function greylist:add_to_cache(ele, value)
-	local ok, err = cachestore:set("plugin_greylist_" .. ele, value)
-	if not ok then then
+	local ok, err = self.cachestore:set("plugin_greylist_" .. ele, value)
+	if not ok then
 		return false, err
 	end 
 	return true

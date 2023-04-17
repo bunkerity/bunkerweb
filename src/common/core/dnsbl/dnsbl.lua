@@ -7,15 +7,16 @@ local resolver		= require "resty.dns.resolver"
 
 local dnsbl			= class("dnsbl", plugin)
 
-local dnsbl:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "dnsbl")
-	if not ok then
-		return false, err
-	end
+function dnsbl:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "dnsbl")
 	-- Instantiate cachestore
-	cachestore:new(use_redis)
-	return true, "success"
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		self.logger:log(ngx.ERR, err)
+	end
+	self.use_redis = use_redis == "yes"
+	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function dnsbl:access()
@@ -27,14 +28,14 @@ function dnsbl:access()
 		return self:ret(true, "dnsbl list is empty")
 	end
 	-- Check if IP is in cache
-	local cache, err = self:is_in_cache(ngx.var.remote_addr)
-	if not cache and err ~= "success" then
+	local ok, cached = self:is_in_cache(ngx.var.remote_addr)
+	if not ok then
 		return self:ret(false, "error while checking cache : " .. err)
-	elseif cache then
-		if cache == "ok" then
+	elseif cached then
+		if cached == "ok" then
 			return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (not blacklisted)")
 		end
-		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (server = " .. cache .. ")", utils.get_deny_status())
+		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")", utils.get_deny_status())
 	end
 	-- Don't go further if IP is not global
 	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
@@ -74,17 +75,17 @@ function dnsbl:preread()
 	return self:access()
 end
 
-function dnsl:is_in_cache(ip)
-	local ok, data = cachestore:get("plugin_dnsbl_" .. ip)
-	if not ok then then
+function dnsbl:is_in_cache(ip)
+	local ok, data = self.cachestore:get("plugin_dnsbl_" .. ip)
+	if not ok then
 		return false, data
 	end 
 	return true, data
 end
 
 function dnsbl:add_to_cache(ip, value)
-	local ok, err = cachestore:set("plugin_dnsbl_" .. ip, value)
-	if not ok then then
+	local ok, err = self.cachestore:set("plugin_dnsbl_" .. ip, value)
+	if not ok then
 		return false, err
 	end 
 	return true

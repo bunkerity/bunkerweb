@@ -1,18 +1,14 @@
 local class			= require "middleclass"
 local plugin		= require "bunkerweb.plugin"
 local utils     	= require "bunkerweb.utils"
-local cachestore	= require "bunkerweb.cachestore"
 local cjson			= require "cjson"
 local template		= require "resty.template"
 
 local errors		= class("errors", plugin)
 
-function errors:new()
-	-- Call parent new
-	local ok, err = plugin.new(self, "errors")
-	if not ok then
-		return false, err
-	end
+function errors:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "errors")
 	-- Default error texts
 	self.default_errors = {
 		["400"] = {
@@ -64,7 +60,6 @@ function errors:new()
 			text = "The gateway has timed out."
 		}
 	}
-	return true, "success"
 end
 
 function errors:render_template(code)

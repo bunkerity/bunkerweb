@@ -27,10 +27,10 @@ helpers.load_plugin = function(json)
         return false, "missing field(s) " .. cjson.encode(missing_fields) .. " for JSON at " .. json
     end
     -- Return plugin
-    return plugin
+    return true, plugin
 end
 
-helpers.new_plugin = function(id)
+helpers.require_plugin = function(id)
     -- Require call
     local ok, plugin_lua = pcall(require, id .. "/" .. id)
     if not ok then
@@ -43,12 +43,17 @@ helpers.new_plugin = function(id)
     if plugin_lua.new == nil then
         return false, "missing new() method for plugin " .. id
     end
-    local ok, err = pcall(plugin_lua.new, plugin_lua)
-    if not ok then
-        return false, "new() call failed for plugin " .. id .. " : " .. err
-    end
     -- Return plugin
     return plugin_lua, "new() call successful for plugin " .. id
+end
+
+helpers.new_plugin = function(plugin_lua)
+    -- Require call
+    local ok, plugin_obj = pcall(plugin_lua.new, plugin_lua)
+    if not ok then
+        return false, "new error for plugin " .. plugin_lua.name .. " : " .. plugin_obj
+    end
+    return true, plugin_obj
 end
 
 helpers.call_plugin = function(plugin, method)
@@ -59,7 +64,10 @@ helpers.call_plugin = function(plugin, method)
     -- Call method
     local ok, ret = pcall(plugin[method], plugin)
     if not ok then
-        return false, plugin.id .. ":" .. method .. "() failed : " .. ret
+        return false, plugin:get_id() .. ":" .. method .. "() failed : " .. ret
+    end
+    if ret == nil then
+        return false, plugin:get_id() .. ":" .. method .. "() returned nil value"
     end
     -- Check values
     local missing_values = {}

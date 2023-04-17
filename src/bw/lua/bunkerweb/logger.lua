@@ -2,8 +2,8 @@ local errlog	= require "ngx.errlog"
 local class     = require "middleclass"
 local logger	= class("logger")
 
-function logger:new(prefix)
-	self.prefix = prefix
+function logger:initialize(prefix)
+	self.prefix = string.upper(prefix)
 end
 
 function logger:log(level, msg)
