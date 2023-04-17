@@ -200,8 +200,8 @@ function blacklist:is_blacklisted_ip()
 
 	-- Check if rDNS is needed
 	local check_rdns = true
+	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
 	if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" then
-		local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
 		if is_global == nil then
 			return nil, err
 		end
@@ -241,22 +241,25 @@ function blacklist:is_blacklisted_ip()
 	end
 
 	-- Check if ASN is in ignore list
-	local asn, err = utils.get_asn(ngx.var.remote_addr)
-	if not asn then
-		return nil, err
-	end
-	local ignore = false
-	for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
-		if ignore_asn == tostring(asn) then
-			ignore = true
-			break
+	if is_global then
+		local asn, err = utils.get_asn(ngx.var.remote_addr)
+		if not asn then
+			self.logger:log(ngx.ERR, "7")
+			return nil, err
 		end
-	end
-	-- Check if ASN is in blacklist
-	if not ignore then
-		for i, bl_asn in ipairs(self.lists["ASN"]) do
-			if bl_asn == tostring(asn) then
-				return true, "ASN " .. bl_asn
+		local ignore = false
+		for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
+			if ignore_asn == tostring(asn) then
+				ignore = true
+				break
+			end
+		end
+		-- Check if ASN is in blacklist
+		if not ignore then
+			for i, bl_asn in ipairs(self.lists["ASN"]) do
+				if bl_asn == tostring(asn) then
+					return true, "ASN " .. bl_asn
+				end
 			end
 		end
 	end

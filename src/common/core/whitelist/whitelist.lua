@@ -219,8 +219,8 @@ function whitelist:is_whitelisted_ip()
 
 	-- Check if rDNS is needed
 	local check_rdns = true
+	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
 	if self.variables["WHITELIST_RDNS_GLOBAL"] == "yes" then
-		local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
 		if is_global == nil then
 			return nil, err
 		end
@@ -245,9 +245,15 @@ function whitelist:is_whitelisted_ip()
 	end
 
 	-- Check if ASN is in whitelist
-	for i, bl_asn in ipairs(self.lists["ASN"]) do
-		if bl_asn == tostring(asn) then
-			return true, "ASN " .. bl_asn
+	if is_global then
+		local asn, err = utils.get_asn(ngx.var.remote_addr)
+		if not asn then
+			return nil, err
+		end
+		for i, bl_asn in ipairs(self.lists["ASN"]) do
+			if bl_asn == tostring(asn) then
+				return true, "ASN " .. bl_asn
+			end
 		end
 	end
 

@@ -8,40 +8,13 @@ local base64    = require "base64"
 local sha256    = require "resty.sha256"
 local str       = require "resty.string"
 local http      = require "resty.http"
+local template	= require "resty.template"
 
 local antibot	= class("antibot", plugin)
 
 function antibot:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "antibot")
-	-- Check if init is needed
-	if ngx.get_phase() == "init" then
-		local init_needed, err = utils.has_not_variable("USE_ANTIBOT", "no")
-		if init_needed == nil then
-			self.logger:log(ngx.ERR, err)
-		end
-		self.init_needed = init_needed
-	end
-end
-
-function antibot:init()
-	if self.init_needed then
-		-- Load templates
-		local templates = {}
-		for i, template in ipairs({ "javascript", "captcha", "recaptcha", "hcaptcha" }) do
-			local f, err = io.open("/usr/share/bunkerweb/core/antibot/files/" .. template .. ".html")
-			if not f then
-				return self:ret(false, "error while loading " .. template .. ".html : " .. err)
-			end
-			templates[template] = f:read("*all")
-			f:close()
-		end
-		local ok, err = self.datastore:set("plugin_antibot_templates", cjson.encode(templates))
-		if not ok then
-			return self:ret(false, "can't save templates to datastore : " .. err)
-		end
-	end
-	return self:ret(true, "success")
 end
 
 function antibot:access()
@@ -195,38 +168,33 @@ function antibot:display_challenge(challenge_uri)
 		return false, "session type is different from antibot type"
 	end
 
-	-- Load HTML templates
-	local str_templates, err = self.datastore:get("plugin_antibot_templates")
-	if not str_templates then
-		return false, "can't get templates from datastore : " .. err
-	end
-	local templates = cjson.decode(str_templates)
-
-	local html = ""
+	-- Common variables for templates
+	local template_vars = {
+		antibot_uri = self.variables["ANTIBOT_URI"]
+	}
 
 	-- Javascript case
 	if self.variables["USE_ANTIBOT"] == "javascript" then
-		html = templates.javascript:format(self.variables["ANTIBOT_URI"], data.random)
+		template_vars.random = data.random
 	end
 
 	-- Captcha case
 	if self.variables["USE_ANTIBOT"] == "captcha" then
-		html = templates.captcha:format(self.variables["ANTIBOT_URI"], data.image)
+		template_vars.captcha = data.image
 	end
 
 	-- reCAPTCHA case
 	if self.variables["USE_ANTIBOT"] == "recaptcha" then
-		html = templates.recaptcha:format(self.variables["ANTIBOT_RECAPTCHA_SITEKEY"], self.variables["ANTIBOT_URI"], self.variables["ANTIBOT_RECAPTCHA_SITEKEY"])
+		template_vars.recaptcha_sitekey = self.variables["ANTIBOT_RECAPTCHA_SITEKEY"]
 	end
 
 	-- hCaptcha case
 	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
-		html = templates.hcaptcha:format(self.variables["ANTIBOT_URI"], self.variables["ANTIBOT_HCAPTCHA_SITEKEY"])
+		template_vars.hcaptcha_sitekey = self.variables["ANTIBOT_HCAPTCHA_SITEKEY"]
 	end
 
-	-- Send content
-	ngx.header["Content-Type"] = "text/html"
-	ngx.say(html)
+	-- Render content
+	template.render(self.variables["USE_ANTIBOT"] .. ".html", template_vars)
 
 	return true, "displayed challenge"
 end
