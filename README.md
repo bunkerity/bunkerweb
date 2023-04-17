@@ -1,11 +1,12 @@
 <p align="center">
-	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/master/logo.png" />
+	<img alt="BunkerWeb logo" src="misc/logo.png" />
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/bunkerweb-1.4.6-blue" />
+	<img src="https://img.shields.io/badge/bunkerweb-1.5.0-blue" />
 	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?label=CI%2FCD%20dev&branch=dev" />
+	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/staging.yml?label=CI%2FCD%20staging&branch=staging" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?label=CI%2FCD%20prod" />
 	<img src="https://img.shields.io/github/issues/bunkerity/bunkerweb">
 	<img src="https://img.shields.io/github/issues-pr/bunkerity/bunkerweb">
@@ -27,19 +28,21 @@
 	🗺️ <a href="https://threatmap.bunkerweb.io">Threatmap</a>
 </p>
 
-> Make security by default great again !
+> 🛡️ Make security by default great again !
 
 # BunkerWeb
 
 <p align="center">
-	<img alt="overview" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/intro-overview.svg" />
+	<img alt="overview" src="docs/assets/img/intro-overview.svg" />
 </p>
 
-BunkerWeb is a web server based on the notorious [NGINX](https://nginx.org/) and focused on security.
+BunkerWeb is an incredible web server that is built upon the reliable [NGINX](https://nginx.org/) and designed with a primary focus on security.
 
-It integrates into existing environments ([Linux](#linux), [Docker](#docker), [Swarm](#swarm), [Kubernetes](#Kubernetes), …) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every setting to meet your use case.
+This web server can effortlessly be integrated into your current environment, whether you're using [Linux](#linux), [Docker](#docker), [Swarm](#swarm), [Kubernetes](#Kubernetes), and more. To ensure that your web services are "secure by default" without any added stress or effort.
 
-BunkerWeb contains primary [security features](#security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](#plugins).
+With BunkerWeb, you can be assured that all security best practices are applied automatically, and you have total control over each setting to meet your unique needs. The web server comes with a table of primary [security features](#security-tuning) as part of the core, but you can easily expand it with extra features using the [plugin system](#plugins).
+
+Overall, BunkerWeb is a great choice for anyone looking for a secure and user-friendly web server that guarantees optimum performance and uncompromised security for their web services.
 
 ## Why BunkerWeb ?
 
@@ -52,7 +55,7 @@ BunkerWeb contains primary [security features](#security-tuning) as part of the 
 
 A non-exhaustive list of security features :
 
-- **HTTPS** support with transparent **Let's Encrypt** automation
+- **HTTPS** support with transparent **Let's Encrypt** automation.
 - **State-of-the-art web security** : HTTP security headers, prevent leaks, TLS hardening, ...
 - Integrated **ModSecurity WAF** with the **OWASP Core Rule Set**
 - **Automatic ban** of strange behaviors based on HTTP status code
@@ -66,7 +69,7 @@ Learn more about the core security features in the [security tuning](https://doc
 ## Demo
 
 <p align="center">
-	<img alt="Demo GIF" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/demo.gif" />
+	<img alt="Demo GIF" src="docs/assets/img/demo.gif" />
 </p>
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.
@@ -74,7 +77,7 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 # Concepts
 
 <p align="center">
-	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/concepts.svg" />
+	<img alt="BunkerWeb logo" src="docs/assets/img/concepts.svg" />
 </p>
 
 You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/latest/concepts).
@@ -133,7 +136,7 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 ## Docker
 
 <p align="center">
-	<img alt="Docker" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-docker.svg" />
+	<img alt="Docker" src="docs/assets/img/integration-docker.svg" />
 </p>
 
 We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) using the `bunkerity/bunkerweb` tag.
@@ -149,7 +152,7 @@ You will find more information in the [Docker integration section](https://docs.
 ## Docker autoconf
 
 <p align="center">
-	<img alt="Docker autoconf" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-autoconf.svg" />
+	<img alt="Docker autoconf" src="docs/assets/img/integration-autoconf.svg" />
 </p>
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
@@ -161,7 +164,7 @@ You will find more information in the [Docker autoconf section](https://docs.bun
 ## Swarm
 
 <p align="center">
-	<img alt="Swarm" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-swarm.svg" />
+	<img alt="Swarm" src="docs/assets/img/integration-swarm.svg" />
 </p>
 
 To automatically configure BunkerWeb instances, a special service, called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
@@ -175,7 +178,7 @@ You will find more information in the [Swarm section](https://docs.bunkerweb.io/
 ## Kubernetes
 
 <p align="center">
-	<img alt="Kubernetes" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-kubernetes.svg" />
+	<img alt="Kubernetes" src="docs/assets/img/integration-kubernetes.svg" />
 </p>
 
 The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
@@ -185,7 +188,7 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 ## Linux
 
 <p align="center">
-	<img alt="Linux" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-linux.svg" />
+	<img alt="Linux" src="docs/assets/img/integration-linux.svg" />
 </p>
 
 List of supported Linux distros :
@@ -202,7 +205,7 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 ## Ansible
 
 <p align="center">
-	<img alt="Ansible" src="https://github.com/bunkerity/bunkerweb/raw/master/docs/assets/img/integration-ansible.svg" />
+	<img alt="Ansible" src="docs/assets/img/integration-ansible.svg" />
 </p>
 
 List of supported Linux distros :
