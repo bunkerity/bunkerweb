@@ -7,7 +7,7 @@
 	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?label=CI%2FCD%20dev&branch=dev" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/staging.yml?label=CI%2FCD%20staging&branch=staging" />
-	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?label=CI%2FCD%20prod" />
+	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/prod.yml?label=CI%2FCD%20prod" />
 	<img src="https://img.shields.io/github/issues/bunkerity/bunkerweb">
 	<img src="https://img.shields.io/github/issues-pr/bunkerity/bunkerweb">
 </p>
