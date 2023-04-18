@@ -9,7 +9,6 @@ local cjson			= require "cjson"
 
 local logger		= clogger:new("UTILS")
 local datastore		= cdatastore:new()
-local cachestore	= ccachestore:new()
 
 local utils 		= {}
 
