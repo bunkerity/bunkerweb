@@ -267,7 +267,7 @@ static int32_t kfold_intop(int32_t k1, int32_t k2, IROp op)
   case IR_SUB: k1 -= k2; break;
   case IR_MUL: k1 *= k2; break;
   case IR_MOD: k1 = lj_vm_modi(k1, k2); break;
-  case IR_NEG: k1 = -k1; break;
+  case IR_NEG: k1 = (int32_t)(~(uint32_t)k1+1u); break;
   case IR_BAND: k1 &= k2; break;
   case IR_BOR: k1 |= k2; break;
   case IR_BXOR: k1 ^= k2; break;
@@ -1366,7 +1366,7 @@ LJFOLDF(simplify_intsub_k)
   if (fright->i == 0)  /* i - 0 ==> i */
     return LEFTFOLD;
   fins->o = IR_ADD;  /* i - k ==> i + (-k) */
-  fins->op2 = (IRRef1)lj_ir_kint(J, -fright->i);  /* Overflow for -2^31 ok. */
+  fins->op2 = (IRRef1)lj_ir_kint(J, (int32_t)(~(uint32_t)fright->i+1u));  /* Overflow for -2^31 ok. */
   return RETRYFOLD;
 }
 
@@ -1397,7 +1397,7 @@ LJFOLDF(simplify_intsub_k64)
   if (k == 0)  /* i - 0 ==> i */
     return LEFTFOLD;
   fins->o = IR_ADD;  /* i - k ==> i + (-k) */
-  fins->op2 = (IRRef1)lj_ir_kint64(J, (uint64_t)-(int64_t)k);
+  fins->op2 = (IRRef1)lj_ir_kint64(J, ~k+1u);
   return RETRYFOLD;
 }
 

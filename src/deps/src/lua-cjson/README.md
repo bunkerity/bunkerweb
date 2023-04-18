@@ -165,7 +165,7 @@ encode_escape_forward_slash
 
 **default:** true
 
-If enabled, forward slash '/' will be encoded as '\/'.
+If enabled, forward slash '/' will be encoded as '\\/'.
 
 If disabled, forward slash '/' will be encoded as '/' (no escape is applied).
 

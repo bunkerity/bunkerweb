@@ -1,30 +1,22 @@
-local _M = {}
-_M.__index = _M
+local class		= require "middleclass"
+local plugin	= require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
 
-local utils			= require "utils"
-local datastore		= require "datastore"
-local logger		= require "logger"
+local cors		= class("cors", plugin)
 
-function _M.new()
-	local self = setmetatable({}, _M)
-	return self, nil
+function cors:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "cors")
 end
 
-function _M:access()
-	-- Check if access is needed
-	local cors, err = utils.get_variable("USE_CORS")
-	if cors == nil then
-		return false, err, nil, nil
+function cors:header()
+	-- Check if header is needed
+	if self.variables["USE_CORS"] ~= "yes" then
+		return self:ret(true, "service doesn't use CORS")
 	end
-	if cors == "no" then
-		return true, "CORS not activated", nil, nil
-	end
-	
-	-- Check if method is OPTIONS
 	if ngx.var.request_method ~= "OPTIONS" then
-		return true, "method is not OPTIONS", nil, nil
+		return self:ret(true, "method is not OPTIONS")
 	end
-	
 	-- Add headers
 	local cors_headers = {
 		["CORS_MAX_AGE"] = "Access-Control-Max-Age",
@@ -32,10 +24,8 @@ function _M:access()
 		["CORS_ALLOW_HEADERS"] = "Access-Control-Allow-Headers"
 	}
 	for variable, header in pairs(cors_headers) do
-		local value, err = utils.get_variable(variable)
-		if value == nil then
-			logger.log(ngx.ERR, "CORS", "can't get " .. variable .. " from datastore : " .. err)
-		elseif value ~= "" then
+		local value = self.variables[variable]
+		if value ~= "" then
 			ngx.header[header] = value
 		end
 	end
@@ -43,8 +33,7 @@ function _M:access()
 	ngx.header["Content-Length"] = "0"
 	
 	-- Send CORS policy with a 204 (no content) status
-	return true, "sent CORS policy", true, ngx.HTTP_NO_CONTENT
-
+	return self:ret(true, "sent CORS policy")
 end
 
-return _M
+return cors

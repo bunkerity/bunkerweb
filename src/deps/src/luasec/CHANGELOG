@@ -1,4 +1,19 @@
 --------------------------------------------------------------------------------
+LuaSec 1.3.1
+---------------
+This version includes:
+
+* Fix: check if PSK is available
+
+--------------------------------------------------------------------------------
+LuaSec 1.3.0
+---------------
+This version includes:
+
+* Add :getlocalchain() + :getlocalcertificate() to mirror the peer methods (@mwild1)
+* Add Pre-Shared Key (PSK) support (@jclab-joseph)
+
+--------------------------------------------------------------------------------
 LuaSec 1.2.0
 ---------------
 This version includes:

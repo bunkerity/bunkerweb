@@ -220,6 +220,12 @@ mix the three forms, but note that setting an optimization level
 overrides all earlier flags.
 </p>
 <p>
+Note that <tt>-Ofma</tt> is not enabled by default at any level,
+because it affects floating-point result accuracy. Only enable this,
+if you fully understand the trade-offs of FMA for performance (higher),
+determinism (lower) and numerical accuracy (higher).
+</p>
+<p>
 Here are the available flags and at what optimization levels they
 are enabled:
 </p>
@@ -251,6 +257,8 @@ are enabled:
 <td class="flag_name">sink</td><td class="flag_level">&nbsp;</td><td class="flag_level">&nbsp;</td><td class="flag_level">&bull;</td><td class="flag_desc">Allocation/Store Sinking</td></tr>
 <tr class="even">
 <td class="flag_name">fuse</td><td class="flag_level">&nbsp;</td><td class="flag_level">&nbsp;</td><td class="flag_level">&bull;</td><td class="flag_desc">Fusion of operands into instructions</td></tr>
+<tr class="odd">
+<td class="flag_name">fma </td><td class="flag_level">&nbsp;</td><td class="flag_level">&nbsp;</td><td class="flag_level">&nbsp;</td><td class="flag_desc">Fused multiply-add</td></tr>
 </table>
 <p>
 Here are the parameters and their default settings:

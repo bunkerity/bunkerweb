@@ -88,10 +88,11 @@
 #define JIT_F_OPT_ABC		(JIT_F_OPT << 7)
 #define JIT_F_OPT_SINK		(JIT_F_OPT << 8)
 #define JIT_F_OPT_FUSE		(JIT_F_OPT << 9)
+#define JIT_F_OPT_FMA		(JIT_F_OPT << 10)
 
 /* Optimizations names for -O. Must match the order above. */
 #define JIT_F_OPTSTRING	\
-  "\4fold\3cse\3dce\3fwd\3dse\6narrow\4loop\3abc\4sink\4fuse"
+  "\4fold\3cse\3dce\3fwd\3dse\6narrow\4loop\3abc\4sink\4fuse\3fma"
 
 /* Optimization levels set a fixed combination of flags. */
 #define JIT_F_OPT_0	0
@@ -100,6 +101,7 @@
 #define JIT_F_OPT_3	(JIT_F_OPT_2|\
   JIT_F_OPT_FWD|JIT_F_OPT_DSE|JIT_F_OPT_ABC|JIT_F_OPT_SINK|JIT_F_OPT_FUSE)
 #define JIT_F_OPT_DEFAULT	JIT_F_OPT_3
+/* Note: FMA is not set by default. */
 
 /* -- JIT engine parameters ----------------------------------------------- */
 

@@ -60,12 +60,10 @@ else
             # Nothing about MaxMind was informed, using the pkg-config to figure things out.
             if test -n "${PKG_CONFIG}"; then
                 MAXMIND_PKG_NAME=""
-                for x in ${MAXMIND_POSSIBLE_LIB_NAMES}; do
-                    if ${PKG_CONFIG} --exists ${x}; then
-                        MAXMIND_PKG_NAME="$x"
-                        break
-                    fi
-                done
+                if ${PKG_CONFIG} --exists libmaxminddb; then
+                    MAXMIND_PKG_NAME="libmaxminddb"
+                    break
+                fi
             fi
             AC_MSG_NOTICE([Nothing about MaxMind was informed during the configure phase. Trying to detect it on the platform...])
             if test -n "${MAXMIND_PKG_NAME}"; then

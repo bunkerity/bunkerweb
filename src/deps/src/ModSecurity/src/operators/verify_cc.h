@@ -39,7 +39,8 @@ class VerifyCC : public Operator {
     explicit VerifyCC(std::unique_ptr<RunTimeString> param)
         : Operator("VerifyCC", std::move(param)),
 #if WITH_PCRE2
-        m_pc(NULL) { }
+        m_pc(NULL),
+        m_pcje(PCRE2_ERROR_JIT_BADOPTION) { }
 #else
         m_pc(NULL),
         m_pce(NULL) { }
@@ -53,6 +54,7 @@ class VerifyCC : public Operator {
  private:
 #if WITH_PCRE2
     pcre2_code *m_pc;
+    int m_pcje;
 #else
     pcre *m_pc;
     pcre_extra *m_pce;

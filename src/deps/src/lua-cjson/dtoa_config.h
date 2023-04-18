@@ -24,7 +24,7 @@
 #define IEEE_8087
 #endif
 
-#define MALLOC(n)   xmalloc(n)
+#define MALLOC xmalloc
 
 static void *xmalloc(size_t size)
 {
@@ -49,6 +49,10 @@ static pthread_mutex_t private_dtoa_lock[2] = {
     PTHREAD_MUTEX_INITIALIZER,
     PTHREAD_MUTEX_INITIALIZER
 };
+
+#define dtoa_get_threadno pthread_self
+void
+set_max_dtoa_threads(unsigned int n);
 
 #define ACQUIRE_DTOA_LOCK(n)    do {                                \
     int r = pthread_mutex_lock(&private_dtoa_lock[n]);              \

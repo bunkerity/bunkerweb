@@ -2,7 +2,7 @@
 --name bunkerweb
 --license agpl3
 --version %VERSION%
---depends bash --depends python3 --depends python3-pip --depends 'nginx = 1.22.1-1~jammy' --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends procps --depends lsof
+--depends bash --depends python3 --depends python3-pip --depends 'nginx = 1.24.0-1~jammy' --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends procps --depends lsof
 --description "BunkerWeb %VERSION% for Ubuntu 22.04"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"

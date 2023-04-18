@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -101,11 +101,11 @@ namespace modsecurity {
  */
 Transaction::Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData)
     : m_creationTimeStamp(utils::cpu_seconds()),
-    /* m_clientIpAddress(nullptr), */
+     m_clientIpAddress(std::make_shared<std::string>("")),
     m_httpVersion(""),
-    /* m_serverIpAddress(""), */
+    m_serverIpAddress(std::make_shared<std::string>("")),
     m_uri(""),
-    /* m_uri_no_query_string_decoded(""), */
+    m_uri_no_query_string_decoded(std::make_shared<std::string>("")),
     m_ARGScombinedSizeDouble(0),
     m_clientPort(0),
     m_highestSeverityAction(255),
@@ -175,11 +175,11 @@ Transaction::Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData)
 
 Transaction::Transaction(ModSecurity *ms, RulesSet *rules, char *id, void *logCbData)
     : m_creationTimeStamp(utils::cpu_seconds()),
-    /* m_clientIpAddress(""), */
+    m_clientIpAddress(std::make_shared<std::string>("")),
     m_httpVersion(""),
-    /* m_serverIpAddress(""), */
+    m_serverIpAddress(std::make_shared<std::string>("")),
     m_uri(""),
-    /* m_uri_no_query_string_decoded(""), */
+    m_uri_no_query_string_decoded(std::make_shared<std::string>("")),
     m_ARGScombinedSizeDouble(0),
     m_clientPort(0),
     m_highestSeverityAction(255),
@@ -814,7 +814,8 @@ int Transaction::processRequestBody() {
             m_variableReqbodyError.set("1", 0);
             m_variableReqbodyErrorMsg.set("Request body excluding files is bigger than the maximum expected.", 0);
             m_variableInboundDataError.set("1", m_variableOffset);
-            ms_dbg(5, "Request body excluding files is bigger than the maximum expected.");
+            ms_dbg(5, "Request body excluding files is bigger than the maximum expected. Limit: " \
+                + std::to_string(m_rules->m_requestBodyNoFilesLimit.m_value));
             requestBodyNoFilesLimitExceeded = true;
 	}
     }
@@ -901,7 +902,8 @@ int Transaction::processRequestBody() {
             m_variableReqbodyError.set("1", 0);
             m_variableReqbodyErrorMsg.set("Request body excluding files is bigger than the maximum expected.", 0);
             m_variableInboundDataError.set("1", m_variableOffset);
-            ms_dbg(5, "Request body excluding files is bigger than the maximum expected.");
+            ms_dbg(5, "Request body excluding files is bigger than the maximum expected. Limit: " \
+                + std::to_string(m_rules->m_requestBodyNoFilesLimit.m_value));
         } else {
             m_variableReqbodyError.set("0", m_variableOffset);
             m_variableReqbodyProcessorError.set("0", m_variableOffset);

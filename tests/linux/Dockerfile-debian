@@ -3,7 +3,7 @@ FROM debian:bullseye
 ENV container docker
 ENV LC_ALL C
 ENV DEBIAN_FRONTEND noninteractive
-ENV NGINX_VERSION 1.22.1
+ENV NGINX_VERSION 1.24.0
 
 RUN apt-get update \
     && apt-get install -y systemd systemd-sysv \

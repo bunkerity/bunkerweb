@@ -135,13 +135,14 @@ std::string string_to_hex(const std::string& input) {
     return output;
 }
 
-
-std::string toHexIfNeeded(const std::string &str) {
+std::string toHexIfNeeded(const std::string &str, bool escape_spec) {
+    // escape_spec: escape special chars or not
+    // spec chars: '"' (quotation mark, ascii 34), '\' (backslash, ascii 92)
     std::stringstream res;
 
     for (int i = 0; i < str.size(); i++) {
         int c = (unsigned char)str.at(i);
-        if (c < 32 || c > 126) {
+        if (c < 32 || c > 126 || (escape_spec == true && (c == 34 || c == 92))) {
             res << "\\x" << std::setw(2) << std::setfill('0') << std::hex << c;
         } else {
             res << str.at(i);
@@ -266,7 +267,6 @@ void replaceAll(std::string *str, const std::string& from,
         start_pos += to.length();
     }
 }
-
 
 }  // namespace string
 }  // namespace utils

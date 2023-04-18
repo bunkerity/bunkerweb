@@ -13,7 +13,7 @@ local ngx_append_body = ngx.req.append_body
 -- local print = print
 
 
-local _M = { _VERSION = '0.10' }
+local _M = { _VERSION = '0.11' }
 
 
 local CHUNK_SIZE = 4096

@@ -569,6 +569,42 @@ Then the output will be
 
 [Back to TOC](#table-of-contents)
 
+Redis Module
+==================
+
+This library supports the Redis module. Here is an example with RedisBloom module:
+
+```lua
+    local cjson = require "cjson"
+    local redis = require "resty.redis"
+    -- register the module prefix "bf" for RedisBloom
+    redis.register_module_prefix("bf")
+
+    local red = redis:new()
+
+    local ok, err = red:connect("127.0.0.1", 6379)
+    if not ok then
+        ngx.say("failed to connect: ", err)
+        return
+    end
+
+    -- call BF.ADD command with the prefix 'bf'
+    res, err = red:bf():add("dog", 1)
+    if not res then
+        ngx.say(err)
+        return
+    end
+    ngx.say("receive: ", cjson.encode(res))
+
+    -- call BF.EXISTS command
+    res, err = red:bf():exists("dog")
+    if not res then
+        ngx.say(err)
+        return
+    end
+    ngx.say("receive: ", cjson.encode(res))
+```
+
 Load Balancing and Failover
 ===========================
 
@@ -610,7 +646,7 @@ handling in your own Lua code, then you are recommended to disable this automati
 Check List for Issues
 =====================
 
-1. Ensure you configure the connection pool size properly in the [set_keepalive](#set_keepalive) . Basically if your NGINX handle `n` concurrent requests and your NGINX has `m` workers, then the connection pool size should be configured as `n/m`. For example, if your NGINX usually handles 1000 concurrent requests and you have 10 NGINX workers, then the connection pool size should be 100.
+1. Ensure you configure the connection pool size properly in the [set_keepalive](#set_keepalive). Basically if your Redis can handle `n` concurrent connections and your NGINX has `m` workers, then the connection pool size should be configured as `n/m`. For example, if your Redis usually handles 1000 concurrent requests and you have 10 NGINX workers, then the connection pool size should be 100. Similarly if you have `p` different NGINX instances, then connection pool size should be `n/m/p`.
 2. Ensure the backlog setting on the Redis side is large enough. For Redis 2.8+, you can directly tune the `tcp-backlog` parameter in the `redis.conf` file (and also tune the kernel parameter `SOMAXCONN` accordingly at least on Linux). You may also want to tune the `maxclients` parameter in `redis.conf`.
 3. Ensure you are not using too short timeout setting in the [set_timeout](#set_timeout) or [set_timeouts](#set_timeouts) methods. If you have to, try redoing the operation upon timeout and turning off [automatic error logging](#automatic-error-logging) (because you are already doing proper error handling in your own Lua code).
 4. If your NGINX worker processes' CPU usage is very high under load, then the NGINX event loop might be blocked by the CPU computation too much. Try sampling a [C-land on-CPU Flame Graph](https://github.com/agentzh/nginx-systemtap-toolkit#sample-bt) and [Lua-land on-CPU Flame Graph](https://github.com/agentzh/stapxx#ngx-lj-lua-stacks) for a typical NGINX worker process. You can optimize the CPU-bound things according to these Flame Graphs.

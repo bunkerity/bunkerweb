@@ -1,9 +1,9 @@
-LuaSec 1.2.0
+LuaSec 1.3.1
 ------------
 
 * OpenSSL options:
 
-    By default, this version includes options for OpenSSL 3.0.0 beta2
+    By default, this version includes options for OpenSSL 3.0.8
 
     If you need to generate the options for a different version of OpenSSL:
 

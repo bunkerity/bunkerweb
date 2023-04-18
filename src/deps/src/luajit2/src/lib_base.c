@@ -304,7 +304,7 @@ LJLIB_ASM(tonumber)		LJLIB_REC(.)
 	while (lj_char_isspace((unsigned char)(*ep))) ep++;
 	if (*ep == '\0') {
 	  if (LJ_DUALNUM && LJ_LIKELY(ul < 0x80000000u+neg)) {
-	    if (neg) ul = (unsigned long)-(long)ul;
+	    if (neg) ul = ~ul+1u;
 	    setintV(L->base-1-LJ_FR2, (int32_t)ul);
 	  } else {
 	    lua_Number n = (lua_Number)ul;

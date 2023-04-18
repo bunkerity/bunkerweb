@@ -114,7 +114,7 @@ void LJ_FASTCALL lj_state_growstack(lua_State *L, MSize need)
       n = LJ_STACK_MAX;
   }
   resizestack(L, n);
-  if (L->stacksize > LJ_STACK_MAXEX)
+  if (L->stacksize >= LJ_STACK_MAXEX)
     lj_err_msg(L, LJ_ERR_STKOV);
 }
 

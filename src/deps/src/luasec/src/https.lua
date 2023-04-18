@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------
--- LuaSec 1.2.0
--- Copyright (C) 2009-2022 PUC-Rio
+-- LuaSec 1.3.1
+--
+-- Copyright (C) 2009-2023 PUC-Rio
 --
 -- Author: Pablo Musa
 -- Author: Tomas Guisasola
@@ -18,8 +19,8 @@ local try    = socket.try
 -- Module
 --
 local _M = {
-  _VERSION   = "1.2.0",
-  _COPYRIGHT = "LuaSec 1.2.0 - Copyright (C) 2009-2022 PUC-Rio",
+  _VERSION   = "1.3.1",
+  _COPYRIGHT = "LuaSec 1.3.1 - Copyright (C) 2009-2023 PUC-Rio",
   PORT       = 443,
   TIMEOUT    = 60
 }

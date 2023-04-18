@@ -1,43 +1,35 @@
-local _M = {}
-_M.__index = _M
+local class			= require "middleclass"
+local plugin		= require "bunkerweb.plugin"
+local logger		= require "bunkerweb.logger"
+local utils			= require "bunkerweb.utils"
+local clusterstore	= require "bunkerweb.clusterstore"
 
-local utils			= require "utils"
-local datastore		= require "datastore"
-local logger		= require "logger"
-local cjson			= require "cjson"
-local resolver		= require "resty.dns.resolver"
-local clusterstore	= require "clusterstore"
+local redis = class("redis", plugin)
 
-function _M.new()
-	local self = setmetatable({}, _M)
-	return self, nil
+function redis:initialize()
+	-- Call parent initialize
+	plugin.initialize(self, "redis")
 end
 
-function _M:init()
+function redis:init()
 	-- Check if init is needed
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if use_redis == nil then
-		return false, "can't check USE_REDIS variable : " .. err
-	end
-	if use_redis ~= "yes" then
-		return true, "redis not used"
+	if self.variables["USE_REDIS"] then
+		return self:ret(true, "redis not used")
 	end
 	-- Check redis connection
-	local redis_client, err = clusterstore:connect()
-	if not redis_client then
-		return false, "can't connect to redis server"
+	local ok, err = clusterstore:connect()
+	if not ok then
+		return self:ret(false, "redis connect error : " .. err)
 	end
-	local ok, err = redis_client:ping()
+	local ok, err = clusterstore:call("ping")
+	clusterstore:close()
 	if err then
-		clusterstore:close(redis_client)
-		return false, "error while sending ping command : " .. err
+		return self:ret(false, "error while sending ping command : " .. err)
 	end
 	if not ok then
-		clusterstore:close(redis_client)
-		return false, "ping command failed"
+		return self:ret(false, "ping command failed")
 	end
-	clusterstore:close(redis_client)
-	return true, "redis ping successful"
+	return self:ret(true, "redis ping successful")
 end
 
-return _M
+return redis

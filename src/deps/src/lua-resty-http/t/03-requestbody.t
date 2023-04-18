@@ -205,7 +205,153 @@ Expectation Failed
 [warn]
 
 
-=== TEST 5: Non string request bodies are converted with correct length
+=== TEST 5: Return 100 Continue with headers
+--- http_config eval: $::HttpConfig
+--- config
+    location = /a {
+        content_by_lua_block {
+            local http = require "resty.http"
+            local httpc = http.new()
+            httpc:connect({
+                scheme = "http",
+                host = "127.0.0.1",
+                port = ngx.var.server_port
+            })
+
+            local res, err = httpc:request{
+                body = "a=1&b=2&c=3",
+                path = "/b",
+                headers = {
+                    ["Expect"] = "100-continue",
+                    ["Content-Type"] = "application/x-www-form-urlencoded",
+                }
+            }
+
+            if not res then
+                ngx.log(ngx.ERR, "httpc:request failed: ", err)
+            end
+
+            ngx.say(res.status)
+            ngx.say(res:read_body())
+            httpc:close()
+        }
+    }
+    location = /b {
+        content_by_lua_block {
+            local len = ngx.req.get_headers()["Content-Length"]
+
+            local sock, err = ngx.req.socket(true)
+            if not sock then
+                ngx.log(ngx.ERR, "server: failed to get raw req socket: ", err)
+                return
+            end
+
+            -- with additional header
+            local ok, err = sock:send("HTTP/1.1 100 Continue\r\nConnection: keep-alive\r\n\r\n")
+            if not ok then
+                ngx.log(ngx.ERR, "failed to send 100 response: ", err)
+            end
+
+            local data, err = sock:receive(len)
+            if not data then
+                ngx.log(ngx.ERR, "failed to receive: ", err)
+                return
+            end
+
+            local ok, err = sock:send("HTTP/1.1 200 OK\r\n" ..
+                                      "Content-Length: " .. len .. "\r\n" ..
+                                      "Content-Type: application/x-www-form-urlencoded\r\n\r\n" ..
+                                      data)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to send 200 response: ", err)
+                return
+            end
+        }
+    }
+--- request
+GET /a
+--- response_body
+200
+a=1&b=2&c=3
+--- no_error_log
+[error]
+[warn]
+
+
+=== TEST 6: Return 100 Continue without headers
+--- http_config eval: $::HttpConfig
+--- config
+    location = /a {
+        content_by_lua_block {
+            local http = require "resty.http"
+            local httpc = http.new()
+            httpc:connect({
+                scheme = "http",
+                host = "127.0.0.1",
+                port = ngx.var.server_port
+            })
+
+            local res, err = httpc:request{
+                body = "a=1&b=2&c=3",
+                path = "/b",
+                headers = {
+                    ["Expect"] = "100-continue",
+                    ["Content-Type"] = "application/x-www-form-urlencoded",
+                }
+            }
+
+            if not res then
+                ngx.log(ngx.ERR, "httpc:request failed: ", err)
+            end
+
+            ngx.say(res.status)
+            ngx.say(res:read_body())
+            httpc:close()
+        }
+    }
+    location = /b {
+        content_by_lua_block {
+            local len = ngx.req.get_headers()["Content-Length"]
+
+            local sock, err = ngx.req.socket(true)
+            if not sock then
+                ngx.log(ngx.ERR, "server: failed to get raw req socket: ", err)
+                return
+            end
+
+            -- without additional headers
+            local ok, err = sock:send("HTTP/1.1 100 Continue\r\n\r\n")
+            if not ok then
+                ngx.log(ngx.ERR, "failed to send 100 response: ", err)
+            end
+
+            local data, err = sock:receive(len)
+            if not data then
+                ngx.log(ngx.ERR, "failed to receive: ", err)
+                return
+            end
+
+            local ok, err = sock:send("HTTP/1.1 200 OK\r\n" ..
+                                      "Content-Length: " .. len .. "\r\n" ..
+                                      "Content-Type: application/x-www-form-urlencoded\r\n\r\n" ..
+                                      data)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to send 200 response: ", err)
+                return
+            end
+        }
+    }
+--- request
+GET /a
+--- response_body
+200
+a=1&b=2&c=3
+--- no_error_log
+[error]
+[warn]
+
+
+=== TEST 7: Non string request bodies are converted with correct length
 --- http_config eval: $::HttpConfig
 --- config
     location = /a {
@@ -247,7 +393,7 @@ mix123edtable
 [warn]
 
 
-=== TEST 6: Request body as iterator
+=== TEST 8: Request body as iterator
 --- http_config eval: $::HttpConfig
 --- config
     location = /a {
@@ -284,7 +430,7 @@ foobar
 [warn]
 
 
-=== TEST 7: Request body as iterator, errors with missing length
+=== TEST 9: Request body as iterator, errors with missing length
 --- http_config eval: $::HttpConfig
 --- config
     location = /a {
@@ -319,7 +465,7 @@ Request body is a function but a length or chunked encoding is not specified
 [warn]
 
 
-=== TEST 8: Request body as iterator with chunked encoding
+=== TEST 10: Request body as iterator with chunked encoding
 --- http_config eval: $::HttpConfig
 --- config
     location = /a {

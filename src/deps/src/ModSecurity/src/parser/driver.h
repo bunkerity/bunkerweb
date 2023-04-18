@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -53,14 +53,6 @@ typedef struct Driver_t Driver;
 #endif
 
 
-/**
- *
- * FIXME: There is a memory leak in the filename at yy::location.
- *        The filename should be converted into a shared string to
- *        save memory or be associated with the life cycle of the
- *        driver class.
- *
- **/
 class Driver : public RulesSetProperties {
  public:
     Driver();
@@ -92,6 +84,13 @@ class Driver : public RulesSetProperties {
     RuleWithActions *m_lastRule;
 
     RulesSetPhases m_rulesSetPhases;
+
+    // Retain a list of new'd filenames so that they are available during the lifetime
+    // of the Driver object, but so that they will get cleaned up by the Driver
+    // destructor. This is to resolve a memory leak of  yy.position.filename in location.hh.
+    // Ordinarily other solutions would have been preferable, but location.hh is a
+    // bison-generated file, which makes some alternative solutions impractical.
+    std::list<std::string> m_filenames;
 };
 
 
