@@ -847,7 +847,7 @@ try:
 
         assert_alert_message(driver, "was successfully created")
 
-        sleep(5)
+        sleep(15)
 
         driver.execute_script("window.open('http://www.example.com/hello','_blank');")
         driver.switch_to.window(driver.window_handles[1])

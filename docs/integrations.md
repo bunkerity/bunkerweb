@@ -12,7 +12,7 @@ Using BunkerWeb as a [Docker](https://www.docker.com/) container is a quick and 
 We provide ready-to-use prebuilt images for x64, x86 armv8 and armv7 architectures on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb) :
 
 ```shell
-docker pull bunkerity/bunkerweb:1.4.6
+docker pull bunkerity/bunkerweb:1.5.0-beta
 ```
 
 Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and get a coffee ☕ because it may take a long time depending on your hardware) :
@@ -39,7 +39,7 @@ docker run \
 	   -e MY_SETTING=value \
 	   -e "MY_OTHER_SETTING=value with spaces" \
 	   ...
-	   bunkerity/bunkerweb:1.4.6
+	   bunkerity/bunkerweb:1.5.0-beta
 ```
 
 Here is the docker-compose equivalent :
@@ -48,7 +48,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.5.0-beta
     environment:
       - MY_SETTING=value
 ```
@@ -73,7 +73,7 @@ docker run \
 	   ...
 	   -v bw_data:/data \
 	   ...
-	   bunkerity/bunkerweb:1.4.6
+	   bunkerity/bunkerweb:1.5.0-beta
 ```
 
 Here is the docker-compose equivalent :
@@ -82,7 +82,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.5.0-beta
     volumes:
       - bw_data:/data
 ...
@@ -152,7 +152,7 @@ docker run \
        ...
 	   --network mynetwork \
 	   ...
-	   bunkerity/bunkerweb:1.4.6
+	   bunkerity/bunkerweb:1.5.0-beta
 ```
 
 You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.
@@ -163,7 +163,7 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.5.0-beta
     networks:
       - bw-net
 ...
@@ -218,7 +218,7 @@ docker run \
 	   -e SERVER_NAME= \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
 	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.4.6 && \
+	   bunkerity/bunkerweb:1.5.0-beta && \
 
 docker network connect bw-services mybunker
 ```
@@ -235,7 +235,7 @@ docker run \
 	   --network bw-autoconf \
 	   -v bw-data:/data \
 	   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-	   bunkerity/bunkerweb-autoconf:1.4.6
+	   bunkerity/bunkerweb-autoconf:1.5.0-beta
 ```
 
 Here is the docker-compose equivalent for the BunkerWeb autoconf stack :
@@ -246,7 +246,7 @@ version: '3.5'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - 80:8080
 	  - 443:8443
@@ -262,7 +262,7 @@ services:
 	  - bw-services
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.6
+    image: bunkerity/bunkerweb-autoconf:1.5.0-beta
     volumes:
       - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -364,7 +364,7 @@ docker service create \
 	   -e MULTISITE=yes \
 	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
 	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.4.6
+	   bunkerity/bunkerweb:1.5.0-beta
 ```
 
 And the autoconf one :
@@ -378,7 +378,7 @@ docker service \
 	   --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
 	   --mount type=volume,source=bw-data,destination=/data \
 	   -e SWARM_MODE=yes \
-	   bunkerity/bunkerweb-autoconf:1.4.6
+	   bunkerity/bunkerweb-autoconf:1.5.0-beta
 ```
 
 Here is the docker-compose equivalent (using `docker stack deploy`) :
@@ -389,7 +389,7 @@ version: '3.5'
 services:
 
   mybunker:
-    image: bunkerity/bunkerweb:1.4.6
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - published: 80
         target: 8080
@@ -416,7 +416,7 @@ services:
         - "bunkerweb.AUTOCONF"
 
   myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.4.6
+    image: bunkerity/bunkerweb-autoconf:1.5.0-beta
     environment:
       - SWARM_MODE=yes
     volumes:
@@ -580,7 +580,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /usr/share/bunkerweb/helpers/healthcheck.sh
+            - /opt/bunkerweb/helpers/healthcheck.sh
           initialDelaySeconds: 30
           periodSeconds: 5
           timeoutSeconds: 1
@@ -588,7 +588,7 @@ spec:
         readinessProbe:
           exec:
             command:
-            - /usr/share/bunkerweb/helpers/healthcheck.sh
+            - /opt/bunkerweb/helpers/healthcheck.sh
           initialDelaySeconds: 30
           periodSeconds: 1
           timeoutSeconds: 1
@@ -706,11 +706,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo apt install -y nginx=1.20.2-1~$(lsb_release -cs)
 	```
 
-	And finally install BunkerWeb 1.4.6 :
+	And finally install BunkerWeb 1.5.0-beta :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	sudo apt update && \
-	sudo apt install -y bunkerweb=1.4.6
+	sudo apt install -y bunkerweb=1.5.0-beta
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -736,11 +736,11 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo apt install -y nginx=1.20.2-1~jammy
 	```
 
-	And finally install BunkerWeb 1.4.6 :
+	And finally install BunkerWeb 1.5.0-beta :
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
 	sudo apt update && \
-	sudo apt install -y bunkerweb=1.4.6
+	sudo apt install -y bunkerweb=1.5.0-beta
     ```
 	
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -755,20 +755,20 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf install -y nginx-1.20.2
 	```
 
-	And finally install BunkerWeb 1.4.6 :
-  ```shell
-  curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
-  sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
-  sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
-  sudo dnf makecache && \
-  sudo dnf install -y bunkerweb-1.4.6
-  ```
+    And finally install BunkerWeb 1.5.0-beta :
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
+  	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
+  	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
+  	sudo dnf makecache && \
+  	sudo dnf install -y bunkerweb-1.5.0-beta
+    ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-  ```shell
-  sudo dnf versionlock add nginx && \
-  sudo dnf versionlock add bunkerweb
-  ```
+	```shell
+	sudo dnf versionlock add nginx && \
+	sudo dnf versionlock add bunkerweb
+	```
 
 === "CentOS Stream"
 
@@ -788,59 +788,12 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf install nginx-1.20.2
 	```
 
-	And finally install BunkerWeb 1.4.6 :
+	And finally install BunkerWeb 1.5.0-beta :
     ```shell
 	dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.4.6
-    ```
-
-	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-	```shell
-	sudo dnf versionlock add nginx && \
-	sudo dnf versionlock add bunkerweb
-	```
-
-=== "Redhat"
-
-    The first step is to add CentOS official repository. Create the following file at `/etc/yum.repos.d/centos.repo` :
-    ```conf
-    [centos]
-    name=CentOS-$releasever - Base
-    baseurl=http://mirror.centos.org/centos/$releasever/BaseOS/$basearch/os/
-    gpgcheck=1
-    enabled=1
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
-	```
-
-    The import the official GPG key of CentOS :
-    ```shell
-    rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
-    ```
-
-      Go to NGINX 1.20.2 by first adding the official NGINX repository. Create the following file at /etc/yum.repos.d/nginx.repo :
-    ```conf
-    [nginx-stable]
-    name=nginx stable repo
-    baseurl=http://nginx.org/packages/rhel/$releasever/$basearch/
-    gpgcheck=1
-    enabled=1
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-	```
-
-    You should now be able to install NGINX 1.20.2 :
-	```shell
-	sudo dnf install nginx-1.20.2-1.el8.ngx.x86_64
-	```
-
-	And finally install BunkerWeb 1.4.6 :
-    ```shell
-	dnf install -y epel-release && \
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-    sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.4.6
+    sudo dnf install -y bunkerweb-1.5.0-beta
     ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -853,9 +806,9 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
     The first step is to install NGINX 1.20.2 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
 	
-	The target installation folder of BunkerWeb is located at `/usr/share/bunkerweb`, let's create it :
+	The target installation folder of BunkerWeb is located at `/opt/bunkerweb`, let's create it :
 	```shell
-	mkdir /usr/share/bunkerweb
+	mkdir /opt/bunkerweb
 	```
 	
 	You can now clone the BunkerWeb project to the `/tmp` folder :
@@ -863,43 +816,40 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	https://github.com/bunkerity/bunkerweb.git /tmp/bunkerweb
 	```
 	
-	BunkerWeb needs some dependencies to be compiled and installed to `/usr/share/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
+	BunkerWeb needs some dependencies to be compiled and installed to `/opt/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
 	```
-	mkdir /usr/share/bunkerweb/deps && \
+	mkdir /opt/bunkerweb/deps && \
 	/tmp/bunkerweb/deps/install.sh
 	```
-
-	Additional Python dependencies needs to be installed into the `/usr/share/bunkerweb/deps/python` folder :
+	
+	Additional Python dependencies needs to be installed into the `/opt/bunkerweb/deps/python` folder :
 	```shell
-	mkdir -p /usr/share/bunkerweb/deps/python && \
-  cat src/scheduler/requirements.txt src/ui/requirements.txt src/common/gen/requirements.txt src/common/db/requirements.txt > /tmp/bunkerweb/deps/requirements.txt && \
-	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+	mkdir /opt/bunkerweb/deps/python && \
+	pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
+	pip install --no-cache-dir --target /opt/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
 	```
 	
-	Once dependencies are installed, you will be able to copy the BunkerWeb sources to the target `/usr/share/bunkerweb` folder :
+	Once dependencies are installed, you will be able to copy the BunkerWeb sources to the target `/opt/bunkerweb` folder :
 	```shell
 	for src in api cli confs core gen helpers job lua misc utils ui settings.json VERSION linux/variables.env linux/ui.env linux/scripts ; do
-		cp -r /tmp/bunkerweb/${src} /usr/share/bunkerweb
+		cp -r /tmp/bunkerweb/${src} /opt/bunkerweb
 	done
-	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin
+	cp /opt/bunkerweb/helpers/bwcli /usr/local/bin
 	```
 	
 	Additional folders also need to be created :
 	```shell
-  mkdir -p /etc/bunkerweb/configs && \
-	mkdir -p /var/cache/bunkerweb && \
-  mkdir -p /etc/bunkerweb/plugins && \
-	mkdir -p /var/tmp/bunkerweb
+	mkdir /opt/bunkerweb/{configs,cache,plugins,tmp}
 	```
 	
 	Permissions needs to be fixed :
 	```shell
-	find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
-	find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
-	find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
-	chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/scripts/*.sh /usr/bin/bwcli /usr/share/bunkerweb/ui/main.py && \
-	chown -R root:nginx /usr/share/bunkerweb
+	find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
+	find /opt/bunkerweb -path /opt/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
+	find /opt/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
+	chmod 770 /opt/bunkerweb/cache /opt/bunkerweb/tmp && \
+	chmod 750 /opt/bunkerweb/gen/main.py /opt/bunkerweb/job/main.py /opt/bunkerweb/cli/main.py /opt/bunkerweb/helpers/*.sh /opt/bunkerweb/scripts/*.sh /usr/local/bin/bwcli /opt/bunkerweb/ui/main.py && \
+	chown -R root:nginx /opt/bunkerweb
 	```
 	
 	Last but not least, you will need to set up systemd unit files :
@@ -912,7 +862,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	systemctl enable bunkerweb-ui
 	```
 
-The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
+The configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file :
 
 ```conf
 MY_SETTING_1=value1
@@ -978,7 +928,7 @@ Configuration of BunkerWeb is done by using specific role variables :
 
 | Name  | Type  | Description  | Default value  |
 |:-----:|:-----:|--------------|----------------|
-| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.4.6` |
+| `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.5.0-beta` |
 | `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
 | `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
 | `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |
@@ -989,92 +939,3 @@ Configuration of BunkerWeb is done by using specific role variables :
 | `custom_plugins` | string | Path of the plugins directory to upload. | empty value |
 | `custom_www_owner` | string | Default owner for www files and folders. | `nginx` |
 | `custom_www_group` | string | Default group for www files and folders. | `nginx` |
-
-## Vagrant
-
-<figure markdown>
-  ![Overwiew](assets/img/integration-vagrant.svg){ align=center }
-  <figcaption>BunkerWeb integration with Vagrant</figcaption>
-</figure>
-
-List of supported providers :
-
-- vmware_desktop 
-- virtualbox 
-- libvirt
-
-**_Note on Supported Base Images_**  
-
-Please be aware that the provided Vagrant boxes are based **exclusively on Ubuntu 22.04 "Jammy"**. While BunkerWeb supports other Linux distributions, the Vagrant setup currently only supports Ubuntu 22.04 as the base operating system. This ensures a consistent and reliable environment for users who want to deploy BunkerWeb using Vagrant.
-
-Similar to other BunkerWeb integrations, the Vagrant setup uses **NGINX version 1.20.2**. This specific version is required to ensure compatibility and smooth functioning with BunkerWeb. Additionally, the Vagrant box includes **PHP** pre-installed, providing a ready-to-use environment for hosting PHP-based applications alongside BunkerWeb.
-
-By using the provided Vagrant box based on Ubuntu 22.04 "Jammy", you benefit from a well-configured and integrated setup, allowing you to focus on developing and securing your applications with BunkerWeb without worrying about the underlying infrastructure.
-
-Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the supported virtualization providers (VirtualBox, VMware, and libvirt):
-
-
-1. Make sure you have Vagrant and one of the supported virtualization providers (VirtualBox, VMware, or libvirt) installed on your system.
-2. There are two ways to install the Vagrant box with BunkerWeb: either by using a provided Vagrantfile to configure your virtual machine or by creating a new box based on the existing BunkerWeb Vagrant box, offering you flexibility in how you set up your development environment.
-
-=== "Vagrantfile"
-
-    ```shell
-    Vagrant.configure("2") do |config|
-      config.vm.box = "bunkerity/bunkerity"
-    end
-    ```
-
-    Depending on the virtualization provider you choose, you may need to install additional plugins:
-
-    * For **VMware**, install the `vagrant-vmware-desktop` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-    * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-    * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-
-=== "New Vagrant Box"
-
-    ```shell
-    vagrant init bunkerity/bunkerity
-    ```
-
-    Depending on the virtualization provider you choose, you may need to install additional plugins:
-
-    * For **VMware**, install the `vagrant-vmware-desktop` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-    * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-    * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-
-After installing the necessary plugins for your chosen virtualization provider, run the following command to start the virtual machine and install BunkerWeb:
-
-```shell
-vagrant up --provider=virtualbox # or --provider=vmware_desktop or --provider=libvirt
-```
-
-Finally, to access the virtual machine using SSH, execute the following command:
-
-```shell
-vagrant ssh
-```
-
-**Example Vagrantfile**
-
-  Here is an example `Vagrantfile` for installing BunkerWeb on Ubuntu 22.04 "Jammy" using the different supported virtualization providers:
-
-```shell
-Vagrant.configure("2") do |config|
-
-  # Ubuntu 22.04 "Jammy"
-  config.vm.box = "bunkerity/bunkerity"
-
-  # Uncomment the desired virtualization provider
-  # For VirtualBox (default)
-  config.vm.provider "virtualbox"
-
-  # For VMware
-  # config.vm.provider "vmware_desktop" # Windows
-  # config.vm.provider "vmware_workstation" # Linux
-
-  # For libvirt
-  # config.vm.provider "libvirt"
-
-end
-```
