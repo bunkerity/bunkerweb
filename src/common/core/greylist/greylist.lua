@@ -239,7 +239,7 @@ function greylist:is_in_cache(ele)
 end
 
 function greylist:add_to_cache(ele, value)
-	local ok, err = self.cachestore:set("plugin_greylist_" .. ele, value)
+	local ok, err = self.cachestore:set("plugin_greylist_" .. ele, value, 86400)
 	if not ok then
 		return false, err
 	end 

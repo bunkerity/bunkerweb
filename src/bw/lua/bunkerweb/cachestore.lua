@@ -110,7 +110,12 @@ function cachestore:set(key, value, ex)
 			self.logger:log(ngx.ERR, err)
 		end
 	end
-	local ok, err = self.cache:set(key, nil, value)
+	local ok, err
+	if ex then
+		ok, err = self.cache:set(key, {ttl = ex}, value)
+	else
+		ok, err = self.cache:set(key, nil, value)
+	end
 	if not ok then
 		return false, err
 	end

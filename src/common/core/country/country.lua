@@ -101,7 +101,7 @@ function country:is_in_cache(ip)
 end
 
 function country:add_to_cache(ip, country, result)
-	local ok, err = self.cachestore:set("plugin_country_cache_" .. ip, cjson.encode({country = country, result = result}))
+	local ok, err = self.cachestore:set("plugin_country_cache_" .. ip, cjson.encode({country = country, result = result}), 86400)
 	if not ok then
 		return false, err
 	end 

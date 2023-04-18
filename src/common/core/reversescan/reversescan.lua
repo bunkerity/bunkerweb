@@ -69,7 +69,7 @@ function reversescan:is_in_cache(ip_port)
 end
 
 function reversescan:add_to_cache(ip_port, value)
-	local ok, err = self.cachestore:set("plugin_reversescan_cache_" .. ip_port, value)
+	local ok, err = self.cachestore:set("plugin_reversescan_cache_" .. ip_port, value, 86400)
 	if not ok then
 		return false, err
 	end 

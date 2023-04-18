@@ -155,7 +155,7 @@ function blacklist:is_in_cache(ele)
 end
 
 function blacklist:add_to_cache(ele, value)
-	local ok, err = self.cachestore:set("plugin_blacklist_" .. ele, value)
+	local ok, err = self.cachestore:set("plugin_blacklist_" .. ele, value, 86400)
 	if not ok then
 		return false, err
 	end 

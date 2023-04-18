@@ -43,9 +43,9 @@ function dnsbl:access()
 		return self:ret(false, "can't check if client IP is global : " .. err)
 	end
 	if not is_global then
-		local ok, err self:add_to_cache(ngx.var.remote_addr, "ok")
+		local ok, err = self:add_to_cache(ngx.var.remote_addr, "ok")
 		if not ok then
-			return self:ret(false, "error while adding element to cache")
+			return self:ret(false, "error while adding element to cache : " .. err)
 		end
 		return self:ret(true, "client IP is not global, skipping DNSBL check")
 	end
@@ -79,12 +79,12 @@ function dnsbl:is_in_cache(ip)
 	local ok, data = self.cachestore:get("plugin_dnsbl_" .. ip)
 	if not ok then
 		return false, data
-	end 
+	end
 	return true, data
 end
 
 function dnsbl:add_to_cache(ip, value)
-	local ok, err = self.cachestore:set("plugin_dnsbl_" .. ip, value)
+	local ok, err = self.cachestore:set("plugin_dnsbl_" .. ip, value, 86400)
 	if not ok then
 		return false, err
 	end 
