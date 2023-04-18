@@ -8,6 +8,20 @@ class Menu {
 
     this.toggleBtn.addEventListener("click", this.toggle.bind(this));
     this.closeBtn.addEventListener("click", this.close.bind(this));
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target.closest("aside").hasAttribute("sidebar-menu") &&
+          e.target.closest("button").getAttribute("role") === "tab"
+        ) {
+          this.close();
+        }
+      } catch (err) {}
+    });
   }
 
   toggle() {
@@ -26,21 +40,15 @@ class News {
   }
 
   init() {
-    window.addEventListener("load", () => {
-      const res = fetch("https://www.bunkerweb.io/api/posts/0/1", {
-        headers: {
-          method: "GET",
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => {
-          console.log("data");
-          const data = res.data;
-          console.log(data);
-          this.render(res);
-        })
-        .catch((err) => console.log(err));
+    window.addEventListener("load", async () => {
+      try {
+        const res = await fetch("https://www.bunkerweb.io/api/posts/0/2", {
+          headers: {
+            method: "GET",
+          },
+        });
+        return await this.render(res);
+      } catch (err) {}
     });
   }
 

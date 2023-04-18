@@ -815,12 +815,12 @@ h6 {
   right: 1.25rem;
 }
 
-.right-2 {
-  right: 0.5rem;
-}
-
 .top-16 {
   top: 4rem;
+}
+
+.right-2 {
+  right: 0.5rem;
 }
 
 .top-\[60px\] {
@@ -976,6 +976,11 @@ h6 {
 .my-1 {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
+}
+
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .mx-2\.5 {
@@ -3380,6 +3385,11 @@ h6 {
 
   .lg\:col-span-8 {
     grid-column: span 8 / span 8;
+  }
+
+  .lg\:mx-0 {
+    margin-left: 0px;
+    margin-right: 0px;
   }
 
   .lg\:mx-8 {
