@@ -53,9 +53,6 @@ RUN apk add --no-cache bash && \
     chown root:nginx /var/log/letsencrypt /var/lib/letsencrypt && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt
 
-# Fix CVEs
-RUN apk add "libcrypto3>=3.0.8-r2" "libssl3>=3.0.8-r2"
-
 VOLUME /data /etc/nginx
 
 WORKDIR /usr/share/bunkerweb/autoconf

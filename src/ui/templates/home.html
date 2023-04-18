@@ -3,6 +3,7 @@
 <a
   href="https://github.com/bunkerity/bunkerweb"
   class="dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  target="_blank"
 >
   <!-- text -->
   <div>
@@ -139,7 +140,7 @@
 
 <!-- stats card-->
 <a
-  href="{% if current_endpoint == 'services' %}javascript:void(0){% else %}loading?next={{ url_for('services') }}{% endif %}"
+  href="{% if current_endpoint == 'services' %}javascript:void(0){% else %}loading?next={{ url_for('plugins') }}{% endif %}"
   class="dark:brightness-110 max-h-none sm:max-h-28 h-full hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <!-- text -->
