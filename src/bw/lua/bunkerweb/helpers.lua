@@ -84,4 +84,29 @@ helpers.call_plugin = function(plugin, method)
     return true, ret
 end
 
+helpers.fill_ctx = function()
+    -- Check if ctx is already filled
+    if ngx.ctx.bw then
+        return true, "already filled"
+    end
+    -- Return errors as table
+    local errors = {}
+    -- Instantiate bw table
+    local data = {}
+    -- Common vars
+    data.ip = ngx.var.remote_addr
+    data.uri = ngx.var.uri
+    data.original_uri = ngx.var.original_uri
+    data.user_agent = ngx.var.http_user_agent
+    -- Global IP
+    local ip_is_global, err = utils.ip_is_global(data.ip)
+    if ip_is_global == nil then
+        table.insert(errors, "can't check if IP is global : " .. err)
+    else
+        data.ip_is_global = ip_is_global
+    end
+    -- ctx filled
+    return true, "ctx filled", errors
+end
+
 return helpers
