@@ -76,7 +76,7 @@ class JobScheduler(ApiCaller):
 
     def __reload(self):
         reload = True
-        if self.__integration == "Linux":
+        if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
             self.__logger.info("Reloading nginx ...")
             proc = run(
                 ["nginx", "-s", "reload"], stdin=DEVNULL, stderr=PIPE, env=self.__env

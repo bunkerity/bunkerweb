@@ -60,12 +60,12 @@ def get_version():
 
 def get_integration():
     try:
-        if getenv("AUTOCONF_MODE") == "yes":
-            return "autoconf"
-        elif getenv("SWARM_MODE") == "yes":
-            return "swarm"
-        elif getenv("KUBERNETES_MODE") == "yes":
+        if getenv("KUBERNETES_MODE", "no") == "yes":
             return "kubernetes"
+        elif getenv("SWARM_MODE", "no") == "yes":
+            return "swarm"
+        elif getenv("AUTOCONF_MODE", "no") == "yes":
+            return "autoconf"
         elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
             return Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip().lower()
         elif (

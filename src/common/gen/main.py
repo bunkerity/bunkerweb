@@ -90,8 +90,13 @@ if __name__ == "__main__":
             integration = "Swarm"
         elif getenv("AUTOCONF_MODE", "no") == "yes":
             integration = "Autoconf"
-        elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
+        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
             integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
+        elif (
+            Path("/etc/os-release").is_file()
+            and "Alpine" in Path("/etc/os-release").read_text()
+        ):
+            integration = "Docker"
 
         if args.variables:
             logger.info(f"Variables : {args.variables}")
@@ -163,7 +168,10 @@ if __name__ == "__main__":
         )
         templator.render()
 
-        if integration == "Linux" and not args.no_linux_reload:
+        if (
+            integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker")
+            and not args.no_linux_reload
+        ):
             retries = 0
             while not Path("/var/tmp/bunkerweb/nginx.pid").exists():
                 if retries == 5:
