@@ -60,15 +60,19 @@ def get_version():
 
 def get_integration():
     try:
-        if getenv("AUTOCONF_MODE") == "yes":
-            return "autoconf"
-        if getenv("SWARM_MODE") == "yes":
-            return "swarm"
-        elif getenv("KUBERNETES_MODE") == "yes":
+        if getenv("KUBERNETES_MODE", "no") == "yes":
             return "kubernetes"
-        elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
-            with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-                return f.read().strip().lower()
+        elif getenv("SWARM_MODE", "no") == "yes":
+            return "swarm"
+        elif getenv("AUTOCONF_MODE", "no") == "yes":
+            return "autoconf"
+        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
+            return Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip().lower()
+        elif (
+            Path("/etc/os-release").is_file()
+            and "Alpine" in Path("/etc/os-release").read_text()
+        ):
+            return "docker"
 
         return "linux"
     except:

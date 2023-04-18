@@ -1,3 +1,4 @@
+local utils = require "bunkerweb.utils"
 local cjson = require "cjson"
 
 local helpers = {}
@@ -82,6 +83,44 @@ helpers.call_plugin = function(plugin, method)
     end
     -- Return
     return true, ret
+end
+
+helpers.fill_ctx = function()
+    -- Check if ctx is already filled
+    if ngx.ctx.bw then
+        return true, "already filled"
+    end
+    -- Return errors as table
+    local errors = {}
+    -- Instantiate bw table
+    local data = {}
+    -- Common vars
+    data.kind = "http"
+    if not ngx.shared.cachestore then
+        data.kind = "stream"
+    end
+    data.ip = ngx.var.remote_addr
+    data.uri = ngx.var.uri
+    data.original_uri = ngx.var.original_uri
+    data.user_agent = ngx.var.http_user_agent
+    -- IP data : global
+    local ip_is_global, err = utils.ip_is_global(data.ip)
+    if ip_is_global == nil then
+        table.insert(errors, "can't check if IP is global : " .. err)
+    else
+        data.ip_is_global = ip_is_global
+    end
+    -- IP data : v4 / v6
+    data.ip_is_ipv4 = utils.is_ipv4(data.ip)
+    data.ip_is_ipv6 = utils.is_ipv6(data.ip)
+    -- Misc info
+    data.integration = utils.get_integration()
+    data.version = utils.get_version()
+    -- Plugins
+    data.plugins = {}
+    -- Fill ctx
+    ngx.ctx.bw = data
+    return true, "ctx filled", errors
 end
 
 return helpers

@@ -267,7 +267,14 @@ fi
 
 # lua-resty-openssl v0.8.21
 echo "ℹ️ Downloading lua-resty-openssl"
+dopatch="no"
+if [ ! -d "deps/src/lua-resty-openssl" ] ; then
+	dopatch="yes"
+fi
 git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "15bc59b97feb5acf25fbdd9426cf73870cf7c838"
+if [ "$dopatch" == "yes" ] ; then
+	do_and_check_cmd rm -r deps/src/lua-resty-openssl/t
+fi
 
 # ModSecurity v3.0.9
 echo "ℹ️ Downloading ModSecurity"

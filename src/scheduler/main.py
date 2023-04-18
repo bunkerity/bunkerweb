@@ -6,6 +6,7 @@ from glob import glob
 from os import (
     _exit,
     chmod,
+    environ,
     getenv,
     getpid,
     listdir,
@@ -105,7 +106,7 @@ def generate_custom_configs(
         Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
         Path(tmp_path).write_bytes(custom_config["data"])
 
-    if integration != "Linux":
+    if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
         logger.info("Sending custom configs to BunkerWeb")
         ret = api_caller._send_files("/data/configs", "/custom_configs")
 
@@ -136,7 +137,7 @@ def generate_external_plugins(
             st = stat(job_file)
             chmod(job_file, st.st_mode | S_IEXEC)
 
-    if integration != "Linux":
+    if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
         logger.info("Sending plugins to BunkerWeb")
         ret = api_caller._send_files("/data/plugins", "/plugins")
 
@@ -214,13 +215,6 @@ if __name__ == "__main__":
                 "Kubernetes",
                 "Autoconf",
             ):
-                # err = db.set_autoconf_load(False)
-                # if err:
-                #     success = False
-                #     logger.error(
-                #         f"Can't set autoconf loaded metadata to false in database: {err}",
-                #     )
-
                 while not db.is_autoconf_loaded():
                     logger.warning(
                         "Autoconf is not loaded yet in the database, retrying in 5s ...",
@@ -327,7 +321,7 @@ if __name__ == "__main__":
         while True:
             # Instantiate scheduler
             scheduler = JobScheduler(
-                env=deepcopy(env),
+                env=deepcopy(env) | environ,
                 apis=api_caller._get_apis(),
                 logger=logger,
                 integration=integration,
@@ -383,7 +377,7 @@ if __name__ == "__main__":
                         logger.info("Successfully sent /data/cache folder")
 
                 # restart nginx
-                if integration == "Linux":
+                if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
                     # Stop temp nginx
                     logger.info("Stopping temp nginx ...")
                     proc = subprocess_run(
@@ -467,7 +461,7 @@ if __name__ == "__main__":
 
                         # reload nginx
                         logger.info("Reloading nginx ...")
-                        if integration == "Linux":
+                        if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
                             # Reloading the nginx server.
                             proc = subprocess_run(
                                 # Reload nginx
@@ -484,10 +478,6 @@ if __name__ == "__main__":
                                 )
                         else:
                             need_reload = True
-                            # if api_caller._send_to_apis("POST", "/reload"):
-                            #     logger.info("Successfully reloaded nginx")
-                            # else:
-                            #     logger.error("Error while reloading nginx")
 
                     # check if the plugins have changed since last time
                     tmp_external_plugins = db.get_plugins(external=True)

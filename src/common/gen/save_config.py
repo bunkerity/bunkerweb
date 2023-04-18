@@ -142,6 +142,11 @@ if __name__ == "__main__":
             integration = "Autoconf"
         elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
             integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
+        elif (
+            Path("/etc/os-release").is_file()
+            and "Alpine" in Path("/etc/os-release").read_text()
+        ):
+            integration = "Docker"
 
         if args.init:
             logger.info(f"Detected {integration} integration")
