@@ -42,12 +42,11 @@ COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/common/settings.json /usr/share/bunkerweb/settings.json
 COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
-COPY misc/*.ascii /usr/share/bunkerweb
+COPY misc/*.ascii /usr/share/bunkerweb/
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache pcre bash python3 && \
 	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
-	echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
 	mkdir -p /var/tmp/bunkerweb && \
 	mkdir -p /var/www/html && \
 	mkdir -p /etc/bunkerweb && \
@@ -71,8 +70,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	ln -s /proc/1/fd/2 /var/log/nginx/error.log && \
 	ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log && \
 	ln -s /proc/1/fd/1 /var/log/nginx/access.log && \
-	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log && \
-	chmod 660 /usr/share/bunkerweb/INTEGRATION
+	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log
 
 VOLUME /data /etc/nginx
 

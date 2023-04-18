@@ -35,14 +35,6 @@ function trap_reload() {
 }
 trap "trap_reload" HUP
 
-if [ "$SWARM_MODE" == "yes" ] ; then
-	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
-elif [ "$KUBERNETES_MODE" == "yes" ] ; then
-	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
-elif [ "$AUTOCONF_MODE" == "yes" ] ; then
-	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
-fi
-
 if [ -f "/etc/nginx/variables.env" ] ; then
 	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb has already been loaded, will not generate temp config"
 else
