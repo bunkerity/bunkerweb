@@ -30,6 +30,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - toc.integrate
+    - content.code.copy
   custom_dir: docs/overrides
 
 extra_css:
@@ -48,7 +49,7 @@ markdown_extensions:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
 
-copyright: Copyright &copy; 2022 Bunkerity
+copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
 extra:
   version:
     provider: mike
