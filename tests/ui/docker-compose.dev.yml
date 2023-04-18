@@ -3,7 +3,7 @@ version: "3.5"
 services:
   mybunker:
     build:
-      context: .
+      context: ../..
       dockerfile: src/bw/Dockerfile
     ports:
       - 80:80
@@ -29,7 +29,6 @@ services:
       www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
       www.example.com_CUSTOM_CONF_MODSEC_CRS_config: 'SecRule REQUEST_FILENAME "@rx /global_config$$" "id:999,ctl:ruleRemoveByTag=platform-pgsql,nolog"'
       www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
-      CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
     labels:
       - "bunkerweb.INSTANCE"
     networks:
@@ -39,7 +38,7 @@ services:
 
   bw-scheduler:
     build:
-      context: .
+      context: ../..
       dockerfile: src/scheduler/Dockerfile
     depends_on:
       - mybunker
@@ -53,7 +52,7 @@ services:
 
   bw-ui:
     build:
-      context: .
+      context: ../..
       dockerfile: src/ui/Dockerfile
     depends_on:
       - mybunker
@@ -83,17 +82,16 @@ services:
     networks:
       bw-services:
         ipv4_address: 192.168.0.4
-
-  ui-tests:
-    build: tests/ui
-    environment:
-      - PYTHONUNBUFFERED=1
-    extra_hosts:
-      - "www.example.com:192.168.0.2"
-      - "app1.example.com:192.168.0.2"
-    networks:
-      bw-services:
-        ipv4_address: 192.168.0.3
+  # ui-tests:
+  #   build: .
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #   extra_hosts:
+  #     - "www.example.com:192.168.0.2"
+  #     - "app1.example.com:192.168.0.2"
+  #   networks:
+  #     bw-services:
+  #       ipv4_address: 192.168.0.3
 
 volumes:
   bw-data:

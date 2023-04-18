@@ -208,6 +208,7 @@ try:
         SEND_FILE_MAX_AGE_DEFAULT=86400,
         PLUGIN_ARGS={},
         RELOADING=False,
+        LAST_RELOAD=0,
         TO_FLASH=[],
         DARK_MODE=False,
     )
@@ -249,8 +250,10 @@ def manage_bunkerweb(method: str, operation: str = "reloads", *args):
         operation = app.config["INSTANCES"].stop_instance(args[0])
     elif operation == "restart":
         operation = app.config["INSTANCES"].restart_instance(args[0])
-    else:
+    elif Path("/usr/sbin/nginx").is_file():
         operation = app.config["INSTANCES"].reload_instances()
+    else:
+        operation = "The scheduler will be in charge of reloading the instances."
 
     if isinstance(operation, list):
         for op in operation:
@@ -387,6 +390,7 @@ def instances():
             return redirect(url_for("loading", next=url_for("instances")))
 
         app.config["RELOADING"] = True
+        app.config["LAST_RELOAD"] = time()
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -500,6 +504,7 @@ def services():
 
         # Reload instances
         app.config["RELOADING"] = True
+        app.config["LAST_RELOAD"] = time()
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -581,6 +586,7 @@ def global_config():
 
         # Reload instances
         app.config["RELOADING"] = True
+        app.config["LAST_RELOAD"] = time()
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -1203,6 +1209,7 @@ def plugins():
 
         # Reload instances
         app.config["RELOADING"] = True
+        app.config["LAST_RELOAD"] = time()
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -1773,7 +1780,12 @@ def darkmode():
 @app.route("/check_reloading")
 @login_required
 def check_reloading():
-    if app.config["RELOADING"] is False:
+    if not app.config["RELOADING"] or app.config["LAST_RELOAD"] + 60 < time():
+        if app.config["RELOADING"]:
+            logger.warning("Reloading took too long, forcing the state to be reloaded")
+            flash("Forced the status to be reloaded", "error")
+            app.config["RELOADING"] = False
+
         for f in app.config["TO_FLASH"]:
             if f["type"] == "error":
                 flash(f["content"], "error")
