@@ -41,7 +41,7 @@ function greylist:init()
 	if not self.init_needed then
 		return self:ret(true, "init not needed")
 	end
-	-- Read blacklists
+	-- Read greylists
 	local greylists = {
 		["IP"] = {},
 		["RDNS"] = {},
@@ -75,13 +75,13 @@ function greylist:access()
 	end
 	-- Check the caches
 	local checks = {
-		["IP"] = "ip" .. ngx.var.remote_addr
+		["IP"] = "ip" .. ngx.ctx.bw.remote_addr
 	}
-	if ngx.var.http_user_agent then
-		checks["UA"] = "ua" .. ngx.var.http_user_agent
+	if ngx.ctx.bw.http_user_agent then
+		checks["UA"] = "ua" .. ngx.ctx.bw.http_user_agent
 	end
-	if ngx.var.uri then
-		checks["URI"] = "uri" .. ngx.var.uri
+	if ngx.ctx.bw.uri then
+		checks["URI"] = "uri" .. ngx.ctx.bw.uri
 	end
 	local already_cached = {
 		["IP"] = false,
@@ -131,11 +131,11 @@ end
 
 function greylist:kind_to_ele(kind)
 	if kind == "IP" then
-		return "ip" .. ngx.var.remote_addr
+		return "ip" .. ngx.ctx.bw.remote_addr
 	elseif kind == "UA" then
-		return "ua" .. ngx.var.http_user_agent
+		return "ua" .. ngx.ctx.bw.http_user_agent
 	elseif kind == "URI" then
-		return "uri" .. ngx.var.uri
+		return "uri" .. ngx.ctx.bw.uri
 	end
 end
 
@@ -151,12 +151,12 @@ function greylist:is_greylisted(kind)
 end
 
 function greylist:is_greylisted_ip()
-	-- Check if IP is in blacklist
+	-- Check if IP is in greylist
 	local ipm, err = ipmatcher.new(self.lists["IP"])
 	if not ipm then
 		return nil, err
 	end
-	local match, err = ipm:match(ngx.var.remote_addr)
+	local match, err = ipm:match(ngx.ctx.bw.remote_addr)
 	if err then
 		return nil, err
 	end
@@ -166,18 +166,12 @@ function greylist:is_greylisted_ip()
 
 	-- Check if rDNS is needed
 	local check_rdns = true
-	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
-	if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" then
-		if is_global == nil then
-			return nil, err
-		end
-		if not is_global then
-			check_rdns = false
-		end
+	if self.variables["GREYLIST_RDNS_GLOBAL"] == "yes" and not ngx.ctx.bw.ip_is_global then
+		check_rdns = false
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns_list, err = utils.get_rdns(ngx.var.remote_addr)
+		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
 		if not rdns_list then
 			return nil, err
 		end
@@ -192,8 +186,8 @@ function greylist:is_greylisted_ip()
 	end
 
 	-- Check if ASN is in greylist
-	if is_global then
-		local asn, err = utils.get_asn(ngx.var.remote_addr)
+	if ngx.ctx.bw.ip_is_global then
+		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
 			return nil, err
 		end
@@ -209,9 +203,9 @@ function greylist:is_greylisted_ip()
 end
 
 function greylist:is_greylisted_uri()
-	-- Check if URI is in blacklist
+	-- Check if URI is in greylist
 	for i, uri in ipairs(self.lists["URI"]) do
-		if ngx.var.uri:match(uri) then
+		if ngx.ctx.bw.uri:match(uri) then
 			return true, "URI " .. uri
 		end
 	end
@@ -222,7 +216,7 @@ end
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
 	for i, ua in ipairs(self.lists["USER_AGENT"]) do
-		if ngx.var.http_user_agent:match(ua) then
+		if ngx.ctx.bw.http_user_agent:match(ua) then
 			return true, "UA " .. ua
 		end
 	end

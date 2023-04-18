@@ -19,7 +19,7 @@ end
 
 function badbehavior:log()
 	-- Check if we are whitelisted
-	if ngx.var.is_whitelisted == "yes" then
+	if ngx.ctx.bw.is_whitelisted == "yes" then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if bad behavior is activated
@@ -31,12 +31,12 @@ function badbehavior:log()
 		return self:ret(true, "not increasing counter")
 	end
 	-- Check if we are already banned
-	local banned, err = self.datastore:get("bans_ip_" .. ngx.var.remote_addr)
+	local banned, err = self.datastore:get("bans_ip_" .. ngx.ctx.bw.remote_addr)
 	if banned then
 		return self:ret(true, "already banned")
 	end
 	-- Call increase function later and with cosocket enabled
-	local ok, err = ngx.timer.at(0, badbehavior.increase, self, ngx.var.remote_addr)
+	local ok, err = ngx.timer.at(0, badbehavior.increase, self, ngx.ctx.bw.remote_addr)
 	if not ok then
 		return self:ret(false, "can't create increase timer : " .. err)
 	end

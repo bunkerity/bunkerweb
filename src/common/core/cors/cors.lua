@@ -14,7 +14,7 @@ function cors:header()
 	if self.variables["USE_CORS"] ~= "yes" then
 		return self:ret(true, "service doesn't use CORS")
 	end
-	if ngx.var.request_method ~= "OPTIONS" then
+	if ngx.ctx.bw.request_method ~= "OPTIONS" then
 		return self:ret(true, "method is not OPTIONS")
 	end
 	-- Add headers

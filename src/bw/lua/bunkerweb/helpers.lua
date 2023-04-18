@@ -99,12 +99,14 @@ helpers.fill_ctx = function()
     if not ngx.shared.cachestore then
         data.kind = "stream"
     end
-    data.ip = ngx.var.remote_addr
+    data.remote_addr = ngx.var.remote_addr
     data.uri = ngx.var.uri
-    data.original_uri = ngx.var.original_uri
-    data.user_agent = ngx.var.http_user_agent
+    data.request_uri = ngx.var.request_uri
+    data.request_method = ngx.var.request_method
+    data.http_user_agent = ngx.var.http_user_agent
+    data.server_name = ngx.var.server_name
     -- IP data : global
-    local ip_is_global, err = utils.ip_is_global(data.ip)
+    local ip_is_global, err = utils.ip_is_global(data.remote_addr)
     if ip_is_global == nil then
         table.insert(errors, "can't check if IP is global : " .. err)
     else

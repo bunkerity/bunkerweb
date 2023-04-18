@@ -35,25 +35,25 @@ function antibot:access()
 		return self:ret(false, "can't check if challenge is resolved : " .. err)
 	end
 	if resolved then
-		if ngx.var.uri == challenge_uri then
+		if ngx.ctx.bw.uri == challenge_uri then
 			return self:ret(true, "client already resolved the challenge", nil, original_uri)
 		end
 		return self:ret(true, "client already resolved the challenge")
 	end
 
 	-- Redirect to challenge page
-	if ngx.var.uri ~= challenge_uri then
+	if ngx.ctx.bw.uri ~= challenge_uri then
 		return self:ret(true, "redirecting client to the challenge uri", nil, challenge_uri)
 	end
 
 	-- Display challenge needed
-	if ngx.var.request_method == "GET" then
+	if ngx.ctx.bw.request_method == "GET" then
 		ngx.ctx.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.HTTP_OK)
 	end
 
 	-- Check challenge
-	if ngx.var.request_method == "POST" then
+	if ngx.ctx.bw.request_method == "POST" then
 		local ok, err, redirect = self:check_challenge(antibot)
 		if ok == nil then
 			return self:ret(false, "check challenge error : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
@@ -123,9 +123,9 @@ function antibot:prepare_challenge()
 		data = {
 			type = self.variables["USE_ANTIBOT"],
 			resolved = self.variables["USE_ANTIBOT"] == "cookie",
-			original_uri = ngx.var.request_uri
+			original_uri = ngx.ctx.bw.request_uri
 		}
-		if ngx.var.original_uri == challenge_uri then
+		if ngx.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			data.original_uri = "/"
 		end
 		set_needed = true
@@ -269,7 +269,7 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
-			body = "secret=" .. self.variables["ANTIBOT_RECAPTCHA_SECRET"] .. "&response=" .. args["token"] .. "&remoteip=" .. ngx.var.remote_addr,
+			body = "secret=" .. self.variables["ANTIBOT_RECAPTCHA_SECRET"] .. "&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -303,7 +303,7 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
-			body = "secret=" .. self.variables["ANTIBOT_HCAPTCHA_SECRET"] .. "&response=" .. args["token"] .. "&remoteip=" .. ngx.var.remote_addr,
+			body = "secret=" .. self.variables["ANTIBOT_HCAPTCHA_SECRET"] .. "&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}

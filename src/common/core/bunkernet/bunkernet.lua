@@ -94,11 +94,7 @@ function bunkernet:log(bypass_use_bunkernet)
 		return self:ret(true, "skipping report because the reason is bunkernet")
 	end
 	-- Check if IP is global
-	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
-	if is_global == nil then
-		return self:ret(false, "error while checking if IP is global " .. err)
-	end
-	if not is_global then
+	if not ngx.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
 	end
 	-- TODO : check if IP has been reported recently
@@ -113,8 +109,8 @@ function bunkernet:log(bypass_use_bunkernet)
 		end
 	end
 
-	local hdr, err = ngx.timer.at(0, report_callback, self, ngx.var.remote_addr, reason, ngx.var.request_method,
-		ngx.var.request_uri, ngx.req.get_headers())
+	local hdr, err = ngx.timer.at(0, report_callback, self, ngx.ctx.bw.remote_addr, reason, ngx.ctx.bw.request_method,
+		ngx.ctx.bw.request_uri, ngx.req.get_headers())
 	if not hdr then
 		return self:ret(false, "can't create report timer : " .. err)
 	end

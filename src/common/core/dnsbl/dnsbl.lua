@@ -28,22 +28,18 @@ function dnsbl:access()
 		return self:ret(true, "dnsbl list is empty")
 	end
 	-- Check if IP is in cache
-	local ok, cached = self:is_in_cache(ngx.var.remote_addr)
+	local ok, cached = self:is_in_cache(ngx.ctx.bw.remote_addr)
 	if not ok then
 		return self:ret(false, "error while checking cache : " .. err)
 	elseif cached then
 		if cached == "ok" then
-			return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (not blacklisted)")
+			return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")
 		end
-		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")", utils.get_deny_status())
+		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")", utils.get_deny_status())
 	end
 	-- Don't go further if IP is not global
-	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
-	if is_global == nil then
-		return self:ret(false, "can't check if client IP is global : " .. err)
-	end
-	if not is_global then
-		local ok, err = self:add_to_cache(ngx.var.remote_addr, "ok")
+	if not ngx.ctx.bw.ip_is_global then
+		local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr, "ok")
 		if not ok then
 			return self:ret(false, "error while adding element to cache : " .. err)
 		end
@@ -56,7 +52,7 @@ function dnsbl:access()
 			self.logger:log(ngx.ERR, "error while sending DNS request to " .. server .. " : " .. err)
 		end
 		if result then
-			local ok, err self:add_to_cache(ngx.var.remote_addr, server)
+			local ok, err self:add_to_cache(ngx.ctx.bw.remote_addr, server)
 			if not ok then
 				return self:ret(false, "error while adding element to cache : " .. err)
 			end
@@ -64,7 +60,7 @@ function dnsbl:access()
 		end
 	end
 	-- IP is not in DNSBL
-	local ok, err = self:add_to_cache(ngx.var.remote_addr, "ok")
+	local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr, "ok")
 	if not ok then
 		return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
 	end
