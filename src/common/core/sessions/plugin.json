@@ -1,0 +1,54 @@
+{
+  "id": "sessions",
+  "order": 999,
+  "name": "Sessions",
+  "description": "Management of session used by other plugins.",
+  "version": "0.1",
+  "settings": {
+    "SESSIONS_SECRET": {
+      "context": "global",
+      "default": "random",
+      "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
+      "id": "session-secret",
+      "label": "Sessions secret",
+      "regex": "^\\w+$",
+      "type": "password"
+    },
+    "SESSIONS_NAME": {
+      "context": "global",
+      "default": "random",
+      "help": "Name of the cookie given to clients.",
+      "id": "sessions-name",
+      "label": "Sessions name",
+      "regex": "^\\w+$",
+      "type": "text"
+    },
+    "SESSIONS_IDLING_TIMEOUT": {
+      "context": "global",
+      "default": "1800",
+      "help": "Maximum time (in seconds) of inactivity before the session is invalidated.",
+      "id": "sessions-idling-timeout",
+      "label": "Sessions idling timeout",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "SESSIONS_ROLLING_TIMEOUT": {
+      "context": "global",
+      "default": "3600",
+      "help": "Maximum time (in seconds) before a session must be renewed.",
+      "id": "sessions-rolling-timeout",
+      "label": "Sessions rolling timeout",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "SESSIONS_ABSOLUTE_TIMEOUT": {
+      "context": "global",
+      "default": "86400",
+      "help": "Maximum time (in seconds) before a session is destroyed.",
+      "id": "sessions-absolute-timeout",
+      "label": "SessionS absolute timeout",
+      "regex": "^\\d+$",
+      "type": "text"
+    }
+  }
+}

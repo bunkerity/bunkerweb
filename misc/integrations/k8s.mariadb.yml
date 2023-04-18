@@ -43,7 +43,7 @@ spec:
         app: bunkerweb
       # mandatory annotation
       annotations:
-        bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/INSTANCE: "yes"
     spec:
       containers:
         - name: bunkerweb
@@ -77,6 +77,10 @@ spec:
               value: ""
             - name: MULTISITE
               value: "yes"
+            - name: USE_REDIS
+              value: "yes"
+            - name: REDIS_HOST
+              value: "svc-bunkerweb-redis.default.svc.cluster.local"
           livenessProbe:
             exec:
               command:
@@ -93,8 +97,6 @@ spec:
             periodSeconds: 1
             timeoutSeconds: 1
             failureThreshold: 3
-      #imagePullSecrets:
-      #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -122,8 +124,6 @@ spec:
               value: "yes"
             - name: "DATABASE_URI"
               value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
-      #imagePullSecrets:
-      #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -141,17 +141,16 @@ spec:
       labels:
         app: bunkerweb-scheduler
     spec:
+      serviceAccountName: sa-bunkerweb
       containers:
-        - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.4.6
+        - name: bunkerweb-scheduler
+          image: bunkerity/bunkerweb-scheduler:1.4.6
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
               value: "yes"
             - name: "DATABASE_URI"
               value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
-      #imagePullSecrets:
-      #- name: secret-registry
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -258,5 +257,3 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: ""
-  volumeName: pv-bunkerweb

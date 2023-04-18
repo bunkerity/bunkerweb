@@ -53,13 +53,13 @@ The first step is to install the plugin by putting the plugin files inside the c
     	   ...
     	   -v "${PWD}/bw-data:/data" \
     	   ...
-    	   bunkerity/bunkerweb:1.4.6
+    	   bunkerity/bunkerweb:1.5.0-beta
     ```
 
     Here is the docker-compose equivalent :
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.4.6
+      image: bunkerity/bunkerweb:1.5.0-beta
       volumes:
         - ./bw-data:/data
       ...
@@ -148,6 +148,14 @@ The first step is to install the plugin by putting the plugin files inside the c
 	ansible-playbook -i inventory.yml playbook.yml
 	```
 
+=== "Vagrant"
+
+    When using the [Vagrant integration](/1.4/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    ```shell
+    git clone https://github.com/bunkerity/bunkerweb-plugins && \
+    cp -rp ./bunkerweb-plugins/* /data/plugins
+    ```
+
 ## Writing a plugin
 
 !!! tip "Existing plugins"
@@ -182,7 +190,7 @@ A file named **plugin.json** and written at the root of the plugin folder must c
 			"regex": "^.*$",
 			"type": "text"
 		}
-	}
+	},
 	"jobs": [
 		{
 			"name": "my-job",

@@ -5,7 +5,6 @@
 local _M = {}
 
 local gd = require 'gd'
-local logger	= require "logger"
 
 local mt = { __index = {} }
 

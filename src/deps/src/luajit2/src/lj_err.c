@@ -329,12 +329,12 @@ static void err_unwind_win_jit(global_State *g, int errcode)
   memset(&hist, 0, sizeof(hist));
   RtlCaptureContext(&ctx);
   while (1) {
-    uintptr_t frame, base, addr = ctx.CONTEXT_REG_PC;
+    DWORD64 frame, base, addr = ctx.CONTEXT_REG_PC;
     void *hdata;
     PRUNTIME_FUNCTION func = RtlLookupFunctionEntry(addr, &base, &hist);
     if (!func) {  /* Found frame without .pdata: must be JIT-compiled code. */
       ExitNo exitno;
-      uintptr_t stub = lj_trace_unwind(G2J(g), addr - sizeof(MCode), &exitno);
+      uintptr_t stub = lj_trace_unwind(G2J(g), (uintptr_t)(addr - sizeof(MCode)), &exitno);
       if (stub) {  /* Jump to side exit to unwind the trace. */
 	ctx.CONTEXT_REG_PC = stub;
 	G2J(g)->exitcode = errcode;
@@ -781,6 +781,7 @@ LJ_NOINLINE void lj_err_mem(lua_State *L)
 {
   if (L->status == LUA_ERRERR+1)  /* Don't touch the stack during lua_open. */
     lj_vm_unwind_c(L->cframe, LUA_ERRMEM);
+  if (curr_funcisL(L)) L->top = curr_topL(L);
   setstrV(L, L->top++, lj_err_str(L, LJ_ERR_ERRMEM));
   lj_err_throw(L, LUA_ERRMEM);
 }

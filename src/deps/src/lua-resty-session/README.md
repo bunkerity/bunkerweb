@@ -2,1180 +2,1461 @@
 
 **lua-resty-session** is a secure, and flexible session library for OpenResty.
 
-## Hello World with lua-resty-session
+## TL;DR;
+
+- Sessions are immutable (each save generates a new session), and lockless.
+- Session data is AES-256-GCM encrypted with a key derived using HKDF-SHA256.
+- Session has a fixed size header that is protected with HMAC-SHA256 MAC with
+  a key derived using HKDF-SHA256.
+- Session data can be stored in a stateless cookie or in various backend storages.
+- A single session cookie can maintain multiple sessions across different audiences.
+
+*Note:* Version 4.0.0 was a rewrite of this library with a lot of lessons learned
+during the years. If you still use older version, please refer
+[old documentation](https://github.com/bungle/lua-resty-session/tree/v3.10).
+
+
+## Status
+
+This library is considered production ready.
+
+
+## Synopsis
 
 ```nginx
 worker_processes  1;
 
 events {
-    worker_connections  1024;
+  worker_connections 1024;
 }
 
 http {
-    server {
-        listen       8080;
-        server_name  localhost;
-        default_type text/html;
+  init_by_lua_block {
+    require "resty.session".init({
+      remember = true,
+      audience = "demo",
+      secret   = "RaJKp8UQW1",
+      storage  = "cookie",
+    })
+  }
+  
+  server {
+    listen       8080;
+    server_name  localhost;
+    default_type text/html;
 
-        location / {
-            content_by_lua '
-                ngx.say("<html><body><a href=/start>Start the test</a>!</body></html>")
-            ';
-        }
-        location /start {
-            content_by_lua '
-                local session = require "resty.session".start()
-                session.data.name = "OpenResty Fan"
-                session:save()
-                ngx.say("<html><body>Session started. ",
-                        "<a href=/test>Check if it is working</a>!</body></html>")
-            ';
-        }
-        location /test {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was started by <strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/modify>Modify the session</a>.</body></html>")
-            ';
-        }
-        location /modify {
-            content_by_lua '
-                local session = require "resty.session".start()
-                session.data.name = "Lua Fan"
-                session:save()
-                ngx.say("<html><body>Session modified. ",
-                        "<a href=/modified>Check if it is modified</a>!</body></html>")
-            ';
-        }
-        location /modified {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was modified by <strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/destroy>Destroy the session</a>.</body></html>")
-            ';
-        }
-        location /destroy {
-            content_by_lua '
-                require "resty.session".destroy()
-                ngx.say("<html><body>Session was destroyed. ",
-                        "<a href=/check>Is it really so</a>?</body></html>")
-            ';
-        }
-        location /check {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was really destroyed, you are known as ",
-                        "<strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/>Start again</a>.</body></html>")
-            ';
-        }
+    location / {
+      content_by_lua_block {
+        ngx.say([[
+          <html>
+          <body>
+            <a href=/start>Start the test</a>
+          </body>
+          </html>
+        ]])
+      }
     }
-}
+
+    location /start {
+      content_by_lua_block {
+        local session = require "resty.session".new()
+        session:set_subject("OpenResty Fan")
+        session:set("quote", "The quick brown fox jumps over the lazy dog")
+        local ok, err = session:save()
+       
+        ngx.say(string.format([[
+          <html>
+          <body>
+            <p>Session started (%s)</p>
+            <p><a href=/started>Check if it really was</a></p>
+          </body>
+          </html>
+        ]], err or "no error"))
+      }
+    }
+
+    location /started {
+      content_by_lua_block {
+        local session, err = require "resty.session".start()
+        
+        ngx.say(string.format([[
+          <html>
+          <body>
+            <p>Session was started by %s (%s)</p>
+            <p><blockquote>%s</blockquote></p>
+            <p><a href=/modify>Modify the session</a></p>
+          </body>
+          </html>
+        ]],
+          session:get_subject() or "Anonymous",
+          err or "no error",
+          session:get("quote") or "no quote"
+        ))
+      }
+    }
+    
+    location /modify {
+      content_by_lua_block {
+        local session, err = require "resty.session".start()
+        session:set_subject("Lua Fan")
+        session:set("quote", "Lorem ipsum dolor sit amet")
+        local _, err_save = session:save()
+        
+        ngx.say(string.format([[
+          <html>
+          <body>
+            <p>Session was modified (%s)</p>
+            <p><a href=/modified>Check if it is modified</a></p>
+          </body>
+          </html>
+        ]], err or err_save or "no error"))
+      }
+    }
+    
+    location /modified {
+      content_by_lua_block {
+        local session, err = require "resty.session".start()
+
+        ngx.say(string.format([[
+          <html>
+          <body>
+            <p>Session was started by %s (%s)</p>
+            <p><blockquote>%s</blockquote></p>
+            <p><a href=/destroy>Destroy the session</a></p>
+          </body>
+          </html>
+        ]],
+          session:get_subject() or "Anonymous",
+          err or "no error",
+          session:get("quote")  or "no quote"
+        ))
+      }
+    }
+    
+    location /destroy {
+      content_by_lua_block {
+        local ok, err = require "resty.session".destroy()
+
+        ngx.say(string.format([[
+          <html>
+          <body>
+            <p>Session was destroyed (%s)</p>
+            <p><a href=/destroyed>Check that it really was?</a></p>
+          </body>
+          </html>
+        ]], err or "no error"))
+      }
+    }
+    
+    location /destroyed {
+      content_by_lua_block {
+        local session, err = require "resty.session".open()
+
+        ngx.say(string.format([[
+          <html>
+          <body>
+            <p>Session was really destroyed, you are known as %s (%s)</p>
+            <p><a href=/>Start again</a></p>
+          </body>
+          </html>
+        ]],
+          session:get_subject() or "Anonymous",
+          err or "no error"
+        ))
+      }
+    }    
+  }
+}  
 ```
 
-## Installation
 
-Just place [`session.lua`](https://github.com/bungle/lua-resty-session/blob/master/lib/resty/session.lua)
-and [`session`](https://github.com/bungle/lua-resty-session/tree/master/lib/resty/session) directory
-somewhere in your `package.path`, under `resty` directory. If you are using OpenResty, the default
-location would be `/usr/local/openresty/lualib/resty`.
+# Table of Contents
 
-### Using OpenResty Package Manager (opm)
+* [Installation](#installation)
+    * [Using OpenResty Package Manager (opm)](#using-openresty-package-manager-opm)
+    * [Using LuaRocks](#using-luarocks)
+* [Configuration](#configuration)
+    * [Session Configuration](#session-configuration)
+    * [Cookie Storage Configuration](#cookie-storage-configuration)
+    * [DSHM Storage Configuration](#dshm-storage-configuration)
+    * [File Storage Configuration](#file-storage-configuration)
+    * [Memcached Storage Configuration](#memcached-storage-configuration)
+    * [MySQL / MariaDB Storage Configuration](#mysql--mariadb-storage-configuration)
+    * [Postgres Configuration](#postgres-configuration)
+    * [Redis Configuration](#redis-configuration)
+        * [Single Redis Configuration](#single-redis-configuration)
+        * [Redis Sentinels Configuration](#redis-sentinels-configuration)
+        * [Redis Cluster Configuration](#redis-cluster-configuration)
+    * [SHM Configuration](#shm-configuration)
+* [API](#api)
+    * [Initialization](#initialization)
+        * [session.init](#sessioninit)
+    * [Constructors](#constructors)
+        * [session.new](#sessionnew)
+    * [Helpers](#helpers)
+        * [session.open](#sessionopen)
+        * [session.start](#sessionstart)
+        * [session.logout](#sessionlogout)
+        * [session.destroy](#sessiondestroy)
+    * [Instance Methods](#instance-methods)
+        * [session:open](#sessionopen-1)
+        * [session:save](#sessionsave)
+        * [session:touch](#sessiontouch)
+        * [session:refresh](#sessionrefresh)
+        * [session:logout](#sessionlogout-1)
+        * [session:destroy](#sessiondestroy-1)
+        * [session:close](#sessionclose)
+        * [session:set_data](#sessionset_data)
+        * [session:get_data](#sessionget_data)
+        * [session:set](#sessionset)
+        * [session:get](#sessionget)
+        * [session:set_audience](#sessionset_audience)
+        * [session:get_audience](#sessionget_audience)
+        * [session:set_subject](#sessionset_subject)
+        * [session:get_subject](#sessionget_subject)
+        * [session:get_property](#sessionget_property)
+        * [session:set_remember](#sessionset_remember)
+        * [session:get_remember](#sessionget_remember)
+        * [session:clear_request_cookie](#sessionclear_request_cookie)
+        * [session:set_headers](#sessionset_headers)
+        * [session:set_request_headers](#sessionset_request_headers)
+        * [session:set_response_headers](#sessionset_response_headers)
+        * [session.info:set](#sessioninfoset)
+        * [session.info:get](#sessioninfoget)
+        * [session.info:save](#sessioninfosave)
+* [Cookie Format](#cookie-format)
+* [Data Encryption](#data-encryption)
+* [Cookie Header Authentication](#cookie-header-authentication)
+* [Custom Storage Interface](#custom-storage-interface)
+* [License](#license)
 
-```Shell
-$ opm get bungle/lua-resty-session
+
+# Installation
+
+## Using OpenResty Package Manager (opm)
+
+```bash
+❯ opm get bungle/lua-resty-session
 ```
 
-### Using LuaRocks
+Please note that `opm` doesn't install all the dependencies like LuaRocks does, e.g. you will still need
+to install [lua_pack](https://github.com/Kong/lua-pack). Also check the dependencies for each storage
+driver (there may be additional dependencies).
 
-```Shell
-$ luarocks install lua-resty-session
+## Using LuaRocks
+
+```bash
+❯ luarocks install lua-resty-session
 ```
 
 LuaRocks repository for `lua-resty-session` is located at https://luarocks.org/modules/bungle/lua-resty-session.
 
-## About The Defaults
+Also check the dependencies for each storage (there may be additional dependencies).
 
-`lua-resty-session` does by default session only cookies (non-persistent, and `HttpOnly`) so that
-the cookies are not readable from Javascript (not subjectible to XSS in that matter). It will also set
-`Secure` flag by default when the request was made via SSL/TLS connection or when cookie name (`session.name`)
-is prefixed with `__Secure-` or `__Host-` (see [Cookies: HTTP State Management Mechanism](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-05).
-Cookies send via SSL/TLS don't work when sent via HTTP and vice-versa (unless the checks are disabled).
-By default the HMAC key is generated from session id (random bytes generated with OpenSSL), expiration time,
-unencrypted data, `http_user_agent` and `scheme`. You may also configure it to use `remote_addr` as well by
-setting `set $session_check_addr on;` (but this may be problematic with clients behind proxies or NATs that
-change the remote address between requests). If you are using SSL Session IDs you may also add
-`set $session_check_ssi on;`, but please check that it works accordingly (you may need to adjust both SSL
-and session library settings).
 
-The data part is encrypted with AES-algorithm (by default it uses OpenSSL `EVP_aes_256_cbc` and
-`EVP_sha512` functions that are provided with `lua-resty-string`. They come pre-installed with
-the default OpenResty bundle. The `lua-resty-session` library is not tested with all the
-`resty.aes` functions (but the defaults are tested to be working). Please let me know or contact
-`lua-resty-string` project if you hit any problems with different algorithms. We also support
-pluggable cipher adapters. You can also disable encryption by choosing `none` adapter.
+# Configuration
 
-Session identifier length is by default 16 bytes (randomly generated data with OpenSSL
-`RAND_bytes` function). The server secret is also generated by default with this same
-function and it's default length is 32 bytes. This will work until Nginx is restarted, but you
-might want to consider setting your own secret using `set $session_secret 623q4hR325t36VsCD3g567922IC0073T;`,
-for example (this will work in farms installations as well). On farm installations you should
-also configure other session configuration variables the same on all the servers in the farm.
+The configuration can be divided to generic session configuration and the server
+side storage configuration.
 
-Cookie parts are encoded with cookie safe Base64 encoding without padding (we also support pluggable
-encoders). Before encrypting and encoding the data part, the data is serialized with JSON encoding
-(so you can use basic Lua types in data, and expect to receive them back as the same Lua types).
-JSON encoding is done by the bundled OpenResty cJSON library (Lua cJSON). We do support pluggable
-serializers as well, though only serializer currently supplied is JSON. Cookie's path scope is by
-default `/` (meaning that it will be send to all paths in the server). The domain scope is not set
-by default, and it means that the cookie will only be sent back to same domain/host where it originated.
-If you set  session name (e.g. `set $session_name <value>`) and it contains prefix `__Secure-` the
-`Secure` flag will be forced, and if it contains `__Host-` the `path` is forced to `/` and the
-`domain` is removed, and the `Secure` flag will be forced too.
-
-For session data we do support pluggable storage adapters. The default adapter is `cookie` that
-stores data to client-side cookie. Currently we do also support a few server side storages: `shm`
-(aka a shared dictionary), `memcache`, `redis`, and `dshm`.
-
-## Notes About Turning Lua Code Cache Off
-
-In issue ([#15](https://github.com/bungle/lua-resty-session/issues/15)) it was raised that there may
-be problems of using `lua-resty-session` when the `lua_code_cache` setting has been turned off.
-
-Nginx:
-
-```nginx
-lua_code_cache off;
-```
-
-The problem is caused by the fact that by default we do generate session secret automatically with
-a random generator (on first use of the library). If the code cache is turned off, we regenerate
-the secret on each request. That will invalidate the cookies aka making sessions non-functioning.
-The cure for this problem is to define the secret in Nginx or in Lua code (it is a good idea to
-always have session secret defined).
-
-Nginx:
-
-```nginx
-set $session_secret 623q4hR325t36VsCD3g567922IC0073T;
-```
-
-Lua:
+Here is an example:
 
 ```lua
-local session = require "resty.session".start{ secret = "623q4hR325t36VsCD3g567922IC0073T" }
--- or
-local session = require "resty.session".new()
-session.secret = "623q4hR325t36VsCD3g567922IC0073T"
-```
-
-## About Locking
-
-With some storage adapters we implement `locking` mechanism. The `locks` are normally released
-automatically, and they will timeout, but if you happen to call `session.start()` or `session:start()`,
-then it is your responsibility to release the lock by calling `session:close()`, `session:save()` or
-`session:destroy()`.
-
-## Pluggable Session Strategies
-
-Strategies can be a bit cumbersome to do with just configuration, and that's why you can
-implement them only with the code. Currently `lua-resty-session` comes with two strategies:
-
-* `default`    — the default strategy (original implementation)
-* `regenerate` — similar to default strategy, but does not use session `expiry` with `HMAC`
-                 functions, and instead generates a new session identifier on each `save`.
-
-The `default` one has been here from the beginning, but recently I got information about
-use case of Javascript application with parallel asynchronous queries, where the session
-was saved to a database with a custom storage adapter using `header_filter` phase, which resulted
-the need to use the asynchronous `ngx.timer`. And that resulted that the JS XHR requests may
-have sent an old cookie, or perhaps a new cookie that was not yet found in db because of async
-timer. This resulted issues because cryptographic functions in `default` strategy used `expires`,
-and every time you saved a cookie it got a new `expiry`. The `regenerate` adapter does not use
-`expiry` anymore, but it instead generates a new `session id` on each `save` call. This makes
-a new row in a database while the previous `session` will still function. If your storage adapter
-implements `ttl` the `regenerate` strategy will call that with the old id and `10` seconds
-of `ttl`. `default` strategy is still adequate if you use `cookie` storage adapter as that
-is not issue with it, but if using server side storage adapter like `redis` or `memcache`
-you may want to consider using `regenerate` if you have a heavily JS based application with
-a lot of asynchronous queries at the same time. This issue happens usually when session
-is about to be renewed, so it is quite rare even when using `default` strategy.
-
-Strategy can be selected with configuration (if no configuration is present, the `default`
-strategy is picked up):
-
-```nginx
-set $session_strategy regenerate;
-```
-
-To implement a custom strategy, please checkout the existing ones.
-
-Basically you need to implement at least these functions:
-- boolean open(session, cookie)
-- boolean start(session)
-- boolean destroy(session)
-- boolean close(session)
-- cookie  save(session, close)
-- cookie  touch(session, close)
-
-## Pluggable HMAC Algorithms
-
-If your strategy happens to be using `HMAC`, like the `default` and `regenerate` ones do,
-you can tell them what `HMAC` algorithm to use. At the moment only `HMAC SHA1` is available
-as that comes with OpenResty and works without additional dependencies. You may implement
-your own custom HMAC algorithms (preferrably binding to some existing crypto library,
-such as OpenSSL), and the strategies will pick up from there.
-
-HMAC can be selected with configuration (if no configuration is present, the `sha1` strategy is picked up):
-
-```nginx
-set $session_hmac sha1;
-```
-
-To implement your own, you need to implement this interface: `digest hmac(secret, input)`.
-
-
-## Pluggable Storage Adapters
-
-With version 2.0 we started to support pluggable session data storage adapters. We do currently have
-support for these backends:
-
-* `cookie` aka Client Side Cookie (this is the default adapter)
-* `shm` aka Lua Shared Dictionary
-* `memcache` aka Memcached Storage Backend (thanks [@zandbelt](https://github.com/zandbelt))
-* `redis` aka Redis Backend
-* `dshm` aka [ngx-distributed-shm](https://github.com/grrolland/ngx-distributed-shm) Storage Adapter (thanks [@grrolland](https://github.com/grrolland))
-
-Here are some comparisons about the backends:
-
-|                               | cookie | shm | memcache | redis | dshm |
-| :---------------------------- | :----: | :-: | :------: | :---: | :--: |
-| Stateless                     | ✓      |     |          |       |      |
-| Lock-less                     | ✓      | ¹   | ¹        | ¹     | ✓    |
-| Works with Web Farms          | ✓      |     | ✓        | ✓     | ✓    |
-| Session Data Stored on Client | ✓      |     |          |       |      |
-| Zero Configuration            | ✓      |     |          |       |      |
-| Extra Dependencies            |        |     | ✓        | ✓     | ✓    |
-| Extra Security ²              |        | ✓   | ✓        | ✓     | ✓    |
-
-¹ Can be configured lock-less.
-
-² HMAC is stored on a client but the data is stored on a server. That means that you are unable to edit
-  cookie if you cannot edit server side storage as well, and vice-versa.
-
-The storage adapter can be selected from Nginx config like this:
-
-```nginx
-set $session_storage shm;
-```
-
-Or with Lua code like this:
-
-```lua
-local session = require "resty.session".new() -- OR .open() | .start()
--- After new you cannot specify storage as a string,
--- you need to give actual implementation
-session.storage = require "resty.session.storage.shm".new(session)
--- or
-local session = require "resty.session".new({
-  storage = "shm"
-})
-```
-
-#### Cookie Storage Adapter
-
-Cookie storage adapter is the default adapter that is used if storage adapter has not been configured. Cookie
-adapter does not have any settings.
-
-Cookie adapter can be selected with configuration (if no configuration is present, the cookie adapter is picked up):
-
-```nginx
-set $session_storage cookie;
-```
-
-**NOTE:**
-
-If you store large amounts of data in a cookie, this library will automatically split the cookies to 4k chars chunks. With large cookies, you may need to adjust your Nginx configuration to accept large client header buffers. E.g.:
-
-```nginx
-large_client_header_buffers 4 16k;
-```
-
-#### Shared Dictionary Storage Adapter
-
-Shared dictionary uses OpenResty shared dictionary and works with multiple worker processes, but it isn't a good
-choice if you want to run multiple separate frontends. It is relatively easy to configure and has some added
-benefits on security side compared to `cookie`, although the normal cookie adapter is quite secure as well.
-For locking the `shm` adapter uses `lua-resty-lock`.
-
-Shared dictionary adapter can be selected with configuration:
-
-```nginx
-set $session_storage shm;
-```
-
-But for this to work, you will also need a storage configured for that:
-
-```nginx
-http {
-   lua_shared_dict sessions 10m;
+init_by_lua_block {
+  require "resty.session".init({
+    remember = true,
+    store_metadata = true,
+    secret = "RaJKp8UQW1",
+    secret_fallbacks = {
+      "X88FuG1AkY",
+      "fxWNymIpbb",
+    },
+    storage = "postgres",
+    postgres = {
+      username = "my-service",
+      password = "kVgIXCE5Hg",
+      database = "sessions",
+    },
+  })
 }
 ```
 
-Additionally you can configure the locking and some other things as well:
+
+## Session Configuration
+
+Session configuration can be passed to [initialization](#initialization), [constructor](#constructors),
+and [helper](#helpers) functions.
+
+Here are the possible session configuration options:
+
+| Option                      |   Default    | Description                                                                                                                                                                                                                                                                                          |
+|-----------------------------|:------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `secret`                    |    `nil`     | Secret used for the key derivation. The secret is hashed with SHA-256 before using it. E.g. `"RaJKp8UQW1"`.                                                                                                                                                                                          |
+| `secret_fallbacks`          |    `nil`     | Array of secrets that can be used as alternative secrets (when doing key rotation), E.g. `{ "6RfrAYYzYq", "MkbTkkyF9C" }`.                                                                                                                                                                           |
+| `ikm`                       |   (random)   | Initial keying material (or ikm) can be specified directly (without using a secret) with exactly 32 bytes of data. E.g. `"5ixIW4QVMk0dPtoIhn41Eh1I9enP2060"`                                                                                                                                         |
+| `ikm_fallbacks`             |    `nil`     | Array of initial keying materials that can be used as alternative keys (when doing key rotation), E.g. `{ "QvPtlPKxOKdP5MCu1oI3lOEXIVuDckp7" }`.                                                                                                                                                     |
+| `cookie_prefix`             |    `nil`     | Cookie prefix, use `nil`, `"__Host-"` or `"__Secure-"`.                                                                                                                                                                                                                                              |
+| `cookie_name`               | `"session"`  | Session cookie name, e.g. `"session"`.                                                                                                                                                                                                                                                               |
+| `cookie_path`               |    `"/"`     | Cookie path, e.g. `"/"`.                                                                                                                                                                                                                                                                             |
+| `cookie_http_only`          |    `true`    | Mark cookie HTTP only, use `true` or `false`.                                                                                                                                                                                                                                                        |
+| `cookie_secure`             |    `nil`     | Mark cookie secure, use `nil`, `true` or `false`.                                                                                                                                                                                                                                                    |
+| `cookie_priority`           |    `nil`     | Cookie priority, use `nil`, `"Low"`, `"Medium"`, or `"High"`.                                                                                                                                                                                                                                        |
+| `cookie_same_site`          |   `"Lax"`    | Cookie same-site policy, use `nil`, `"Lax"`, `"Strict"`, `"None"`, or `"Default"`                                                                                                                                                                                                                    |
+| `cookie_same_party`         |    `nil`     | Mark cookie with same party flag, use `nil`, `true`, or `false`.                                                                                                                                                                                                                                     |
+| `cookie_partitioned`        |    `nil`     | Mark cookie with partitioned flag, use `nil`, `true`, or `false`.                                                                                                                                                                                                                                    |
+| `remember`                  |   `false`    | Enable or disable persistent sessions, use `nil`, `true`, or `false`.                                                                                                                                                                                                                                |
+| `remember_safety`           |  `"Medium"`  | Remember cookie key derivation complexity, use `nil`, `"None"` (fast), `"Low"`, `"Medium"`, `"High"` or `"Very High"` (slow).                                                                                                                                                                        |
+| `remember_cookie_name`      | `"remember"` | Persistent session cookie name, e.g. `"remember"`.                                                                                                                                                                                                                                                   |
+| `audience`                  | `"default"`  | Session audience, e.g. `"my-application"`.                                                                                                                                                                                                                                                           |
+| `subject`                   |    `nil`     | Session subject, e.g. `"john.doe@example.com"`.                                                                                                                                                                                                                                                      |
+| `enforce_same_subject`      |   `false`    | When set to `true`, audiences need to share the same subject. The library removes non-subject matching audience data on save.                                                                                                                                                                        |
+| `stale_ttl`                 |     `10`     | When session is saved a new session is created, stale ttl specifies how long the old one can still be used, e.g. `10` (in seconds).                                                                                                                                                                  |
+| `idling_timeout`            |    `900`     | Idling timeout specifies how long the session can be inactive until it is considered invalid, e.g. `900` (15 minutes) (in seconds), `0` disables the checks and touching.                                                                                                                            |
+| `rolling_timeout`           |    `3600`    | Rolling timeout specifies how long the session can be used until it needs to be renewed, e.g. `3600` (an hour) (in seconds), `0` disables the checks and rolling.                                                                                                                                    |
+| `absolute_timeout`          |   `86400`    | Absolute timeout limits how long the session can be renewed, until re-authentication is required, e.g. `86400` (a day) (in seconds), `0` disables the checks.                                                                                                                                        |
+| `remember_rolling_timeout`  |   `604800`   | Remember timeout specifies how long the persistent session is considered valid, e.g. `604800` (a week) (in seconds), `0` disables the checks and rolling.                                                                                                                                            |
+| `remember_absolute_timeout` |  `2592000`   | Remember absolute timeout limits how long the persistent session can be renewed, until re-authentication is required, e.g. `2592000` (30 days) (in seconds), `0` disables the checks.                                                                                                                |
+| `hash_storage_key`          |   `false`    | Whether to hash or not the storage key. With storage key hashed it is impossible to decrypt data on server side without having a cookie too, use `nil`, `true` or `false`.                                                                                                                           |
+| `hash_subject`              |   `false`    | Whether to hash or not the subject when `store_metadata` is enabled, e.g. for PII reasons.                                                                                                                                                                                                           |
+| `store_metadata`            |   `false`    | Whether to also store metadata of sessions, such as collecting data of sessions for a specific audience belonging to a specific subject.                                                                                                                                                             |
+| `touch_threshold`           |     `60`     | Touch threshold controls how frequently or infrequently the `session:refresh` touches the cookie, e.g. `60` (a minute) (in seconds)                                                                                                                                                                  |
+| `compression_threshold`     |    `1024`    | Compression threshold controls when the data is deflated, e.g. `1024` (a kilobyte) (in bytes), `0` disables compression.                                                                                                                                                                             |
+| `request_headers`           |    `nil`     | Set of headers to send to upstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` request headers when `set_headers` is called.                                        |
+| `response_headers`          |    `nil`     | Set of headers to send to downstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` response headers when `set_headers` is called.                                     |
+| `storage`                   |    `nil`     | Storage is responsible of storing session data, use `nil` or `"cookie"` (data is stored in cookie), `"dshm"`, `"file"`, `"memcached"`, `"mysql"`, `"postgres"`, `"redis"`, or `"shm"`, or give a name of custom module (`"custom-storage"`), or a `table` that implements session storage interface. |
+| `dshm`                      |    `nil`     | Configuration for dshm storage, e.g. `{ prefix = "sessions" }` (see below)                                                                                                                                                                                                                           |
+| `file`                      |    `nil`     | Configuration for file storage, e.g. `{ path = "/tmp", suffix = "session" }` (see below)                                                                                                                                                                                                             |
+| `memcached`                 |    `nil`     | Configuration for memcached storage, e.g. `{ prefix = "sessions" }` (see below)                                                                                                                                                                                                                      |
+| `mysql`                     |    `nil`     | Configuration for MySQL / MariaDB storage, e.g. `{ database = "sessions" }` (see below)                                                                                                                                                                                                              |
+| `postgres`                  |    `nil`     | Configuration for Postgres storage, e.g. `{ database = "sessions" }` (see below)                                                                                                                                                                                                                     |
+| `redis`                     |    `nil`     | Configuration for Redis / Redis Sentinel / Redis Cluster storages, e.g. `{ prefix = "sessions" }` (see below)                                                                                                                                                                                        |
+| `shm`                       |    `nil`     | Configuration for shared memory storage, e.g. `{ zone = "sessions" }`                                                                                                                                                                                                                                |
+| `["custom-storage"]`        |    `nil`     | custom storage (loaded with `require "custom-storage"`) configuration.                                                                                                                                                                                                                               |
+
+
+## Cookie Storage Configuration
+
+When storing data to cookie, there is no additional configuration required,
+just set the `storage` to `nil` or `"cookie"`.
+
+
+## DSHM Storage Configuration
+
+With DHSM storage you can use the following settings (set the `storage` to `"dshm"`):
+
+| Option              |    Default    | Description                                                                                  |
+|---------------------|:-------------:|----------------------------------------------------------------------------------------------|
+| `prefix`            |     `nil`     | The Prefix for the keys stored in DSHM.                                                      |
+| `suffix`            |     `nil`     | The suffix for the keys stored in DSHM.                                                      |
+| `host`              | `"127.0.0.1"` | The host to connect.                                                                         |
+| `port`              |    `4321`     | The port to connect.                                                                         |
+| `connect_timeout`   |     `nil`     | Controls the default timeout value used in TCP/unix-domain socket object's `connect` method. |
+| `send_timeout`      |     `nil`     | Controls the default timeout value used in TCP/unix-domain socket object's `send` method.    |
+| `read_timeout`      |     `nil`     | Controls the default timeout value used in TCP/unix-domain socket object's `receive` method. |
+| `keepalive_timeout` |     `nil`     | Controls the default maximal idle time of the connections in the connection pool.            |
+| `pool`              |     `nil`     | A custom name for the connection pool being used.                                            |
+| `pool_size`         |     `nil`     | The size of the connection pool.                                                             |
+| `backlog`           |     `nil`     | A queue size to use when the connection pool is full (configured with pool_size).            |
+| `ssl`               |     `nil`     | Enable SSL.                                                                                  |
+| `ssl_verify`        |     `nil`     | Verify server certificate.                                                                   |
+| `server_name`       |     `nil`     | The server name for the new TLS extension Server Name Indication (SNI).                      |
+
+Please refer to [ngx-distributed-shm](https://github.com/grrolland/ngx-distributed-shm) to get necessary
+dependencies installed.
+
+
+## File Storage Configuration
+
+With file storage you can use the following settings (set the `storage` to `"file"`):
+
+| Option              |     Default     | Description                                                                         |
+|---------------------|:---------------:|-------------------------------------------------------------------------------------|
+| `prefix`            |      `nil`      | File prefix for session file.                                                       |
+| `suffix`            |      `nil`      | File suffix (or extension without `.`) for session file.                            |
+| `pool`              |      `nil`      | Name of the thread pool under which file writing happens (available on Linux only). |
+| `path`              | (tmp directory) | Path (or directory) under which session files are created.                          |
+
+
+The implementation requires `LuaFileSystem` which you can install with LuaRocks:
+```sh
+❯ luarocks install LuaFileSystem
+```
+
+
+## Memcached Storage Configuration
+
+With file Memcached you can use the following settings (set the `storage` to `"memcached"`):
+
+| Option              |   Default   | Description                                                                                  |
+|---------------------|:-----------:|----------------------------------------------------------------------------------------------|
+| `prefix`            |    `nil`    | Prefix for the keys stored in memcached.                                                     |
+| `suffix`            |    `nil`    | Suffix for the keys stored in memcached.                                                     |
+| `host`              | `127.0.0.1` | The host to connect.                                                                         |
+| `port`              |   `11211`   | The port to connect.                                                                         |
+| `socket`            |    `nil`    | The socket file to connect to.                                                               |
+| `connect_timeout`   |    `nil`    | Controls the default timeout value used in TCP/unix-domain socket object's `connect` method. |
+| `send_timeout`      |    `nil`    | Controls the default timeout value used in TCP/unix-domain socket object's `send` method.    |
+| `read_timeout`      |    `nil`    | Controls the default timeout value used in TCP/unix-domain socket object's `receive` method. |
+| `keepalive_timeout` |    `nil`    | Controls the default maximal idle time of the connections in the connection pool.            |
+| `pool`              |    `nil`    | A custom name for the connection pool being used.                                            |
+| `pool_size`         |    `nil`    | The size of the connection pool.                                                             |
+| `backlog`           |    `nil`    | A queue size to use when the connection pool is full (configured with pool_size).            |
+| `ssl`               |   `false`   | Enable SSL                                                                                   |
+| `ssl_verify`        |    `nil`    | Verify server certificate                                                                    |
+| `server_name`       |    `nil`    | The server name for the new TLS extension Server Name Indication (SNI).                      |
+
+
+## MySQL / MariaDB Storage Configuration
+
+With file MySQL / MariaDB you can use the following settings (set the `storage` to `"mysql"`):
+
+| Option              |      Default      | Description                                                                                  |
+|---------------------|:-----------------:|----------------------------------------------------------------------------------------------|
+| `host`              |   `"127.0.0.1"`   | The host to connect.                                                                         |
+| `port`              |      `3306`       | The port to connect.                                                                         |
+| `socket`            |       `nil`       | The socket file to connect to.                                                               |
+| `username`          |       `nil`       | The database username to authenticate.                                                       |
+| `password`          |       `nil`       | Password for authentication, may be required depending on server configuration.              |
+| `charset`           |     `"ascii"`     | The character set used on the MySQL connection.                                              |
+| `database`          |       `nil`       | The database name to connect.                                                                |
+| `table_name`        |   `"sessions"`    | Name of database table to which to store session data.                                       |
+| `table_name_meta`   | `"sessions_meta"` | Name of database meta data table to which to store session meta data.                        |
+| `max_packet_size`   |     `1048576`     | The upper limit for the reply packets sent from the MySQL server (in bytes).                 |
+| `connect_timeout`   |       `nil`       | Controls the default timeout value used in TCP/unix-domain socket object's `connect` method. |
+| `send_timeout`      |       `nil`       | Controls the default timeout value used in TCP/unix-domain socket object's `send` method.    |
+| `read_timeout`      |       `nil`       | Controls the default timeout value used in TCP/unix-domain socket object's `receive` method. |
+| `keepalive_timeout` |       `nil`       | Controls the default maximal idle time of the connections in the connection pool.            |
+| `pool`              |       `nil`       | A custom name for the connection pool being used.                                            |
+| `pool_size`         |       `nil`       | The size of the connection pool.                                                             |
+| `backlog`           |       `nil`       | A queue size to use when the connection pool is full (configured with pool_size).            |
+| `ssl`               |      `false`      | Enable SSL.                                                                                  |
+| `ssl_verify`        |       `nil`       | Verify server certificate.                                                                   |
+
+You also need to create following tables in your database:
+
+```sql
+--
+-- Database table that stores session data.
+--
+CREATE TABLE IF NOT EXISTS sessions (
+  sid  CHAR(43) PRIMARY KEY,
+  name VARCHAR(255),
+  data MEDIUMTEXT,
+  exp  DATETIME,
+  INDEX (exp)
+) CHARACTER SET ascii;
+
+--
+-- Sessions metadata table.
+--
+-- This is only needed if you want to store session metadata.
+--
+CREATE TABLE IF NOT EXISTS sessions_meta (
+  aud VARCHAR(255),
+  sub VARCHAR(255),
+  sid CHAR(43),
+  PRIMARY KEY (aud, sub, sid),
+  CONSTRAINT FOREIGN KEY (sid) REFERENCES sessions(sid) ON DELETE CASCADE ON UPDATE CASCADE
+) CHARACTER SET ascii;
+```
+
+
+## Postgres Configuration
+
+With file Postgres you can use the following settings (set the `storage` to `"postgres"`):
+
+| Option              |      Default      | Description                                                                                               |
+|---------------------|:-----------------:|-----------------------------------------------------------------------------------------------------------|
+| `host`              |   `"127.0.0.1"`   | The host to connect.                                                                                      |
+| `port`              |      `5432`       | The port to connect.                                                                                      |
+| `application`       |      `5432`       | Set the name of the connection as displayed in pg_stat_activity (defaults to `"pgmoon"`).                 |
+| `username`          |   `"postgres"`    | The database username to authenticate.                                                                    |
+| `password`          |       `nil`       | Password for authentication, may be required depending on server configuration.                           |
+| `database`          |       `nil`       | The database name to connect.                                                                             |
+| `table_name`        |   `"sessions"`    | Name of database table to which to store session data (can be `database schema` prefixed).                |
+| `table_name_meta`   | `"sessions_meta"` | Name of database meta data table to which to store session meta data (can be `database schema` prefixed). |
+| `connect_timeout`   |       `nil`       | Controls the default timeout value used in TCP/unix-domain socket object's `connect` method.              |
+| `send_timeout`      |       `nil`       | Controls the default timeout value used in TCP/unix-domain socket object's `send` method.                 |
+| `read_timeout`      |       `nil`       | Controls the default timeout value used in TCP/unix-domain socket object's `receive` method.              |
+| `keepalive_timeout` |       `nil`       | Controls the default maximal idle time of the connections in the connection pool.                         |
+| `pool`              |       `nil`       | A custom name for the connection pool being used.                                                         |
+| `pool_size`         |       `nil`       | The size of the connection pool.                                                                          |
+| `backlog`           |       `nil`       | A queue size to use when the connection pool is full (configured with pool_size).                         |
+| `ssl`               |      `false`      | Enable SSL.                                                                                               |
+| `ssl_verify`        |       `nil`       | Verify server certificate.                                                                                |
+| `ssl_required`      |       `nil`       | Abort the connection if the server does not support SSL connections.                                      |
+
+You also need to create following tables in your database:
+
+```sql
+--
+-- Database table that stores session data.
+--
+CREATE TABLE IF NOT EXISTS sessions (
+  sid  TEXT PRIMARY KEY,
+  name TEXT,
+  data TEXT,
+  exp  TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX ON sessions (exp);
+
+--
+-- Sessions metadata table.
+--
+-- This is only needed if you want to store session metadata.
+--
+CREATE TABLE IF NOT EXISTS sessions_meta (
+  aud TEXT,
+  sub TEXT,
+  sid TEXT REFERENCES sessions (sid) ON DELETE CASCADE ON UPDATE CASCADE,
+  PRIMARY KEY (aud, sub, sid)
+);
+```
+
+The implementation requires `pgmoon` which you can install with LuaRocks:
+```sh
+❯ luarocks install pgmoon
+```
+
+
+## Redis Configuration
+
+The session library supports single Redis, Redis Sentinel, and Redis Cluster
+connections. Common configuration settings among them all:
+
+| Option              | Default | Description                                                                                  |
+|---------------------|:-------:|----------------------------------------------------------------------------------------------|
+| `prefix`            |  `nil`  | Prefix for the keys stored in Redis.                                                         |
+| `suffix`            |  `nil`  | Suffix for the keys stored in Redis.                                                         |
+| `username`          |  `nil`  | The database username to authenticate.                                                       |
+| `password`          |  `nil`  | Password for authentication.                                                                 |
+| `connect_timeout`   |  `nil`  | Controls the default timeout value used in TCP/unix-domain socket object's `connect` method. |
+| `send_timeout`      |  `nil`  | Controls the default timeout value used in TCP/unix-domain socket object's `send` method.    |
+| `read_timeout`      |  `nil`  | Controls the default timeout value used in TCP/unix-domain socket object's `receive` method. |
+| `keepalive_timeout` |  `nil`  | Controls the default maximal idle time of the connections in the connection pool.            |
+| `pool`              |  `nil`  | A custom name for the connection pool being used.                                            |
+| `pool_size`         |  `nil`  | The size of the connection pool.                                                             |
+| `backlog`           |  `nil`  | A queue size to use when the connection pool is full (configured with pool_size).            |
+| `ssl`               | `false` | Enable SSL                                                                                   |
+| `ssl_verify`        |  `nil`  | Verify server certificate                                                                    |
+| `server_name`       |  `nil`  | The server name for the new TLS extension Server Name Indication (SNI).                      |
+
+The `single redis` implementation is selected when you don't pass either `sentinels` or `nodes`,
+which would lead to selecting `sentinel` or `cluster` implementation.
+
+### Single Redis Configuration
+
+Single Redis has following additional configuration options (set the `storage` to `"redis"`):
+
+| Option      |     Default     | Description                    |
+|-------------|:---------------:|--------------------------------|
+| `host`      |  `"127.0.0.1"`  | The host to connect.           |
+| `port`      |     `6379`      | The port to connect.           |
+| `socket`    |      `nil`      | The socket file to connect to. |
+| `database`  |      `nil`      | The database to connect.       |
+
+
+### Redis Sentinels Configuration
+
+Redis Sentinel has following additional configuration options (set the `storage` to `"redis"`
+and configure the `sentinels`):
+
+| Option              | Default  | Description                    |
+|---------------------|:--------:|--------------------------------|
+| `master`            |  `nil`   | Name of master.                |
+| `role`              |  `nil`   | `"master"` or `"slave"`.       |
+| `socket`            |  `nil`   | The socket file to connect to. |
+| `sentinels`         |  `nil`   | Redis Sentinels.               |
+| `sentinel_username` |  `nil`   | Optional sentinel username.    |
+| `sentinel_password` |  `nil`   | Optional sentinel password.    |
+| `database`          |  `nil`   | The database to connect.       |
+
+The `sentinels` is an array of Sentinel records:
+
+| Option | Default | Description          |
+|--------|:-------:|----------------------|
+| `host` |  `nil`  | The host to connect. |
+| `port` |  `nil`  | The port to connect. |
+
+The `sentinel` implementation is selected when you pass `sentinels` as part of `redis`
+configuration (and do not pass `nodes`, which would select `cluster` implementation).
+
+The implementation requires `lua-resty-redis-connector` which you can install with LuaRocks:
+```sh
+❯ luarocks install lua-resty-redis-connector
+```
+
+
+### Redis Cluster Configuration
+
+Redis Cluster has following additional configuration options (set the `storage` to `"redis"`
+and configure the `nodes`):
+
+| Option                    | Default | Description                                            |
+|---------------------------|:-------:|--------------------------------------------------------|
+| `name`                    |  `nil`  | Redis cluster name.                                    |
+| `nodes`                   |  `nil`  | Redis cluster nodes.                                   |
+| `lock_zone`               |  `nil`  | Shared dictionary name for locks.                      |
+| `lock_prefix`             |  `nil`  | Shared dictionary name prefix for lock.                |
+| `max_redirections`        |  `nil`  | Maximum retry attempts for redirection.                |
+| `max_connection_attempts` |  `nil`  | Maximum retry attempts for connection.                 |
+| `max_connection_timeout`  |  `nil`  | Maximum connection timeout in total among the retries. |
+
+The `nodes` is an array of Cluster node records:
+
+| Option |    Default    | Description                |
+|--------|:-------------:|----------------------------|
+| `ip`   | `"127.0.0.1"` | The IP address to connect. |
+| `port` |    `6379`     | The port to connect.       |
+
+The `cluster` implementation is selected when you pass `nodes` as part of `redis`
+configuration.
+
+For `cluster` to work properly, you need to configure `lock_zone`, so also add this
+to your Nginx configuration:
 
 ```nginx
-set $session_shm_store         sessions;
-set $session_shm_uselocking    on;
-set $session_shm_lock_exptime  30;    # (in seconds)
-set $session_shm_lock_timeout  5;     # (in seconds)
-set $session_shm_lock_step     0.001; # (in seconds)
-set $session_shm_lock_ratio    2;
-set $session_shm_lock_max_step 0.5;   # (in seconds)
+lua_shared_dict redis_cluster_locks 100k;
 ```
 
-The keys stored in shared dictionary are in form:
+And set the `lock_zone` to `"redis_cluster_locks"`
 
-`{session id}` and `{session id}.lock`.
+The implementation requires `resty-redis-cluster` or `kong-redis-cluster` which you can install with LuaRocks:
+```sh
+❯ luarocks install resty-redis-cluster
+# or
+❯ luarocks install kong-redis-cluster
+```
 
 
-#### Memcache Storage Adapter
+## SHM Configuration
 
-Memcache storage adapter stores the session data inside Memcached server.
-It is scalable and works with web farms.
+With SHM storage you can use the following settings (set the `storage` to `"shm"`):
 
-Memcache adapter can be selected with configuration:
+| Option   |   Default    | Description                        |
+|----------|:------------:|------------------------------------|
+| `prefix` |    `nil`     | Prefix for the keys stored in SHM. |
+| `suffix` |    `nil`     | Suffix for the keys stored in SHM. |
+| `zone`   | `"sessions"` | A name of shared memory zone.      |
+
+You will also need to create a shared dictionary `zone` in Nginx:
 
 ```nginx
-set $session_storage memcache;
+lua_shared_dict sessions 10m;
 ```
 
-Additionally you can configure Memcache adapter with these settings:
-
-```nginx
-set $session_memcache_prefix           sessions;
-set $session_memcache_connect_timeout  1000; # (in milliseconds)
-set $session_memcache_send_timeout     1000; # (in milliseconds)
-set $session_memcache_read_timeout     1000; # (in milliseconds)
-set $session_memcache_socket           unix:///var/run/memcached/memcached.sock;
-set $session_memcache_host             127.0.0.1;
-set $session_memcache_port             11211;
-set $session_memcache_uselocking       on;
-set $session_memcache_spinlockwait     150;  # (in milliseconds)
-set $session_memcache_maxlockwait      30;   # (in seconds)
-set $session_memcache_pool_name        sessions;
-set $session_memcache_pool_timeout     1000; # (in milliseconds)
-set $session_memcache_pool_size        10;
-set $session_memcache_pool_backlog     10;
-```
-
-The keys stored in Memcached are in form:
-
-`{prefix}:{session id}` and `{prefix}:{session id}.lock`.
-
-#### Redis Storage Adapter
-
-Redis storage adapter stores the session data inside Redis server.
-It is scalable and works with web farms.
-
-Redis adapter can be selected with configuration:
-
-```nginx
-set $session_storage redis;
-```
-
-Additionally you can configure Redis adapter with these settings:
-
-```nginx
-set $session_redis_prefix                   sessions;
-set $session_redis_database                 0;
-set $session_redis_connect_timeout          1000; # (in milliseconds)
-set $session_redis_send_timeout             1000; # (in milliseconds)
-set $session_redis_read_timeout             1000; # (in milliseconds)
-set $session_redis_socket                   unix:///var/run/redis/redis.sock;
-set $session_redis_host                     127.0.0.1;
-set $session_redis_port                     6379;
-set $session_redis_ssl                      off;
-set $session_redis_ssl_verify               off;
-set $session_redis_server_name              example.com; # for TLS SNI
-set $session_redis_username                 username;
-set $session_redis_password                 password;
-set $session_redis_uselocking               on;
-set $session_redis_spinlockwait             150;  # (in milliseconds)
-set $session_redis_maxlockwait              30;   # (in seconds)
-set $session_redis_pool_name                sessions;
-set $session_redis_pool_timeout             1000; # (in milliseconds)
-set $session_redis_pool_size                10;
-set $session_redis_pool_backlog             10;
-set $session_redis_cluster_name             redis-cluster;
-set $session_redis_cluster_dict             sessions;
-set $session_redis_cluster_maxredirections  5;
-set $session_redis_cluster_nodes            '127.0.0.1:30001 127.0.0.1:30002 127.0.0.1:30003 127.0.0.1:30004 127.0.0.1:30005 127.0.0.1:30006';
-```
-
-**Note**: `session_redis_auth` has been deprecated; use `session_redis_password`.
-
-To use `cluster` you need also to install:
-```shell
-luarocks install kong-redis-cluster
-# OR
-luarocks install lua-resty-redis-cluster
-
-# OR install this manually https://github.com/steve0511/resty-redis-cluster
-```
-
-The keys stored in Redis are in form:
-
-`{prefix}:{session id}` and `{prefix}:{session id}.lock`.
-
-#### DSHM Storage Adapter
-
-DSHM storage adapter stores the session data inside Distributed Shared Memory server based
-on Vertx and Hazelcast. It is scalable and works with web farms.
-
-The DSHM lua library and the DSHM servers should be installed conforming with the documentation
-[here](https://github.com/grrolland/ngx-distributed-shm/blob/master/README.md).
+*Note:* you may need to adjust the size of shared memory zone according to your needs.
 
 
-DSHM adapter can be selected with configuration:
+# API
 
-```nginx
-set $session_storage dshm;
-```
+LDoc generated API docs can also be viewed at [bungle.github.io/lua-resty-session](https://bungle.github.io/lua-resty-session/).
 
-Additionally you can configure DSHM adapter with these settings:
 
-```nginx
-set $session_dshm_region           sessions;
-set $session_dshm_connect_timeout  1000; # (in milliseconds)
-set $session_dshm_send_timeout     1000; # (in milliseconds)
-set $session_dshm_read_timeout     1000; # (in milliseconds)
-set $session_dshm_host             127.0.0.1;
-set $session_dshm_port             4321;
-set $session_dshm_pool_name        sessions;
-set $session_dshm_pool_timeout     1000; # (in milliseconds)
-set $session_dshm_pool_size        10;
-set $session_dshm_pool_backlog     10;
-```
+## Initialization
 
-The keys stored in DSHM are in form:
+### session.init
 
-`{region}::{encoded session id}`
+**syntax:** *session.init(configuration)*
 
-The `region` represents the cache region in DSHM.
+Initialize the session library.
 
-#### Implementing a Storage Adapter
-
-It is possible to implement additional storage adapters using the plugin architecture in `lua-resty-session`.
-
-You need to implement APIs you need
-
-* `storage new(session)`
-* `boolean storage:open(id)`
-* `boolean storage:start(id)`
-* `boolean storage:save(id, ttl, data, close)`
-* `bookean storage:close(id)`
-* `boolean storage:destroy(id)`
-* `boolean storage:ttl(id, ttl, close)`
-
-The `id` parameter is already encoded, but `data` is in raw bytes, so please encode it as needed.
-
-You have to place your adapter inside `resty.session.storage` for auto-loader to work.
-
-To configure session to use your adapter, you can do so with Nginx configuration
-(or in Lua code):
-
-```nginx
-# Just an example. Pull request for MySQL support is greatly welcomed.
-set $session_storage mysql;
-```
-
-## Pluggable Ciphers
-
-With version 2.1 we started to support pluggable ciphers. We currently have support for these ciphers:
-
-* `aes` aka AES encryption / decryption using `lua-resty-string`'s AES library (the default).
-* `none` aka no encryption or decryption is done.
-
-The cipher adapter can be selected from Nginx config like this:
-
-```nginx
-set $session_cipher aes;
-```
-
-Or with Lua code like this:
+This function can be called on `init` or `init_worker` phases on OpenResty
+to set global default configuration to all session instances created by this
+library.
 
 ```lua
-local session = require "resty.session".start{ cipher = "aes" }
+require "resty.session".init({
+  audience = "my-application",
+  storage = "redis",
+  redis = {
+    username = "session",
+    password = "storage",
+  },
+})
 ```
 
-#### AES Cipher
+See [configuration](#configuration) for possible configuration settings.
 
-AES Cipher uses `lua-resty-string`'s (an OpenResty core library) AES implementation
-(bindings to OpenSSL) for encryption.
 
-AES adapter can be selected with configuration:
+## Constructors
 
-```nginx
-set $session_cipher aes;
-```
+### session.new
 
-Additionally you can configure Memcache adapter with these settings:
+**syntax:** *session = session.new(configuration)*
 
-```nginx
-set $session_aes_size   256;
-set $session_aes_mode   "cbc";
-set $session_aes_hash   "sha512";
-set $session_aes_rounds 1;
-```
-
-Here follows the description of each setting:
-
-**size**
-
-`session.aes.size` holds the size of the cipher (`lua-resty-string` supports AES in `128`, `192`,
-and `256` bits key sizes). See `aes.cipher` function in `lua-resty-string` for more information.
-By default this will use `256` bits key size. This can be configured with Nginx
-`set $session_aes_size 256;`.
-
-**mode**
-
-`session.aes.mode` holds the mode of the cipher. `lua-resty-string` supports AES in `ecb`, `cbc`,
-`cfb1`, `cfb8`, `cfb128`, `ofb`, `ctr`, and `gcm` (recommended!) modes (ctr mode is not available
-with 256 bit keys).  See `aes.cipher` function in `lua-resty-string` for more information.
-By default `cbc` mode is  used. This can be configured with Nginx `set $session_aes_mode cbc;`.
-
-**hash**
-
-`session.aes.hash` is used in ecryption key, and iv derivation (see: OpenSSL
-[EVP_BytesToKey](https://www.openssl.org/docs/crypto/EVP_BytesToKey.html)). By default `sha512` is
-used but `md5`, `sha1`, `sha224`, `sha256`, and `sha384` are supported as well in `lua-resty-string`.
-This can be configured with Nginx `set $session_aes_hash sha512;`.
-
-**rounds**
-
-`session.aes.rounds` can be used to slow-down the encryption key, and iv derivation. By default
-this is set to `1` (the fastest). This can be configured with Nginx `set $session_aes_rounds 1;`.
-
-#### None Cipher
-
-None cipher disables encryption of the session data. This can be handy if you want to
-debug things or want you session management as light as possible, or perhaps share the
-session data with some other process without having to deal with encryption key management.
-In general it is better to have encryption enabled in a production.
-
-None adapter can be selected with configuration:
-
-```nginx
-set $session_cipher none;
-```
-
-There isn't any settings for None adapter as it is basically a no-op adapter.
-
-#### Implementing a Cipher Adapter
-
-If you want to write your own cipher adapter, you need to implement these three methods:
-
-* `cipher new(session)`
-* `string, err, tag = cipher:encrypt(data, key, salt, aad)`
-* `string, err, tag = cipher:decrypt(data, key, salt, aad, tag)`
-
-If you do not use say salt or aad (associated data) in your cipher, you can ignore them.
-If you don't use `AEAD` construct (like `AES in GCM-mode`), don't return `tag`.
-
-You have to place your adapter inside `resty.session.ciphers` for auto-loader to work.
-
-## Pluggable Serializers
-
-Currently we only support JSON serializer, but there is a plugin architecture that you can use to
-plugin your own serializer. The serializer is used to serialize session data in a form that can be
-later deserialized and stored in some of our supported storages.
-
-The supported serializer names are:
-
-* `json`
-
-You need only to implement two functions to write an adapter:
-
-* `string serialize(table)`
-* `table  deserialize(string)`
-
-You have to place your adapter inside `resty.session.serializers` for auto-loader to work.
-
-To configure session to use your adapter, you can do so with Nginx configuration (or in Lua code):
-
-```nginx
-set $session_serializer json;
-```
-
-## Pluggable Compressors
-
-The session data may grew quite a big if you decide to store for example JWT tokens in a session.
-By compressing the data we can make the data part of the cookie smaller before sending it to client
-or before storing it to a backend store (using pluggable storage adapters).
-
-The supported compressors are:
-
-* `none` (the default)
-* `zlib` (this has extra requirement to `penlight` and `ffi-zlib`)
-
-To use `zlib` you need also to install:
-```shell
-luarocks install lua-ffi-zlib
-luarocks install penlight
-
-# OR install these manually:
-# - https://github.com/hamishforbes/lua-ffi-zlib
-# - https://github.com/lunarmodules/Penlight
-```
-
-
-If you want to write your own compressor you need to implement these three methods:
-
-* `cipher new(session)`
-* `string compressor:compress(data)`
-* `string compressor:decompress(data)`
-
-To configure session to use your compressor, you can do so with Nginx configuration (or in Lua code):
-
-```nginx
-set $session_compressor none;
-```
-
-## Pluggable Encoders
-
-Cookie data needs to be encoded in cookie form before it is send to client. We support
-two encoding methods by default: modified cookie friendly base-64, and base-16 (or hexadecimal encoding).
-
-The supported encoder names are:
-
-* `base64`
-* `base16` or `hex`
-
-If you want to write your own encoder, you need to implement these two methods:
-
-* `string encode(string)`
-* `string decode(string)`
-
-You have to place your adapter inside `resty.session.encoders` for auto-loader to work.
-
-To configure session to use your adapter, you can do so with Nginx configuration (or in Lua code):
-
-```nginx
-set $session_encoder base64;
-```
-
-## Pluggable Session Identifier Generators
-
-With version 2.12 we started to support pluggable session identifier generators in `lua-resty-session`.
-Right now we support only one type of generator, and that is:
-
-* `random`
-
-If you want to write your own session identifier generator, you need to implement one function:
-
-* `string generate(session)`
-
-(the `config` is actually a `session` instance)
-
-You have to place your generator inside `resty.session.identifiers` for auto-loader to work.
-
-To configure session to use your generator, you can do so with Nginx configuration (or in Lua code):
-
-```nginx
-set $session_identifier_generator random;
-```
-
-#### Random Sesssion Identifier Generator
-
-Random generator uses `lua-resty-string`'s (an OpenResty core library) OpenSSL based cryptographically
-safe random generator.
-
-Random generator can be selected with configuration:
-
-```nginx
-set $session_identifier random;
-```
-
-Additionally you can configure Random generator with these settings:
-
-```nginx
-set $session_random_length 16;
-```
-
-Here follows the description of each setting:
-
-**length**
-
-`session.random.length` holds the length of the `session.id`. By default it is 16 bytes.
-This can be configured with Nginx `set $session_random_length 16;`.
-
-## Lua API
-
-### Functions and Methods
-
-#### session session.new(opts)
-
-With this function you can create a new session table (i.e. the actual session instance). This allows
-you to generate session table first, and set invidual configuration before calling `session:open()` or
-`session:start()`. You can also pass in `opts` Lua `table` with the configurations.
+Creates a new session instance.
 
 ```lua
 local session = require "resty.session".new()
--- set the configuration parameters before calling start
-session.cookie.domain = "mydomain.com"
--- call start before setting session.data parameters
-session:start()
-session.data.uid = 1
--- save session and update the cookie to be sent to the client
-session:save()
+-- OR
+local session = require "resty.session".new({
+  audience = "my-application",
+})
 ```
 
-This is equivalent to this:
+See [configuration](#configuration) for possible configuration settings.
 
-```lua
-local session = require "resty.session".new{ cookie = { domain = "mydomain.com" } }
-session:start()
-session.data.uid = 1
-session:save()
-```
 
-As well as with this:
+## Helpers
 
-```lua
-local session = require "resty.session".start{ cookie = { domain = "mydomain.com" } }
-session.data.uid = 1
-session:save()
-```
+### session.open
 
-#### session, present, reason = session.open(opts, keep_lock)
+**syntax:** *session, err, exists = session.open(configuration)*
 
-With this function you can open a new session. It will create a new session Lua `table` on each call (unless called with
-colon `:` as in examples above with `session.new`). Calling this function repeatedly will be a no-op when using colon `:`.
-This function will return a (new) session `table` as a result. If the session cookie is supplied with user's HTTP(S)
-client then this function validates the supplied session cookie. If validation is successful, the user supplied session
-data will be used (if not, a new session is generated with empty data). You may supply optional session configuration
-variables with `opts` argument, but be aware that many of these will only have effect if the session is a fresh session
-(i.e. not loaded from user supplied cookie). If you set the `keep_lock` argument to `true` the possible lock implemented
-by a storage adapter will not be released after opening the session. The second `boolean` return argument `present` will
-be `true` if the user client send a valid cookie (meaning that session was already started on some earlier request),
-and `false` if the new session was created (either because user client didn't send a cookie or that the cookie was not
-a valid one). If the cookie was not `present` the last `string` argument `reason` will return the reason why it failed
-to open a session cookie. This function will not set a client cookie or write data to database (e.g. update the expiry).
-You need to call `session:start()` to really start the session. This open function is mainly used if you only want to
-read data and avoid automatically sending a cookie (see also issue [#12](https://github.com/bungle/lua-resty-session/issues/12)).
-But be aware that this doesn't update cookie expiration time stored in a cookie or in the database.
+This can be used to open a session, and it will either return an existing
+session or a new session. The `exists` (a boolean) return parameters tells whether
+it was existing or new session that was returned. The `err` (a string) contains
+a message of why opening might have failed (the function will still return
+`session` too).
 
 ```lua
 local session = require "resty.session".open()
--- Set some options (overwriting the defaults or nginx configuration variables)
-local session = require "resty.session".open{ random = { length = 32 }}
--- Read some data
-if session.present then
-    ngx.print(session.data.uid)
-end
--- Now let's really start the session
--- (session.started will be always false in this example):
-if not session.started then
-    session:start() -- with some storage adapters this will held a lock.
-end
-
-session.data.greeting = "Hello, World!"
-session:save() -- this releases the possible lock held by :start()
+-- OR
+local session, err, exists = require "resty.session".open({
+  audience = "my-application",
+})
 ```
 
-#### session, present, reason session.start(opts)
+See [configuration](#configuration) for possible configuration settings.
 
-With this function you can start a new session. It will create a new session Lua `table` on each call (unless called with
-colon `:` as in examples above with `session.new`). Right now you should only start session once per request as calling
-this function repeatedly will overwrite the previously started session cookie and session data. This function will return
-a (new) session `table` as a result. If the session cookie is supplied with user's HTTP(S) client then this function
-validates the supplied session cookie. If validation is successful, the user supplied session data will be used
-(if not, a new session is generated with empty data). You may supply optional session configuration variables
-with `opts` argument, but be aware that many of these will only have effect if the session is a fresh session
-(i.e. not loaded from user supplied cookie). This function does also manage session cookie renewing configured
-with `$session_cookie_renew`. E.g. it will send a new cookie with a new expiration time if the following is
-met `session.expires - now < session.cookie.renew or session.expires > now + session.cookie.lifetime`. The second
-`boolean` return argument will be `true` if the user client send a valid cookie (meaning that session was already
-started on some earlier request), and `false` if the new session was created (either because user client didn't send
-a cookie or that the cookie was not a valid one). On error this will return nil and error message.
+
+### session.start
+
+**syntax:** *session, err, exists, refreshed = session.start(configuration)*
+
+This can be used to start a session, and it will either return an existing
+session or a new session. In case there is an existing session, the
+session will be refreshed as well (as needed). The `exists` (a boolean)
+return parameters tells whether it was existing or new session that was
+returned. The `refreshed` (a boolean) tells whether the call to `refresh`
+was succesful.  The `err` (a string) contains a message of why opening or
+refreshing might have failed (the function will still return `session` too).
 
 ```lua
 local session = require "resty.session".start()
--- Set some options (overwriting the defaults or nginx configuration variables)
-local session = require "resty.session".start{ random = { length = 32 }}
--- Always remember to:
-session:close()
 -- OR
-session:save()
--- OR
-session:destroy()
+local session, err, exists, refreshed = require "resty.session".start({
+  audience = "my-application",
+})
 ```
 
-#### boolean session.destroy(opts)
+See [configuration](#configuration) for possible configuration settings.
 
-This function will immediately set session data to empty table `{}`. It will also send a new cookie to
-client with empty data and Expires flag `Expires=Thu, 01 Jan 1970 00:00:01 GMT` (meaning that the client
-should remove the cookie, and not send it back again). This function returns a boolean value if everything went
-as planned. It returns nil and error on failure.
+
+### session.logout
+
+**syntax:** *ok, err, exists, logged_out = session.logout(configuration)*
+
+It logouts from a specific audience.
+
+A single session cookie may be shared between multiple audiences
+(or applications), thus there is a need to be able to logout from
+just a single audience while keeping the session for the other
+audiences. The `exists` (a boolean) return parameters tells whether
+session existed. The `logged_out` (a boolean) return parameter signals
+if the session existed and was also logged out. The `err` (a string)
+contains a reason why session didn't exists or why the logout failed.
+The `ok` (truthy) will be `true` when session existed and was
+successfully logged out.
+
+When there is only a single audience, then this can be considered
+equal to `session.destroy`.
+
+When the last audience is logged out, the cookie will be destroyed
+as well and invalidated on a client.
+
+```lua
+require "resty.session".logout()
+-- OR
+local ok, err, exists, logged_out = require "resty.session".logout({
+  audience = "my-application",
+})
+```
+
+
+See [configuration](#configuration) for possible configuration settings.
+
+
+### session.destroy
+
+**syntax:** *ok, err, exists, destroyed = session.destroy(configuration)*
+
+It destroys the whole session and clears the cookies.
+
+A single session cookie may be shared between multiple audiences
+(or applications), thus there is a need to be able to logout from
+just a single audience while keeping the session for the other
+audiences. The `exists` (a boolean) return parameters tells whether
+session existed. The `destroyed` (a boolean) return parameter signals
+if the session existed and was also destroyed out. The `err` (a string)
+contains a reason why session didn't exists or why the logout failed.
+The `ok` (truthy) will be `true` when session existed and was
+successfully logged out.
 
 ```lua
 require "resty.session".destroy()
--- but usually you want to possibly lock (server side storages)
--- the session before destroying
-local session require "resty.session".start()
-session:destroy()
+-- OR
+local ok, err, exists, destroyed = require "resty.session".destroy({
+  cookie_name = "auth",
+})
 ```
 
-#### string session:get_cookie()
+See [configuration](#configuration) for possible configuration settings.
 
-Returns the cookie from the request or `nil` if the cookie was not found.
 
-#### table session:parse_cookie(cookie)
+## Instance Methods
 
-Parses cookie and returns the data back as a `table` on success and `nil` and error on errors.
+### session:open
 
-#### boolean session:regenerate(flush, close)
+**syntax:** *ok, err = session:open()*
 
-This function regenerates a session. It will generate a new session identifier (`session.id`) and optionally
-flush the session data if `flush` argument evaluates `true`. It will automatically call `session:save` which
-means that a new expires flag is set on the cookie, and the data is encrypted with the new parameters. With
-client side sessions (`cookie` storage adapter) this overwrites the current cookie with a new one (but it
-doesn't invalidate the old one as there is no state held on server side - invalidation actually happens when
-the cookie's expiration time is not valid anymore). Optionally you may pass `false` to this method as a second
-argument, if you don't want to `close` the session just yet, but just to regenerate a new id and save the session.
-This function returns a boolean value if everything went as planned. If not it will return `nil` and error string
-as a second return value.
+This can be used to open a session. It returns `true` when
+session was opened and validated. Otherwise, it returns `nil` and
+an error message.
 
 ```lua
-local session = require "resty.session".start()
-session:regenerate()
--- flush the current data, and but keep session
--- open and possible locks still held
-session:regenerate(true, false)
+local session = require "resty.session".new()
+local ok, err = session:open()
+if ok then
+  -- session exists
+  
+else
+  -- session did not exists or was invalid
+end
 ```
 
-#### boolean session:save(close)
 
-This function saves the session and sends (not immediate though, as actual sending is handled by Nginx/OpenResty)
-a new cookie to client (with a new expiration time and encrypted data). You need to call this function whenever
-you want to save the changes made to `session.data` table. It is advised that you call this function only once
-per request (no need to encrypt and set cookie many times). This function returns a boolean value if everything
-went as planned. If not it will return error string as a second return value. Optionally you may pass `false`
-to this method, if you don't want to `close` the session just yet, but just to save the data.
+### session:save
+
+**syntax:** *ok, err = session:save()*
+
+Saves the session data and issues a new session cookie with a new session id.
+When `remember` is enabled, it will also issue a new persistent cookie and
+possibly save the data in backend store. It returns `true` when session was saved.
+Otherwise, it returns `nil` and an error message.
 
 ```lua
-local session = require "resty.session".start()
-session.data.uid = 1
+local session = require "resty.session".new()
+session:set_subject("john")
+local ok, err = session:save()
+if not ok then
+  -- error when saving session
+end
+```
+
+
+### session:touch
+
+**syntax:** *ok, err = session:touch()*
+
+Updates idling offset of the session by sending an updated session cookie.
+It only sends the client cookie and never calls any backend session store
+APIs. Normally the `session:refresh` is used to call this indirectly. In
+error case it returns `nil` and an error message, otherwise `true`.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  ok, err = session:touch()
+end
+```
+
+
+### session:refresh
+
+**syntax:** *ok, err = session:refresh()*
+
+Either saves the session (creating a new session id) or touches the session
+depending on whether the rolling timeout is getting closer, which means
+by default when 3/4 of rolling timeout is spent, that is 45 minutes with default
+rolling timeout of an hour. The touch has a threshold, by default one minute,
+so it may be skipped in some cases (you can call `session:touch()` to force it).
+In error case it returns `nil` and an error message, otherwise `true`.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local ok, err = session:refresh()
+end
+```
+
+The above code looks a bit like `session.start()` helper.
+
+
+### session:logout
+
+**syntax:** *ok, err = session:logout()*
+
+Logout either destroys the session or just clears the data for the current audience,
+and saves it (logging out from the current audience). In error case it returns `nil`
+and an error message, otherwise `true`.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local ok, err = session:logout()
+end
+```
+
+
+### session:destroy
+
+**syntax:** *ok, err = session:destroy()*
+
+Destroy the session and clear the cookies. In error case it returns `nil`
+and an error message, otherwise `true`.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local ok, err = session:destroy()
+end
+```
+
+
+### session:close
+
+**syntax:** *session:close()*
+
+Just closes the session instance so that it cannot be used anymore.
+
+```lua
+local session = require "resty.session".new()
+session:set_subject("john")
+local ok, err = session:save()
+if not ok then
+  -- error when saving session
+end
+session:close()
+```
+
+
+### session:set_data
+
+**syntax:** *session:set_data(data)*
+
+Set session data. The `data` needs to be a `table`.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if not exists then
+   session:set_data({
+     cart = {},
+   })
+  session:save()
+end
+```
+
+
+### session:get_data
+
+**syntax:** *data = session:get_data()*
+
+Get session data.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local data = session:get_data()
+  ngx.req.set_header("Authorization", "Bearer " .. data.access_token)
+end
+```
+
+
+### session:set
+
+**syntax:** *session:set(key, value)*
+
+Set a value in session.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if not exists then
+  session:set("access-token", "eyJ...")
+  session:save()
+end
+```
+
+
+### session:get
+
+**syntax:** *value = session:get(key)*
+
+Get a value from session.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local access_token = session:get("access-token")
+  ngx.req.set_header("Authorization", "Bearer " .. access_token)
+end
+```
+
+### session:set_audience
+
+**syntax:** *session:set_audience(audience)*
+
+Set session audience.
+
+```lua
+local session = require "resty.session".new()
+session.set_audience("my-service")
+```
+
+
+### session:get_audience
+
+**syntax:** *audience = session:get_audience()*
+
+Set session subject.
+
+
+### session:set_subject
+
+**syntax:** *session:set_subject(subject)*
+
+Set session audience.
+
+```lua
+local session = require "resty.session".new()
+session.set_subject("john@doe.com")
+```
+
+
+### session:get_subject
+
+**syntax:** *subject = session:get_subject()*
+
+Get session subject.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local subject = session.get_subject()
+end
+```
+
+
+### session:get_property
+
+**syntax:** *value = session:get_property(name)*
+
+Get session property. Possible property names:
+
+- `"id"`: 43 bytes session id (same as nonce, but base64 url-encoded)
+- `"nonce"`: 32 bytes nonce (same as session id but in raw bytes)
+- `"audience"`: Current session audience
+- `"subject"`: Current session subject
+- `"timeout"`: Closest timeout (in seconds) (what's left of it)
+- `"idling-timeout`"`: Session idling timeout (in seconds) (what's left of it)
+- `"rolling-timeout`"`: Session rolling timeout (in seconds) (what's left of it)
+- `"absolute-timeout`"`: Session absolute timeout (in seconds) (what's left of it)
+
+*Note:* the returned value may be `nil`.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local timeout = session.get_property("timeout")
+end
+```
+
+
+### session:set_remember
+
+**syntax:** *session:set_remember(value)*
+
+Set persistent sessions on/off.
+
+In many login forms user is given an option for "remember me".
+You can call this function based on what user selected.
+
+```lua
+local session = require "resty.session".new()
+if ngx.var.args.remember then
+  session:set_remember(true)
+end
+session:set_subject(ngx.var.args.username)
 session:save()
 ```
 
-#### boolean, string session:close()
 
-This function is mainly usable with storages that implement `locking` as calling this with e.g. `cookie` storage
-does not do anything else than set `session.closed` to `true`.
+### session:get_remember
 
+**syntax:** *remember = session:get_remember()*
 
-#### session:hide()
-
-Sometimes, when you are using `lua-resty-session` in reverse proxy, you may want to hide the session
-cookies from the upstream server. To do that you can call `session:hide()`.
+Get state of persistent sessions.
 
 ```lua
-local session = require "resty.session".start()
-session:hide()
+local session, err, exists = require "resty.session".open()
+if exists then
+  local remember = session.get_remember()
+end
 ```
 
-### Fields
 
-#### string session.id
+### session:clear_request_cookie
 
-`session.id` holds the current session id. By default it is 16 bytes long (raw binary bytes).
-It is automatically generated.
+**syntax:** *session:clear_request_cookie()*
 
-#### boolean session.present
-
-`session.present` can be used to check if the session that was opened with `session.open` or `session.start`
-was really a one the was received from a client. If the session is a new one, this will be false.
-
-#### boolean session.opened
-
-`session.opened` can be used to check if the `session:open()` was called for the current session
-object.
-
-#### boolean session.started
-
-`session.started` can be used to check if the `session:start()` was called for the current session
-object.
-
-#### boolean session.destroyed
-
-`session.destroyed` can be used to check if the `session:destroy()` was called for the current session
-object. It will also set `session.opened`, `session.started`,  and `session.present` to false.
-
-#### boolean session.closed
-
-`session.closed` can be used to check if the `session:close()` was called for the current session
-object.
-
-#### string session.key
-
-`session.key` holds the HMAC key. It is automatically generated. Nginx configuration like
-`set $session_check_ssi on;`, `set $session_check_ua on;`, `set $session_check_scheme on;` and `set $session_check_addr on;`
- will have effect on the generated key.
-
-#### table session.data
-
-`session.data` holds the data part of the session cookie. This is a Lua `table`. `session.data`
-is the place where you store or retrieve session variables. When you want to save the data table,
-you need to call `session:save` method.
-
-**Setting session variable:**
+Modifies the request headers by removing the session related
+cookies. This is useful when you use the session library on
+a proxy server and don't want the session cookies to be forwarded
+to the upstream service.
 
 ```lua
-local session = require "resty.session".start()
-session.data.uid = 1
-session:save()
+local session, err, exists = require "resty.session".open()
+if exists then
+  session:clear_request_cookie()
+end
 ```
 
-**Retrieving session variable (in other request):**
+
+### session:set_headers
+
+**syntax:** *session:set_headers(arg1, arg2, ...)*
+
+Sets request and response headers based on configuration.
 
 ```lua
-local session = require "resty.session".open()
-local uid = session.data.uid
+local session, err, exists = require "resty.session".open({
+  request_headers = { "audience", "subject", "id" },
+  response_headers = { "timeout", "idling-timeout", "rolling-timeout", "absolute-timeout" },
+})
+if exists then
+  session:set_headers()
+end
 ```
 
-#### number session.expires
+When called without arguments it will set request headers configured with `request_headers`
+and response headers configured with `response_headers`.
 
-`session.expires` holds the expiration time of the session (expiration time will be generated when
-`session:save` method is called).
+See [configuration](#configuration) for possible header names.
 
-#### string session.secret
 
-`session.secret` holds the secret that is used in keyed HMAC generation.
+### session:set_request_headers
 
-#### boolean session.cookie.persistent
+**syntax:** *session:set_request_headers(arg1, arg2, ...)*
 
-`session.cookie.persistent` is by default `false`. This means that cookies are not persisted between browser sessions
-(i.e. they are deleted when the browser is closed). You can enable persistent sessions if you want to by setting this
-to `true`. This can be configured with Nginx `set $session_cookie_persistent on;`.
+Set request headers.
 
-#### number session.usebefore
-
-`session.usebefore` holds the expiration time based on session usgae (expiration time will be generated
-when the session is saved or started). This expiry time is only stored client-side in the cookie.
-Note that just opening a session will not update the cookie! To mark the session as used you must call
-`session:touch`. (You can also use `session:save` but that will also write session data to the
-storage, whereas just calling `touch` reads the session data and updates the `usebefore` value in the
-client-side cookie without writing to the storage, it will just be setting a new cookie)
-
-#### number session.cookie.idletime
-
-`session.cookie.idletime` holds the cookie idletime in seconds in the future. If a cookie is not used
-(idle) for this time, the session becomes invalid. By default this is set to 0 seconds, meaning it is
-disabled. This can be configured with Nginx `set $session_cookie_idletime 300;`.
-
-#### number session.cookie.discard
-
-`session.cookie.discard` holds the time in seconds how of long you want to keep old cookies alive when
-using `regenerate` session strategy. This can be configured with Nginx `set $session_cookie_discard 10;`
-(10 seconds is the default value). This works only with server side session storage adapters and when
-using `regenerate` strategy (perhaps your custom strategy could utilize this too).
-
-#### number session.cookie.renew
-
-`session.cookie.renew` holds the minimun seconds until the cookie expires, and renews cookie automatically
-(i.e. sends a new cookie with a new expiration time according to `session.cookie.lifetime`). This can be configured
-with Nginx `set $session_cookie_renew 600;` (600 seconds is the default value).
-
-#### number session.cookie.lifetime
-
-`session.cookie.lifetime` holds the cookie lifetime in seconds in the future. By default this is set
-to 3,600 seconds. This can be configured with Nginx `set $session_cookie_lifetime 3600;`. This does not
-set cookie's expiration time on session only (by default) cookies, but it is used if the cookies are
-configured persistent with `session.cookie.persistent == true`. See also notes about
-[ssl_session_timeout](#nginx-configuration-variables).
-
-#### string session.cookie.path
-
-`session.cookie.path` holds the value of the cookie path scope. This is by default permissive `/`. You
-may want to have a more specific scope if your application resides in different path (e.g. `/forums/`).
-This can be configured with Nginx `set $session_cookie_path /forums/;`.
-
-#### string session.cookie.domain
-
-`session.cookie.domain` holds the value of the cookie domain. By default this is automatically set using
-Nginx variable `host`. This can be configured with Nginx `set $session_cookie_domain openresty.org;`.
-For `localhost` this is omitted.
-
-#### string session.cookie.samesite
-
-`session.cookie.samesite` holds the value of the cookie SameSite flag. By default we do use value of `Lax`.
-The possible values are `Lax`, `Strict`, `None`, and `off`. Actually, setting this parameter anything else than
-`Lax`, `Strict` or `None` will turn this off (but in general, you shouldn't do it). If you want better protection
-against Cross Site Request Forgery (CSRF), set this to `Strict`. Default value of `Lax` gives you quite a
-good protection against CSRF, but `Strict` goes even further.
-
-#### boolean session.cookie.secure
-
-`session.cookie.secure` holds the value of the cookie `Secure` flag. meaning that when set the client will
-only send the cookie with encrypted TLS/SSL connection. By default the `Secure` flag is set on all the
-cookies where the request was made through TLS/SSL connection. This can be configured and forced with
-Nginx `set $session_cookie_secure on;`.
-
-#### boolean session.cookie.httponly
-
-`session.cookie.httponly` holds the value of the cookie `HttpOnly` flag. By default this is enabled,
-and I cannot think of an situation where one would want to turn this off. By keeping this on you can
-prevent your session cookies access from Javascript and give some safety of XSS attacks. If you really
-want to turn this off, this can be configured with Nginx `set $session_cookie_httponly off;`.
-
-#### string session.cookie.maxsize
-
-`session.cookie.maxsize` is used to configure maximum size of a single cookie. This value is used to split a
-large cookie into chunks. By default it is `4000` bytes of serialized and encoded data which does not count
-the cookie name and cookie flags. If you expect your cookies + flags be more than e.g. `4096` bytes, you
-should reduce the `session.cookie.maxsize` so that a single cookie fits into `4096` bytes because otherwise
-the user-agent may ignore the cookie (being too big).
-
-#### number session.cookie.chunks
-
-`session.cookie.chunks` should be used as a read only property to determine how many separate cookies was
-used for a session. Usually this is `1`, but if you are using a `cookie` storage backend and store a lot
-of data in session, then the cookie is divided to `n` chunks where each stores data containing 4.000 bytes
-(the last one 4000 or less). This was implemented in version 2.15.
-
-#### boolean session.check.ssi
-
-`session.check.ssi` is additional check to validate that the request was made with the same SSL
-session as when the original cookie was delivered. This check is enabled by default on releases prior 2.12
-on non-persistent sessions and disabled by default on persistent sessions and on releases 2.12 and later.
-Please note that on TLS with TLS Tickets enabled, this will be empty) and not used. This is discussed on issue #5
-(https://github.com/bungle/lua-resty-session/issues/5). You can disable TLS tickets with Nginx configuration:
-
-```nginx
-ssl_session_tickets off;
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  session:set_request_headers("audience", "subject", "id")
+end
 ```
 
-#### boolean session.check.ua
+When called without arguments it will set request headers configured with `request_headers`.
 
-`session.check.ua` is additional check to validate that the request was made with the same user-agent browser string
-as where the original cookie was delivered. This check is enabled by default.
+See [configuration](#configuration) for possible header names.
 
-#### boolean session.check.addr
 
-`session.check.addr` is additional check to validate that the request was made from the same remote ip-address
-as where the original cookie was delivered. This check is disabled by default.
+### session:set_response_headers
 
-#### boolean session.check.scheme
+**syntax:** *session:set_response_headers(arg1, arg2, ...)*
 
-`session.check.scheme` is additional check to validate that the request was made using the same protocol
-as the one used when the original cookie was delivered. This check is enabled by default.
+Set request headers.
 
-## Nginx Configuration Variables
-
-You can set default configuration parameters directly from Nginx configuration. It's **IMPORTANT** to understand
-that these are read only once (not on every request), for performance reasons. This is especially important if
-you run multiple sites (with different configurations) on the same Nginx server. You can of course set the common
-parameters on Nginx configuration even on that case. But if you are really supporting multiple site with different
-configurations (e.g. different `session.secret` on each site), you should set these in code (see: `session.new`
-and `session.start`).
-
-Please note that Nginx has also its own SSL/TLS caches and timeouts. Especially note `ssl_session_timeout` if you
-are running services over SSL/TLS as this will end sessions regardless of `session.cookie.lifetime`. Please adjust
-that accordingly or disable `ssl_session_id` check `session.check.ssi = false` (in code) or
-`set $session_check_ssi off;` (in Nginx configuration). As of 2.12 checking SSL session identifier check
-(`$session_check_ssi` / `session.check.ssi`) is disabled by default because it was not reliable (most servers use
-session tickets now), and it usually needed extra configuration.
-
-You may want to add something like this to your Nginx SSL/TLS config (quite a huge cache in this example, 1 MB is
-about 4.000 SSL sessions):
-
-```nginx
-ssl_session_cache shared:SSL:100m;
-ssl_session_timeout 60m;
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  session:set_response_headers("timeout", "idling-timeout", "rolling-timeout", "absolute-timeout")
+end
 ```
 
-Also note that the `ssl_session_id` may be `null` if the TLS tickets are enabled. You can disable tickets in Nginx
-server with the configuration below:
+When called without arguments it will set request headers configured with `response_headers`.
 
-```nginx
-ssl_session_tickets off;
+See [configuration](#configuration) for possible header names.
+
+
+### session.info:set
+
+**syntax:** *session.info:set(key, value)*
+
+Set a value in session information store. Session information store
+may be used in scenarios when you want to store data on server side
+storage, but do not want to create a new session and send a new
+session cookie. The information store data is not considered when
+checking authentication tag or message authentication code. Thus if
+you want to use this for data that needs to be encrypted, you need
+to encrypt value before passing it to thus function.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  session.info:set("last-access", ngx.now())
+  session.info:save()
+end
 ```
 
-Right now this is a workaround and may change in a future if we find alternative ways to have the added security
-that we have with `ssl_session_id` with TLS tickets too. While TLS tickets are great, they also have effect on
-(Perfect) Forward Secrecy, and it is adviced to disable tickets until the problems mentioned in
-[The Sad State of Server-Side TLS Session Resumption Implementations](https://timtaubert.de/blog/2014/11/the-sad-state-of-server-side-tls-session-resumption-implementations/)
-article are resolved.
+With cookie storage this still works, but it is then almost the same as
+`session:set`.
 
-Here is a list of `lua-resty-session` related Nginx configuration variables that you can use to control
-`lua-resty-session`:
 
-```nginx
-set $session_name              session;
-set $session_secret            623q4hR325t36VsCD3g567922IC0073T;
-set $session_strategy          default;
-set $session_storage           cookie;
-set $session_hmac              sha1;
-set $session_cipher            aes;
-set $session_encoder           base64;
-set $session_serializer        json;
-set $session_compressor        none;
-set $session_cookie_persistent off;
-set $session_cookie_discard    10;
-set $session_cookie_idletime   0;
-set $session_cookie_renew      600;
-set $session_cookie_lifetime   3600;
-set $session_cookie_path       /;
-set $session_cookie_domain     openresty.org;
-set $session_cookie_samesite   Lax;
-set $session_cookie_secure     on;
-set $session_cookie_httponly   on;
-set $session_cookie_delimiter  |;
-set $session_cookie_maxsize    4000;
-set $session_check_ssi         off;
-set $session_check_ua          on;
-set $session_check_scheme      on;
-set $session_check_addr        off;
-set $session_random_length     16;
-set $session_aes_mode          cbc;
-set $session_aes_size          256;
-set $session_aes_hash          sha512;
-set $session_aes_rounds        1;
+### session.info:get
+
+**syntax:** *value = session.info:get(key)*
+
+Get a value from session information store.
+
+```lua
+local session, err, exists = require "resty.session".open()
+if exists then
+  local last_access = session.info:get("last-access")
+end
 ```
 
-## Changes
 
-The changes of every release of this module is recorded in [Changes.md](https://github.com/bungle/lua-resty-session/blob/master/Changes.md) file.
+### session.info:save
 
-## Roadmap
+**syntax:** *value = session.info:save()*
 
-* Add support for different schemes:
-    * Encrypt-and-MAC: The ciphertext is generated by encrypting the plaintext and then appending a MAC of the plaintext.
-    * MAC-then-encrypt: The ciphertext is generated by appending a MAC to the plaintext and then encrypting everything.
-    * Encrypt-then-MAC: The ciphertext is generated by encrypting the plaintext and then appending a MAC of the encrypted plaintext.
-    * Authenticated Encryption with Associated Data (AEAD)
-* Add support for HMAC plugins
-* Add support for `lua-resty-nettle` for more wide variety of encryption algorithms as a plugin.
-* Implement cookieless server-side session support using `ssl_session_id` as a `session.id` (using a server-side storage).
+Save information. Only updates backend storage. Does not send a new cookie (except with cookie storage).
 
-## See Also
+```lua
+local session = require "resty.session".new()
+session.info:set("last-access", ngx.now())
+local ok, err = session.info:save()
+```
 
-* [lua-resty-route](https://github.com/bungle/lua-resty-route) — Routing library
-* [lua-resty-reqargs](https://github.com/bungle/lua-resty-reqargs) — Request arguments parser
-* [lua-resty-template](https://github.com/bungle/lua-resty-template) — Templating engine
-* [lua-resty-validation](https://github.com/bungle/lua-resty-validation) — Validation and filtering library
 
-## License
+# Cookie Format
+
+```
+[ HEADER -------------------------------------------------------------------------------------]
+[ Type || Flags || SID || Created at || Rolling Offset || Size || Tag || Idling Offset || Mac ]
+[ 1B   || 2B    || 32B || 5B         || 4B             || 3B   || 16B || 3B            || 16B ]
+```
+
+and
+
+```
+[ PAYLOAD --]
+[ Data  *B  ]   
+```
+
+Both the `HEADER` and `PAYLOAD` are base64 url-encoded before putting in a `Set-Cookie` header.
+When using a server side storage, the `PAYLOAD` is not put in the cookie. With cookie storage
+the base64 url-encoded header is concatenated with base64 url-encoded payload.
+
+The `HEADER` is fixed size 82 bytes binary or 110 bytes in base64 url-encoded form.
+
+Header fields explained:
+
+- Type: number `1` binary packed in a single little endian byte (currently the only supported `type`).
+- Flags: binary packed flags (short) in a two byte little endian form.
+- SID: `32` bytes of crypto random data (Session ID).
+- Created at: binary packed secs from epoch in a little endian form, truncated to 5 bytes.
+- Rolling Offset: binary packed secs from creation time in a little endian form (integer). 
+- Size: binary packed data size (short) in a two byte little endian form.
+- Tag: `16` bytes of authentication tag from AES-256-GCM encryption of the data.
+- Idling Offset: binary packed secs from creation time + rolling offset in a little endian form, truncated to 3 bytes.
+- Mac: `16` bytes message authentication code of the header.
+
+
+# Data Encryption
+
+1. Initial keying material (IKM):
+   1. derive IKM from `secret` by hashing `secret` with SHA-256, or
+   2. use 32 byte IKM when passed to library with `ikm`
+2. Generate 32 bytes of crypto random session id (`sid`) 
+3. Derive 32 byte encryption key and 12 byte initialization vector with HKDF using SHA-256 (on FIPS-mode it uses PBKDF2 with SHA-256 instead)
+   1. Use HKDF extract to derive a new key from `ikm` to get `key` (this step can be done just once per `ikm`):
+      - output length: `32`
+      - digest: `"sha256"`
+      - key: `<ikm>`
+      - mode: `extract only`
+      - info: `""`
+      - salt: `""`
+   2. Use HKDF expand to derive `44` bytes of `output`:
+      - output length: `44`
+      - digest: `"sha256"`
+      - key: `<key>`
+      - mode: `expand only`
+      - info: `"encryption:<sid>"`
+      - salt: `""`
+   3. The first 32 bytes of `output` are the encryption key (`aes-key`), and the last 12 bytes are the initialization vector (`iv`)
+4. Encrypt `plaintext` (JSON encoded and optionally deflated) using AES-256-GCM to get `ciphertext` and `tag`
+   1. cipher: `"aes-256-gcm"`
+   2. key: `<aes-key>`
+   3. iv: `<iv>`
+   4. plaintext: `<plaintext>`
+   5. aad: use the first 47 bytes of `header` as `aad`, that includes:
+      1. Type
+      2. Flags
+      3. Session ID
+      4. Creation Time
+      5. Rolling Offset
+      6. Data Size
+
+There is a variation for `remember` cookies on step 3, where we may use `PBKDF2`
+instead of `HKDF`, depending  on `remember_safety` setting (we also use it in FIPS-mode).
+The `PBKDF2` settings:
+
+- output length: `44`
+- digest: `"sha256"`
+- password: `<key>`
+- salt: `"encryption:<sid>"`
+- iterations: `<1000|10000|100000|1000000>`
+
+Iteration counts are based on `remember_safety` setting (`"Low"`, `"Medium"`, `"High"`, `"Very High"`),
+if `remember_safety` is set to `"None"`, we will use the HDKF as above.
+
+
+# Cookie Header Authentication
+
+1. Derive 32 byte authentication key (`mac_key`) with HKDF using SHA-256  (on FIPS-mode it uses PBKDF2 with SHA-256 instead):
+    1. Use HKDF extract to derive a new key from `ikm` to get `key` (this step can be done just once per `ikm` and reused with encryption key generation):
+        - output length: `32`
+        - digest: `"sha256"`
+        - key: `<ikm>`
+        - mode: `extract only`
+        - info: `""`
+        - salt: `""`
+    2. Use HKDF expand to derive `32` bytes of `mac-key`:
+        - output length: `32`
+        - digest: `"sha256"`
+        - key: `<key>`
+        - mode: `expand only`
+        - info: `"authentication:<sid>"`
+        - salt: `""`
+2. Calculate message authentication code using HMAC-SHA256:
+   -  digest: `"sha256"`
+   -  key: `<mac-key>`
+   -  message: use the first 66 bytes of `header`, that includes:
+      1. Type
+      2. Flags
+      3. Session ID
+      4. Creation Time
+      5. Rolling Offset
+      6. Data Size
+      7. Tag
+      8. Idling Offset
+
+
+# Custom Storage Interface
+
+If you want to implement custom storage, you need to implement following interface:
+
+```lua
+---
+-- <custom> backend for session library
+--
+-- @module <custom>
+
+
+---
+-- Storage
+-- @section instance
+
+
+local metatable = {}
+
+
+metatable.__index = metatable
+
+
+function metatable.__newindex()
+  error("attempt to update a read-only table", 2)
+end
+
+
+---
+-- Store session data.
+--
+-- @function instance:set
+-- @tparam string name cookie name
+-- @tparam string key session key
+-- @tparam string value session value
+-- @tparam number ttl session ttl
+-- @tparam number current_time current time
+-- @tparam[opt] string old_key old session id
+-- @tparam string stale_ttl stale ttl
+-- @tparam[opt] table metadata table of metadata
+-- @tparam boolean remember whether storing persistent session or not
+-- @treturn true|nil ok
+-- @treturn string error message
+function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+  -- NYI
+end
+
+
+---
+-- Retrieve session data.
+--
+-- @function instance:get
+-- @tparam string name cookie name
+-- @tparam string key session key
+-- @treturn string|nil session data
+-- @treturn string error message
+function metatable:get(name, key)
+  -- NYI
+end
+
+
+---
+-- Delete session data.
+--
+-- @function instance:delete
+-- @tparam string name cookie name
+-- @tparam string key session key
+-- @tparam[opt] table metadata  session meta data
+-- @treturn boolean|nil session data
+-- @treturn string error message
+function metatable:delete(name, key, current_time, metadata)
+  -- NYI
+end
+
+
+local storage = {}
+
+
+---
+-- Constructors
+-- @section constructors
+
+
+---
+-- Configuration
+-- @section configuration
+
+
+---
+-- <custom> storage backend configuration
+-- @field <field-name> TBD
+-- @table configuration
+
+
+---
+-- Create a <custom> storage.
+--
+-- This creates a new shared memory storage instance.
+--
+-- @function module.new
+-- @tparam[opt]  table   configuration  <custom> storage @{configuration}
+-- @treturn      table                  <custom> storage instance
+function storage.new(configuration)
+  -- NYI
+  -- return setmetatable({}, metatable)
+end
+
+
+return storage
+```
+
+Please check the existing implementations for the defails. And please
+make a pull-request so that we can integrate it directly to library
+for other users as well.
+
+
+# License
 
 `lua-resty-session` uses two clause BSD license.
 
 ```
-Copyright (c) 2014 – 2022 Aapo Talvensaari
+Copyright (c) 2014 – 2023 Aapo Talvensaari, 2022 – 2023 Samuele Illuminati
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

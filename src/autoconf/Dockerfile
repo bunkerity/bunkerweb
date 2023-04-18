@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.11.3-alpine
 
 # Copy python requirements
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
@@ -54,13 +54,13 @@ RUN apk add --no-cache bash && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt
 
 # Fix CVEs
-# No need to update anything for now, there are no CVE concerning the already installed packages inside this image
+RUN apk add "libcrypto3>=3.0.8-r2" "libssl3>=3.0.8-r2"
 
 VOLUME /data /etc/nginx
 
 WORKDIR /usr/share/bunkerweb/autoconf
 
-USER root:nginx
+USER nginx:nginx
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 

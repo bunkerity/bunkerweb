@@ -1,5 +1,7 @@
 FROM redhat/ubi8-init:8.7
 
+ENV NGINX_VERSION 1.24.0
+
 # Copy centos repo
 COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
 
@@ -13,6 +15,6 @@ COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf install php-fpm curl yum-utils -y && \
-	dnf install nginx-1.22.1 -y
+	dnf install nginx-${NGINX_VERSION} -y
 
 COPY ./package-rhel/*.rpm /opt

@@ -140,6 +140,11 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):4 loop\]/
 
 
 === TEST 4: ngx.req.get_headers (metatable)
+--- http_config eval
+"
+$::HttpConfig
+underscores_in_headers on;
+"
 --- config
     location = /t {
         set $foo hello;
@@ -159,6 +164,10 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):4 loop\]/
             for _, k in ipairs(keys) do
                 ngx.say(k, ": ", headers[k])
             end
+
+            ngx.say("X_Bar_Header: ", headers["X_Bar_Header"])
+            ngx.say("x_Bar_Header: ", headers["x_Bar_Header"])
+            ngx.say("x_bar_header: ", headers["x_bar_header"])
         }
     }
 --- request
@@ -169,9 +178,14 @@ baz: baz
 connection: close
 foo-bar: foo
 host: localhost
+x_bar_header: bar
+X_Bar_Header: bar
+x_Bar_Header: bar
+x_bar_header: bar
 --- more_headers
 Foo-Bar: foo
 Baz: baz
+X_Bar_Header: bar
 --- wait: 0.2
 --- error_log eval
 qr/\[TRACE\s+\d+ .*? -> \d+\]/

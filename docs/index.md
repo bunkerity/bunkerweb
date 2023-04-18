@@ -3,7 +3,7 @@
 ## Overview
 
 <figure markdown>
-  ![Overview](assets/img/intro-overview.svg){ align=center }
+  ![Overview](assets/img/intro-overview.svg){ align=center, width="800" }
   <figcaption>Make your web services secure by default !</figcaption>
 </figure>
 
@@ -38,7 +38,7 @@ Learn more about the core security features in the [security tuning](security-tu
 ## Demo
 
 <figure markdown>
-  ![Overwiew](assets/img/demo.gif){ align=center }
+  ![Demo](assets/img/demo.gif){ align=center }
   <figcaption>Fooling automated tools/scanners</figcaption>
 </figure>
 

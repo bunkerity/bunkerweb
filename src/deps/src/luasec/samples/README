@@ -45,6 +45,9 @@ Directories:
 * oneshot
  A simple connection example.
 
+* psk
+ PSK(Pre Shared Key) support.
+
 * sni
  Support to SNI (Server Name Indication).
 

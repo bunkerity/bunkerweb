@@ -35,13 +35,25 @@ try:
     # Compute the mmdb URL
     mmdb_url = f"https://download.db-ip.com/free/dbip-asn-lite-{date.today().strftime('%Y-%m')}.mmdb.gz"
 
-    # Download the mmdb file
+    # Download the mmdb file and save it to tmp
     logger.info(f"Downloading mmdb file from url {mmdb_url} ...")
-    resp = get(mmdb_url)
+    file_content = b""
+    with get(mmdb_url, stream=True) as resp:
+        resp.raise_for_status()
+        for chunk in resp.iter_content(chunk_size=4 * 1024):
+            if chunk:
+                file_content += chunk
 
-    # Save it to temp
-    logger.info("Saving mmdb file to tmp ...")
-    Path(f"/var/tmp/bunkerweb/asn.mmdb").write_bytes(decompress(resp.content))
+    try:
+        assert file_content
+    except AssertionError:
+        logger.error(f"Error while downloading mmdb file from {mmdb_url}")
+        _exit(2)
+
+    # Decompress it
+    logger.info("Decompressing mmdb file ...")
+    file_content = decompress(file_content)
+    Path(f"/var/tmp/bunkerweb/asn.mmdb").write_bytes(file_content)
 
     # Try to load it
     logger.info("Checking if mmdb file is valid ...")
@@ -73,7 +85,7 @@ try:
     # Update db
     with lock:
         err = db.update_job_cache(
-            "mmdb-asn", None, "asn.mmdb", resp.content, checksum=new_hash
+            "mmdb-asn", None, "asn.mmdb", file_content, checksum=new_hash
         )
 
     if err:

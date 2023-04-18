@@ -48,56 +48,56 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Linux
-  build-ubuntu:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: ubuntu
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-debian:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: debian
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-centos:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: centos
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-fedora:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: fedora
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-rhel:
-    uses: ./.github/workflows/staging-linux-build.yml
-    with:
-      LINUX: rhel
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-ubuntu:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: ubuntu
+  #     PACKAGE: deb
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-debian:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: debian
+  #     PACKAGE: deb
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-centos:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: centos
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-fedora:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: fedora
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-rhel:
+  #   uses: ./.github/workflows/staging-linux-build.yml
+  #   with:
+  #     LINUX: rhel
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Code security
   code-security:
@@ -131,42 +131,43 @@ jobs:
       TYPE: docker
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-autoconf:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: autoconf
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-swarm:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: swarm
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-k8s:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: k8s
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-linux:
-    needs:
-      [
-        code-security,
-        build-ubuntu,
-        build-debian,
-        build-centos,
-        build-fedora,
-        build-rhel,
-      ]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: linux
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-autoconf:
+  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: autoconf
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-swarm:
+  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: swarm
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-k8s:
+  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: k8s
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-linux:
+    # needs:
+    #   [
+    #     code-security,
+    #     build-ubuntu,
+    #     build-debian,
+    #     build-centos,
+    #     build-fedora,
+    #     build-rhel,
+    #   ]
+    # needs: [code-security, build-rhel]
+    # uses: ./.github/workflows/staging-create-infra.yml
+    # with:
+    #   TYPE: linux
+    # secrets:
+    #   CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Perform tests
   tests-docker:
@@ -176,42 +177,42 @@ jobs:
       TYPE: docker
       RUNS_ON: "['self-hosted', 'bw-docker']"
     secrets: inherit
-  tests-autoconf:
-    needs: [create-infra-autoconf]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: autoconf
-      RUNS_ON: "['self-hosted', 'bw-autoconf']"
-    secrets: inherit
-  tests-swarm:
-    needs: [create-infra-swarm]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: swarm
-      RUNS_ON: "['self-hosted', 'bw-swarm']"
-    secrets: inherit
-  tests-k8s:
-    needs: [create-infra-k8s]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: k8s
-      RUNS_ON: "['ubuntu-latest']"
-    secrets: inherit
-  tests-linux:
-    needs: [create-infra-linux]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: linux
-      RUNS_ON: "['self-hosted', 'bw-linux']"
-    secrets: inherit
-  tests-ui:
-    needs: [code-security, build-ui]
-    uses: ./.github/workflows/staging-tests-ui.yml
-    with:
-      MODE: staging
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # tests-autoconf:
+  #   needs: [create-infra-autoconf]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: autoconf
+  #     RUNS_ON: "['self-hosted', 'bw-autoconf']"
+  #   secrets: inherit
+  # tests-swarm:
+  #   needs: [create-infra-swarm]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: swarm
+  #     RUNS_ON: "['self-hosted', 'bw-swarm']"
+  #   secrets: inherit
+  # tests-k8s:
+  #   needs: [create-infra-k8s]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: k8s
+  #     RUNS_ON: "['ubuntu-latest']"
+  #   secrets: inherit
+  # tests-linux:
+  #   needs: [create-infra-linux]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: linux
+  #     RUNS_ON: "['self-hosted', 'bw-linux']"
+  #   secrets: inherit
+  # tests-ui:
+  #   needs: [code-security, build-ui]
+  #   uses: ./.github/workflows/staging-tests-ui.yml
+  #   with:
+  #     MODE: staging
+  #   secrets:
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
   delete-infra-docker:
@@ -222,131 +223,131 @@ jobs:
       TYPE: docker
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-autoconf:
-    if: ${{ always() }}
-    needs: [tests-autoconf]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: autoconf
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-swarm:
-    if: ${{ always() }}
-    needs: [tests-swarm]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: swarm
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-k8s:
-    if: ${{ always() }}
-    needs: [tests-k8s]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: k8s
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-linux:
-    if: ${{ always() }}
-    needs: [tests-linux]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: linux
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-autoconf:
+  #   if: ${{ always() }}
+  #   needs: [tests-autoconf]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: autoconf
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-swarm:
+  #   if: ${{ always() }}
+  #   needs: [tests-swarm]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: swarm
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-k8s:
+  #   if: ${{ always() }}
+  #   needs: [tests-k8s]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: k8s
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-linux:
+  #   if: ${{ always() }}
+  #   needs: [tests-linux]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: linux
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
-  # Push containers
-  push-bunkerweb:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
-    uses: ./.github/workflows/staging-push-docker.yml
-    with:
-      PRIVATE_IMAGE: bunkerweb-tests:staging
-      PUBLIC_IMAGE: bunkerweb:beta
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  push-scheduler:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
-    uses: ./.github/workflows/staging-push-docker.yml
-    with:
-      PRIVATE_IMAGE: scheduler-tests:staging
-      PUBLIC_IMAGE: bunkerweb-scheduler:beta
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  push-autoconf:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
-    uses: ./.github/workflows/staging-push-docker.yml
-    with:
-      PRIVATE_IMAGE: autoconf-tests:staging
-      PUBLIC_IMAGE: bunkerweb-autoconf:beta
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  push-ui:
-    needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
-    uses: ./.github/workflows/staging-push-docker.yml
-    with:
-      PRIVATE_IMAGE: ui-tests:staging
-      PUBLIC_IMAGE: bunkerweb-ui:beta
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # # Push containers
+  # push-bunkerweb:
+  #   needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
+  #   uses: ./.github/workflows/staging-push-docker.yml
+  #   with:
+  #     PRIVATE_IMAGE: bunkerweb-tests:staging
+  #     PUBLIC_IMAGE: bunkerweb:beta
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # push-scheduler:
+  #   needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
+  #   uses: ./.github/workflows/staging-push-docker.yml
+  #   with:
+  #     PRIVATE_IMAGE: scheduler-tests:staging
+  #     PUBLIC_IMAGE: bunkerweb-scheduler:beta
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # push-autoconf:
+  #   needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
+  #   uses: ./.github/workflows/staging-push-docker.yml
+  #   with:
+  #     PRIVATE_IMAGE: autoconf-tests:staging
+  #     PUBLIC_IMAGE: bunkerweb-autoconf:beta
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # push-ui:
+  #   needs: [tests-docker, tests-autoconf, tests-swarm, tests-k8s, tests-ui]
+  #   uses: ./.github/workflows/staging-push-docker.yml
+  #   with:
+  #     PRIVATE_IMAGE: ui-tests:staging
+  #     PUBLIC_IMAGE: bunkerweb-ui:beta
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
-  # Push Linux packages
-  push-ubuntu:
-    needs: [tests-linux, tests-ui]
-    uses: ./.github/workflows/staging-push-packagecloud.yml
-    with:
-      SEPARATOR: _
-      SUFFIX: amd64
-      REPO: bunkerweb-dev
-      LINUX: ubuntu
-      VERSION: jammy
-      PACKAGE: deb
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-debian:
-    needs: [tests-linux, tests-ui]
-    uses: ./.github/workflows/staging-push-packagecloud.yml
-    with:
-      SEPARATOR: _
-      SUFFIX: amd64
-      REPO: bunkerweb-dev
-      LINUX: debian
-      VERSION: bullseye
-      PACKAGE: deb
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-rhel:
-    needs: [tests-linux, tests-ui]
-    uses: ./.github/workflows/staging-push-packagecloud.yml
-    with:
-      SEPARATOR: "-"
-      SUFFIX: 1.x86_64
-      REPO: bunkerweb-dev
-      LINUX: el
-      VERSION: 8
-      PACKAGE: rpm
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-fedora:
-    needs: [tests-linux, tests-ui]
-    uses: ./.github/workflows/staging-push-packagecloud.yml
-    with:
-      SEPARATOR: "-"
-      SUFFIX: 1.x86_64
-      REPO: bunkerweb-dev
-      LINUX: fedora
-      VERSION: 37
-      PACKAGE: rpm
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  # # Push Linux packages
+  # push-ubuntu:
+  #   needs: [tests-linux, tests-ui]
+  #   uses: ./.github/workflows/staging-push-packagecloud.yml
+  #   with:
+  #     SEPARATOR: _
+  #     SUFFIX: amd64
+  #     REPO: bunkerweb-dev
+  #     LINUX: ubuntu
+  #     VERSION: jammy
+  #     PACKAGE: deb
+  #   secrets:
+  #     PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  # push-debian:
+  #   needs: [tests-linux, tests-ui]
+  #   uses: ./.github/workflows/staging-push-packagecloud.yml
+  #   with:
+  #     SEPARATOR: _
+  #     SUFFIX: amd64
+  #     REPO: bunkerweb-dev
+  #     LINUX: debian
+  #     VERSION: bullseye
+  #     PACKAGE: deb
+  #   secrets:
+  #     PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  # push-rhel:
+  #   needs: [tests-linux, tests-ui]
+  #   uses: ./.github/workflows/staging-push-packagecloud.yml
+  #   with:
+  #     SEPARATOR: "-"
+  #     SUFFIX: 1.x86_64
+  #     REPO: bunkerweb-dev
+  #     LINUX: el
+  #     VERSION: 8
+  #     PACKAGE: rpm
+  #   secrets:
+  #     PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  # push-fedora:
+  #   needs: [tests-linux, tests-ui]
+  #   uses: ./.github/workflows/staging-push-packagecloud.yml
+  #   with:
+  #     SEPARATOR: "-"
+  #     SUFFIX: 1.x86_64
+  #     REPO: bunkerweb-dev
+  #     LINUX: fedora
+  #     VERSION: 37
+  #     PACKAGE: rpm
+  #   secrets:
+  #     PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

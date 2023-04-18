@@ -197,6 +197,13 @@ class IngressController(Controller, ConfigCaller):
                 continue
             config_site = ""
             if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
+                if not self._is_service_present(
+                    configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]
+                ):
+                    self.__logger.warning(
+                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist",
+                    )
+                    continue
                 config_site = (
                     f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
                 )
@@ -213,6 +220,8 @@ class IngressController(Controller, ConfigCaller):
             what = self.__networkingv1.list_ingress_for_all_namespaces
         elif watch_type == "configmap":
             what = self.__corev1.list_config_map_for_all_namespaces
+        elif watch_type == "service":
+            what = self.__corev1.list_service_for_all_namespaces
         else:
             raise Exception(f"Unsupported watch_type {watch_type}")
 
@@ -233,7 +242,7 @@ class IngressController(Controller, ConfigCaller):
                         locked = False
                         continue
                     self.__logger.info(
-                        "Catched kubernetes event, deploying new configuration ...",
+                        f"Catched kubernetes event ({watch_type}), deploying new configuration ...",
                     )
                     try:
                         ret = self.apply_config()
@@ -241,7 +250,6 @@ class IngressController(Controller, ConfigCaller):
                             self.__logger.error(
                                 "Error while deploying new configuration ...",
                             )
-                            error = True
                         else:
                             self.__logger.info(
                                 "Successfully deployed new configuration 🚀",
@@ -257,16 +265,19 @@ class IngressController(Controller, ConfigCaller):
                         self.__logger.error(
                             f"Exception while deploying new configuration :\n{format_exc()}",
                         )
-                        error = True
+                    self.__internal_lock.release()
+                    locked = False
             except ApiException as e:
                 if e.status != 410:
                     self.__logger.error(
-                        f"Exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
+                        f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                     )
+                    error = True
             except:
                 self.__logger.error(
                     f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                 )
+                error = True
             finally:
                 if locked:
                     self.__internal_lock.release()
@@ -283,7 +294,7 @@ class IngressController(Controller, ConfigCaller):
 
     def process_events(self):
         self._set_autoconf_load_db()
-        watch_types = ("pod", "ingress", "configmap")
+        watch_types = ("pod", "ingress", "configmap", "service")
         threads = [
             Thread(target=self.__watch, args=(watch_type,))
             for watch_type in watch_types

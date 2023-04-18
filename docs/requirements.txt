@@ -1,5 +1,5 @@
 mkdocs==1.4.2
-mkdocs-material==9.1.4
+mkdocs-material==9.1.6
 pytablewriter==0.64.2
 mike==1.1.2
 jinja2<3.1.0

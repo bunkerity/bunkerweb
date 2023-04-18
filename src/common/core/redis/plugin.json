@@ -32,6 +32,15 @@
       "regex": "^[0-9]+$",
       "type": "text"
     },
+    "REDIS_DATABASE": {
+      "context": "global",
+      "default": "0",
+      "help": "Redis database number.",
+      "id": "redis-database",
+      "label": "Redis database",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
     "REDIS_SSL": {
       "context": "global",
       "default": "no",

@@ -488,7 +488,7 @@ static void cp_expr_prefix(CPState *cp, CPValue *k)
   } else if (cp_opt(cp, '+')) {
     cp_expr_unary(cp, k);  /* Nothing to do (well, integer promotion). */
   } else if (cp_opt(cp, '-')) {
-    cp_expr_unary(cp, k); k->i32 = -k->i32;
+    cp_expr_unary(cp, k); k->i32 = (int32_t)(~(uint32_t)k->i32+1);
   } else if (cp_opt(cp, '~')) {
     cp_expr_unary(cp, k); k->i32 = ~k->i32;
   } else if (cp_opt(cp, '!')) {

@@ -1,0 +1,16 @@
+config_diagnostics = 1
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+
+[provider_sect]
+fips = fips_sect
+default = default_sect
+
+[default_sect]
+activate = 1
+
+# need fipsinstall to populate below section
+# [fips_sect]
+

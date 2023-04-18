@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Session Library for OpenResty Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>resty.session</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Configuration">Configuration </a></li>
+<li><a href="#Constructors">Constructors </a></li>
+<li><a href="#Storage">Storage </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/resty.session.html">resty.session</a></li>
+  <li><a href="../modules/resty.session.dshm.html">resty.session.dshm</a></li>
+  <li><a href="../modules/resty.session.file.html">resty.session.file</a></li>
+  <li><a href="../modules/resty.session.file.thread.html">resty.session.file.thread</a></li>
+  <li><a href="../modules/resty.session.file.utils.html">resty.session.file.utils</a></li>
+  <li><strong>resty.session.memcached</strong></li>
+  <li><a href="../modules/resty.session.mysql.html">resty.session.mysql</a></li>
+  <li><a href="../modules/resty.session.postgres.html">resty.session.postgres</a></li>
+  <li><a href="../modules/resty.session.redis.html">resty.session.redis</a></li>
+  <li><a href="../modules/resty.session.redis.cluster.html">resty.session.redis.cluster</a></li>
+  <li><a href="../modules/resty.session.redis.common.html">resty.session.redis.common</a></li>
+  <li><a href="../modules/resty.session.redis.sentinel.html">resty.session.redis.sentinel</a></li>
+  <li><a href="../modules/resty.session.shm.html">resty.session.shm</a></li>
+  <li><a href="../modules/resty.session.utils.html">resty.session.utils</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>resty.session.memcached</code></h1>
+<p>Memcached backend for session library</p>
+<p>
+</p>
+
+
+<h2><a href="#Configuration">Configuration </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#configuration">configuration</a></td>
+	<td class="summary">Distributed shared memory storage backend configuration</td>
+	</tr>
+</table>
+<h2><a href="#Constructors">Constructors </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#module.new">module.new ([configuration])</a></td>
+	<td class="summary">Create a memcached storage.</td>
+	</tr>
+</table>
+<h2><a href="#Storage">Storage </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#instance:set">instance:set (name, key, value, ttl, current_time[, old_key], stale_ttl[, metadata], remember)</a></td>
+	<td class="summary">Store session data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#instance:get">instance:get (name, key)</a></td>
+	<td class="summary">Retrieve session data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#instance:delete">instance:delete (name, key[, metadata])</a></td>
+	<td class="summary">Delete session data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#instance:read_metadata">instance:read_metadata (name, audience, subject, current_time)</a></td>
+	<td class="summary">Read session metadata.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Configuration"></a>Configuration </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "configuration"></a>
+    <strong>configuration</strong>
+    </dt>
+    <dd>
+    Distributed shared memory storage backend configuration
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">prefix</span>
+         Prefix for the keys stored in memcached.
+        </li>
+        <li><span class="parameter">suffix</span>
+         Suffix for the keys stored in memcached.
+        </li>
+        <li><span class="parameter">host</span>
+         The host to connect (defaults to <code>&quot;127.0.0.1&quot;</code>).
+        </li>
+        <li><span class="parameter">port</span>
+         The port to connect (defaults to <code>11211</code>).
+        </li>
+        <li><span class="parameter">socket</span>
+         The socket file to connect to (defaults to <code>nil</code>).
+        </li>
+        <li><span class="parameter">connect_timeout</span>
+         Controls the default timeout value used in TCP/unix-domain socket object&rsquo;s <code>connect</code> method.
+        </li>
+        <li><span class="parameter">send_timeout</span>
+         Controls the default timeout value used in TCP/unix-domain socket object&rsquo;s <code>send</code> method.
+        </li>
+        <li><span class="parameter">read_timeout</span>
+         Controls the default timeout value used in TCP/unix-domain socket object&rsquo;s <code>receive</code> method.
+        </li>
+        <li><span class="parameter">keepalive_timeout</span>
+         Controls the default maximal idle time of the connections in the connection pool.
+        </li>
+        <li><span class="parameter">pool</span>
+         A custom name for the connection pool being used.
+        </li>
+        <li><span class="parameter">pool_size</span>
+         The size of the connection pool.
+        </li>
+        <li><span class="parameter">backlog</span>
+         A queue size to use when the connection pool is full (configured with @pool_size).
+        </li>
+        <li><span class="parameter">ssl</span>
+         Enable SSL (defaults to <code>false</code>).
+        </li>
+        <li><span class="parameter">ssl_verify</span>
+         Verify server certificate (defaults to <code>nil</code>).
+        </li>
+        <li><span class="parameter">server_name</span>
+         The server name for the new TLS extension Server Name Indication (SNI).
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Constructors"></a>Constructors </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "module.new"></a>
+    <strong>module.new ([configuration])</strong>
+    </dt>
+    <dd>
+    Create a memcached storage. </p>
+
+<p> This creates a new memcached storage instance.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         memcached storage <a href="../modules/resty.session.memcached.html#configuration">configuration</a>
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        memcached storage instance
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Storage"></a>Storage </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "instance:set"></a>
+    <strong>instance:set (name, key, value, ttl, current_time[, old_key], stale_ttl[, metadata], remember)</strong>
+    </dt>
+    <dd>
+    Store session data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         cookie name
+        </li>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session key
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session value
+        </li>
+        <li><span class="parameter">ttl</span>
+            <span class="types"><span class="type">number</span></span>
+         session ttl
+        </li>
+        <li><span class="parameter">current_time</span>
+            <span class="types"><span class="type">number</span></span>
+         current time
+        </li>
+        <li><span class="parameter">old_key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         old session id
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">stale_ttl</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         stale ttl
+        </li>
+        <li><span class="parameter">metadata</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         table of metadata
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">remember</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether storing persistent session or not
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "instance:get"></a>
+    <strong>instance:get (name, key)</strong>
+    </dt>
+    <dd>
+    Retrieve session data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         cookie name
+        </li>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session key
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        session data</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "instance:delete"></a>
+    <strong>instance:delete (name, key[, metadata])</strong>
+    </dt>
+    <dd>
+    Delete session data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         cookie name
+        </li>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session key
+        </li>
+        <li><span class="parameter">metadata</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         session meta data
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">boolean</span> or <span class="type">nil</span></span>
+        session data</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "instance:read_metadata"></a>
+    <strong>instance:read_metadata (name, audience, subject, current_time)</strong>
+    </dt>
+    <dd>
+    Read session metadata.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         cookie name
+        </li>
+        <li><span class="parameter">audience</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session key
+        </li>
+        <li><span class="parameter">subject</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         session key
+        </li>
+        <li><span class="parameter">current_time</span>
+            <span class="types"><span class="type">number</span></span>
+         current time
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a> or <span class="type">nil</span></span>
+        session metadata</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-02-15 16:31:40 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

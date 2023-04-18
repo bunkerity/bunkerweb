@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         cc: ["gcc", "clang"]
-        luaVersion: ["5.1", "5.2", "5.3", "luajit", "luajit-openresty"]
+        luaVersion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
         include:
           - luaVersion: "luajit"
             runtestArgs: "LUA_INCLUDE_DIR=.lua/include/luajit-2.1"

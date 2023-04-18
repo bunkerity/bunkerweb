@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2022 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -88,6 +88,10 @@ IpTree::~IpTree() {
 bool IpTree::addFromBuffer(std::istream *ss, std::string *error) {
     char *error_msg = NULL;
     for (std::string line; std::getline(*ss, line); ) {
+        size_t comment_start = line.find('#');
+        if (comment_start != std::string::npos) {
+            line = line.substr(0, comment_start);
+        }
         int res = add_ip_from_param(line.c_str(), &m_tree, &error_msg);
         if (res != 0) {
             if (error_msg != NULL) {

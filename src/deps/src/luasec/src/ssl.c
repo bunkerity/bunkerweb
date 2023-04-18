@@ -1,9 +1,8 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.2.0
+ * LuaSec 1.3.1
  *
- * Copyright (C) 2014-2022 Kim Alvefur, Paul Aurich, Tobias Markmann, 
- *                         Matthew Wild.
- * Copyright (C) 2006-2022 Bruno Silvestre.
+ * Copyright (C) 2014-2023 Kim Alvefur, Paul Aurich, Tobias Markmann, Matthew Wild
+ * Copyright (C) 2006-2023 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -531,6 +530,58 @@ static int meth_getpeercertificate(lua_State *L)
 }
 
 /**
+ * Return the nth certificate of the chain sent to our peer.
+ */
+static int meth_getlocalcertificate(lua_State *L)
+{
+  int n;
+  X509 *cert;
+  STACK_OF(X509) *certs;
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  if (ssl->state != LSEC_STATE_CONNECTED) {
+    lua_pushnil(L);
+    lua_pushstring(L, "closed");
+    return 2;
+  }
+  /* Default to the first cert */
+  n = (int)luaL_optinteger(L, 2, 1);
+  /* This function is 1-based, but OpenSSL is 0-based */
+  --n;
+  if (n < 0) {
+    lua_pushnil(L);
+    lua_pushliteral(L, "invalid certificate index");
+    return 2;
+  }
+  if (n == 0) {
+    cert = SSL_get_certificate(ssl->ssl);
+    if (cert)
+      lsec_pushx509(L, cert);
+    else
+      lua_pushnil(L);
+    return 1;
+  }
+  /* In a server-context, the stack doesn't contain the peer cert,
+   * so adjust accordingly.
+   */
+  if (SSL_is_server(ssl->ssl))
+    --n;
+  if(SSL_get0_chain_certs(ssl->ssl, &certs) != 1) {
+    lua_pushnil(L);
+  } else {
+    if (n >= sk_X509_num(certs)) {
+      lua_pushnil(L);
+      return 1;
+    }
+    cert = sk_X509_value(certs, n);
+    /* Increment the reference counting of the object. */
+    /* See SSL_get_peer_certificate() source code.     */
+    X509_up_ref(cert);
+    lsec_pushx509(L, cert);
+  }
+  return 1;
+}
+
+/**
  * Return the chain of certificate of the peer.
  */
 static int meth_getpeerchain(lua_State *L)
@@ -560,6 +611,41 @@ static int meth_getpeerchain(lua_State *L)
     X509_up_ref(cert);
     lsec_pushx509(L, cert);
     lua_rawseti(L, -2, idx++);
+  }
+  return 1;
+}
+
+/**
+ * Return the chain of certificates sent to the peer.
+ */
+static int meth_getlocalchain(lua_State *L)
+{
+  int i;
+  int idx = 1;
+  int n_certs;
+  X509 *cert;
+  STACK_OF(X509) *certs;
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  if (ssl->state != LSEC_STATE_CONNECTED) {
+    lua_pushnil(L);
+    lua_pushstring(L, "closed");
+    return 2;
+  }
+  lua_newtable(L);
+  if (SSL_is_server(ssl->ssl)) {
+    lsec_pushx509(L, SSL_get_certificate(ssl->ssl));
+    lua_rawseti(L, -2, idx++);
+  }
+  if(SSL_get0_chain_certs(ssl->ssl, &certs)) {
+    n_certs = sk_X509_num(certs);
+    for (i = 0; i < n_certs; i++) {
+      cert = sk_X509_value(certs, i);
+      /* Increment the reference counting of the object. */
+      /* See SSL_get_peer_certificate() source code.     */
+      X509_up_ref(cert);
+      lsec_pushx509(L, cert);
+      lua_rawseti(L, -2, idx++);
+    }
   }
   return 1;
 }
@@ -861,7 +947,7 @@ static int meth_getalpn(lua_State *L)
 
 static int meth_copyright(lua_State *L)
 {
-  lua_pushstring(L, "LuaSec 1.2.0 - Copyright (C) 2006-2022 Bruno Silvestre, UFG"
+  lua_pushstring(L, "LuaSec 1.3.1 - Copyright (C) 2006-2023 Bruno Silvestre, UFG"
 #if defined(WITH_LUASOCKET)
                     "\nLuaSocket 3.0-RC1 - Copyright (C) 2004-2013 Diego Nehab"
 #endif
@@ -908,7 +994,9 @@ static luaL_Reg methods[] = {
   {"getfd",               meth_getfd},
   {"getfinished",         meth_getfinished},
   {"getpeercertificate",  meth_getpeercertificate},
+  {"getlocalcertificate", meth_getlocalcertificate},
   {"getpeerchain",        meth_getpeerchain},
+  {"getlocalchain",       meth_getlocalchain},
   {"getpeerverification", meth_getpeerverification},
   {"getpeerfinished",     meth_getpeerfinished},
   {"exportkeyingmaterial",meth_exportkeyingmaterial},

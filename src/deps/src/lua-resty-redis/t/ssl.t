@@ -290,3 +290,54 @@ ok
     }
 --- response_body
 ok
+
+
+
+=== TEST 8: ssl reuse
+--- config
+    location /t {
+        content_by_lua_block {
+            local redis = require "resty.redis"
+            local red = redis:new()
+            red:set_timeout(1000)
+
+            local function connect_set(red)
+                local ok, err = red:connect("127.0.0.1", $TEST_NGINX_STREAM_REDIS_PORT, {
+                    ssl = true
+                })
+                if not ok then
+                    ngx.say("failed to connect: ", err)
+                    return
+                end
+                ngx.say("sock reusetimes: ", red:get_reused_times())
+
+                ok, err = red:select(1)
+                if not ok then
+                    ngx.say("failed to select: ", err)
+                    return
+                end
+
+                local res, err = red:set("dog", "an animal")
+                if not res then
+                    ngx.say("failed to set dog: ", err)
+                    return
+                end
+
+                ngx.say("set dog: ", res)
+
+                local ok, err = red:set_keepalive()
+                if not ok then
+                    ngx.say("failed to set keepalive: ", err)
+                    return
+                end
+            end
+
+            connect_set(red)
+            connect_set(red)
+        }
+    }
+--- response_body eval
+qr/sock reusetimes: (0|2)
+set dog: OK
+sock reusetimes: (1|3)
+set dog: OK/

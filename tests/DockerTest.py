@@ -17,11 +17,11 @@ class DockerTest(Test):
             delay=delay,
         )
         self._domains = {
-            r"www\.example\.com": getenv("TEST_DOMAIN1"),
-            r"auth\.example\.com": getenv("TEST_DOMAIN1"),
-            r"app1\.example\.com": getenv("TEST_DOMAIN1_1"),
-            r"app2\.example\.com": getenv("TEST_DOMAIN1_2"),
-            r"app3\.example\.com": getenv("TEST_DOMAIN1_3"),
+            r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+            r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+            r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+            r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+            r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3")
         }
         self._check_domains()
 
@@ -57,6 +57,7 @@ class DockerTest(Test):
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
+            Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
             Test.replace_in_file(
                 compose,
                 r"AUTO_LETS_ENCRYPT=yes",

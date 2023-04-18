@@ -2,7 +2,7 @@
 
 from os import getenv, makedirs
 from os.path import isfile
-from subprocess import DEVNULL, STDOUT, run
+from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 

@@ -1,0 +1,6 @@
+- utils refactoring
+- load inline values for white/black/grey list core
+- check if correct setting is set to yes in new() before loading stuff in self
+- store object in ngx.ctx
+- bwcli with redis
+- move bans to cachestore

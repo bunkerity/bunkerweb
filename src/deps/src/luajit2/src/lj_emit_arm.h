@@ -157,7 +157,7 @@ static int emit_kdelta2(ASMState *as, Reg rd, int32_t i)
       if (other) {
 	int32_t delta = i - other;
 	uint32_t sh, inv = 0, k2, k;
-	if (delta < 0) { delta = -delta; inv = ARMI_ADD^ARMI_SUB; }
+	if (delta < 0) { delta = (int32_t)(~(uint32_t)delta+1u); inv = ARMI_ADD^ARMI_SUB; }
 	sh = lj_ffs(delta) & ~1;
 	k2 = emit_isk12(0, delta & (255 << sh));
 	k = emit_isk12(0, delta & ~(255 << sh));

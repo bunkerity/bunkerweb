@@ -31,24 +31,6 @@
       "regex": "^/[\\w\\].~:/?#[@!$&'()*+,;=-]*$",
       "type": "text"
     },
-    "ANTIBOT_SESSION_SECRET": {
-      "context": "global",
-      "default": "random",
-      "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
-      "id": "antibot-session-secret",
-      "label": "Antibot Session secret",
-      "regex": "^(random|\\w+)$",
-      "type": "password"
-    },
-    "ANTIBOT_SESSION_NAME": {
-      "context": "global",
-      "default": "random",
-      "help": "Name of the cookie used by the antibot feature.",
-      "id": "antibot-session-name",
-      "label": "Antibot Session name",
-      "regex": "^(random|\\w+)$",
-      "type": "text"
-    },
     "ANTIBOT_RECAPTCHA_SCORE": {
       "context": "multisite",
       "default": "0.7",

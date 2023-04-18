@@ -250,7 +250,7 @@ class FetchLogs {
 
   //get settings
   setSettings() {
-    this.instanceName = this.instance.textContent;
+    this.instanceName = this.instance.textContent.trim();
     //get range date
     this.fromDate = Date.parse(this.fromDateInp.value)
       ? Date.parse(this.fromDateInp.value)

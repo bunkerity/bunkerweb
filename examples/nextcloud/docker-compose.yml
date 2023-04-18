@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - 80:8080
       - 443:8443
@@ -10,6 +10,7 @@ services:
       - SERVER_NAME=www.example.com # replace with your domain
       - AUTO_LETS_ENCRYPT=yes
       - DISABLE_DEFAULT_SERVER=yes
+      - API_WHITELIST_IP=127.0.0.1 10.20.30.0/24
       - MAX_CLIENT_SIZE=10G
       - USE_CLIENT_CACHE=yes
       - SERVE_FILES=no
@@ -53,7 +54,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     depends_on:
       - mybunker
     environment:
@@ -84,9 +85,9 @@ services:
       - TRUSTED_PROXIES=192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
       - APACHE_DISABLE_REWRITE_IP=1
       - MYSQL_HOST=mydb
-      - MYSQL_DATABASE=${NEXTCLOUD_DATABASE:-nextclouddb}
-      - MYSQL_USER=${NEXTCLOUD_USER:-user}
-      - MYSQL_PASSWORD=${NEXTCLOUD_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # set a stronger password in a .env file (must match MYSQL_PASSWORD)
     networks:
       - bw-services
 
@@ -94,12 +95,12 @@ services:
     image: mariadb:10.9
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
-      - ./db-data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=nc
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MYSQL_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
     networks:
       - bw-universe
       - bw-services
@@ -108,6 +109,7 @@ volumes:
   bw-data:
   db-data:
   nc-files:
+
 
 networks:
   bw-universe:

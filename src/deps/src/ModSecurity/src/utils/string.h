@@ -61,7 +61,7 @@ std::string dash_if_empty(const std::string *str);
 std::string limitTo(int amount, const std::string &str);
 std::string removeBracketsIfNeeded(std::string a);
 std::string string_to_hex(const std::string& input);
-std::string toHexIfNeeded(const std::string &str);
+std::string toHexIfNeeded(const std::string &str, bool escape_spec = false);
 std::string tolower(std::string str);
 std::string toupper(std::string str);
 std::vector<std::string> ssplit(std::string str, char delimiter);

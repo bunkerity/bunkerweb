@@ -119,10 +119,46 @@
   },
   "DATASTORE_MEMORY_SIZE": {
     "context": "global",
-    "default": "256m",
+    "default": "64m",
     "help": "Size of the internal datastore.",
     "id": "datastore-memory-size",
     "label": "Datastore memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_MEMORY_SIZE": {
+    "context": "global",
+    "default": "64m",
+    "help": "Size of the internal cachestore.",
+    "id": "cachestore-memory-size",
+    "label": "Cachestore memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_IPC_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal cachestore (ipc).",
+    "id": "cachestore-ipc-memory-size",
+    "label": "Cachestore ipc memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_MISS_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal cachestore (miss).",
+    "id": "cachestore-miss-memory-size",
+    "label": "Cachestore miss memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_LOCKS_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal cachestore (locks).",
+    "id": "cachestore-locks-memory-size",
+    "label": "Cachestore locks memory size",
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },

@@ -6,17 +6,18 @@ from traceback import format_exc
 from subprocess import run
 from time import sleep
 from logger import log
+from yaml import safe_load, dump
 
 
 class SwarmTest(Test):
     def __init__(self, name, timeout, tests, delay=0):
         super().__init__(name, "swarm", timeout, tests, delay=delay)
         self._domains = {
-            r"www\.example\.com": getenv("TEST_DOMAIN1_1"),
-            r"auth\.example\.com": getenv("TEST_DOMAIN1_2"),
-            r"app1\.example\.com": getenv("TEST_DOMAIN1"),
-            r"app2\.example\.com": getenv("TEST_DOMAIN2"),
-            r"app3\.example\.com": getenv("TEST_DOMAIN3"),
+            r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
+            r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
+            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
+            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
+            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
         }
 
     @staticmethod
@@ -32,6 +33,21 @@ class SwarmTest(Test):
             mkdir("/tmp/swarm")
             copy("./misc/integrations/swarm.mariadb.yml", "/tmp/swarm/stack.yml")
             compose = "/tmp/swarm/stack.yml"
+            with open(compose, "r") as f:
+                data = safe_load(f.read())
+            if (
+                not "AUTO_LETS_ENCRYPT=yes"
+                in data["services"]["bunkerweb"]["environment"]
+            ):
+                data["services"]["bunkerweb"]["environment"].append(
+                    "AUTO_LETS_ENCRYPT=yes"
+                )
+            data["services"]["bunkerweb"]["environment"].append(
+                "USE_LETS_ENCRYPT_STAGING=yes"
+            )
+            del data["services"]["bunkerweb"]["deploy"]["placement"]
+            with open(compose, "w") as f:
+                f.write(dump(data))
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",
@@ -47,7 +63,7 @@ class SwarmTest(Test):
                 r"bunkerity/bunkerweb-scheduler:.*$",
                 "192.168.42.100:5000/scheduler-tests:latest",
             )
-            Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
+            # Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run(
                 "docker stack deploy -c stack.yml bunkerweb",
                 cwd="/tmp/swarm",
@@ -71,20 +87,20 @@ class SwarmTest(Test):
                 i += 1
             if not healthy:
                 proc = run(
-                    "docker service logs bunkerweb_bunkerweb ; docker service logs bunkerweb_bw-autoconf ; docker service logs bunkerweb_bw-scheduler ; docker service logs bunkerweb_bw-db",
+                    "docker service logs bunkerweb_bunkerweb ; docker service logs bunkerweb_bw-autoconf ; docker service logs bunkerweb_bw-scheduler ; docker service logs bunkerweb_bw-db ; docker service logs bunkerweb_bw-redis ; docker stack ps --no-trunc bunkerweb",
                     cwd="/tmp/swarm",
                     shell=True,
                     capture_output=True,
                 )
-                log("SWARM", "❌", "stdout logs = " + proc.stdout.decode())
-                log("SWARM", "❌", "stderr logs = " + proc.stderr.decode())
+                log("SWARM", "❌", f"stdout logs = {proc.stdout.decode()}")
+                log("SWARM", "❌", f"stderr logs = {proc.stderr.decode()}")
                 raise (Exception("swarm stack is not healthy"))
             sleep(60)
         except:
             log(
                 "SWARM",
                 "❌",
-                "exception while running SwarmTest.init()\n" + format_exc(),
+                f"exception while running SwarmTest.init()\n{format_exc()}",
             )
             return False
         return True
@@ -101,7 +117,7 @@ class SwarmTest(Test):
             rmtree("/tmp/swarm")
         except:
             log(
-                "SWARM", "❌", "exception while running SwarmTest.end()\n" + format_exc()
+                "SWARM", "❌", f"exception while running SwarmTest.end()\n{format_exc()}"
             )
             return False
         return ret
@@ -161,7 +177,7 @@ class SwarmTest(Test):
             log(
                 "SWARM",
                 "❌",
-                "exception while running SwarmTest._setup_test()\n" + format_exc(),
+                f"exception while running SwarmTest._setup_test()\n{format_exc()}",
             )
             self._cleanup_test()
             return False
@@ -196,7 +212,7 @@ class SwarmTest(Test):
             log(
                 "SWARM",
                 "❌",
-                "exception while running SwarmTest._cleanup_test()\n" + format_exc(),
+                f"exception while running SwarmTest._cleanup_test()\n{format_exc()}",
             )
             return False
         return True

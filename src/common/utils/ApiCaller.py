@@ -13,7 +13,7 @@ from API import API
 if "/usr/share/bunkerweb/deps/python" not in sys_path:
     sys_path.append("/usr/share/bunkerweb/deps/python")
 
-from kubernetes import client as kube_client
+from kubernetes import client as kube_client, config
 from docker import DockerClient
 
 
@@ -30,6 +30,7 @@ class ApiCaller:
                 bw_integration = "Swarm"
 
         if bw_integration == "Kubernetes":
+            config.load_incluster_config()
             corev1 = kube_client.CoreV1Api()
             for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
                 if (
@@ -71,12 +72,14 @@ class ApiCaller:
                         elif var.startswith("API_SERVER_NAME="):
                             api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
-                    self.__apis.append(
-                        API(
-                            f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
-                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                    for task in instance.tasks():
+                        self.__apis.append(
+                            API(
+                                f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                                host=api_server_name
+                                or getenv("API_SERVER_NAME", "bwapi"),
+                            )
                         )
-                    )
                 return
 
             for instance in docker_client.containers.list(

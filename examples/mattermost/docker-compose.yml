@@ -2,12 +2,13 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - 80:8080
       - 443:8443
     environment:
       - SERVER_NAME=www.example.com # replace with your domain
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - AUTO_LETS_ENCRYPT=yes
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
@@ -43,7 +44,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     depends_on:
       - mybunker
     environment:

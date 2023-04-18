@@ -29,11 +29,13 @@ class Download {
 
   async sendFileToDL(jobName, fileName) {
     window.open(
-      `${location.href}/download?job_name=${jobName}&file_name=${fileName}`
+      `${location.href.replace(
+        "cache",
+        "jobs"
+      )}/download?job_name=${jobName}&file_name=${fileName}`
     );
   }
 }
-
 
 const setModal = new FolderModal("cache");
 const setEditor = new FolderEditor();

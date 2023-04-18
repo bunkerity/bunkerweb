@@ -11,3 +11,4 @@ LICENSE.md
 README.md
 SECURITY.md
 src/ui/static
+examples/*

@@ -10,4 +10,4 @@
 docker config rm cfg_reverse_server_http
 
 # create configs
-docker config create -l bunkerweb.CONFIG_TYPE=server-http cfg_reverse_server_http -l bunkerweb.CONFIG_SITE=www.example.com ./bw-data/configs/server-http/redirects.conf
+docker config create -l bunkerweb.CONFIG_TYPE=server-http -l bunkerweb.CONFIG_SITE=www.example.com cfg_reverse_server_http ./bw-data/configs/server-http/redirects.conf

@@ -10,4 +10,4 @@
 docker config rm cfg_wordpress_modsec_crs
 
 # create configs
-docker config create -l bunkerweb.CONFIG_TYPE=modsec-crs cfg_wordpress_modsec_crs -l bunkerweb.CONFIG_SITE=www.example.com ./bw-data/configs/modsec-crs/wordpress.conf
+docker config create -l bunkerweb.CONFIG_TYPE=modsec-crs -l bunkerweb.CONFIG_SITE=www.example.com cfg_wordpress_modsec_crs ./bw-data/configs/modsec-crs/wordpress.conf

@@ -29,17 +29,17 @@ std::string RuleMessage::_details(const RuleMessage *rm) {
     msg.append(" [file \"" + std::string(*rm->m_ruleFile.get()) + "\"]");
     msg.append(" [line \"" + std::to_string(rm->m_ruleLine) + "\"]");
     msg.append(" [id \"" + std::to_string(rm->m_ruleId) + "\"]");
-    msg.append(" [rev \"" + rm->m_rev + "\"]");
+    msg.append(" [rev \"" + utils::string::toHexIfNeeded(rm->m_rev, true) + "\"]");
     msg.append(" [msg \"" + rm->m_message + "\"]");
-    msg.append(" [data \"" + utils::string::limitTo(200, rm->m_data) + "\"]");
+    msg.append(" [data \"" + utils::string::toHexIfNeeded(utils::string::limitTo(200, rm->m_data), true) + "\"]");
     msg.append(" [severity \"" +
         std::to_string(rm->m_severity) + "\"]");
-    msg.append(" [ver \"" + rm->m_ver + "\"]");
+    msg.append(" [ver \"" + utils::string::toHexIfNeeded(rm->m_ver, true) + "\"]");
     msg.append(" [maturity \"" + std::to_string(rm->m_maturity) + "\"]");
     msg.append(" [accuracy \"" + std::to_string(rm->m_accuracy) + "\"]");
 
     for (auto &a : rm->m_tags) {
-        msg.append(" [tag \"" + a + "\"]");
+        msg.append(" [tag \"" + utils::string::toHexIfNeeded(a, true) + "\"]");
     }
 
     msg.append(" [hostname \"" + *rm->m_serverIpAddress.get() \

@@ -10,4 +10,4 @@
 docker config rm cfg_magento_server_http
 
 # create configs
-docker config create -l bunkerweb.CONFIG_TYPE=server-http cfg_magento_server_http -l bunkerweb.CONFIG_SITE=www.example.com ./bw-data/configs/server-http/buffering.conf
+docker config create -l bunkerweb.CONFIG_TYPE=server-http -l bunkerweb.CONFIG_SITE=www.example.com cfg_magento_server_http ./bw-data/configs/server-http/buffering.conf

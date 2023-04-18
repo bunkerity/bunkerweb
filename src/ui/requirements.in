@@ -1,7 +1,8 @@
 Flask==2.2.3
 Flask_Login==0.6.2
 Flask_WTF==1.1.1
-beautifulsoup4==4.12.0
+beautifulsoup4==4.12.2
 python_dateutil==2.8.2
 bcrypt==4.0.1
 gunicorn==20.1.0
+gevent==22.10.2

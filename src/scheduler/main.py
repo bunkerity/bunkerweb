@@ -214,12 +214,12 @@ if __name__ == "__main__":
                 "Kubernetes",
                 "Autoconf",
             ):
-                err = db.set_autoconf_load(False)
-                if err:
-                    success = False
-                    logger.error(
-                        f"Can't set autoconf loaded metadata to false in database: {err}",
-                    )
+                # err = db.set_autoconf_load(False)
+                # if err:
+                #     success = False
+                #     logger.error(
+                #         f"Can't set autoconf loaded metadata to false in database: {err}",
+                #     )
 
                 while not db.is_autoconf_loaded():
                     logger.warning(
@@ -380,12 +380,12 @@ if __name__ == "__main__":
                     if not api_caller._send_files("/data/cache", "/cache"):
                         logger.error("Error while sending /data/cache folder")
                     else:
-                        logger.info("Successfuly sent /data/cache folder")
+                        logger.info("Successfully sent /data/cache folder")
 
                 # restart nginx
-                logger.info("Stopping temp nginx ...")
                 if integration == "Linux":
                     # Stop temp nginx
+                    logger.info("Stopping temp nginx ...")
                     proc = subprocess_run(
                         ["/usr/sbin/nginx", "-s", "stop"],
                         stdin=DEVNULL,
@@ -393,17 +393,19 @@ if __name__ == "__main__":
                         env=deepcopy(env),
                     )
                     if proc.returncode == 0:
-                        logger.info("Successfuly sent stop signal to temp nginx")
+                        logger.info("Successfully sent stop signal to temp nginx")
                         i = 0
-                        while i < 20 :
-                            if not Path("/var/tmp/bunkerweb/nginx.pid").is_file() :
+                        while i < 20:
+                            if not Path("/var/tmp/bunkerweb/nginx.pid").is_file():
                                 break
                             logger.warning("Waiting for temp nginx to stop ...")
                             sleep(1)
                             i += 1
-                        if i >= 20 :
-                            logger.error("Timeout error while waiting for temp nginx to stop")
-                        else :
+                        if i >= 20:
+                            logger.error(
+                                "Timeout error while waiting for temp nginx to stop"
+                            )
+                        else:
                             # Start nginx
                             logger.info("Starting nginx ...")
                             proc = subprocess_run(
@@ -413,8 +415,8 @@ if __name__ == "__main__":
                                 env=deepcopy(env),
                             )
                             if proc.returncode == 0:
-                                logger.info("Successfuly started nginx")
-                            else :
+                                logger.info("Successfully started nginx")
+                            else:
                                 logger.error(
                                     f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
                                 )
@@ -424,7 +426,7 @@ if __name__ == "__main__":
                         )
                 else:
                     if api_caller._send_to_apis("POST", "/reload"):
-                        logger.info("Successfuly reloaded nginx")
+                        logger.info("Successfully reloaded nginx")
                     else:
                         logger.error("Error while reloading nginx")
             except:
@@ -475,16 +477,17 @@ if __name__ == "__main__":
                                 env=deepcopy(env),
                             )
                             if proc.returncode == 0:
-                                logger.info("Successfuly reloaded nginx")
+                                logger.info("Successfully reloaded nginx")
                             else:
                                 logger.error(
                                     f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
                                 )
                         else:
-                            if api_caller._send_to_apis("POST", "/reload"):
-                                logger.info("Successfuly reloaded nginx")
-                            else:
-                                logger.error("Error while reloading nginx")
+                            need_reload = True
+                            # if api_caller._send_to_apis("POST", "/reload"):
+                            #     logger.info("Successfully reloaded nginx")
+                            # else:
+                            #     logger.error("Error while reloading nginx")
 
                     # check if the plugins have changed since last time
                     tmp_external_plugins = db.get_plugins(external=True)

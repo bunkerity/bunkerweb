@@ -1,6 +1,25 @@
 # Changelog
 
-## v1.4.6
+## v1.4.8 - 2023/04/05
+
+- Fix UI bug related to multiple settings
+- Increase check reload interval in UI to avoid rate limit
+- Fix Let's Encrypt error when using auth basic
+- Fix wrong setting name in realip job (again)
+- Fix blog posts retrieval in the UI
+- Fix missing logs for UI
+- Fix error log if BunkerNet ip list is empty
+- Updated python dependencies
+- Gunicorn will now show the logs in the console for the UI
+- BunkerNet job will now create the ip list file at the beginning of the job to avoid errors
+
+## v1.4.7 - 2023/02/27
+
+- Fix DISABLE_DEFAULT_SERVER=yes not working with HTTPS (again)
+- Fix wrong setting name in realip job
+- Fix whitelisting not working with modsecurity
+
+## v1.4.6 - 2023/02/14
 
 - Fix error in the UI when a service have multiple domains
 - Fix bwcli bans command

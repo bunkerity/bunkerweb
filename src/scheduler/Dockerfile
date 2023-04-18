@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.11.3-alpine
 
 # Copy python requirements
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
@@ -64,7 +64,7 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-# No need to update anything for now, there are no CVE concerning the already installed packages inside this image
+RUN apk add "libcrypto3>=3.0.8-r2" "libssl3>=3.0.8-r2"
 
 VOLUME /data /etc/nginx
 

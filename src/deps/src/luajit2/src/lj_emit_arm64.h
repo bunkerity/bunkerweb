@@ -27,8 +27,8 @@ static uint64_t get_k64val(ASMState *as, IRRef ref)
 /* Encode constant in K12 format for data processing instructions. */
 static uint32_t emit_isk12(int64_t n)
 {
-  uint64_t k = (n < 0) ? -n : n;
-  uint32_t m = (n < 0) ? 0x40000000 : 0;
+  uint64_t k = n < 0 ? ~(uint64_t)n+1u : (uint64_t)n;
+  uint32_t m = n < 0 ? 0x40000000 : 0;
   if (k < 0x1000) {
     return A64I_K12|m|A64F_U12(k);
   } else if ((k & 0xfff000) == k) {
@@ -177,7 +177,7 @@ static int emit_kdelta(ASMState *as, Reg rd, uint64_t k, int lim)
 	emit_dm(as, A64I_MOVx, rd, r);
 	return 1;
       } else {
-	uint32_t k12 = emit_isk12(delta < 0 ? -delta : delta);
+	uint32_t k12 = emit_isk12(delta < 0 ? (int64_t)(~(uint64_t)delta+1u) : delta);
 	if (k12) {
 	  emit_dn(as, (delta < 0 ? A64I_SUBx : A64I_ADDx)^k12, rd, r);
 	  return 1;
@@ -417,7 +417,8 @@ static void emit_addptr(ASMState *as, Reg r, int32_t ofs)
 {
   if (ofs)
     emit_opk(as, ofs < 0 ? A64I_SUBx : A64I_ADDx, r, r,
-		 ofs < 0 ? -ofs : ofs, rset_exclude(RSET_GPR, r));
+		 ofs < 0 ? (int32_t)(~(uint32_t)ofs+1u) : ofs,
+		 rset_exclude(RSET_GPR, r));
 }
 
 #define emit_spsub(as, ofs)	emit_addptr(as, RID_SP, -(ofs))

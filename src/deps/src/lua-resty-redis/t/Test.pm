@@ -24,7 +24,7 @@ add_block_preprocessor(sub {
     my $block = shift;
 
     if (!defined $block->http_only) {
-        if ($ENV{TEST_SUBSYSTEM} eq "stream") {
+        if (defined($ENV{TEST_SUBSYSTEM}) && $ENV{TEST_SUBSYSTEM} eq "stream") {
             if (!defined $block->stream_config) {
                 $block->set_value("stream_config", $block->global_config);
             }

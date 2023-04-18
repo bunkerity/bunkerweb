@@ -139,10 +139,16 @@ tests.logPatterns = function()
   end
   test_func()
   assert(last_msg ~= "%source", "expected '%source' placeholder to be replaced, got: " .. tostring(last_msg))
-  assert(last_msg:find("'test_func'", 1, true), "expected function name in output, got: " .. tostring(last_msg))
-  assert(last_msg:find(":138 ", 1, true), "expected line number in output, got: " .. tostring(last_msg)) -- update hardcoded linenumber when this fails!
-  assert(last_msg:find("generic.lua:", 1, true), "expected filename in output, got: " .. tostring(last_msg))
-
+  if debug then
+    assert(last_msg:find("'test_func'", 1, true), "expected function name in output, got: " .. tostring(last_msg))
+    assert(last_msg:find(":138 ", 1, true), "expected line number in output, got: " .. tostring(last_msg)) -- update hardcoded linenumber when this fails!
+    assert(last_msg:find("generic.lua:", 1, true), "expected filename in output, got: " .. tostring(last_msg))
+  else
+    -- debug library disabled
+    assert(last_msg:find("'unknown function'", 1, true), "expected 'unknwon function' in output, got: " .. tostring(last_msg))
+    assert(last_msg:find(":-1 ", 1, true), "expected line number (-1) in output, got: " .. tostring(last_msg)) -- update hardcoded linenumber when this fails!
+    assert(last_msg:find("?:", 1, true), "expected filename ('?') in output, got: " .. tostring(last_msg))
+  end
   -- mutiple separate patterns
   local logger = logging.test {
     logPattern = "%message",
@@ -193,11 +199,13 @@ tests.format_error_stacktrace = function()
   assert(last_msg == 'DEBUG abc-007')
 
   logger:debug("%s=%s", nil)
-  assert(last_msg:find("bad argument #%d to '(.-)'"))
-  assert(last_msg:find("in main chunk"))
-  assert(last_msg:find("in %w+ 'func'"))
-  local _, levels = last_msg:gsub("(|)", function() count = count + 1 end)
-  assert(levels == 3, "got : " .. levels)
+  assert(last_msg:find("bad argument #%d to '(.-)'"), "msg:'"..last_msg.."'")
+  if debug then
+    assert(last_msg:find("in main chunk"), "msg:'"..last_msg.."'")
+    assert(last_msg:find("in %w+ 'func'"), "msg:'"..last_msg.."'")
+    local _, levels = last_msg:gsub("(|)", function() count = count + 1 end)
+    assert(levels == 3, "got : " .. tostring(levels))
+  end
 end
 
 

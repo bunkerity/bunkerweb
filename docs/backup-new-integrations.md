@@ -17,13 +17,13 @@
 	sudo dnf install nginx-1.20.2
 	```
 
-	And finally install BunkerWeb 1.4.6 :
+	And finally install BunkerWeb 1.5.0-beta :
   ```shell
 	wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
   sudo dnf check-update && \
-  sudo dnf install -y bunkerweb-1.4.6
+  sudo dnf install -y bunkerweb-1.5.0-beta
   ```
 
 	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -96,7 +96,7 @@ vagrant ssh
 		python3 -m http.server -b 127.0.0.1
 		```
 
-    Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file.
+    Configuration of BunkerWeb is done by editing the `/opt/bunkerweb/variables.env` file.
 
 	Connect to your vagrant machine :
 	```shell
@@ -159,7 +159,7 @@ vagrant ssh
 	vagrant ssh
 	```
 
-    Configuration of BunkerWeb is done by editing the /etc/bunkerweb/variables.env file :
+    Configuration of BunkerWeb is done by editing the /opt/bunkerweb/variables.env file :
 	```conf
 	SERVER_NAME=app1.example.com app2.example.com app3.example.com
 	HTTP_PORT=80
@@ -190,7 +190,7 @@ vagrant ssh
 
 === "Vagrant"
 
-    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
+    You will need to add the settings to the `/opt/bunkerweb/variables.env` file :
 
 	```conf
 	...
@@ -204,7 +204,7 @@ vagrant ssh
 
 === "Vagrant"
 
-    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
+    You will need to add the settings to the `/opt/bunkerweb/variables.env` file :
 
 	```conf
 	...
@@ -219,7 +219,7 @@ vagrant ssh
 
 === "Vagrant"
 
-    When using the [Vagrant integration](/1.4/integrations/#vagrant), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
+    When using the [Vagrant integration](/1.4/integrations/#vagrant), custom configurations must be written to the `/opt/bunkerweb/configs` folder.
 
     Here is an example for server-http/hello-world.conf :
     ```conf
@@ -233,8 +233,8 @@ vagrant ssh
 
     Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
     ```shell
-    chown -R root:nginx /etc/bunkerweb/configs && \
-    chmod -R 770 /etc/bunkerweb/configs
+    chown -R root:nginx /opt/bunkerweb/configs && \
+    chmod -R 770 /opt/bunkerweb/configs
     ```
 
     Don't forget to restart the BunkerWeb service once it's done.
@@ -243,9 +243,9 @@ vagrant ssh
 
     We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP application. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/var/www/html` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
 	...
 	[www]
@@ -263,14 +263,14 @@ vagrant ssh
 	systemctl restart php8.1-fpm
 	```
 
-	Once your application is copied to the `/var/www/html` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
+	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
 	```shell
-	chown -R www-data:nginx /var/www/html && \
-	find /var/www/html -type f -exec chmod 0640 {} \; && \
-	find /var/www/html -type d -exec chmod 0750 {} \;
+	chown -R www-data:nginx /opt/bunkerweb/www && \
+	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
+	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
 	```
 
-	You can now edit the `/etc/bunkerweb/variable.env` file :
+	You can now edit the `/opt/bunkerweb/variable.env` file :
 	```env
 	HTTP_PORT=80
 	HTTPS_PORT=443
@@ -278,7 +278,7 @@ vagrant ssh
 	SERVER_NAME=www.example.com
 	AUTO_LETS_ENCRYPT=yes
 	LOCAL_PHP=/run/php/php-fpm.sock
-	LOCAL_PHP_PATH=/var/www/html/	
+	LOCAL_PHP_PATH=/opt/bunkerweb/www/	
 	```
 
     Let's check the status of BunkerWeb :
@@ -299,9 +299,9 @@ vagrant ssh
 
 	We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
 
-    By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
+    By default, BunkerWeb will search for web files inside the `/opt/bunkerweb/www` folder. You can use it to store your PHP applications : each application will be in its own subfolder named the same as the primary server name. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
-	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/var/www/html` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
+	First of all, you will need to make sure that your PHP-FPM instance can access the files inside the `/opt/bunkerweb/www` folder and also that BunkerWeb can access the UNIX socket file in order to communicate with PHP-FPM. We recommend to set a different user like `www-data` for the PHP-FPM service and to give the nginx group access to the UNIX socket file. Here is corresponding PHP-FPM configuration :
 	```ini
 	...
 	[www]
@@ -319,14 +319,14 @@ vagrant ssh
 	systemctl restart php8.1-fpm
 	```
 
-	Once your application is copied to the `/var/www/html` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
+	Once your application is copied to the `/opt/bunkerweb/www` folder, you will need to fix the permissions so BunkerWeb (user/group nginx) can at least read files and list folders and PHP-FPM (user/group www-data) is the owner of the files and folders : 
 	```shell
-	chown -R www-data:nginx /var/www/html && \
-	find /var/www/html -type f -exec chmod 0640 {} \; && \
-	find /var/www/html -type d -exec chmod 0750 {} \;
+	chown -R www-data:nginx /opt/bunkerweb/www && \
+	find /opt/bunkerweb/www -type f -exec chmod 0640 {} \; && \
+	find /opt/bunkerweb/www -type d -exec chmod 0750 {} \;
 	```
 
-	You can now edit the `/etc/bunkerweb/variable.env` file :
+	You can now edit the `/opt/bunkerweb/variable.env` file :
 	```env
 	HTTP_PORT=80
 	HTTPS_PORT=443
@@ -335,11 +335,11 @@ vagrant ssh
 	MULTISITE=yes
 	AUTO_LETS_ENCRYPT=yes
 	app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app1.example.com_LOCAL_PHP_PATH=/var/www/html/app1.example.com
+	app1.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app1.example.com
 	app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app2.example.com_LOCAL_PHP_PATH=/var/www/html/app2.example.com
+	app2.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app2.example.com
 	app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-	app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
+	app3.example.com_LOCAL_PHP_PATH=/opt/bunkerweb/www/app3.example.com
 	```
 
     Let's check the status of BunkerWeb :
@@ -360,7 +360,7 @@ vagrant ssh
 
 === "Vagrant"
 
-    When using the [Linux integration](/1.4/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Linux integration](/1.4/integrations/#linux), plugins must be written to the `/opt/bunkerweb/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins
@@ -372,7 +372,7 @@ vagrant ssh
 
     The installation of the web UI using the [Vagrant integration](/1.4/integrations/#vagrant) is pretty straightforward because it is installed with BunkerWeb.
 
-    The first thing to do is to edit the BunkerWeb configuration located at **/etc/bunkerweb/variables.env** to add settings related to the web UI :
+    The first thing to do is to edit the BunkerWeb configuration located at **/opt/bunkerweb/variables.env** to add settings related to the web UI :
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
@@ -401,7 +401,7 @@ vagrant ssh
     systemctl restart bunkerweb
     ```
 
-    You can edit the **/etc/bunkerweb/ui.env** file containing the settings of the web UI :
+    You can edit the **/opt/bunkerweb/ui.env** file containing the settings of the web UI :
     ```conf
     ADMIN_USERNAME=admin
     ADMIN_PASSWORD=changeme
@@ -410,7 +410,7 @@ vagrant ssh
 
     Important things to note :
 
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/etc/bunkerweb/variables.env**)
+    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/opt/bunkerweb/variables.env**)
     * replace the username `admin` and password `changeme` with strong ones
 
     Restart the BunkerWeb UI service and you are now ready to access it :

@@ -10,6 +10,8 @@ from re import sub, search, MULTILINE
 from datetime import datetime
 from subprocess import run
 from logger import log
+from string import ascii_lowercase, digits
+from random import choice
 
 
 class Test(ABC):
@@ -23,12 +25,7 @@ class Test(ABC):
         log(
             "TEST",
             "ℹ️",
-            "instiantiated with "
-            + str(len(tests))
-            + " tests and timeout of "
-            + str(timeout)
-            + "s for "
-            + self._name,
+            f"instiantiated with {len(tests)} tests and timeout of {timeout}s for {self._name}",
         )
 
     # Class method
@@ -41,11 +38,11 @@ class Test(ABC):
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs:
                 if isdir(rm_dir):
-                    run("sudo rm -rf /tmp/bw-data/" + rm_dir, shell=True)
+                    run(f"sudo rm -rf /tmp/bw-data/{rm_dir}", shell=True)
             if not isdir("/tmp/tests"):
                 mkdir("/tmp/tests")
         except:
-            log("TEST", "❌", "exception while running Test.init()\n" + format_exc())
+            log("TEST", "❌", f"exception while running Test.init()\n{format_exc()}")
             return False
         return True
 
@@ -58,7 +55,7 @@ class Test(ABC):
     def _check_domains(self):
         for k, v in self._domains.items():
             if v is None:
-                log("TEST", "⚠️", "env " + k + " is None")
+                log("TEST", "⚠️", f"env {k} is None")
 
     # called before starting the tests
     # must be override if specific actions needs to be done
@@ -66,19 +63,19 @@ class Test(ABC):
         try:
             rm_dirs = ["configs", "plugins", "www"]
             for rm_dir in rm_dirs:
-                if isdir("/tmp/bw-data/" + rm_dir):
+                if isdir(f"/tmp/bw-data/{rm_dir}"):
                     run(
-                        "sudo bash -c 'rm -rf /tmp/bw-data/" + rm_dir + "/*'",
+                        f"sudo bash -c 'rm -rf /tmp/bw-data/{rm_dir}/*'",
                         shell=True,
                     )
-            if isdir("/tmp/tests/" + self._name):
-                run("sudo rm -rf /tmp/tests/" + self._name, shell=True)
-            copytree("./examples/" + self._name, "/tmp/tests/" + self._name)
+            if isdir(f"/tmp/tests/{self._name}"):
+                run(f"sudo rm -rf /tmp/tests/{self._name}", shell=True)
+            copytree(f"./examples/{self._name}/tmp/tests/{self._name}")
         except:
             log(
                 "TEST",
                 "❌",
-                "exception while running Test._setup_test()\n" + format_exc(),
+                f"exception while running Test._setup_test()\n{format_exc()}",
             )
             return False
         return True
@@ -86,12 +83,12 @@ class Test(ABC):
     # called after running the tests
     def _cleanup_test(self):
         try:
-            run("sudo rm -rf /tmp/tests/" + self._name, shell=True)
+            run(f"sudo rm -rf /tmp/tests/{self._name}", shell=True)
         except:
             log(
                 "TEST",
                 "❌",
-                "exception while running Test._cleanup_test()\n" + format_exc(),
+                f"exception while running Test._cleanup_test()\n{format_exc()}",
             )
             return False
         return True
@@ -102,7 +99,7 @@ class Test(ABC):
             self._debug_fail()
             return False
         if self.__delay != 0:
-            log("TEST", "ℹ️", "delay is set, sleeping " + str(self.__delay) + "s")
+            log("TEST", "ℹ️", f"delay is set, sleeping {self.__delay}s")
             sleep(self.__delay)
         start = time()
         while time() < start + self._timeout:
@@ -118,13 +115,13 @@ class Test(ABC):
                 log(
                     "TEST",
                     "ℹ️",
-                    "success (" + elapsed + "/" + str(self._timeout) + "s)",
+                    f"success ({elapsed}/{self._timeout}s)",
                 )
                 return self._cleanup_test()
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
         self._debug_fail()
         self._cleanup_test()
-        log("TEST", "❌", "failed (timeout = " + str(self._timeout) + "s)")
+        log("TEST", "❌", f"failed (timeout = {self._timeout}s)")
         return False
 
     # run a single test
@@ -142,9 +139,8 @@ class Test(ABC):
                 r = get(ex_url, timeout=10, verify=False)
                 return test["status"] == r.status_code
         except:
-            # log("TEST", "❌", "exception while running test of type " + test["type"] + " on URL " + ex_url + "\n" + format_exc())
             return False
-        raise (Exception("unknow test type " + test["type"]))
+        raise (Exception(f"unknown test type {test['type']}"))
 
     # called when tests fail : typical case is to show logs
     def _debug_fail(self):
@@ -158,7 +154,7 @@ class Test(ABC):
             with open(path, "w") as f:
                 f.write(content)
         except:
-            log("TEST", "⚠️", "can't replace file " + path + " : " + format_exc())
+            log("TEST", "⚠️", f"can't replace file {path} : {format_exc()}")
 
     def replace_in_files(path, old, new):
         for root, dirs, files in walk(path):
@@ -172,3 +168,7 @@ class Test(ABC):
                 new_path = sub(old, new, full_path)
                 if full_path != new_path:
                     rename(full_path, new_path)
+
+    def random_string(length):
+        charset = ascii_lowercase + digits
+        return "".join(choice(charset) for i in range(length))

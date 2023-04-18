@@ -1,6 +1,24 @@
-v3.x.y - YYYY-MMM-DD (to be released)
--------------------------------------
+v3.0.9 - 2023-Apr-12
+--------------------
 
+  - Fix: possible segfault on reload if duplicate ip+CIDR in ip match list
+    [Issue #2877, #2890 - @tomsommer, @martinhsv]
+  - Add some member variable inits in Transaction class (possible segfault)
+    [Issue #2886 - @GNU-Plus-Windows-User, @airween, @mdounin, @martinhsv]
+  - Resolve memory leak on reload (bison-generated variable)
+    [Issue #2876 - @martinhsv]
+  - Support equals sign in XPath expressions
+    [Issue #2328 - @dennus, @martinhsv]
+  - Encode two special chars in error.log output
+    [Issue #2854 - @airween, @martinhsv]
+  - Add JIT support for PCRE2
+    [Issue #2791 - @wfjsw, @airween, @FireBurn, @martinhsv]
+  - Support comments in ipMatchFromFile file via '#' token
+    [Issue #2554 - @tomsommer, @martinhsv]
+  - Use name package name libmaxminddb with pkg-config
+    [Issue #2595, #2596 - @frankvanbever, @ffontaine, @arnout]
+  - Fix: FILES_TMP_CONTENT collection key should use part name
+    [Issue #2831 - @airween]
   - Use AS_HELP_STRING instead of obsolete AC_HELP_STRING macro
     [Issue #2806 - @hughmcmaster]
   - During configure, do not check for pcre if pcre2 specified

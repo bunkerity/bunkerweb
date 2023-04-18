@@ -5,7 +5,7 @@
 -- @author Andre Carregal (info@keplerproject.org)
 -- @author Thiago Costa Ponte (thiago@ideais.com.br)
 --
--- @copyright 2004-2022 Kepler Project
+-- @copyright 2004-2010 Kepler Project, 2011-2013 Neopallium, 2020-2023 Thijs Schreijer
 -------------------------------------------------------------------------------
 
 local type, table, string, _tostring, tonumber = type, table, string, tostring, tonumber
@@ -18,9 +18,9 @@ local ipairs = ipairs
 
 local logging = {
   -- Meta information
-  _COPYRIGHT = "Copyright (C) 2004-2022 Kepler Project",
+  _COPYRIGHT = "Copyright (C) 2004-2010 Kepler Project, 2011-2013 Neopallium, 2020-2023 Thijs Schreijer",
   _DESCRIPTION = "A simple API to use logging features in Lua",
-  _VERSION = "LuaLogging 1.8.0",
+  _VERSION = "LuaLogging 1.8.2",
 }
 
 local LEVELS = { "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
@@ -39,7 +39,7 @@ local defaultLogger = nil
 local function rewrite_stacktrace()
   -- prettify stack-trace, remove lualogging entries and reformat to 1 line
   local result = ''
-  local trace = debug.traceback()
+  local trace = debug and debug.traceback() or ''
   for entry in trace:gmatch("%s*(.-)\n") do
     if entry:match("%:%d+%:") and not entry:find('logging.lua') then
       result = result .. ' | ' .. entry
@@ -179,7 +179,7 @@ end
 -- Prepares the log message
 -------------------------------------------------------------------------------
 local sourceDebugLevel = 1 -- this will be set dynamically below
-local getDebugInfoLine = "local info = debug.getinfo(%d)"
+local getDebugInfoLine = debug and "local info = debug.getinfo(%d)" or "local info = { short_src = '?', currentline = -1 }"
 
 function logging.compilePattern(pattern)
   pattern = string.format("%q", pattern)
@@ -193,7 +193,7 @@ function logging.compilePattern(pattern)
     ["message"] = false,
     -- truthy: requires debug info to be fetched first
     ["file"] = "info.short_src",
-    ["line"] = "info.currentline",
+    ["line"] = "tostring(info.currentline)",
     ["function"] = '(info.name or "unknown function")',
   }
   local inject_info = false
@@ -431,7 +431,7 @@ end
 -------------------------------------------------------------------------------
 -- dynamically detect proper source debug level, since this can vary by Lua versions
 -------------------------------------------------------------------------------
-do
+if debug then
   local detection_logger, test_msg
 
   local function detect_func() detection_logger:debug("message") end -- This function MUST be on a single line!!

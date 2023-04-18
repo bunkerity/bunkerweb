@@ -897,6 +897,7 @@ namespace yy {
       // "RUN_TIME_VAR_TIME_YEAR"
       // "VARIABLE"
       // "Dictionary element"
+      // "Dictionary element, with equals"
       // "Dictionary element, selected by regexp"
       char dummy1[sizeof (std::string)];
 
@@ -1314,7 +1315,8 @@ namespace yy {
     TOK_RUN_TIME_VAR_TIME_YEAR = 596, // "RUN_TIME_VAR_TIME_YEAR"
     TOK_VARIABLE = 597,            // "VARIABLE"
     TOK_DICT_ELEMENT = 598,        // "Dictionary element"
-    TOK_DICT_ELEMENT_REGEXP = 599  // "Dictionary element, selected by regexp"
+    TOK_DICT_ELEMENT_WITH_EQUALS = 599, // "Dictionary element, with equals"
+    TOK_DICT_ELEMENT_REGEXP = 600  // "Dictionary element, selected by regexp"
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -1331,7 +1333,7 @@ namespace yy {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 345, ///< Number of tokens.
+        YYNTOKENS = 346, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -1677,23 +1679,24 @@ namespace yy {
         S_RUN_TIME_VAR_TIME_YEAR = 341,          // "RUN_TIME_VAR_TIME_YEAR"
         S_VARIABLE = 342,                        // "VARIABLE"
         S_DICT_ELEMENT = 343,                    // "Dictionary element"
-        S_DICT_ELEMENT_REGEXP = 344,             // "Dictionary element, selected by regexp"
-        S_YYACCEPT = 345,                        // $accept
-        S_input = 346,                           // input
-        S_line = 347,                            // line
-        S_audit_log = 348,                       // audit_log
-        S_actions = 349,                         // actions
-        S_actions_may_quoted = 350,              // actions_may_quoted
-        S_op = 351,                              // op
-        S_op_before_init = 352,                  // op_before_init
-        S_expression = 353,                      // expression
-        S_variables = 354,                       // variables
-        S_variables_pre_process = 355,           // variables_pre_process
-        S_variables_may_be_quoted = 356,         // variables_may_be_quoted
-        S_var = 357,                             // var
-        S_act = 358,                             // act
-        S_setvar_action = 359,                   // setvar_action
-        S_run_time_string = 360                  // run_time_string
+        S_DICT_ELEMENT_WITH_EQUALS = 344,        // "Dictionary element, with equals"
+        S_DICT_ELEMENT_REGEXP = 345,             // "Dictionary element, selected by regexp"
+        S_YYACCEPT = 346,                        // $accept
+        S_input = 347,                           // input
+        S_line = 348,                            // line
+        S_audit_log = 349,                       // audit_log
+        S_actions = 350,                         // actions
+        S_actions_may_quoted = 351,              // actions_may_quoted
+        S_op = 352,                              // op
+        S_op_before_init = 353,                  // op_before_init
+        S_expression = 354,                      // expression
+        S_variables = 355,                       // variables
+        S_variables_pre_process = 356,           // variables_pre_process
+        S_variables_may_be_quoted = 357,         // variables_may_be_quoted
+        S_var = 358,                             // var
+        S_act = 359,                             // act
+        S_setvar_action = 360,                   // setvar_action
+        S_run_time_string = 361                  // run_time_string
       };
     };
 
@@ -1927,6 +1930,7 @@ namespace yy {
       case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
       case symbol_kind::S_VARIABLE: // "VARIABLE"
       case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_WITH_EQUALS: // "Dictionary element, with equals"
       case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.move< std::string > (std::move (that.value));
         break;
@@ -2300,6 +2304,7 @@ switch (yykind)
       case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
       case symbol_kind::S_VARIABLE: // "VARIABLE"
       case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_WITH_EQUALS: // "Dictionary element, with equals"
       case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.template destroy< std::string > ();
         break;
@@ -7651,6 +7656,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_DICT_ELEMENT_WITH_EQUALS (std::string v, location_type l)
+      {
+        return symbol_type (token::TOK_DICT_ELEMENT_WITH_EQUALS, std::move (v), std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_DICT_ELEMENT_WITH_EQUALS (const std::string& v, const location_type& l)
+      {
+        return symbol_type (token::TOK_DICT_ELEMENT_WITH_EQUALS, v, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_DICT_ELEMENT_REGEXP (std::string v, location_type l)
       {
         return symbol_type (token::TOK_DICT_ELEMENT_REGEXP, std::move (v), std::move (l));
@@ -7993,7 +8013,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3344,     ///< Last index in yytable_.
+      yylast_ = 3346,     ///< Last index in yytable_.
       yynnts_ = 16,  ///< Number of nonterminal symbols.
       yyfinal_ = 339 ///< Termination state number.
     };
@@ -8073,10 +8093,11 @@ switch (yykind)
      305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
      315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
      325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
-     335,   336,   337,   338,   339,   340,   341,   342,   343,   344
+     335,   336,   337,   338,   339,   340,   341,   342,   343,   344,
+     345
     };
     // Last valid token kind.
-    const int code_max = 599;
+    const int code_max = 600;
 
     if (t <= 0)
       return symbol_kind::S_YYEOF;
@@ -8292,6 +8313,7 @@ switch (yykind)
       case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
       case symbol_kind::S_VARIABLE: // "VARIABLE"
       case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_WITH_EQUALS: // "Dictionary element, with equals"
       case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.copy< std::string > (YY_MOVE (that.value));
         break;
@@ -8551,6 +8573,7 @@ switch (yykind)
       case symbol_kind::S_RUN_TIME_VAR_TIME_YEAR: // "RUN_TIME_VAR_TIME_YEAR"
       case symbol_kind::S_VARIABLE: // "VARIABLE"
       case symbol_kind::S_DICT_ELEMENT: // "Dictionary element"
+      case symbol_kind::S_DICT_ELEMENT_WITH_EQUALS: // "Dictionary element, with equals"
       case symbol_kind::S_DICT_ELEMENT_REGEXP: // "Dictionary element, selected by regexp"
         value.move< std::string > (YY_MOVE (s.value));
         break;
@@ -8646,7 +8669,7 @@ switch (yykind)
   }
 
 } // yy
-#line 8650 "seclang-parser.hh"
+#line 8673 "seclang-parser.hh"
 
 
 

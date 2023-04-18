@@ -123,6 +123,26 @@ do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lbase64/base64.lua /usr/share/bun
 echo "ℹ️ Installing lua-resty-env"
 do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lua-resty-env/src/resty/env.lua /usr/share/bunkerweb/deps/lib/lua/resty
 
+# Installing lua-resty-mlcache
+echo "ℹ️ Installing lua-resty-mlcache"
+do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lua-resty-mlcache/lib/resty/* /usr/share/bunkerweb/deps/lib/lua/resty
+
+# Installing lua-resty-template
+echo "ℹ️ Installing lua-resty-template"
+do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lua-resty-template/lib/resty/* /usr/share/bunkerweb/deps/lib/lua/resty
+
+# Installing lua-resty-lock
+echo "ℹ️ Installing lua-resty-lock"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-lock" do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
+
+# Installing lua-pack
+echo "ℹ️ Installing lua-pack"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-pack" do_and_check_cmd make INST_LIBDIR=/usr/share/bunkerweb/deps/lib/lua LUA_LIBDIR=-L/usr/share/bunkerweb/deps/lib LUA_INCDIR=-I/usr/share/bunkerweb/deps/include install
+
+# Installing lua-resty-openssl
+echo "ℹ️ Installing lua-resty-openssl"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-openssl" do_and_check_cmd make LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
+
 # Compile dynamic modules
 echo "ℹ️ Compiling and installing dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"

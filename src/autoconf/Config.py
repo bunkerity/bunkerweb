@@ -54,14 +54,19 @@ class Config(ConfigCaller):
         custom_configs = []
         for config_type in self.__configs:
             for file, data in self.__configs[config_type].items():
-                exploded = file.split("/")
+                site = None
+                name = file
+                if "/" in file:
+                    exploded = file.split("/")
+                    site = exploded[0]
+                    name = exploded[1]
                 custom_configs.append(
                     {
                         "value": data,
                         "exploded": [
-                            exploded[0],
+                            site,
                             config_type,
-                            exploded[1].replace(".conf", ""),
+                            name.replace(".conf", ""),
                         ],
                     }
                 )

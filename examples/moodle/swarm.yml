@@ -32,7 +32,7 @@ services:
   mydb:
     image: mariadb:10.5
     volumes:
-      - db_data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     networks:
       - bw-services
     environment:

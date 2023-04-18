@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -34,6 +34,7 @@ Driver::Driver()
 
 
 Driver::~Driver() {
+
     while (loc.empty() == false) {
         yy::location *a = loc.back();
         loc.pop_back();
@@ -129,9 +130,11 @@ int Driver::parse(const std::string &f, const std::string &ref) {
     m_lastRule = nullptr;
     loc.push_back(new yy::location());
     if (ref.empty()) {
-        loc.back()->begin.filename = loc.back()->end.filename = new std::string("<<reference missing or not informed>>");
+        m_filenames.push_back("<<reference missing or not informed>>");
+        loc.back()->begin.filename = loc.back()->end.filename = &(m_filenames.back());
     } else {
-        loc.back()->begin.filename = loc.back()->end.filename = new std::string(ref);
+        m_filenames.push_back(ref);
+        loc.back()->begin.filename = loc.back()->end.filename = &(m_filenames.back());
     }
 
     if (f.empty()) {

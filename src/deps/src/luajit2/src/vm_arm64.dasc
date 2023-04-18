@@ -2636,7 +2636,9 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.macro ins_arithmod, res, reg1, reg2
     |  fdiv d2, reg1, reg2
     |  frintm d2, d2
-    |  fmsub res, d2, reg2, reg1
+    |  // Cannot use fmsub, because FMA is not enabled by default.
+    |  fmul d2, d2, reg2
+    |  fsub res, reg1, d2
     |.endmacro
     |
     |.macro ins_arithdn, intins, fpins

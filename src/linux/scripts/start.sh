@@ -16,7 +16,7 @@ function display_help() {
 }
 
 function stop_nginx() {
-    pgrep nginx
+    pgrep nginx > /dev/null 2>&1
     if [ $? -eq 0 ] ; then
         log "SYSTEMCTL" "ℹ️ " "Stopping nginx..."
         nginx -s stop
@@ -26,7 +26,7 @@ function stop_nginx() {
     fi
     count=0
     while [ 1 ] ; do
-        pgrep nginx
+        pgrep nginx > /dev/null 2>&1
         if [ $? -ne 0 ] ; then
             break
         fi
@@ -80,8 +80,11 @@ function start() {
 
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb service ..."
 
-    # Setup and check /data folder
-    /usr/share/bunkerweb/helpers/data.sh "SYSTEMCTL"
+    # Create dummy variables.env
+    if [ ! -f /etc/bunkerweb/variables.env ]; then
+        echo -ne "# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n" > /etc/bunkerweb/variables.env
+        log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
+    fi
 
     # Stop scheduler if it's running
     stop_scheduler
@@ -90,9 +93,15 @@ function start() {
     stop_nginx
 
     # Generate temp conf for jobs and start nginx
-    if [ ! -f /var/tmp/bunkerweb/tmp.env ] ; then
-        echo -ne "IS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n" > /var/tmp/bunkerweb/tmp.env
+    HTTP_PORT="$(grep "^HTTP_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$HTTP_PORT" = "" ] ; then
+        HTTP_PORT="8080"
     fi
+    HTTPS_PORT="$(grep "^HTTPS_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$HTTPS_PORT" = "" ] ; then
+        HTTPS_PORT="8443"
+    fi
+    echo -ne "IS_LOADING=yes\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n" > /var/tmp/bunkerweb/tmp.env
     /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
@@ -100,10 +109,10 @@ function start() {
     fi
 
     # Start nginx
-    log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
+    log "SYSTEMCTL" "ℹ️" "Starting temp nginx ..."
     nginx
     if [ $? -ne 0 ] ; then
-        log "SYSTEMCTL" "❌" "Error while executing nginx"
+        log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
     fi
     count=0
@@ -121,11 +130,6 @@ function start() {
         exit 1
     fi
     log "SYSTEMCTL" "ℹ️" "nginx started ..."
-
-    # Create dummy variables.env
-    if [ ! -f /etc/bunkerweb/variables.env ]; then
-        echo -ne "# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n" > /etc/bunkerweb/variables.env
-    fi
 
     # Update database
     log "SYSTEMCTL" "ℹ️" "Updating database ..."

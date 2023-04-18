@@ -28,22 +28,25 @@ ngx_stream_lua_ffi_worker_pid(void)
 }
 
 
+#if !(NGX_WIN32)
 int
 ngx_stream_lua_ffi_worker_pids(int *pids, size_t *pids_len)
 {
-    ngx_int_t i, n;
+    size_t    n;
+    ngx_int_t i;
 
     n = 0;
-    for (i = 0; i < NGX_MAX_PROCESSES; i++) {
+    for (i = 0; n < *pids_len && i < NGX_MAX_PROCESSES; i++) {
         if (i != ngx_process_slot && ngx_processes[i].pid == 0) {
             break;
         }
 
-        if (i == ngx_process_slot && ngx_processes[i].pid == 0) {
+        /* The current process */
+        if (i == ngx_process_slot) {
             pids[n++] = ngx_pid;
         }
 
-        if (ngx_processes[i].pid > 0) {
+        if (ngx_processes[i].channel[0] > 0 && ngx_processes[i].pid > 0) {
             pids[n++] = ngx_processes[i].pid;
         }
     }
@@ -56,6 +59,7 @@ ngx_stream_lua_ffi_worker_pids(int *pids, size_t *pids_len)
 
     return NGX_OK;
 }
+#endif
 
 
 int

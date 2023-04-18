@@ -1,6 +1,8 @@
 local ngx_re_gmatch = ngx.re.gmatch
 local ngx_re_sub = ngx.re.sub
 local ngx_re_find = ngx.re.find
+local ngx_log = ngx.log
+local ngx_WARN = ngx.WARN
 
 --[[
 A connection function that incorporates:
@@ -22,10 +24,16 @@ client:connect {
     backlog = nil,
 
     -- ssl options as per: https://github.com/openresty/lua-nginx-module#tcpsocksslhandshake
+    ssl_reused_session = nil
     ssl_server_name = nil,
     ssl_send_status_req = nil,
     ssl_verify = true,      -- NOTE: defaults to true
     ctx = nil,              -- NOTE: not supported
+
+    -- mTLS options: These require support for mTLS in cosockets, which first
+    -- appeared in `ngx_http_lua_module` v0.10.23.
+    ssl_client_cert = nil,
+    ssl_client_priv_key = nil,
 
     proxy_opts,             -- proxy opts, defaults to global proxy options
 }
@@ -53,15 +61,19 @@ local function connect(self, options)
     end
 
     -- ssl settings
-    local ssl, ssl_server_name, ssl_verify, ssl_send_status_req
+    local ssl, ssl_reused_session, ssl_server_name
+    local ssl_verify, ssl_send_status_req, ssl_client_cert, ssl_client_priv_key
     if request_scheme == "https" then
         ssl = true
+        ssl_reused_session = options.ssl_reused_session
         ssl_server_name = options.ssl_server_name
         ssl_send_status_req = options.ssl_send_status_req
         ssl_verify = true -- default
         if options.ssl_verify == false then
             ssl_verify = false
         end
+        ssl_client_cert = options.ssl_client_cert
+        ssl_client_priv_key = options.ssl_client_priv_key
     end
 
     -- proxy related settings
@@ -133,9 +145,10 @@ local function connect(self, options)
     end
 
     if proxy then
-        local proxy_uri_t, err = self:parse_uri(proxy_uri)
+        local proxy_uri_t
+        proxy_uri_t, err = self:parse_uri(proxy_uri)
         if not proxy_uri_t then
-            return nil, err
+            return nil, "uri parse error: ", err
         end
 
         local proxy_scheme = proxy_uri_t[1]
@@ -169,7 +182,9 @@ local function connect(self, options)
         -- proxy based connection
         ok, err = sock:connect(proxy_host, proxy_port, tcp_opts)
         if not ok then
-            return nil, err
+            return nil, "failed to connect to: " .. (proxy_host or "") ..
+                        ":" .. (proxy_port or "") ..
+                        ": ", err
         end
 
         if ssl and sock:getreusedtimes() == 0 then
@@ -178,7 +193,8 @@ local function connect(self, options)
             -- authority-form of RFC 7230 Section 5.3.3. See also RFC 7231 Section
             -- 4.3.6 for more details about the CONNECT request
             local destination = request_host .. ":" .. request_port
-            local res, err = self:request({
+            local res
+            res, err = self:request({
                 method = "CONNECT",
                 path = destination,
                 headers = {
@@ -188,7 +204,7 @@ local function connect(self, options)
             })
 
             if not res then
-                return nil, err
+                return nil, "failed to issue CONNECT to proxy:", err
             end
 
             if res.status < 200 or res.status > 299 then
@@ -211,10 +227,25 @@ local function connect(self, options)
         end
     end
 
+    local ssl_session
     -- Now do the ssl handshake
     if ssl and sock:getreusedtimes() == 0 then
-        local ok, err = sock:sslhandshake(nil, ssl_server_name, ssl_verify, ssl_send_status_req)
-        if not ok then
+
+        -- Experimental mTLS support
+        if ssl_client_cert and ssl_client_priv_key then
+          if type(sock.setclientcert) ~= "function" then
+            ngx_log(ngx_WARN, "cannot use SSL client cert and key without mTLS support")
+
+          else
+            ok, err = sock:setclientcert(ssl_client_cert, ssl_client_priv_key)
+            if not ok then
+              ngx_log(ngx_WARN, "could not set client certificate: ", err)
+            end
+          end
+        end
+
+        ssl_session, err = sock:sslhandshake(ssl_reused_session, ssl_server_name, ssl_verify, ssl_send_status_req)
+        if not ssl_session then
             self:close()
             return nil, err
         end
@@ -228,7 +259,7 @@ local function connect(self, options)
     self.http_proxy_auth = request_scheme ~= "https" and proxy_authorization or nil
     self.path_prefix = path_prefix
 
-    return true
+    return true, nil, ssl_session
 end
 
 return connect

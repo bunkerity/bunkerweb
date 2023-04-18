@@ -20,6 +20,7 @@ local get_string_buf = base.get_string_buf
 local get_size_ptr = base.get_size_ptr
 local setmetatable = setmetatable
 local lower = string.lower
+local find = string.find
 local rawget = rawget
 local ngx = ngx
 local get_request = base.get_request
@@ -114,7 +115,12 @@ local truncated = ffi.new("int[1]")
 
 local req_headers_mt = {
     __index = function (tb, key)
-        return rawget(tb, (str_replace_char(lower(key), '_', '-')))
+        key = lower(key)
+        local value = rawget(tb, key)
+        if value == nil and find(key, '_', 1, true) then
+            value = rawget(tb, (str_replace_char(key, '_', '-')))
+        end
+        return value
     end
 }
 

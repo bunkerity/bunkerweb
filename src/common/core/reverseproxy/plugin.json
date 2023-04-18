@@ -39,7 +39,7 @@
       "help": "Location URL that will be proxied.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
-      "regex": "^(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)?$",
+      "regex": "^.*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },

@@ -20,7 +20,7 @@ resource "scaleway_k8s_cluster" "cluster" {
 resource "scaleway_k8s_pool" "pool" {
   cluster_id = scaleway_k8s_cluster.cluster.id
   name = "bw_k8s"
-  node_type = "DEV1-M"
+  node_type = "DEV1-L"
   size = 3
   wait_for_pool_ready = true
 }

@@ -35,10 +35,10 @@
     "ALLOWED_METHODS": {
       "context": "multisite",
       "default": "GET|POST|HEAD",
-      "help": "Allowed HTTP methods, separated with pipes to be sent by clients.",
+      "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
       "id": "allowed-methods",
       "label": "Allowed methods",
-      "regex": "^(?!\\|)(\\|?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
+      "regex": "^(?!\\|)(\\|?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH|COPY|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|UNLOCK)(?!.*\\2))+$",
       "type": "text"
     },
     "MAX_CLIENT_SIZE": {
@@ -165,6 +165,12 @@
       "name": "default-server-cert",
       "file": "default-server-cert.py",
       "every": "once",
+      "reload": false
+    },
+    {
+      "name": "update-check",
+      "file": "update-check.py",
+      "every": "day",
       "reload": false
     }
   ]

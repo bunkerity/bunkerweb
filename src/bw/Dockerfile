@@ -1,4 +1,4 @@
-FROM nginx:1.22.1-alpine AS builder
+FROM nginx:1.24.0-alpine AS builder
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
@@ -21,7 +21,7 @@ RUN apk add --no-cache --virtual .build-deps py3-pip && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del .build-deps
 
-FROM nginx:1.22.1-alpine
+FROM nginx:1.24.0-alpine
 
 # Copy dependencies
 COPY --from=builder /usr/share/bunkerweb /usr/share/bunkerweb
@@ -42,6 +42,7 @@ COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/common/settings.json /usr/share/bunkerweb/settings.json
 COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
+COPY misc/*.ascii /usr/share/bunkerweb
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache pcre bash python3 && \
@@ -74,7 +75,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-RUN apk add "curl>=7.83.1-r6" "libcrypto1.1>=1.1.1t-r1" "libcurl>=7.83.1-r6" "libssl1.1>=1.1.1t-r1"
+RUN apk add "curl>=7.83.1-r6" "libcrypto1.1>=1.1.1t-r1" "libcurl>=7.83.1-r6" "libssl1.1>=1.1.1t-r1" "libcrypto3>=3.0.8-r2" "libssl3>=3.0.8-r2"
 
 VOLUME /data /etc/nginx
 

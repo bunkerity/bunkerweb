@@ -5,7 +5,7 @@
 --
 -- @author Tiago Cesar Katcipis (tiagokatcipis@gmail.com)
 --
--- @copyright 2004-2022 Kepler Project
+-- @copyright 2004-2010 Kepler Project, 2011-2013 Neopallium, 2020-2023 Thijs Schreijer
 ---------------------------------------------------------------------------
 
 local logging = require"logging"
@@ -37,7 +37,7 @@ end
 local rollOver = function (self)
   for i = self.maxIndex - 1, 1, -1 do
     -- files may not exist yet, lets ignore the possible errors.
-    os.rename(self.filename.."."..i, self.filename.."."..i+1)
+    os.rename(self.filename.."."..tostring(i), self.filename.."."..tostring(i+1))
   end
 
   self.file:close()

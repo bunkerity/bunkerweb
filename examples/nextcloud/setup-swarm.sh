@@ -11,5 +11,5 @@ docker config rm cfg_nextcloud_modsec
 docker config rm cfg_nextcloud_modsec_crs
 
 # create configs
-docker config create -l bunkerweb.CONFIG_TYPE=modsec cfg_nextcloud_modsec -l bunkerweb.CONFIG_SITE=www.example.com ./bw-data/configs/modsec/nextcloud.conf
-docker config create -l bunkerweb.CONFIG_TYPE=modsec-crs cfg_nextcloud_modsec_crs -l bunkerweb.CONFIG_SITE=www.example.com ./bw-data/configs/modsec-crs/nextcloud.conf
+docker config create -l bunkerweb.CONFIG_TYPE=modsec -l bunkerweb.CONFIG_SITE=www.example.com cfg_nextcloud_modsec ./bw-data/configs/modsec/nextcloud.conf
+docker config create -l bunkerweb.CONFIG_TYPE=modsec-crs -l bunkerweb.CONFIG_SITE=www.example.com cfg_nextcloud_modsec_crs ./bw-data/configs/modsec-crs/nextcloud.conf

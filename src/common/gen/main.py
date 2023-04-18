@@ -71,9 +71,7 @@ if __name__ == "__main__":
             help="path to the file containing environment variables",
         )
         parser.add_argument(
-            "--no-linux-reload",
-            action="store_true",
-            help="disable linux reload"
+            "--no-linux-reload", action="store_true", help="disable linux reload"
         )
         args = parser.parse_args()
 

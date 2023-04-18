@@ -5,11 +5,12 @@ services:
     image: bunkerity/bunkerweb:1.5.0-beta
     pull_policy: never
     ports:
-      - 80:8080
+      - 80:80
       - 443:8443
     environment:
       SERVER_NAME: "www.example.com"
       MULTISITE: "yes"
+      HTTP_PORT: "80"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
@@ -23,8 +24,8 @@ services:
       www.example.com_REVERSE_PROXY_URL: "/admin/"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
       www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
-      www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
       www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
+      CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
     labels:
       - "bunkerweb.INSTANCE"
     networks:
@@ -52,7 +53,7 @@ services:
       - bw
       - bw-docker-proxy
     environment:
-      ABSOLUTE_URI: "http://www.example.com:8080/admin/"
+      ABSOLUTE_URI: "http://www.example.com/admin/"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "admin"
       DOCKER_HOST: "tcp://bw-docker-proxy:2375"
@@ -72,7 +73,7 @@ services:
       - bw-docker
 
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       bw-services:
         ipv4_address: 192.168.0.4

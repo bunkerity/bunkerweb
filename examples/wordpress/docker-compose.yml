@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - 80:8080
       - 443:8443
@@ -25,7 +25,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     depends_on:
       - mybunker
     environment:
@@ -51,9 +51,9 @@ services:
       - wp-data:/var/www/html
     environment:
       - WORDPRESS_DB_HOST=mydb
-      - WORDPRESS_DB_NAME=${WORDPRESS_DATABASE:-wp}
-      - WORDPRESS_DB_USER=${WORDPRESS_USER:-user}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_PASSWORD:-secret} # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+      - WORDPRESS_DB_NAME=wp
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=db-user-pwd # set a stronger password in a .env file (must match MYSQL_PASSWORD)
       - WORDPRESS_TABLE_PREFIX=prefix_ # best practice : replace with a random prefix
     networks:
       - bw-services

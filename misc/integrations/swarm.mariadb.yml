@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - published: 80
         target: 8080
@@ -32,7 +32,7 @@ services:
         - "bunkerweb.INSTANCE"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.0
+    image: bunkerity/bunkerweb-autoconf:1.5.0-beta
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -40,6 +40,10 @@ services:
     networks:
       - bw-universe
       - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
   bw-docker:
     image: tecnativa/docker-socket-proxy
@@ -59,7 +63,7 @@ services:
           - "node.role == manager"
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -67,6 +71,10 @@ services:
     networks:
       - bw-universe
       - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
   bw-db:
     image: mariadb:10.10
@@ -79,11 +87,19 @@ services:
       - bw-data:/var/lib/mysql
     networks:
       - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
   bw-redis:
     image: redis:7-alpine
     networks:
       - bw-universe
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
 volumes:
   bw-data:

@@ -8,6 +8,7 @@ from time import sleep
 from logger import log
 from yaml import safe_load, dump
 
+
 class AutoconfTest(Test):
     def __init__(self, name, timeout, tests, no_copy_container=False, delay=0):
         super().__init__(
@@ -19,11 +20,11 @@ class AutoconfTest(Test):
             delay=delay,
         )
         self._domains = {
-            r"www\.example\.com": getenv("TEST_DOMAIN1"),
-            r"auth\.example\.com": getenv("TEST_DOMAIN1"),
-            r"app1\.example\.com": getenv("TEST_DOMAIN1_1"),
-            r"app2\.example\.com": getenv("TEST_DOMAIN1_2"),
-            r"app3\.example\.com": getenv("TEST_DOMAIN1_3"),
+            r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
+            r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
+            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
+            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
+            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
         }
         self._check_domains()
 
@@ -56,10 +57,20 @@ class AutoconfTest(Test):
                 "local/scheduler-tests:latest",
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
-            with open(compose, "r") as f :
+            with open(compose, "r") as f:
                 data = safe_load(f.read())
-            data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:var/www/html"]
-            with open(compose, "w") as f :
+            data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:/var/www/html"]
+            if (
+                not "AUTO_LETS_ENCRYPT=yes"
+                in data["services"]["bunkerweb"]["environment"]
+            ):
+                data["services"]["bunkerweb"]["environment"].append(
+                    "AUTO_LETS_ENCRYPT=yes"
+                )
+            data["services"]["bunkerweb"]["environment"].append(
+                "USE_LETS_ENCRYPT_STAGING=yes"
+            )
+            with open(compose, "w") as f:
                 f.write(dump(data))
             proc = run(
                 "docker-compose pull --ignore-pull-failures",
@@ -93,7 +104,7 @@ class AutoconfTest(Test):
             log(
                 "AUTOCONF",
                 "❌",
-                "exception while running AutoconfTest.init()\n" + format_exc(),
+                f"exception while running AutoconfTest.init()\n{format_exc()}",
             )
             return False
         return True
@@ -111,7 +122,7 @@ class AutoconfTest(Test):
             log(
                 "AUTOCONF",
                 "❌",
-                "exception while running AutoconfTest.end()\n" + format_exc(),
+                f"exception while running AutoconfTest.end()\n{format_exc()}",
             )
             return False
         return ret
@@ -119,10 +130,10 @@ class AutoconfTest(Test):
     def _setup_test(self):
         try:
             super()._setup_test()
-            test = "/tmp/tests/" + self._name
-            compose = "/tmp/tests/" + self._name + "/autoconf.yml"
-            example_data = "/tmp/tests/" + self._name + "/bw-data"
-            example_www = "/tmp/tests/" + self._name + "/www"
+            test = f"/tmp/tests/{self._name}"
+            compose = f"/tmp/tests/{self._name}/autoconf.yml"
+            example_data = f"/tmp/tests/{self._name}/bw-data"
+            example_www = f"/tmp/tests/{self._name}/www"
             Test.replace_in_file(
                 compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest"
             )
@@ -138,25 +149,26 @@ class AutoconfTest(Test):
             )
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
+            Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
             Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
-            setup = test + "/setup-autoconf.sh"
+            setup = f"{test}/setup-autoconf.sh"
             if isfile(setup):
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)
                 if proc.returncode != 0:
                     raise (Exception("setup-autoconf failed"))
             if isdir(example_data) and not self._no_copy_container:
                 proc = run(
-                    "sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'",
+                    f"sudo bash -c 'cp -rp {example_data}/* /tmp/bw-data'",
                     shell=True,
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
-            if isdir(example_www) :
+            if isdir(example_www):
                 proc = run(
-                    "sudo bash -c 'cp -rp " + example_www + "/* /tmp/www'",
+                    f"sudo bash -c 'cp -rp {example_www}/* /tmp/www'",
                     shell=True,
                 )
                 if proc.returncode != 0:
@@ -175,7 +187,7 @@ class AutoconfTest(Test):
             log(
                 "AUTOCONF",
                 "❌",
-                "exception while running AutoconfTest._setup_test()\n" + format_exc(),
+                f"exception while running AutoconfTest._setup_test()\n{format_exc()}",
             )
             self._cleanup_test()
             return False
@@ -183,7 +195,7 @@ class AutoconfTest(Test):
 
     def _cleanup_test(self):
         try:
-            test = "/tmp/tests/" + self._name
+            test = f"/tmp/tests/{self._name}"
             proc = run("docker-compose -f autoconf.yml down -v", shell=True, cwd=test)
             if proc.returncode != 0:
                 raise (Exception("docker-compose down failed"))
@@ -198,7 +210,7 @@ class AutoconfTest(Test):
             log(
                 "AUTOCONF",
                 "❌",
-                "exception while running AutoconfTest._cleanup_test()\n" + format_exc(),
+                f"exception while running AutoconfTest._cleanup_test()\n{format_exc()}",
             )
             return False
         return True
@@ -206,5 +218,5 @@ class AutoconfTest(Test):
     def _debug_fail(self):
         autoconf = "/tmp/autoconf"
         proc = run("docker-compose logs", shell=True, cwd=autoconf)
-        test = "/tmp/tests/" + self._name
+        test = f"/tmp/tests/{self._name}"
         proc = run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)
