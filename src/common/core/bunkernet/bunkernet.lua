@@ -27,7 +27,7 @@ function bunkernet:init()
 	if init_needed == nil then
 		return self:ret(false, "can't check USE_BUNKERNET variable : " .. err)
 	end
-	if not init_needed then
+	if not init_needed or self.is_loading then
 		return self:ret(true, "no service uses bunkernet, skipping init")
 	end
 

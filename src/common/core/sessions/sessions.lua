@@ -11,6 +11,9 @@ function sessions:initialize()
 end
 
 function sessions:init()
+    if self.is_loading then
+        return self:ret(true, "init not needed")
+    end
     -- Get redis vars
     local redis_vars = {
         ["USE_REDIS"] = "",

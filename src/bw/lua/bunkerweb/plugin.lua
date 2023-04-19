@@ -27,6 +27,12 @@ function plugin:initialize(id)
         end
         self.variables[k] = value
     end
+    -- Is loading
+    local is_loading, err = utils.get_variable("IS_LOADING", false)
+    if is_loading == nil then
+        self.logger:log(ngx.ERR, "can't get IS_LOADING variable : " .. err)
+    end
+    self.is_loading = is_loading == "yes"
 end
 
 function plugin:get_id()

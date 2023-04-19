@@ -48,7 +48,7 @@ function limit:init()
 	if init_needed == nil then
 		return self:ret(false, err)
 	end
-	if not init_needed then
+	if not init_needed or self.is_loading then
 		return self:ret(true, "no service uses Limit for requests, skipping init")
 	end
 	-- Get variables

@@ -13,8 +13,8 @@ end
 
 function redis:init()
 	-- Check if init is needed
-	if self.variables["USE_REDIS"] then
-		return self:ret(true, "redis not used")
+	if self.variables["USE_REDIS"] ~= "yes" or self.is_loading then
+		return self:ret(true, "init not needed")
 	end
 	-- Check redis connection
 	local ok, err = clusterstore:connect()

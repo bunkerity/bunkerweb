@@ -35,7 +35,7 @@ function greylist:init()
 	if init_needed == nil then
 		return self:ret(false, "can't check USE_GREYLIST variable : " .. err)
 	end
-	if not init_needed then
+	if not init_needed or self.is_loading then
 		return self:ret(true, "init not needed")
 	end
 	-- Read greylists
