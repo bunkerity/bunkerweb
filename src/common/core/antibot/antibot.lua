@@ -24,7 +24,7 @@ function antibot:access()
 	end
 
 	-- Prepare challenge
-	local ok, err = self:prepare_challenge(antibot, challenge_uri)
+	local ok, err = self:prepare_challenge(antibot, self.variables["ANTIBOT_URI"])
 	if not ok then
 		return self:ret(false, "can't prepare challenge : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
@@ -35,20 +35,20 @@ function antibot:access()
 		return self:ret(false, "can't check if challenge is resolved : " .. err)
 	end
 	if resolved then
-		if ngx.ctx.bw.uri == challenge_uri then
+		if ngx.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			return self:ret(true, "client already resolved the challenge", nil, original_uri)
 		end
 		return self:ret(true, "client already resolved the challenge")
 	end
 
 	-- Redirect to challenge page
-	if ngx.ctx.bw.uri ~= challenge_uri then
-		return self:ret(true, "redirecting client to the challenge uri", nil, challenge_uri)
+	if ngx.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
+		return self:ret(true, "redirecting client to the challenge uri", nil, self.variables["ANTIBOT_URI"])
 	end
 
 	-- Display challenge needed
 	if ngx.ctx.bw.request_method == "GET" then
-		ngx.ctx.antibot_display_content = true
+		ngx.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.HTTP_OK)
 	end
 
@@ -61,7 +61,7 @@ function antibot:access()
 		if redirect then
 			return self:ret(true, "check challenge redirect : " .. redirect, nil, redirect)
 		end
-		ngx.ctx.antibot_display_content = true
+		ngx.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.HTTP_OK)
 	end
 
@@ -79,7 +79,7 @@ function antibot:content()
 		return self:ret(true, "antibot not activated")
 	end
 	-- Check if display content is needed
-	if not ngx.ctx.antibot_display_content then
+	if not ngx.ctx.bw.antibot_display_content then
 		return self:ret(true, "display content not needed")
 	end
 	-- Display content
@@ -91,13 +91,15 @@ function antibot:content()
 end
 
 function antibot:challenge_resolved()
-	local session, err, exists = utils.get_session()
+	local session, err, exists, refreshed = utils.get_session()
 	if err then
-		return false, "session error : " .. err
+		return nil, "session error : " .. err
+	elseif not exists then
+		return false, "no session set"
 	end
-	local raw_data = get_session("antibot")
+	local ok, err, raw_data = utils.get_session_var("antibot")
 	if not raw_data then
-		return false, "session is set but no antibot data", nil
+		return nil, "session is set but no antibot data", nil
 	end
 	local data = cjson.decode(raw_data)
 	if data.resolved and self.variables["USE_ANTIBOT"] == data.antibot then
@@ -107,19 +109,19 @@ function antibot:challenge_resolved()
 end
 
 function antibot:prepare_challenge()
-	local session, err, exists = utils.get_session()
+	local session, err, exists, refreshed = utils.get_session()
 	if err then
 		return false, "session error : " .. err
 	end
 	local set_needed = false
 	local data = nil
 	if exists then
-		local raw_data = get_session("antibot")
+		local ok, err, raw_data = utils.get_session_var("antibot")
 		if raw_data then
 			data = cjson.decode(raw_data)
 		end
 	end
-	if not data or current_data.antibot ~= self.variables["USE_ANTIBOT"] then
+	if not data or data.antibot ~= self.variables["USE_ANTIBOT"] then
 		data = {
 			type = self.variables["USE_ANTIBOT"],
 			resolved = self.variables["USE_ANTIBOT"] == "cookie",
@@ -144,20 +146,25 @@ function antibot:prepare_challenge()
 		end
 	end
 	if set_needed then
-		utils.set_session("antibot", cjson.encode(data))
+		local ok, err = utils.set_session_var("antibot", cjson.encode(data))
+		if not ok then
+			return false, "error while setting session antibot : " .. err
+		end
 	end
 	return true, "prepared"
 end
 
 function antibot:display_challenge(challenge_uri)
 	-- Open session
-	local session, err, exists = utils.get_session()
+	local session, err, exists, refreshed = utils.get_session()
 	if err then
 		return false, "can't open session : " .. err
+	elseif not exists then
+		return false, "no session set"
 	end
 
 	-- Get data
-	local raw_data = get_session("antibot")
+	local ok, err, raw_data = utils.get_session_var("antibot")
 	if not raw_data then
 		return false, "session is set but no data"
 	end
@@ -201,13 +208,15 @@ end
 
 function antibot:check_challenge()
 	-- Open session
-	local session, err, exists = utils.get_session()
+	local session, err, exists, refreshed = utils.get_session()
 	if err then
 		return nil, "can't open session : " .. err, nil
+	elseif not exists then
+		return false, "no session set"
 	end
 
 	-- Get data
-	local raw_data = get_session("antibot")
+	local ok, err, raw_data = utils.get_session_var("antibot")
 	if not raw_data then
 		return false, "session is set but no data", nil
 	end
@@ -237,7 +246,10 @@ function antibot:check_challenge()
 			return false, "wrong value", nil
 		end
 		data.resolved = true
-		utils.set_session("antibot", cjson.encode(data))
+		local ok, err = utils.set_session("antibot", cjson.encode(data))
+		if not ok then
+			return false, "error while setting session antibot : " .. err
+		end
 		return true, "resolved", data.original_uri
 	end
 
@@ -252,7 +264,10 @@ function antibot:check_challenge()
 			return false, "wrong value", nil
 		end
 		data.resolved = true
-		utils.set_session("antibot", cjson.encode(data))
+		local ok, err = utils.set_session("antibot", cjson.encode(data))
+		if not ok then
+			return false, "error while setting session antibot : " .. err
+		end
 		return true, "resolved", data.original_uri
 	end
 
@@ -286,7 +301,10 @@ function antibot:check_challenge()
 			return false, "client failed challenge with score " .. tostring(rdata.score), nil
 		end
 		data.resolved = true
-		utils.set_session("antibot", cjson.encode(data))
+		local ok, err = utils.set_session("antibot", cjson.encode(data))
+		if not ok then
+			return false, "error while setting session antibot : " .. err
+		end
 		return true, "resolved", data.original_uri
 	end
 
@@ -320,7 +338,10 @@ function antibot:check_challenge()
 			return false, "client failed challenge", nil
 		end
 		data.resolved = true
-		utils.set_session("antibot", cjson.encode(data))
+		local ok, err = utils.set_session("antibot", cjson.encode(data))
+		if not ok then
+			return false, "error while setting session antibot : " .. err
+		end
 		return true, "resolved", data.original_uri
 	end
 

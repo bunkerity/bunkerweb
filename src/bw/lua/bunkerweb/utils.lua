@@ -433,55 +433,59 @@ end
 utils.get_session = function()
 	-- Session already in context
 	if ngx.ctx.bw.session then
-		return ngx.ctx.bw.session, ngx.ctx.bw.session_err, ngx.ctx.bw.session_exists
+		return ngx.ctx.bw.session, ngx.ctx.bw.session_err, ngx.ctx.bw.session_exists, ngx.ctx.bw.session_refreshed
 	end
-	-- Open session
-	local _session, err, exists = session.start()
-	if err then
+	-- Open session and fill ctx
+	local _session, err, exists, refreshed = session.start()
+	ngx.ctx.bw.session_err = nil
+	if err and err ~= "missing session cookie" and err ~= "no session" then
 		logger:log(ngx.ERR, "can't start session : " .. err)
+		ngx.ctx.bw.session_err = nil
 	end
-	-- Fill ctx
-	ngx.ctx.session = _session
-	ngx.ctx.session_err = err
-	ngx.ctx.session_exists = exists
-	ngx.ctx.session_saved = false
-	ngx.ctx.session_data = _session.get_data()
-	if not ngx.ctx.session_data then
-		ngx.ctx.session_data = {}
+	ngx.ctx.bw.session = _session
+	ngx.ctx.bw.session_exists = exists
+	ngx.ctx.bw.session_refreshed = refreshed
+	ngx.ctx.bw.session_saved = false
+	ngx.ctx.bw.session_data = _session:get_data()
+	if not ngx.ctx.bw.session_data then
+		ngx.ctx.bw.session_data = {}
 	end
-	return _session, err, exists
+	return _session, ngx.ctx.bw.session_err, exists, refreshed
 end
 
 utils.save_session = function()
 	-- Check if save is needed
-	if ngx.ctx.session and not ngx.ctx.session_err and not ngx.ctx.session_saved then
-		ngx.ctx.session:set_data(ngx.ctx.session_data)
-		local ok, err = ngx.ctx.session:save()
+	if ngx.ctx.bw.session and not ngx.ctx.bw.session_err and not ngx.ctx.bw.session_saved then
+		ngx.ctx.bw.session:set_data(ngx.ctx.bw.session_data)
+		local ok, err = ngx.ctx.bw.session:save()
 		if err then
 			logger:log(ngx.ERR, "can't save session : " .. err)
 			return false,  "can't save session : " .. err
 		end
-		ngx.ctx.session_saved = true
+		ngx.ctx.bw.session_saved = true
 		return true, "session saved"
-	elseif ngx.ctx.session_saved then
+	elseif ngx.ctx.bw.session_saved then
 		return true, "session already saved"
 	end
 	return true, "no session"
 end
 
-utils.set_session = function(key, value)
+utils.set_session_var = function(key, value)
 	-- Set new data
-	if ngx.ctx.session and not ngx.ctx.session_err then
-		ngx.ctx.session_data[key] = value
+	if ngx.ctx.bw.session and not ngx.ctx.bw.session_err then
+		ngx.ctx.bw.session_data[key] = value
 		return true, "value set"
 	end
-	return true, "no session"
+	return false, "no session"
 end
 
-utils.get_session = function(key)
+utils.get_session_var = function(key)
 	-- Get data
-	if ngx.ctx.session and not ngx.ctx.session_err then
-		return true, "value get", ngx.ctx.session_data[key]
+	if ngx.ctx.bw.session and not ngx.ctx.bw.session_err then
+		if ngx.ctx.bw.session_data[key] then
+			return true, "data present", ngx.ctx.bw.session_data[key]
+		end
+		return true, "no data"
 	end
 	return false, "no session"
 end
