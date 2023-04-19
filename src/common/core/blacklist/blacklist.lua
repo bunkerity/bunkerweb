@@ -17,15 +17,8 @@ function blacklist:initialize()
 		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
-	-- Check if init is needed
-	if ngx.get_phase() == "init" then
-		local init_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
-		if init_needed == nil then
-			self.logger:log(ngx.ERR, err)
-		end
-		self.init_needed = init_needed
 	-- Decode lists
-	else
+	if ngx.get_phase() ~= "init" and self.variables["USE_BLACKLIST"] == "yes" then
 		local lists, err = self.datastore:get("plugin_blacklist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
@@ -39,9 +32,14 @@ end
 
 function blacklist:init()
 	-- Check if init is needed
-	if not self.init_needed then
+	local init_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
+	if init_needed == nil then
+		return self:ret(false, "can't check USE_BLACKLIST variable : " .. err)
+	end
+	if not init_needed then
 		return self:ret(true, "init not needed")
 	end
+
 	-- Read blacklists
 	local blacklists = {
 		["IP"] = {},

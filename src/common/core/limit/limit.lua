@@ -17,28 +17,26 @@ function limit:initialize()
 	end
 	self.use_redis = use_redis == "yes"
 	-- Load rules if needed
-	if ngx.get_phase() == "access" then
-		if self.variables["USE_LIMIT_REQ"] == "yes" then
-			-- Get all rules from datastore
-			local limited = false
-			local all_rules, err = self.datastore:get("plugin_limit_rules")
-			if not all_rules then
-				self.logger:log(ngx.ERR, err)
-				return
+	if ngx.get_phase() ~= "init" and self.variables["USE_LIMIT_REQ"] == "yes" then
+		-- Get all rules from datastore
+		local limited = false
+		local all_rules, err = self.datastore:get("plugin_limit_rules")
+		if not all_rules then
+			self.logger:log(ngx.ERR, err)
+			return
+		end
+		all_rules = cjson.decode(all_rules)
+		self.rules = {}
+		-- Extract global rules
+		if all_rules.global then
+			for k, v in pairs(all_rules.global) do
+				self.rules[k] = v
 			end
-			all_rules = cjson.decode(all_rules)
-			self.rules = {}
-			-- Extract global rules
-			if all_rules.global then
-				for k, v in pairs(all_rules.global) do
-					self.rules[k] = v
-				end
-			end
-			-- Extract and overwrite if needed server rules
-			if all_rules[ngx.ctx.bw.server_name] then
-				for k, v in pairs(all_rules[ngx.ctx.bw.server_name]) do
-					self.rules[k] = v
-				end
+		end
+		-- Extract and overwrite if needed server rules
+		if all_rules[ngx.ctx.bw.server_name] then
+			for k, v in pairs(all_rules[ngx.ctx.bw.server_name]) do
+				self.rules[k] = v
 			end
 		end
 	end

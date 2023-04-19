@@ -10,29 +10,27 @@ local bunkernet = class("bunkernet", plugin)
 function bunkernet:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "bunkernet")
-	-- Check if init is needed
-	if ngx.get_phase() == "init" then
-		local init_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
-		if init_needed == nil then
-			self.logger:log(ngx.ERR, err)
-		end
-		self.init_needed = init_needed
 	-- Get BunkerNet ID
-	else
+	if ngx.get_phase() ~= "init" and self.variables["USE_BUNKERNET"] == "yes" then
 		local id, err = self.datastore:get("plugin_bunkernet_id")
-		if not id then
-			self.bunkernet_id = nil
-		else
+		if id then
 			self.bunkernet_id = id
+		else
+			self.logger:log(ngx.ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end
 	end
 end
 
 function bunkernet:init()
 	-- Check if init is needed
-	if not self.init_needed then
+	local init_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
+	if init_needed == nil then
+		return self:ret(false, "can't check USE_BUNKERNET variable : " .. err)
+	end
+	if not init_needed then
 		return self:ret(true, "no service uses bunkernet, skipping init")
 	end
+
 	-- Check if instance ID is present
 	local f, err = io.open("/var/cache/bunkerweb/bunkernet/instance.id", "r")
 	if not f then
@@ -83,7 +81,7 @@ function bunkernet:log(bypass_use_bunkernet)
 	end
 	-- Check if BunkerNet ID is generated
 	if not self.bunkernet_id then
-		return self:ret(true, "bunkernet ID is not generated")
+		return self:ret(false, "bunkernet ID is not generated")
 	end
 	-- Check if IP has been blocked
 	local reason = utils.get_reason()
@@ -98,8 +96,10 @@ function bunkernet:log(bypass_use_bunkernet)
 		return self:ret(true, "IP is not global")
 	end
 	-- TODO : check if IP has been reported recently
+	self.integration = ngx.ctx.bw.integration
+	self.version = ngx.ctx.bw.version
 	local function report_callback(premature, obj, ip, reason, method, url, headers)
-		local ok, err, status, data = obj:report(ip, reason, method, url, headers)
+		local ok, err, status, data = obj:report(ip, reason, method, url, headers, obj.ctx.integration, obj.ctx.version)
 		if status == 429 then
 			obj.logger:log(ngx.WARN, "bunkernet API is rate limiting us")
 		elseif not ok then
@@ -145,8 +145,8 @@ function bunkernet:request(method, url, data)
 	end
 	local all_data = {
 		id = self.id,
-		integration = utils.get_integration(),
-		version = utils.get_version()
+		integration = self.integration,
+		version = self.version
 	}
 	for k, v in pairs(data) do
 		all_data[k] = v
@@ -156,7 +156,7 @@ function bunkernet:request(method, url, data)
 		body = cjson.encode(all_data),
 		headers = {
 			["Content-Type"] = "application/json",
-			["User-Agent"] = "BunkerWeb/" .. utils.get_version()
+			["User-Agent"] = "BunkerWeb/" .. self.version
 		}
 	})
 	httpc:close()
