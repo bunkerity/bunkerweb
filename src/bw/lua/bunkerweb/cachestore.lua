@@ -54,37 +54,35 @@ function cachestore:get(key)
 		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
 		end
-		-- Exec transaction
-		local calls = {
-			{"get", {key}},
-			{"ttl", {key}}
-		}
-		-- Exec transaction
-		local exec, err = clusterstore:multi(calls)
-		if err then
-			clusterstore:close()
-			return nil, "exec() failed : " .. err, nil
+		-- Redis script to get value + ttl
+		local redis_script = [[
+			local ret_get = redis.pcall("GET", KEYS[1])
+			if type(ret_get) == "table" and ret_get["err"] ~= nil then
+				redis.log(redis.LOG_WARNING, "BUNKERWEB CACHESTORE GET error : " .. ret_get["err"])
+				return ret_get
+			end
+			local ret_ttl = redis.pcall("TTL", KEYS[1])
+			if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
+				redis.log(redis.LOG_WARNING, "BUNKERWEB CACHESTORE DEL error : " .. ret_ttl["err"])
+				return ret_ttl
+			end
+			return {ret_get, ret_ttl}
+		]]
+		local ret, err = clusterstore:call("eval", redis_script, 1, key)
+		-- local cjson = require "cjson"
+		-- require "bunkerweb.logger":new("DEBUG"):log(ngx.ERR, cjson.encode(ret))
+		if not ret then
+			return nil, err, nil
 		end
-		-- Get results
-		local value = exec[1]
-		if type(value) == "table" then
-			clusterstore:close(redis)
-			return nil, "GET error : " .. value[2], nil
-		end
-		local ttl = exec[2]
-		if type(ttl) == "table" then
-			clusterstore:close(redis)
-			return nil, "TTL error : " .. ttl[2], nil
-		end
-		-- Return value
+		-- Extract values
 		clusterstore:close(redis)
-		if value == ngx.null then
-			value = nil
+		if ret[1] == ngx.null then
+			ret[1] = nil
 		end
-		if ttl < 0 then
-			ttl = ttl + 1
+		if ret[2] < 0 then
+			ret[2] = ret[2] + 1
 		end
-		return value, nil, ttl
+		return ret[1], nil, ret[2]
 	end
 	local value, err, hit_level
 	if self.use_redis then
@@ -92,7 +90,7 @@ function cachestore:get(key)
 	else
 		value, err, hit_level = self.cache:get(key)
 	end
-	if value == nil and hit_level == nil then
+	if value == nil and err ~= nil then
 		return false, err
 	end
 	self.logger:log(ngx.INFO, "hit level for " .. key .. " = " .. tostring(hit_level))
@@ -121,18 +119,18 @@ end
 function cachestore:set_redis(key, value, ex)
 	-- Connect to redis
 	local clusterstore = require "bunkerweb.clusterstore":new()
-	local redis, err = clusterstore:connect()
-	if not redis then
+	local ok, err = clusterstore:connect()
+	if not ok then
 		return false, "can't connect to redis : " .. err
 	end
 	-- Set value with ttl
-	local default_ex = ttl or 30
-	local ok, err = redis:set(key, value, "EX", ex)
+	local default_ex = ex or 30
+	local ok, err = clusterstore:call("set", key, value, "EX", default_ex)
 	if err then
-		clusterstore:close(redis)
-		return false, "GET failed : " .. err
+		clusterstore:close()
+		return false, "SET failed : " .. err
 	end
-	clusterstore:close(redis)
+	clusterstore:close()
 	return true
 end
 
@@ -153,17 +151,17 @@ end
 function cachestore:del_redis(key)
 	-- Connect to redis
 	local clusterstore = require "bunkerweb.clusterstore":new()
-	local redis, err = clusterstore:connect()
-	if not redis then
+	local ok, err = clusterstore:connect()
+	if not ok then
 		return false, "can't connect to redis : " .. err
 	end
 	-- Set value with ttl
-	local ok, err = redis:del(key)
+	local ok, err = clusterstore:del(key)
 	if err then
-		clusterstore:close(redis)
+		clusterstore:close()
 		return false, "DEL failed : " .. err
 	end
-	clusterstore:close(redis)
+	clusterstore:close()
 	return true
 end
 

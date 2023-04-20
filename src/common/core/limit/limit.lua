@@ -183,7 +183,8 @@ function limit:limit_req_redis(rate_max, rate_time)
 		self.clusterstore:close()
 		return nil, err
 	end
-	if timestamps then
+	-- self.logger:log(ngx.ERR, getmetatable(timestamps))
+	if timestamps and timestamps ~= ngx.null then
 		timestamps = cjson.decode(timestamps)
 	else
 		timestamps = {}

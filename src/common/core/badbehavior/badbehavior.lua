@@ -162,18 +162,16 @@ function badbehavior:redis_increase(ip)
 		return ret_incr
 	]]
 	-- Connect to server
-	local cstore, err = clusterstore:new()
-	if not cstore then
-		return false, err
-	end
-	local ok, err = clusterstore:connect()
+	local cstore = clusterstore:new()
+	local ok, err = cstore:connect()
 	if not ok then
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err = clusterstore:call("eval", redis_script, 2, "bad_behavior_" .. ip, "ban_" .. ip, "bad behavior", count_time, ban_time)
+	local counter, err = cstore:call("eval", redis_script, 2, "bad_behavior_" .. ip, "ban_" .. ip, "bad behavior", count_time, ban_time)
 	self.logger(ngx.ERR, counter)
 	if not counter then
+		cstore:close()
 		return false, err
 	end
 	-- Exec transaction
@@ -207,7 +205,7 @@ function badbehavior:redis_increase(ip)
 	-- 	end
 	-- end
 	-- End connection
-	clusterstore:close()
+	cstore:close()
 	return counter
 end
 
@@ -229,17 +227,15 @@ function badbehavior:redis_decrease(ip)
 		return ret_decr
 	]]
 	-- Connect to server
-	local cstore, err = clusterstore:new()
-	if not cstore then
-		return false, err
-	end
-	local ok, err = clusterstore:connect()
+	local cstore = clusterstore:new()
+	local ok, err = cstore:connect()
 	if not ok then
 		return false, err
 	end
-	local counter, err = clusterstore:call("eval", redis_script, 1, "bad_behavior_" .. ip)
+	local counter, err = cstore:call("eval", redis_script, 1, "bad_behavior_" .. ip)
 	self.logger(ngx.ERR, counter)
 	if not counter then
+		cstore:close()
 		return false, err
 	end
 	-- -- Decrement counter
@@ -260,7 +256,7 @@ function badbehavior:redis_decrease(ip)
 	-- 	end
 	-- end
 	-- End connection
-	clusterstore:close()
+	cstore:close()
 	return counter
 end
 
