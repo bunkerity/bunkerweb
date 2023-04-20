@@ -16,6 +16,7 @@ function limit:initialize()
 		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
+	self.clusterstore = clusterstore:new()
 	-- Load rules if needed
 	if ngx.get_phase() ~= "init" and self.variables["USE_LIMIT_REQ"] == "yes" then
 		-- Get all rules from datastore
@@ -172,19 +173,14 @@ function limit:limit_req_local(rate_max, rate_time)
 end
 
 function limit:limit_req_redis(rate_max, rate_time)
-	-- Connect to server
-	local cstore, err = clusterstore:new()
-	if not cstore then
-		return nil, err
-	end
-	local ok, err = clusterstore:connect()
+	local ok, err = self.clusterstore:connect()
 	if not ok then
 		return nil, err
 	end
 	-- Get timestamps
-	local timestamps, err = clusterstore:call("get", "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
+	local timestamps, err = self.clusterstore:call("get", "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
 	if err then
-		clusterstore:close()
+		self.clusterstore:close()
 		return nil, err
 	end
 	if timestamps then
@@ -196,13 +192,13 @@ function limit:limit_req_redis(rate_max, rate_time)
 	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
 	-- Save new timestamps if needed
 	if updated then
-		local ok, err = clusterstore:call("set", "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(new_timestamps), "EX", delay)
+		local ok, err = self.clusterstore:call("set", "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(new_timestamps), "EX", delay)
 		if not ok then
-			clusterstore:close()
+			self.clusterstore:close()
 			return nil, err
 		end
 	end
-	lusterstore:close()
+	self.clusterstore:close()
 	return new_timestamps, "success"
 end
 

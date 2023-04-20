@@ -47,13 +47,9 @@ function cachestore:initialize(use_redis)
 end
 
 function cachestore:get(key)
-	local function callback(key)
+	local callback = function(key)
 		-- Connect to redis
-		local clusterstore = require "bunkerweb.clusterstore"
-		local ok, err = clusterstore:new()
-		if not ok then
-			return nil, "clusterstore:new() failed : " .. err, nil
-		end
+		local clusterstore = require "bunkerweb.clusterstore":new()
 		local ok, err = clusterstore:connect()
 		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
@@ -124,6 +120,7 @@ end
 
 function cachestore:set_redis(key, value, ex)
 	-- Connect to redis
+	local clusterstore = require "bunkerweb.clusterstore":new()
 	local redis, err = clusterstore:connect()
 	if not redis then
 		return false, "can't connect to redis : " .. err
@@ -155,6 +152,7 @@ end
 
 function cachestore:del_redis(key)
 	-- Connect to redis
+	local clusterstore = require "bunkerweb.clusterstore":new()
 	local redis, err = clusterstore:connect()
 	if not redis then
 		return false, "can't connect to redis : " .. err

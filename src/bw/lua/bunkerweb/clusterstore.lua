@@ -62,7 +62,7 @@ function clusterstore:connect()
         return false, err
     end
     if times == 0 then
-        local select, err = redis_client:select(tonumber(variables["REDIS_DATABASE"]))
+        local select, err = redis_client:select(tonumber(self.variables["REDIS_DATABASE"]))
         if err then
             self:close()
             return false, err
@@ -74,8 +74,9 @@ end
 function clusterstore:close()
     if self.redis_client then
         -- Equivalent to close but keep a pool of connections
+        local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
         self.redis_client = nil
-        return self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
+        return ok, err
     end
     return false, "not connected"
 end
@@ -102,7 +103,7 @@ function clusterstore:multi(calls)
     -- Loop on calls
     for i, call in ipairs(calls) do
         local method = call[1]
-        local args = table.unpack(call[2])
+        local args = unpack(call[2])
         local ok, err = self.redis_client[method](self.redis_client, args)
         if not ok then
             return false, method + "() failed : " .. err

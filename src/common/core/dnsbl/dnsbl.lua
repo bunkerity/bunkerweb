@@ -30,7 +30,7 @@ function dnsbl:access()
 	-- Check if IP is in cache
 	local ok, cached = self:is_in_cache(ngx.ctx.bw.remote_addr)
 	if not ok then
-		return self:ret(false, "error while checking cache : " .. err)
+		return self:ret(false, "error while checking cache : " .. cached)
 	elseif cached then
 		if cached == "ok" then
 			return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")

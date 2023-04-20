@@ -28,7 +28,7 @@ function whitelist:initialize()
 		end
 	end
 	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis)
+	self.cachestore = cachestore:new(self.use_redis and ngx.get_phase() == "access")
 end
 
 function whitelist:init()
