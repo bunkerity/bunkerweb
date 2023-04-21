@@ -3,9 +3,9 @@ FROM python:3.10-alpine
 # Install dependencies
 COPY deps/requirements.txt /opt/bunkerweb/deps/requirements.txt
 RUN apk add --no-cache --virtual build gcc python3-dev musl-dev libffi-dev openssl-dev cargo && \
-        mkdir /opt/bunkerweb/deps/python && \
-        pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/deps/requirements.txt && \
-        apk del build
+    mkdir /opt/bunkerweb/deps/python && \
+    pip install --no-cache-dir --require-hashes --target /opt/bunkerweb/deps/python -r /opt/bunkerweb/deps/requirements.txt && \
+    apk del build
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -48,7 +48,7 @@ RUN apk add --no-cache libgcc libstdc++ openssl git && \
     ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log
 
 # Fix CVEs
-# RUN apk add "libcurl>=7.87.0-r2"
+RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
 
 VOLUME /data /etc/nginx
 

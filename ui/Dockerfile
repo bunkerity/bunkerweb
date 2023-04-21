@@ -48,7 +48,7 @@ RUN addgroup -g 101 nginx && \
     ln -s /usr/local/bin/python /usr/bin/python3
 
 # Fix CVEs
-# There are no CVEs for python:3.10-alpine for now
+RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
 
 VOLUME /data /etc/nginx
 
