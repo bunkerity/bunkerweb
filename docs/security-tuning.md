@@ -118,9 +118,9 @@ If you want to use your own certificates, here is the list of related settings :
 
 |       Setting       | Default | Description                                                                                                                                                                                                                             |
 | :-----------------: | :-----: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_CUSTOM_HTTPS`  |  `no`   | When set to `yes`, HTTPS will be enabled with custom certificates.                                                                                                                                                                      |
-| `CUSTOM_HTTPS_CERT` |         | Full path to the certificate. If you have one or more intermediate certificate(s) in your chain of trust, you will need to provide the bundle (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)). |
-| `CUSTOM_HTTPS_KEY`  |         | Full path to the private key.                                                                                                                                                                                                           |
+| `USE_CUSTOM_SSL`  |  `no`   | When set to `yes`, HTTPS will be enabled with custom certificates.                                                                                                                                                                      |
+| `CUSTOM_SSL_CERT` |         | Full path to the certificate. If you have one or more intermediate certificate(s) in your chain of trust, you will need to provide the bundle (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)). |
+| `CUSTOM_SSL_KEY`  |         | Full path to the private key.                                                                                                                                                                                                           |
 
 When `USE_CUSTOM_HTTPS` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_HTTPS_CERT` is modified and will reload NGINX if that's the case.
 
