@@ -48,7 +48,7 @@ RUN addgroup -g 101 nginx && \
     ln -s /usr/local/bin/python /usr/bin/python3
 
 # Fix CVEs
-# RUN apk add "libcurl>=7.87.0-r2"
+# There are no CVEs for python:3.10-alpine for now
 
 VOLUME /data /etc/nginx
 
