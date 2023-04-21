@@ -42,21 +42,23 @@ def generate_cert(first_server, days, subj):
         return False, 2
 
     # Update db
-    key_data = Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.key").read_bytes()
-
     with lock:
         err = db.update_job_cache(
-            "self-signed", first_server, f"{first_server}.key", key_data
+            "self-signed",
+            first_server,
+            f"{first_server}.key",
+            Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.key").read_bytes(),
         )
 
     if err:
         logger.warning(f"Couldn't update db cache for {first_server}.key file: {err}")
 
-    pem_data = Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem").read_bytes()
-
     with lock:
         err = db.update_job_cache(
-            "self-signed", first_server, f"{first_server}.pem", pem_data
+            "self-signed",
+            first_server,
+            f"{first_server}.pem",
+            Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem").read_bytes(),
         )
 
     if err:

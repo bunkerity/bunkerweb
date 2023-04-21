@@ -99,17 +99,15 @@ try:
                 )
 
                 if Path(f"/etc/letsencrypt/live/{first_server}/cert.pem").exists():
-                    cert = Path(
-                        f"/etc/letsencrypt/live/{first_server}/cert.pem"
-                    ).read_bytes()
-
                     # Update db
                     with lock:
                         err = db.update_job_cache(
                             "certbot-new",
                             first_server,
                             "cert.pem",
-                            cert,
+                            Path(
+                                f"/etc/letsencrypt/live/{first_server}/cert.pem"
+                            ).read_bytes(),
                         )
 
                     if err:
@@ -139,17 +137,15 @@ try:
                 )
 
                 if Path(f"/etc/letsencrypt/live/{first_server}/cert.pem").exists():
-                    cert = Path(
-                        f"/etc/letsencrypt/live/{first_server}/cert.pem"
-                    ).read_bytes()
-
                     # Update db
                     with lock:
                         err = db.update_job_cache(
                             "certbot-new",
                             first_server,
                             "cert.pem",
-                            cert,
+                            Path(
+                                f"/etc/letsencrypt/live/{first_server}/cert.pem"
+                            ).read_bytes(),
                         )
 
                     if err:

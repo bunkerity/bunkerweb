@@ -6,7 +6,6 @@ from os import _exit, getenv
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 from typing import Tuple
 
@@ -84,7 +83,6 @@ try:
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
-    lock = Lock()
 
     # Create directories if they don't exist
     Path("/var/cache/bunkerweb/greylist").mkdir(parents=True, exist_ok=True)
@@ -103,7 +101,7 @@ try:
     }
     all_fresh = True
     for kind in kinds_fresh:
-        if not is_cached_file(f"/var/cache/bunkerweb/greylist/{kind}.list", "hour"):
+        if not is_cached_file(f"/var/cache/bunkerweb/greylist/{kind}.list", "hour", db):
             kinds_fresh[kind] = False
             all_fresh = False
             logger.info(
@@ -156,7 +154,7 @@ try:
                 logger.info(f"Downloaded {i} grey {kind}")
                 # Check if file has changed
                 new_hash = file_hash(f"/var/tmp/bunkerweb/greylist/{kind}.list")
-                old_hash = cache_hash(f"/var/cache/bunkerweb/greylist/{kind}.list")
+                old_hash = cache_hash(f"/var/cache/bunkerweb/greylist/{kind}.list", db)
                 if new_hash == old_hash:
                     logger.info(
                         f"New file {kind}.list is identical to cache file, reload is not needed",
@@ -170,25 +168,12 @@ try:
                         f"/var/tmp/bunkerweb/greylist/{kind}.list",
                         f"/var/cache/bunkerweb/greylist/{kind}.list",
                         new_hash,
+                        db,
                     )
 
                     if not cached:
                         logger.error(f"Error while caching greylist : {err}")
                         status = 2
-                    else:
-                        # Update db
-                        with lock:
-                            err = db.update_job_cache(
-                                "greylist-download",
-                                None,
-                                f"{kind}.list",
-                                content,
-                                checksum=new_hash,
-                            )
-
-                        if err:
-                            logger.warning(f"Couldn't update db cache: {err}")
-                        status = 1
             except:
                 status = 2
                 logger.error(

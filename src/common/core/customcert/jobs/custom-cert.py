@@ -81,30 +81,28 @@ def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
         if old_hash != key_hash:
             copy(key_path, key_cache_path.replace(".hash", ""))
 
-            with open(key_path, "r") as f:
-                with lock:
-                    err = db.update_job_cache(
-                        "custom-cert",
-                        first_server,
-                        key_cache_path.replace(".hash", "").split("/")[-1],
-                        f.read().encode("utf-8"),
-                        checksum=key_hash,
-                    )
+            with lock:
+                err = db.update_job_cache(
+                    "custom-cert",
+                    first_server,
+                    key_cache_path.replace(".hash", "").split("/")[-1],
+                    Path(key_path).read_bytes(),
+                    checksum=key_hash,
+                )
 
             if err:
                 logger.warning(
                     f"Couldn't update db cache for {key_path.replace('/', '_')}.hash: {err}"
                 )
 
-        with open(cert_path, "r") as f:
-            with lock:
-                err = db.update_job_cache(
-                    "custom-cert",
-                    first_server,
-                    cert_cache_path.replace(".hash", "").split("/")[-1],
-                    f.read().encode("utf-8"),
-                    checksum=cert_hash,
-                )
+        with lock:
+            err = db.update_job_cache(
+                "custom-cert",
+                first_server,
+                cert_cache_path.replace(".hash", "").split("/")[-1],
+                Path(cert_path).read_bytes(),
+                checksum=cert_hash,
+            )
 
         if err:
             logger.warning(

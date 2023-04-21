@@ -1,11 +1,16 @@
 from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
+from inspect import getsourcefile
 from json import dumps, loads
 from pathlib import Path
 from shutil import copy
+from sys import _getframe
+from threading import Lock
 from traceback import format_exc
+from typing import Optional, Tuple
 
+lock = Lock()
 
 """
 {
@@ -15,13 +20,24 @@ from traceback import format_exc
 """
 
 
-def is_cached_file(file, expire):
+def is_cached_file(file: str, expire: str, db=None) -> bool:
     is_cached = False
     try:
         if not Path(f"{file}.md").is_file():
-            return False
+            if not db:
+                return False
+            cached_file = db.get_job_cache_file(
+                getsourcefile(_getframe(1)).replace(".py", ""),
+                file.split("/")[-1],
+                with_data=False,
+            )
 
-        cached_time = loads(Path(f"{file}.md").read_text())["date"]
+            if not cached_file:
+                return False
+            cached_time = cached_file.last_update
+        else:
+            cached_time = loads(Path(f"{file}.md").read_text())["date"]
+
         current_time = datetime.now().timestamp()
         if current_time < cached_time:
             return False
@@ -37,7 +53,7 @@ def is_cached_file(file, expire):
     return is_cached
 
 
-def file_hash(file):
+def file_hash(file: str) -> str:
     _sha512 = sha512()
     with open(file, "rb") as f:
         while True:
@@ -48,19 +64,44 @@ def file_hash(file):
     return _sha512.hexdigest()
 
 
-def cache_hash(cache):
+def cache_hash(cache: str, db=None) -> Optional[str]:
     with suppress(BaseException):
-        return loads(Path(f"{cache}.md").read_text())["checksum"]
+        return loads(Path(f"{cache}.md").read_text()).get("checksum", None)
+    if db:
+        cached_file = db.get_job_cache_file(
+            getsourcefile(_getframe(1)).replace(".py", ""),
+            cache.split("/")[-1],
+            with_data=False,
+        )
+
+        if cached_file:
+            return cached_file.checksum
     return None
 
 
-def cache_file(file, cache, _hash):
+def cache_file(
+    file: str, cache: str, _hash: str, db=None, *, service_id: Optional[str] = None
+) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
-        copy(file, cache)
+        content = Path(file).read_bytes()
+        Path(cache).write_bytes(content)
         Path(file).unlink()
-        md = {"date": datetime.timestamp(datetime.now()), "checksum": _hash}
+        md = {"date": datetime.now().timestamp(), "checksum": _hash}
         Path(f"{cache}.md").write_text(dumps(md))
+
+        if db:
+            with lock:
+                err = db.update_job_cache(
+                    getsourcefile(_getframe(1)).replace(".py", ""),
+                    service_id,
+                    cache.split("/")[-1],
+                    content,
+                    checksum=_hash,
+                )
+
+                if err:
+                    ret = False
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err

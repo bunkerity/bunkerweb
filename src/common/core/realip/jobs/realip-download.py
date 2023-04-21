@@ -67,8 +67,13 @@ try:
     # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
 
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+
     # Don't go further if the cache is fresh
-    if is_cached_file("/var/cache/bunkerweb/realip/combined.list", "hour"):
+    if is_cached_file("/var/cache/bunkerweb/realip/combined.list", "hour", db):
         logger.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
@@ -106,7 +111,7 @@ try:
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/realip-combined.list")
-    old_hash = cache_hash("/var/cache/bunkerweb/realip/combined.list")
+    old_hash = cache_hash("/var/cache/bunkerweb/realip/combined.list", db)
     if new_hash == old_hash:
         logger.info("New file is identical to cache file, reload is not needed")
         _exit(0)
@@ -116,29 +121,11 @@ try:
         "/var/tmp/bunkerweb/realip-combined.list",
         "/var/cache/bunkerweb/realip/combined.list",
         new_hash,
+        db,
     )
     if not cached:
         logger.error(f"Error while caching list : {err}")
         _exit(2)
-
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-    lock = Lock()
-
-    # Update db
-    with lock:
-        err = db.update_job_cache(
-            "realip-download",
-            None,
-            "combined.list",
-            content,
-            checksum=new_hash,
-        )
-
-    if err:
-        logger.warning(f"Couldn't update db cache: {err}")
 
     logger.info(f"Downloaded {i} trusted IP/net")
 
