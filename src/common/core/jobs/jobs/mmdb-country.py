@@ -24,12 +24,35 @@ from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
 status = 0
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
 
 try:
+    # Only download mmdb if the country blacklist or whitelist is enabled
+    dl_mmdb = False
+    # Multisite case
+    if getenv("MULTISITE", "no") == "yes":
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if getenv(
+                f"{first_server}_BLACKLIST_COUNTRY", getenv("BLACKLIST_COUNTRY")
+            ) or getenv(
+                f"{first_server}_WHITELIST_COUNTRY", getenv("WHITELIST_COUNTRY")
+            ):
+                dl_mmdb = True
+                break
+    # Singlesite case
+    elif getenv("BLACKLIST_COUNTRY") or getenv("WHITELIST_COUNTRY"):
+        dl_mmdb = True
+
+    if not dl_mmdb:
+        logger.info(
+            "Country blacklist or whitelist is not enabled, skipping download..."
+        )
+        _exit(0)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+
     # Don't go further if the cache is fresh
     if is_cached_file("/var/cache/bunkerweb/country.mmdb", "month", db):
         logger.info("country.mmdb is already in cache, skipping download...")
