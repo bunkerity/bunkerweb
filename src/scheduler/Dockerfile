@@ -63,6 +63,9 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION
 
+# Fix CVEs
+RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
+
 VOLUME /data /etc/nginx
 
 WORKDIR /usr/share/bunkerweb/scheduler
