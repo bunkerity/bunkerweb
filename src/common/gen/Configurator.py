@@ -146,14 +146,21 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
-            elif not variable.startswith("PYTHON") and variable not in (
-                "GPG_KEY",
-                "LANG",
-                "PATH",
-                "NGINX_VERSION",
-                "NJS_VERSION",
-                "PKG_RELEASE",
-                "DOCKER_HOST",
+            elif (
+                not variable.startswith("PYTHON")
+                and not variable.startswith("KUBERNETES_SERVICE_")
+                and not variable.startswith("KUBERNETES_PORT_")
+                and not variable.startswith("SVC_")
+                and variable
+                not in (
+                    "GPG_KEY",
+                    "LANG",
+                    "PATH",
+                    "NGINX_VERSION",
+                    "NJS_VERSION",
+                    "PKG_RELEASE",
+                    "DOCKER_HOST",
+                )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
         # Expand variables to each sites if MULTISITE=yes and if not present
