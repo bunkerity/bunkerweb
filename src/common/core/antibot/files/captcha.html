@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {-raw-}
     <title>Bot Detection</title>
     <link
     rel="icon"
@@ -219,8 +220,10 @@
       <!-- text -->
       <div id="text-container" class="-translate-y-12 md:-translate-y-20 w-full z-10 flex flex-col justify-center items-center">
         <h1 class="lg:max-w-[700px] xl:max-w-[1200px] 2xl:max-w-[1500px] uppercase title text-lg xsm:text-xl sm:text-2xl 2xl:text-3xl  tracking-wider text-white text-center">Please prove that you are Human before accessing this website</h1>
-        <form class="w-full flex flex-col justify-center items-center mt-8" method="POST" action="{{antibot_uri}}">
-          <img src="data:image/jpeg;base64,{{captcha}}"/>
+        {-raw-}
+        <form class="w-full flex flex-col justify-center items-center mt-8" method="POST" action="{*antibot_uri*}">
+          <img src="data:image/jpeg;base64,{*captcha*}"/>
+          {-raw-}
           <input class="px-2 text-gray-800 h-8 w-full max-w-[300px] rounded-lg outline-secondary" type="text" name="captcha" />
           <button class="hover:brightness-90 mt-2 rounded-lg bg-secondary px-6 py-2 text-white text-sm xs:text-base font-bold" type="submit" value="Submit">Submit</button> 
         </form>
@@ -264,3 +267,4 @@
   
   </body>
 </html>
+{-raw-}

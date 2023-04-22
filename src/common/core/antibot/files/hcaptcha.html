@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {-raw-}
     <title>Bot Detection</title>
     <link
     rel="icon"
@@ -230,15 +231,17 @@
             JavaScript needs to be enabled in order to visit this website.
           </p>
         </noscript>
-        <form class="hidden"  method="POST" action="{{antibot_uri}}" id="form">
+        {-raw-}
+        <form class="hidden"  method="POST" action="{*antibot_uri*}" id="form">
           <input type="hidden" name="token" id="token" />
         </form>
         <div class="mt-8 flex flex-col justify-center items-center">
           <div
             class="h-captcha"
-            data-sitekey="{{hcaptcha_sitekey}}"
+            data-sitekey="{*hcaptcha_sitekey*}"
             data-callback="send_challenge"
           ></div>
+          {-raw-}
           <br />
           <p class="text-gray-100 text-center text-xs sm:text-sm">
             This site is protected by
@@ -282,3 +285,4 @@
     <!-- end content -->
   </body>
 </html>
+{-raw-}
