@@ -130,7 +130,7 @@
     <div class="cover message">
         <h1>Please prove that you are Human before accessing this website</h1>
         <p class="lead">
-      <form class="form" method="POST" action="{{antibot_uri}}">
+      <form class="form" method="POST" action="{*antibot_uri*}">
         <img src="data:image/jpeg;base64,{{captcha}}"/>
         <input class="captcha" type="text" name="captcha" /> <input class="btn" type="submit" value="Submit" />
       </form>
