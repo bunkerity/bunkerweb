@@ -12,34 +12,39 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ## Global settings
 
-|        Setting         |                                                        Default                                                         | Context |Multiple|                   Description                    |
-|------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
-|`IS_LOADING`            |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.     |
-|`NGINX_PREFIX`          |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.       |
-|`HTTP_PORT`             |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.        |
-|`HTTPS_PORT`            |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.       |
-|`MULTISITE`             |`no`                                                                                                                    |global   |no      |Multi site activation.                            |
-|`SERVER_NAME`           |`www.example.com`                                                                                                       |multisite|no      |List of the virtual hosts served by bunkerweb.    |
-|`WORKER_PROCESSES`      |`auto`                                                                                                                  |global   |no      |Number of worker processes.                       |
-|`WORKER_RLIMIT_NOFILE`  |`2048`                                                                                                                  |global   |no      |Maximum number of open files for worker processes.|
-|`WORKER_CONNECTIONS`    |`1024`                                                                                                                  |global   |no      |Maximum number of connections per worker.         |
-|`LOG_FORMAT`            |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                |
-|`LOG_LEVEL`             |`notice`                                                                                                                |global   |no      |The level to use for error logs.                  |
-|`DNS_RESOLVERS`         |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                |
-|`DATASTORE_MEMORY_SIZE` |`256m`                                                                                                                  |global   |no      |Size of the internal datastore.                   |
-|`USE_API`               |`yes`                                                                                                                   |global   |no      |Activate the API to control BunkerWeb.            |
-|`API_HTTP_PORT`         |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                   |
-|`API_LISTEN_IP`         |`0.0.0.0`                                                                                                               |global   |no      |Listen IP address for the API.                    |
-|`API_SERVER_NAME`       |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.           |
-|`API_WHITELIST_IP`      |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.    |
-|`AUTOCONF_MODE`         |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.               |
-|`SWARM_MODE`            |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                  |
-|`KUBERNETES_MODE`       |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                    |
-|`SERVER_TYPE`           |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                     |
-|`LISTEN_STREAM`         |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).       |
-|`LISTEN_STREAM_PORT`    |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).         |
-|`LISTEN_STREAM_PORT_SSL`|`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).             |
-|`USE_UDP`               |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).               |
+|           Setting            |                                                        Default                                                         | Context |Multiple|                   Description                    |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
+|`IS_LOADING`                  |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.     |
+|`NGINX_PREFIX`                |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.       |
+|`HTTP_PORT`                   |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.        |
+|`HTTPS_PORT`                  |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.       |
+|`MULTISITE`                   |`no`                                                                                                                    |global   |no      |Multi site activation.                            |
+|`SERVER_NAME`                 |`www.example.com`                                                                                                       |multisite|no      |List of the virtual hosts served by bunkerweb.    |
+|`WORKER_PROCESSES`            |`auto`                                                                                                                  |global   |no      |Number of worker processes.                       |
+|`WORKER_RLIMIT_NOFILE`        |`2048`                                                                                                                  |global   |no      |Maximum number of open files for worker processes.|
+|`WORKER_CONNECTIONS`          |`1024`                                                                                                                  |global   |no      |Maximum number of connections per worker.         |
+|`LOG_FORMAT`                  |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                |
+|`LOG_LEVEL`                   |`notice`                                                                                                                |global   |no      |The level to use for error logs.                  |
+|`DNS_RESOLVERS`               |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                |
+|`DATASTORE_MEMORY_SIZE`       |`64m`                                                                                                                   |global   |no      |Size of the internal datastore.                   |
+|`CACHESTORE_MEMORY_SIZE`      |`64m`                                                                                                                   |global   |no      |Size of the internal cachestore.                  |
+|`CACHESTORE_IPC_MEMORY_SIZE`  |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (ipc).            |
+|`CACHESTORE_MISS_MEMORY_SIZE` |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (miss).           |
+|`CACHESTORE_LOCKS_MEMORY_SIZE`|`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (locks).          |
+|`USE_API`                     |`yes`                                                                                                                   |global   |no      |Activate the API to control BunkerWeb.            |
+|`API_HTTP_PORT`               |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                   |
+|`API_LISTEN_IP`               |`0.0.0.0`                                                                                                               |global   |no      |Listen IP address for the API.                    |
+|`API_SERVER_NAME`             |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.           |
+|`API_WHITELIST_IP`            |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.    |
+|`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.               |
+|`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                  |
+|`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                    |
+|`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                     |
+|`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).       |
+|`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).         |
+|`LISTEN_STREAM_PORT_SSL`      |`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).             |
+|`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).               |
+
 
 ## Core settings
 
@@ -135,7 +140,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 |         Setting         |                          Default                           | Context |Multiple|                            Description                             |
 |-------------------------|------------------------------------------------------------|---------|--------|--------------------------------------------------------------------|
 |`USE_CLIENT_CACHE`       |`no`                                                        |multisite|no      |Tell client to store locally static files.                          |
-|`CLIENT_CACHE_EXTENSIONS`|`jpg\|jpeg\|png\|bmp\|ico\|svg\|tif\|css\|js\|otf\|ttf\|eot\|woff\|woff2`|global   |no      |List of file extensions, separated with pipes that should be cached.|
+|`CLIENT_CACHE_EXTENSIONS`|`jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2`|global   |no      |List of file extensions, separated with pipes that should be cached.|
 |`CLIENT_CACHE_ETAG`      |`yes`                                                       |multisite|no      |Send the HTTP ETag header for static resources.                     |
 |`CLIENT_CACHE_CONTROL`   |`public, max-age=15552000`                                  |multisite|no      |Value of the Cache-Control HTTP header.                             |
 
@@ -249,7 +254,7 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`DISABLE_DEFAULT_SERVER`     |`no`                   |global   |no      |Close connection if the request vhost is unknown.                                                                     |
 |`REDIRECT_HTTP_TO_HTTPS`     |`no`                   |multisite|no      |Redirect all HTTP request to HTTPS.                                                                                   |
 |`AUTO_REDIRECT_HTTP_TO_HTTPS`|`yes`                  |multisite|no      |Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.                             |
-|`ALLOWED_METHODS`            |`GET\|POST\|HEAD`        |multisite|no      |Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.                                          |
+|`ALLOWED_METHODS`            |`GET|POST|HEAD`        |multisite|no      |Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.                                          |
 |`MAX_CLIENT_SIZE`            |`10m`                  |multisite|no      |Maximum body size (0 for infinite).                                                                                   |
 |`SERVE_FILES`                |`yes`                  |multisite|no      |Serve files from the local folder.                                                                                    |
 |`ROOT_FOLDER`                |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                         |
