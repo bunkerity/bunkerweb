@@ -1,10 +1,10 @@
+{-raw-}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {-raw-}
     <title>Bot Detection</title>
     <link
     rel="icon"
@@ -209,16 +209,6 @@
     </div>
     <!-- end traits y -->
 
-    <!-- back btn -->
-    <aside class="z-20 fixed left-4 lg:left-48 top-8 lg:top-24">
-      <button data-go-back role="link" class="transition hover:-translate-y-0.5 hover:bg-gray-100/10 rounded-full p-1.5 xs:p-2 sm:p-3 border border-gray-100/50">
-        <svg class="pointer-events-none h-5 w-5 xs:h-6 xs:w-6 sm:h-7 sm:w-7 stroke-gray-100/50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
-        </svg>
-      </button>
-    </aside>
-    <!-- end back btn -->
-
     <!-- content -->
     <main class="overflow-hidden relative z-10 w-full h-full flex-col lg:flex-row flex justify-center items-center">
       <!-- text -->
@@ -246,26 +236,9 @@
       <!-- text -->
 
       <script>
-        //go back btn
-        const backBtn = document.querySelector('button[data-go-back]');
-        window.addEventListener('click', (e) => {
-          try {
-            if(e.target.closest('button').hasAttribute('data-go-back')) {
-                //case there is previous page, go back 
-            if (history.length > 2) {
-              history.back();
-            }  else {
-                // or go home page
-                window.location.href = window.location.origin
-            }
-            }
-          }catch(err) {}          
-        });
-      </script>
-      {-raw-}
-      <script>
         //repatcha
         function check_robot() {
+          {-raw-}
           grecaptcha.ready(function () {
             grecaptcha
               .execute("{*recaptcha_sitekey*}", { action: "recaptcha" })
@@ -274,9 +247,9 @@
                 document.getElementById("form").submit();
               });
           });
+          {-raw-}
         }
         </script>
-        {-raw-}
 
       <footer class="fixed bottom-1.5 lg:bottom-2">
         <div class="flex justify-center pb-2">  <img class="h-8"
