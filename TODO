@@ -1,4 +1,4 @@
 - load inline values for white/black/grey list core
-- store object in ngx.ctx
 - bwcli with redis
 - move bans to cachestore
+- direct access to ANTIBOT_URI without prepare_challenge call

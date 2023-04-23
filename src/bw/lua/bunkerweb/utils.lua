@@ -440,7 +440,7 @@ utils.get_session = function()
 	ngx.ctx.bw.session_err = nil
 	if err and err ~= "missing session cookie" and err ~= "no session" then
 		logger:log(ngx.ERR, "can't start session : " .. err)
-		ngx.ctx.bw.session_err = nil
+		ngx.ctx.bw.session_err = err
 	end
 	ngx.ctx.bw.session = _session
 	ngx.ctx.bw.session_exists = exists
