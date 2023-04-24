@@ -93,9 +93,7 @@ end
 
 function antibot:challenge_resolved()
 	local session, err, exists, refreshed = utils.get_session()
-	if err then
-		return nil, "session error : " .. err
-	elseif not exists then
+	if not exists then
 		return false, "no session set"
 	end
 	local ok, err, raw_data = utils.get_session_var("antibot")
@@ -111,9 +109,6 @@ end
 
 function antibot:prepare_challenge()
 	local session, err, exists, refreshed = utils.get_session()
-	if err then
-		return false, "session error : " .. err
-	end
 	local set_needed = false
 	local data = nil
 	if exists then
@@ -158,9 +153,7 @@ end
 function antibot:display_challenge()
 	-- Open session
 	local session, err, exists, refreshed = utils.get_session()
-	if err then
-		return false, "can't open session : " .. err
-	elseif not exists then
+	if not exists then
 		return false, "no session set"
 	end
 
@@ -210,9 +203,7 @@ end
 function antibot:check_challenge()
 	-- Open session
 	local session, err, exists, refreshed = utils.get_session()
-	if err then
-		return nil, "can't open session : " .. err, nil
-	elseif not exists then
+	if not exists then
 		return false, "no session set"
 	end
 

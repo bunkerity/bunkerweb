@@ -35,7 +35,6 @@ function whitelist:initialize()
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
-				self.logger:log(ngx.ERR, data)
 				table.insert(self.lists[kind], data)
 			end
 		end

@@ -439,7 +439,7 @@ utils.get_session = function()
 	local _session, err, exists, refreshed = session.start()
 	ngx.ctx.bw.session_err = nil
 	if err and err ~= "missing session cookie" and err ~= "no session" then
-		logger:log(ngx.ERR, "can't start session : " .. err)
+		logger:log(ngx.WARN, "can't start session : " .. err)
 		ngx.ctx.bw.session_err = err
 	end
 	ngx.ctx.bw.session = _session
@@ -455,7 +455,7 @@ end
 
 utils.save_session = function()
 	-- Check if save is needed
-	if ngx.ctx.bw.session and not ngx.ctx.bw.session_err and not ngx.ctx.bw.session_saved then
+	if ngx.ctx.bw.session and not ngx.ctx.bw.session_saved then
 		ngx.ctx.bw.session:set_data(ngx.ctx.bw.session_data)
 		local ok, err = ngx.ctx.bw.session:save()
 		if err then
@@ -472,7 +472,7 @@ end
 
 utils.set_session_var = function(key, value)
 	-- Set new data
-	if ngx.ctx.bw.session and not ngx.ctx.bw.session_err then
+	if ngx.ctx.bw.session then
 		ngx.ctx.bw.session_data[key] = value
 		return true, "value set"
 	end
@@ -481,7 +481,7 @@ end
 
 utils.get_session_var = function(key)
 	-- Get data
-	if ngx.ctx.bw.session and not ngx.ctx.bw.session_err then
+	if ngx.ctx.bw.session then
 		if ngx.ctx.bw.session_data[key] then
 			return true, "data present", ngx.ctx.bw.session_data[key]
 		end
