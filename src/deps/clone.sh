@@ -278,7 +278,14 @@ fi
 
 # lua-ffi-zlib v0.5.0
 echo "ℹ️ Downloading lua-ffi-zlib"
+dopatch="no"
+if [ ! -d "deps/src/lua-ffi-zlib" ] ; then
+	dopatch="yes"
+fi
 git_secure_clone "https://github.com/hamishforbes/lua-ffi-zlib.git" "1fb69ca505444097c82d2b72e87904f3ed923ae9"
+if [ "$dopatch" = "yes" ] ; then
+	do_and_check_cmd patch deps/src/lua-ffi-zlib/lib/ffi-zlib.lua deps/misc/lua-ffi-zlib.patch
+fi
 
 # ModSecurity v3.0.9
 echo "ℹ️ Downloading ModSecurity"
@@ -311,6 +318,10 @@ fi
 # libmaxminddb v1.7.1
 echo "ℹ️ Downloading libmaxminddb"
 git_secure_clone "https://github.com/maxmind/libmaxminddb.git" "ac4d0d2480032a8664e251588e57d7b306ca630c"
+
+# zlib v1.2.13
+echo "ℹ️ Downloading zlib"
+git_secure_clone "https://github.com/madler/zlib.git" "04f42ceca40f73e2978b50e93806c2a18c1281fc"
 
 # headers-more-nginx-module v0.34
 echo "ℹ️ Downloading headers-more-nginx-module"
