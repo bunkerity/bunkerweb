@@ -26,6 +26,19 @@ function whitelist:initialize()
 		else
 			self.lists = cjson.decode(lists)
 		end
+		local kinds = {
+			["IP"] = {},
+			["RDNS"] = {},
+			["ASN"] = {},
+			["USER_AGENT"] = {},
+			["URI"] = {}
+		}
+		for kind, _ in pairs(kinds) do
+			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
+				self.logger:log(ngx.ERR, data)
+				table.insert(self.lists[kind], data)
+			end
+		end
 	end
 	-- Instantiate cachestore
 	self.cachestore = cachestore:new(self.use_redis and ngx.get_phase() == "access")

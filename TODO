@@ -1,5 +1,5 @@
-- load inline values for white/black/grey list core
 - bwcli with redis
 - direct access to ANTIBOT_URI without prepare_challenge call
 - don't fail if session err is not nil (new session will be created)
-- limit refactoring with redis scripts if needed
+- stream refactoring
+- stream examples

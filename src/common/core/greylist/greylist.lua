@@ -24,6 +24,18 @@ function greylist:initialize()
 		else
 			self.lists = cjson.decode(lists)
 		end
+		local kinds = {
+			["IP"] = {},
+			["RDNS"] = {},
+			["ASN"] = {},
+			["USER_AGENT"] = {},
+			["URI"] = {}
+		}
+		for kind, _ in pairs(kinds) do
+			for data in self.variables["GREYLIST_" .. kind]:gmatch("%S+") do
+				table.insert(self.lists[kind], data)
+			end
+		end
 	end
 	-- Instantiate cachestore
 	self.cachestore = cachestore:new(self.use_redis)
