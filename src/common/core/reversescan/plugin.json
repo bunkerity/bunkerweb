@@ -1,6 +1,6 @@
 {
   "id": "reversescan",
-  "order": 5,
+  "order": 6,
   "name": "Reverse scan",
   "description": "Scan clients ports to detect proxies or servers.",
   "version": "0.1",

@@ -141,9 +141,10 @@ spec:
       labels:
         app: bunkerweb-scheduler
     spec:
+      serviceAccountName: sa-bunkerweb
       containers:
-        - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.4.6
+        - name: bunkerweb-scheduler
+          image: bunkerity/bunkerweb-scheduler:1.4.6
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE

@@ -1,6 +1,6 @@
 {
   "id": "bunkernet",
-  "order": 6,
+  "order": 7,
   "name": "BunkerNet",
   "description": "Share threat data with other BunkerWeb instances via BunkerNet.",
   "version": "0.1",

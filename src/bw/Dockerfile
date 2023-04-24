@@ -72,6 +72,9 @@ RUN apk add --no-cache pcre bash python3 && \
 	ln -s /proc/1/fd/1 /var/log/nginx/access.log && \
 	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log
 
+# Fix CVEs
+RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
+
 VOLUME /data /etc/nginx
 
 EXPOSE 8080/tcp 8443/tcp

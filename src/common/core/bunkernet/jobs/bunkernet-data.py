@@ -47,7 +47,6 @@ try:
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
-    lock = Lock()
 
     # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
@@ -64,7 +63,7 @@ try:
         _exit(2)
 
     # Don't go further if the cache is fresh
-    if is_cached_file("/var/cache/bunkerweb/bunkernet/ip.list", "day"):
+    if is_cached_file("/var/cache/bunkerweb/bunkernet/ip.list", "day", db):
         logger.info(
             "BunkerNet list is already in cache, skipping download...",
         )
@@ -111,7 +110,7 @@ try:
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/bunkernet-ip.list")
-    old_hash = cache_hash("/var/cache/bunkerweb/bunkernet/ip.list")
+    old_hash = cache_hash("/var/cache/bunkerweb/bunkernet/ip.list", db)
     if new_hash == old_hash:
         logger.info(
             "New file is identical to cache file, reload is not needed",
@@ -123,23 +122,11 @@ try:
         "/var/tmp/bunkerweb/bunkernet-ip.list",
         "/var/cache/bunkerweb/bunkernet/ip.list",
         new_hash,
+        db,
     )
     if not cached:
         logger.error(f"Error while caching BunkerNet data : {err}")
         _exit(2)
-
-    # Update db
-    with lock:
-        err = db.update_job_cache(
-            "bunkernet-data",
-            None,
-            "ip.list",
-            content,
-            checksum=new_hash,
-        )
-
-    if err:
-        logger.warning(f"Couldn't update db ip.list cache: {err}")
 
     logger.info("Successfully saved BunkerNet data")
 

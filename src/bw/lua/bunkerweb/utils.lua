@@ -338,7 +338,7 @@ utils.get_rdns = function(ip)
 	return false, nil
 end
 
-utils.get_ips = function(fqdn, resolvers)
+utils.get_ips = function(fqdn)
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
 	if not resolvers then
@@ -433,57 +433,153 @@ end
 utils.get_session = function()
 	-- Session already in context
 	if ngx.ctx.bw.session then
-		return ngx.ctx.bw.session, ngx.ctx.bw.session_err, ngx.ctx.bw.session_exists
+		return ngx.ctx.bw.session, ngx.ctx.bw.session_err, ngx.ctx.bw.session_exists, ngx.ctx.bw.session_refreshed
 	end
-	-- Open session
-	local _session, err, exists = session.start()
-	if err then
-		logger:log(ngx.ERR, "can't start session : " .. err)
+	-- Open session and fill ctx
+	local _session, err, exists, refreshed = session.start()
+	ngx.ctx.bw.session_err = nil
+	if err and err ~= "missing session cookie" and err ~= "no session" then
+		logger:log(ngx.WARN, "can't start session : " .. err)
+		ngx.ctx.bw.session_err = err
 	end
-	-- Fill ctx
-	ngx.ctx.session = _session
-	ngx.ctx.session_err = err
-	ngx.ctx.session_exists = exists
-	ngx.ctx.session_saved = false
-	ngx.ctx.session_data = _session.get_data()
-	if not ngx.ctx.session_data then
-		ngx.ctx.session_data = {}
+	ngx.ctx.bw.session = _session
+	ngx.ctx.bw.session_exists = exists
+	ngx.ctx.bw.session_refreshed = refreshed
+	ngx.ctx.bw.session_saved = false
+	ngx.ctx.bw.session_data = _session:get_data()
+	if not ngx.ctx.bw.session_data then
+		ngx.ctx.bw.session_data = {}
 	end
-	return _session, err, exists
+	return _session, ngx.ctx.bw.session_err, exists, refreshed
 end
 
 utils.save_session = function()
 	-- Check if save is needed
-	if ngx.ctx.session and not ngx.ctx.session_err and not ngx.ctx.session_saved then
-		ngx.ctx.session:set_data(ngx.ctx.session_data)
-		local ok, err = ngx.ctx.session:save()
+	if ngx.ctx.bw.session and not ngx.ctx.bw.session_saved then
+		ngx.ctx.bw.session:set_data(ngx.ctx.bw.session_data)
+		local ok, err = ngx.ctx.bw.session:save()
 		if err then
 			logger:log(ngx.ERR, "can't save session : " .. err)
 			return false,  "can't save session : " .. err
 		end
-		ngx.ctx.session_saved = true
+		ngx.ctx.bw.session_saved = true
 		return true, "session saved"
-	elseif ngx.ctx.session_saved then
+	elseif ngx.ctx.bw.session_saved then
 		return true, "session already saved"
 	end
 	return true, "no session"
 end
 
-utils.set_session = function(key, value)
+utils.set_session_var = function(key, value)
 	-- Set new data
-	if ngx.ctx.session and not ngx.ctx.session_err then
-		ngx.ctx.session_data[key] = value
+	if ngx.ctx.bw.session then
+		ngx.ctx.bw.session_data[key] = value
 		return true, "value set"
 	end
-	return true, "no session"
+	return false, "no session"
 end
 
-utils.get_session = function(key)
+utils.get_session_var = function(key)
 	-- Get data
-	if ngx.ctx.session and not ngx.ctx.session_err then
-		return true, "value get", ngx.ctx.session_data[key]
+	if ngx.ctx.bw.session then
+		if ngx.ctx.bw.session_data[key] then
+			return true, "data present", ngx.ctx.bw.session_data[key]
+		end
+		return true, "no data"
 	end
 	return false, "no session"
+end
+
+utils.is_banned = function(ip)
+	-- Check on local datastore
+	local reason, err = datastore:get("bans_ip_" .. ip)
+	if not reason and err ~= "not found" then
+		return nil, "datastore:get() error : " .. reason
+	elseif reason and err ~= "not found" then
+		local ok, ttl = datastore:ttl("bans_ip_" .. ip)
+		if not ok then
+			return true, reason, -1
+		end
+		return true, reason, ttl
+	end
+	-- Redis case
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return nil, "can't get USE_REDIS variable : " .. err
+	elseif use_redis ~= "yes" then
+		return false, "not banned"
+	end
+	-- Connect
+	local clusterstore = require "bunkerweb.clusterstore":new()
+	local ok, err = clusterstore:connect()
+	if not ok then
+		return nil, "can't connect to redis server : " .. err
+	end
+	-- Redis atomic script : GET+TTL
+	local redis_script = [[
+		local ret_get = redis.pcall("GET", KEYS[1])
+		if type(ret_get) == "table" and ret_get["err"] ~= nil then
+			redis.log(redis.LOG_WARNING, "access GET error : " .. ret_get["err"])
+			return ret_get
+		end
+		local ret_ttl = nil
+		if ret_get ~= nil then
+			ret_ttl = redis.pcall("TTL", KEYS[1])
+			if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
+				redis.log(redis.LOG_WARNING, "access TTL error : " .. ret_ttl["err"])
+				return ret_ttl
+			end
+		end
+		return {ret_get, ret_ttl}
+	]]
+	-- Execute redis script
+	local data, err = clusterstore:call("eval", redis_script, 1, "bans_ip_" .. ip)
+	if not data then
+		clusterstore:close()
+		return nil, "redis call error : " .. err
+	elseif data.err then
+		clusterstore:close()
+		return nil, "redis script error : " .. data.err
+	elseif data[1] ~= ngx.null then
+		clusterstore:close()
+		-- Update local cache
+		local ok, err = datastore:set("bans_ip_" .. ip, data[1], data[2])
+		if not ok then
+			return nil, "datastore:set() error : " .. err
+		end
+		return true, data[1], data[2]
+	end
+	clusterstore:close()
+	return false, "not banned"
+end
+
+utils.add_ban = function(ip, reason, ttl)
+	-- Set on local datastore
+	local ok, err = datastore:set("bans_ip_" .. ip, reason, ttl)
+	if not ok then
+		return false, "datastore:set() error : " .. err
+	end
+	-- Set on redis
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return nil, "can't get USE_REDIS variable : " .. err
+	elseif use_redis ~= "yes" then
+		return true, "success"
+	end
+	-- Connect
+	local clusterstore = require "bunkerweb.clusterstore":new()
+	local ok, err = clusterstore:connect()
+	if not ok then
+		return false, "can't connect to redis server : " .. err
+	end
+	-- SET call
+	local ok, err = clusterstore:call("set", "bans_ip_" .. ip, reason, "EX", ttl)
+	if not ok then
+		clusterstore:close()
+		return false, "redis SET failed : " .. err
+	end
+	clusterstore:close()
+	return true, "success"
 end
 
 return utils

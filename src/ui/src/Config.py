@@ -28,14 +28,14 @@ class Config:
                 self.__logger.warning(
                     "Database is not initialized, retrying in 5s ...",
                 )
-                sleep(3)
+                sleep(5)
 
             env = self.__db.get_config()
             while not self.__db.is_first_config_saved() or not env:
                 self.__logger.warning(
                     "Database doesn't have any config saved yet, retrying in 5s ...",
                 )
-                sleep(3)
+                sleep(5)
                 env = self.__db.get_config()
 
             self.__logger.info("Database is ready")

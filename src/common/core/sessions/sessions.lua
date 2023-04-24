@@ -11,21 +11,26 @@ function sessions:initialize()
 end
 
 function sessions:init()
+    if self.is_loading then
+        return self:ret(true, "init not needed")
+    end
     -- Get redis vars
     local redis_vars = {
         ["USE_REDIS"] = "",
         ["REDIS_HOST"] = "",
         ["REDIS_PORT"] = "",
+        ["REDIS_DATABASE"] = "",
         ["REDIS_SSL"] = "",
         ["REDIS_TIMEOUT"] = "",
         ["REDIS_KEEPALIVE_IDLE"] = "",
         ["REDIS_KEEPALIVE_POOL"] = ""
     }
     for k, v in pairs(redis_vars) do
-        local var, err = utils.get_variable(k, false)
-        if var == nil then
+        local value, err = utils.get_variable(k, false)
+        if value == nil then
             return self:ret(false, "can't get " .. k .. " variable : " .. err)
         end
+        redis_vars[k] = value
     end
     -- Init configuration
     local config = {
@@ -55,7 +60,7 @@ function sessions:init()
             pool_size = tonumber(redis_vars["REDIS_KEEPALIVE_POOL"]),
             ssl = redis_vars["REDIS_SSL"] == "yes",
             host = redis_vars["REDIS_HOST"],
-            port = tonumber(redis_vars["REDIS_HOST"]),
+            port = tonumber(redis_vars["REDIS_PORT"]),
             database = tonumber(redis_vars["REDIS_DATABASE"])
         }
     end

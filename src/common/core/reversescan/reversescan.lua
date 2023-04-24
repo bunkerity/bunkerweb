@@ -25,28 +25,28 @@ function reversescan:access()
     -- Loop on ports
     for port in self.variables["REVERSE_SCAN_PORTS"]:gmatch("%S+") do
         -- Check if the scan is already cached
-        local cached, err = self:is_in_cache(ngx.var.remote_addr .. ":" .. port)
+        local cached, err = self:is_in_cache(ngx.ctx.bw.remote_addr .. ":" .. port)
         if cached == nil then
             return self:ret(false, "error getting cache from datastore : " .. err)
         end
         if cached == "open" then
-            return self:ret(true, "port " .. port .. " is opened for IP " .. ngx.var.remote_addr, utils.get_deny_status())
+            return self:ret(true, "port " .. port .. " is opened for IP " .. ngx.ctx.bw.remote_addr, utils.get_deny_status())
         elseif not cached then
             -- Do the scan
-            local res, err = self:scan(ngx.var.remote_addr, tonumber(port), tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
+            local res, err = self:scan(ngx.ctx.bw.remote_addr, tonumber(port), tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
             -- Cache the result
-            local ok, err = self:add_to_cache(ngx.var.remote_addr .. ":" .. port, res)
+            local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr .. ":" .. port, res)
             if not ok then
                 return self:ret(false, "error updating cache from datastore : " .. err)
             end
             -- Deny request if port is open
             if res == "open" then
-                return self:ret(true, "port " .. port .. " is opened for IP " .. ngx.var.remote_addr, utils.get_deny_status())
+                return self:ret(true, "port " .. port .. " is opened for IP " .. ngx.ctx.bw.remote_addr, utils.get_deny_status())
             end
         end
     end
     -- No port opened
-    return self:ret(true, "no port open for IP " .. ngx.var.remote_addr)
+    return self:ret(true, "no port open for IP " .. ngx.ctx.bw.remote_addr)
 end
 
 function reversescan:scan(ip, port, timeout)

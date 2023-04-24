@@ -276,6 +276,10 @@ if [ "$dopatch" == "yes" ] ; then
 	do_and_check_cmd rm -r deps/src/lua-resty-openssl/t
 fi
 
+# lua-ffi-zlib v0.5.0
+echo "ℹ️ Downloading lua-ffi-zlib"
+git_secure_clone "https://github.com/hamishforbes/lua-ffi-zlib.git" "1fb69ca505444097c82d2b72e87904f3ed923ae9"
+
 # ModSecurity v3.0.9
 echo "ℹ️ Downloading ModSecurity"
 dopatch="no"

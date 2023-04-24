@@ -5,7 +5,6 @@ from gzip import decompress
 from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -25,10 +24,14 @@ from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("JOBS.mmdb-asn", getenv("LOG_LEVEL", "INFO"))
 status = 0
+db = Database(
+    logger,
+    sqlalchemy_string=getenv("DATABASE_URI", None),
+)
 
 try:
     # Don't go further if the cache is fresh
-    if is_cached_file("/var/cache/bunkerweb/asn.mmdb", "month"):
+    if is_cached_file("/var/cache/bunkerweb/asn.mmdb", "month", db):
         logger.info("asn.mmdb is already in cache, skipping download...")
         _exit(0)
 
@@ -52,8 +55,7 @@ try:
 
     # Decompress it
     logger.info("Decompressing mmdb file ...")
-    file_content = decompress(file_content)
-    Path(f"/var/tmp/bunkerweb/asn.mmdb").write_bytes(file_content)
+    Path(f"/var/tmp/bunkerweb/asn.mmdb").write_bytes(decompress(file_content))
 
     # Try to load it
     logger.info("Checking if mmdb file is valid ...")
@@ -62,7 +64,7 @@ try:
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/asn.mmdb")
-    old_hash = cache_hash("/var/cache/bunkerweb/asn.mmdb")
+    old_hash = cache_hash("/var/cache/bunkerweb/asn.mmdb", db)
     if new_hash == old_hash:
         logger.info("New file is identical to cache file, reload is not needed")
         _exit(0)
@@ -70,26 +72,11 @@ try:
     # Move it to cache folder
     logger.info("Moving mmdb file to cache ...")
     cached, err = cache_file(
-        "/var/tmp/bunkerweb/asn.mmdb", "/var/cache/bunkerweb/asn.mmdb", new_hash
+        "/var/tmp/bunkerweb/asn.mmdb", "/var/cache/bunkerweb/asn.mmdb", new_hash, db
     )
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)
-
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-    lock = Lock()
-
-    # Update db
-    with lock:
-        err = db.update_job_cache(
-            "mmdb-asn", None, "asn.mmdb", file_content, checksum=new_hash
-        )
-
-    if err:
-        logger.warning(f"Couldn't update db cache: {err}")
 
     # Success
     logger.info(f"Downloaded new mmdb from {mmdb_url}")

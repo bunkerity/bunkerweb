@@ -16,29 +16,28 @@ function limit:initialize()
 		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
+	self.clusterstore = clusterstore:new()
 	-- Load rules if needed
-	if ngx.get_phase() == "access" then
-		if self.variables["USE_LIMIT_REQ"] == "yes" then
-			-- Get all rules from datastore
-			local limited = false
-			local all_rules, err = self.datastore:get("plugin_limit_rules")
-			if not all_rules then
-				self.logger:log(ngx.ERR, err)
-				return
+	if ngx.get_phase() ~= "init" and self.variables["USE_LIMIT_REQ"] == "yes" then
+		-- Get all rules from datastore
+		local limited = false
+		local all_rules, err = self.datastore:get("plugin_limit_rules")
+		if not all_rules then
+			self.logger:log(ngx.ERR, err)
+			return
+		end
+		all_rules = cjson.decode(all_rules)
+		self.rules = {}
+		-- Extract global rules
+		if all_rules.global then
+			for k, v in pairs(all_rules.global) do
+				self.rules[k] = v
 			end
-			all_rules = cjson.decode(all_rules)
-			self.rules = {}
-			-- Extract global rules
-			if all_rules.global then
-				for k, v in pairs(all_rules.global) do
-					self.rules[k] = v
-				end
-			end
-			-- Extract and overwrite if needed server rules
-			if all_rules[ngx.var.server_name] then
-				for k, v in pairs(all_rules[ngx.var.server_name]) do
-					self.rules[k] = v
-				end
+		end
+		-- Extract and overwrite if needed server rules
+		if all_rules[ngx.ctx.bw.server_name] then
+			for k, v in pairs(all_rules[ngx.ctx.bw.server_name]) do
+				self.rules[k] = v
 			end
 		end
 	end
@@ -50,7 +49,7 @@ function limit:init()
 	if init_needed == nil then
 		return self:ret(false, err)
 	end
-	if not init_needed then
+	if not init_needed or self.is_loading then
 		return self:ret(true, "no service uses Limit for requests, skipping init")
 	end
 	-- Get variables
@@ -83,7 +82,7 @@ end
 
 function limit:access()
 	-- Check if we are whitelisted
-	if ngx.var.is_whitelisted == "yes" then
+	if ngx.ctx.bw.is_whitelisted == "yes" then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if access is needed
@@ -94,7 +93,7 @@ function limit:access()
 	local rate = nil
 	local uri = nil
 	for k, v in pairs(self.rules) do
-		if k ~= "/" and ngx.var.uri:match(k) then
+		if k ~= "/" and ngx.ctx.bw.uri:match(k) then
 			rate = v
 			uri = k
 			break
@@ -105,7 +104,7 @@ function limit:access()
 			rate = self.rules["/"]
 			uri = "/"
 		else
-			return self:ret(true, "no rule for " .. ngx.var.uri)
+			return self:ret(true, "no rule for " .. ngx.ctx.bw.uri)
 		end
 	end
 	-- Check if limit is reached
@@ -116,10 +115,10 @@ function limit:access()
 	end
 	-- Limit reached
 	if limited then
-		return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is limited for URL " .. ngx.var.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")", ngx.HTTP_TOO_MANY_REQUESTS)
+		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is limited for URL " .. ngx.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")", ngx.HTTP_TOO_MANY_REQUESTS)
 	end
 	-- Limit not reached
-	return self:ret(true, "client IP " .. ngx.var.remote_addr .. " is not limited for URL " .. ngx.var.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")
+	return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is not limited for URL " .. ngx.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")
 end
 
 function limit:limit_req(rate_max, rate_time)
@@ -132,7 +131,7 @@ function limit:limit_req(rate_max, rate_time)
 		else
 			timestamps = redis_timestamps
 			-- Save the new timestamps
-			local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(timestamps), delay)
+			local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(timestamps), delay)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
 			end
@@ -154,7 +153,7 @@ end
 
 function limit:limit_req_local(rate_max, rate_time)
 	-- Get timestamps
-	local timestamps, err = self.datastore:get("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri)
+	local timestamps, err = self.datastore:get("plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -165,7 +164,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
 	-- Save new timestamps if needed
 	if updated then
-		local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(timestamps), delay)
+		local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(new_timestamps), delay)
 		if not ok then
 			return nil, err
 		end
@@ -174,38 +173,69 @@ function limit:limit_req_local(rate_max, rate_time)
 end
 
 function limit:limit_req_redis(rate_max, rate_time)
-	-- Connect to server
-	local cstore, err = clusterstore:new()
-	if not cstore then
-		return nil, err
-	end
-	local ok, err = clusterstore:connect()
+	-- Redis atomic script
+	local redis_script = [[
+		local ret_get = redis.pcall("GET", KEYS[1])
+		if type(ret_get) == "table" and ret_get["err"] ~= nil then
+			redis.log(redis.LOG_WARNING, "limit GET error : " .. ret_get["err"])
+			return ret_get
+		end
+		local timestamps = {}
+		if ret_get then
+			timestamps = cjson.decode(ret_get)
+		end
+		-- Keep only timestamps within the delay
+		local updated = false
+		local new_timestamps = {}
+		local rate_max = tonumber(ARGV[1])
+		local rate_time = ARGV[2]
+		local current_timestamp = tonumber(ARGV[3])
+		local delay = 0
+		if rate_time == "s" then
+			delay = 1
+		elseif rate_time == "m" then
+			delay = 60
+		elseif rate_time == "h" then
+			delay = 3600
+		elseif rate_time == "d" then
+			delay = 86400
+		end
+		for i, timestamp in ipairs(timestamps) do
+			if current_timestamp - timestamp <= delay then
+				table.insert(new_timestamps, timestamp)
+			else
+				updated = true
+			end
+		end
+		-- Only insert the new timestamp if client is not limited already to avoid infinite insert
+		if #new_timestamps <= rate_max then
+			table.insert(new_timestamps, current_timestamp)
+			updated = true
+		end
+		-- Save new timestamps if needed
+		if updated then
+			local ret_set = redis.pcall("SET", KEYS[1], cjson.encode(new_timestamps), "EX", delay)
+			if type(ret_set) == "table" and ret_set["err"] ~= nil then
+				redis.log(redis.LOG_WARNING, "limit SET error : " .. ret_set["err"])
+				return ret_set
+			end
+		end
+		return new_timestamps
+	]]
+	-- Connect
+	local ok, err = self.clusterstore:connect()
 	if not ok then
 		return nil, err
 	end
-	-- Get timestamps
-	local timestamps, err = clusterstore:call("get", "limit_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri)
-	if err then
-		clusterstore:close()
+	-- Execute script
+	local timestamps, err = self.clusterstore:call("eval", redis_script, 1, "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, rate_max, rate_time, os.time(os.date("!*t")))
+	if not timestamps then
+		self.clusterstore:close()
 		return nil, err
 	end
-	if timestamps then
-		timestamps = cjson.decode(timestamps)
-	else
-		timestamps = {}
-	end
-	-- Compute new timestamps
-	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
-	-- Save new timestamps if needed
-	if updated then
-		local ok, err = clusterstore:call("set", "limit_" .. ngx.var.server_name .. ngx.var.remote_addr .. ngx.var.uri, cjson.encode(new_timestamps), "EX", delay)
-		if not ok then
-			clusterstore:close()
-			return nil, err
-		end
-	end
-	lusterstore:close()
-	return new_timestamps, "success"
+	-- Return timestamps
+	self.clusterstore:close()
+	return timestamps, "success"
 end
 
 function limit:limit_req_timestamps(rate_max, rate_time, timestamps)

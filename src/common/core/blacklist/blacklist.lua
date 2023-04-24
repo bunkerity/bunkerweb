@@ -17,20 +17,30 @@ function blacklist:initialize()
 		self.logger:log(ngx.ERR, err)
 	end
 	self.use_redis = use_redis == "yes"
-	-- Check if init is needed
-	if ngx.get_phase() == "init" then
-		local init_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
-		if init_needed == nil then
-			self.logger:log(ngx.ERR, err)
-		end
-		self.init_needed = init_needed
 	-- Decode lists
-	else
+	if ngx.get_phase() ~= "init" and self.variables["USE_BLACKLIST"] == "yes" then
 		local lists, err = self.datastore:get("plugin_blacklist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
 		else
 			self.lists = cjson.decode(lists)
+		end
+		local kinds = {
+			["IP"] = {},
+			["RDNS"] = {},
+			["ASN"] = {},
+			["USER_AGENT"] = {},
+			["URI"] = {},
+			["IGNORE_IP"] = {},
+			["IGNORE_RDNS"] = {},
+			["IGNORE_ASN"] = {},
+			["IGNORE_USER_AGENT"] = {},
+			["IGNORE_URI"] = {},
+		}
+		for kind, _ in pairs(kinds) do
+			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
+				table.insert(self.lists[kind], data)
+			end
 		end
 	end
 	-- Instantiate cachestore
@@ -39,9 +49,14 @@ end
 
 function blacklist:init()
 	-- Check if init is needed
-	if not self.init_needed then
+	local init_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
+	if init_needed == nil then
+		return self:ret(false, "can't check USE_BLACKLIST variable : " .. err)
+	end
+	if not init_needed or self.is_loading then
 		return self:ret(true, "init not needed")
 	end
+
 	-- Read blacklists
 	local blacklists = {
 		["IP"] = {},
@@ -81,13 +96,13 @@ function blacklist:access()
 	end
 	-- Check the caches
 	local checks = {
-		["IP"] = "ip" .. ngx.var.remote_addr
+		["IP"] = "ip" .. ngx.ctx.bw.remote_addr
 	}
-	if ngx.var.http_user_agent then
-		checks["UA"] = "ua" .. ngx.var.http_user_agent
+	if ngx.ctx.bw.http_user_agent then
+		checks["UA"] = "ua" .. ngx.ctx.bw.http_user_agent
 	end
-	if ngx.var.uri then
-		checks["URI"] = "uri" .. ngx.var.uri
+	if ngx.ctx.bw.uri then
+		checks["URI"] = "uri" .. ngx.ctx.bw.uri
 	end
 	local already_cached = {
 		["IP"] = false,
@@ -99,7 +114,7 @@ function blacklist:access()
 		if not ok then
 			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
-			return self:ret(true, k + " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
+			return self:ret(true, k .. " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
 		end
 		if cached then
 			already_cached[k] = true
@@ -121,7 +136,7 @@ function blacklist:access()
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
 				if blacklisted ~= "ok" then
-					return self:ret(true, k + " is blacklisted (info : " .. blacklisted .. ")", utils.get_deny_status())
+					return self:ret(true, k .. " is blacklisted (info : " .. blacklisted .. ")", utils.get_deny_status())
 				end
 			end
 		end
@@ -138,11 +153,11 @@ end
 
 function blacklist:kind_to_ele(kind)
 	if kind == "IP" then
-		return "ip" .. ngx.var.remote_addr
+		return "ip" .. ngx.ctx.bw.remote_addr
 	elseif kind == "UA" then
-		return "ua" .. ngx.var.http_user_agent
+		return "ua" .. ngx.ctx.bw.http_user_agent
 	elseif kind == "URI" then
-		return "uri" .. ngx.var.uri
+		return "uri" .. ngx.ctx.bw.uri
 	end
 end
 
@@ -179,7 +194,7 @@ function blacklist:is_blacklisted_ip()
 	if not ipm then
 		return nil, err
 	end
-	local match, err = ipm:match(ngx.var.remote_addr)
+	local match, err = ipm:match(ngx.ctx.bw.remote_addr)
 	if err then
 		return nil, err
 	end
@@ -189,7 +204,7 @@ function blacklist:is_blacklisted_ip()
 		if not ipm then
 			return nil, err
 		end
-		local match, err = ipm:match(ngx.var.remote_addr)
+		local match, err = ipm:match(ngx.ctx.bw.remote_addr)
 		if err then
 			return nil, err
 		end
@@ -200,18 +215,12 @@ function blacklist:is_blacklisted_ip()
 
 	-- Check if rDNS is needed
 	local check_rdns = true
-	local is_global, err = utils.ip_is_global(ngx.var.remote_addr)
-	if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" then
-		if is_global == nil then
-			return nil, err
-		end
-		if not is_global then
-			check_rdns = false
-		end
+	if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" and not ngx.ctx.bw.ip_is_global then
+		check_rdns = false
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns_list, err = utils.get_rdns(ngx.var.remote_addr)
+		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
 		if not rdns_list then
 			return false, err
 		end
@@ -241,8 +250,8 @@ function blacklist:is_blacklisted_ip()
 	end
 
 	-- Check if ASN is in ignore list
-	if is_global then
-		local asn, err = utils.get_asn(ngx.var.remote_addr)
+	if ngx.ctx.bw.ip_is_global then
+		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
 			self.logger:log(ngx.ERR, "7")
 			return nil, err
@@ -272,7 +281,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in ignore list
 	local ignore = false
 	for i, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if ngx.var.uri:match(ignore_uri) then
+		if ngx.ctx.bw.uri:match(ignore_uri) then
 			ignore = true
 			break
 		end
@@ -280,7 +289,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in blacklist
 	if not ignore then
 		for i, uri in ipairs(self.lists["URI"]) do
-			if ngx.var.uri:match(uri) then
+			if ngx.ctx.bw.uri:match(uri) then
 				return true, "URI " .. uri
 			end
 		end
@@ -293,7 +302,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in ignore list
 	local ignore = false
 	for i, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
-		if ngx.var.http_user_agent:match(ignore_ua) then
+		if ngx.ctx.bw.http_user_agent:match(ignore_ua) then
 			ignore = true
 			break
 		end
@@ -301,7 +310,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in blacklist
 	if not ignore then
 		for i, ua in ipairs(self.lists["USER_AGENT"]) do
-			if ngx.var.http_user_agent:match(ua) then
+			if ngx.ctx.bw.http_user_agent:match(ua) then
 				return true, "UA " .. ua
 			end
 		end

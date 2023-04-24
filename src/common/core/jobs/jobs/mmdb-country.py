@@ -5,7 +5,6 @@ from gzip import decompress
 from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -27,8 +26,35 @@ logger = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
+    # Only download mmdb if the country blacklist or whitelist is enabled
+    dl_mmdb = False
+    # Multisite case
+    if getenv("MULTISITE", "no") == "yes":
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if getenv(
+                f"{first_server}_BLACKLIST_COUNTRY", getenv("BLACKLIST_COUNTRY")
+            ) or getenv(
+                f"{first_server}_WHITELIST_COUNTRY", getenv("WHITELIST_COUNTRY")
+            ):
+                dl_mmdb = True
+                break
+    # Singlesite case
+    elif getenv("BLACKLIST_COUNTRY") or getenv("WHITELIST_COUNTRY"):
+        dl_mmdb = True
+
+    if not dl_mmdb:
+        logger.info(
+            "Country blacklist or whitelist is not enabled, skipping download..."
+        )
+        _exit(0)
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+
     # Don't go further if the cache is fresh
-    if is_cached_file("/var/cache/bunkerweb/country.mmdb", "month"):
+    if is_cached_file("/var/cache/bunkerweb/country.mmdb", "month", db):
         logger.info("country.mmdb is already in cache, skipping download...")
         _exit(0)
 
@@ -52,8 +78,7 @@ try:
 
     # Decompress it
     logger.info("Decompressing mmdb file ...")
-    file_content = decompress(file_content)
-    Path(f"/var/tmp/bunkerweb/country.mmdb").write_bytes(file_content)
+    Path(f"/var/tmp/bunkerweb/country.mmdb").write_bytes(decompress(file_content))
 
     # Try to load it
     logger.info("Checking if mmdb file is valid ...")
@@ -62,7 +87,7 @@ try:
 
     # Check if file has changed
     new_hash = file_hash("/var/tmp/bunkerweb/country.mmdb")
-    old_hash = cache_hash("/var/cache/bunkerweb/country.mmdb")
+    old_hash = cache_hash("/var/cache/bunkerweb/country.mmdb", db)
     if new_hash == old_hash:
         logger.info("New file is identical to cache file, reload is not needed")
         _exit(0)
@@ -70,26 +95,14 @@ try:
     # Move it to cache folder
     logger.info("Moving mmdb file to cache ...")
     cached, err = cache_file(
-        "/var/tmp/bunkerweb/country.mmdb", "/var/cache/bunkerweb/country.mmdb", new_hash
+        "/var/tmp/bunkerweb/country.mmdb",
+        "/var/cache/bunkerweb/country.mmdb",
+        new_hash,
+        db,
     )
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)
-
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-    lock = Lock()
-
-    # Update db
-    with lock:
-        err = db.update_job_cache(
-            "mmdb-country", None, "country.mmdb", file_content, checksum=new_hash
-        )
-
-    if err:
-        logger.warning(f"Couldn't update db cache: {err}")
 
     # Success
     logger.info(f"Downloaded new mmdb from {mmdb_url}")

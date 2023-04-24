@@ -1501,12 +1501,25 @@ class Database:
                 )
             }
 
-    def get_job_cache_file(self, job_name: str, file_name: str) -> Optional[Any]:
+    def get_job_cache_file(
+        self,
+        job_name: str,
+        file_name: str,
+        *,
+        with_info: bool = False,
+        with_data: bool = True,
+    ) -> Optional[Any]:
         """Get job cache file."""
+        entities = []
+        if with_info:
+            entities.extend([Jobs_cache.last_update, Jobs_cache.checksum])
+        if with_data:
+            entities.append(Jobs_cache.data)
+
         with self.__db_session() as session:
             return (
                 session.query(Jobs_cache)
-                .with_entities(Jobs_cache.data)
+                .with_entities(*entities)
                 .filter_by(job_name=job_name, file_name=file_name)
                 .first()
             )
