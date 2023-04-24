@@ -76,7 +76,9 @@ class ServiceModal {
           this.setSettingsDefault();
           //server name is unset
           const inpServName = document.querySelector("input#SERVER_NAME");
+          inpServName.getAttribute("value", "");
           inpServName.value = "";
+
           //show modal
           this.openModal();
         }
@@ -104,7 +106,6 @@ class ServiceModal {
       const inpName = inp.getAttribute("name");
       if (
         inpName === "csrf_token" ||
-        inpName === "SERVER_NAME" ||
         inpName === "OLD_SERVER_NAME" ||
         inpName === "operation"
       )
@@ -169,20 +170,19 @@ class ServiceModal {
 
     if (action === "edit" || action === "new") {
       this.showNewEditForm();
-      formEl
-        .querySelector(`input[name="OLD_SERVER_NAME"]`)
-        .setAttribute("value", serviceName);
+      const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
+      oldNameInp.setAttribute("value", serviceName);
+      oldNameInp.value = serviceName;
     }
 
     if (action === "delete") {
       this.showDeleteForm();
-      formEl.setAttribute("id", `form-${action}-${serviceName}`);
-      formEl
-        .querySelector(`input[name="SERVER_NAME"]`)
-        .setAttribute("value", serviceName);
       formEl.querySelector(
         `[services-modal-text]`
       ).textContent = `Are you sure you want to delete ${serviceName} ?`;
+      const nameInp = formEl.querySelector(`input[name="SERVER_NAME"]`);
+      nameInp.setAttribute("value", serviceName);
+      nameInp.value = serviceName;
     }
   }
 
@@ -245,7 +245,6 @@ class ServiceModal {
           const inpName = inp.getAttribute("name");
           if (
             inpName === "csrf_token" ||
-            inpName === "SERVER_NAME" ||
             inpName === "OLD_SERVER_NAME" ||
             inpName === "operation"
           )
@@ -627,7 +626,6 @@ class Multiple {
         const inpName = inp.getAttribute("name");
         if (
           inpName === "csrf_token" ||
-          inpName === "SERVER_NAME" ||
           inpName === "OLD_SERVER_NAME" ||
           inpName === "operation"
         )

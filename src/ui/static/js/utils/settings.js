@@ -82,12 +82,18 @@ class Tabs {
     //reset desktop style
     const tabsDesktop = container.querySelectorAll("button[tab-handler]");
     tabsDesktop.forEach((tab) => {
-      tab.classList.remove("brightness-90", "z-10");
+      tab.classList.remove("brightness-90", "z-[1001]");
+      tab.classList.add("z-1000");
     });
     //reset mobile style
     const tabsMobile = container.querySelectorAll("button[tab-handler-mobile]");
     tabsMobile.forEach((tab) => {
-      tab.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
+      tab.classList.add(
+        "bg-white",
+        "dark:bg-slate-700",
+        "text-gray-700",
+        "z-1000"
+      );
       tab.classList.remove(
         "dark:bg-primary",
         "bg-primary",
@@ -103,7 +109,7 @@ class Tabs {
     const tabDesktop = container.querySelector(
       `button[tab-handler='${tabAtt}']`
     );
-    tabDesktop.classList.add("brightness-90", "z-10");
+    tabDesktop.classList.add("brightness-90", "z-[1001]");
 
     //mobile case
     const tabMobile = container.querySelector(
@@ -158,10 +164,7 @@ class FormatValue {
       try {
         inp.setAttribute("value", inp.getAttribute("value").trim());
         inp.value = inp.value.trim();
-
-      }catch(err) {
-
-      }
+      } catch (err) {}
     });
   }
 }

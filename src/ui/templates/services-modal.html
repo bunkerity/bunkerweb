@@ -94,8 +94,9 @@
       method="POST"
     >
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input type="hidden" value="server_name" name="SERVER_NAME" />
       <input type="hidden" value="delete" name="operation" />
+      <input type="hidden" value="" name="SERVER_NAME" />
+
       <div class="flex justify-center">
         <p
           services-modal-text

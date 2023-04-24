@@ -181,6 +181,14 @@ class FolderDropdown {
   init() {
     let prevActionBtn = ""; //compare with curr to hide or not prev
     this.container.addEventListener("click", (e) => {
+      //remove when none click
+      try {
+        if (
+          !e.target.closest("div").hasAttribute(`${this.prefix}-action-button`)
+        ) {
+          this.hideDropEls();
+        }
+      } catch (err) {}
       //show dropdown actions for folders
       try {
         if (
