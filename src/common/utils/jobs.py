@@ -4,7 +4,6 @@ from hashlib import sha512
 from inspect import getsourcefile
 from json import dumps, loads
 from pathlib import Path
-from shutil import copy
 from sys import _getframe
 from threading import Lock
 from traceback import format_exc
@@ -27,7 +26,7 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
             if not db:
                 return False
             cached_file = db.get_job_cache_file(
-                getsourcefile(_getframe(1)).replace(".py", ""),
+                getsourcefile(_getframe(1)).replace(".py", "").split("/")[-1],
                 file.split("/")[-1],
                 with_data=False,
             )
@@ -69,7 +68,7 @@ def cache_hash(cache: str, db=None) -> Optional[str]:
         return loads(Path(f"{cache}.md").read_text()).get("checksum", None)
     if db:
         cached_file = db.get_job_cache_file(
-            getsourcefile(_getframe(1)).replace(".py", ""),
+            getsourcefile(_getframe(1)).replace(".py", "").split("/")[-1],
             cache.split("/")[-1],
             with_data=False,
         )
@@ -93,7 +92,7 @@ def cache_file(
         if db:
             with lock:
                 err = db.update_job_cache(
-                    getsourcefile(_getframe(1)).replace(".py", ""),
+                    getsourcefile(_getframe(1)).replace(".py", "").split("/")[-1],
                     service_id,
                     cache.split("/")[-1],
                     content,

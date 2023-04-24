@@ -69,7 +69,7 @@ Because the web UI is a web application, the recommended installation procedure 
        -e bwadm.example.com_REVERSE_PROXY_URL=/changeme/ \
        -e bwadm.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000 \
        -e "bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
-       -e bwadm.example.com_INTERCEPTED_ERROR_CODES="400 401.5.0-beta 413 429 500 501 502 503 504" \
+       -e bwadm.example.com_INTERCEPTED_ERROR_CODES="400 401 405 413 429 500 501 502 503 504" \
        -l bunkerweb.INSTANCE \
        bunkerity/bunkerweb:1.5.0-beta && \
     docker network connect bw-universe bunkerweb
@@ -294,7 +294,7 @@ Because the web UI is a web application, the recommended installation procedure 
            -l "bunkerweb.REVERSE_PROXY_URL=/changeme" \
            -l "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000" \
            -l "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
-           -l "bunkerweb.INTERCEPTED_ERROR_CODES=400 401.5.0-beta 405 413 429 500 501 502 503 504" \
+           -l "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 405 413 429 500 501 502 503 504" \
            bunkerity/bunkerweb-ui:1.5.0-beta && \
     docker network connect bw-docker bw-ui
     ```
@@ -379,7 +379,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
           - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
-          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 401.5.0-beta 405 413 429 500 501 502 503 504"
+          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 405 413 429 500 501 502 503 504"
 
     volumes:
       bw-data:
@@ -526,7 +526,7 @@ Because the web UI is a web application, the recommended installation procedure 
            -l "bunkerweb.REVERSE_PROXY_URL=/changeme" \
            -l "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000" \
            -l "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
-           -l "bunkerweb.INTERCEPTED_ERROR_CODES=400 401.5.0-beta 405 413 429 500 501 502 503 504" \
+           -l "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 405 413 429 500 501 502 503 504" \
            bunkerity/bunkerweb-ui:1.5.0-beta
     ```
 
