@@ -173,34 +173,69 @@ function limit:limit_req_local(rate_max, rate_time)
 end
 
 function limit:limit_req_redis(rate_max, rate_time)
+	-- Redis atomic script
+	local redis_script = [[
+		local ret_get = redis.pcall("GET", KEYS[1])
+		if type(ret_get) == "table" and ret_get["err"] ~= nil then
+			redis.log(redis.LOG_WARNING, "limit GET error : " .. ret_get["err"])
+			return ret_get
+		end
+		local timestamps = {}
+		if ret_get then
+			timestamps = cjson.decode(ret_get)
+		end
+		-- Keep only timestamps within the delay
+		local updated = false
+		local new_timestamps = {}
+		local rate_max = tonumber(ARGV[1])
+		local rate_time = ARGV[2]
+		local current_timestamp = tonumber(ARGV[3])
+		local delay = 0
+		if rate_time == "s" then
+			delay = 1
+		elseif rate_time == "m" then
+			delay = 60
+		elseif rate_time == "h" then
+			delay = 3600
+		elseif rate_time == "d" then
+			delay = 86400
+		end
+		for i, timestamp in ipairs(timestamps) do
+			if current_timestamp - timestamp <= delay then
+				table.insert(new_timestamps, timestamp)
+			else
+				updated = true
+			end
+		end
+		-- Only insert the new timestamp if client is not limited already to avoid infinite insert
+		if #new_timestamps <= rate_max then
+			table.insert(new_timestamps, current_timestamp)
+			updated = true
+		end
+		-- Save new timestamps if needed
+		if updated then
+			local ret_set = redis.pcall("SET", KEYS[1], cjson.encode(new_timestamps), "EX", delay)
+			if type(ret_set) == "table" and ret_set["err"] ~= nil then
+				redis.log(redis.LOG_WARNING, "limit SET error : " .. ret_set["err"])
+				return ret_set
+			end
+		end
+		return new_timestamps
+	]]
+	-- Connect
 	local ok, err = self.clusterstore:connect()
 	if not ok then
 		return nil, err
 	end
-	-- Get timestamps
-	local timestamps, err = self.clusterstore:call("get", "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
-	if err then
+	-- Execute script
+	local timestamps, err = self.clusterstore:call("eval", redis_script, 1, "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, rate_max, rate_time, os.time(os.date("!*t")))
+	if not timestamps then
 		self.clusterstore:close()
 		return nil, err
 	end
-	-- self.logger:log(ngx.ERR, getmetatable(timestamps))
-	if timestamps and timestamps ~= ngx.null then
-		timestamps = cjson.decode(timestamps)
-	else
-		timestamps = {}
-	end
-	-- Compute new timestamps
-	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
-	-- Save new timestamps if needed
-	if updated then
-		local ok, err = self.clusterstore:call("set", "limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(new_timestamps), "EX", delay)
-		if not ok then
-			self.clusterstore:close()
-			return nil, err
-		end
-	end
+	-- Return timestamps
 	self.clusterstore:close()
-	return new_timestamps, "success"
+	return timestamps, "success"
 end
 
 function limit:limit_req_timestamps(rate_max, rate_time, timestamps)
