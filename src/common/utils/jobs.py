@@ -3,6 +3,7 @@ from datetime import datetime
 from hashlib import sha512
 from inspect import getsourcefile
 from json import dumps, loads
+from os.path import basename
 from pathlib import Path
 from sys import _getframe
 from threading import Lock
@@ -21,34 +22,40 @@ lock = Lock()
 
 def is_cached_file(file: str, expire: str, db=None) -> bool:
     is_cached = False
+    cached_file = None
     try:
         if not Path(f"{file}.md").is_file():
             if not db:
                 return False
             cached_file = db.get_job_cache_file(
-                getsourcefile(_getframe(1)).replace(".py", "").split("/")[-1],
-                file.split("/")[-1],
-                with_data=False,
+                basename(getsourcefile(_getframe(1))).replace(".py", ""),
+                basename(file),
+                with_info=True,
             )
 
             if not cached_file:
                 return False
-            cached_time = cached_file.last_update
+            cached_time = cached_file.last_update.timestamp()
         else:
             cached_time = loads(Path(f"{file}.md").read_text())["date"]
 
         current_time = datetime.now().timestamp()
         if current_time < cached_time:
-            return False
-        diff_time = current_time - cached_time
-        if expire == "hour":
-            is_cached = diff_time < 3600
-        elif expire == "day":
-            is_cached = diff_time < 86400
-        elif expire == "month":
-            is_cached = diff_time < 2592000
+            is_cached = False
+        else:
+            diff_time = current_time - cached_time
+            if expire == "hour":
+                is_cached = diff_time < 3600
+            elif expire == "day":
+                is_cached = diff_time < 86400
+            elif expire == "month":
+                is_cached = diff_time < 2592000
     except:
         is_cached = False
+
+    if is_cached and cached_file:
+        Path(file).write_bytes(cached_file.data)
+
     return is_cached
 
 
@@ -68,8 +75,9 @@ def cache_hash(cache: str, db=None) -> Optional[str]:
         return loads(Path(f"{cache}.md").read_text()).get("checksum", None)
     if db:
         cached_file = db.get_job_cache_file(
-            getsourcefile(_getframe(1)).replace(".py", "").split("/")[-1],
-            cache.split("/")[-1],
+            basename(getsourcefile(_getframe(1))).replace(".py", ""),
+            basename(cache),
+            with_info=True,
             with_data=False,
         )
 
@@ -86,21 +94,23 @@ def cache_file(
         content = Path(file).read_bytes()
         Path(cache).write_bytes(content)
         Path(file).unlink()
-        md = {"date": datetime.now().timestamp(), "checksum": _hash}
-        Path(f"{cache}.md").write_text(dumps(md))
 
         if db:
             with lock:
                 err = db.update_job_cache(
-                    getsourcefile(_getframe(1)).replace(".py", "").split("/")[-1],
+                    basename(getsourcefile(_getframe(1))).replace(".py", ""),
                     service_id,
-                    cache.split("/")[-1],
+                    basename(cache),
                     content,
                     checksum=_hash,
                 )
 
                 if err:
                     ret = False
+        else:
+            Path(f"{cache}.md").write_text(
+                dumps(dict(date=datetime.now().timestamp(), checksum=_hash))
+            )
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err

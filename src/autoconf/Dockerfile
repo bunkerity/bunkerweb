@@ -54,7 +54,7 @@ RUN apk add --no-cache bash && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
+# There are no CVEs for the image python:3.11.3-alpine at the moment
 
 VOLUME /data /etc/nginx
 
