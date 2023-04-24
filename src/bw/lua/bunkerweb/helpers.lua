@@ -104,6 +104,7 @@ helpers.fill_ctx = function()
     data.request_uri = ngx.var.request_uri
     data.request_method = ngx.var.request_method
     data.http_user_agent = ngx.var.http_user_agent
+    data.http_host = ngx.var.http_host
     data.server_name = ngx.var.server_name
     -- IP data : global
     local ip_is_global, err = utils.ip_is_global(data.remote_addr)
