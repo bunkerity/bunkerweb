@@ -45,6 +45,14 @@ function antibot:access()
 		return self:ret(true, "redirecting client to the challenge uri", nil, self.variables["ANTIBOT_URI"])
 	end
 
+	-- Direct access without session => prepare challenge
+	if not self:challenge_prepared() then
+		local ok, err = self:prepare_challenge()
+		if not ok then
+			return self:ret(false, "can't prepare challenge : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
+		end
+	end
+
 	-- Display challenge needed
 	if ngx.ctx.bw.request_method == "GET" then
 		ngx.ctx.bw.antibot_display_content = true
@@ -98,13 +106,25 @@ function antibot:challenge_resolved()
 	end
 	local ok, err, raw_data = utils.get_session_var("antibot")
 	if not raw_data then
-		return false, "session is set but no antibot data", nil
+		return false, "session is set but no antibot data"
 	end
 	local data = raw_data
 	if data.resolved and self.variables["USE_ANTIBOT"] == data.type then
 		return true, "challenge resolved", data.original_uri
 	end
 	return false, "challenge not resolved", data.original_uri
+end
+
+function antibot:challenge_prepared()
+	local session, err, exists, refreshed = utils.get_session()
+	if not exists then
+		return false
+	end
+	local ok, err, raw_data = utils.get_session_var("antibot")
+	if not raw_data then
+		return false
+	end
+	return self.variables["USE_ANTIBOT"] == raw_data.type
 end
 
 function antibot:prepare_challenge()
