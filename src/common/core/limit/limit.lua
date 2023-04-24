@@ -164,7 +164,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
 	-- Save new timestamps if needed
 	if updated then
-		local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(timestamps), delay)
+		local ok, err = self.datastore:set("plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, cjson.encode(new_timestamps), delay)
 		if not ok then
 			return nil, err
 		end

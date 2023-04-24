@@ -47,7 +47,7 @@ function dnsbl:access()
 	end
 	-- Loop on DNSBL list
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
-		local result, err = self:is_in_dnsbl(server)
+		local result, err = self:is_in_dnsbl(ngx.ctx.bw.remote_addr, server)
 		if result == nil then
 			self.logger:log(ngx.ERR, "error while sending DNS request to " .. server .. " : " .. err)
 		end
@@ -87,7 +87,7 @@ function dnsbl:add_to_cache(ip, value)
 	return true
 end
 
-function dnsbl:is_in_dnsbl(server)
+function dnsbl:is_in_dnsbl(ip, server)
 	local request = resolver.arpa_str(ip) .. "." .. server
 	local ips, err = utils.get_ips(request)
 	if not ips then

@@ -131,7 +131,7 @@ function whitelist:access()
 					ngx.var.is_whitelisted = "yes"
 					ngx.ctx.bw.is_whitelisted = "yes"
 					env.set("is_whitelisted", "yes")
-					return self:ret(true, k + " is whitelisted (info : " .. whitelisted .. ")", ngx.OK)
+					return self:ret(true, k .. " is whitelisted (info : " .. whitelisted .. ")", ngx.OK)
 				end
 			end
 		end
@@ -175,7 +175,7 @@ function whitelist:check_cache()
 		if not ok then
 			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
-			return true, k + " is in cached whitelist (info : " .. cached .. ")"
+			return true, k .. " is in cached whitelist (info : " .. cached .. ")"
 		end
 		if cached then
 			already_cached[k] = true

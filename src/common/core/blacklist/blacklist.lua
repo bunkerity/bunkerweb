@@ -114,7 +114,7 @@ function blacklist:access()
 		if not ok then
 			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
-			return self:ret(true, k + " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
+			return self:ret(true, k .. " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
 		end
 		if cached then
 			already_cached[k] = true
@@ -136,7 +136,7 @@ function blacklist:access()
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
 				if blacklisted ~= "ok" then
-					return self:ret(true, k + " is blacklisted (info : " .. blacklisted .. ")", utils.get_deny_status())
+					return self:ret(true, k .. " is blacklisted (info : " .. blacklisted .. ")", utils.get_deny_status())
 				end
 			end
 		end

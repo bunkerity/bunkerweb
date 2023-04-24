@@ -102,7 +102,7 @@ function greylist:access()
 		if not cached and err ~= "success" then
 			self.logger:log(ngx.ERR, "error while checking cache : " .. err)
 		elseif cached and cached ~= "ok" then
-			return self:ret(true, k + " is in cached greylist", utils.get_deny_status())
+			return self:ret(true, k .. " is in cached greylist", utils.get_deny_status())
 		end
 		if cached then
 			already_cached[k] = true
@@ -124,7 +124,7 @@ function greylist:access()
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
 				if greylisted == "ko" then
-					return self:ret(true, k + " is not in greylist", utils.get_deny_status())
+					return self:ret(true, k .. " is not in greylist", utils.get_deny_status())
 				end
 			end
 		end
