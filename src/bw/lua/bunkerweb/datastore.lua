@@ -30,7 +30,7 @@ function datastore:keys()
 	return self.dict:get_keys(0)
 end
 
-function datastore:exp(key)
+function datastore:ttl(key)
 	local ttl, err = self.dict:ttl(key)
 	if not ttl then
 		return false, err

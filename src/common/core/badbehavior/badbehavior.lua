@@ -53,7 +53,7 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 	local counter = false
 	-- Redis case
 	if use_redis then
-		local redis_counter, err = bad_behavior.redis_increase(ip, count_time, ban_time)
+		local redis_counter, err = badbehavior.redis_increase(ip, count_time, ban_time)
 		if not redis_counter then
 			logger:log(ngx.ERR, "(increase) redis_increase failed, falling back to local : " .. err)
 		else
@@ -84,9 +84,9 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 	end
 	-- Store local ban
 	if counter > threshold then
-		local ok, err = datastore:set("bans_ip_" .. ip, "bad behavior", ban_time)
+		local ok, err = utils.add_ban(ip, "bad behavior", ban_time)
 		if not ok then
-			logger:log(ngx.ERR, "(increase) can't save ban to the datastore : " .. err)
+			logger:log(ngx.ERR, "(increase) can't save ban : " .. err)
 			return
 		end
 		logger:log(ngx.WARN, "IP " .. ip .. " is banned for " .. ban_time .. "s (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
@@ -102,9 +102,9 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 	local counter = false
 	-- Redis case
 	if use_redis then
-		local redis_counter, err = badbehavior.redis_decrease(ip)
+		local redis_counter, err = badbehavior.redis_decrease(ip, count_time)
 		if not redis_counter then
-			logger:log(ngx.ERR, "(increase) redis_increase failed, falling back to local : " .. err)
+			logger:log(ngx.ERR, "(decrease) redis_decrease failed, falling back to local : " .. err)
 		else
 			counter = redis_counter
 		end
@@ -113,7 +113,7 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 	if not counter then
 		local local_counter, err = datastore:get("plugin_badbehavior_count_" .. ip)
 		if not local_counter and err ~= "not found" then
-			logger:log(ngx.ERR, "(increase) can't get counts from the datastore : " .. err)
+			logger:log(ngx.ERR, "(decrease) can't get counts from the datastore : " .. err)
 		end
 		if local_counter == nil or local_counter <= 1 then
 			counter = 0
@@ -123,11 +123,12 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 	end
 	-- Store local counter
 	if counter <= 0 then
+		counter = 0
 		local ok, err = datastore:delete("plugin_badbehavior_count_" .. ip)
 	else
 		local ok, err = datastore:set("plugin_badbehavior_count_" .. ip, counter, count_time)
 		if not ok then
-			logger:log(ngx.ERR, "(increase) can't save counts to the datastore : " .. err)
+			logger:log(ngx.ERR, "(decrease) can't save counts to the datastore : " .. err)
 			return
 		end
 	end
@@ -149,7 +150,7 @@ function badbehavior.redis_increase(ip, count_time, ban_time)
 			redis.log(redis.LOG_WARNING, "Bad behavior increase EXPIRE error : " .. ret_expire["err"])
 			return ret_expire
 		end
-		if ret_incr > ARGV[2] then
+		if ret_incr > tonumber(ARGV[2]) then
 			local ret_set = redis.pcall("SET", KEYS[2], "bad behavior", "EX", ARGV[2])
 			if type(ret_set) == "table" and ret_set["err"] ~= nil then
 				redis.log(redis.LOG_WARNING, "Bad behavior increase SET error : " .. ret_set["err"])

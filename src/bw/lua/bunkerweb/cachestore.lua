@@ -69,13 +69,12 @@ function cachestore:get(key)
 			return {ret_get, ret_ttl}
 		]]
 		local ret, err = clusterstore:call("eval", redis_script, 1, key)
-		-- local cjson = require "cjson"
-		-- require "bunkerweb.logger":new("DEBUG"):log(ngx.ERR, cjson.encode(ret))
 		if not ret then
+			clusterstore:close()
 			return nil, err, nil
 		end
 		-- Extract values
-		clusterstore:close(redis)
+		clusterstore:close()
 		if ret[1] == ngx.null then
 			ret[1] = nil
 		end
