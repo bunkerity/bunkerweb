@@ -37,6 +37,23 @@ class Select {
 
   init() {
     window.addEventListener("click", (e) => {
+      //CASE NO BTN SELECT CLICKED
+      try {
+        if (!e.target.closest("button")) {
+          const selectEls = document.querySelectorAll(
+            "div[setting-select-dropdown]"
+          );
+          selectEls.forEach((select) => {
+            select.classList.add("hidden");
+            select.classList.remove("flex");
+          });
+          const btnEls = document.querySelectorAll("button[setting-select]");
+          btnEls.forEach((btn) => {
+            const dropdownChevron = btn.querySelector(`svg[setting-select]`);
+            dropdownChevron.classList.remove("rotate-180");
+          });
+        }
+      } catch (err) {}
       //SELECT BTN LOGIC
       try {
         if (
