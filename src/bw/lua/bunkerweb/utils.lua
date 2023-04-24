@@ -338,7 +338,7 @@ utils.get_rdns = function(ip)
 	return false, nil
 end
 
-utils.get_ips = function(fqdn, resolvers)
+utils.get_ips = function(fqdn)
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
 	if not resolvers then
