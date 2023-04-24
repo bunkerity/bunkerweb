@@ -12,14 +12,14 @@
     <button
     tab-handler="{{ plugin['id'] }}"
     type="button"
-    class="z-1000 {% if loop.first %} brightness-90 {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
+    class="{% if loop.first %} brightness-90 z-[1001]{%else %} {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
   >
     <div class="w-full flex justify-between items-center">
       <!-- text and icon -->
       <span class="text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300"> {{ plugin["name"] }} </span>
       <svg
         popover-btn="{{ plugin["name"] }}"
-        class=" z-20 fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
+        class=" fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
       >
@@ -68,32 +68,31 @@
   tab-dropdown
     class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto  max-h-90"
   >
-  {% if current_endpoint != "services" %}
-
-  <!-- general button-->
-  <button
-  tab-handler-mobile="general"
-    type="button"
-    data-select="false"
-    class="flex justify-between border-t rounded-t border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-primary dark:bg-primary my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600  dark:text-gray-300 text-gray-300"    >
-      General
-
-  </button>
-  <!-- end general button-->
-  {% endif %}
-
+  {% set first_el = "True" %}
   {% for plugin in plugins %}  {% if current_endpoint == "services" and plugin["settings"]
   and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" and plugin["settings"]
   and check_settings(plugin["settings"], "global") %}
-    <button
-    tab-handler-mobile="{{ plugin['id'] }}"
-      type="button"
-      data-select="false"
-      id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
-      class="flex justify-between {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300">
-      {{ plugin["name"] }}
-   
-    </button>
+
+  {% if loop.first %}
+  <button
+  tab-handler-mobile="{{ plugin['id'] }}"
+    type="button"
+    data-select="false"
+    id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
+    class="flex justify-between border-t rounded-t border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-1000 dark:bg-primary bg-primary text-gray-300">
+    {{ plugin["name"] }}
+  </button>
+  {% else %}
+  <button
+  tab-handler-mobile="{{ plugin['id'] }}"
+    type="button"
+    data-select="false"
+    id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
+    class="flex justify-between {% if loop.index == loop.length %}rounded-b {% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300">
+    {{ plugin["name"] }}
+ 
+  </button>
+  {%endif%}
     {% endif %} {% endfor %}
   </div>
   <!-- end dropdown-->
