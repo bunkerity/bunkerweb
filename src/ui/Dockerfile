@@ -50,7 +50,7 @@ RUN apk add --no-cache bash && \
     chmod 660 /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-# There are no CVEs for the image python:3.11.3-alpine at the moment
+RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
 
 VOLUME /data /etc/nginx
 
