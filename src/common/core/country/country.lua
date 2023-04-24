@@ -2,6 +2,7 @@ local class			= require "middleclass"
 local plugin		= require "bunkerweb.plugin"
 local utils     	= require "bunkerweb.utils"
 local cachestore 	= require "bunkerweb.cachestore"
+local cjson			= require "cjson"
 
 local country	= class("country", plugin)
 

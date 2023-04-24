@@ -188,6 +188,7 @@ function api:do_api_call()
 		local status, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
 		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, resp
 	end
+	list = cjson.decode(list)
 	for i, plugin in ipairs(list) do
 		if pcall(require, plugin.id .. "/" .. plugin.id) then
 			local plugin_lua = require(plugin.id .. "/" .. plugin.id)
