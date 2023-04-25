@@ -2,7 +2,7 @@ from io import BytesIO
 from os import getenv
 from sys import path as sys_path
 from tarfile import open as taropen
-from typing import Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 if "/usr/share/bunkerweb/utils" not in sys_path:
     sys_path.append("/usr/share/bunkerweb/utils")
@@ -18,8 +18,8 @@ from docker import DockerClient
 
 
 class ApiCaller:
-    def __init__(self, apis=[]):
-        self.__apis = apis
+    def __init__(self, apis: List[API] = None):
+        self.__apis = apis or []
         self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
 
     def auto_setup(self, bw_integration: Optional[str] = None):
@@ -101,14 +101,22 @@ class ApiCaller:
                     )
                 )
 
-    def _set_apis(self, apis):
+    def _set_apis(self, apis: List[API]):
         self.__apis = apis
 
     def _get_apis(self):
         return self.__apis
 
-    def _send_to_apis(self, method, url, files=None, data=None, response=False):
+    def _send_to_apis(
+        self,
+        method: Union[Literal["POST"], Literal["GET"]],
+        url: str,
+        files: Optional[Dict[str, BytesIO]] = None,
+        data: Optional[Dict[str, Any]] = None,
+        response: bool = False,
+    ) -> Tuple[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         ret = True
+        responses = {}
         for api in self.__apis:
             if files is not None:
                 for buffer in files.values():
@@ -130,13 +138,18 @@ class ApiCaller:
                         f"Successfully sent API request to {api.get_endpoint()}{url}",
                     )
 
+            if response:
+                instance = api.get_endpoint().replace("http://", "").split(":")[0]
+                if isinstance(resp, dict):
+                    responses[instance] = resp
+                else:
+                    responses[instance] = resp.json()
+
         if response:
-            if isinstance(resp, dict):
-                return ret, resp
-            return ret, resp.json()
+            return ret, responses
         return ret
 
-    def _send_files(self, path, url):
+    def _send_files(self, path: str, url: str) -> bool:
         ret = True
         with BytesIO() as tgz:
             with taropen(
