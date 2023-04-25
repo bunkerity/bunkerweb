@@ -96,7 +96,7 @@ helpers.fill_ctx = function()
     local data = {}
     -- Common vars
     data.kind = "http"
-    if not ngx.shared.datastore_stream then
+    if ngx.shared.datastore_stream then
         data.kind = "stream"
     end
     data.remote_addr = ngx.var.remote_addr
