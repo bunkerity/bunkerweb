@@ -1,3 +1,4 @@
 - bwcli with redis
 - stream refactoring
 - stream examples
+- prepare new antibot challenge when not resolved and "refresh page"

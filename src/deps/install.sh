@@ -31,6 +31,12 @@ CHANGE_DIR="/tmp/bunkerweb/deps/src/libmaxminddb" do_and_check_cmd ./configure -
 CHANGE_DIR="/tmp/bunkerweb/deps/src/libmaxminddb" do_and_check_cmd make -j $NTASK
 CHANGE_DIR="/tmp/bunkerweb/deps/src/libmaxminddb" do_and_check_cmd make install
 
+# Compiling and installing zlib
+echo "ℹ️ Compiling and installing zlib"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/zlib" do_and_check_cmd ./configure --prefix=/usr/share/bunkerweb/deps --libdir=/usr/share/bunkerweb/deps/lib/lua
+CHANGE_DIR="/tmp/bunkerweb/deps/src/zlib" do_and_check_cmd make -j $NTASK
+CHANGE_DIR="/tmp/bunkerweb/deps/src/zlib" do_and_check_cmd make install
+
 # Compiling and installing ModSecurity
 echo "ℹ️ Compiling and installing ModSecurity"
 # temp fix : Debian run it twice
