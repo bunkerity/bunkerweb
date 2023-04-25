@@ -49,6 +49,10 @@ function reversescan:access()
     return self:ret(true, "no port open for IP " .. ngx.ctx.bw.remote_addr)
 end
 
+function reversescan:preread()
+	return self:access()
+end
+
 function reversescan:scan(ip, port, timeout)
     local tcpsock = ngx.socket.tcp()
     tcpsock:settimeout(timeout)

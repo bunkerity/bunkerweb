@@ -45,6 +45,10 @@ function badbehavior:log_default()
 	return self:log()
 end
 
+function badbehavior:log_stream()
+	return self:log()
+end
+
 function badbehavior.increase(premature, ip, count_time, ban_time, threshold, use_redis)
 	-- Instantiate objects
 	local logger = require "bunkerweb.logger":new("badbehavior")

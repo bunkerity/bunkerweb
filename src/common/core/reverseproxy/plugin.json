@@ -29,7 +29,7 @@
       "help": "Full URL of the proxied resource (proxy_pass).",
       "id": "reverse-proxy-host",
       "label": "Reverse proxy host",
-      "regex": "^(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^.*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },

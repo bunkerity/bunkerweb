@@ -11,7 +11,7 @@ function bunkernet:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "bunkernet")
 	-- Get BunkerNet ID
-	if ngx.get_phase() ~= "init" and self.variables["USE_BUNKERNET"] == "yes" then
+	if ngx.get_phase() ~= "init" and self.variables["USE_BUNKERNET"] == "yes" and not self.is_loading then
 		local id, err = self.datastore:get("plugin_bunkernet_id")
 		if id then
 			self.bunkernet_id = id
@@ -23,6 +23,9 @@ end
 
 function bunkernet:init()
 	-- Check if init is needed
+	if self.is_loading then
+		return self:ret(true, "bunkerweb is loading")
+	end
 	local init_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
 	if init_needed == nil then
 		return self:ret(false, "can't check USE_BUNKERNET variable : " .. err)
@@ -73,6 +76,10 @@ function bunkernet:init()
 end
 
 function bunkernet:log(bypass_use_bunkernet)
+	-- Check if not loading is needed
+	if self.is_loading then
+		return self:ret(true, "bunkerweb is loading")
+	end
 	if not bypass_use_bunkernet then
 		-- Check if BunkerNet is enabled
 		if self.variables["USE_BUNKERNET"] ~= "yes" then
@@ -118,6 +125,10 @@ function bunkernet:log(bypass_use_bunkernet)
 end
 
 function bunkernet:log_default()
+	-- Check if not loading is needed
+	if self.is_loading then
+		return self:ret(true, "bunkerweb is loading")
+	end
 	-- Check if BunkerNet is activated
 	local check, err = utils.has_variable("USE_BUNKERNET", "yes")
 	if check == nil then
@@ -136,6 +147,10 @@ function bunkernet:log_default()
 	end
 	-- Call log method
 	return self:log(true)
+end
+
+function bunkernet:log_stream()
+	return self:log()
 end
 
 function bunkernet:request(method, url, data)

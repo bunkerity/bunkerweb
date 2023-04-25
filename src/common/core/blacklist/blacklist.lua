@@ -245,7 +245,6 @@ function blacklist:is_blacklisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			self.logger:log(ngx.ERR, "7")
 			return nil, err
 		end
 		local ignore = false

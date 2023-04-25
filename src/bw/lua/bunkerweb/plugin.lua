@@ -33,6 +33,11 @@ function plugin:initialize(id)
         self.logger:log(ngx.ERR, "can't get IS_LOADING variable : " .. err)
     end
     self.is_loading = is_loading == "yes"
+    -- Kind of server
+    self.kind = "http"
+    if ngx.shared.datastore_stream then
+        self.kind = "stream"
+    end
 end
 
 function plugin:get_id()
