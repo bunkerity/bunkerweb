@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from os import _exit
+from os import _exit, getenv
 from sys import exit as sys_exit, path
 from traceback import format_exc
 
@@ -34,11 +34,17 @@ if __name__ == "__main__":
         # Ban subparser
         parser_ban = subparsers.add_parser("ban", help="add a ban to the cache")
         parser_ban.add_argument("ip", type=str, help="IP address to ban")
+
+        ban_time = getenv("BAD_BEHAVIOR_BAN_TIME", "86400")
+        if not ban_time.isdigit():
+            ban_time = "86400"
+        ban_time = int(ban_time)
+
         parser_ban.add_argument(
-            "exp",
+            "-exp",
             type=int,
-            help="banning time in seconds (default : 86400)",
-            default=86400,
+            help=f"banning time in seconds (default : {ban_time})",
+            default=ban_time,
         )
 
         # Bans subparser
