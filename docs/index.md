@@ -7,17 +7,19 @@
   <figcaption>Make your web services secure by default !</figcaption>
 </figure>
 
-BunkerWeb is a web server based on the notorious [NGINX](https://nginx.org/) and focused on security.
+BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
 
-It integrates into existing environments ([Linux](/1.4/integrations/#linux), [Docker](/1.4/integrations/#docker), [Swarm](/1.4/integrations/#swarm), [Kubernetes](/1.4/integrations/#Kubernetes), …) to make your web services "secure by default" without any hassle. The security best practices are automatically applied for you while keeping control of every setting to meet your use case.
+Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](/1.5.0-beta/integrations/#linux), [Docker](/1.5.0-beta/integrations/#docker), [Swarm](/1.5.0-beta/integrations/#swarm), [Kubernetes](/1.5.0-beta/integrations/#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](/1.5.0-beta/web-ui/) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
 
-BunkerWeb contains primary [security features](/1.4/security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](/1.4/plugins).
+BunkerWeb contains primary [security features](/1.5.0-beta/security-tuning/) as part of the core but can be easily extended with additional ones thanks to a [plugin system](/1.5.0-beta/plugins/).
 
 ## Why BunkerWeb ?
 
-- **Easy integration into existing environments** : support for Linux, Docker, Swarm and Kubernetes
+- **Easy integration into existing environments** : support for Linux, Docker, Swarm, Kubernetes, Ansible, Vagrant, ...
 - **Highly customizable** : enable, disable and configure features easily to meet your use case
 - **Secure by default** : offers out-of-the-box and hassle-free minimal security for your web services
+- **Awesome web UI** : keep control of everything more efficiently without the need of the CLI
+- **Plugin system** : extend BunkerWeb to meet your own use-cases
 - **Free as in "freedom"** : licensed under the free [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 ## Security features
@@ -33,7 +35,7 @@ A non-exhaustive list of security features :
 - **Block known bad IPs** with external blacklists and DNSBL
 - And much more ...
 
-Learn more about the core security features in the [security tuning](security-tuning) section of the documentation.
+Learn more about the core security features in the [security tuning](/1.5.0-beta/security-tuning) section of the documentation.
 
 ## Demo
 
