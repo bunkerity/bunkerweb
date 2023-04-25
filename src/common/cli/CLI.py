@@ -1,3 +1,4 @@
+from os import getenv
 from dotenv import dotenv_values
 from pathlib import Path
 from redis import StrictRedis
@@ -35,8 +36,22 @@ def format_remaining_time(seconds):
 
 class CLI(ApiCaller):
     def __init__(self):
-        self.__variables = dotenv_values("/etc/nginx/variables.env")
-        self.__logger = setup_logger("CLI", self.__variables.get("LOG_LEVEL", "INFO"))
+        self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
+
+        if not Path("/usr/share/bunkerweb/db").is_dir():
+            self.__variables = dotenv_values("/etc/nginx/variables.env")
+        else:
+            if "/usr/share/bunkerweb/db" not in sys_path:
+                sys_path.append("/usr/share/bunkerweb/db")
+
+            from Database import Database
+
+            db = Database(
+                self.__logger,
+                sqlalchemy_string=getenv("DATABASE_URI", None),
+            )
+            self.__variables = db.get_config()
+
         self.__integration = self.__detect_integration()
         self.__use_redis = self.__variables.get("USE_REDIS", "no") == "yes"
         self.__redis = None
@@ -95,7 +110,11 @@ class CLI(ApiCaller):
                 )
                 self.__use_redis = False
 
-        if self.__integration in ("docker", "linux"):
+        if not Path("/usr/share/bunkerweb/db").is_dir() or self.__integration not in (
+            "kubernetes",
+            "swarm",
+            "autoconf",
+        ):
             # Docker & Linux case
             super().__init__(
                 apis=[
@@ -154,14 +173,21 @@ class CLI(ApiCaller):
         return False, "error"
 
     def bans(self) -> Tuple[bool, str]:
-        bans = {}
+        servers = {}
+
+        ret, resp = self._send_to_apis("GET", "/bans", response=True)
+        if not ret:
+            return False, "error"
+
+        for k, v in resp.items():
+            servers[k] = v.get("data", [])
 
         if self.__redis:
-            bans["redis"] = []
+            servers["redis"] = []
             for key in self.__redis.scan_iter("bans_ip_*"):
                 ip = key.decode("utf-8").replace("bans_ip_", "")
                 exp = self.__redis.ttl(key)
-                bans["redis"].append(
+                servers["redis"].append(
                     {
                         "ip": ip,
                         "exp": exp,
@@ -169,18 +195,15 @@ class CLI(ApiCaller):
                     }
                 )
 
-        ret, resp = self._send_to_apis("GET", "/bans", response=True)  # TODO: fix this
-        if not ret:
-            return False, "error"
+        cli_str = ""
+        for server, bans in servers.items():
+            cli_str += f"List of bans for {server}:\n"
+            if not bans:
+                cli_str += "No ban found\n"
 
-        print(resp, flush=True)  # TODO: handle response
+            for ban in bans:
+                cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
+            else:
+                cli_str += "\n"
 
-        # bans.extend(resp.get("data", []))
-
-        # if len(bans) == 0:
-        #     return True, "No ban found"
-
-        # cli_str = "List of bans :\n"
-        # for ban in bans:
-        #     cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
-        # return True, cli_str
+        return True, cli_str

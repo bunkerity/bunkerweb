@@ -36,13 +36,12 @@ COPY src/common/api /usr/share/bunkerweb/api
 COPY src/common/cli /usr/share/bunkerweb/cli
 COPY src/common/confs /usr/share/bunkerweb/confs
 COPY src/common/core /usr/share/bunkerweb/core
-COPY src/common/db /usr/share/bunkerweb/db
 COPY src/common/gen /usr/share/bunkerweb/gen
 COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/common/settings.json /usr/share/bunkerweb/settings.json
 COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
-COPY misc/*.ascii /usr/share/bunkerweb/
+COPY misc/*.ascii /usr/share/bunkerweb/misc/
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache pcre bash python3 && \

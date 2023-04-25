@@ -2,7 +2,7 @@
 
 . /usr/share/bunkerweb/helpers/utils.sh
 
-ascii_array=($(ls /usr/share/bunkerweb/*.ascii))
+ascii_array=($(ls /usr/share/bunkerweb/misc/*.ascii))
 cat ${ascii_array[$(($RANDOM % ${#ascii_array[@]}))]}
 
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSION) ..."
