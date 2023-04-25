@@ -165,11 +165,10 @@ function whitelist:check_cache()
 	if ngx.ctx.bw.uri then
 		checks["URI"] = "uri" .. ngx.ctx.bw.uri
 	end
-	local already_cached = {
-		["IP"] = false,
-		["URI"] = false,
-		["UA"] = false
-	}
+	local already_cached = {}
+	for i, k in ipairs(checks) do
+		already_cached[k] = false
+	end
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
 		if not ok then

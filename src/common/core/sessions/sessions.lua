@@ -11,7 +11,7 @@ function sessions:initialize()
 end
 
 function sessions:init()
-    if self.is_loading then
+    if self.is_loading or self.kind ~= "http" then
         return self:ret(true, "init not needed")
     end
     -- Get redis vars
