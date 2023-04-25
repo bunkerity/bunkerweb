@@ -18,7 +18,7 @@ start() {
     fi
     source /etc/bunkerweb/ui.env
     export $(cat /etc/bunkerweb/ui.env)
-    python3 -m gunicorn --graceful-timeout=0 --bind=127.0.0.1:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=2 main:app &
+    python3 -m gunicorn --graceful-timeout=0 --bind=127.0.0.1:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=4 main:app &
     echo $! > /var/tmp/bunkerweb/ui.pid
 }
 

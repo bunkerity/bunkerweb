@@ -318,6 +318,7 @@ if __name__ == "__main__":
         if Path("/var/lib/bunkerweb/db.sqlite3").exists():
             chmod("/var/lib/bunkerweb/db.sqlite3", 0o760)
 
+        first_run = True
         while True:
             # Instantiate scheduler
             scheduler = JobScheduler(
@@ -346,7 +347,11 @@ if __name__ == "__main__":
                         "--output",
                         "/etc/nginx",
                     ]
-                    + (["--variables", args.variables] if args.variables else []),
+                    + (
+                        ["--variables", args.variables]
+                        if args.variables and first_run
+                        else []
+                    ),
                     stdin=DEVNULL,
                     stderr=STDOUT,
                 )
@@ -431,6 +436,7 @@ if __name__ == "__main__":
             generate = True
             scheduler.setup()
             need_reload = False
+            first_run = False
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
@@ -439,83 +445,82 @@ if __name__ == "__main__":
                 scheduler.run_pending()
                 sleep(1)
 
-                if not args.variables:
-                    # check if the custom configs have changed since last time
-                    tmp_custom_configs = db.get_custom_configs()
-                    if custom_configs != tmp_custom_configs:
-                        logger.info("Custom configs changed, generating ...")
-                        logger.debug(f"{tmp_custom_configs=}")
-                        logger.debug(f"{custom_configs=}")
-                        custom_configs = deepcopy(tmp_custom_configs)
+                # check if the custom configs have changed since last time
+                tmp_custom_configs = db.get_custom_configs()
+                if custom_configs != tmp_custom_configs:
+                    logger.info("Custom configs changed, generating ...")
+                    logger.debug(f"{tmp_custom_configs=}")
+                    logger.debug(f"{custom_configs=}")
+                    custom_configs = deepcopy(tmp_custom_configs)
 
-                        # Remove old custom configs files
-                        logger.info("Removing old custom configs files ...")
-                        for file in glob("/data/configs/*"):
-                            if Path(file).is_symlink() or Path(file).is_file():
-                                Path(file).unlink()
-                            elif Path(file).is_dir():
-                                rmtree(file, ignore_errors=False)
+                    # Remove old custom configs files
+                    logger.info("Removing old custom configs files ...")
+                    for file in glob("/data/configs/*"):
+                        if Path(file).is_symlink() or Path(file).is_file():
+                            Path(file).unlink()
+                        elif Path(file).is_dir():
+                            rmtree(file, ignore_errors=False)
 
-                        logger.info("Generating new custom configs ...")
-                        generate_custom_configs(custom_configs, integration, api_caller)
+                    logger.info("Generating new custom configs ...")
+                    generate_custom_configs(custom_configs, integration, api_caller)
 
-                        # reload nginx
-                        logger.info("Reloading nginx ...")
-                        if integration not in (
-                            "Autoconf",
-                            "Swarm",
-                            "Kubernetes",
-                            "Docker",
-                        ):
-                            # Reloading the nginx server.
-                            proc = subprocess_run(
-                                # Reload nginx
-                                ["/usr/sbin/nginx", "-s", "reload"],
-                                stdin=DEVNULL,
-                                stderr=STDOUT,
-                                env=deepcopy(env),
-                            )
-                            if proc.returncode == 0:
-                                logger.info("Successfully reloaded nginx")
-                            else:
-                                logger.error(
-                                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
-                                )
-                        else:
-                            need_reload = True
-
-                    # check if the plugins have changed since last time
-                    tmp_external_plugins = db.get_plugins(external=True)
-                    if external_plugins != tmp_external_plugins:
-                        logger.info("External plugins changed, generating ...")
-                        logger.debug(f"{tmp_external_plugins=}")
-                        logger.debug(f"{external_plugins=}")
-                        external_plugins = deepcopy(tmp_external_plugins)
-
-                        # Remove old external plugins files
-                        logger.info("Removing old external plugins files ...")
-                        for file in glob("/data/plugins/*"):
-                            if Path(file).is_symlink() or Path(file).is_file():
-                                Path(file).unlink()
-                            elif Path(file).is_dir():
-                                rmtree(file, ignore_errors=False)
-
-                        logger.info("Generating new external plugins ...")
-                        generate_external_plugins(
-                            db.get_plugins(external=True, with_data=True),
-                            integration,
-                            api_caller,
+                    # reload nginx
+                    logger.info("Reloading nginx ...")
+                    if integration not in (
+                        "Autoconf",
+                        "Swarm",
+                        "Kubernetes",
+                        "Docker",
+                    ):
+                        # Reloading the nginx server.
+                        proc = subprocess_run(
+                            # Reload nginx
+                            ["/usr/sbin/nginx", "-s", "reload"],
+                            stdin=DEVNULL,
+                            stderr=STDOUT,
+                            env=deepcopy(env),
                         )
+                        if proc.returncode == 0:
+                            logger.info("Successfully reloaded nginx")
+                        else:
+                            logger.error(
+                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                            )
+                    else:
                         need_reload = True
 
-                    # check if the config have changed since last time
-                    tmp_env = db.get_config()
-                    if env != tmp_env:
-                        logger.info("Config changed, generating ...")
-                        logger.debug(f"{tmp_env=}")
-                        logger.debug(f"{env=}")
-                        env = deepcopy(tmp_env)
-                        need_reload = True
+                # check if the plugins have changed since last time
+                tmp_external_plugins = db.get_plugins(external=True)
+                if external_plugins != tmp_external_plugins:
+                    logger.info("External plugins changed, generating ...")
+                    logger.debug(f"{tmp_external_plugins=}")
+                    logger.debug(f"{external_plugins=}")
+                    external_plugins = deepcopy(tmp_external_plugins)
+
+                    # Remove old external plugins files
+                    logger.info("Removing old external plugins files ...")
+                    for file in glob("/data/plugins/*"):
+                        if Path(file).is_symlink() or Path(file).is_file():
+                            Path(file).unlink()
+                        elif Path(file).is_dir():
+                            rmtree(file, ignore_errors=False)
+
+                    logger.info("Generating new external plugins ...")
+                    generate_external_plugins(
+                        db.get_plugins(external=True, with_data=True),
+                        integration,
+                        api_caller,
+                    )
+                    need_reload = True
+
+                # check if the config have changed since last time
+                tmp_env = db.get_config()
+                if env != tmp_env:
+                    logger.info("Config changed, generating ...")
+                    logger.debug(f"{tmp_env=}")
+                    logger.debug(f"{env=}")
+                    env = deepcopy(tmp_env)
+                    need_reload = True
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

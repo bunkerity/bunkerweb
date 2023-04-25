@@ -23,23 +23,22 @@ class Config:
         self.__logger = logger
         self.__db = db
 
-        if not Path("/usr/sbin/nginx").exists():
-            while not self.__db.is_initialized():
-                self.__logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
-                sleep(5)
+        while not self.__db.is_initialized():
+            self.__logger.warning(
+                "Database is not initialized, retrying in 5s ...",
+            )
+            sleep(5)
 
+        env = self.__db.get_config()
+        while not self.__db.is_first_config_saved() or not env:
+            self.__logger.warning(
+                "Database doesn't have any config saved yet, retrying in 5s ...",
+            )
+            sleep(5)
             env = self.__db.get_config()
-            while not self.__db.is_first_config_saved() or not env:
-                self.__logger.warning(
-                    "Database doesn't have any config saved yet, retrying in 5s ...",
-                )
-                sleep(5)
-                env = self.__db.get_config()
 
-            self.__logger.info("Database is ready")
-            Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
+        self.__logger.info("Database is ready")
+        Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
 
     def __env_to_dict(self, filename: str) -> dict:
         """Converts the content of an env file into a dict
@@ -144,21 +143,6 @@ class Config:
     def get_plugins(
         self, *, external: bool = False, with_data: bool = False
     ) -> List[dict]:
-        if not Path("/usr/sbin/nginx").exists():
-            plugins = self.__db.get_plugins(external=external, with_data=with_data)
-            plugins.sort(key=lambda x: x["name"])
-
-            if not external:
-                general_plugin = None
-                for x, plugin in enumerate(plugins):
-                    if plugin["name"] == "General":
-                        general_plugin = plugin
-                        del plugins[x]
-                        break
-                plugins.insert(0, general_plugin)
-
-            return plugins
-
         plugins = []
 
         for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + (
@@ -231,12 +215,6 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        if Path("/usr/sbin/nginx").exists():
-            return {
-                k: ({"value": v, "method": "ui"} if methods else v)
-                for k, v in self.__env_to_dict("/etc/nginx/variables.env").items()
-            }
-
         return self.__db.get_config(methods=methods)
 
     def get_services(self, methods: bool = True) -> list[dict]:
@@ -247,22 +225,6 @@ class Config:
         list
             The services
         """
-        if Path("/usr/sbin/nginx").exists():
-            services = []
-            plugins_settings = self.get_plugins_settings()
-            for filename in iglob("/etc/nginx/**/variables.env"):
-                service = filename.split("/")[3]
-                env = {
-                    k.replace(f"{service}_", ""): (
-                        {"value": v, "method": "ui"} if methods else v
-                    )
-                    for k, v in self.__env_to_dict(filename).items()
-                    if k.startswith(f"{service}_") or k in plugins_settings
-                }
-                services.append(env)
-
-            return services
-
         return self.__db.get_services_settings(methods=methods)
 
     def check_variables(self, variables: dict, _global: bool = False) -> int:
