@@ -24,7 +24,7 @@ function country:access()
 		return self:ret(true, "country not activated")
 	end
 	-- Check if IP is in cache
-	local data, err = self:is_in_cache(ngx.ctx.bw.remote_addr)
+	local ok, data = self:is_in_cache(ngx.ctx.bw.remote_addr)
 	if data then
 		if data.result == "ok" then
 			return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in country cache (not blacklisted, country = " .. data.country .. ")")

@@ -220,27 +220,19 @@ function blacklist:is_blacklisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
-		if not rdns_list then
-			return false, err
-		end
-		-- Check if rDNS is in ignore list
-		local ignore = false
-		for i, ignore_suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-			for j, rdns in ipairs(rdns_list) do
+		local rdns, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
+		if rdns then
+			-- Check if rDNS is in ignore list
+			local ignore = false
+			for i, ignore_suffix in ipairs(self.lists["IGNORE_RDNS"]) do
 				if rdns:sub(-#ignore_suffix) == ignore_suffix then
 					ignore = true
 					break
 				end
 			end
-			if ignore then
-				break
-			end
-		end
-		-- Check if rDNS is in blacklist
-		if not ignore then
-			for i, suffix in ipairs(self.lists["RDNS"]) do
-				for j, rdns in ipairs(rdns_list) do
+			-- Check if rDNS is in blacklist
+			if not ignore then
+				for i, suffix in ipairs(self.lists["RDNS"]) do
 					if rdns:sub(-#suffix) == suffix then
 						return true, "rDNS " .. suffix
 					end
