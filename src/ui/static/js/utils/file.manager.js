@@ -1,15 +1,15 @@
 class FolderNav {
   constructor(prefix) {
     this.prefix = prefix;
-    this.breadContainer = document.querySelector(`[${this.prefix}-breadcrumb]`);
-    this.container = document.querySelector(`[${this.prefix}-container]`);
-    this.listContainer = document.querySelector(`[${this.prefix}-folders]`);
-    this.els = document.querySelectorAll(`div[${this.prefix}-element]`);
+    this.breadContainer = document.querySelector(`[data-${this.prefix}-breadcrumb]`);
+    this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.listContainer = document.querySelector(`[data-${this.prefix}-folders]`);
+    this.els = document.querySelectorAll(`div[data-${this.prefix}-element]`);
     this.files = document.querySelectorAll(
-      `div[${this.prefix}-element][_type='file']`
+      `div[data-${this.prefix}-element][data-_type='file']`
     );
-    this.addFileEl = document.querySelector(`[${this.prefix}-add-file]`);
-    this.addFolderEl = document.querySelector(`[${this.prefix}-add-folder]`);
+    this.addFileEl = document.querySelector(`[data-${this.prefix}-add-file]`);
+    this.addFolderEl = document.querySelector(`[data-${this.prefix}-add-folder]`);
     this.initSorted();
     this.initNav();
   }
@@ -25,9 +25,9 @@ class FolderNav {
     this.container.addEventListener("click", (e) => {
       //GO ON NESTED FOLDER
       try {
-        if (e.target.closest("div").getAttribute("_type") === "folder") {
+        if (e.target.closest("div").getAttribute("data-_type") === "folder") {
           //avoid logic on action btn click
-          const folder = e.target.closest("div[_type='folder']");
+          const folder = e.target.closest("div[data-_type='folder']");
           this.updatedNested(folder);
         }
       } catch (err) {}
@@ -36,8 +36,8 @@ class FolderNav {
         if (
           e.target
             .closest("li")
-            .hasAttribute(`${this.prefix}-breadcrumb-item`) &&
-          !e.target.closest("li").hasAttribute(`${this.prefix}-back`) &&
+            .hasAttribute(`data-${this.prefix}-breadcrumb-item`) &&
+          !e.target.closest("li").hasAttribute(`data-${this.prefix}-back`) &&
           e.target.closest("li").nextSibling !== null
         ) {
           const breadItem = e.target.closest("li");
@@ -47,8 +47,8 @@ class FolderNav {
       //BREADCRUMB BACK LOGIC
       try {
         if (
-          e.target.closest("li").hasAttribute(`${this.prefix}-back`) &&
-          +this.breadContainer.lastElementChild.getAttribute("level") !== 0
+          e.target.closest("li").hasAttribute(`data-${this.prefix}-back`) &&
+          +this.breadContainer.lastElementChild.getAttribute("data-level") !== 0
         ) {
           //back is like clicking on last prev element
           const prevItem =
@@ -81,7 +81,7 @@ class FolderNav {
     //remove useless bread
     this.removeBreadElByLvl(+prevLvl);
     const folder = document.querySelector(
-      `div[${this.prefix}-element][path='${item.getAttribute("path")}']`
+      `div[data-${this.prefix}-element][data-path='${item.getAttribute("data-path")}']`
     );
     this.updateActions(folder);
   }
@@ -91,8 +91,8 @@ class FolderNav {
     //by default
     this.hideAddConf();
     //check if folder allow add file/folder
-    const isAddFile = folder.getAttribute("can-create-file");
-    const isAddFolder = folder.getAttribute("can-create-folder");
+    const isAddFile = folder.getAttribute("data-can-create-file");
+    const isAddFolder = folder.getAttribute("data-can-create-folder");
     isAddFile === "True" ? this.addFileEl.classList.remove("hidden") : "";
     isAddFolder === "True" ? this.addFolderEl.classList.remove("hidden") : "";
   }
@@ -104,11 +104,11 @@ class FolderNav {
 
   showCurrentFolderEls(path, lvl) {
     const nestedEl = document.querySelectorAll(
-      `div[path^="${path}/"][level="${+lvl + 1}"]`
+      `div[data-path^="${path}/"][data-level="${+lvl + 1}"]`
     );
     for (let i = 0; i < nestedEl.length; i++) {
       const el = nestedEl[i];
-      el.setAttribute("current-el", "");
+      el.setAttribute("data-current-el", "");
       el.classList.remove("hidden");
     }
   }
@@ -117,28 +117,28 @@ class FolderNav {
   //the clicked bread item
   removeBreadElByLvl(lvl) {
     const breadcrumbItem = this.breadContainer.querySelectorAll(
-      `[${this.prefix}-breadcrumb-item]`
+      `[data-${this.prefix}-breadcrumb-item]`
     );
     breadcrumbItem.forEach((item) => {
-      if (item.hasAttribute("level") && +item.getAttribute("level") > lvl)
+      if (item.hasAttribute("data-level") && +item.getAttribute("data-level") > lvl)
         item.remove();
     });
   }
 
   //retrieve path, level and text
   getElAtt(el) {
-    const newPath = el.getAttribute("path");
-    const newLvl = el.getAttribute("level");
-    const newTxt = el.getAttribute("name");
+    const newPath = el.getAttribute("data-path");
+    const newLvl = el.getAttribute("data-level");
+    const newTxt = el.getAttribute("data-name");
     return [newPath, newLvl, newTxt];
   }
 
   //hidden all folders
   hiddenConfEls() {
-    this.els = document.querySelectorAll(`div[${this.prefix}-element]`);
+    this.els = document.querySelectorAll(`div[data-${this.prefix}-element]`);
     this.els.forEach((el) => {
       el.classList.add("hidden");
-      el.removeAttribute("current-el");
+      el.removeAttribute("data-current-el");
     });
   }
 
@@ -149,10 +149,10 @@ class FolderNav {
     itemEl.className = "leading-normal text-sm";
     //set item atts
     const itemAtt = [
-      ["path", path],
-      [`${this.prefix}-breadcrumb-item`, ""],
-      ["level", level],
-      ["name", name],
+      ["data-path", path],
+      [`data-${this.prefix}-breadcrumb-item`, ""],
+      ["data-level", level],
+      ["data-name", name],
     ];
     for (let i = 0; i < itemAtt.length; i++) {
       itemEl.setAttribute(`${itemAtt[i][0]}`, `${itemAtt[i][1]}`);
@@ -171,9 +171,9 @@ class FolderNav {
 class FolderDropdown {
   constructor(prefix) {
     this.prefix = prefix;
-    this.container = document.querySelector(`[${this.prefix}-container]`);
+    this.container = document.querySelector(`[data-${this.prefix}-container]`);
     this.dropEls = document.querySelectorAll(
-      `[${this.prefix}-action-dropdown]`
+      `[data-${this.prefix}-action-dropdown]`
     );
     this.init();
   }
@@ -184,7 +184,7 @@ class FolderDropdown {
       //remove when none click
       try {
         if (
-          !e.target.closest("div").hasAttribute(`${this.prefix}-action-button`)
+          !e.target.closest("div").hasAttribute(`data-${this.prefix}-action-button`)
         ) {
           this.hideDropEls();
         }
@@ -192,11 +192,11 @@ class FolderDropdown {
       //show dropdown actions for folders
       try {
         if (
-          e.target.closest("div").hasAttribute(`${this.prefix}-action-button`)
+          e.target.closest("div").hasAttribute(`data-${this.prefix}-action-button`)
         ) {
           const dropEl = e.target
-            .closest(`div[${this.prefix}-element]`)
-            .querySelector(`[${this.prefix}-action-dropdown]`);
+            .closest(`div[data-${this.prefix}-element]`)
+            .querySelector(`[data-${this.prefix}-action-dropdown]`);
           //avoid multiple dropdown
           if (prevActionBtn === "") prevActionBtn = dropEl;
           if (prevActionBtn !== dropEl) this.hideDropEls();
@@ -209,13 +209,13 @@ class FolderDropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-action-dropdown-btn`)
+            .hasAttribute(`data-${this.prefix}-action-dropdown-btn`)
         ) {
           const att = e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-action-dropdown-btn`);
+            .getAttribute(`data-${this.prefix}-action-dropdown-btn`);
           const dropEl = document.querySelector(
-            `[${this.prefix}-action-dropdown="${att}"]`
+            `[data-${this.prefix}-action-dropdown="${att}"]`
           );
           this.hideDrop(dropEl);
         }
@@ -245,7 +245,7 @@ class FolderDropdown {
 class FolderEditor {
   constructor() {
     this.editor = ace.edit("editor");
-    this.darkMode = document.querySelector("[dark-toggle]");
+    this.darkMode = document.querySelector("[data-dark-toggle]");
     this.initEditor();
     this.listenDarkToggle();
   }
@@ -287,32 +287,32 @@ class FolderModal {
   constructor(prefix) {
     this.prefix = prefix;
     //container
-    this.container = document.querySelector(`[${this.prefix}-container]`);
+    this.container = document.querySelector(`[data-${this.prefix}-container]`);
     //add service/file elements
-    this.breadContainer = document.querySelector(`[${this.prefix}-breadcrumb]`);
+    this.breadContainer = document.querySelector(`[data-${this.prefix}-breadcrumb]`);
     this.addConfContainer = document.querySelector(
-      `[${this.prefix}-add-container]`
+      `[data-${this.prefix}-add-container]`
     );
     //modal DOM elements
-    this.form = document.querySelector(`[${this.prefix}-modal-form]`);
-    this.modalEl = document.querySelector(`[${this.prefix}-modal]`);
+    this.form = document.querySelector(`[data-${this.prefix}-modal-form]`);
+    this.modalEl = document.querySelector(`[data-${this.prefix}-modal]`);
     this.modalTitle = this.modalEl.querySelector(
-      `[${this.prefix}-modal-title]`
+      `[data-${this.prefix}-modal-title]`
     );
-    this.modalPath = this.modalEl.querySelector(`[${this.prefix}-modal-path]`);
+    this.modalPath = this.modalEl.querySelector(`[data-${this.prefix}-modal-path]`);
     this.modalEditor = this.modalEl.querySelector(
-      `[${this.prefix}-modal-editor]`
+      `[data-${this.prefix}-modal-editor]`
     );
     this.modalPathPrev = this.modalPath.querySelector(
-      `p[${this.prefix}-modal-path-prefix]`
+      `p[data-${this.prefix}-modal-path-prefix]`
     );
     this.modalPathName = this.modalPath.querySelector("input");
     this.modalPathSuffix = this.modalPath.querySelector(
-      `p[${this.prefix}-modal-path-suffix]`
+      `p[data-${this.prefix}-modal-path-suffix]`
     );
 
     this.modalSubmit = this.modalEl.querySelector(
-      `[${this.prefix}-modal-submit]`
+      `[data-${this.prefix}-modal-submit]`
     );
     //hidden input for backend
     this.modalInpPath = this.modalEl.querySelector("#path");
@@ -336,7 +336,7 @@ class FolderModal {
     this.addConfContainer.addEventListener("click", (e) => {
       //add folder
       try {
-        if (e.target.closest("li").hasAttribute(`${this.prefix}-add-folder`)) {
+        if (e.target.closest("li").hasAttribute(`data-${this.prefix}-add-folder`)) {
           this.setModal(
             "new",
             this.getPathFromBread(),
@@ -349,7 +349,7 @@ class FolderModal {
       } catch (err) {}
       //add file
       try {
-        if (e.target.closest("li").hasAttribute(`${this.prefix}-add-file`)) {
+        if (e.target.closest("li").hasAttribute(`data-${this.prefix}-add-file`)) {
           this.setModal(
             "new",
             this.getPathFromBread(),
@@ -367,10 +367,10 @@ class FolderModal {
     this.container.addEventListener("click", (e) => {
       //click on file logic
       try {
-        if (e.target.closest("div").getAttribute("_type") == "file") {
+        if (e.target.closest("div").getAttribute("data-_type") == "file") {
           const btnEl = e.target
             .closest("div")
-            .querySelector('button[value="view"]');
+            .querySelector('button[value]');
           const [action, path, type, content, name, level] =
             this.getInfoFromActionBtn(btnEl);
           this.setModal(action, path, type, content, name, level);
@@ -382,7 +382,7 @@ class FolderModal {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-action-dropdown-btn`) &&
+            .hasAttribute(`data-${this.prefix}-action-dropdown-btn`) &&
           e.target.closest("button").getAttribute("value") !== "download"
         ) {
           const btnEl = e.target.closest("button");
@@ -397,7 +397,7 @@ class FolderModal {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-action-dropdown-btn`) &&
+            .hasAttribute(`data-${this.prefix}-action-dropdown-btn`) &&
           e.target.closest("button").getAttribute("value") === "download"
         ) {
           const btnEl = e.target.closest("button");
@@ -414,7 +414,7 @@ class FolderModal {
       //close modal logic
       try {
         if (
-          e.target.closest("button").hasAttribute(`${this.prefix}-modal-close`)
+          e.target.closest("button").hasAttribute(`data-${this.prefix}-modal-close`)
         ) {
           this.closeModal();
         }
@@ -467,12 +467,12 @@ class FolderModal {
   //for add file/folder btn
   //get path of last bread element
   getPathFromBread() {
-    const path = this.breadContainer.lastElementChild.getAttribute("path");
+    const path = this.breadContainer.lastElementChild.getAttribute("data-path");
     return `${path}/`;
   }
 
   getLevelFromBread() {
-    const level = this.breadContainer.lastElementChild.getAttribute("level");
+    const level = this.breadContainer.lastElementChild.getAttribute("data-level");
     return level;
   }
   //set all needed data from btn action and folder info
@@ -562,16 +562,16 @@ class FolderModal {
   //get all needed info when clicking on action btn
   getInfoFromActionBtn(btnEl) {
     const action = btnEl.getAttribute("value");
-    const name = btnEl.getAttribute(`${this.prefix}-action-dropdown-btn`);
-    const folder = btnEl.closest(`[${this.prefix}-element]`);
-    const level = folder.getAttribute("level");
-    const path = folder.getAttribute("path");
-    const type = folder.getAttribute("_type");
+    const name = btnEl.getAttribute(`data-${this.prefix}-action-dropdown-btn`);
+    const folder = btnEl.closest(`[data-${this.prefix}-element]`);
+    const level = folder.getAttribute("data-level");
+    const path = folder.getAttribute("data-path");
+    const type = folder.getAttribute("data-_type");
     let content;
     try {
       content = folder
-        .querySelector(`[${this.prefix}-content]`)
-        .getAttribute("value");
+        .querySelector(`[data-${this.prefix}-content]`)
+        .getAttribute("data-value");
     } catch (err) {
       content = "";
     }

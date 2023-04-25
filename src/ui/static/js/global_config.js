@@ -15,12 +15,12 @@ class Multiple {
   init() {
     //hide multiple btn if no multiple exist on a plugin
     const multiples = document.querySelectorAll(
-      `[${this.prefix}-settings-multiple]`
+      `[data-${this.prefix}-settings-multiple]`
     );
     multiples.forEach((container) => {
-      if (container.querySelectorAll(`[setting-container]`).length <= 0)
+      if (container.querySelectorAll(`[data-setting-container]`).length <= 0)
         container.parentElement
-          .querySelector("[multiple-handler]")
+          .querySelector("[data-multiple-handler]")
           .classList.add("hidden");
     });
   }
@@ -36,5 +36,5 @@ const format = new FormatValue();
 const setMultiple = new Multiple("global-config");
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
-  "[service-content='settings']"
+  "[data-service-content='settings']"
 );

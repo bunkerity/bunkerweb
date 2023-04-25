@@ -14,12 +14,12 @@ class Dropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-setting-select`) &&
+            .hasAttribute(`data-${this.prefix}-setting-select`) &&
           !e.target.closest("button").hasAttribute(`disabled`)
         ) {
           const btnName = e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select`);
+            .getAttribute(`data-${this.prefix}-setting-select`);
           if (this.lastDrop !== btnName) {
             this.lastDrop = btnName;
             this.closeAllDrop();
@@ -32,12 +32,12 @@ class Dropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-setting-select-dropdown-btn`)
+            .hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)
         ) {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -49,7 +49,7 @@ class Dropdown {
           this.changeDropBtnStyle(btnSetting, btn);
           //show / hide filter
           if (btnSetting === "instances") {
-            this.hideFilterOnLocal(btn.getAttribute("_type"));
+            this.hideFilterOnLocal(btn.getAttribute("data-_type"));
           }
         }
       } catch (err) {}
@@ -58,15 +58,15 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
       drop.classList.remove("flex");
       document
         .querySelector(
-          `svg[${this.prefix}-setting-select="${drop.getAttribute(
-            `${this.prefix}-setting-select-dropdown`
+          `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown`
           )}"]`
         )
         .classList.remove("rotate-180");
@@ -75,7 +75,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -83,30 +83,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     selectCustom.querySelector(
-      `[${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -133,13 +133,13 @@ class Dropdown {
   toggleSelectBtn(e) {
     const attribut = e.target
       .closest("button")
-      .getAttribute(`${this.prefix}-setting-select`);
+      .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${attribut}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribut}"]`
     );
     const dropdownChevron = document.querySelector(
-      `svg[${this.prefix}-setting-select="${attribut}"]`
+      `svg[data-${this.prefix}-setting-select="${attribut}"]`
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -174,7 +174,7 @@ class FetchLogs {
   constructor(prefix = "logs") {
     this.prefix = prefix;
     this.instance = document.querySelector(
-      `[${this.prefix}-setting-select-text="instances"]`
+      `[data-${this.prefix}-setting-select-text="instances"]`
     );
     this.instanceName = "";
     this.updateInp = document.querySelector("input#update-date");
@@ -187,8 +187,8 @@ class FetchLogs {
     this.isLiveUpdate = false;
     this.updateDelay = 2000;
     this.lastUpdate = Date.now() - 86400000;
-    this.container = document.querySelector(`[${this.prefix}-settings]`);
-    this.logListContainer = document.querySelector(`[${this.prefix}-list]`);
+    this.container = document.querySelector(`[data-${this.prefix}-settings]`);
+    this.logListContainer = document.querySelector(`[data-${this.prefix}-list]`);
     this.submitSettings = document.querySelector("button#submit-settings");
     this.init();
   }
@@ -268,10 +268,10 @@ class FetchLogs {
 
   goBottomList() {
     document
-      .querySelector(`[${this.prefix}-list]`)
+      .querySelector(`[data-${this.prefix}-list]`)
       .scrollTo(
         0,
-        document.querySelector(`[${this.prefix}-list]`).scrollHeight
+        document.querySelector(`[data-${this.prefix}-list]`).scrollHeight
       );
   }
 
@@ -318,14 +318,14 @@ class FetchLogs {
       typeEl.className =
         "dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0";
       typeEl.textContent = log.type;
-      typeEl.setAttribute("logs-type", "");
+      typeEl.setAttribute("data-logs-type", "");
       logContainer.appendChild(typeEl);
       //content
       const contentEl = document.createElement("p");
       contentEl.className =
         "dark:text-gray-400 dark:opacity-80 text-sm col-span-9 m-0";
       contentEl.textContent = log.content;
-      contentEl.setAttribute("logs-content", "");
+      contentEl.setAttribute("data-logs-content", "");
       logContainer.appendChild(contentEl);
       //show on DOM
       this.logListContainer.appendChild(logContainer);
@@ -343,7 +343,7 @@ class FetchLogs {
 class Filter {
   constructor(prefix = "logs") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[${this.prefix}-filter]`);
+    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
     this.lastType = "all";
     this.initHandler();
@@ -356,13 +356,13 @@ class Filter {
         if (
           e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
           "types"
         ) {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`
           );
 
           this.lastType = btnValue;
@@ -378,7 +378,7 @@ class Filter {
   }
 
   filter() {
-    const logs = document.querySelector(`[${this.prefix}-list]`).children;
+    const logs = document.querySelector(`[data-${this.prefix}-list]`).children;
     if (logs.length === 0) return;
     //reset
     for (let i = 0; i < logs.length; i++) {
@@ -395,7 +395,7 @@ class Filter {
 
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
-      const typeEl = el.querySelector("[logs-type]");
+      const typeEl = el.querySelector("[data-logs-type]");
       if (this.lastType !== "misc" && typeEl.textContent !== this.lastType)
         el.classList.add("hidden");
       if (
@@ -413,7 +413,7 @@ class Filter {
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
       const content = el
-        .querySelector("[logs-content]")
+        .querySelector("[data-logs-content]")
         .textContent.trim()
         .toLowerCase();
       if (!content.includes(keyword)) el.classList.add("hidden");
