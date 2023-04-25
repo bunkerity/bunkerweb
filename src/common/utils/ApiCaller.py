@@ -1,5 +1,5 @@
 from io import BytesIO
-from os import environ, getenv
+from os import getenv
 from sys import path as sys_path
 from tarfile import open as taropen
 from typing import Optional
@@ -20,7 +20,7 @@ from docker import DockerClient
 class ApiCaller:
     def __init__(self, apis=[]):
         self.__apis = apis
-        self.__logger = setup_logger("Api", environ.get("LOG_LEVEL", "INFO"))
+        self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
 
     def auto_setup(self, bw_integration: Optional[str] = None):
         if bw_integration is None:
@@ -139,7 +139,9 @@ class ApiCaller:
     def _send_files(self, path, url):
         ret = True
         with BytesIO() as tgz:
-            with taropen(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=5) as tf:
+            with taropen(
+                mode="w:gz", fileobj=tgz, dereference=True, compresslevel=5
+            ) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
