@@ -46,7 +46,10 @@ class Dropdown {
           this.setSelectNewValue(btnSetting, btnValue);
           //close dropdown and change style
           this.hideDropdown(btnSetting);
-          this.changeDropBtnStyle(btnSetting, btn);
+
+          if (!e.target.closest("button").hasAttribute(`data-${prefix}-file`)) {
+            this.changeDropBtnStyle(btnSetting, btn);
+          }
           //show / hide filter
           if (btnSetting === "instances") {
             this.hideFilterOnLocal(btn.getAttribute("data-_type"));
@@ -113,9 +116,8 @@ class Dropdown {
 
     btnEls.forEach((btn) => {
       btn.classList.remove(
+        "bg-primary",
         "dark:bg-primary",
-        "bg-primary",
-        "bg-primary",
         "text-gray-300",
         "text-gray-300"
       );
@@ -194,7 +196,9 @@ class Filter {
         ) {
           setTimeout(() => {
             const value = document
-              .querySelector(`[data-${this.prefix}-setting-select-text="success"]`)
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="success"]`
+              )
               .textContent.trim();
 
             this.successValue = value;
@@ -215,7 +219,9 @@ class Filter {
         ) {
           setTimeout(() => {
             const value = document
-              .querySelector(`[data-${this.prefix}-setting-select-text="reload"]`)
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="reload"]`
+              )
               .textContent.trim();
 
             this.reloadValue = value;
@@ -308,7 +314,9 @@ class Download {
     this.listContainer.addEventListener("click", (e) => {
       try {
         if (
-          e.target.closest("button").hasAttribute(`data-${this.prefix}-download`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-download`)
         ) {
           const btnEl = e.target.closest("button");
           const jobName = btnEl.getAttribute("data-jobs-download");

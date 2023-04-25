@@ -1,4 +1,4 @@
-import { Checkbox } from "./utils/form.js";
+import { Checkbox, Select } from "./utils/form.js";
 
 class Dropdown {
   constructor(prefix = "logs") {
@@ -113,9 +113,8 @@ class Dropdown {
 
     btnEls.forEach((btn) => {
       btn.classList.remove(
+        "bg-primary",
         "dark:bg-primary",
-        "bg-primary",
-        "bg-primary",
         "text-gray-300",
         "text-gray-300"
       );
@@ -422,6 +421,7 @@ class Filter {
 }
 
 const setCheckbox = new Checkbox();
+const setSelect = new Select();
 const dropdown = new Dropdown("logs");
 const setLogs = new FetchLogs();
 const setFilter = new Filter("logs");
