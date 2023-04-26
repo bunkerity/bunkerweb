@@ -15,19 +15,22 @@ We provide ready-to-use prebuilt images for x64, x86 armv8 and armv7 architectur
 docker pull bunkerity/bunkerweb:1.5.0-beta
 ```
 
-Alternatively, you can build the Docker images directly from the [source](https://github.com/bunkerity/bunkerweb) (and get a coffee ☕ because it may take a long time depending on your hardware) :
+Alternatively, you can build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb) (and get a coffee ☕ because it may take a long time depending on your hardware) :
 
 ```shell
 git clone https://github.com/bunkerity/bunkerweb.git && \
 cd bunkerweb && \
-docker build -t my-bunkerweb .
+docker build -t my-bunkerweb -f src/bunkerweb/Dockerfile .
 ```
 
-BunkerWeb container's usage and configuration are based on :
+Docker integration key concepts are :
 
-- **Environment variables** to configure BunkerWeb and meet your use cases
-- **Volume** to cache important data and mount custom configuration files
-- **Networks** to expose ports for clients and connect to upstream web services
+- **Environment variables** to configure BunkerWeb
+- **Scheduler** container to store configuration and execute jobs
+- **Networks** to expose ports for clients and connect to upstream web services.
+
+!!! info "Database backend"
+    Please note that we assume you are using SQLite as database backend (which is the default for the `DATABASE_URI` setting). Other backends for this integration are not documented but still possible if you want to.
 
 ### Environment variables
 
@@ -56,14 +59,26 @@ services:
 !!! info "Full list"
     For the complete list of environment variables, see the [settings section](/1.4/settings) of the documentation.
 
-### Volume
+### Scheduler
 
-A volume is used to share data with BunkerWeb and store persistent data like certificates, cached files, ...
-
-The easiest way of managing the volume is by using a named one. You will first need to create it :
+The [scheduler](/1.5.0-beta/concepts/#scheduler) is executed in its own container which is also available on Docker Hub :
 
 ```shell
-docker volume create bw_data
+docker pull bunkerity/bunkerweb-scheduler:1.5.0-beta
+```
+
+Alternatively, you can build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb) (less coffee ☕ needed than BunkerWeb image) :
+
+```shell
+git clone https://github.com/bunkerity/bunkerweb.git && \
+cd bunkerweb && \
+docker build -t my-scheduler -f src/scheduler/Dockerfile .
+```
+
+A volume is needed to store the SQLite database that will be used by the scheduler :
+
+```shell
+docker volume create bw-data
 ```
 
 Once it's created, you will be able to mount it on `/data` when running the container :
@@ -71,9 +86,9 @@ Once it's created, you will be able to mount it on `/data` when running the cont
 ```shell
 docker run \
 	   ...
-	   -v bw_data:/data \
+	   -v bw-data:/data \
 	   ...
-	   bunkerity/bunkerweb:1.5.0-beta
+	   bunkerity/bunkerweb-scheduler:1.5.0-beta
 ```
 
 Here is the docker-compose equivalent :
@@ -82,17 +97,17 @@ Here is the docker-compose equivalent :
 ...
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     volumes:
-      - bw_data:/data
+      - bw-data:/data
 ...
 volumes:
-  bw_data:
+  bw-data:
 ```
 
 !!! warning "Using local folder for persistent data"
 
-    BunkerWeb runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+    The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
     But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
     ```shell
     mkdir bw-data && \
@@ -125,6 +140,8 @@ volumes:
     chmod -R 770 bw-data
     ```
 
+TODO
+
 ### Networks
 
 By default, BunkerWeb container is listening (inside the container) on **8080/tcp** for **HTTP** and **8443/tcp** for **HTTPS**.
@@ -137,7 +154,7 @@ By default, BunkerWeb container is listening (inside the container) on **8080/tc
     sudo sysctl net.ipv4.ip_unprivileged_port_start=1
     ```
 
-The easiest way to connect BunkerWeb to web applications is by using Docker networks.
+The easiest way to connect BunkerWeb to web applications is by using Docker networks. 
 
 First of all, you will need to create a network :
 

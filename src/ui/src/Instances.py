@@ -1,9 +1,17 @@
 from pathlib import Path
-from subprocess import run
+from subprocess import DEVNULL, STDOUT, run
+from sys import path as sys_path
 from typing import Any, Optional, Union
+
 
 from API import API
 from ApiCaller import ApiCaller
+
+if "/usr/share/bunkerweb/deps/python" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/deps/python")
+
+from dotenv import dotenv_values
+from kubernetes import config
 
 
 class Instance:
@@ -45,15 +53,55 @@ class Instance:
         return self._id
 
     def reload(self) -> bool:
+        if self._type == "local":
+            return (
+                run(
+                    ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                ).returncode
+                == 0
+            )
+
         return self.apiCaller._send_to_apis("POST", "/reload")
 
     def start(self) -> bool:
+        if self._type == "local":
+            return (
+                run(
+                    ["sudo", "/usr/sbin/nginx"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                ).returncode
+                == 0
+            )
+
         return self.apiCaller._send_to_apis("POST", "/start")
 
     def stop(self) -> bool:
+        if self._type == "local":
+            return (
+                run(
+                    ["sudo", "/usr/sbin/nginx", "-s", "stop"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                ).returncode
+                == 0
+            )
+
         return self.apiCaller._send_to_apis("POST", "/stop")
 
     def restart(self) -> bool:
+        if self._type == "local":
+            return (
+                run(
+                    ["sudo", "/usr/sbin/nginx", "-s", "restart"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                ).returncode
+                == 0
+            )
+
         return self.apiCaller._send_to_apis("POST", "/restart")
 
 
@@ -114,6 +162,30 @@ class Instances:
                 if desired_tasks > 0 and (desired_tasks == running_tasks):
                     status = "up"
 
+                apis = []
+                for instance in self.__docker_client.services.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                ):
+                    api_http_port = None
+                    api_server_name = None
+
+                    for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
+                        "Env"
+                    ]:
+                        if var.startswith("API_HTTP_PORT="):
+                            api_http_port = var.replace("API_HTTP_PORT=", "", 1)
+                        elif var.startswith("API_SERVER_NAME="):
+                            api_server_name = var.replace("API_SERVER_NAME=", "", 1)
+
+                    for task in instance.tasks():
+                        apis.append(
+                            API(
+                                f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or '5000'}",
+                                host=api_server_name or "bwapi",
+                            )
+                        )
+                apiCaller = ApiCaller(apis=apis)
+
                 instances.append(
                     Instance(
                         instance.id,
@@ -122,7 +194,7 @@ class Instances:
                         "service",
                         status,
                         instance,
-                        None,
+                        apiCaller,
                     )
                 )
         elif self.__integration == "Kubernetes":
@@ -137,15 +209,30 @@ class Instances:
                         e.name: e.value for e in pod.spec.containers[0].env
                     }
 
-                    apiCaller = ApiCaller()
-                    apiCaller._set_apis(
-                        [
-                            API(
-                                f"http://{pod.status.pod_ip}:{env_variables.get('API_HTTP_PORT', '5000')}",
-                                env_variables.get("API_SERVER_NAME", "bwapi"),
+                    apis = []
+                    config.load_incluster_config()
+                    corev1 = self.__kubernetes_client.CoreV1Api()
+                    for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
+                        if (
+                            pod.metadata.annotations != None
+                            and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
+                        ):
+                            api_http_port = None
+                            api_server_name = None
+
+                            for pod_env in pod.spec.containers[0].env:
+                                if pod_env.name == "API_HTTP_PORT":
+                                    api_http_port = pod_env.value or "5000"
+                                elif pod_env.name == "API_SERVER_NAME":
+                                    api_server_name = pod_env.value or "bwapi"
+
+                            apis.append(
+                                API(
+                                    f"http://{pod.status.pod_ip}:{api_http_port or '5000'}",
+                                    host=api_server_name or "bwapi",
+                                )
                             )
-                        ]
-                    )
+                    apiCaller = ApiCaller(apis=apis)
 
                     status = "up"
                     if pod.status.conditions is not None:
@@ -173,6 +260,17 @@ class Instances:
 
         # Local instance
         if Path("/usr/sbin/nginx").exists():
+            apiCaller = ApiCaller()
+            env_variables = dotenv_values("/etc/bunkerweb/variables.env")
+            apiCaller._set_apis(
+                [
+                    API(
+                        f"http://127.0.0.1:{env_variables.get('API_HTTP_PORT', '5000')}",
+                        env_variables.get("API_SERVER_NAME", "bwapi"),
+                    )
+                ]
+            )
+
             instances.insert(
                 0,
                 Instance(
@@ -181,6 +279,8 @@ class Instances:
                     "127.0.0.1",
                     "local",
                     "up" if Path("/var/tmp/bunkerweb/nginx.pid").exists() else "down",
+                    None,
+                    apiCaller,
                 ),
             )
 
@@ -204,17 +304,7 @@ class Instances:
         if instance is None:
             instance = self.__instance_from_id(id)
 
-        result = True
-        if instance._type == "local":
-            result = (
-                run(
-                    ["sudo", "systemctl", "restart", "bunkerweb"], capture_output=True
-                ).returncode
-                != 0
-            )
-        elif instance._type == "container":
-            # result = instance.run_jobs()
-            result = result & instance.reload()
+        result = instance.reload()
 
         if result:
             return f"Instance {instance.name} has been reloaded."
@@ -223,16 +313,8 @@ class Instances:
 
     def start_instance(self, id) -> str:
         instance = self.__instance_from_id(id)
-        result = True
 
-        if instance._type == "local":
-            proc = run(
-                ["sudo", "/usr/share/bunkerweb/ui/linux.sh", "start"],
-                capture_output=True,
-            )
-            result = proc.returncode == 0
-        elif instance._type == "container":
-            result = instance.start()
+        result = instance.start()
 
         if result:
             return f"Instance {instance.name} has been started."
@@ -241,16 +323,8 @@ class Instances:
 
     def stop_instance(self, id) -> str:
         instance = self.__instance_from_id(id)
-        result = True
 
-        if instance._type == "local":
-            proc = run(
-                ["sudo", "/usr/share/bunkerweb/ui/linux.sh", "stop"],
-                capture_output=True,
-            )
-            result = proc.returncode == 0
-        elif instance._type == "container":
-            result = instance.stop()
+        result = instance.stop()
 
         if result:
             return f"Instance {instance.name} has been stopped."
@@ -259,16 +333,8 @@ class Instances:
 
     def restart_instance(self, id) -> str:
         instance = self.__instance_from_id(id)
-        result = True
 
-        if instance._type == "local":
-            proc = run(
-                ["sudo", "/usr/share/bunkerweb/ui/linux.sh", "restart"],
-                capture_output=True,
-            )
-            result = proc.returncode == 0
-        elif instance._type == "container":
-            result = instance.restart()
+        result = instance.restart()
 
         if result:
             return f"Instance {instance.name} has been restarted."

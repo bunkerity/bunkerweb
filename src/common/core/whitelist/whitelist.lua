@@ -165,11 +165,10 @@ function whitelist:check_cache()
 	if ngx.ctx.bw.uri then
 		checks["URI"] = "uri" .. ngx.ctx.bw.uri
 	end
-	local already_cached = {
-		["IP"] = false,
-		["URI"] = false,
-		["UA"] = false
-	}
+	local already_cached = {}
+	for i, k in ipairs(checks) do
+		already_cached[k] = false
+	end
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
 		if not ok then
@@ -237,13 +236,10 @@ function whitelist:is_whitelisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
-		if not rdns_list then
-			return nil, err
-		end
+		local rdns, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
 		-- Check if rDNS is in whitelist
-		for i, suffix in ipairs(self.lists["RDNS"]) do
-			for j, rdns in ipairs(rdns_list) do
+		if rdns then
+			for i, suffix in ipairs(self.lists["RDNS"]) do
 				if rdns:sub(-#suffix) == suffix then
 					return true, "rDNS " .. suffix
 				end

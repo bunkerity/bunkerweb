@@ -60,6 +60,15 @@
       "label": "Maximum number of HTTP/2 streams",
       "regex": "^\\d+$",
       "type": "text"
+    },
+    "LIMIT_CONN_MAX_STREAM": {
+      "context": "multisite",
+      "default": "10",
+      "help": "Maximum number of connections per IP when using stream.",
+      "id": "limit-conn-max-stream",
+      "label": "Maximum number of stream connections",
+      "regex": "^\\d+$",
+      "type": "text"
     }
   }
 }

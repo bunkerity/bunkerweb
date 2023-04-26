@@ -234,7 +234,11 @@ spec:
             - name: "ADMIN_PASSWORD"
               value: "changeme"
             - name: "ABSOLUTE_URI"
-              value: "http://www.example.com/admin"
+              value: "http://www.example.com/admin/"
+            - name: KUBERNETES_MODE
+              value: "YES"
+            - name: "DATABASE_URI"
+              value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
 ---
 apiVersion: v1
 kind: Service
@@ -319,13 +323,13 @@ metadata:
   name: ingress
   annotations:
     bunkerweb.io/www.example.com_USE_UI: "yes"
-    bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /admin"
 spec:
   rules:
     - host: www.example.com
       http:
         paths:
-          - path: /admin
+          - path: /admin/
             pathType: Prefix
             backend:
               service:

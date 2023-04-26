@@ -41,17 +41,17 @@ api.global.POST["^/stop$"] = function(self)
 end
 
 api.global.POST["^/confs$"] = function(self)
-	local tmp = "/var/tmp/bunkerweb/api_" .. ngx.var.uri:sub(2) .. ".tar.gz"
-	local destination = "/usr/share/bunkerweb/" .. ngx.var.uri:sub(2)
-	if ngx.var.uri == "/confs" then
+	local tmp = "/var/tmp/bunkerweb/api_" .. ngx.ctx.bw.uri:sub(2) .. ".tar.gz"
+	local destination = "/usr/share/bunkerweb/" .. ngx.ctx.bw.uri:sub(2)
+	if ngx.ctx.bw.uri == "/confs" then
 		destination = "/etc/nginx"
-	elseif ngx.var.uri == "/data" then
+	elseif ngx.ctx.bw.uri == "/data" then
 		destination = "/data"
-	elseif ngx.var.uri == "/cache" then
+	elseif ngx.ctx.bw.uri == "/cache" then
 		destination = "/data/cache"
-	elseif ngx.var.uri == "/custom_configs" then
+	elseif ngx.ctx.bw.uri == "/custom_configs" then
 		destination = "/data/configs"
-	elseif ngx.var.uri == "/plugins" then
+	elseif ngx.ctx.bw.uri == "/plugins" then
 		destination = "/data/plugins"
 	end
 	local form, err = upload:new(4096)
@@ -136,17 +136,17 @@ api.global.GET["^/bans$"] = function(self)
 	local data = {}
 	for i, k in ipairs(self.datastore:keys()) do
 		if k:find("^bans_ip_") then
-			local ret, reason = datastore:get(k)
+			local ret, reason = self.datastore:get(k)
 			if not ret then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
 					"can't access " .. k .. " from datastore : " + reason)
 			end
-			local ret, exp = self.datastore:exp(k)
-			if not ret then
+			local ttl, err = self.datastore:ttl(k)
+			if not ttl then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access exp " .. k .. " from datastore : " + exp)
+					"can't access ttl " .. k .. " from datastore : " .. err)
 			end
-			local ban = { ip = k:sub(9, #k), reason = reason, exp = exp }
+			local ban = { ip = k:sub(9, #k), reason = reason, exp = ttl }
 			table.insert(data, ban)
 		end
 	end
@@ -158,16 +158,16 @@ function api:is_allowed_ip()
 	if not data then
 		return false, "can't access api_allowed_ips in datastore"
 	end
-	if utils.is_ip_in_networks(ngx.var.remote_addr, cjson.decode(data)) then
+	if utils.is_ip_in_networks(ngx.ctx.bw.remote_addr, cjson.decode(data)) then
 		return true, "ok"
 	end
 	return false, "IP is not in API_WHITELIST_IP"
 end
 
 function api:do_api_call()
-	if self.global[ngx.var.request_method] ~= nil then
-		for uri, api_fun in pairs(self.global[ngx.var.request_method]) do
-			if string.match(ngx.var.uri, uri) then
+	if self.global[ngx.ctx.bw.request_method] ~= nil then
+		for uri, api_fun in pairs(self.global[ngx.ctx.bw.request_method]) do
+			if string.match(ngx.ctx.bw.uri, uri) then
 				local status, resp = api_fun(self)
 				local ret = true
 				if status ~= ngx.HTTP_OK then

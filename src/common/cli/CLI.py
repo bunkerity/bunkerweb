@@ -1,10 +1,17 @@
-from pathlib import Path
+from os import getenv
 from dotenv import dotenv_values
-from docker import DockerClient
-from kubernetes import client, config
+from pathlib import Path
+from redis import StrictRedis
+from sys import path as sys_path
+from typing import Tuple
 
-from ApiCaller import ApiCaller
+
+if "/usr/share/bunkerweb/utils" not in sys_path:
+    sys_path.append("/usr/share/bunkerweb/utils")
+
 from API import API
+from ApiCaller import ApiCaller
+from logger import setup_logger
 
 
 def format_remaining_time(seconds):
@@ -29,129 +36,174 @@ def format_remaining_time(seconds):
 
 class CLI(ApiCaller):
     def __init__(self):
-        self.__variables = dotenv_values("/etc/nginx/variables.env")
+        self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
+
+        if not Path("/usr/share/bunkerweb/db").is_dir():
+            self.__variables = dotenv_values("/etc/nginx/variables.env")
+        else:
+            if "/usr/share/bunkerweb/db" not in sys_path:
+                sys_path.append("/usr/share/bunkerweb/db")
+
+            from Database import Database
+
+            db = Database(
+                self.__logger,
+                sqlalchemy_string=getenv("DATABASE_URI", None),
+            )
+            self.__variables = db.get_config()
+
         self.__integration = self.__detect_integration()
-        super().__init__(self.__get_apis())
-
-    def __detect_integration(self):
-        distrib = ""
-        if Path("/etc/os-release").is_file():
-            with open("/etc/os-release", "r") as f:
-                if "Alpine" in f.read():
-                    distrib = "alpine"
-                else:
-                    distrib = "other"
-        # Docker case
-        if distrib == "alpine" and Path("/usr/sbin/nginx").is_file():
-            return "docker"
-        # Linux case
-        if distrib == "other":
-            return "linux"
-        # Swarm case
-        if self.__variables["SWARM_MODE"] == "yes":
-            return "swarm"
-        # Kubernetes case
-        if self.__variables["KUBERNETES_MODE"] == "yes":
-            return "kubernetes"
-        # Autoconf case
-        if distrib == "alpine":
-            return "autoconf"
-
-        raise Exception("Can't detect integration")
-
-    def __get_apis(self):
-        # Docker case
-        if self.__integration in ("docker", "linux"):
-            return [
-                API(
-                    f"http://127.0.0.1:{self.__variables['API_HTTP_PORT']}",
-                    host=self.__variables["API_SERVER_NAME"],
-                )
-            ]
-
-        # Autoconf case
-        if self.__integration == "autoconf":
-            docker_client = DockerClient()
-            apis = []
-            for container in self.__client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
-                port = "5000"
-                host = "bwapi"
-                for env in container.attrs["Config"]["Env"]:
-                    if env.startswith("API_HTTP_PORT="):
-                        port = env.split("=")[1]
-                    elif env.startswith("API_SERVER_NAME="):
-                        host = env.split("=")[1]
-                apis.append(API(f"http://{container.name}:{port}", host=host))
-            return apis
-
-        # Swarm case
-        if self.__integration == "swarm":
-            docker_client = DockerClient()
-            apis = []
-            for service in self.__client.services.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
-                port = "5000"
-                host = "bwapi"
-                for env in service.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
-                    "Env"
-                ]:
-                    if env.startswith("API_HTTP_PORT="):
-                        port = env.split("=")[1]
-                    elif env.startswith("API_SERVER_NAME="):
-                        host = env.split("=")[1]
-                for task in service.tasks():
-                    apis.append(
-                        API(
-                            f"http://{service.name}.{task['NodeID']}.{task['ID']}:{port}",
-                            host=host,
-                        )
+        self.__use_redis = self.__variables.get("USE_REDIS", "no") == "yes"
+        self.__redis = None
+        if self.__use_redis:
+            redis_host = self.__variables.get("REDIS_HOST")
+            if redis_host:
+                redis_port = self.__variables.get("REDIS_PORT", "6379")
+                if not redis_port.isdigit():
+                    self.__logger.error(
+                        f"REDIS_PORT is not a valid port number: {redis_port}, defaulting to 6379"
                     )
-            return apis
+                    redis_port = "6379"
+                redis_port = int(redis_port)
 
-        # Kubernetes case
-        if self.__integration == "kubernetes":
-            config.load_incluster_config()
-            corev1 = client.CoreV1Api()
-            apis = []
-            for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                if (
-                    pod.metadata.annotations != None
-                    and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                    and pod.status.pod_ip
-                ):
-                    port = "5000"
-                    host = "bwapi"
-                    for env in pod.spec.containers[0].env:
-                        if env.name == "API_HTTP_PORT":
-                            port = env.value
-                        elif env.name == "API_SERVER_NAME":
-                            host = env.value
-                    apis.append(API(f"http://{pod.status.pod_ip}:{port}", host=host))
-            return apis
+                redis_db = self.__variables.get("REDIS_DB", "0")
+                if not redis_db.isdigit():
+                    self.__logger.error(
+                        f"REDIS_DB is not a valid database number: {redis_db}, defaulting to 0"
+                    )
+                    redis_db = "0"
+                redis_db = int(redis_db)
 
-    def unban(self, ip):
+                redis_timeout = self.__variables.get("REDIS_TIMEOUT", "1000.0")
+                if redis_timeout:
+                    try:
+                        redis_timeout = float(redis_timeout)
+                    except ValueError:
+                        self.__logger.error(
+                            f"REDIS_TIMEOUT is not a valid timeout: {redis_timeout}, defaulting to 1000 ms"
+                        )
+                        redis_timeout = 1000.0
+
+                redis_keepalive_pool = self.__variables.get(
+                    "REDIS_KEEPALIVE_POOL", "10"
+                )
+                if not redis_keepalive_pool.isdigit():
+                    self.__logger.error(
+                        f"REDIS_KEEPALIVE_POOL is not a valid number of connections: {redis_keepalive_pool}, defaulting to 10"
+                    )
+                    redis_keepalive_pool = "10"
+                redis_keepalive_pool = int(redis_keepalive_pool)
+
+                self.__redis = StrictRedis(
+                    host=redis_host,
+                    port=redis_port,
+                    db=redis_db,
+                    socket_timeout=redis_timeout,
+                    socket_connect_timeout=redis_timeout,
+                    socket_keepalive=True,
+                    max_connections=redis_keepalive_pool,
+                    ssl=self.__variables.get("REDIS_SSL", "no") == "yes",
+                )
+            else:
+                self.__logger.error(
+                    "USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis"
+                )
+                self.__use_redis = False
+
+        if not Path("/usr/share/bunkerweb/db").is_dir() or self.__integration not in (
+            "kubernetes",
+            "swarm",
+            "autoconf",
+        ):
+            # Docker & Linux case
+            super().__init__(
+                apis=[
+                    API(
+                        f"http://127.0.0.1:{self.__variables.get('API_HTTP_PORT', '5000')}",
+                        host=self.__variables.get("API_SERVER_NAME", "bwapi"),
+                    )
+                ]
+            )
+        else:
+            super().__init__()
+            self.auto_setup(self.__integration)
+
+    def __detect_integration(self) -> str:
+        if self.__variables.get("KUBERNETES_MODE", "no") == "yes":
+            return "kubernetes"
+        elif self.__variables.get("SWARM_MODE", "no") == "yes":
+            return "swarm"
+        elif self.__variables.get("AUTOCONF_MODE", "no") == "yes":
+            return "autoconf"
+        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
+            return Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip().lower()
+        elif (
+            Path("/etc/os-release").is_file()
+            and "Alpine" in Path("/etc/os-release").read_text()
+        ):
+            return "docker"
+
+        return "linux"
+
+    def unban(self, ip: str) -> Tuple[bool, str]:
+        if self.__redis:
+            ok = self.__redis.delete(f"bans_ip_{ip}")
+            if not ok:
+                self.__logger.error(f"Failed to delete ban for {ip} from redis")
+
         if self._send_to_apis("POST", "/unban", data={"ip": ip}):
             return True, f"IP {ip} has been unbanned"
         return False, "error"
 
-    def ban(self, ip, exp):
+    def ban(self, ip: str, exp: float) -> Tuple[bool, str]:
+        if self.__redis:
+            ok = self.__redis.set(
+                f"bans_ip_{ip}",
+                "manual",
+                ex=exp,
+            )
+            if not ok:
+                self.__logger.error(f"Failed to ban {ip} in redis")
+
         if self._send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
-            return True, f"IP {ip} has been banned"
+            return (
+                True,
+                f"IP {ip} has been banned for {format_remaining_time(exp)}",
+            )
         return False, "error"
 
-    def bans(self):
+    def bans(self) -> Tuple[bool, str]:
+        servers = {}
+
         ret, resp = self._send_to_apis("GET", "/bans", response=True)
-        if ret:
-            bans = resp.get("data", [])
+        if not ret:
+            return False, "error"
 
-            if len(bans) == 0:
-                return True, "No ban found"
+        for k, v in resp.items():
+            servers[k] = v.get("data", [])
 
-            cli_str = "List of bans :\n"
+        if self.__redis:
+            servers["redis"] = []
+            for key in self.__redis.scan_iter("bans_ip_*"):
+                ip = key.decode("utf-8").replace("bans_ip_", "")
+                exp = self.__redis.ttl(key)
+                servers["redis"].append(
+                    {
+                        "ip": ip,
+                        "exp": exp,
+                        "reason": "manual",
+                    }
+                )
+
+        cli_str = ""
+        for server, bans in servers.items():
+            cli_str += f"List of bans for {server}:\n"
+            if not bans:
+                cli_str += "No ban found\n"
+
             for ban in bans:
                 cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
-            return True, cli_str
-        return False, "error"
+            else:
+                cli_str += "\n"
+
+        return True, cli_str

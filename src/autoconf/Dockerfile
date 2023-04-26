@@ -43,12 +43,11 @@ RUN apk add --no-cache bash && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
     chown -R root:nginx /data && \
     chmod -R 770 /data && \
-    chown -R root:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
+    chown -R root:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
     find /usr/share/bunkerweb -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -type d -exec chmod 0750 {} \; && \
     chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/* && \
-    chown root:nginx /usr/bin/bwcli && \
     mkdir /var/log/letsencrypt /var/lib/letsencrypt && \
     chown root:nginx /var/log/letsencrypt /var/lib/letsencrypt && \
     chmod 770 /var/log/letsencrypt /var/lib/letsencrypt

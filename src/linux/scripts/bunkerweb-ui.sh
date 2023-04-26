@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python
+export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 
 # Create the ui.env file if it doesn't exist 
 if [ ! -f /etc/bunkerweb/ui.env ]; then
     echo "ADMIN_USERNAME=admin" > /etc/bunkerweb/ui.env
     echo "ADMIN_PASSWORD=changeme" >> /etc/bunkerweb/ui.env
-    echo "ABSOLUTE_URI=http://mydomain.ext/mypath/" >> /etc/bunkerweb/ui.env
+    echo "ABSOLUTE_URI=http://bwadm.example.com/changeme/" >> /etc/bunkerweb/ui.env
 fi
 
 # Function to start the UI
@@ -18,7 +18,7 @@ start() {
     fi
     source /etc/bunkerweb/ui.env
     export $(cat /etc/bunkerweb/ui.env)
-    python3 -m gunicorn --graceful-timeout=0 --bind=127.0.0.1:7000 --chdir /usr/share/bunkerweb/ui/ --workers=1 --threads=2 main:app &
+    python3 -m gunicorn main:app --worker-class gevent --bind 127.0.0.1:7000 --graceful-timeout 0 --access-logfile - --error-logfile - &
     echo $! > /var/tmp/bunkerweb/ui.pid
 }
 

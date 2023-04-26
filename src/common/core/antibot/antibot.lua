@@ -8,7 +8,10 @@ local base64    = require "base64"
 local sha256    = require "resty.sha256"
 local str       = require "resty.string"
 local http      = require "resty.http"
-local template	= require "resty.template"
+local template	= nil
+if ngx.shared.datastore then
+	template	= require "resty.template"
+end
 
 local antibot	= class("antibot", plugin)
 

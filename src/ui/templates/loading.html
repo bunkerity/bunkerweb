@@ -43,7 +43,7 @@
 
     async function check_reloading() {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 500);
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       const response = await fetch(
         `${location.href.replace("/loading", "/check_reloading")}`,
         { signal: controller.signal }

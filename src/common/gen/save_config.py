@@ -393,7 +393,7 @@ if __name__ == "__main__":
                         logger.warning(err)
             else:
                 err = db.add_instance(
-                    "localhost",
+                    "127.0.0.1",
                     config_files.get("API_HTTP_PORT", 5000),
                     config_files.get("API_SERVER_NAME", "bwapi"),
                 )
