@@ -60,7 +60,7 @@ When multisite mode is enabled, BunkerWeb serves and protects multiple web appli
 
 The multisite mode is controlled by the `MULTISITE` setting which can be set to `yes` (enabled) or `no` (disabled, which is the default).
 
-Each setting has a context that defines "where" it can be applied. If the context is global then the setting can't be set per server (or "per site", "per app") but only to the whole configuration. Otherwise, if the context is multisite, the setting can be set globally and per server. Defining a multisite setting to a specific server is done by adding the server name as a prefix of the setting name like `app1.example.com_AUTO_LETS_ENCRYPT` or `app2.example.com_USE_ANTIBOT` for example. When a multisite setting is defined globally (without any server prefix), all the servers will inherit that setting (but can still be overriden if we set the same setting with the server name prefix).
+Each setting has a context that defines "where" it can be applied. If the context is global then the setting can't be set per server (or "per site", "per app") but only to the whole configuration. Otherwise, if the context is multisite, the setting can be set globally and per server. Defining a multisite setting to a specific server is done by adding the server name as a prefix of the setting name like `app1.example.com_AUTO_LETS_ENCRYPT` or `app2.example.com_USE_ANTIBOT` for example. When a multisite setting is defined globally (without any server prefix), all the servers will inherit that setting (but can still be overridden if we set the same setting with the server name prefix).
 
 Here is a dummy example of a multisite BunkerWeb configuration :
 

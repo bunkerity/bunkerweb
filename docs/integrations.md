@@ -27,34 +27,29 @@ Docker integration key concepts are :
 
 - **Environment variables** to configure BunkerWeb
 - **Scheduler** container to store configuration and execute jobs
-- **Networks** to expose ports for clients and connect to upstream web services.
+- **Networks** to expose ports for clients and connect to upstream web services
 
 !!! info "Database backend"
-    Please note that we assume you are using SQLite as database backend (which is the default for the `DATABASE_URI` setting). Other backends for this integration are not documented but still possible if you want to.
+    Please note that we assume you are using SQLite as database backend (which is the default for the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information.
 
 ### Environment variables
 
-Settings are passed to BunkerWeb using Docker environment variables. You can use the `-e` flag :
-
-```shell
-docker run \
-	   ...
-	   -e MY_SETTING=value \
-	   -e "MY_OTHER_SETTING=value with spaces" \
-	   ...
-	   bunkerity/bunkerweb:1.5.0-beta
-```
-
-Here is the docker-compose equivalent :
+Settings are passed to BunkerWeb using Docker environment variables :
 
 ```yaml
 ...
 services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0-beta
+    labels:
+      - "bunkerweb.INSTANCE"
     environment:
       - MY_SETTING=value
+      - ANOTHER_SETTING=another value
+...
 ```
+
+Please note that the `bunkerweb.INSTANCE` is mandatory to make sure the scheduler can detect BunkerWeb instance(s).
 
 !!! info "Full list"
     For the complete list of environment variables, see the [settings section](/1.4/settings) of the documentation.
@@ -76,22 +71,6 @@ docker build -t my-scheduler -f src/scheduler/Dockerfile .
 ```
 
 A volume is needed to store the SQLite database that will be used by the scheduler :
-
-```shell
-docker volume create bw-data
-```
-
-Once it's created, you will be able to mount it on `/data` when running the container :
-
-```shell
-docker run \
-	   ...
-	   -v bw-data:/data \
-	   ...
-	   bunkerity/bunkerweb-scheduler:1.5.0-beta
-```
-
-Here is the docker-compose equivalent :
 
 ```yaml
 ...
@@ -140,7 +119,35 @@ volumes:
     chmod -R 770 bw-data
     ```
 
-TODO
+When using Docker-based integrations, the scheduler will need to access the Docker API to get things working which is defined using the `DOCKER_HOST` environment variable.
+
+!!! warning "Docker API access and security"
+
+    Since Docker doesn't support fine-grained authorizations, accessing the API poses a security risk. An attacker with access to the API can easily gain root privileges on the host machine (more info [here](https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html)).
+
+    We strongly recommend not to mount the socket file usually located at `/var/run/docker.sock` directly in the container. An alternative, which is described here, is to use a "proxy" container like [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy) that will allow only the necessary API calls.
+
+You will need to create the Docker API proxy container, mount the socket and set the `DOCKER_HOST` environment variable to use the Docker API proxy :
+
+```yaml
+...
+services:
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    env:
+      - DOCKER_HOST=tcp://bw-docker:2375
+...
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CONTAINERS=1
+...
+```
+
+!!! warning "Docker socket in rootless mode"
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), you will need to replace the mount of the docker socket with the following value : `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
 
 ### Networks
 
@@ -154,27 +161,20 @@ By default, BunkerWeb container is listening (inside the container) on **8080/tc
     sudo sysctl net.ipv4.ip_unprivileged_port_start=1
     ```
 
-The easiest way to connect BunkerWeb to web applications is by using Docker networks. 
+The typical BunkerWeb stack when using the Docker integration contains the following containers :
 
-First of all, you will need to create a network :
+- BunkerWeb
+- Scheduler
+- Docker socket proxy
+- Your services
 
-```shell
-docker network create mynetwork
-```
+For defense in depth purposes, we strongly recommend to create at least three different Docker networks :
 
-Once it's created, you will need to connect the container to that network :
+- `bw-services` : for BunkerWeb and your web services
+- `bw-universe` : for BunkerWeb and scheduler
+- `bw-docker` : for scheduler and the Docker API proxy
 
-```shell
-docker run \
-       ...
-	   --network mynetwork \
-	   ...
-	   bunkerity/bunkerweb:1.5.0-beta
-```
-
-You will also need to do the same with your web application(s). Please note that the other containers are accessible using their name as the hostname.
-
-Here is the docker-compose equivalent :
+The scheduler needs to contact the API of BunkerWeb and for obvious security reason BunkerWeb needs to check if the caller is authorized to make API calls. The `API_WHITELIST_IP` setting lets you choose allowed IP addresses and subnets : usage of a static subnet for the `bw-universe` is strongly advised :
 
 ```yaml
 ...
@@ -182,10 +182,31 @@ services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0-beta
     networks:
-      - bw-net
+      - bw-services
+      - bw-universe
+...
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    networks:
+      - bw-universe
+      - bw-docker
+...
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
+    networks:
+      - bw-docker
 ...
 networks:
-  bw-net:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-docker:
+    name: bw-docker
 ```
 
 ## Docker autoconf
@@ -205,137 +226,97 @@ Instead of defining environment variables for the BunkerWeb container, you simpl
 !!! info "Multisite mode"
     The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](/1.4/concepts/#multisite-mode) of the documentation for more information.
 
-First of all, you will need to create the data volume :
+!!! info "Database backend"
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information.
 
-```shell
-docker volume create bw-data
-```
-
-Then, you can create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :
-
-```shell
-docker network create --subnet 10.20.30.0/24 bw-autoconf && \
-docker network create bw-services
-```
-
-- One for communication between **BunkerWeb** and **autoconf**
-- Another one for communication between **BunkerWeb** and **web applications**
-
-You can now create the BunkerWeb container with the `AUTOCONF_MODE=yes` setting and the `bunkerweb.AUTOCONF` label (replace 10.20.30.0/24 with the subnet specified before) :
-
-```shell
-docker run \
-       -d \
-       --name mybunker \
-	   --network bw-autoconf \
-	   -p 80:8080 \
-	   -p 443:8443 \
-	   -e AUTOCONF_MODE=yes \
-	   -e MULTISITE=yes \
-	   -e SERVER_NAME= \
-	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.5.0-beta && \
-
-docker network connect bw-services mybunker
-```
-
-!!! warning "Using Docker in rootless mode"
-    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), you will need to replace the mount of the docker socket with the following value : `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
-
-And the autoconf one :
-
-```shell
-docker run \
-       -d \
-	   --name myautoconf \
-	   --network bw-autoconf \
-	   -v bw-data:/data \
-	   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-	   bunkerity/bunkerweb-autoconf:1.5.0-beta
-```
-
-Here is the docker-compose equivalent for the BunkerWeb autoconf stack :
+Another container, named `bw-autoconf` for example, containing the autoconf service must be added to the stack. Since two services will generate the configuration for BunkerWeb, a "real" database backend (in other words, not SQLite) also needs to be added :
 
 ```yaml
-version: '3.5'
-
+...
 services:
-
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.5.0-beta
-    ports:
-      - 80:8080
-	  - 443:8443
-    environment:
-	  - AUTOCONF_MODE=yes
-	  - MULTISITE=yes
-      - SERVER_NAME=
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     labels:
-      - "bunkerweb.AUTOCONF"
+      - "bunkerweb.INSTANCE"
+    environment:
+      - MULTISITE=yes
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     networks:
-      - bw-autoconf
-	  - bw-services
-
-  myautoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+      - bw-universe
+      - bw-services
+...
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - DOCKER_HOST=tcp://bw-docker:2375
+    networks:
+      - bw-universe
+      - bw-docker
+...
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
     volumes:
-      - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
     networks:
-      - bw-autoconf
+      - bw-docker
+...
+  bw-db:
+    image: mariadb:10.10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+    volumes:
+      - bw-data:/var/lib/mysql
+    networks:
+      - bw-docker
 
 volumes:
   bw-data:
 
 networks:
-  bw-autoconf:
+  bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
+  bw-docker:
+    name: bw-docker
 ```
+
+!!! warning "Using Docker in rootless mode"
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), you will need to replace the mount of the docker socket with the following value : `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
 
 Once the stack is set up, you will be able to create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically set up BunkerWeb :
 
-```shell
-docker run \
-       -d \
-       --name myapp \
-	   --network bw-services \
-	   -l bunkerweb.MY_SETTING_1=value1 \
-	   -l bunkerweb.MY_SETTING_2=value2 \
-       ...
-	   mywebapp:4.2
-```
-
-Here is the docker-compose equivalent :
-
 ```yaml
 ...
-
 services:
-
   myapp:
-	image: mywebapp:4.2
-    networks:
-      bw-services:
-        aliases:
-          - myapp
-    labels:
-      - "bunkerweb.MY_SETTING_1=value1"
-	  - "bunkerweb.MY_SETTING_2=value2"
-
+    image: mywebapp:4.2
+      networks:
+        bw-services:
+          aliases:
+            - myapp
+      labels:
+        - "bunkerweb.MY_SETTING_1=value1"
+        - "bunkerweb.MY_SETTING_2=value2"
 ...
-
 networks:
   bw-services:
     external:
       name: bw-services
-
 ...
 ```
 
@@ -349,63 +330,26 @@ networks:
 !!! info "Docker autoconf"
     The Docker autoconf integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
 
-To automatically configure BunkerWeb instances, a special service called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
+To automatically configure BunkerWeb instances, a special service called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime. It also monitors other Swarm objects like [configs](https://docs.docker.com/engine/swarm/configs/) for custom configurations.
 
 Like the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined by using labels starting with the special **bunkerweb.** prefix.
 
-The recommended setup is to schedule the **BunkerWeb service** as a **global service** on all worker nodes and the **autoconf service** as a **single replicated service** on a manager node.
+The recommended setup is to schedule the **BunkerWeb service** as a **global service** on all nodes and the **autoconf, scheduler and Docker API proxy services** as **single replicated services**. Please note that the **Docker API proxy service** needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
 
-First of all, you will need to create two networks (replace 10.20.30.0/24 with an unused subnet of your choice) :
+Since we have multiple instances of BunkerWeb running, a shared data store implemented as a [Redis](https://redis.io/) service must be created : the instances will use it to cache and share data. You will find more information about the Redis settings [here](/1.5.0-beta/settings/#redis)
 
-```shell
-docker network create -d overlay --attachable --subnet 10.20.30.0/24 bw-autoconf && \
-docker network create -d overlay --attachable bw-services
-```
+Using a shared folder or a specific driver for the database volume is left as an exercise for the reader (and depends on your own use-case).
 
-- One for communication between **BunkerWeb** and **autoconf**
-- Another one for communication between **BunkerWeb** and **web applications**
+!!! info "Database backend"
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
 
-You can now create the BunkerWeb service (replace 10.20.30.0/24 with the subnet specified before) :
-
-```shell
-docker service create \
-       --name mybunker \
-	   --mode global \
-	   --constraint node.role==worker \
-	   --network bw-autoconf \
-	   --network bw-services \
-	   -p published=80,target=8080,mode=host \
-	   -p published=443,target=8443,mode=host \
-	   -e SWARM_MODE=yes \
-	   -e SERVER_NAME= \
-	   -e MULTISITE=yes \
-	   -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-	   -l bunkerweb.AUTOCONF \
-	   bunkerity/bunkerweb:1.5.0-beta
-```
-
-And the autoconf one :
-
-```shell
-docker service \
-       create \
-	   --name myautoconf \
-	   --constraint node.role==manager \
-	   --network bw-autoconf \
-	   --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
-	   --mount type=volume,source=bw-data,destination=/data \
-	   -e SWARM_MODE=yes \
-	   bunkerity/bunkerweb-autoconf:1.5.0-beta
-```
-
-Here is the docker-compose equivalent (using `docker stack deploy`) :
+Here is the stack boilerplate that you can deploy using `docker stack deploy` :
 
 ```yaml
-version: '3.5'
+version: "3.5"
 
 services:
-
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.5.0-beta
     ports:
       - published: 80
@@ -417,70 +361,122 @@ services:
         mode: host
         protocol: tcp
     environment:
-      - SWARM_MODE=yes
       - SERVER_NAME=
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - SWARM_MODE=yes
       - MULTISITE=yes
+      - USE_REDIS=yes
+      - REDIS_HOST=bw-redis
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     networks:
-      - bw-autoconf
+      - bw-universe
       - bw-services
     deploy:
       mode: global
       placement:
         constraints:
-          - "node.role==worker"
+          - "node.role == worker"
       labels:
-        - "bunkerweb.AUTOCONF"
+        - "bunkerweb.INSTANCE"
 
-  myautoconf:
+  bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.5.0-beta
     environment:
       - SWARM_MODE=yes
-    volumes:
-      - bw-data:/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
     networks:
-      - bw-autoconf
+      - bw-universe
+      - bw-docker
     deploy:
-      replicas: 1
       placement:
         constraints:
-          - "node.role==manager"
+          - "node.role == worker"
 
-networks:
-  bw-autoconf:
-    driver: overlay
-    attachable: true
-    name: bw-autoconf
-	ipam:
-	  config:
-        - subnet: 10.20.30.0/24
-  bw-services:
-    driver: overlay
-    attachable: true
-    name: bw-services
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONFIGS=1
+      - CONTAINERS=1
+      - SERVICES=1
+      - SWARM=1
+      - TASKS=1
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    environment:
+      - SWARM_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+    networks:
+      - bw-universe
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-db:
+    image: mariadb:10.10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=changeme
+    volumes:
+      - bw-data:/var/lib/mysql
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-redis:
+    image: redis:7-alpine
+    networks:
+      - bw-universe
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
 volumes:
   bw-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    driver: overlay
+    attachable: true
+  bw-docker:
+    name: bw-docker
+    driver: overlay
+    attachable: true
 ```
 
-Once the BunkerWeb Swarm stack is set up and running (see autoconf logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
+Please note that the `SWARM_MODE=yes` environment variable is mandatory when using the Swarm integration.
 
-```shell
-docker service \
-       create \
-       --name myapp \
-       --network bw-services \
-       -l bunkerweb.MY_SETTING_1=value1 \
-       -l bunkerweb.MY_SETTING_2=value2 \
-       ...
-       mywebapp:4.2
-```
-
-Here is the docker-compose equivalent (using `docker stack deploy`) :
+Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
 
 ```yaml
-...
+version: "3.5"
+
 services:
   myapp:
     image: mywebapp:4.2
@@ -493,7 +489,7 @@ services:
       labels:
         - "bunkerweb.MY_SETTING_1=value1"
         - "bunkerweb.MY_SETTING_2=value2"
-...
+
 networks:
   bw-services:
     external:
@@ -509,7 +505,18 @@ networks:
 
 The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
 
-The first step to install BunkerWeb on a Kubernetes cluster is to add a role and permissions on the cluster for the autoconf :
+The recommended setup is to define **BunkerWeb** as a **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)** which will create a pod on all nodes and the **autoconf and scheduler** as **single replicated [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
+
+Since we have multiple instances of BunkerWeb running, a shared data store implemented as a [Redis](https://redis.io/) service must be created : the instances will use it to cache and share data. You will find more information about the Redis settings [here](/1.5.0-beta/settings/#redis)
+
+!!! info "Database backend"
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
+
+Please note that both scheduler and autoconf services needs to access the Kubernetes API. The recommended way of doing it is using [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
+
+Another important thing is the `KUBERNETES_MODE=yes` environment variable which is mandatory when using the Kubernetes integration.
+
+Here is the yaml boilerplate you can use as a base :
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -517,12 +524,12 @@ kind: ClusterRole
 metadata:
   name: cr-bunkerweb
 rules:
-- apiGroups: [""]
-  resources: ["services", "pods", "configmaps"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["ingresses"]
-  verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["services", "pods", "configmaps"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -534,19 +541,15 @@ kind: ClusterRoleBinding
 metadata:
   name: crb-bunkerweb
 subjects:
-- kind: ServiceAccount
-  name: sa-bunkerweb
-  namespace: default
-  apiGroup: ""
+  - kind: ServiceAccount
+    name: sa-bunkerweb
+    namespace: default
+    apiGroup: ""
 roleRef:
   kind: ClusterRole
   name: cr-bunkerweb
   apiGroup: rbac.authorization.k8s.io
-```
-
-The recommended way of deploying BunkerWeb is using a [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) which means each node in the cluster will run an instance of BunkerWeb :
-
-```yaml
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -561,84 +564,61 @@ spec:
         app: bunkerweb
       # mandatory annotation
       annotations:
-        bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/INSTANCE: "yes"
     spec:
       containers:
-      - name: bunkerweb
-        image: bunkerity/bunkerweb
-        securityContext:
-          runAsUser: 101
-          runAsGroup: 101
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-        ports:
-        - containerPort: 8080
-          hostPort: 80
-        - containerPort: 8443
-          hostPort: 443
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        # replace with your DNS resolvers
-        # e.g. : kube-dns.kube-system.svc.cluster.local
-        - name: DNS_RESOLVERS
-          value: "coredns.kube-system.svc.cluster.local"
-        - name: USE_API
-          value: "yes"
-        # 10.0.0.0/8 is the cluster internal subnet
-        - name: API_WHITELIST_IP
-          value: "127.0.0.0/8 10.0.0.0/8"
-        - name: SERVER_NAME
-          value: ""
-        - name: MULTISITE
-          value: "yes"
-        livenessProbe:
-          exec:
-            command:
-            - /usr/share/bunkerweb/helpers/healthcheck.sh
-          initialDelaySeconds: 30
-          periodSeconds: 5
-          timeoutSeconds: 1
-          failureThreshold: 3
-        readinessProbe:
-          exec:
-            command:
-            - /usr/share/bunkerweb/helpers/healthcheck.sh
-          initialDelaySeconds: 30
-          periodSeconds: 1
-          timeoutSeconds: 1
-          failureThreshold: 3
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.4.6
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+              hostPort: 80
+            - containerPort: 8443
+              hostPort: 443
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            # replace with your DNS resolvers
+            # e.g. : kube-dns.kube-system.svc.cluster.local
+            - name: DNS_RESOLVERS
+              value: "coredns.kube-system.svc.cluster.local"
+            - name: USE_API
+              value: "yes"
+            # 10.0.0.0/8 is the cluster internal subnet
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8"
+            - name: SERVER_NAME
+              value: ""
+            - name: MULTISITE
+              value: "yes"
+            - name: USE_REDIS
+              value: "yes"
+            - name: REDIS_HOST
+              value: "svc-bunkerweb-redis.default.svc.cluster.local"
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: svc-bunkerweb
-spec:
-  clusterIP: None
-  selector:
-    app: bunkerweb
-```
-
-In order to store persistent data, you will need a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) :
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc-bunkerweb
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-```
-
-Now, you can start the autoconf as a single replica [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) :
-
-```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -656,20 +636,148 @@ spec:
         app: bunkerweb-controller
     spec:
       serviceAccountName: sa-bunkerweb
-      volumes:
-      - name: vol-bunkerweb
-        persistentVolumeClaim:
-          claimName: pvc-bunkerweb
       containers:
-      - name: bunkerweb-controller
-        image: bunkerity/bunkerweb-autoconf
-        imagePullPolicy: Always
-        env:
-        - name: KUBERNETES_MODE
-          value: "yes"
-        volumeMounts:
-        - name: vol-bunkerweb
-          mountPath: /data
+        - name: bunkerweb-controller
+          image: bunkerity/bunkerweb-autoconf:1.4.6
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            - name: "DATABASE_URI"
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-scheduler
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-scheduler
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-scheduler
+    spec:
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-scheduler
+          image: bunkerity/bunkerweb-scheduler:1.4.6
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            - name: "DATABASE_URI"
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-redis
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-redis
+    spec:
+      containers:
+        - name: bunkerweb-redis
+          image: redis:7-alpine
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-db
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-db
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-db
+    spec:
+      containers:
+        - name: bunkerweb-db
+          image: mariadb:10.10
+          imagePullPolicy: Always
+          env:
+            - name: MYSQL_RANDOM_ROOT_PASSWORD
+              value: "yes"
+            - name: "MYSQL_DATABASE"
+              value: "db"
+            - name: "MYSQL_USER"
+              value: "bunkerweb"
+            - name: "MYSQL_PASSWORD"
+              value: "changeme"
+          volumeMounts:
+            - mountPath: "/var/lib/mysql"
+              name: vol-db
+      volumes:
+        - name: vol-db
+          persistentVolumeClaim:
+            claimName: pvc-bunkerweb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb
+spec:
+  clusterIP: None
+  selector:
+    app: bunkerweb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-db
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-db
+  ports:
+    - name: sql
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-redis
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-redis
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bunkerweb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
 ```
 
 Once the BunkerWeb Kubernetes stack is set up and running (see autoconf logs for more information), you will be able to deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/1.4/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
@@ -678,12 +786,22 @@ Once the BunkerWeb Kubernetes stack is set up and running (see autoconf logs for
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress
+  name: my-ingress
   annotations:
-	bunkerweb.io/MY_SETTING_1: "value1"
-	bunkerweb.io/MY_SETTING_2: "value2"
+    bunkerweb.io/MY_SETTING_1: "value1"
+    bunkerweb.io/MY_SETTING_2: "value2"
 spec:
   rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-my-app
+                port:
+                  number: 8000
 ...
 ```
 
@@ -698,10 +816,11 @@ List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 36
+- Fedora 37
 - CentOS Stream 8
+- RedHat Enterprise Linux (RHEL) 8.7
 
-Please note that you will need to **install NGINX 1.20.2 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
+Please note that you will need to **install NGINX 1.24.0 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script to add and trust the repository automatically (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -717,10 +836,10 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     | sudo tee /etc/apt/sources.list.d/nginx.list
 	```
 
-    You should now be able to install NGINX 1.20.2 :
+    You should now be able to install NGINX 1.24.0 :
 	```shell
 	sudo apt update && \
-	sudo apt install -y nginx=1.20.2-1~$(lsb_release -cs)
+	sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
 	```
 
 	And finally install BunkerWeb 1.5.0-beta :
@@ -747,10 +866,10 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     | sudo tee /etc/apt/sources.list.d/nginx.list
 	```
 
-    You should now be able to install NGINX 1.20.2 :
+    You should now be able to install NGINX 1.24.0 :
 	```shell
 	sudo apt update && \
-	sudo apt install -y nginx=1.20.2-1~jammy
+	sudo apt install -y nginx=1.24.0-1~jammy
 	```
 
 	And finally install BunkerWeb 1.5.0-beta :
@@ -767,9 +886,9 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 === "Fedora"
 
-    Fedora already provides NGINX 1.20.2 that we support :
+    Fedora already provides NGINX 1.24.0 that we support :
 	```shell
-	sudo dnf install -y nginx-1.20.2
+	sudo dnf install -y nginx-1.24.0
 	```
 
     And finally install BunkerWeb 1.5.0-beta :
@@ -800,9 +919,9 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     module_hotfixes=true
 	```
 
-    You should now be able to install NGINX 1.20.2 :
+    You should now be able to install NGINX 1.24.0 :
 	```shell
-	sudo dnf install nginx-1.20.2
+	sudo dnf install nginx-1.24.0
 	```
 
 	And finally install BunkerWeb 1.5.0-beta :
@@ -821,7 +940,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 === "From source"
 
-    The first step is to install NGINX 1.20.2 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
+    The first step is to install NGINX 1.24.0 using the repository of your choice or by [compiling it from source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/#compiling-and-installing-from-source).
 	
 	The target installation folder of BunkerWeb is located at `/usr/share/bunkerweb`, let's create it :
 	```shell
@@ -836,14 +955,14 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	BunkerWeb needs some dependencies to be compiled and installed to `/usr/share/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
 	```
 	mkdir /usr/share/bunkerweb/deps && \
-	/tmp/bunkerweb/deps/install.sh
+	/tmp/bunkerweb/src/deps/install.sh
 	```
 	
 	Additional Python dependencies needs to be installed into the `/usr/share/bunkerweb/deps/python` folder :
 	```shell
-	mkdir /usr/share/bunkerweb/deps/python && \
+	mkdir /usr/share/bunkerweb/src/deps/python && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt && \
-	pip install --no-cache-dir --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/ui/requirements.txt
+	pip install --no-cache-dir --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/src/ui/requirements.txt
 	```
 	
 	Once dependencies are installed, you will be able to copy the BunkerWeb sources to the target `/usr/share/bunkerweb` folder :
@@ -907,8 +1026,9 @@ List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 36
+- Fedora 37
 - CentOS Stream 8
+- RedHat Enterprise Linux (RHEL) 8.7
 
 [Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
@@ -948,7 +1068,7 @@ Configuration of BunkerWeb is done by using specific role variables :
 | Name  | Type  | Description  | Default value  |
 |:-----:|:-----:|--------------|----------------|
 | `bunkerweb_version` | string | Version of BunkerWeb to install. | `1.5.0-beta` |
-| `nginx_version` | string | Version of NGINX to install. | `1.20.2` |
+| `nginx_version` | string | Version of NGINX to install. | `1.24.0` |
 | `freeze_versions` | boolean | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades. | `true` |
 | `variables_env` | string | Path of the variables.env file to configure BunkerWeb. | `files/variables.env` |
 | `enable_ui` | boolean | Activate the web UI. | `false` |
@@ -976,7 +1096,7 @@ List of supported providers :
 
 Please be aware that the provided Vagrant boxes are based **exclusively on Ubuntu 22.04 "Jammy"**. While BunkerWeb supports other Linux distributions, the Vagrant setup currently only supports Ubuntu 22.04 as the base operating system. This ensures a consistent and reliable environment for users who want to deploy BunkerWeb using Vagrant.
 
-Similar to other BunkerWeb integrations, the Vagrant setup uses **NGINX version 1.20.2**. This specific version is required to ensure compatibility and smooth functioning with BunkerWeb. Additionally, the Vagrant box includes **PHP** pre-installed, providing a ready-to-use environment for hosting PHP-based applications alongside BunkerWeb.
+Similar to other BunkerWeb integrations, the Vagrant setup uses **NGINX version 1.24.0**. This specific version is required to ensure compatibility and smooth functioning with BunkerWeb. Additionally, the Vagrant box includes **PHP** pre-installed, providing a ready-to-use environment for hosting PHP-based applications alongside BunkerWeb.
 
 By using the provided Vagrant box based on Ubuntu 22.04 "Jammy", you benefit from a well-configured and integrated setup, allowing you to focus on developing and securing your applications with BunkerWeb without worrying about the underlying infrastructure.
 
@@ -990,7 +1110,7 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 
     ```shell
     Vagrant.configure("2") do |config|
-      config.vm.box = "bunkerity/bunkerity"
+      config.vm.box = "bunkerity/bunkerweb"
     end
     ```
 
@@ -1003,7 +1123,7 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 === "New Vagrant Box"
 
     ```shell
-    vagrant init bunkerity/bunkerity
+    vagrant init bunkerity/bunkerweb
     ```
 
     Depending on the virtualization provider you choose, you may need to install additional plugins:
@@ -1031,7 +1151,7 @@ vagrant ssh
 ```shell
 Vagrant.configure("2") do |config|
   # Ubuntu 22.04 "Jammy"
-  config.vm.box = "bunkerity/bunkerity"
+  config.vm.box = "bunkerity/bunkerweb"
   # Uncomment the desired virtualization provider
   # For VirtualBox (default)
   config.vm.provider "virtualbox"
