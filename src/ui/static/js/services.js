@@ -72,6 +72,7 @@ class ServiceModal {
           const obj = JSON.parse(servicesSettings);
           this.updateModalData(obj);
           //show modal
+          this.changeSubmitBtnName("EDIT");
           this.openModal();
         }
       } catch (err) {}
@@ -92,6 +93,7 @@ class ServiceModal {
           inpServName.value = "";
 
           //show modal
+          this.changeSubmitBtnName("CREATE");
           this.openModal();
         }
       } catch (err) {}
@@ -109,6 +111,13 @@ class ServiceModal {
         }
       } catch (err) {}
     });
+  }
+
+  changeSubmitBtnName(text) {
+    const submitBtn = document.querySelector(
+      "button[data-services-modal-submit]"
+    );
+    submitBtn.textContent = text;
   }
 
   setSettingsDefault() {
