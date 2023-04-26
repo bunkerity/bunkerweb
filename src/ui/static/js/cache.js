@@ -8,7 +8,7 @@ import {
 class Download {
   constructor(prefix = "cache") {
     this.prefix = prefix;
-    this.listContainer = document.querySelector(`[cache-container]`);
+    this.listContainer = document.querySelector(`[data-cache-container]`);
     this.init();
   }
 
@@ -16,11 +16,11 @@ class Download {
     this.listContainer.addEventListener("click", (e) => {
       try {
         if (
-          e.target.closest("button").hasAttribute(`${this.prefix}-download`)
+          e.target.closest("button").hasAttribute(`data-${this.prefix}-download`)
         ) {
           const btnEl = e.target.closest("button");
-          const jobName = btnEl.getAttribute("cache-download");
-          const fileName = btnEl.getAttribute("cache-file");
+          const jobName = btnEl.getAttribute("data-cache-download");
+          const fileName = btnEl.getAttribute("data-cache-file");
           this.sendFileToDL(jobName, fileName);
         }
       } catch (err) {}

@@ -1,4 +1,4 @@
-import { Checkbox, Select, Password } from "./utils/form.js";
+import { Checkbox, Select, Password, DisabledPop } from "./utils/form.js";
 import {
   Popover,
   Tabs,
@@ -15,12 +15,12 @@ class Multiple {
   init() {
     //hide multiple btn if no multiple exist on a plugin
     const multiples = document.querySelectorAll(
-      `[${this.prefix}-settings-multiple]`
+      `[data-${this.prefix}-settings-multiple]`
     );
     multiples.forEach((container) => {
-      if (container.querySelectorAll(`[setting-container]`).length <= 0)
+      if (container.querySelectorAll(`[data-setting-container]`).length <= 0)
         container.parentElement
-          .querySelector("[multiple-handler]")
+          .querySelector("[data-multiple-handler]")
           .classList.add("hidden");
     });
   }
@@ -29,6 +29,7 @@ class Multiple {
 const setCheckbox = new Checkbox();
 const setSelect = new Select();
 const setPassword = new Password();
+const setDisabledPop = new DisabledPop();
 
 const setPopover = new Popover("main", "global-config");
 const setTabs = new Tabs("[global-config-tabs]", "global-config");
@@ -36,5 +37,5 @@ const format = new FormatValue();
 const setMultiple = new Multiple("global-config");
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
-  "[service-content='settings']"
+  "[data-service-content='settings']"
 );

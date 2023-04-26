@@ -13,7 +13,7 @@
       Version
     </p>
     <!-- version of user -->
-    <h5 class="mb-1 font-bold dark:text-white">{{ version }}</h5>
+    <h5 class="mb-1 font-bold dark:text-gray-400">{{ version }}</h5>
 
     <p class="mb-0 dark:text-white dark:opacity-60">
       <!-- case no remote fetch -->
@@ -64,7 +64,7 @@
     >
       Instances
     </p>
-    <h5 class="mb-1 font-bold dark:text-white">{{ instances_number }}</h5>
+    <h5 class="mb-1 font-bold dark:text-gray-400">{{ instances_number }}</h5>
     <p class="mb-0 dark:text-white dark:opacity-60">
       <span class="font-bold leading-normal text-sm text-emerald-500 mx-0.5"
         >{{instance_health_count}} / {{ instances_number }}</span
@@ -103,7 +103,7 @@
     >
       Services
     </p>
-    <h5 class="mb-1 font-bold dark:text-white">{{ services_number }}</h5>
+    <h5 class="mb-1 font-bold dark:text-gray-400">{{ services_number }}</h5>
     <p class="mb-0 dark:text-white dark:opacity-60">
       <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
         >{{services_ui_count}}</span
@@ -150,8 +150,9 @@
     >
       Plugins
     </p>
-    <!--  add {{ plugins_number }} && {{ plugins_error}}-->
-    <h5 class="mb-1 font-bold dark:text-white">1</h5>
+    <h5 class="mb-1 font-bold dark:text-gray-400">
+      {{ config["CONFIG"].get_plugins()|length }}
+    </h5>
     <p class="mb-0 dark:text-white dark:opacity-60">
       <span class="font-bold leading-normal text-sm text-red-500 mx-0.5"
         >{{plugins_errors}}</span

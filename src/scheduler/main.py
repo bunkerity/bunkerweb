@@ -315,9 +315,6 @@ if __name__ == "__main__":
                 "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
             )
 
-        if Path("/var/lib/bunkerweb/db.sqlite3").exists():
-            chmod("/var/lib/bunkerweb/db.sqlite3", 0o760)
-
         first_run = True
         while True:
             # Instantiate scheduler
@@ -386,7 +383,7 @@ if __name__ == "__main__":
                     # Stop temp nginx
                     logger.info("Stopping temp nginx ...")
                     proc = subprocess_run(
-                        ["/usr/sbin/nginx", "-s", "stop"],
+                        ["sudo", "/usr/sbin/nginx", "-s", "stop"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=deepcopy(env),
@@ -408,7 +405,7 @@ if __name__ == "__main__":
                             # Start nginx
                             logger.info("Starting nginx ...")
                             proc = subprocess_run(
-                                ["/usr/sbin/nginx"],
+                                ["sudo", "/usr/sbin/nginx"],
                                 stdin=DEVNULL,
                                 stderr=STDOUT,
                                 env=deepcopy(env),
@@ -475,7 +472,7 @@ if __name__ == "__main__":
                         # Reloading the nginx server.
                         proc = subprocess_run(
                             # Reload nginx
-                            ["/usr/sbin/nginx", "-s", "reload"],
+                            ["sudo", "/usr/sbin/nginx", "-s", "reload"],
                             stdin=DEVNULL,
                             stderr=STDOUT,
                             env=deepcopy(env),

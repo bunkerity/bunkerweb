@@ -1,21 +1,21 @@
 <!-- modal -->
 <div
-  service-content="settings"
-  services-modal
+data-service-content="settings"
+data-services-modal
   class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
 >
   <div
-    services-modal-card
+  data-services-modal-card
     class="overflow-y-auto mx-3 ml-2 mr-6 sm:mx-6 lg:mx-8 my-3 px-4 pt-4 pb-8 w-full min-w-[500px] h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div class="w-full flex justify-between mb-2">
       <p
-        services-modal-title
+      data-services-modal-title
         class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-200 mb-2 font-sans font-semibold leading-normal uppercase text-md"
       >
         SERVICE MODAL
       </p>
-      <button class="-translate-y-1" type="button" services-modal-close>
+      <button class="-translate-y-1" type="button" data-services-modal-close>
         <svg
           class="transition duration-300 ease-in-out dark:opacity-90 h-6 w-6 sm:h-7 sm:w-7 fill-slate-800 dark:fill-gray-300"
           xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +28,7 @@
       </button>
     </div>
     <div
-      services-tabs-header
+    data-services-tabs-header
       class="flex justify-start items-center gap-x-4 gap-y-2 my-3"
     >
       <h5
@@ -55,7 +55,7 @@
     {% include "settings_tabs.html" %}
     <!-- new and edit form -->
     <form
-      services-modal-form
+    data-services-modal-form
       class="w-full h-full flex flex-col justify-between"
       id="form-new"
       method="POST"
@@ -69,14 +69,14 @@
       <!-- action button -->
       <div class="w-full justify-center flex mt-10">
         <button
-          services-modal-close
+        data-services-modal-close
           type="button"
           class="dark:brightness-90 mb-4 mr-3 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >
           Close
         </button>
         <button
-          services-modal-submit
+        data-services-modal-submit
           type="submit"
           class="dark:brightness-90 mb-4 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >
@@ -88,7 +88,7 @@
     <!-- end new and edit form -->
     <!-- delete form-->
     <form
-      services-modal-form-delete
+    data-services-modal-form-delete
       class="w-full h-full flex flex-col justify-between"
       id="form-delete-server_name"
       method="POST"
@@ -99,14 +99,14 @@
 
       <div class="flex justify-center">
         <p
-          services-modal-text
+        data-services-modal-text
           class="mx-2 mb-2 mt-8 font-semibold font-sans leading-normal uppercase text-sm"
         ></p>
       </div>
       <!-- action button -->
       <div class="w-full justify-center flex mt-10">
         <button
-          services-modal-close
+        data-services-modal-close
           type="button"
           class="dark:brightness-90 mr-3 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >

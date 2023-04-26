@@ -55,13 +55,13 @@ from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, getenv, getpid, listdir
 from re import match as re_match
 from requests import get
-from shutil import move, rmtree, copytree
+from shutil import move, rmtree
 from signal import SIGINT, signal, SIGTERM
 from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from tempfile import NamedTemporaryFile
-from time import time
+from time import sleep, time
 from traceback import format_exc
 from typing import Optional
 from zipfile import BadZipFile, ZipFile
@@ -79,10 +79,6 @@ from utils import (
 )
 from logger import setup_logger
 from Database import Database
-
-if not Path("/var/log/nginx/ui.log").exists():
-    Path("/var/log/nginx").mkdir(parents=True, exist_ok=True)
-    Path("/var/log/nginx/ui.log").touch()
 
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
@@ -113,8 +109,8 @@ def handle_stop(signum, frame):
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
-
-Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
+if not Path("/var/tmp/bunkerweb/ui.pid").is_file():
+    Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 # Flask app
 app = Flask(
@@ -187,6 +183,24 @@ elif integration == "Kubernetes":
     kubernetes_client = kube_client.CoreV1Api()
 
 db = Database(logger)
+
+while not db.is_initialized():
+    logger.warning(
+        "Database is not initialized, retrying in 5s ...",
+    )
+    sleep(5)
+
+env = db.get_config()
+while not db.is_first_config_saved() or not env:
+    logger.warning(
+        "Database doesn't have any config saved yet, retrying in 5s ...",
+    )
+    sleep(5)
+    env = db.get_config()
+
+logger.info("Database is ready")
+Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
+
 with open("/usr/share/bunkerweb/VERSION", "r") as f:
     bw_version = f.read().strip()
 
@@ -196,7 +210,7 @@ try:
         SECRET_KEY=vars["FLASK_SECRET"],
         ABSOLUTE_URI=vars["ABSOLUTE_URI"],
         INSTANCES=Instances(docker_client, kubernetes_client, integration),
-        CONFIG=Config(logger, db),
+        CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(logger, db),
         SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]
         .replace("http://", "")
@@ -449,7 +463,7 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            config = app.config["CONFIG"].get_config(methods=True)
+            config = app.config["CONFIG"].get_config(methods=False)
             for variable, value in deepcopy(variables).items():
                 if variable.endswith("SCHEMA"):
                     del variables[variable]
@@ -460,18 +474,14 @@ def services():
                 elif value == "off":
                     value = "no"
 
-                config_setting = config.get(
-                    f"{variables['SERVER_NAME'].split(' ')[0]}_{variable}", None
-                )
-
                 if variable in variables and (
-                    request.form["operation"] == "edit"
-                    and variable != "SERVER_NAME"
-                    and config_setting is not None
-                    and value == config_setting["value"]
+                    variable != "SERVER_NAME"
+                    and value == config.get(variable, None)
                     or not value.strip()
                 ):
                     del variables[variable]
+
+            print(variables, flush=True)
 
             if len(variables) <= 1:
                 flash(
@@ -630,6 +640,8 @@ def configs():
 
         operation = app.config["CONFIGFILES"].check_path(variables["path"])
 
+        print(variables, flush=True)
+
         if operation:
             flash(operation, "error")
             return redirect(url_for("loading", next=url_for("configs"))), 500
@@ -736,6 +748,7 @@ def plugins():
                     f"Couldn't update external plugins to database: {err}",
                     "error",
                 )
+            flash(f"Deleted plugin {variables['name']} successfully")
         else:
             if not Path("/var/tmp/bunkerweb/ui").exists() or not listdir(
                 "/var/tmp/bunkerweb/ui"
@@ -1231,9 +1244,7 @@ def custom_plugin(plugin):
             f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
             "error",
         )
-        return redirect(
-            url_for("loading", next=url_for("plugins", plugin_id=plugin))
-        )
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     try:
         # Try to import the custom plugin
@@ -1248,9 +1259,7 @@ def custom_plugin(plugin):
             f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
             "error",
         )
-        return redirect(
-            url_for("loading", next=url_for("plugins", plugin_id=plugin))
-        )
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     error = False
     res = None
@@ -1541,6 +1550,9 @@ def logs_container(container_id):
 
         log = " ".join(splitted[1:])
         log_lower = log.lower()
+
+        if "[48;2" in log or not log.strip():
+            continue
 
         logs.append(
             {

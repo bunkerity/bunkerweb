@@ -2,8 +2,8 @@
 %}
 
 <head>
-  <base href="{{ config["ABSOLUTE_URI"] }}">
   <meta charset="utf-8" />
+  <base href="{{ config["ABSOLUTE_URI"] }}">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta
     name="viewport"
@@ -21,41 +21,37 @@
   <!-- tailwind style -->
   <link rel="stylesheet" type="text/css" href="./css/dashboard.css" />
 
-  <script type="module" defer src="./js/global.js"></script>
+  <script type="module"  src="./js/global.js"></script>
 
   <script
-    type="text/javascript"
-    charset="utf-8"
-    defer
     src="./js/editor/ace.js"
   ></script>
 
   {% if current_endpoint == "global_config" %}
-  <script defer type="module" src="./js/global_config.js"></script>
+  <script  type="module" src="./js/global_config.js"></script>
   {% elif current_endpoint == "configs" %}
-  <script defer type="module" src="./js/configs.js"></script>
+  <script  type="module" src="./js/configs.js"></script>
   {% elif current_endpoint == "services" %}
-  <script defer type="module" src="./js/services.js"></script>
+  <script  type="module" src="./js/services.js"></script>
   {% elif current_endpoint == "plugins" %}
-  <script type="module" defer src="./js/plugins.js"></script>
+  <script type="module"  src="./js/plugins.js"></script>
   {% elif current_endpoint == "cache" %}
-  <script defer type="module" src="./js/cache.js"></script>
+  <script  type="module" src="./js/cache.js"></script>
   {% elif current_endpoint == "logs" %}
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
 
-  <script type="module" defer src="./js/utils/flatpickr.js"></script>
-  <script type="module" defer src="./js/utils/fr.js"></script>
+  <script type="module"  src="./js/utils/flatpickr.js"></script>
+  <script type="module"  src="./js/utils/fr.js"></script>
 
-  <script type="module" defer src="./js/logs.js"></script>
-  <script type="module" defer src="./js/datepicker/datepicker.js"></script>
+  <script type="module"  src="./js/logs.js"></script>
+  <script type="module"  src="./js/datepicker/datepicker.js"></script>
   <link
     rel="stylesheet"
     type="text/css"
     href="./css/datepicker-foundation.css"
   />
   {% elif current_endpoint == "jobs" %}
-  <script defer type="module" src="./js/jobs.js"></script>
-
+  <script type="module" src="./js/jobs.js"></script>
   {% endif %}
 </head>

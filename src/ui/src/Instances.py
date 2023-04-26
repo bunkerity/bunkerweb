@@ -1,5 +1,5 @@
 from pathlib import Path
-from subprocess import run
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from typing import Any, Optional, Union
 
@@ -56,8 +56,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "reload", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -68,8 +69,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "start", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -80,8 +82,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "stop", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx", "-s", "stop"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -92,8 +95,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "restart", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx", "-s", "restart"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -159,27 +163,24 @@ class Instances:
                     status = "up"
 
                 apis = []
-                for instance in self.__docker_client.services.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
-                    api_http_port = None
-                    api_server_name = None
+                api_http_port = None
+                api_server_name = None
 
-                    for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
-                        "Env"
-                    ]:
-                        if var.startswith("API_HTTP_PORT="):
-                            api_http_port = var.replace("API_HTTP_PORT=", "", 1)
-                        elif var.startswith("API_SERVER_NAME="):
-                            api_server_name = var.replace("API_SERVER_NAME=", "", 1)
+                for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
+                    "Env"
+                ]:
+                    if var.startswith("API_HTTP_PORT="):
+                        api_http_port = var.replace("API_HTTP_PORT=", "", 1)
+                    elif var.startswith("API_SERVER_NAME="):
+                        api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
-                    for task in instance.tasks():
-                        apis.append(
-                            API(
-                                f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or '5000'}",
-                                host=api_server_name or "bwapi",
-                            )
+                for task in instance.tasks():
+                    apis.append(
+                        API(
+                            f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or '5000'}",
+                            host=api_server_name or "bwapi",
                         )
+                    )
                 apiCaller = ApiCaller(apis=apis)
 
                 instances.append(
@@ -202,33 +203,17 @@ class Instances:
                     and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
                 ):
                     env_variables = {
-                        e.name: e.value for e in pod.spec.containers[0].env
+                        env.name: env.value or "" for env in pod.spec.containers[0].env
                     }
 
-                    apis = []
-                    config.load_incluster_config()
-                    corev1 = self.__kubernetes_client.CoreV1Api()
-                    for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                        if (
-                            pod.metadata.annotations != None
-                            and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                        ):
-                            api_http_port = None
-                            api_server_name = None
-
-                            for pod_env in pod.spec.containers[0].env:
-                                if pod_env.name == "API_HTTP_PORT":
-                                    api_http_port = pod_env.value or "5000"
-                                elif pod_env.name == "API_SERVER_NAME":
-                                    api_server_name = pod_env.value or "bwapi"
-
-                            apis.append(
-                                API(
-                                    f"http://{pod.status.pod_ip}:{api_http_port or '5000'}",
-                                    host=api_server_name or "bwapi",
-                                )
+                    apiCaller = ApiCaller(
+                        apis=[
+                            API(
+                                f"http://{pod.status.pod_ip}:{env_variables.get('API_HTTP_PORT', '5000')}",
+                                host=env_variables.get("API_SERVER_NAME", "bwapi"),
                             )
-                    apiCaller = ApiCaller(apis=apis)
+                        ]
+                    )
 
                     status = "up"
                     if pod.status.conditions is not None:

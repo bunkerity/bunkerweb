@@ -279,6 +279,22 @@ You can use the following settings to set up whitelisting :
 | `WHITELIST_USER_AGENT_URLS` |                                                                                                                                                                                              | List of URLs containing User-Agent to whitelist.                                                                         |
 |       `WHITELIST_URI`       |                                                                                                                                                                                              | List of requests URI to whitelist.                                                                                       |
 |    `WHITELIST_URI_URLS`     |                                                                                                                                                                                              | List of URLs containing request(s) URI to whitelist.                                                                     |
+## ReverseScan
+
+ReverseScan" is a feature designed to detect open ports by establishing TCP connections with clients' IP addresses.
+Consider adding this feature if you want to detect possible open proxies or connections from servers.
+
+We provide a list of suspicious ports by default, but it can be modified to fit your needs.Be mindful, Adding too many ports to the list can significantly slow down clients' connections due to the caching process.If a listed port is open, the client's access will be denied.
+
+Please be aware, this feature is new and further improvements will be added soon.
+
+Here is the list of settings related to ReverseScan:
+
+|   Setting    |                                   Default                                    | Description                                    |
+| :----------: | :--------------------------------------------------------------------------: | :--------------------------------------------- |
+| `USE_REVERSE_SCAN`  |                                    `no`                                     | When set to `yes`, will enable ReverseScan. |
+| `REVERSE_SCAN_PORTS` | `22 80 443 3128 8000 8080`                                                 | List of suspicious ports to scan.                  |
+| `REVERSE_SCAN_TIMEOUT` | `500`                                                                    | Specify the maximum timeout (in ms) when scanning a port.                |
 
 ## BunkerNet
 

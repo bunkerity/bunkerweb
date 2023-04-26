@@ -13,12 +13,12 @@ class Dropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-setting-select`) &&
+            .hasAttribute(`data-${this.prefix}-setting-select`) &&
           !e.target.closest("button").hasAttribute(`disabled`)
         ) {
           const btnName = e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select`);
+            .getAttribute(`data-${this.prefix}-setting-select`);
           if (this.lastDrop !== btnName) {
             this.lastDrop = btnName;
             this.closeAllDrop();
@@ -32,12 +32,12 @@ class Dropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-setting-select-dropdown-btn`)
+            .hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)
         ) {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -46,10 +46,13 @@ class Dropdown {
           this.setSelectNewValue(btnSetting, btnValue);
           //close dropdown and change style
           this.hideDropdown(btnSetting);
-          this.changeDropBtnStyle(btnSetting, btn);
+
+          if (!e.target.closest("button").hasAttribute(`data-${prefix}-file`)) {
+            this.changeDropBtnStyle(btnSetting, btn);
+          }
           //show / hide filter
           if (btnSetting === "instances") {
-            this.hideFilterOnLocal(btn.getAttribute("_type"));
+            this.hideFilterOnLocal(btn.getAttribute("data-_type"));
           }
         }
       } catch (err) {}
@@ -58,15 +61,15 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
       drop.classList.remove("flex");
       document
         .querySelector(
-          `svg[${this.prefix}-setting-select="${drop.getAttribute(
-            `${this.prefix}-setting-select-dropdown`
+          `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown`
           )}"]`
         )
         .classList.remove("rotate-180");
@@ -75,7 +78,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -83,39 +86,38 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     selectCustom.querySelector(
-      `[${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
 
     btnEls.forEach((btn) => {
       btn.classList.remove(
+        "bg-primary",
         "dark:bg-primary",
-        "bg-primary",
-        "bg-primary",
         "text-gray-300",
         "text-gray-300"
       );
@@ -133,13 +135,13 @@ class Dropdown {
   toggleSelectBtn(e) {
     const attribut = e.target
       .closest("button")
-      .getAttribute(`${this.prefix}-setting-select`);
+      .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${attribut}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribut}"]`
     );
     const dropdownChevron = document.querySelector(
-      `svg[${this.prefix}-setting-select="${attribut}"]`
+      `svg[data-${this.prefix}-setting-select="${attribut}"]`
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -173,7 +175,7 @@ class Dropdown {
 class Filter {
   constructor(prefix = "jobs") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[${this.prefix}-filter]`);
+    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
     this.successValue = "all";
     this.reloadValue = "all";
@@ -189,12 +191,14 @@ class Filter {
         if (
           e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
           "success"
         ) {
           setTimeout(() => {
             const value = document
-              .querySelector(`[${this.prefix}-setting-select-text="success"]`)
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="success"]`
+              )
               .textContent.trim();
 
             this.successValue = value;
@@ -210,12 +214,14 @@ class Filter {
         if (
           e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
           "reload"
         ) {
           setTimeout(() => {
             const value = document
-              .querySelector(`[${this.prefix}-setting-select-text="reload"]`)
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="reload"]`
+              )
               .textContent.trim();
 
             this.reloadValue = value;
@@ -232,7 +238,7 @@ class Filter {
   }
 
   filter() {
-    const jobs = document.querySelector(`[${this.prefix}-list]`).children;
+    const jobs = document.querySelector(`[data-${this.prefix}-list]`).children;
     if (jobs.length === 0) return;
     //reset
     for (let i = 0; i < jobs.length; i++) {
@@ -250,8 +256,8 @@ class Filter {
     for (let i = 0; i < jobs.length; i++) {
       const el = jobs[i];
       const type = el
-        .querySelector(`[${this.prefix}-success]`)
-        .getAttribute(`${this.prefix}-success`)
+        .querySelector(`[data-${this.prefix}-success]`)
+        .getAttribute(`data-${this.prefix}-success`)
         .trim();
       if (type !== this.successValue) el.classList.add("hidden");
     }
@@ -262,8 +268,8 @@ class Filter {
     for (let i = 0; i < jobs.length; i++) {
       const el = jobs[i];
       const type = el
-        .querySelector(`[${this.prefix}-reload]`)
-        .getAttribute(`${this.prefix}-reload`)
+        .querySelector(`[data-${this.prefix}-reload]`)
+        .getAttribute(`data-${this.prefix}-reload`)
         .trim();
       if (type !== this.reloadValue) el.classList.add("hidden");
     }
@@ -275,15 +281,15 @@ class Filter {
     for (let i = 0; i < jobs.length; i++) {
       const el = jobs[i];
       const name = el
-        .querySelector(`[${this.prefix}-name`)
+        .querySelector(`[data-${this.prefix}-name]`)
         .textContent.trim()
         .toLowerCase();
       const date = el
-        .querySelector(`[${this.prefix}-last_run`)
+        .querySelector(`[data-${this.prefix}-last_run]`)
         .textContent.trim()
         .toLowerCase();
       const every = el
-        .querySelector(`[${this.prefix}-every`)
+        .querySelector(`[data-${this.prefix}-every]`)
         .textContent.trim()
         .toLowerCase();
 
@@ -300,7 +306,7 @@ class Filter {
 class Download {
   constructor(prefix = "jobs") {
     this.prefix = prefix;
-    this.listContainer = document.querySelector(`[${this.prefix}-list]`);
+    this.listContainer = document.querySelector(`[data-${this.prefix}-list]`);
     this.init();
   }
 
@@ -308,11 +314,13 @@ class Download {
     this.listContainer.addEventListener("click", (e) => {
       try {
         if (
-          e.target.closest("button").hasAttribute(`${this.prefix}-download`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-download`)
         ) {
           const btnEl = e.target.closest("button");
-          const jobName = btnEl.getAttribute("jobs-download");
-          const fileName = btnEl.getAttribute("jobs-file");
+          const jobName = btnEl.getAttribute("data-jobs-download");
+          const fileName = btnEl.getAttribute("data-jobs-file");
           this.sendFileToDL(jobName, fileName);
         }
       } catch (err) {}

@@ -4,8 +4,8 @@
   class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border"
 >
   <button
-  services-action="new"
-  services-name="service"
+  data-services-action="new"
+  data-services-name="service"
   type="button"
     class="dark:bg-green-500/90 duration-300 dark:opacity-90 w-80 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
   >
@@ -15,7 +15,7 @@
 <!-- end actions -->
 <!-- services container-->
 <div
-  class="gap-3 p-4 grid grid-cols-12 col-span-12 relative min-w-0 break-words rounded-2xl bg-clip-border"
+  class="gap-8 p-4 grid grid-cols-12 col-span-12 relative min-w-0 break-words rounded-2xl bg-clip-border"
 >
   {% if services|length == 0 %}
   <div class="col-span-12 sm:col-span-4 sm:col-start-5">
@@ -28,10 +28,10 @@
   {% else %}{% for services_batched in services|batch(3) %} {% for service in
   services_batched %} {% set id_server_name =
   service["SERVER_NAME"]['value'].replace(".", "-") %}
- <div services-service
+ <div data-services-service
     class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
-    <div services-settings class="hidden" value="{{service['settings']}}"></div>
+    <div data-services-settings class="hidden" data-value="{{service['settings']}}"></div>
     <h5 class="transition duration-300 ease-in-out dark:opacity-90 text-center sm:text-left mb-1 font-bold dark:text-white">
       {{ service["SERVER_NAME"]['value'] }}
     </h5>
@@ -339,9 +339,9 @@
 
    
       <button
-      services-action="edit"
+      data-services-action="edit"
       type="button"
-      services-name="{{service["SERVER_NAME"]['value']}}"
+      data-services-name="{{service["SERVER_NAME"]['value']}}"
 
         class="dark:brightness-90 z-20 mx-1 bg-blue-500 hover:bg-blue-500/80 focus:bg-yellow-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md"
       >
@@ -354,9 +354,9 @@
     
       {% if service["SERVER_NAME"]['method'] == "ui" %}
       <button
-      services-action="delete"
+      data-services-action="delete"
       type="button"
-      services-name="{{service["SERVER_NAME"]['value']}}"
+      data-services-name="{{service["SERVER_NAME"]['value']}}"
         class="dark:brightness-90 z-20 mx-1 bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md"
       >
         <svg
@@ -379,5 +379,5 @@
 <!-- end services container-->
 
 <!-- modal -->
-{% include "services-modal.html" %}
+{% include "services_modal.html" %}
 {% endblock %}
