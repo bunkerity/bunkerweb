@@ -12,12 +12,12 @@ class Dropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-setting-select`) &&
+            .hasAttribute(`data-${this.prefix}-setting-select`) &&
           !e.target.closest("button").hasAttribute(`disabled`)
         ) {
           const btnName = e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select`);
+            .getAttribute(`data-${this.prefix}-setting-select`);
           if (this.lastDrop !== btnName) {
             this.lastDrop = btnName;
             this.closeAllDrop();
@@ -31,12 +31,12 @@ class Dropdown {
         if (
           e.target
             .closest("button")
-            .hasAttribute(`${this.prefix}-setting-select-dropdown-btn`)
+            .hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)
         ) {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -48,7 +48,7 @@ class Dropdown {
           this.changeDropBtnStyle(btnSetting, btn);
           //show / hide filter
           if (btnSetting === "instances") {
-            this.hideFilterOnLocal(btn.getAttribute("_type"));
+            this.hideFilterOnLocal(btn.getAttribute("data-_type"));
           }
         }
       } catch (err) {}
@@ -57,15 +57,15 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
       drop.classList.remove("flex");
       document
         .querySelector(
-          `svg[${this.prefix}-setting-select="${drop.getAttribute(
-            `${this.prefix}-setting-select-dropdown`
+          `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown`
           )}"]`
         )
         .classList.remove("rotate-180");
@@ -74,7 +74,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -82,30 +82,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     selectCustom.querySelector(
-      `[${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -132,13 +132,13 @@ class Dropdown {
   toggleSelectBtn(e) {
     const attribut = e.target
       .closest("button")
-      .getAttribute(`${this.prefix}-setting-select`);
+      .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[${this.prefix}-setting-select-dropdown="${attribut}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribut}"]`
     );
     const dropdownChevron = document.querySelector(
-      `svg[${this.prefix}-setting-select="${attribut}"]`
+      `svg[data-${this.prefix}-setting-select="${attribut}"]`
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -172,7 +172,7 @@ class Dropdown {
 class Filter {
   constructor(prefix = "plugins") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[${this.prefix}-filter]`);
+    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
     this.lastType = "all";
     this.initHandler();
@@ -185,7 +185,7 @@ class Filter {
         if (
           e.target
             .closest("button")
-            .getAttribute(`${this.prefix}-setting-select-dropdown-btn`) ===
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
           "types"
         ) {
           const btn = e.target.closest("button");
@@ -204,7 +204,7 @@ class Filter {
   }
 
   filter() {
-    const logs = document.querySelector(`[${this.prefix}-list]`).children;
+    const logs = document.querySelector(`[data-${this.prefix}-list]`).children;
     if (logs.length === 0) return;
     //reset
     for (let i = 0; i < logs.length; i++) {
@@ -220,7 +220,7 @@ class Filter {
     if (this.lastType === "all") return;
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
-      const type = el.getAttribute(`${this.prefix}-external`).trim();
+      const type = el.getAttribute(`data-${this.prefix}-external`).trim();
       if (type !== this.lastType) el.classList.add("hidden");
     }
   }
@@ -231,7 +231,7 @@ class Filter {
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
       const content = el
-        .querySelector(`[${this.prefix}-content]`)
+        .querySelector(`[data-${this.prefix}-content]`)
         .textContent.trim()
         .toLowerCase();
 
@@ -242,7 +242,7 @@ class Filter {
 
 class Upload {
   constructor() {
-    this.container = document.querySelector("[plugins-upload]");
+    this.container = document.querySelector("[data-plugins-upload]");
     this.form = document.querySelector("#dropzone-form");
     this.dropZoneElement = document.querySelector(".drop-zone");
     this.fileInput = document.querySelector(".file-input");
@@ -286,8 +286,8 @@ class Upload {
     //close fail/success log
     this.container.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("upload-message-delete")) {
-          const message = e.target.closest("div[upload-message]");
+        if (e.target.closest("button").hasAttribute("data-upload-message-delete")) {
+          const message = e.target.closest("div[data-upload-message]");
           message.remove();
         }
       } catch (err) {}
@@ -362,18 +362,21 @@ class Upload {
   }
 
   allowReload() {
-    const reloadBtn = document.querySelector("[plugin-reload-btn]");
+    const reloadBtn = document.querySelector("[data-plugin-reload-btn]");
     reloadBtn.removeAttribute("disabled");
   }
 
   fileLoad(name, fileSize) {
-    const str = `<div u class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
+    const str = `<div class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
       <div class="flex items-center justify-between">
-      <svg class="fill-sky-500 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM385 215c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-71-71V392c0 13.3-10.7 24-24 24s-24-10.7-24-24V177.9l-71 71c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 103c9.4-9.4 24.6-9.4 33.9 0L385 215z"/></svg>  
+        <svg class="fill-sky-500 stroke-sky-500 h-5 w-5"   xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
       <span class="text-sm text-slate-700 dark:text-gray-300 mr-4">${name} </span>
         <span class="text-sm text-slate-700 dark:text-gray-300">${fileSize}</span>
-        <svg class=" fill-gray-600 dark:fill-gray-300 dark:opacity-80 h-3 w-3 "  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+       
+        <svg class=" fill-gray-600 dark:fill-gray-300 dark:opacity-80 h-3 w-3 " viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="50"/>
         </svg>
       </div>
     </div>
@@ -382,7 +385,7 @@ class Upload {
   }
 
   fileSuccess(name, fileSize) {
-    const str = `<div upload-message class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
+    const str = `<div data-upload-message class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
       <div class="flex items-center justify-between">
       <svg
       class="fill-green-500 h-5 w-5"
@@ -395,10 +398,10 @@ class Upload {
     </svg>          
       <span class="text-sm text-slate-700 dark:text-gray-300 mr-4">${name} </span>
         <span class="text-sm text-slate-700 dark:text-gray-300">${fileSize}</span>
-        <button type="button" upload-message-delete>
+        <button type="button" data-upload-message-delete>
         <svg  class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 h-4 w-4 " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-    <path  d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"></path>
-    </svg>
+          <path  d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"></path>
+        </svg>
     </button>
       </div>
     </div>
@@ -407,7 +410,7 @@ class Upload {
   }
 
   fileFail(name, fileSize) {
-    const str = `<div upload-message class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
+    const str = `<div data-upload-message class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
       <div class="flex items-center justify-between">
       <svg
       class="fill-red-500 h-5 w-5 mr-4"
@@ -420,7 +423,7 @@ class Upload {
     </svg>                
       <span class="text-sm text-slate-700 dark:text-gray-300 mr-4">${name} </span>
         <span class="text-sm text-slate-700 dark:text-gray-300">${fileSize}</span>
-        <button type="button" upload-message-delete>
+        <button type="button" data-upload-message-delete>
 
         <svg  class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 h-4 w-4 " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
     <path  d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"></path>
@@ -437,13 +440,13 @@ class Upload {
 class Modal {
   constructor(prefix = "plugins") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[${this.prefix}-list]`);
-    this.modal = document.querySelector(`[${this.prefix}-modal]`);
+    this.container = document.querySelector(`[data-${this.prefix}-list]`);
+    this.modal = document.querySelector(`[data-${this.prefix}-modal]`);
     this.modalNameInp = this.modal.querySelector("input#name");
     this.modalExtInp = this.modal.querySelector("input#external");
 
-    this.modalTitle = this.modal.querySelector(`[${this.prefix}-modal-title]`);
-    this.modalTxt = this.modal.querySelector(`[${this.prefix}-modal-text]`);
+    this.modalTitle = this.modal.querySelector(`[data-${this.prefix}-modal-title]`);
+    this.modalTxt = this.modal.querySelector(`[data-${this.prefix}-modal-text]`);
     this.init();
   }
 
@@ -452,7 +455,7 @@ class Modal {
       //DELETE HANDLER
       try {
         if (
-          e.target.closest("button").getAttribute(`${this.prefix}-action`) ===
+          e.target.closest("button").getAttribute(`data-${this.prefix}-action`) ===
           "delete"
         ) {
           const btnEl = e.target.closest("button");
@@ -466,7 +469,7 @@ class Modal {
       //CLOSE MODAL HANDLER
       try {
         if (
-          e.target.closest("button").hasAttribute(`${this.prefix}-modal-close`)
+          e.target.closest("button").hasAttribute(`data-${this.prefix}-modal-close`)
         ) {
           this.hideModal();
         }
@@ -482,8 +485,8 @@ class Modal {
     this.modalTxt.textContent = `Are you sure you want to delete ${elName} ?`;
     //external
     const isExternal = el
-      .closest("[plugins-external]")
-      .getAttribute("plugins-external")
+      .closest("[data-plugins-external]")
+      .getAttribute("data-plugins-external")
       .trim()
       .includes("external")
       ? "True"

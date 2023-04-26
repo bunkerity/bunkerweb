@@ -2,7 +2,7 @@
 url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- main container -->
 <div
-  {{current_endpoint}}-container
+  data-{{current_endpoint}}-container
   class="dark:brightness-110 md:min-h-75-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <div class="w-full grid-cols-12 grid">
@@ -13,12 +13,12 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       </h5>
       <!--breadcrumb -->
       <ul
-        {{current_endpoint}}-breadcrumb
+      data-{{current_endpoint}}-breadcrumb
         class="flex flex-wrap bg-transparent rounded-lg md:mb-8"
       >
         <li
-          {{current_endpoint}}-breadcrumb-item
-          {{current_endpoint}}-back
+        data-{{current_endpoint}}-breadcrumb-item
+          data-{{current_endpoint}}-back
           class="mr-2 cursor-pointer text-sm capitalize leading-normal text-gray-700"
           aria-current="page"
         >
@@ -39,10 +39,10 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         </svg>
         </li>
         <li
-          {{current_endpoint}}-breadcrumb-item
-          level="0"
-          path="{% if current_endpoint == "cache" %}/var/cache/bunkerweb{% elif current_endpoint == "configs" %}/etc/bunkerweb/{{current_endpoint}}{% endif %}"
-          name="{{current_endpoint}}"
+        data-{{current_endpoint}}-breadcrumb-item
+        data-level="0"
+        data-path="{% if current_endpoint == "cache" %}/var/cache/bunkerweb{% elif current_endpoint == "configs" %}/etc/bunkerweb/{{current_endpoint}}{% endif %}"
+          data-name="{{current_endpoint}}"
           class="leading-normal text-sm"
         >
           <button
@@ -57,11 +57,11 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     </div>
     <!-- actions -->
     <ul
-      {{current_endpoint}}-add-container
+    data-{{current_endpoint}}-add-container
       class="col-span-12 md:col-span-4 my-2 md:my-0 w-full flex justify-center md:justify-end items-center mb-3"
     >
       <li
-        {{current_endpoint}}-add-folder
+      data-{{current_endpoint}}-add-folder
         class="rounded transition hidden flex-col items-center mx-2 p-2 md:py-4 md:px-6 relative cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800"
       >
         <button type="button">
@@ -80,16 +80,15 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
               d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
             />
           </svg>
-
-          <p
+          <span
             class="dark:text-gray-500 pt-1 mb-0 font-sans font-semibold leading-normal uppercase text-sm lg:text-md"
           >
             ADD SERVICE
-          </p>
+          </span>
         </button>
       </li>
       <li
-        {{current_endpoint}}-add-file
+      data-{{current_endpoint}}-add-file
         class="rounded transition hidden flex-col items-center mx-2 p-2 md:py-4 md:px-6 relative cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800"
       >
         <button type="button">
@@ -109,11 +108,11 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
               />
             </svg>
         
-          <p
+          <span
             class="dark:text-gray-500 pt-1 mb-0 font-sans font-semibold leading-normal uppercase text-sm lg:text-md"
           >
             ADD FILE
-          </p>
+          </span>
         </button>
       </li>
     </ul>
@@ -121,48 +120,42 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
   </div>
 
   <!-- folders-->
-  <div {{current_endpoint}}-folders
+  <div data-{{current_endpoint}}-folders
   class="grid grid-cols-12 gap-3">
     {% for folder in folders %} {% for child in folder['children'] recursive %}
     {{loop(child['children'])}}
     <!--  folder -->
     <div
-      {{current_endpoint}}-element="{{child['name']}}"
-      name="{{child['name']}}"
-      can-create-folder="{{child['can_create_folders']}}"
-      can-create-file="{{child['can_create_files']}}"
-      path="{{child['path']}}"
-      level="{{loop.depth}}"
-      _type="{{child['type']}}"
+    data-{{current_endpoint}}-element="{{child['name']}}"
+      data-name="{{child['name']}}"
+      data-can-create-folder="{{child['can_create_folders']}}"
+      data-can-create-file="{{child['can_create_files']}}"
+      data-path="{{child['path']}}"
+      data-level="{{loop.depth}}"
+      data-_type="{{child['type']}}"
       class="cursor-pointer {% if loop.depth != 1%} hidden {% endif %} relative min-h-20 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-3 flex justify-center items-center h-full transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
       {% if child['content'] %}
       <span
-        value="{{child['content']}}"
-        {{current_endpoint}}-content
+        data-value="{{child['content']}}"
+        data-{{current_endpoint}}-content
         class="hidden"
       ></span>
       {% endif %}
-      <span>
+      <div class="pointer-events-none">
         <!-- service root-->
          {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth == 1 %}
          <svg
-            class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150"
+            class=" absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth="{1.5}"
             stroke="currentColor"
-            className="w-6 h-6"
           >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
               d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
             />
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
@@ -171,42 +164,41 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 
         <!-- services folder -->
          {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 %}
-         <svg class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" /></svg>         {% endif %}
+         <svg class=" absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" /></svg>         {% endif %}
           <!-- end services folder-->
           <!-- services files -->
           {% if child['type'] == "file" and current_endpoint == "configs" and loop.depth != 1 %}
-          <svg class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          <svg class=" absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
           {% endif %}
           <!-- end services files-->
         <!-- cache folder-->
         {% if child['type'] == "folder" and current_endpoint == "cache" and loop.depth == 1 %}
-        <svg  class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <svg  class=" absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
         </svg>
         {% endif %}
         <!-- end cache folder -->
         <!-- cache file -->
          {% if child['type'] == "file" and current_endpoint == "cache" %}
-         <svg             class="absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150"
+         <svg class=" absolute left-3 top-5 h-10 w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150"
          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 13.5H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
         </svg>
          {% endif %}
         <!-- end cache file -->
 
-    
-
-
-        <p
-          {{current_endpoint}}-element-text
-          class="transition duration-300 ease-in-out dark:opacity-90 text-center ml-12 mr-7 mb-0 text-sm md:text-base text-slate-700 dark:text-gray-300"
+        <span
+        data-{{current_endpoint}}-element-text
+          class="pointer-events-none transition duration-300 ease-in-out dark:opacity-90 text-center ml-12 mr-7 mb-0 text-sm md:text-base text-slate-700 dark:text-gray-300"
         >
           {{child['name']}}
-        </p>
+        </span>
+
+        </div>
+        <div>
         <!-- action button -->
         <div
-          {{current_endpoint}}-action-button="{{child['name']}}"
-          type="button"
+        data-{{current_endpoint}}-action-button="{{child['name']}}"
           class="dark:brightness-125 dark:hover:brightness-100 flex justify-center items-center absolute h-full w-10 bg-primary fill-white first-letter:absolute top-0 -right-1 font-bold text-center text-white uppercase transition-all rounded-none rounded-r-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem bg-150 bg-x-25 active:opacity-85"
         >
           <svg
@@ -226,20 +218,21 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         </svg>
         </div>
         <!-- end action button -->
-      </span>
+      </div>
       <!-- dropdown actions -->
-      <div
-        {{current_endpoint}}-action-dropdown="{{child['name']}}"
+      <div role="tablist"
+      data-{{current_endpoint}}-action-dropdown="{{child['name']}}"
         class="absolute hidden flex-col z-110 w-48 right-0 top-0 translate-y-16"
       >
         <!-- view button-->
         <button
+        role="tab"
           type="button"
           value="view"
-          {{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
+          data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
           class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-t rounded-t border-b border-l border-r hover:bg-gray-100"
         >
-          <div class="flex justify-start items-center">
+          <span class="flex justify-start items-center">
             <svg
             class="h-6 w-6 stroke-green-700 dark:brightness-125"
             xmlns="http://www.w3.org/2000/svg"
@@ -264,7 +257,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
               class="transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase"
               >view</span
             >
-          </div>
+          </span>
         </button>
         <!-- end view button-->
 
@@ -272,12 +265,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         {% if child['type'] == "file" and child['can_edit'] == True or
         child['type'] == "folder" and child['can_edit'] == True %}
         <button
+        role="tab"
           type="button"
           value="edit"
-          {{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
+          data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
           class="duration-300 border-gray-300 hover:brightness-90 bg-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 w-full border-b border-l border-r hover:bg-gray-100"
         >
-          <div class="flex justify-start items-center">
+          <span class="flex justify-start items-center">
             <svg  class="h-6 w-6 stroke-orange-500"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
@@ -287,7 +281,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
               class="transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase"
               >edit</span
             >
-          </div>
+          </span>
         </button>
         {% endif %}
         <!-- end edit button -->
@@ -296,14 +290,15 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         {% if child['type'] == "file" and child['can_download'] == True %}
         {% if current_endpoint == "cache" %}
         <button
+        role="tab"
           type="button"
           value="download"
-          {{current_endpoint}}-download="{{child['name'].split('/')[0]}}"
-          {{current_endpoint}}-file="{{child['name'].split('/')[1]}}"
-          {{current_endpoint}}-setting-select-dropdown-btn="{{child['name'].split('/')[0]}}"
+          data-{{current_endpoint}}-download="{{child['name'].split('/')[0]}}"
+          data-{{current_endpoint}}-file="{{child['name'].split('/')[1]}}"
+          data-{{current_endpoint}}-setting-select-dropdown-btn="{{child['name'].split('/')[0]}}"
           class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100"
         >
-          <div class="flex justify-start items-center">
+          <span class="flex justify-start items-center">
             <svg                class="h-6 w-6 stroke-sky-500"
              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -314,16 +309,17 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
               class="transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase"
               >download</span
             >
-          </div>
+          </span>
         </button>
         {%else%}
         <button
+        role="tab"
         type="button"
         value="download"
-        {{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
+        data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
         class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100"
       >
-        <div class="flex justify-start items-center">
+        <span class="flex justify-start items-center">
           <svg                class="h-6 w-6 stroke-sky-500"
            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -334,7 +330,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
             class="transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase"
             >download</span
           >
-        </div>
+        </span>
       </button>
         {%endif %}
         {% endif %}
@@ -343,12 +339,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         <!-- delete button -->
         {% if child['can_delete'] == True %}
         <button
+        role="tab"
           type="button"
           value="delete"
-          {{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
+          data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
           class="bg-white duration-300 border-gray-300 hover:brightness-90 text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100"
         >
-          <div class="flex justify-start items-center">
+          <span class="flex justify-start items-center">
             <svg class="h-6 w-6 stroke-red-500"
           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -357,7 +354,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
               class="transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase"
               >delete</span
             >
-          </div>
+          </span>
         </button>
         {% endif %}
         <!-- end delete button -->
@@ -375,7 +372,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 
 <!-- modal -->
 <div
-  {{current_endpoint}}-modal
+data-{{current_endpoint}}-modal
   class="hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
 >
   <div
@@ -383,24 +380,24 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
   >
     <div class="w-full flex justify-between">
       <p
-        {{current_endpoint}}-modal-title
+      data-{{current_endpoint}}-modal-title
         class="dark:text-white mb-0 font-sans font-semibold leading-normal uppercase text-sm"
       >
         TITLE
       </p>
     </div>
     <form
-      {{current_endpoint}}-modal-form
+    data-{{current_endpoint}}-modal-form
       class="w-full"
       id="form-services"
       method="POST"
     >
       <div
         class="mb-2 flex flex-col sm:flex-row justify-start align-middle items-start sm:items-center"
-        {{current_endpoint}}-modal-path
+        data-{{current_endpoint}}-modal-path
       >
         <p
-          {{current_endpoint}}-modal-path-prefix
+        data-{{current_endpoint}}-modal-path-prefix
           class="mb-0 dark:text-white dark:opacity-75 text-gray-700 opacity-50 text-sm"
         ></p>
         <input
@@ -412,7 +409,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
           required
         />
         <p
-          {{current_endpoint}}-modal-path-suffix
+        data-{{current_endpoint}}-modal-path-suffix
           class="mb-0 dark:text-white dark:opacity-75 text-gray-700 opacity-50 text-sm"
         >
           suffix
@@ -423,10 +420,10 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
       <input type="hidden" id="path" value="" name="path" />
       <input type="hidden" id="old_name" value="" name="old_name" />
       <input type="hidden" id="_type" value="file" name="type" />
-      <textarea class="hidden" id="content" name="content" value=""></textarea>
+      <textarea class="hidden" id="content" name="content"></textarea>
       <!-- editor-->
       <div
-        {{current_endpoint}}-modal-editor
+      data-{{current_endpoint}}-modal-editor
         id="editor"
         class="text-base w-full h-48 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800"
       ></div>
@@ -434,14 +431,14 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 
       <div class="mt-4 w-full justify-end flex">
         <button
-          {{current_endpoint}}-modal-close
+        data-{{current_endpoint}}-modal-close
           type="button"
           class="dark:brightness-90 mr-3 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >
           Close
         </button>
         <button
-          {{current_endpoint}}-modal-submit
+        data-{{current_endpoint}}-modal-submit
           type="submit"
           class="dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >

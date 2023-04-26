@@ -2,9 +2,9 @@ import { Checkbox } from "./utils/form.js";
 
 class Menu {
   constructor() {
-    this.sidebarEl = document.querySelector("[sidebar-menu]");
-    this.toggleBtn = document.querySelector("[sidebar-menu-toggle]");
-    this.closeBtn = document.querySelector("[sidebar-menu-close]");
+    this.sidebarEl = document.querySelector("[data-sidebar-menu]");
+    this.toggleBtn = document.querySelector("[data-sidebar-menu-toggle]");
+    this.closeBtn = document.querySelector("[data-sidebar-menu-close]");
 
     this.toggleBtn.addEventListener("click", this.toggle.bind(this));
     this.closeBtn.addEventListener("click", this.close.bind(this));
@@ -15,7 +15,7 @@ class Menu {
     window.addEventListener("click", (e) => {
       try {
         if (
-          e.target.closest("aside").hasAttribute("sidebar-menu") &&
+          e.target.closest("aside").hasAttribute("data-sidebar-menu") &&
           e.target.closest("button").getAttribute("role") === "tab"
         ) {
           this.close();
@@ -53,7 +53,7 @@ class News {
   }
 
   render(lastNews) {
-    const newsContainer = document.querySelector("[news-container]");
+    const newsContainer = document.querySelector("[data-news-container]");
     //remove default message
     newsContainer.textContent = "";
     //render last news
@@ -76,7 +76,7 @@ class News {
       );
       //add to DOM
       document
-        .querySelector("[news-container]")
+        .querySelector("[data-news-container]")
         .insertAdjacentHTML("afterbegin", cardHTML);
     });
   }
@@ -157,8 +157,8 @@ class Sidebar {
 class darkMode {
   constructor() {
     this.htmlEl = document.querySelector("html");
-    this.darkToggleEl = document.querySelector("[dark-toggle]");
-    this.darkToggleLabel = document.querySelector("[dark-toggle-label]");
+    this.darkToggleEl = document.querySelector("[data-dark-toggle]");
+    this.darkToggleLabel = document.querySelector("[data-dark-toggle-label]");
     this.csrf = document.querySelector("input#csrf_token");
     this.init();
   }
@@ -197,8 +197,8 @@ class darkMode {
 
 class FlashMsg {
   constructor() {
-    this.openBtn = document.querySelector("[flash-sidebar-open]");
-    this.flashCount = document.querySelector("[flash-count]");
+    this.openBtn = document.querySelector("[data-flash-sidebar-open]");
+    this.flashCount = document.querySelector("[data-flash-count]");
     this.isMsgCheck = false;
     this.init();
   }
@@ -211,7 +211,7 @@ class FlashMsg {
     //stop animate if clicked once
     this.openBtn.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("flash-sidebar-open")) {
+        if (e.target.closest("button").hasAttribute("data-flash-sidebar-open")) {
           this.isMsgCheck = true;
         }
       } catch (err) {}
@@ -219,14 +219,14 @@ class FlashMsg {
     //remove flash message and change count
     window.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("close-flash-message")) {
+        if (e.target.closest("button").hasAttribute("data-close-flash-message")) {
           //remove logic
           const closeBtn = e.target.closest("button");
-          const flashEl = closeBtn.closest("[flash-message]");
+          const flashEl = closeBtn.closest("[data-flash-message]");
           flashEl.remove();
           //update count
           this.flashCount.textContent =
-            document.querySelectorAll("[flash-message]").length;
+            document.querySelectorAll("[data-flash-message]").length;
         }
       } catch (err) {}
     });
@@ -254,9 +254,9 @@ class FlashMsg {
 
 class Loader {
   constructor() {
-    this.menuContainer = document.querySelector("[menu-container]");
-    this.logoContainer = document.querySelector("[loader]");
-    this.logoEl = document.querySelector("[loader-img]");
+    this.menuContainer = document.querySelector("[data-menu-container]");
+    this.logoContainer = document.querySelector("[data-loader]");
+    this.logoEl = document.querySelector("[data-loader-img]");
     this.isLoading = true;
     this.init();
   }
@@ -292,14 +292,14 @@ class Loader {
 const setLoader = new Loader();
 const setMenu = new Menu();
 const setNewsSidebar = new Sidebar(
-  "[sidebar-info]",
-  "[sidebar-info-open]",
-  "[sidebar-info-close]"
+  "[data-sidebar-info]",
+  "[data-sidebar-info-open]",
+  "[data-sidebar-info-close]"
 );
 const setFlashSidebar = new Sidebar(
-  "[flash-sidebar]",
-  "[flash-sidebar-open]",
-  "[flash-sidebar-close]"
+  "[data-flash-sidebar]",
+  "[data-flash-sidebar-open]",
+  "[data-flash-sidebar-close]"
 );
 const setNews = new News();
 const setDarkM = new darkMode();
