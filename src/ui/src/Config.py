@@ -10,35 +10,16 @@ from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
 from tarfile import open as tar_open
-from time import sleep
 from typing import List, Tuple
 from uuid import uuid4
 
 
 class Config:
-    def __init__(self, logger, db) -> None:
+    def __init__(self, db) -> None:
         with open("/usr/share/bunkerweb/settings.json", "r") as f:
             self.__settings: dict = json_load(f)
 
-        self.__logger = logger
         self.__db = db
-
-        while not self.__db.is_initialized():
-            self.__logger.warning(
-                "Database is not initialized, retrying in 5s ...",
-            )
-            sleep(5)
-
-        env = self.__db.get_config()
-        while not self.__db.is_first_config_saved() or not env:
-            self.__logger.warning(
-                "Database doesn't have any config saved yet, retrying in 5s ...",
-            )
-            sleep(5)
-            env = self.__db.get_config()
-
-        self.__logger.info("Database is ready")
-        Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
 
     def __env_to_dict(self, filename: str) -> dict:
         """Converts the content of an env file into a dict

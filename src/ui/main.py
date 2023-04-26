@@ -61,7 +61,7 @@ from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from tempfile import NamedTemporaryFile
-from time import time
+from time import sleep, time
 from traceback import format_exc
 from typing import Optional
 from zipfile import BadZipFile, ZipFile
@@ -187,6 +187,24 @@ elif integration == "Kubernetes":
     kubernetes_client = kube_client.CoreV1Api()
 
 db = Database(logger)
+
+while not db.is_initialized():
+    logger.warning(
+        "Database is not initialized, retrying in 5s ...",
+    )
+    sleep(5)
+
+env = db.get_config()
+while not db.is_first_config_saved() or not env:
+    logger.warning(
+        "Database doesn't have any config saved yet, retrying in 5s ...",
+    )
+    sleep(5)
+    env = db.get_config()
+
+logger.info("Database is ready")
+Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
+
 with open("/usr/share/bunkerweb/VERSION", "r") as f:
     bw_version = f.read().strip()
 
@@ -196,7 +214,7 @@ try:
         SECRET_KEY=vars["FLASK_SECRET"],
         ABSOLUTE_URI=vars["ABSOLUTE_URI"],
         INSTANCES=Instances(docker_client, kubernetes_client, integration),
-        CONFIG=Config(logger, db),
+        CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(logger, db),
         SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]
         .replace("http://", "")
@@ -629,6 +647,8 @@ def configs():
         del variables["csrf_token"]
 
         operation = app.config["CONFIGFILES"].check_path(variables["path"])
+
+        print(variables, flush=True)
 
         if operation:
             flash(operation, "error")
@@ -1231,9 +1251,7 @@ def custom_plugin(plugin):
             f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
             "error",
         )
-        return redirect(
-            url_for("loading", next=url_for("plugins", plugin_id=plugin))
-        )
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     try:
         # Try to import the custom plugin
@@ -1248,9 +1266,7 @@ def custom_plugin(plugin):
             f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
             "error",
         )
-        return redirect(
-            url_for("loading", next=url_for("plugins", plugin_id=plugin))
-        )
+        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     error = False
     res = None

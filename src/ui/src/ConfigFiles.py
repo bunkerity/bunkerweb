@@ -1,11 +1,27 @@
+from glob import glob
 from os import listdir, replace, walk
 from os.path import dirname, join
 from pathlib import Path
 from re import compile as re_compile
 from shutil import rmtree, move as shutil_move
-from typing import Tuple
+from typing import Any, Dict, List, Tuple
 
 from utils import path_to_dict
+
+
+def generate_custom_configs(
+    custom_configs: List[Dict[str, Any]],
+    *,
+    original_path: str = "/data/configs",
+):
+    Path(original_path).mkdir(parents=True, exist_ok=True)
+    for custom_config in custom_configs:
+        tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
+        if custom_config["service_id"]:
+            tmp_path += f"/{custom_config['service_id']}"
+        tmp_path += f"/{custom_config['name']}.conf"
+        Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
+        Path(tmp_path).write_bytes(custom_config["data"])
 
 
 class ConfigFiles:
@@ -18,6 +34,21 @@ class ConfigFiles:
         self.__file_creation_blacklist = ["http", "stream"]
         self.__logger = logger
         self.__db = db
+
+        if not Path("/usr/sbin/nginx").is_file():
+            custom_configs = self.__db.get_custom_configs()
+
+            if custom_configs:
+                self.__logger.info("Refreshing custom configs ...")
+                # Remove old custom configs files
+                for file in glob("/data/configs/*"):
+                    if Path(file).is_symlink() or Path(file).is_file():
+                        Path(file).unlink()
+                    elif Path(file).is_dir():
+                        rmtree(file, ignore_errors=False)
+
+                generate_custom_configs(custom_configs)
+                self.__logger.info("Custom configs refreshed successfully")
 
     def save_configs(self) -> str:
         custom_configs = []
@@ -109,8 +140,8 @@ class ConfigFiles:
         return f"The file {file_path} was successfully created", 0
 
     def edit_folder(self, path: str, name: str, old_name: str) -> Tuple[str, int]:
-        new_folder_path = dirname(join(path, name))
-        old_folder_path = dirname(join(path, old_name))
+        new_folder_path = join(dirname(path), name)
+        old_folder_path = join(dirname(path), old_name)
 
         if old_folder_path == new_folder_path:
             return (
@@ -131,8 +162,8 @@ class ConfigFiles:
     def edit_file(
         self, path: str, name: str, old_name: str, content: str
     ) -> Tuple[str, int]:
-        new_path = dirname(join(path, name))
-        old_path = dirname(join(path, old_name))
+        new_path = join(dirname(path), name)
+        old_path = join(dirname(path), old_name)
 
         try:
             file_content = Path(old_path).read_text()
