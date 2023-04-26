@@ -1,4 +1,4 @@
-import { Checkbox, Select, Password } from "./utils/form.js";
+import { Checkbox, Select, Password, DisabledPop } from "./utils/form.js";
 import {
   Popover,
   Tabs,
@@ -29,6 +29,7 @@ class Multiple {
 const setCheckbox = new Checkbox();
 const setSelect = new Select();
 const setPassword = new Password();
+const setDisabledPop = new DisabledPop();
 
 const setPopover = new Popover("main", "global-config");
 const setTabs = new Tabs("[global-config-tabs]", "global-config");
