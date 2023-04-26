@@ -125,7 +125,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 
     services:
       myapp:
-        image: nginxdemos/hello:plain-text
+        image: tutum/hello-world
         networks:
           bw-services:
               aliases:
@@ -199,16 +199,16 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
         bunkerweb.io/DUMMY_SETTING: "value"
     spec:
       rules:
-      - host: www.example.com
-    	http:
-    	  paths:
-    	  - path: /
-    		pathType: Prefix
-    		backend:
-    		  service:
-    			name: svc-app
-    			port:
-    			  number: 80
+        - host: www.example.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                  name: svc-app
+                  port:
+                    number: 80
     ```
 
 === "Linux"
@@ -348,548 +348,316 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 ### Multiple applications
 
 !!! tip "Testing"
-	To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
-	```shell
-	curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server
-	```
-	
-	If you are using HTTPS, you will need to play with SNI :
-	```shell
-	curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
-	```
+
+    To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
+
+    ```shell
+    curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server
+    ```
+    
+    If you are using HTTPS, you will need to play with SNI :
+
+    ```shell
+    curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
+    ```
 
 === "Docker"
 
-    When using Docker integration, the easiest way of protecting multiple existing applications is to create a network so BunkerWeb can send requests using the container names.
+    When using Docker integration, the easiest way of protecting an existing application is to add the web service in the `bw-services network` :
 
-    Create the Docker network if it's not already created :
-    ```shell
-    docker network create bw-net
-    ```
-
-    Then instantiate your apps :
-    === "App #1"
-    	```shell
-    	docker run -d \
-    		   --name myapp1 \
-    		   --network bw-net \
-    		   nginxdemos/hello:plain-text
-    	```
-    === "App #2"
-    	```shell
-    	docker run -d \
-    		   --name myapp2 \
-    		   --network bw-net \
-    		   nginxdemos/hello:plain-text
-    	```
-    === "App #3"
-    	```shell
-    	docker run -d \
-    		   --name myapp3 \
-    		   --network bw-net \
-    		   nginxdemos/hello:plain-text
-    	```
-
-    Create the BunkerWeb volume if it's not already created :
-    ```shell
-    docker volume create bw-data
-    ```
-
-    You can now run BunkerWeb and configure it for your apps :
-    ```shell
-    docker run -d \
-           --name mybunker \
-    	   --network bw-net \
-    	   -p 80:8080 \
-    	   -p 443:8443 \
-    	   -v bw-data:/data \
-    	   -e MULTISITE=yes \
-    	   -e "SERVER_NAME=app1.example.com app2.example.com app3.example.com" \
-    	   -e USE_REVERSE_PROXY=yes \
-    	   -e REVERSE_PROXY_URL=/ \
-    	   -e app1.example.com_REVERSE_PROXY_HOST=http://myapp1 \
-    	   -e app2.example.com_REVERSE_PROXY_HOST=http://myapp2 \
-    	   -e app3.example.com_REVERSE_PROXY_HOST=http://myapp3 \
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
-
-    Here is the docker-compose equivalent :
     ```yaml
-    version: '3'
+    version: "3.5"
 
     services:
-
-      mybunker:
-    	image: bunkerity/bunkerweb:1.5.0-beta
-    	ports:
-    	  - 80:8080
-    	  - 443:8443
-    	volumes:
-    	  - bw-data:/data
-    	environment:
-    	  - MULTISITE=yes
-    	  - SERVER_NAME=app1.example.com app2.example.com app3.example.com
-    	  - USE_REVERSE_PROXY=yes
-    	  - REVERSE_PROXY_URL=/
-    	  - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
-    	  - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
-    	  - app3.example.com_REVERSE_PROXY_HOST=http://myapp3
-    	networks:
-    	  - bw-net
-
       myapp1:
-    	image: nginxdemos/hello:plain-text
-    	networks:
-    	  - bw-net
+        image: tutum/hello-world
+        networks:
+          - bw-services
 
       myapp2:
-    	image: nginxdemos/hello:plain-text
-    	networks:
-    	  - bw-net
+        image: tutum/hello-world
+        networks:
+          - bw-services
 
       myapp3:
-    	image: nginxdemos/hello:plain-text
-    	networks:
-    	  - bw-net
+        image: tutum/hello-world
+        networks:
+          - bw-services
+
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          - 80:8080
+          - 443:8443
+        labels:
+          - "bunkerweb.INSTANCE"
+        environment:
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - MULTISITE=yes
+          - SERVER_NAME=app1.example.com app2.example.com app3.example.com
+          - USE_REVERSE_PROXY=yes # Will be applied to all server config
+          - REVERSE_PROXY_URL=/ # Will be applied to all server config
+          - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
+          - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
+          - app3.example.com_REVERSE_PROXY_HOST=http://myapp3
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        volumes:
+          - bw-data:/data
+        environment:
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+        networks:
+          - bw-docker
 
     volumes:
       bw-data:
 
     networks:
-      bw-net:
-    	name: bw-net
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
     ```
 
 === "Docker autoconf"
 
-    We will assume that you already have the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack running on your machine and connected to a network called bw-services.
+    We will assume that you already have the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
-    You can instantiate your containers and pass the settings as labels :
-    === "App #1"
-    	```shell
-    	docker run -d \
-           --name myapp1 \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=app1.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.USE_REVERSE_URL=/ \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp1 \
-    	   nginxdemos/hello:plain-text
-    	```
+    ```yaml
+    version: '3.5'
 
-    	Here is the docker-compose equivalent :
-    	```yaml
-    	version: '3'
+    services:
+      myapp1:
+    	  image: tutum/hello-world
+    	  networks:
+    	    bw-services:
+    		    aliases:
+    		      - myapp1
+    	  labels:
+    	    - "bunkerweb.SERVER_NAME=app1.example.com"
+    	    - "bunkerweb.USE_REVERSE_PROXY=yes"
+    	    - "bunkerweb.REVERSE_PROXY_URL=/"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
 
-    	services:
+      myapp2:
+    	  image: tutum/hello-world
+    	  networks:
+    	    bw-services:
+    		    aliases:
+    		      - myapp1
+    	  labels:
+    	    - "bunkerweb.SERVER_NAME=app2.example.com"
+    	    - "bunkerweb.USE_REVERSE_PROXY=yes"
+    	    - "bunkerweb.REVERSE_PROXY_URL=/"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
 
-    	  myapp1:
-    		image: nginxdemos/hello:plain-text
-    		networks:
-    		  bw-services:
-    			aliases:
-    			  - myapp1
-    		labels:
-    		  - "bunkerweb.SERVER_NAME=app1.example.com"
-    		  - "bunkerweb.USE_REVERSE_PROXY=yes"
-    		  - "bunkerweb.REVERSE_PROXY_URL=/"
-    		  - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+      myapp3:
+    	  image: tutum/hello-world
+    	  networks:
+    	    bw-services:
+    		    aliases:
+    		      - myapp3
+    	  labels:
+    	    - "bunkerweb.SERVER_NAME=app3.example.com"
+    	    - "bunkerweb.USE_REVERSE_PROXY=yes"
+    	    - "bunkerweb.REVERSE_PROXY_URL=/"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
 
-    	networks:
-    	  bw-services:
-    		external:
-    		  name: bw-services
-    	```
-
-    === "App #2"
-    	```shell
-    	docker run -d \
-           --name myapp2 \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=app2.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.USE_REVERSE_URL=/ \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp2 \
-    	   nginxdemos/hello:plain-text
-    	```
-
-    	Here is the docker-compose equivalent :
-    	```yaml
-    	version: '3'
-
-    	services:
-
-    	  myapp2:
-    		image: nginxdemos/hello:plain-text
-    		networks:
-    		  bw-services:
-    			aliases:
-    			  - myapp2
-    		labels:
-    		  - "bunkerweb.SERVER_NAME=app2.example.com"
-    		  - "bunkerweb.USE_REVERSE_PROXY=yes"
-    		  - "bunkerweb.REVERSE_PROXY_URL=/"
-    		  - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
-
-    	networks:
-    	  bw-services:
-    		external:
-    		  name: bw-services
-    	```
-    === "App #3"
-    	```shell
-    	docker run -d \
-           --name myapp3 \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=app3.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.USE_REVERSE_URL=/ \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp3 \
-    	   nginxdemos/hello:plain-text
-    	```
-
-    	Here is the docker-compose equivalent :
-    	```yaml
-    	version: '3'
-
-    	services:
-
-    	  myapp3:
-    		image: nginxdemos/hello:plain-text
-    		networks:
-    		  bw-services:
-    			aliases:
-    			  - myapp3
-    		labels:
-    		  - "bunkerweb.SERVER_NAME=app3.example.com"
-    		  - "bunkerweb.USE_REVERSE_PROXY=yes"
-    		  - "bunkerweb.REVERSE_PROXY_URL=/"
-    		  - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
-
-    	networks:
-    	  bw-services:
-    		external:
-    		  name: bw-services
-    	```
+    networks:
+      bw-services:
+    	external:
+    	  name: bw-services
+    ```
 
 === "Swarm"
 
-    We will assume that you already have the [Swarm integration](/1.4/integrations/#swarm) stack running on your cluster.
+    We will assume that you already have the [Swarm integration](/1.4/integrations/#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
-    You can instantiate your services and pass the settings as labels :
-    === "App #1"
-    	```shell
-    	docker service \
-    	   create \
-    	   --name myapp1 \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=app1.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp1 \
-    	   -l bunkerweb.REVERSE_PROXY_URL=/ \
-    	   nginxdemos/hello:plain-text
-    	```
+    ```yaml
+    version: "3"
 
-    	Here is the docker-compose equivalent (using `docker stack deploy`) :
-    	```yaml
-    	version: "3"
+    services:
+      myapp1:
+        image: tutum/hello-world
+        networks:
+          bw-services:
+              aliases:
+                - myapp1
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+          - "bunkerweb.SERVER_NAME=app1.example.com"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
 
-    	services:
+      myapp2:
+        image: tutum/hello-world
+        networks:
+          bw-services:
+              aliases:
+                - myapp2
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+          - "bunkerweb.SERVER_NAME=app2.example.com"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
 
-    	  myapp1:
-    		image: nginxdemos/hello:plain-text
-    		networks:
-    		  bw-services:
-    			aliases:
-    			  - myapp1
-    		deploy:
-    		  placement:
-    			constraints:
-    			  - "node.role==worker"
-    		  labels:
-    			- "bunkerweb.SERVER_NAME=app1.example.com"
-    			- "bunkerweb.USE_REVERSE_PROXY=yes"
-    			- "bunkerweb.REVERSE_PROXY_URL=/"
-    			- "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+      myapp3:
+        image: tutum/hello-world
+        networks:
+          bw-services:
+              aliases:
+                - myapp3
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+          - "bunkerweb.SERVER_NAME=app3.example.com"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
 
-    	networks:
-    	  bw-services:
-    		external:
-    		  name: bw-services
-    	```
-
-    === "App #2"
-    	```shell
-    	docker service \
-    	   create \
-    	   --name myapp2 \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=app2.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp2 \
-    	   -l bunkerweb.REVERSE_PROXY_URL=/ \
-    	   nginxdemos/hello:plain-text
-    	```
-
-    	Here is the docker-compose equivalent (using `docker stack deploy`) :
-    	```yaml
-    	version: "3"
-
-    	services:
-
-    	  myapp2:
-    		image: nginxdemos/hello:plain-text
-    		networks:
-    		  bw-services:
-    			aliases:
-    			  - myapp2
-    		deploy:
-    		  placement:
-    			constraints:
-    			  - "node.role==worker"
-    		  labels:
-    			- "bunkerweb.SERVER_NAME=app2.example.com"
-    			- "bunkerweb.USE_REVERSE_PROXY=yes"
-    			- "bunkerweb.REVERSE_PROXY_URL=/"
-    			- "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
-
-    	networks:
-    	  bw-services:
-    		external:
-    		  name: bw-services
-    	```
-
-    === "App #3"
-    	```shell
-    	docker service \
-    	   create \
-    	   --name myapp3 \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=app3.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp3 \
-    	   -l bunkerweb.REVERSE_PROXY_URL=/ \
-    	   nginxdemos/hello:plain-text
-    	```
-
-    	Here is the docker-compose equivalent (using `docker stack deploy`) :
-    	```yaml
-    	version: "3"
-
-    	services:
-
-    	  myapp3:
-    		image: nginxdemos/hello:plain-text
-    		networks:
-    		  bw-services:
-    			aliases:
-    			  - myapp3
-    		deploy:
-    		  placement:
-    			constraints:
-    			  - "node.role==worker"
-    		  labels:
-    			- "bunkerweb.SERVER_NAME=app3.example.com"
-    			- "bunkerweb.USE_REVERSE_PROXY=yes"
-    			- "bunkerweb.REVERSE_PROXY_URL=/"
-    			- "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
-
-    	networks:
-    	  bw-services:
-    		external:
-    		  name: bw-services
-    	```
+    networks:
+      bw-services:
+    	external:
+    	  name: bw-services
+    ```
 
 === "Kubernetes"
 
     We will assume that you already have the [Kubernetes integration](/1.4/integrations/#kubernetes) stack running on your cluster.
 
-    Let's also assume that you have some typical Deployments with Services to access the web applications from within the cluster :
+    Let's assume that you have typical Deployments with a Service to access the web applications from within the cluster :
 
-    === "App #1"
-    	```yaml
-    	apiVersion: apps/v1
-    	kind: Deployment
+    ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: app1
+      labels:
+    	app: app1
+    spec:
+      replicas: 1
+      selector:
+    	matchLabels:
+    	  app: app1
+      template:
     	metadata:
-    	  name: app1
     	  labels:
     		app: app1
     	spec:
-    	  replicas: 1
-    	  selector:
-    		matchLabels:
-    		  app: app1
-    	  template:
-    		metadata:
-    		  labels:
-    			app: app1
-    		spec:
-    		  containers:
-    		  - name: app1
-    			image: nginxdemos/hello:plain-text
-    			ports:
-    			- containerPort: 80
-    	---
-    	apiVersion: v1
-    	kind: Service
-    	metadata:
-    	  name: svc-app1
-    	spec:
-    	  selector:
-    		app: app1
-    	  ports:
-    		- protocol: TCP
-    		  port: 80
-    		  targetPort: 80
-    	```
-
-    === "App #2"
-    	```yaml
-    	apiVersion: apps/v1
-    	kind: Deployment
-    	metadata:
-    	  name: app2
-    	  labels:
-    		app: app2
-    	spec:
-    	  replicas: 1
-    	  selector:
-    		matchLabels:
-    		  app: app2
-    	  template:
-    		metadata:
-    		  labels:
-    			app: app2
-    		spec:
-    		  containers:
-    		  - name: app2
-    			image: nginxdemos/hello:plain-text
-    			ports:
-    			- containerPort: 80
-    	---
-    	apiVersion: v1
-    	kind: Service
-    	metadata:
-    	  name: svc-app2
-    	spec:
-    	  selector:
-    		app: app2
-    	  ports:
-    		- protocol: TCP
-    		  port: 80
-    		  targetPort: 80
-    	```
-
-    === "App #3"
-    	```yaml
-    	apiVersion: apps/v1
-    	kind: Deployment
-    	metadata:
-    	  name: app3
-    	  labels:
-    		app: app3
-    	spec:
-    	  replicas: 1
-    	  selector:
-    		matchLabels:
-    		  app: app3
-    	  template:
-    		metadata:
-    		  labels:
-    			app: app3
-    		spec:
-    		  containers:
-    		  - name: app1
-    			image: nginxdemos/hello:plain-text
-    			ports:
-    			- containerPort: 80
-    	---
-    	apiVersion: v1
-    	kind: Service
-    	metadata:
-    	  name: svc-app3
-    	spec:
-    	  selector:
-    		app: app3
-    	  ports:
-    		- protocol: TCP
-    		  port: 80
-    		  targetPort: 80
-    	```
+    	  containers:
+    	  - name: app1
+    		image: tutum/hello-world
+    		ports:
+    		- containerPort: 80
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-app1
+    spec:
+      selector:
+    	app: app1
+      ports:
+    	- protocol: TCP
+    	  port: 80
+    	  targetPort: 80
+    ```
 
     Here is the corresponding Ingress definition to serve and protect the web applications :
+
     ```yaml
     apiVersion: networking.k8s.io/v1
     kind: Ingress
     metadata:
       name: ingress
       annotations:
-    	bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/DUMMY_SETTING: "value"
+        bunkerweb.io/app1.example.com_DUMMY_SETTING: "value"
     spec:
       rules:
-      - host: app1.example.com
-    	http:
-    	  paths:
-    	  - path: /
-    		pathType: Prefix
-    		backend:
-    		  service:
-    			name: svc-app1
-    			port:
-    			  number: 80
-      - host: app2.example.com
-    	http:
-    	  paths:
-    	  - path: /
-    		pathType: Prefix
-    		backend:
-    		  service:
-    			name: svc-app2
-    			port:
-    			  number: 80
-      - host: app3.example.com
-    	http:
-    	  paths:
-    	  - path: /
-    		pathType: Prefix
-    		backend:
-    		  service:
-    			name: svc-app3
-    			port:
-    			  number: 80
+        - host: app1.example.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                  name: svc-app1
+                  port:
+                    number: 80
+        - host: app2.example.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                  name: svc-app2
+                  port:
+                    number: 80
+        - host: app3.example.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                  name: svc-app3
+                  port:
+                    number: 80
     ```
 
 === "Linux"
 
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
-    Let's assume that you have some web applications running on the same machine as BunkerWeb :
+    The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory (repeat it and change the port if you want to test BunkerWeb) :
 
-    === "App #1"
-    	The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8001
-    	```
-
-    === "App #2"
-    	The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8002
-    	```
-
-    === "App #3"
-    	The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8003
-    	```
+    ```shell
+    python3 -m http.server -b 127.0.0.1 8001
+    ```
 
     Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
+
     ```conf
-    SERVER_NAME=app1.example.com app2.example.com app3.example.com
     HTTP_PORT=80
     HTTPS_PORT=443
-    MULTISITE=yes
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    MULTISITE=yes
+    SERVER_NAME=app1.example.com app2.example.com app3.example.com
     USE_REVERSE_PROXY=yes
     REVERSE_PROXY_URL=/
     app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
@@ -898,134 +666,120 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     ```
 
     Let's check the status of BunkerWeb :
+
     ```shell
     systemctl status bunkerweb
     ```
 
     If it's already running, we can restart it :
+
     ```shell
     systemctl restart bunkerweb
     ```
 
     Otherwise, we will need to start it :
+
     ```shell
     systemctl start bunkerweb
     ```
-	
-=== "Vagrant"
-
-	We will assume that you already have the [Vagrant integration](/1.4/integrations/#Vagrant) stack running on your machine with some web applications running on the same machine as BunkerWeb.
-
-	Let's assume that you have some web applications running on the same machine as BunkerWeb :
-
-	=== "App #1"
-		The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
-		```shell
-		python3 -m http.server -b 127.0.0.1 8001
-		```
-
-	=== "App #2"
-		The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
-		```shell
-		python3 -m http.server -b 127.0.0.1 8002
-		```
-
-	=== "App #3"
-		The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
-		```shell
-		python3 -m http.server -b 127.0.0.1 8003
-		```
-
-	Connect to your vagrant machine :
-	```shell
-	vagrant ssh
-	```
-
-	Configuration of BunkerWeb is done by editing the /etc/bunkerweb/variables.env file :
-	```conf
-	SERVER_NAME=app1.example.com app2.example.com app3.example.com
-	HTTP_PORT=80
-	HTTPS_PORT=443
-	MULTISITE=yes
-	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	USE_REVERSE_PROXY=yes
-	REVERSE_PROXY_URL=/
-	app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
-	app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
-	app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
-	```
-
-	If it's already running we can restart it :
-	```shell
-	systemctl restart bunkerweb
-	```
-
-	Otherwise, we will need to start it :
-	```shell
-	systemctl start bunkerweb
-	```
-
-	Let's check the status of BunkerWeb :
-	```shell
-	systemctl status bunkerweb
-	```
 
 === "Ansible"
 
-    Let's assume that you have some web applications running on the same machine as BunkerWeb :
+    We will assume that you already have a service running and you want to use BunkerWeb as a reverse-proxy.
 
-    === "App #1"
-    	The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8001
-    	```
+    The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory (repeat it and change the port if you want to test BunkerWeb) :
 
-    === "App #2"
-    	The following command will run a basic HTTP server on the port 8002 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8002
-    	```
+    ```shell
+    python3 -m http.server -b 127.0.0.1 8001
+    ```
 
-    === "App #3"
-    	The following command will run a basic HTTP server on the port 8003 and deliver the files in the current directory :
-    	```shell
-    	python3 -m http.server -b 127.0.0.1 8003
-    	```
+    Content of the `my_variables.env` configuration file :
 
-   Content of the `my_variables.env` configuration file : 
     ```conf
-    SERVER_NAME=app1.example.com app2.example.com app3.example.com
     HTTP_PORT=80
     HTTPS_PORT=443
-    MULTISITE=yes
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    MULTISITE=yes
+    SERVER_NAME=app1.example.com app2.example.com app3.example.com
     USE_REVERSE_PROXY=yes
     REVERSE_PROXY_URL=/
     app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
     app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
     app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
     ```
-	[]()
-	In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-	```yaml
-	[mybunkers]
-    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-	```
-	[]()
-	Or alternatively, in your playbook file : 
-	```yaml
+
+    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
+
+    ```yaml
+    [mybunkers]
+      192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
+    ```
+    
+    Or alternatively, in your playbook file :
+
+    ```yaml
     - hosts: all
       become: true
       vars:
         - variables_env: "{{ playbook_dir }}/my_variables.env"
       roles:
         - bunkerity.bunkerweb
-	```
-	[]()
-	Run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
+    ```
+
+    You can now run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
+
+=== "Vagrant"
+
+    We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
+
+	  First of all, connect to your vagrant machine :
+
+    ```shell
+    vagrant ssh
+    ```
+
+    The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory (repeat it and change the port if you want to test BunkerWeb) :
+
+    ```shell
+    python3 -m http.server -b 127.0.0.1 8001
+    ```
+
+	  And then you can edit the `variables.env` file in your host machine like this :
+
+    ```conf
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    MULTISITE=yes
+    SERVER_NAME=app1.example.com app2.example.com app3.example.com
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/
+    app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
+    app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
+    app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
+    ```
+
+    Let's check the status of BunkerWeb :
+
+    ```shell
+    systemctl status bunkerweb
+    ```
+
+    If it's already running we can restart it :
+
+    ```shell
+    systemctl restart bunkerweb
+    ```
+
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb
+    ```
 
 ## Behind load balancer or reverse proxy
 
@@ -1033,15 +787,15 @@ When BunkerWeb is itself behind a load balancer or a reverse proxy, you need to 
 
 BunkerWeb actually supports two methods to retrieve the real IP address of the client :
 
-- Using the PROXY protocol
-- Using a HTTP header like X-Forwarded-For
+- Using the `PROXY protocol`
+- Using a HTTP header like `X-Forwarded-For`
 
 The following settings can be used :
 
 - `USE_REAL_IP` : enable/disable real IP retrieval
 - `USE_PROXY_PROTOCOL` : enable/disable PROXY protocol support
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
-- `REAL_IP_HEADER` : the HTTP header containing the real IP or special value "proxy_protocol" when using PROXY protocol
+- `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
 You will find more settings about real IP in the [settings section](/1.4/settings/#real-ip) of the documentation.
 
@@ -1049,8 +803,8 @@ You will find more settings about real IP in the [settings section](/1.4/setting
 
 We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :
 
-- They use the X-Forwarded-For header to set the real IP
-- They have IPs in the 1.2.3.0/24 and 100.64.0.0/16 networks
+- They use the `X-Forwarded-For` header to set the real IP
+- They have IPs in the `1.2.3.0/24` and `100.64.0.0/10` networks
 
 The following settings need to be set :
 
@@ -1063,24 +817,14 @@ REAL_IP_HEADER=X-Forwarded-For
 === "Docker"
 
     When starting the BunkerWeb container, you will need to add the settings :
-    ```shell
-    docker run \
-    	   ...
-    	   -e USE_REAL_IP=yes \
-    	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
-    	   -e REAL_IP_HEADER=X-Forwarded-For \
-    	   ...
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
 
-    Here is the docker-compose equivalent :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
         - REAL_IP_HEADER=X-Forwarded-For
       ...
     ```
@@ -1088,24 +832,14 @@ REAL_IP_HEADER=X-Forwarded-For
 === "Docker autoconf"
 
     Before running the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
-    ```shell
-    docker run \
-           ...
-           -e USE_REAL_IP=yes \
-           -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
-           -e REAL_IP_HEADER=X-Forwarded-For \
-           ...
-           bunkerity/bunkerweb:1.5.0-beta
-    ```
 
-    Here is the docker-compose equivalent :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
         - REAL_IP_HEADER=X-Forwarded-For
       ...
     ```
@@ -1113,24 +847,14 @@ REAL_IP_HEADER=X-Forwarded-For
 === "Swarm"
 
     Before running the [Swarm integration](/1.4/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
-    ```shell
-    docker service create \
-           ...
-           -e USE_REAL_IP=yes \
-           -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
-           -e REAL_IP_HEADER=X-Forwarded-For \
-           ...
-           bunkerity/bunkerweb:1.5.0-beta
-    ```
 
-    Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
         - REAL_IP_HEADER=X-Forwarded-For
       ...
     ```
@@ -1138,87 +862,89 @@ REAL_IP_HEADER=X-Forwarded-For
 === "Kubernetes"
 
     You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+
     ```yaml
-	apiVersion: apps/v1
-	kind: DaemonSet
-	metadata:
-	  name: bunkerweb
-	spec:
-	  selector:
-		matchLabels:
-		  app: bunkerweb
-	  template:
-		spec:
-		  containers:
-		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.5.0-beta
-			...
-			env:
-			- name: USE_REAL_IP
-			  value: "yes"
-			- name: REAL_IP_HEADER
-			  value: "X-Forwarded-For"
-			- name: REAL_IP_FROM
-			  value: "1.2.3.0/24 100.64.0.0/16"
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      name: bunkerweb
+    spec:
+        ...
+        spec:
+          containers:
+            - name: bunkerweb
+              ...
+              env:
+                - name: USE_REAL_IP
+                  value: "yes"
+                - name: REAL_IP_FROM
+                  value: "1.2.3.0/24 100.64.0.0/10"
+                - name: REAL_IP_HEADER
+                  value: "X-Forwarded-For"
     ...
     ```
 
 === "Linux"
 
     You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
+
     ```conf
-	...
-	USE_REAL_IP=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=X-Forwarded-For
-	...
-	```
+    ...
+    USE_REAL_IP=yes
+    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    REAL_IP_HEADER=X-Forwarded-For
+    ...
+    ```
 
     Don't forget to restart the BunkerWeb service once it's done.
 
 === "Ansible"
 
     You will need to add the settings to your `my_variables.env` configuration file :
-    ```conf
-	...
-	USE_REAL_IP=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=X-Forwarded-For
-	...
-	```
 
-	In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file : 
-	```yaml
+    ```conf
+    ...
+    USE_REAL_IP=yes
+    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    REAL_IP_HEADER=X-Forwarded-For
+    ...
+    ```
+
+    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
+
+    ```yaml
     [mybunkers]
     192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-	```
+    ```
 
-	Or alternatively, in your playbook file :
-	```yaml
-	- hosts: all
-      become: true
-      vars:
-        - variables_env: "{{ playbook_dir }}/my_variables.env"
-      roles:
-        - bunkerity.bunkerweb
-	```
+	  Or alternatively, in your playbook file :
 
-	Run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
+    ```yaml
+    - hosts: all
+        become: true
+        vars:
+          - variables_env: "{{ playbook_dir }}/my_variables.env"
+        roles:
+          - bunkerity.bunkerweb
+    ```
+
+    Run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
 
 === "Vagrant"
 
     You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
 
-	```conf
-	...
-	USE_REAL_IP=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=X-Forwarded-For
-	...
-	```
+    ```conf
+    ...
+    USE_REAL_IP=yes
+    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    REAL_IP_HEADER=X-Forwarded-For
+    ...
+    ```
 
     Don't forget to restart the BunkerWeb service once it's done.
 
@@ -1226,8 +952,8 @@ REAL_IP_HEADER=X-Forwarded-For
 
 We will assume the following regarding the load balancers or reverse proxies (you will need to update the settings depending on your configuration) :
 
-- They use the PROXY protocol v1 or v2 to set the real IP
-- They have IPs in the 1.2.3.0/24 and 100.64.0.0/16 networks
+- They use the `PROXY protocol` v1 or v2 to set the real IP
+- They have IPs in the `1.2.3.0/24` and `100.64.0.0/10` networks
 
 The following settings need to be set :
 
@@ -1241,26 +967,15 @@ REAL_IP_HEADER=proxy_protocol
 === "Docker"
 
     When starting the BunkerWeb container, you will need to add the settings :
-    ```shell
-    docker run \
-    	   ...
-    	   -e USE_REAL_IP=yes \
-    	   -e USE_PROXY_PROTOCOL=yes \
-    	   -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
-    	   -e REAL_IP_HEADER=proxy_protocol \
-    	   ...
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
 
-    Here is the docker-compose equivalent :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
-    	- USE_PROXY_PROTOCOL=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+        - USE_PROXY_PROTOCOL=yes
+        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
         - REAL_IP_HEADER=proxy_protocol
       ...
     ```
@@ -1268,26 +983,15 @@ REAL_IP_HEADER=proxy_protocol
 === "Docker autoconf"
 
     Before running the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
-    ```shell
-    docker run \
-           ...
-           -e USE_REAL_IP=yes \
-    	   -e USE_PROXY_PROTOCOL=yes \
-           -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
-           -e REAL_IP_HEADER=proxy_protocol \
-           ...
-           bunkerity/bunkerweb:1.5.0-beta
-    ```
 
-    Here is the docker-compose equivalent :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
-    	- USE_PROXY_PROTOCOL=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+        - USE_PROXY_PROTOCOL=yes
+        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
         - REAL_IP_HEADER=proxy_protocol
       ...
     ```
@@ -1295,26 +999,15 @@ REAL_IP_HEADER=proxy_protocol
 === "Swarm"
 
     Before running the [Swarm integration](/1.4/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
-    ```shell
-    docker service create \
-           ...
-           -e USE_REAL_IP=yes \
-    	   -e USE_PROXY_PROTOCOL=yes \
-           -e "REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16" \
-           -e REAL_IP_HEADER=proxy_protocol \
-           ...
-           bunkerity/bunkerweb:1.5.0-beta
-    ```
 
-    Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
-    	- USE_PROXY_PROTOCOL=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+        - USE_PROXY_PROTOCOL=yes
+        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
         - REAL_IP_HEADER=proxy_protocol
       ...
     ```
@@ -1322,94 +1015,100 @@ REAL_IP_HEADER=proxy_protocol
 === "Kubernetes"
 
     You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+
     ```yaml
-	apiVersion: apps/v1
-	kind: DaemonSet
-	metadata:
-	  name: bunkerweb
-	spec:
-	  selector:
-		matchLabels:
-		  app: bunkerweb
-	  template:
-		spec:
-		  containers:
-		  - name: bunkerweb
-			image: bunkerity/bunkerweb:1.5.0-beta
-			...
-			env:
-			- name: USE_REAL_IP
-			  value: "yes"
-			- name: USE_PROXY_PROTOCOL
-			  value: "yes"
-			- name: REAL_IP_HEADER
-			  value: "proxy_protocol"
-			- name: REAL_IP_FROM
-			  value: "1.2.3.0/24 100.64.0.0/16"
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      name: bunkerweb
+    spec:
+        ...
+        spec:
+          containers:
+            - name: bunkerweb
+              ...
+              env:
+                - name: USE_REAL_IP
+                  value: "yes"
+                - name: USE_PROXY_PROTOCOL
+                  value: "yes"
+                - name: REAL_IP_FROM
+                  value: "1.2.3.0/24 100.64.0.0/10"
+                - name: REAL_IP_HEADER
+                  value: "proxy_protocol"
     ...
     ```
 
 === "Linux"
 
     You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
+
     ```conf
-	...
-	USE_REAL_IP=yes
-	USE_PROXY_PROTOCOL=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=proxy_protocol
-	...
-	```
+    ...
+    USE_REAL_IP=yes
+    USE_PROXY_PROTOCOL=yes
+    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    REAL_IP_HEADER=proxy_protocol
+    ...
+    ```
 
     Don't forget to restart the BunkerWeb service once it's done.
 
 === "Ansible"
 
     You will need to add the settings to your `my_variables.env` configuration file :
-    ```conf
-	...
-	USE_REAL_IP=yes
-	USE_PROXY_PROTOCOL=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=proxy_protocol
-	...
-	```
 
-	In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-	```yaml
+    ```conf
+    ...
+    USE_REAL_IP=yes
+    USE_PROXY_PROTOCOL=yes
+    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    REAL_IP_HEADER=proxy_protocol
+    ...
+    ```
+
+    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
+
+    ```yaml
     [mybunkers]
     192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-	```
+    ```
 
-	Or alternatively, in your playbook file : 
-	```yaml
+	  Or alternatively, in your playbook file :
+
+    ```yaml
     - hosts: all
-      become: true
-      vars:
-        - variables_env: "{{ playbook_dir }}/my_variables.env"
-      roles:
-        - bunkerity.bunkerweb
-	```
+        become: true
+        vars:
+          - variables_env: "{{ playbook_dir }}/my_variables.env"
+        roles:
+          - bunkerity.bunkerweb
+    ```
 
-	Run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
+    Run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
 
 === "Vagrant"
 
     You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
 
-	```conf
-	...
-	USE_REAL_IP=yes
-	USE_PROXY_PROTOCOL=yes
-	REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-	REAL_IP_HEADER=proxy_protocol
-	...
-	```
+    ```conf
+    ...
+    USE_REAL_IP=yes
+    USE_PROXY_PROTOCOL=yes
+    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
+    REAL_IP_HEADER=proxy_protocol
+    ...
+    ```
 
     Don't forget to restart the BunkerWeb service once it's done.
+
+## Generic UDP/TCP (stream)
+
+TODO
 
 ## Custom configurations
 
@@ -1420,6 +1119,8 @@ Because BunkerWeb is based on the NGINX web server, you can add custom NGINX con
 - **default-server-http** : server level of NGINX (only apply to the "default server" when the name supplied by the client doesn't match any server name in `SERVER_NAME`)
 - **modsec-crs** : before the OWASP Core Rule Set is loaded
 - **modsec** : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
+- **stream** : todo
+- **server-stream** : todo
 
 Custom configurations can be applied globally or only for a specific server when applicable and if the multisite mode is enabled.
 

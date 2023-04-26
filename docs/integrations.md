@@ -788,8 +788,8 @@ kind: Ingress
 metadata:
   name: my-ingress
   annotations:
-    bunkerweb.io/MY_SETTING_1: "value1"
-    bunkerweb.io/MY_SETTING_2: "value2"
+    bunkerweb.io/MY_SETTING: "value"
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
 spec:
   rules:
     - host: www.example.com
