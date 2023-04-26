@@ -90,6 +90,7 @@ class ServiceModal {
           //server name is unset
           const inpServName = document.querySelector("input#SERVER_NAME");
           inpServName.getAttribute("value", "");
+          inpServName.removeAttribute("disabled", "");
           inpServName.value = "";
 
           //show modal
@@ -133,7 +134,7 @@ class ServiceModal {
         return;
 
       //for all other settings values
-      const defaultMethod = "default";
+      const defaultMethod = inp.getAttribute("data-default-method");
       const defaultVal = inp.getAttribute("data-default-value") || "";
 
       //SET VALUE
