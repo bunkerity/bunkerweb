@@ -1551,6 +1551,9 @@ def logs_container(container_id):
         log = " ".join(splitted[1:])
         log_lower = log.lower()
 
+        if "[48;2" in log or not log.strip():
+            continue
+
         logs.append(
             {
                 "content": log,
