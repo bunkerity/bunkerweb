@@ -47,9 +47,13 @@ class Select {
             select.classList.add("hidden");
             select.classList.remove("flex");
           });
-          const btnEls = document.querySelectorAll("button[data-setting-select]");
+          const btnEls = document.querySelectorAll(
+            "button[data-setting-select]"
+          );
           btnEls.forEach((btn) => {
-            const dropdownChevron = btn.querySelector(`svg[data-setting-select]`);
+            const dropdownChevron = btn.querySelector(
+              `svg[data-setting-select]`
+            );
             dropdownChevron.classList.remove("rotate-180");
           });
         }
@@ -67,9 +71,13 @@ class Select {
       //SELECT DROPDOWN BTN LOGIC
       try {
         if (
-          e.target.closest("button").hasAttribute(`data-setting-select-dropdown-btn`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-setting-select-dropdown-btn`)
         ) {
-          const btn = e.target.closest(`button[data-setting-select-dropdown-btn]`);
+          const btn = e.target.closest(
+            `button[data-setting-select-dropdown-btn]`
+          );
           const btnValue = btn.getAttribute("value");
 
           //add new value to custom
@@ -106,8 +114,9 @@ class Select {
           btn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
 
           //close dropdown
-          const dropdownChevron =
-            selectCustom.querySelector(`svg[data-setting-select]`);
+          const dropdownChevron = selectCustom.querySelector(
+            `svg[data-setting-select]`
+          );
           dropdownChevron.classList.remove("rotate-180");
 
           //update real select element
@@ -158,7 +167,9 @@ class Password {
         if (e.target.closest("button").hasAttribute("data-setting-password")) {
           const btn = e.target.closest("button");
           const action = btn.getAttribute("data-setting-password");
-          const inp = btn.closest("[data-setting-container]").querySelector("input");
+          const inp = btn
+            .closest("[data-setting-container]")
+            .querySelector("input");
           this.setValDisplay(action, inp);
           this.hiddenBtns(btn);
           this.showOppositeBtn(btn, action);
@@ -202,4 +213,49 @@ class Password {
   }
 }
 
-export { Checkbox, Select, Password };
+class DisabledPop {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("pointerover", (e) => {
+      //for checkbox and regular inputs
+      if (e.target.tagName === "INPUT") {
+        const el = e.target;
+        this.showPopup(el, "input");
+      }
+      //for select custom
+      if (
+        e.target.tagName === "BUTTON" &&
+        e.target.hasAttribute("data-setting-select")
+      ) {
+        const el = e.target;
+        this.showPopup(el, "select");
+      }
+    });
+
+    window.addEventListener("pointerout", (e) => {
+      try {
+        const popupEl = e.target
+          .closest("div")
+          .querySelector("div[data-disabled-info]");
+        popupEl.remove();
+      } catch (err) {}
+    });
+  }
+
+  showPopup(el, type = "input") {
+    if (!el.hasAttribute("disabled")) return;
+    const method = el.getAttribute("data-default-method");
+    const popupHTML = `
+    <div data-disabled-info class="${
+      type === "select" ? "translate-y-2" : ""
+    } bg-blue-500 absolute right-2 rounded-lg px-2 py-1 z-20">
+    <p class="m-0 text-xs text-white">disabled by ${method}</p>
+    </div>`;
+    el.insertAdjacentHTML("beforebegin", popupHTML);
+  }
+}
+
+export { Checkbox, Select, Password, DisabledPop };
