@@ -748,6 +748,7 @@ def plugins():
                     f"Couldn't update external plugins to database: {err}",
                     "error",
                 )
+            flash(f"Deleted plugin {variables['name']} successfully")
         else:
             if not Path("/var/tmp/bunkerweb/ui").exists() or not listdir(
                 "/var/tmp/bunkerweb/ui"
