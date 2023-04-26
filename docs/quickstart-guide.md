@@ -22,107 +22,93 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 
 === "Docker"
 
-    When using Docker integration, the easiest way of protecting an existing application is to create a network so BunkerWeb can send requests using the container name.
+    When using Docker integration, the easiest way of protecting an existing application is to add the web service in the `bw-services` network :
 
-    Create the Docker network if it's not already created :
-    ```shell
-    docker network create bw-net
-    ```
-
-    Then, instantiate your app :
-    ```shell
-    docker run -d \
-           --name myapp \
-    	   --network bw-net \
-    	   nginxdemos/hello:plain-text
-    ```
-
-    Create the BunkerWeb volume if it's not already created :
-    ```shell
-    docker volume create bw-data
-    ```
-
-    You can now run BunkerWeb and configure it for your app :
-    ```shell
-    docker run -d \
-           --name mybunker \
-    	   --network bw-net \
-    	   -p 80:8080 \
-    	   -p 443:8443 \
-    	   -v bw-data:/data \
-    	   -e SERVER_NAME=www.example.com \
-    	   -e USE_REVERSE_PROXY=yes \
-    	   -e REVERSE_PROXY_URL=/ \
-    	   -e REVERSE_PROXY_HOST=http://myapp \
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
-
-    Here is the docker-compose equivalent :
     ```yaml
-    version: '3'
+    version: "3.5"
 
     services:
 
-      mybunker:
-    	image: bunkerity/bunkerweb:1.5.0-beta
-    	ports:
-    	  - 80:8080
-    	  - 443:8443
-    	volumes:
-    	  - bw-data:/data
-    	environment:
-    	  - USE_REVERSE_PROXY=yes
-    	  - REVERSE_PROXY_URL=/
-    	  - REVERSE_PROXY_HOST=http://myapp
-    	networks:
-    	  - bw-net
-
       myapp:
-    	image: nginxdemos/hello:plain-text
-    	networks:
-    	  - bw-net
+        image: tutum/hello-world
+        networks:
+          - bw-services
+
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          - 80:8080
+          - 443:8443
+        labels:
+          - "bunkerweb.INSTANCE"
+        environment:
+          - SERVER_NAME=www.example.com
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - USE_REVERSE_PROXY=yes
+          - REVERSE_PROXY_URL=/
+          - REVERSE_PROXY_HOST=http://myapp
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        volumes:
+          - bw-data:/data
+        environment:
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+        networks:
+          - bw-docker
 
     volumes:
       bw-data:
 
     networks:
-      bw-net:
-    	name: bw-net
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
+
     ```
 
 === "Docker autoconf"
 
-    We will assume that you already have the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack running on your machine and connected to a network called bw-services.
+    We will assume that you already have the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
-    You can instantiate your container and pass the settings as labels :
-    ```shell
-    docker run -d \
-           --name myapp \
-    	   --network bw-services \
-    	   -l bunkerweb.SERVER_NAME=www.example.com \
-    	   -l bunkerweb.USE_REVERSE_PROXY=yes \
-    	   -l bunkerweb.USE_REVERSE_URL=/ \
-    	   -l bunkerweb.REVERSE_PROXY_HOST=http://myapp \
-    	   nginxdemos/hello:plain-text
-    ```
-
-    Here is the docker-compose equivalent :
     ```yaml
-    version: '3'
+    version: '3.5'
 
     services:
-
       myapp:
-    	image: nginxdemos/hello:plain-text
-    	networks:
-    	  bw-services:
-    		aliases:
-    		  - myapp
-    	labels:
-    	  - "bunkerweb.SERVER_NAME=www.example.com"
-    	  - "bunkerweb.USE_REVERSE_PROXY=yes"
-    	  - "bunkerweb.REVERSE_PROXY_URL=/"
-    	  - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
+    	  image: tutum/hello-world
+    	  networks:
+    	    bw-services:
+    		    aliases:
+    		      - myapp
+    	  labels:
+    	    - "bunkerweb.SERVER_NAME=www.example.com"
+    	    - "bunkerweb.USE_REVERSE_PROXY=yes"
+    	    - "bunkerweb.REVERSE_PROXY_URL=/"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
 
     networks:
       bw-services:
@@ -132,42 +118,27 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
 
 === "Swarm"
 
-    We will assume that you already have the [Swarm integration](/1.4/integrations/#swarm) stack running on your cluster.
+    We will assume that you already have the [Swarm integration](/1.4/integrations/#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
-    You can instantiate your service and pass the settings as labels :
-    ```shell
-    docker service \
-       create \
-       --name myapp \
-       --network bw-services \
-       -l bunkerweb.SERVER_NAME=www.example.com \
-       -l bunkerweb.USE_REVERSE_PROXY=yes \
-       -l bunkerweb.REVERSE_PROXY_HOST=http://myapp \
-       -l bunkerweb.REVERSE_PROXY_URL=/ \
-       nginxdemos/hello:plain-text
-    ```
-
-    Here is the docker-compose equivalent (using `docker stack deploy`) :
     ```yaml
     version: "3"
 
     services:
-
       myapp:
-    	image: nginxdemos/hello:plain-text
-    	networks:
-    	  bw-services:
-            aliases:
-              - myapp
-    	deploy:
-    	  placement:
-    		constraints:
-    		  - "node.role==worker"
-    	  labels:
-    		- "bunkerweb.SERVER_NAME=www.example.com"
-    		- "bunkerweb.USE_REVERSE_PROXY=yes"
-    		- "bunkerweb.REVERSE_PROXY_URL=/"
-    		- "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
+        image: nginxdemos/hello:plain-text
+        networks:
+          bw-services:
+              aliases:
+                - myapp
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+          - "bunkerweb.SERVER_NAME=www.example.com"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
 
     networks:
       bw-services:
@@ -180,6 +151,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     We will assume that you already have the [Kubernetes integration](/1.4/integrations/#kubernetes) stack running on your cluster.
 
     Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster :
+
     ```yaml
     apiVersion: apps/v1
     kind: Deployment
@@ -199,7 +171,7 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     	spec:
     	  containers:
     	  - name: app
-    		image: nginxdemos/hello:plain-text
+    		image: tutum/hello-world
     		ports:
     		- containerPort: 80
     ---
@@ -217,13 +189,14 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     ```
 
     Here is the corresponding Ingress definition to serve and protect the web application :
+
     ```yaml
     apiVersion: networking.k8s.io/v1
     kind: Ingress
     metadata:
       name: ingress
       annotations:
-    	bunkerweb.io/AUTOCONF: "yes"
+        bunkerweb.io/DUMMY_SETTING: "value"
     spec:
       rules:
       - host: www.example.com
@@ -243,32 +216,37 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     We will assume that you already have the [Linux integration](/1.4/integrations/#linux) stack running on your machine.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
+
     ```shell
     python3 -m http.server -b 127.0.0.1
     ```
 
     Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
+
     ```conf
-    SERVER_NAME=www.example.com
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    SERVER_NAME=www.example.com
     USE_REVERSE_PROXY=yes
     REVERSE_PROXY_URL=/
     REVERSE_PROXY_HOST=http://127.0.0.1:8000
     ```
 
     Let's check the status of BunkerWeb :
+
     ```shell
     systemctl status bunkerweb
     ```
 
     If it's already running, we can restart it :
+
     ```shell
     systemctl restart bunkerweb
     ```
 
     Otherwise, we will need to start it :
+
     ```shell
     systemctl start bunkerweb
     ```
@@ -278,11 +256,67 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     We will assume that you already have a service running and you want to use BunkerWeb as a reverse-proxy.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
+
     ```shell
     python3 -m http.server -b 127.0.0.1
     ```
 
     Content of the `my_variables.env` configuration file :
+
+    ```conf
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    SERVER_NAME=www.example.com
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/
+    REVERSE_PROXY_HOST=http://127.0.0.1:8000
+    ```
+
+    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
+
+    ```yaml
+    [mybunkers]
+      192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
+    ```
+    
+    Or alternatively, in your playbook file :
+
+    ```yaml
+    - hosts: all
+      become: true
+      vars:
+        - variables_env: "{{ playbook_dir }}/my_variables.env"
+      roles:
+        - bunkerity.bunkerweb
+    ```
+
+    You can now run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
+
+=== "Vagrant"
+
+    We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
+
+    The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
+
+    ```shell
+    python3 -m http.server -b 127.0.0.1
+    ```
+
+    Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file.
+
+	  Connect to your vagrant machine :
+
+    ```shell
+    vagrant ssh
+    ```
+
+	  And then you can edit the `variables.env` file in your host machine like this :
+
     ```conf
     SERVER_NAME=www.example.com
     HTTP_PORT=80
@@ -293,68 +327,22 @@ You will find more settings about reverse proxy in the [settings section](/1.4/s
     REVERSE_PROXY_HOST=http://127.0.0.1:8000
     ```
 
-    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-	```yaml
-	[mybunkers]
-    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-	```
-    
-    Or alternatively, in your playbook file :
-    ```yaml
-    - hosts: all
-      become: true
-      vars:
-        - variables_env: "{{ playbook_dir }}/my_variables.env"
-      roles:
-        - bunkerity.bunkerweb
+    Let's check the status of BunkerWeb :
+
+    ```shell
+    systemctl status bunkerweb
     ```
 
-	You can now run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
-
-=== "Vagrant"
-
-    We will assume that you already have the [Vagrant integration](/1.4/integrations/#vagrant) stack running on your machine.
-
-    The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
-		```shell
-		python3 -m http.server -b 127.0.0.1
-		```
-
-    Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file.
-
-	Connect to your vagrant machine :
-	```shell
-	vagrant ssh
-	```
-
-	And then you can edit the `variables.env` file in your host machine like this :
-
-	```conf
-	SERVER_NAME=www.example.com
-	HTTP_PORT=80
-	HTTPS_PORT=443
-	DNS_RESOLVERS=8.8.8.8 8.8.4.4
-	USE_REVERSE_PROXY=yes
-	REVERSE_PROXY_URL=/
-	REVERSE_PROXY_HOST=http://127.0.0.1:8000
-	```
-
     If it's already running we can restart it :
+
     ```shell
     systemctl restart bunkerweb
     ```
 
     Otherwise, we will need to start it :
+
     ```shell
     systemctl start bunkerweb
-    ```
-
-    Let's check the status of BunkerWeb :
-    ```shell
-    systemctl status bunkerweb
     ```
 
 ### Multiple applications

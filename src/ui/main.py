@@ -51,6 +51,7 @@ from io import BytesIO
 from json import JSONDecodeError, dumps, load as json_load
 from jinja2 import Template
 from kubernetes import client as kube_client
+from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, getenv, getpid, listdir
 from re import match as re_match
@@ -180,6 +181,7 @@ if integration in ("Docker", "Swarm", "Autoconf"):
     except (docker_APIError, DockerException):
         logger.warning("No docker host found")
 elif integration == "Kubernetes":
+    kube_config.load_incluster_config()
     kubernetes_client = kube_client.CoreV1Api()
 
 db = Database(logger)
