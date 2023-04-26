@@ -84,11 +84,11 @@ if __name__ == "__main__":
         logger.info(f"Target : {args.target}")
 
         integration = "Linux"
-        if getenv("KUBERNETES_MODE", "no") == "yes":
+        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
             integration = "Kubernetes"
-        elif getenv("SWARM_MODE", "no") == "yes":
+        elif getenv("SWARM_MODE", "no").lower() == "yes":
             integration = "Swarm"
-        elif getenv("AUTOCONF_MODE", "no") == "yes":
+        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
             integration = "Autoconf"
         elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
             integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()

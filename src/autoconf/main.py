@@ -22,8 +22,8 @@ from DockerController import DockerController
 
 # Get variables
 logger = setup_logger("Autoconf", getenv("LOG_LEVEL", "INFO"))
-swarm = getenv("SWARM_MODE", "no") == "yes"
-kubernetes = getenv("KUBERNETES_MODE", "no") == "yes"
+swarm = getenv("SWARM_MODE", "no").lower() == "yes"
+kubernetes = getenv("KUBERNETES_MODE", "no").lower() == "yes"
 docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 wait_retry_interval = getenv("WAIT_RETRY_INTERVAL", "5")
 

@@ -21,11 +21,11 @@ log "ENTRYPOINT" "ℹ️" "Starting the job scheduler v$(cat /usr/share/bunkerwe
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
-if [ "$SWARM_MODE" == "yes" ] ; then
+if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
-elif [ "$KUBERNETES_MODE" == "yes" ] ; then
+elif [[ $(echo "$KUBERNETES_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
-elif [ "$AUTOCONF_MODE" == "yes" ] ; then
+elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
 fi
 
