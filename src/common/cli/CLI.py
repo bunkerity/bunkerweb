@@ -129,11 +129,11 @@ class CLI(ApiCaller):
             self.auto_setup(self.__integration)
 
     def __detect_integration(self) -> str:
-        if self.__variables.get("KUBERNETES_MODE", "no") == "yes":
+        if self.__variables.get("KUBERNETES_MODE", "no").lower() == "yes":
             return "kubernetes"
-        elif self.__variables.get("SWARM_MODE", "no") == "yes":
+        elif self.__variables.get("SWARM_MODE", "no").lower() == "yes":
             return "swarm"
-        elif self.__variables.get("AUTOCONF_MODE", "no") == "yes":
+        elif self.__variables.get("AUTOCONF_MODE", "no").lower() == "yes":
             return "autoconf"
         elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
             return Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip().lower()

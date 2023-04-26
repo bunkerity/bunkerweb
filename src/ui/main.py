@@ -160,11 +160,11 @@ PLUGIN_KEYS = [
 ]
 
 integration = "Linux"
-if getenv("KUBERNETES_MODE", "no") == "yes":
+if getenv("KUBERNETES_MODE", "no").lower() == "yes":
     integration = "Kubernetes"
-elif getenv("SWARM_MODE", "no") == "yes":
+elif getenv("SWARM_MODE", "no").lower() == "yes":
     integration = "Swarm"
-elif getenv("AUTOCONF_MODE", "no") == "yes":
+elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
     integration = "Autoconf"
 elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
     with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
@@ -1495,7 +1495,7 @@ def logs_container(container_id):
     tmp_logs = []
     if docker_client:
         try:
-            if getenv("SWARM_MODE", "no") == "no":
+            if integration == "Swarm":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,

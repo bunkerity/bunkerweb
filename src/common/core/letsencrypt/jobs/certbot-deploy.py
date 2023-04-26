@@ -28,11 +28,11 @@ status = 0
 try:
     # Get env vars
     bw_integration = None
-    if getenv("KUBERNETES_MODE") == "yes":
+    if getenv("KUBERNETES_MODE", "no").lower() == "yes":
         bw_integration = "Kubernetes"
-    elif getenv("SWARM_MODE") == "yes":
+    elif getenv("SWARM_MODE", "no").lower() == "yes":
         bw_integration = "Swarm"
-    elif getenv("AUTOCONF_MODE") == "yes":
+    elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
         bw_integration = "Autoconf"
     elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
         with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
