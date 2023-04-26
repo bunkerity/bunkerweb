@@ -28,7 +28,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker"
 
-    When using the [Docker integration](/1.4/integrations/#docker), plugins must be written to the volume mounted on `/data`.
+    When using the [Docker integration](/integrations/#docker), plugins must be written to the volume mounted on `/data`.
 
     The first thing to do is to create the plugins folder :
     ```shell
@@ -47,27 +47,11 @@ The first step is to install the plugin by putting the plugin files inside the c
     chmod -R 770 bw-data
     ```
 
-    When starting the BunkerWeb container, you will need to mount the folder on `/data` :
-    ```shell
-    docker run \
-    	   ...
-    	   -v "${PWD}/bw-data:/data" \
-    	   ...
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
-
-    Here is the docker-compose equivalent :
-    ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.5.0-beta
-      volumes:
-        - ./bw-data:/data
-      ...
-    ```
+    Here is the docker-compose associated : [Scheduler](/integrations/#scheduler).
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data`.
+    When using the [Docker autoconf integration](/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data`.
 
     The easiest way to do it is by starting the Docker autoconf stack with a folder mounted on `/data` (instead of a named volume). Once the stack is started, you can copy the plugins of your choice to the `plugins` folder from your host :
     ```shell
@@ -83,7 +67,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Swarm"
 
-    When using the [Swarm integration](/1.4/integrations/#swarm), the easiest way of installing plugins is by using `docker exec` and downloading the plugins from the container.
+    When using the [Swarm integration](/integrations/#swarm), the easiest way of installing plugins is by using `docker exec` and downloading the plugins from the container.
 
     Execute a shell inside the autoconf container (use `docker ps` to get the name) :
     ```shell
@@ -98,7 +82,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](/1.4/integrations/#kubernetes), the easiest way of installing plugins is by using `kubectl exec` and downloading the plugins from the container.
+    When using the [Kubernetes integration](/integrations/#kubernetes), the easiest way of installing plugins is by using `kubectl exec` and downloading the plugins from the container.
 
     Execute a shell inside the autoconf container (use `kubectl get pods` to get the name) :
     ```shell
@@ -113,14 +97,14 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Linux"
 
-    When using the [Linux integration](/1.4/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Linux integration](/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins
     ```
 
 === "Ansible"
-    When using the [Ansible integration](/1.4/integrations/#ansible), you can use the `plugins` variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.
+    When using the [Ansible integration](/integrations/#ansible), you can use the `plugins` variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.
 	
 	Let's assume that you have plugins inside the `bunkerweb-plugins` folder :
 	```shell
@@ -150,7 +134,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Vagrant"
 
-    When using the [Vagrant integration](/1.4/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Vagrant integration](/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder :
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* /data/plugins
@@ -237,7 +221,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/1.4/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http` and `default-server-http`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http` and `default-server-http`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -259,50 +243,56 @@ location /setting {
 Under the hood, BunkerWeb is using the [NGINX LUA module](https://github.com/openresty/lua-nginx-module) to execute code within NGINX. Plugins that need to execute code must provide a lua file at the root directory of the plugin folder using the `id` value of **plugin.json** as its name. Here is an example named **myplugin.lua** :
 
 ```lua
-local _M		= {}
-_M.__index		= _M
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
 
-local utils		= require "utils"
-local datastore	= require "datastore"
-local logger	= require "logger"
 
-function _M.new()
-	local self = setmetatable({}, _M)
-	self.dummy = "dummy"
-	return self, nil
+local myplugin = class("myplugin", plugin)
+
+
+function myplugin:initialize()
+    plugin.initialize(self, "myplugin")
+    self.dummy="dummy"
 end
 
-function _M:init()
-	logger.log(ngx.NOTICE, "MYPLUGIN", "init called")
-	return true, "success"
+function myplugin:init()
+    plugin.initialize(self, "myplugin")
+    return self:ret(true,"success")
 end
 
-function _M:access()
-	logger.log(ngx.NOTICE, "MYPLUGIN", "access called")
-	return true, "success", nil, nil
+function myplugin:set()
+    self.logger:log(ngx.NOTICE,"set called")
+    return self:ret(true,"success")
 end
 
-function _M:log()
-	logger.log(ngx.NOTICE, "MYPLUGIN", "log called")
-	return true, "success"
+function myplugin:access()
+    self.logger:log(ngx.NOTICE,"access called")
+    return self:ret(true,"success")
 end
 
-function _M:log_default()
-	logger.log(ngx.NOTICE, "MYPLUGIN", "log_default called")
-	return true, "success"
+function myplugin:log()
+    self.logger:log(ngx.NOTICE,"log called")
+    return self:ret(true, "success")
 end
 
-return _M
+function myplugin:log_default()
+    self.logger:log(ngx.NOTICE,"log_default called")
+    return self:ret(true,"success")
+end
+
+return myplugin
 ```
 
 The declared functions are automatically called during specific contexts. Here are the details of each function :
 
 | Function |                                   Context                                    | Description                                                                                                                                               | Return value                                                                                                                                                                                                                                                                                                                            |
 | :------: | :--------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  `init`  |   [init_by_lua](https://github.com/openresty/lua-nginx-module#init_by_lua)   | Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.                  | `ret`, `err`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
-| `access` | [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua) | Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.                     | `ret`, `err`, `return`, `status`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li><li>`return` (boolean) : true if you want to stop the access phase and send a status to the client</li><li>`status` (number) : the return value to set if `return` is set to true</li></ul> |
-|  `log`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example. | `ret`, `err`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
-|  `log_default`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Same as `log` but only called on the default server. | `ret`, `err`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`err` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
+|  `init`  |   [init_by_lua](https://github.com/openresty/lua-nginx-module#init_by_lua)   | Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.                  | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>|
+|  `set`  |   [set_by_lua](https://github.com/openresty/lua-nginx-module#set_by_lua)   | Called before each request received by the server.The typical use case is for computing before access phase.                 | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>|
+| `access` | [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua) | Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.                     | `ret`, `msg`,`status`,`redirect`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [http-status-constants](https://github.com/openresty/lua-nginx-module#http-status-constants)</li><li>`redirect` (URL) : if set will redirect to given URL</li></ul> |
+|  `log`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example. | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
+|  `log_default`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Same as `log` but only called on the default server. | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
 
 #### Libraries
 
@@ -336,54 +326,57 @@ mylibrary.dummy()
 
 Some helpers modules provide common helpful functions :
 
-- **datastore** : access the global shared data (key/value store)
-- **logger** : generate logs
-- **utils** : various useful functions
+- self.variables : allows to access and store plugins' attributes.
+- datastore : access the global shared data on one instance (key/value store)
+- clusterstore : access a Redis data store shared beetween BunkerWeb instances (key/value store)
+- logger : generate logs
+- utils : various useful functions
 
 To access the functions, you first need to **require** the module :
 
 ```lua
 ...
 
+local plugins   = requier "plugins"
 local utils		= require "utils"
-local datastore	= require "datastore"
+local datastore	= require "bunkerweb.datastore"
 local logger	= require "logger"
-
+local clustestore   = require "bunkerweb.clustertore"
 ...
 ```
 
 Retrieve a setting value :
 
 ```lua
-local value, err = utils:get_variable("DUMMY_SETTING")
+local value, err = self.variables["SOMEVALUE"]
 if not value then
-	logger.log(ngx.ERR, "MYPLUGIN", "can't retrieve setting DUMMY_SETTING : " .. err)
+	self.logger:log(ngx.ERR, "can't retrieve setting DUMMY_SETTING : " .. err)
 else
-	logger.log(ngx.NOTICE, "MYPLUGIN", "DUMMY_SETTING = " .. value)
+	self.logger:log(ngx.NOTICE, "DUMMY_SETTING = " .. value)
 end
 ```
 
 Store something in the cache :
 
 ```lua
-local ok, err = datastore:set("plugin_myplugin_something", "somevalue")
+local ok, err = self.datastore:set("plugin_myplugin_something", "somevalue")
 if not value then
-	logger.log(ngx.ERR, "MYPLUGIN", "can't save plugin_myplugin_something into datastore : " .. err)
+	self.logger:log(ngx.ERR, "can't save plugin_myplugin_something into datastore : " .. err)
 else
-	logger.log(ngx.NOTICE, "MYPLUGIN", "successfully saved plugin_myplugin_something into datastore into datastore")
+	self.logger:log(ngx.NOTICE, "successfully saved plugin_myplugin_something into datastore into datastore")
 end
 ```
 
 Check if an IP address is global :
 
 ```lua
-local ret, err = utils.ip_is_global(ngx.var.remote_addr)
+local ret, err = utils.ip_is_global(ngx.ctx.bw.remote_addr)
 if ret == nil then
-	logger.log(ngx.ERR, "MYPLUGIN", "error while checking if IP " .. ngx.var.remote_addr .. " is global or not : " .. err)
+	self.logger:log(ngx.ERR, "error while checking if IP " .. ngx.ctx.bw.remote_addr .. " is global or not : " .. err)
 elseif not ret then
-	logger.log(ngx.NOTICE, "MYPLUGIN", "IP " .. ngx.var.remote_addr .. " is not global")
+	self.logger:log(ngx.NOTICE, "IP " .. ngx.ctx.bw.remote_addr .. " is not global")
 else
-	logger.log(ngx.NOTICE, "MYPLUGIN", "IP " .. ngx.var.remote_addr .. " is global")
+	self.logger:log(ngx.NOTICE, "IP " .. ngx.ctx.bw.remote_addr .. " is global")
 end
 ```
 
@@ -397,7 +390,7 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 ### Plugin page
 
-Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](/1.4/web-ui).
+Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](/web-ui).
 
 Everything related to the web UI is located inside a subfolder named **ui** at the root directory of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
 
