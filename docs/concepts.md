@@ -2,7 +2,6 @@
 
 <figure markdown>
   ![Overwiew](assets/img/concepts.svg){ align=center }
-  
 </figure>
 
 ## Integrations
@@ -11,18 +10,19 @@ The first concept is the integration of BunkerWeb into the target environment. W
 
 The following integrations are officially supported :
 
-- [Docker](/1.4/integrations/#docker)
-- [Docker autoconf](/1.4/integrations/#docker-autoconf)
-- [Swarm](/1.4/integrations/#swarm)
+- [Docker](/1.5.0-beta/integrations/#docker)
+- [Docker autoconf](/1.5.0-beta/integrations/#docker-autoconf)
+- [Swarm](/1.5.0-beta/integrations/#swarm)
 - [Kubernetes](/1.4/integrations/#kubernetes)
-- [Linux](/1.4/integrations/#linux)
-- [Ansible](/1.4/integrations/#ansible)
+- [Linux](/1.5.0-beta/integrations/#linux)
+- [Ansible](/1.5.0-beta/integrations/#ansible)
+- [Vagrant](/1.5.0-beta/integrations/#vagrant)
 
 If you think that a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
 
 !!! info "Going further"
 
-    The technical details of all BunkerWeb integrations are available in the [integrations section](/1.4/integrations) of the documentation.
+    The technical details of all BunkerWeb integrations are available in the [integrations section](/1.5.0-beta/integrations) of the documentation.
 
 ## Settings
 
@@ -79,11 +79,11 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [quickstart guide](/1.4/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [quickstart guide](/1.5.0-beta/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
 
 ## Custom configurations
 
-Because meeting all the use cases only using the settings is not an option (even with [external plugins](/1.4/plugins)), you can use custom configurations to solve your specific challenges.
+Because meeting all the use cases only using the settings is not an option (even with [external plugins](/1.5.0-beta/plugins)), you can use custom configurations to solve your specific challenges.
 
 Under the hood, BunkerWeb uses the notorious NGINX web server, that's why you can leverage its configuration system for your specific needs. Custom NGINX configurations can be included in different [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) like HTTP or server (all servers and/or specific server block).
 
@@ -91,4 +91,36 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [quickstart guide](/1.4/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [quickstart guide](/1.5.0-beta/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+
+## Database
+
+State of the current configuration of BunkerWeb is stored in a backend database which contains the following data :
+
+- Settings defined for all the services
+- Custom configurations 
+- BunkerWeb instances
+- Metadata about jobs execution
+- Cached files
+
+Under the hood, when you edit a setting or add a new configuration, everything is stored in the database. We actually support SQLite, MariaDB, MySQL and PostgreSQL as backends.
+
+Database configuration is done by using the `DATABASE_URI` setting which respects the following formats :
+
+- SQLite : `sqlite:///var/lib/bunkerweb/db.sqlite3`
+- MariaDB : `mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db`
+- MySQL : `mysql+pymysql://bunkerweb:changeme@bw-db:3306/db`
+- PostgreSQL : `postgresql://bunkerweb:changeme@bw-db:5432/db`
+
+## Scheduler
+
+To make things automagically work together, a dedicated service called the scheduler is in charge of :
+
+- Storing the settings and custom configurations inside the database
+- Executing various tasks (called jobs)
+- Generating a configuration which is understood by BunkerWeb
+- Being the intermediary for other services (like web UI or autoconf)
+
+In other words, the scheduler is the brain of BunkerWeb.
+
+When using container-based integrations, the scheduler is executed in its own container. Whereas, for linux-based integrations scheduler is self-contained in the `bunkerweb` service.
