@@ -1,4 +1,3 @@
-from datetime import datetime
 from logging import (
     CRITICAL,
     DEBUG,
@@ -31,10 +30,6 @@ class BWLogger(Logger):
         stack_info=False,
         stacklevel=1,
     ):
-        if self.name == "UI":
-            with open("/var/log/nginx/ui.log", "a") as f:
-                f.write(f"[{datetime.now().replace(microsecond=0)}] {msg}\n")
-
         return super(BWLogger, self)._log(
             level, msg, args, exc_info, extra, stack_info, stacklevel
         )

@@ -55,7 +55,7 @@ from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, getenv, getpid, listdir
 from re import match as re_match
 from requests import get
-from shutil import move, rmtree, copytree
+from shutil import move, rmtree
 from signal import SIGINT, signal, SIGTERM
 from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
@@ -79,10 +79,6 @@ from utils import (
 )
 from logger import setup_logger
 from Database import Database
-
-if not Path("/var/log/nginx/ui.log").exists():
-    Path("/var/log/nginx").mkdir(parents=True, exist_ok=True)
-    Path("/var/log/nginx/ui.log").touch()
 
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
@@ -113,8 +109,8 @@ def handle_stop(signum, frame):
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
-
-Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
+if not Path("/var/tmp/bunkerweb/ui.pid").is_file():
+    Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
 
 # Flask app
 app = Flask(

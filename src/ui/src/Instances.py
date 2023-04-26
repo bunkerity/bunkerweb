@@ -1,5 +1,5 @@
 from pathlib import Path
-from subprocess import run
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from typing import Any, Optional, Union
 
@@ -56,8 +56,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "reload", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -68,8 +69,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "start", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -80,8 +82,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "stop", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx", "-s", "stop"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )
@@ -92,8 +95,9 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "systemctl", "restart", "bunkerweb"],
-                    capture_output=True,
+                    ["sudo", "/usr/sbin/nginx", "-s", "restart"],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
                 ).returncode
                 == 0
             )

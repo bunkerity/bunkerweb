@@ -186,7 +186,11 @@ if __name__ == "__main__":
                 retries += 1
                 sleep(5)
 
-            proc = run(["nginx", "-s", "reload"], stdin=DEVNULL, stderr=STDOUT)
+            proc = run(
+                ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+            )
             if proc.returncode != 0:
                 status = 1
                 logger.error("Error while reloading nginx")
