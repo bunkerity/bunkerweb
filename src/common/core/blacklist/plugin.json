@@ -4,6 +4,7 @@
   "name": "Blacklist",
   "description": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
   "version": "0.1",
+  "stream": "partial",
   "settings": {
     "USE_BLACKLIST": {
       "context": "multisite",

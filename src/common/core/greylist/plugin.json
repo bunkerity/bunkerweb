@@ -4,6 +4,7 @@
   "name": "Greylist",
   "description": "Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.",
   "version": "0.1",
+  "stream": "partial",
   "settings": {
     "USE_GREYLIST": {
       "context": "multisite",

@@ -4,6 +4,7 @@
   "name": "Client cache",
   "description": "Manage caching for clients.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "USE_CLIENT_CACHE": {
       "context": "multisite",

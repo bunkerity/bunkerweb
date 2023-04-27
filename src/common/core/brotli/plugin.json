@@ -4,6 +4,7 @@
   "name": "Brotli",
   "description": "Compress HTTP requests with the brotli algorithm.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "USE_BROTLI": {
       "context": "multisite",

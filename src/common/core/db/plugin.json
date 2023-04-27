@@ -4,6 +4,7 @@
   "name": "DB",
   "description": "Integrate easily the Database.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "DATABASE_URI": {
       "context": "global",

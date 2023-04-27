@@ -4,6 +4,7 @@
   "name": "Limit",
   "description": "Limit maximum number of requests and connections.",
   "version": "0.1",
+  "stream": "partial",
   "settings": {
     "USE_LIMIT_REQ": {
       "context": "multisite",

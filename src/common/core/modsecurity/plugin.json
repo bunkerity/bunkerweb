@@ -4,6 +4,7 @@
 	"name": "ModSecurity",
 	"description": "Management of the ModSecurity WAF.",
 	"version": "0.1",
+	"stream": "no",
 	"settings": {
 		"USE_MODSECURITY": {
 			"context": "multisite",

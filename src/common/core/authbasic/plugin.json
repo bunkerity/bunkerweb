@@ -4,6 +4,7 @@
   "name": "Auth basic",
   "description": "Enforce login before accessing a resource or the whole site using HTTP basic auth method.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "USE_AUTH_BASIC": {
       "context": "multisite",

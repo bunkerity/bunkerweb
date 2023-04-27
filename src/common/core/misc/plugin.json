@@ -4,6 +4,7 @@
   "name": "Miscellaneous",
   "description": "Miscellaneous settings.",
   "version": "0.1",
+  "stream": "partial",
   "settings": {
     "DISABLE_DEFAULT_SERVER": {
       "context": "global",

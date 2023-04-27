@@ -4,6 +4,7 @@
   "name": "DNSBL",
   "description": "Deny access based on external DNSBL servers.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "USE_DNSBL": {
       "context": "multisite",

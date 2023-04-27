@@ -4,6 +4,7 @@
   "name": "CORS",
   "description": "Cross-Origin Resource Sharing.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "USE_CORS": {
       "context": "multisite",

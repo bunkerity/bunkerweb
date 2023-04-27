@@ -4,6 +4,7 @@
   "name": "Whitelist",
   "description": "Allow access based on internal and external IP/network/rDNS/ASN whitelists.",
   "version": "0.1",
+  "stream": "partial",
   "settings": {
     "USE_WHITELIST": {
       "context": "multisite",

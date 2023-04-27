@@ -4,6 +4,7 @@
   "name": "Redirect",
   "description": "Manage HTTP redirects.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "REDIRECT_TO": {
       "context": "multisite",

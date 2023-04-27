@@ -4,6 +4,7 @@
   "name": "Self-signed certificate",
   "description": "Generate self-signed certificate.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "GENERATE_SELF_SIGNED_SSL": {
       "context": "multisite",

@@ -4,6 +4,7 @@
   "name": "Sessions",
   "description": "Management of session used by other plugins.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "SESSIONS_SECRET": {
       "context": "global",

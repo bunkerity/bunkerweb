@@ -4,6 +4,7 @@
   "name": "Bad behavior",
   "description": "Ban IP generating too much 'bad' HTTP status code in a period of time.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "USE_BAD_BEHAVIOR": {
       "context": "multisite",

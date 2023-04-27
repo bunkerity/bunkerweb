@@ -4,6 +4,7 @@
   "name": "BunkerNet",
   "description": "Share threat data with other BunkerWeb instances via BunkerNet.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "USE_BUNKERNET": {
       "context": "multisite",

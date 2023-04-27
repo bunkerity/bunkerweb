@@ -4,6 +4,7 @@
   "name": "Errors",
   "description": "Manage default error pages",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "ERRORS": {
       "context": "multisite",

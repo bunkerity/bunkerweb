@@ -12,6 +12,9 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ## Global settings
 
+
+STREAM support :warning:
+
 |           Setting            |                                                        Default                                                         | Context |Multiple|                   Description                    |
 |------------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
 |`IS_LOADING`                  |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.     |
@@ -50,6 +53,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Antibot
 
+STREAM support :x:
+
+Bot detection by using a challenge.
+
 |          Setting          |  Default   | Context |Multiple|                             Description                             |
 |---------------------------|------------|---------|--------|---------------------------------------------------------------------|
 |`USE_ANTIBOT`              |`no`        |multisite|no      |Activate antibot feature.                                            |
@@ -62,6 +69,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Auth basic
 
+STREAM support :x:
+
+Enforce login before accessing a resource or the whole site using HTTP basic auth method.
+
 |       Setting       |     Default     | Context |Multiple|                  Description                   |
 |---------------------|-----------------|---------|--------|------------------------------------------------|
 |`USE_AUTH_BASIC`     |`no`             |multisite|no      |Use HTTP basic auth                             |
@@ -72,6 +83,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Bad behavior
 
+STREAM support :white_check_mark:
+
+Ban IP generating too much 'bad' HTTP status code in a period of time.
+
 |          Setting          |           Default           | Context |Multiple|                                        Description                                         |
 |---------------------------|-----------------------------|---------|--------|--------------------------------------------------------------------------------------------|
 |`USE_BAD_BEHAVIOR`         |`yes`                        |multisite|no      |Activate Bad behavior feature.                                                              |
@@ -81,6 +96,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`BAD_BEHAVIOR_COUNT_TIME`  |`60`                         |multisite|no      |Period of time (in seconds) during which we count 'bad' HTTP status codes.                  |
 
 ### Blacklist
+
+STREAM support :warning:
+
+Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 
 |             Setting              |                                                           Default                                                            | Context |Multiple|                                          Description                                           |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------|
@@ -109,6 +128,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Brotli
 
+STREAM support :x:
+
+Compress HTTP requests with the brotli algorithm.
+
 |      Setting      |                                                                                                                                                                                                            Default                                                                                                                                                                                                             | Context |Multiple|                      Description                      |
 |-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|-------------------------------------------------------|
 |`USE_BROTLI`       |`no`                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Use brotli                                             |
@@ -118,12 +141,20 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### BunkerNet
 
+STREAM support :white_check_mark:
+
+Share threat data with other BunkerWeb instances via BunkerNet.
+
 |     Setting      |         Default          | Context |Multiple|         Description         |
 |------------------|--------------------------|---------|--------|-----------------------------|
 |`USE_BUNKERNET`   |`yes`                     |multisite|no      |Activate BunkerNet feature.  |
 |`BUNKERNET_SERVER`|`https://api.bunkerweb.io`|global   |no      |Address of the BunkerNet API.|
 
 ### CORS
+
+STREAM support :x:
+
+Cross-Origin Resource Sharing.
 
 |        Setting         |                                      Default                                       | Context |Multiple|                   Description                    |
 |------------------------|------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
@@ -137,6 +168,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Client cache
 
+STREAM support :x:
+
+Manage caching for clients.
+
 |         Setting         |                          Default                           | Context |Multiple|                            Description                             |
 |-------------------------|------------------------------------------------------------|---------|--------|--------------------------------------------------------------------|
 |`USE_CLIENT_CACHE`       |`no`                                                        |multisite|no      |Tell client to store locally static files.                          |
@@ -146,12 +181,20 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Country
 
+STREAM support :white_check_mark:
+
+Deny access based on the country of the client IP.
+
 |      Setting      |Default| Context |Multiple|                                 Description                                 |
 |-------------------|-------|---------|--------|-----------------------------------------------------------------------------|
 |`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (2 letters code).    |
 |`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (2 letters code).|
 
 ### Custom HTTPS certificate
+
+STREAM support :white_check_mark:
+
+Choose custom certificate for HTTPS.
 
 |     Setting     |Default| Context |Multiple|                Description                 |
 |-----------------|-------|---------|--------|--------------------------------------------|
@@ -161,11 +204,19 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### DB
 
+STREAM support :white_check_mark:
+
+Integrate easily the Database.
+
 |   Setting    |                 Default                 |Context|Multiple|                   Description                    |
 |--------------|-----------------------------------------|-------|--------|--------------------------------------------------|
 |`DATABASE_URI`|`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
 
 ### DNSBL
+
+STREAM support :white_check_mark:
+
+Deny access based on external DNSBL servers.
 
 |  Setting   |                                  Default                                   | Context |Multiple|      Description      |
 |------------|----------------------------------------------------------------------------|---------|--------|-----------------------|
@@ -174,12 +225,20 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Errors
 
+STREAM support :x:
+
+Manage default error pages
+
 |         Setting         |                     Default                     | Context |Multiple|                                                      Description                                                       |
 |-------------------------|-------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------------------------------|
 |`ERRORS`                 |                                                 |multisite|no      |List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).|
 |`INTERCEPTED_ERROR_CODES`|`400 401 403 404 405 413 429 500 501 502 503 504`|multisite|no      |List of HTTP error code intercepted by Bunkerweb                                                                        |
 
 ### Greylist
+
+STREAM support :warning:
+
+Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.
 
 |         Setting          |Default| Context |Multiple|                                         Description                                          |
 |--------------------------|-------|---------|--------|----------------------------------------------------------------------------------------------|
@@ -198,6 +257,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Gzip
 
+STREAM support :x:
+
+Compress HTTP requests with the gzip algorithm.
+
 |     Setting     |                                                                                                                                                                                                            Default                                                                                                                                                                                                             | Context |Multiple|                     Description                     |
 |-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|-----------------------------------------------------|
 |`USE_GZIP`       |`no`                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Use gzip                                             |
@@ -207,11 +270,19 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### HTML injection
 
+STREAM support :x:
+
+Inject custom HTML code before the </body> tag.
+
 |   Setting   |Default| Context |Multiple|      Description       |
 |-------------|-------|---------|--------|------------------------|
 |`INJECT_BODY`|       |multisite|no      |The HTML code to inject.|
 
 ### Headers
+
+STREAM support :x:
+
+Manage HTTP headers sent to clients.
 
 |          Setting          |                                                                                                                                                                                                                                                                                                                                                       Default                                                                                                                                                                                                                                                                                                                                                       | Context |Multiple|                                         Description                                          |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|----------------------------------------------------------------------------------------------|
@@ -230,6 +301,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Let's Encrypt
 
+STREAM support :white_check_mark:
+
+Automatic creation, renewal and configuration of Let's Encrypt certificates.
+
 |         Setting          |Default| Context |Multiple|                                                                                 Description                                                                                 |
 |--------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
@@ -238,16 +313,25 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Limit
 
-|       Setting        |Default| Context |Multiple|                                  Description                                   |
-|----------------------|-------|---------|--------|--------------------------------------------------------------------------------|
-|`USE_LIMIT_REQ`       |`yes`  |multisite|no      |Activate limit requests feature.                                                |
-|`LIMIT_REQ_URL`       |`/`    |multisite|yes     |URL where the limit request will be applied.                                    |
-|`LIMIT_REQ_RATE`      |`2r/s` |multisite|yes     |Rate to apply to the URL (s for second, m for minute, h for hour and d for day).|
-|`USE_LIMIT_CONN`      |`yes`  |multisite|no      |Activate limit connections feature.                                             |
-|`LIMIT_CONN_MAX_HTTP1`|`10`   |multisite|no      |Maximum number of connections per IP when using HTTP/1.X protocol.              |
-|`LIMIT_CONN_MAX_HTTP2`|`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                    |
+STREAM support :warning:
+
+Limit maximum number of requests and connections.
+
+|        Setting        |Default| Context |Multiple|                                  Description                                   |
+|-----------------------|-------|---------|--------|--------------------------------------------------------------------------------|
+|`USE_LIMIT_REQ`        |`yes`  |multisite|no      |Activate limit requests feature.                                                |
+|`LIMIT_REQ_URL`        |`/`    |multisite|yes     |URL where the limit request will be applied.                                    |
+|`LIMIT_REQ_RATE`       |`2r/s` |multisite|yes     |Rate to apply to the URL (s for second, m for minute, h for hour and d for day).|
+|`USE_LIMIT_CONN`       |`yes`  |multisite|no      |Activate limit connections feature.                                             |
+|`LIMIT_CONN_MAX_HTTP1` |`10`   |multisite|no      |Maximum number of connections per IP when using HTTP/1.X protocol.              |
+|`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                    |
+|`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                         |
 
 ### Miscellaneous
+
+STREAM support :warning:
+
+Miscellaneous settings.
 
 |           Setting           |        Default        | Context |Multiple|                                                     Description                                                      |
 |-----------------------------|-----------------------|---------|--------|----------------------------------------------------------------------------------------------------------------------|
@@ -271,6 +355,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### ModSecurity
 
+STREAM support :x:
+
+Management of the ModSecurity WAF.
+
 |             Setting             |   Default    | Context |Multiple|               Description                |
 |---------------------------------|--------------|---------|--------|------------------------------------------|
 |`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                   |
@@ -281,6 +369,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### PHP
 
+STREAM support :x:
+
+Manage local or remote PHP-FPM.
+
 |     Setting     |Default| Context |Multiple|                        Description                         |
 |-----------------|-------|---------|--------|------------------------------------------------------------|
 |`REMOTE_PHP`     |       |multisite|no      |Hostname of the remote PHP-FPM instance.                    |
@@ -289,6 +381,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`LOCAL_PHP_PATH` |       |multisite|no      |Root folder containing files in the local PHP-FPM instance. |
 
 ### Real IP
+
+STREAM support :warning:
+
+Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.
 
 |      Setting       |                 Default                 | Context |Multiple|                                              Description                                               |
 |--------------------|-----------------------------------------|---------|--------|--------------------------------------------------------------------------------------------------------|
@@ -301,12 +397,20 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Redirect
 
+STREAM support :x:
+
+Manage HTTP redirects.
+
 |         Setting         |Default| Context |Multiple|                   Description                   |
 |-------------------------|-------|---------|--------|-------------------------------------------------|
 |`REDIRECT_TO`            |       |multisite|no      |Redirect a whole site to another one.            |
 |`REDIRECT_TO_REQUEST_URI`|`no`   |multisite|no      |Append the requested URI to the redirect address.|
 
 ### Redis
+
+STREAM support :white_check_mark:
+
+Redis server configuration when using BunkerWeb in cluster mode.
 
 |       Setting        |Default|Context|Multiple|                           Description                            |
 |----------------------|-------|-------|--------|------------------------------------------------------------------|
@@ -320,6 +424,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`REDIS_KEEPALIVE_POOL`|`10`   |global |no      |Max number of redis connection(s) kept in the pool.               |
 
 ### Reverse proxy
+
+STREAM support :warning:
+
+Manage reverse proxy configurations.
 
 |                Setting                |             Default              | Context |Multiple|                                                         Description                                                         |
 |---------------------------------------|----------------------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------|
@@ -351,6 +459,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Reverse scan
 
+STREAM support :white_check_mark:
+
+Scan clients ports to detect proxies or servers.
+
 |       Setting        |         Default          | Context |Multiple|                           Description                            |
 |----------------------|--------------------------|---------|--------|------------------------------------------------------------------|
 |`USE_REVERSE_SCAN`    |`no`                      |multisite|no      |Enable scanning of clients ports and deny access if one is opened.|
@@ -359,6 +471,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### Self-signed certificate
 
+STREAM support :white_check_mark:
+
+Generate self-signed certificate.
+
 |         Setting          |       Default        | Context |Multiple|               Description               |
 |--------------------------|----------------------|---------|--------|-----------------------------------------|
 |`GENERATE_SELF_SIGNED_SSL`|`no`                  |multisite|no      |Generate and use self-signed certificate.|
@@ -366,6 +482,10 @@ When settings are considered as "multiple", it means that you can have multiple 
 |`SELF_SIGNED_SSL_SUBJ`    |`/CN=www.example.com/`|multisite|no      |Self-signed certificate subject.         |
 
 ### Sessions
+
+STREAM support :white_check_mark:
+
+Management of session used by other plugins.
 
 |          Setting          |Default |Context|Multiple|                                   Description                                   |
 |---------------------------|--------|-------|--------|---------------------------------------------------------------------------------|
@@ -377,11 +497,19 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 ### UI
 
+STREAM support :x:
+
+Integrate easily the BunkerWeb UI.
+
 |Setting |Default| Context |Multiple|Description|
 |--------|-------|---------|--------|-----------|
 |`USE_UI`|`no`   |multisite|no      |Use UI     |
 
 ### Whitelist
+
+STREAM support :warning:
+
+Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 
 |          Setting          |                                                                                          Default                                                                                           | Context |Multiple|                                   Description                                    |
 |---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|----------------------------------------------------------------------------------|

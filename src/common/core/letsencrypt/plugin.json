@@ -4,6 +4,7 @@
   "name": "Let's Encrypt",
   "description": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "AUTO_LETS_ENCRYPT": {
       "context": "multisite",

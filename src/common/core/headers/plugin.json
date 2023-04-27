@@ -4,6 +4,7 @@
   "name": "Headers",
   "description": "Manage HTTP headers sent to clients.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "CUSTOM_HEADER": {
       "context": "multisite",

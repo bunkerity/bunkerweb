@@ -4,6 +4,7 @@
   "name": "Jobs",
   "description": "Fake core plugin for internal jobs.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {},
   "jobs": [
     {

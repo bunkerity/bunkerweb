@@ -4,6 +4,7 @@
   "name": "PHP",
   "description": "Manage local or remote PHP-FPM.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "REMOTE_PHP": {
       "context": "multisite",

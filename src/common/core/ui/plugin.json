@@ -4,6 +4,7 @@
   "name": "UI",
   "description": "Integrate easily the BunkerWeb UI.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "USE_UI": {
       "context": "multisite",

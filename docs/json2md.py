@@ -22,6 +22,15 @@ def print_md_table(settings) -> MarkdownTableWriter:
     )
     return writer
 
+def stream_support(support) -> str:
+    md = "STREAM support "
+    if support == "no":
+        md += ":x:"
+    elif support == "yes":
+        md += ":white_check_mark:"
+    else:
+        md += ":warning:"
+    return md
 
 doc = StringIO()
 
@@ -45,6 +54,7 @@ print(
 
 # Print global settings
 print("## Global settings\n", file=doc)
+print(f"\n{stream_support('partial')}\n", file=doc)
 with open("src/common/settings.json", "r") as f:
     print(print_md_table(loads(f.read())), file=doc)
     print(file=doc)
@@ -56,11 +66,13 @@ for core in glob("src/common/core/*/plugin.json"):
     with open(core, "r") as f:
         core_plugin = loads(f.read())
         if len(core_plugin["settings"]) > 0:
-            core_settings[core_plugin["name"]] = core_plugin["settings"]
+            core_settings[core_plugin["name"]] = core_plugin
 
-for name, settings in dict(sorted(core_settings.items())).items():
-    print(f"### {name}\n", file=doc)
-    print(print_md_table(settings), file=doc)
+for name, data in dict(sorted(core_settings.items())).items():
+    print(f"### {data['name']}\n", file=doc)
+    print(f"{stream_support(data['stream'])}\n", file=doc)
+    print(f"{data['description']}\n", file=doc)
+    print(print_md_table(data['settings']), file=doc)
 
 doc.seek(0)
 content = doc.read()

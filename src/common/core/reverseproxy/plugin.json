@@ -4,6 +4,7 @@
   "name": "Reverse proxy",
   "description": "Manage reverse proxy configurations.",
   "version": "0.1",
+  "stream": "partial",
   "settings": {
     "USE_REVERSE_PROXY": {
       "context": "multisite",

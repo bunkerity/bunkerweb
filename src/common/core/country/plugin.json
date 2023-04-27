@@ -4,6 +4,7 @@
   "name": "Country",
   "description": "Deny access based on the country of the client IP.",
   "version": "0.1",
+  "stream": "yes",
   "settings": {
     "BLACKLIST_COUNTRY": {
       "context": "multisite",
