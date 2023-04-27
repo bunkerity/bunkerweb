@@ -14,6 +14,8 @@ The "Web UI" is a web application that helps you manage your BunkerWeb instance 
 - Add, edit and delete settings for your web applications
 - Add, edit and delete custom configurations for NGINX and ModSecurity
 - Install and uninstall external plugins
+- Explore the cached files
+- Monitor jobs execution
 - View the logs and search pattern
 
 ## Installation
@@ -31,282 +33,38 @@ Because the web UI is a web application, the recommended installation procedure 
 
 !!! info "Multisite mode"
 
-    The installation of the web UI implies enabling the [multisite mode](/1.4/concepts/#multisite-mode).
-
-!!! info "UI specific env variables"
-
-    * Don't forget to add `USE_UI` environnement variable as it adds the security rules needed for `Modsecurity` to work with the UI.
-    * Also it is advised to tweak the `INTERCEPTED_ERROR_CODES` setting to stop Bunkerweb from intercepting certain HTTP errors.
+    The usage of the web UI implies enabling the [multisite mode](/1.4/concepts/#multisite-mode).
 
 === "Docker"
 
-    When using the [Docker integration](/1.4/integrations/#docker), we recommend you to connect BunkerWeb and web UI using a dedicated network like with the scheduler and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the [bunkerweb-ui image](https://hub.docker.com/r/bunkerity/bunkerweb-ui).
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
 
-    Let's start by creating the networks (replace 10.20.30.0/24 with an unused network of your choice) :
     ```shell
-    docker network create --subnet 10.20.30.0/24 bw-universe && \
-    docker network create bw-services
+    docker pull bunkerity/bunkerweb-ui
     ```
 
-    You will also need the data volume, which where BunkerWeb's data will be stored :
+    Alternatively, you can also build it yourself :
+
     ```shell
-    docker volume create bw-data
+    git clone https://github.com/bunkerity/bunkerweb.git && \
+    cd bunkerweb && \
+    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
 
-    You can now create the BunkerWeb container with specific settings related to the web UI, please note the special `bunkerweb.INSTANCE` label which is mandatory for the scheduler as well as the web UI to work properly :
-    ```shell
-    docker run -d \
-       --name bunkerweb \
-       --network bw-services \
-       -p 80:8080 \
-       -p 443:8443 \
-       -e SERVER_NAME=bwadm.example.com \
-       -e MULTISITE=yes \
-       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-       -e bwadm.example.com_USE_UI=yes \
-       -e "bwadm.example.com_CONTENT_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';" \
-       -e bwadm.example.com_USE_REVERSE_PROXY=yes \
-       -e bwadm.example.com_REVERSE_PROXY_URL=/changeme/ \
-       -e bwadm.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000 \
-       -e "bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
-       -e bwadm.example.com_INTERCEPTED_ERROR_CODES="400 401 404 405 413 429 500 501 502 503 504" \
-       -l bunkerweb.INSTANCE \
-       bunkerity/bunkerweb:1.5.0-beta && \
-    docker network connect bw-universe bunkerweb
-    ```
+    The following environment variables are used to configure the web UI container :
 
-    Important things to note :
+    - `ADMIN_USERNAME` : username to access the web UI
+    - `ADMIN_PASSWORD` : password to access the web UI
+    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
-    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace `10.20.30.0/24` with the same network address used for the `bw-universe` network
-    * replace the `/changeme` URL with a custom one of your choice
-    * the `bunkerweb.INSTANCE` label is mandatory
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/1.5.0-beta/quickstart-guide/#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
-    The web UI and the Scheduler will need to access the Docker API in order to get metadata about the running containers. It can be done easily by mounting the **docker.sock** file into the container. But there is a security risk : if the web UI is exploited, all your container(s) and the host will be impacted because, at the moment, Docker doesn't provide any restriction feature. We highly recommend using something like a [docker socket proxy](https://github.com/Tecnativa/docker-socket-proxy) to mitigate that risk (only a subset of read-only API endpoints will be available to the web UI container).
+    !!! info "Database backend"
 
-    To connect the docker socket proxy and the web UI, you will need another network :
-    ```shell
-    docker network create bw-docker
-    ```
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
 
-    Once the network is created, you can now create the docker socket proxy container :
-    ```shell
-    docker run -d \
-           --name bw-docker \
-           --network bw-docker \
-           -v /var/run/docker.sock:/var/run/docker.sock:ro \
-           -e CONTAINERS=1 \
-           tecnativa/docker-socket-proxy
-    ```
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
-    You can then create the scheduler container with the bw-data volume and the docker socket proxy network :
-    ```shell
-    docker run -d \
-           --name bw-scheduler \
-           --network bw-universe \
-           -v bw-data:/data \
-           -e DOCKER_HOST=tcp://bw-docker:2375 \
-           bunkerity/bunkerweb-scheduler:1.5.0-beta && \
-    docker network connect bw-docker bw-scheduler
-    ```
-
-    We can finally create the web UI container :
-    ```shell
-    docker run -d \
-           --name bw-ui \
-           --network bw-universe \
-           -v bw-data:/data \
-           -e DOCKER_HOST=tcp://bw-docker:2375 \
-           -e ADMIN_USERNAME=admin \
-           -e ADMIN_PASSWORD=changeme \
-           -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/ \
-           bunkerity/bunkerweb-ui:1.5.0-beta && \
-    docker network connect bw-docker bw-ui
-    ```
-
-    Important things to note :
-
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used when creating the BunkerWeb container)
-    * Replace the username `admin` and password `changeme` with strong ones
-
-    Here is the docker-compose equivalent :
-    ```yaml
-    version: "3"
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0-beta
-        ports:
-          - "80:8080"
-          - "443:8443"
-        environment:
-          - SERVER_NAME=bwadm.example.com
-          - MULTISITE=yes
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - bwadm.example.com_USE_UI=yes
-          - bwadm.example.com_CONTENT_SECURITY_POLICY="object-src 'none'; frame-ancestors 'self';"
-          - bwadm.example.com_USE_REVERSE_PROXY=yes
-          - bwadm.example.com_REVERSE_PROXY_URL=/changeme/
-          - bwadm.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-          - bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-          - bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
-        labels:
-          - "bunkerweb.INSTANCE"
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
-        volumes:
-          - bw-data:/data
-        environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
-        networks:
-          - bw-universe
-          - bw-docker
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0-beta
-        volumes:
-          - bw-data:/data
-        environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - ADMIN_USERNAME=admin
-          - ADMIN_PASSWORD=changeme
-          - ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-        networks:
-          - bw-docker
-          - bw-universe
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-        networks:
-          - bw-docker
-
-    volumes:
-      bw-data:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-      bw-docker:
-    ```
-
-=== "Docker autoconf"
-
-    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), we recommend you to connect the Autoconf and web UI containers using a dedicated network like with the scheduler and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the [bunkerweb-ui image](https://hub.docker.com/r/bunkerity/bunkerweb-ui).
-
-    Let's start by creating the networks (replace 10.20.30.0/24 with an unused network of your choice) :
-    ```shell
-    docker network create --subnet 10.20.30.0/24 bw-universe && \
-    docker network create bw-services
-    ```
-
-    You will also need the data volume, which where BunkerWeb's data will be stored :
-    ```shell
-    docker volume create bw-data
-    ```
-
-    You can now create the BunkerWeb container, please note the special `bunkerweb.INSTANCE` label which is mandatory for the scheduler as well as the web UI to work properly :
-    ```shell
-    docker run -d \
-       --name bunkerweb \
-       --network bw-universe \
-       -p 80:8080 \
-       -p 443:8443 \
-       -e SERVER_NAME= \
-       -e MULTISITE=yes \
-       -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-       -l bunkerweb.INSTANCE \
-       bunkerity/bunkerweb:1.5.0-beta
-    ```
-
-    Important things to note :
-
-    * replace `10.20.30.0/24` with the same network address used for the `bw-universe` network
-    * the `bunkerweb.INSTANCE` label is mandatory
-
-    The Autoconf, the Scheduler and web UI will need to access the Docker API in order to get metadata about the running containers. It can be done easily by mounting the **docker.sock** file into the container. But there is a security risk : if the web UI is exploited, all your container(s) and the host will be impacted because, at the moment, Docker doesn't provide any restriction feature. We highly recommend using something like a [docker socket proxy](https://github.com/Tecnativa/docker-socket-proxy) to mitigate that risk (only a subset of read-only API endpoints will be available to the web UI container).
-
-    To connect the docker socket proxy and the web UI, you will need another network :
-    ```shell
-    docker network create bw-docker
-    ```
-
-    Once the network is created, you can now create the docker socket proxy container :
-    ```shell
-    docker run -d \
-           --name bw-docker \
-           --network bw-docker \
-           -v /var/run/docker.sock:/var/run/docker.sock:ro \
-           -e CONTAINERS=1 \
-           tecnativa/docker-socket-proxy
-    ```
-
-    You can then create the autoconf container connected to the docker socket proxy network :
-    ```shell
-    docker run -d \
-           --name bw-autoconf \
-           --network bw-universe \
-           -v bw-data:/data \
-           -e DOCKER_HOST=tcp://bw-docker:2375 \
-           bunkerity/bunkerweb-autoconf:1.5.0-beta && \
-    docker network connect bw-docker bw-autoconf
-    ```
-
-    You can then create the scheduler container with the bw-data volume and the docker socket proxy network :
-    ```shell
-    docker run -d \
-           --name bw-scheduler \
-           --network bw-universe \
-           -v bw-data:/data \
-           -e DOCKER_HOST=tcp://bw-docker:2375 \
-           -e AUTOCONF_MODE=yes \
-           bunkerity/bunkerweb-scheduler:1.5.0-beta && \
-    docker network connect bw-docker bw-scheduler
-    ```
-
-    We can finally create the web UI container :
-    ```shell
-    docker run -d \
-           --name bw-ui \
-           --network bw-universe \
-           -v bw-data:/data \
-           -e DOCKER_HOST=tcp://bw-docker:2375 \
-           -e AUTOCONF_MODE=yes \
-           -e ADMIN_USERNAME=admin \
-           -e ADMIN_PASSWORD=changeme \
-           -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/ \
-           -l "bunkerweb.SERVER_NAME=bwadm.example.com" \
-           -l "bunkerweb.USE_UI=yes" \
-           -l "bunkerweb.CONTENT_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';" \
-           -l "bunkerweb.USE_REVERSE_PROXY=yes" \
-           -l "bunkerweb.REVERSE_PROXY_URL=/changeme" \
-           -l "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000" \
-           -l "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
-           -l "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 405 413 429 500 501 502 503 504" \
-           bunkerity/bunkerweb-ui:1.5.0-beta && \
-    docker network connect bw-docker bw-ui
-    ```
-
-    Important things to note :
-
-    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace the `/changeme` URL with a custom one of your choice
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used when creating the BunkerWeb container)
-    * Replace the username `admin` and password `changeme` with strong ones
-
-    Here is the docker-compose equivalent :
     ```yaml
     version: "3.5"
 
@@ -319,30 +77,31 @@ Because the web UI is a web application, the recommended installation procedure 
         labels:
           - "bunkerweb.INSTANCE"
         environment:
-          - SERVER_NAME=
+          - SERVER_NAME=www.example.com
           - MULTISITE=yes
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - DISABLE_DEFAULT_SERVER=yes
+          - USE_CLIENT_CACHE=yes
+          - USE_GZIP=yes
+          - www.example.com_USE_UI=yes
+          - www.example.com_USE_REVERSE_PROXY=yes
+          - www.example.com_REVERSE_PROXY_URL=/changeme/
+          - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
+          - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+          - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
         networks:
           - bw-universe
           - bw-services
 
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.0-beta
-        volumes:
-          - bw-data:/data
-        environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
-        networks:
-          - bw-universe
-          - bw-docker
-
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.5.0-beta
-        volumes:
-          - bw-data:/data
+        depends_on:
+          - bunkerweb
+          - bw-docker
         environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
-          - AUTOCONF_MODE=yes
         networks:
           - bw-universe
           - bw-docker
@@ -355,31 +114,32 @@ Because the web UI is a web application, the recommended installation procedure 
           - CONTAINERS=1
         networks:
           - bw-docker
-          
+
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.5.0-beta
-        networks:
-          bw-docker:
-          bw-universe:
-            aliases:
-              - bw-ui
-        volumes:
-          - bw-data:/data
+        depends_on:
+          - bw-docker
         environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
-          - AUTOCONF_MODE=yes
-          - ADMIN_USERNAME=admin
-          - ADMIN_PASSWORD=changeme
-          - ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-        labels:
-          - "bunkerweb.SERVER_NAME=bwadm.example.com"
-          - "bunkerweb.USE_UI=yes"
-          - "bunkerweb.CONTENT_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';"
-          - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
-          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 405 413 429 500 501 502 503 504"
+          - ADMIN_USERNAME=changeme
+          - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
+          - ABSOLUTE_URI=http://www.example.com/changeme/
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-db:
+        image: mariadb:10.10
+        environment:
+          - MYSQL_RANDOM_ROOT_PASSWORD=yes
+          - MYSQL_DATABASE=db
+          - MYSQL_USER=bunkerweb
+          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+        volumes:
+          - bw-data:/var/lib/mysql
+        networks:
+          - bw-docker
 
     volumes:
       bw-data:
@@ -395,149 +155,175 @@ Because the web UI is a web application, the recommended installation procedure 
         name: bw-services
       bw-docker:
         name: bw-docker
+    ```
 
+=== "Docker autoconf"
+
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
+
+    ```shell
+    docker pull bunkerity/bunkerweb-ui
+    ```
+
+    Alternatively, you can also build it yourself :
+
+    ```shell
+    git clone https://github.com/bunkerity/bunkerweb.git && \
+    cd bunkerweb && \
+    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
+    ```
+
+    The following environment variables are used to configure the web UI container :
+
+    - `ADMIN_USERNAME` : username to access the web UI
+    - `ADMIN_PASSWORD` : password to access the web UI
+    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
+
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/1.5.0-beta/quickstart-guide/#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+
+    !!! info "Database backend"
+
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
+
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    ```yaml
+    version: "3.5"
+
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          - 80:8080
+          - 443:8443
+        labels:
+          - "bunkerweb.INSTANCE"
+        environment:
+          - SERVER_NAME=
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - AUTOCONF_MODE=yes
+          - MULTISITE=yes
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-autoconf:
+        image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - AUTOCONF_MODE=yes
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - DOCKER_HOST=tcp://bw-docker:2375
+          - AUTOCONF_MODE=yes
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+        networks:
+          - bw-docker
+
+      bw-db:
+        image: mariadb:10.10
+        environment:
+          - MYSQL_RANDOM_ROOT_PASSWORD=yes
+          - MYSQL_DATABASE=db
+          - MYSQL_USER=bunkerweb
+          - MYSQL_PASSWORD=changeme
+        volumes:
+          - bw-data:/var/lib/mysql
+        networks:
+          - bw-docker
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.5.0-beta
+        networks:
+          bw-docker:
+          bw-universe:
+            aliases:
+              - bw-ui
+        environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - DOCKER_HOST=tcp://bw-docker:2375
+          - AUTOCONF_MODE=yes
+          - ADMIN_USERNAME=admin
+          - ADMIN_PASSWORD=changeme
+          - ABSOLUTE_URI=http://www.example.com/changeme/
+        labels:
+          - "bunkerweb.SERVER_NAME=www.example.com"
+          - "bunkerweb.USE_UI=yes"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+          - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
+          - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
+
+    volumes:
+      bw-data:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
     ```
 
 === "Swarm"
 
-    When using the [Swarm integration](/1.4/integrations/#swarm), we recommend you to connect the Swarm and web UI containers using a dedicated network like with the scheduler and use another dedicated network for the communications between BunkerWeb and your web applications. The web UI can be deployed using a dedicated container based on the [bunkerweb-ui image](https://hub.docker.com/r/bunkerity/bunkerweb-ui).
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
 
-    Let's start by creating the networks (replace 10.20.30.0/24 with an unused network of your choice) :
     ```shell
-    docker network create -d overlay --attachable --subnet 10.20.30.0/24 bw-universe && \
-    docker network create -d overlay --attachable bw-services
+    docker pull bunkerity/bunkerweb-ui
     ```
 
-    Swarm will need a redis instance to work properly, you can use the [official redis image](https://hub.docker.com/_/redis) :
+    Alternatively, you can also build it yourself :
+
     ```shell
-    docker service create \
-           --name bw-redis \
-           --constraint 'node.role == worker' \
-           --network bw-universe \
-           redis:7-alpine
+    git clone https://github.com/bunkerity/bunkerweb.git && \
+    cd bunkerweb && \
+    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
 
-    You can now create the BunkerWeb container, please note the special `bunkerweb.INSTANCE` label which is mandatory for the scheduler as well as the web UI to work properly :
-    ```shell
-    docker service create \
-           --name bunkerweb \
-           --mode global \
-           --constraint 'node.role == worker' \
-           --network bw-universe \
-           --network bw-services \
-           -p published=80,target=8080,mode=host \
-           -p published=443,target=8443,mode=host \
-           -e SERVER_NAME= \
-           -e MULTISITE=yes \
-           -e USE_REDIS=yes \
-           -e REDIS_HOST=bw-redis \
-           -e "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24" \
-           -l "bunkerweb.INSTANCE" \
-           bunkerity/bunkerweb:1.5.0-beta
-    ```
+    The following environment variables are used to configure the web UI container :
 
-    Important things to note :
+    - `ADMIN_USERNAME` : username to access the web UI
+    - `ADMIN_PASSWORD` : password to access the web UI
+    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
-    * replace `10.20.30.0/24` with the same network address used for the `bw-universe` network
-    * the `bunkerweb.INSTANCE` label is mandatory
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/1.5.0-beta/quickstart-guide/#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
-    Swarm, the Scheduler and the web UI will need to access the Docker API in order to get metadata about the running containers. It can be done easily by mounting the **docker.sock** file into the container. But there is a security risk : if the web UI is exploited, all your container(s) and the host will be impacted because, at the moment, Docker doesn't provide any restriction feature. We highly recommend using something like a [docker socket proxy](https://github.com/Tecnativa/docker-socket-proxy) to mitigate that risk (only a subset of read-only API endpoints will be available to the web UI container).
+    !!! info "Database backend"
 
-    To connect the docker socket proxy and the web UI, you will need another network :
-    ```shell
-    docker network create bw-docker
-    ```
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
 
-    Once the network is created, you can now create the docker socket proxy container :
-    ```shell
-    docker service create \
-           --name bw-docker \
-           --constraint 'node.role == manager' \
-           --network bw-docker \
-           --mount type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock,ro \
-           -e CONFIGS=1 \
-           -e CONTAINERS=1 \
-           -e SERVICES=1 \
-           -e SWARM=1 \
-           -e TASKS=1 \
-           tecnativa/docker-socket-proxy
-    ```
+    Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
-    Swarm, the Scheduler and the web UI will also need to share data among them. We recommend using a dedicated database container for that purpose. For this example, we will use a [MariaDB](https://mariadb.org/) container :
-    ```shell
-    docker service create \
-           --name bw-db \
-           --network bw-docker \
-           --mount type=volume,source=bw-data,destination=/var/lib/mysql \
-           -e MYSQL_RANDOM_ROOT_PASSWORD=yes \
-           -e MYSQL_DATABASE=db \
-           -e MYSQL_USER=bunkerweb \
-           -e MYSQL_PASSWORD=changeme \
-           mariadb:10.10
-    ```
-
-    Important things to note :
-
-    * For security purposes the database container should not be on the same network as the BunkerWeb container
-    * Replace the password `changeme` with strong ones, the same password will be used in the url provided to Swarm, the Scheduler and the web UI
-    * The URL provided to Swarm, the Scheduler and the web UI will be `mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db`
-
-    You can then create the autoconf container connected to the database and the docker socket proxy network :
-    ```shell
-    docker service create \
-           --name bw-autoconf \
-           --network bw-universe \
-           --network bw-docker \
-           -e SWARM_MODE=yes \
-           -e DOCKER_HOST=tcp://bw-docker:2375
-           -e DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db \
-           bunkerity/bunkerweb-autoconf:1.5.0-beta
-    ```
-
-    You can then create the scheduler container connected to the database and the docker socket proxy network :
-    ```shell
-    docker service create \
-           --name bw-scheduler \
-           --network bw-universe \
-           --network bw-docker \
-           -e SWARM_MODE=yes \
-           -e DOCKER_HOST=tcp://bw-docker:2375
-           -e DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db \
-           bunkerity/bunkerweb-scheduler:1.5.0-beta
-    ```
-
-    We can finally create the web UI container :
-    ```shell
-    docker service create \
-           --name bw-ui \
-           --network bw-universe \
-           --network bw-docker \
-           -v bw-data:/data \
-           -e SWARM_MODE=yes \
-           -e DOCKER_HOST=tcp://bw-docker:2375 \
-           -e DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db \
-           -e ADMIN_USERNAME=admin \
-           -e ADMIN_PASSWORD=changeme \
-           -e ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/ \
-           -l "bunkerweb.SERVER_NAME=bwadm.example.com" \
-           -l "bunkerweb.USE_UI=yes" \
-           -l "bunkerweb.CONTENT_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';" \
-           -l "bunkerweb.USE_REVERSE_PROXY=yes" \
-           -l "bunkerweb.REVERSE_PROXY_URL=/changeme" \
-           -l "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000" \
-           -l "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme" \
-           -l "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 405 413 429 500 501 502 503 504" \
-           bunkerity/bunkerweb-ui:1.5.0-beta
-    ```
-
-    Important things to note :
-
-    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace the `/changeme` URL with a custom one of your choice
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used when creating the BunkerWeb container)
-    * Replace the username `admin` and password `changeme` with strong ones
-
-    Here is the docker-compose equivalent :
     ```yaml
     version: "3.5"
 
@@ -555,6 +341,8 @@ Because the web UI is a web application, the recommended installation procedure 
             protocol: tcp
         environment:
           - SERVER_NAME=
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - SWARM_MODE=yes
           - MULTISITE=yes
           - USE_REDIS=yes
           - REDIS_HOST=bw-redis
@@ -627,25 +415,23 @@ Because the web UI is a web application, the recommended installation procedure 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.5.0-beta
         environment:
-          - SWARM_MODE=yes
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
-          - ADMIN_USERNAME=admin
-          - ADMIN_PASSWORD=changeme
-          - ABSOLUTE_URI=http://bwadm.example.com/changeme
+          - ADMIN_USERNAME=changeme
+          - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
+          - ABSOLUTE_URI=http://www.example.com/changeme/
         networks:
           - bw-universe
           - bw-docker
         deploy:
           labels:
-            - bunkerweb.SERVER_NAME=bwadm.example.com
+            - bunkerweb.SERVER_NAME=www.example.com
             - bunkerweb.USE_UI=yes
-            - "bunkerweb.CONTENT_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';"
             - bunkerweb.USE_REVERSE_PROXY=yes
-            - bunkerweb.REVERSE_PROXY_URL=/changeme
+            - bunkerweb.REVERSE_PROXY_URL=/changeme/
             - bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000
             - bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-            - bunkerweb.INTERCEPTED_ERROR_CODES=400 401 404 405 413 429 500 501 502 503 504
+            - bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no
 
     volumes:
       bw-data:
@@ -670,115 +456,452 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Kubernetes"
 
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) as a standard [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
+
+    The following environment variables are used to configure the web UI container :
+
+    - `ADMIN_USERNAME` : username to access the web UI
+    - `ADMIN_PASSWORD` : password to access the web UI
+    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
+
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/1.5.0-beta/quickstart-guide/#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
+
+    !!! info "Database backend"
+
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
+
+    Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    ```yaml
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: cr-bunkerweb
+    rules:
+      - apiGroups: [""]
+        resources: ["services", "pods", "configmaps"]
+        verbs: ["get", "watch", "list"]
+      - apiGroups: ["networking.k8s.io"]
+        resources: ["ingresses"]
+        verbs: ["get", "watch", "list"]
+    ---
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: sa-bunkerweb
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: crb-bunkerweb
+    subjects:
+      - kind: ServiceAccount
+        name: sa-bunkerweb
+        namespace: default
+        apiGroup: ""
+    roleRef:
+      kind: ClusterRole
+      name: cr-bunkerweb
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      name: bunkerweb
+    spec:
+      selector:
+        matchLabels:
+          app: bunkerweb
+      template:
+        metadata:
+          labels:
+            app: bunkerweb
+          # mandatory annotation
+          annotations:
+            bunkerweb.io/INSTANCE: "yes"
+        spec:
+          containers:
+            - name: bunkerweb
+              image: bunkerity/bunkerweb:1.4.6
+              imagePullPolicy: Always
+              securityContext:
+                runAsUser: 101
+                runAsGroup: 101
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              ports:
+                - containerPort: 8080
+                  hostPort: 80
+                - containerPort: 8443
+                  hostPort: 443
+              env:
+                - name: KUBERNETES_MODE
+                  value: "yes"
+                # replace with your DNS resolvers
+                # e.g. : kube-dns.kube-system.svc.cluster.local
+                - name: DNS_RESOLVERS
+                  value: "coredns.kube-system.svc.cluster.local"
+                - name: USE_API
+                  value: "yes"
+                # 10.0.0.0/8 is the cluster internal subnet
+                - name: API_WHITELIST_IP
+                  value: "127.0.0.0/8 10.0.0.0/8"
+                - name: SERVER_NAME
+                  value: ""
+                - name: MULTISITE
+                  value: "yes"
+                - name: USE_REDIS
+                  value: "yes"
+                - name: REDIS_HOST
+                  value: "svc-bunkerweb-redis.default.svc.cluster.local"
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/share/bunkerweb/helpers/healthcheck.sh
+                initialDelaySeconds: 30
+                periodSeconds: 5
+                timeoutSeconds: 1
+                failureThreshold: 3
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/share/bunkerweb/helpers/healthcheck.sh
+                initialDelaySeconds: 30
+                periodSeconds: 1
+                timeoutSeconds: 1
+                failureThreshold: 3
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-controller
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-controller
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-controller
+        spec:
+          serviceAccountName: sa-bunkerweb
+          containers:
+            - name: bunkerweb-controller
+              image: bunkerity/bunkerweb-autoconf:1.4.6
+              imagePullPolicy: Always
+              env:
+                - name: KUBERNETES_MODE
+                  value: "yes"
+                - name: "DATABASE_URI"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-scheduler
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-scheduler
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-scheduler
+        spec:
+          serviceAccountName: sa-bunkerweb
+          containers:
+            - name: bunkerweb-scheduler
+              image: bunkerity/bunkerweb-scheduler:1.4.6
+              imagePullPolicy: Always
+              env:
+                - name: KUBERNETES_MODE
+                  value: "yes"
+                - name: "DATABASE_URI"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-redis
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-redis
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-redis
+        spec:
+          containers:
+            - name: bunkerweb-redis
+              image: redis:7-alpine
+              imagePullPolicy: Always
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-db
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-db
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-db
+        spec:
+          containers:
+            - name: bunkerweb-db
+              image: mariadb:10.10
+              imagePullPolicy: Always
+              env:
+                - name: MYSQL_RANDOM_ROOT_PASSWORD
+                  value: "yes"
+                - name: "MYSQL_DATABASE"
+                  value: "db"
+                - name: "MYSQL_USER"
+                  value: "bunkerweb"
+                - name: "MYSQL_PASSWORD"
+                  value: "changeme"
+              volumeMounts:
+                - mountPath: "/var/lib/mysql"
+                  name: vol-db
+          volumes:
+            - name: vol-db
+              persistentVolumeClaim:
+                claimName: pvc-bunkerweb
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-ui
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-ui
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-ui
+        spec:
+          containers:
+            - name: bunkerweb-ui
+              image: bunkerity/bunkerweb-ui:1.5.0-beta
+              imagePullPolicy: Always
+              env:
+                - name: ADMIN_USERNAME
+                  value: "changeme"
+                - name: "ADMIN_PASSWORD"
+                  value: "changeme"
+                - name: "ABSOLUTE_URI"
+                  value: "http://www.example.com/changeme/"
+                - name: KUBERNETES_MODE
+                  value: "YES"
+                - name: "DATABASE_URI"
+                  value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-bunkerweb
+    spec:
+      clusterIP: None
+      selector:
+        app: bunkerweb
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-bunkerweb-db
+    spec:
+      type: ClusterIP
+      selector:
+        app: bunkerweb-db
+      ports:
+        - name: sql
+          protocol: TCP
+          port: 3306
+          targetPort: 3306
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-bunkerweb-redis
+    spec:
+      type: ClusterIP
+      selector:
+        app: bunkerweb-redis
+      ports:
+        - name: redis
+          protocol: TCP
+          port: 6379
+          targetPort: 6379
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-bunkerweb-ui
+    spec:
+      type: ClusterIP
+      selector:
+        app: bunkerweb-ui
+      ports:
+        - name: http
+          protocol: TCP
+          port: 7000
+          targetPort: 7000
+    ---
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: pvc-bunkerweb
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: ""
+      volumeName: pv-bunkerweb
+    ---
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: ingress
+      annotations:
+        bunkerweb.io/www.example.com_USE_UI: "yes"
+        bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /changeme"
+        bunkerweb.io/www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+    spec:
+      rules:
+        - host: www.example.com
+          http:
+            paths:
+              - path: /changeme/
+                pathType: Prefix
+                backend:
+                  service:
+                    name: svc-bunkerweb-ui
+                    port:
+                      number: 7000
+    ```
+
 === "Linux"
 
     The installation of the web UI using the [Linux integration](/1.4/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
 
-    The first thing to do is to edit the BunkerWeb configuration located at **/etc/bunkerweb/variables.env** to add settings related to the web UI :
+    The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
+
+    ```shell
+    systemctl enable bunkerweb
+    ```
+
+    A dedicated environment file located at `/etc/bunkerweb/ui.env` is used to configure the web UI :
+
+    ```conf
+    ADMIN_USERNAME=changeme
+    ADMIN_PASSWORD=changeme
+    ABSOLUTE_URI=http://www.example.com/changeme/
+    ```
+
+    Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
+
+    ```shell
+    systemctl restart bunkerweb-ui
+    ```
+
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/1.5.0-beta/quickstart-guide/#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
+
+    Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
+
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
-    ...
-    SERVER_NAME=bwadm.example.com
+    SERVER_NAME=www.example.com
     MULTISITE=yes
-    USE_API=yes
-    API_WHITELIST_IP=127.0.0.0/8
-    bwadm.example.com_USE_UI=yes
-    bwadm.example.com_USE_REVERSE_PROXY=yes
-    bwadm.example.com_REVERSE_PROXY_URL=/changeme/
-    bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-    bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
-    ...
+    USE_UI=yes
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/changeme/
+    REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+    REVERSE_PROXY_INTERCEPT_ERRORS=no
     ```
 
-    Important things to note :
+    Don't forget to restart the `bunkerweb` service :
 
-    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace the `/changeme` URLs with a custom one of your choice
-
-    Once the configuration file is edited, you will need to restart BunkerWeb :
     ```shell
     systemctl restart bunkerweb
     ```
 
-    You can edit the **/etc/bunkerweb/ui.env** file containing the settings of the web UI :
-    ```conf
-    ADMIN_USERNAME=admin
-    ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-    ```
-
-    Important things to note :
-
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/etc/bunkerweb/variables.env**)
-    * replace the username `admin` and password `changeme` with strong ones
-
-    Restart the BunkerWeb UI service and you are now ready to access it :
-	```shell
-	systemctl restart bunkerweb-ui
-	```
-
 === "Ansible"
 
-    The installation of the web UI using the [Ansible integration](/1.4/integrations/#ansible) is pretty straightforward because it is already installed with BunkerWeb, the variable `enable_ui` can be set to `true` in order to activate the web UI service and the variable `custom_ui` can be used to specify the configuration file for the web UI.
+    The installation of the web UI using the [Vagrant integration](/1.4/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
 
-    The first thing to do is to edit your local BunkerWeb configuration and add settings related to the web UI :
+    Create a `my_ui.env` filed used to configure the web UI :
+
+    ```conf
+    ADMIN_USERNAME=changeme
+    ADMIN_PASSWORD=changeme
+    ABSOLUTE_URI=http://www.example.com/changeme/
+    ```
+
+    Here is the `my_variables.env` boilerplate you can use :
+
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
-    ...
-    SERVER_NAME=bwadm.example.com
+    SERVER_NAME=www.example.com
     MULTISITE=yes
-    USE_API=yes
-    API_WHITELIST_IP=127.0.0.0/8
-    bwadm.example.com_USE_UI=yes
-    bwadm.example.com_USE_REVERSE_PROXY=yes
-    bwadm.example.com_REVERSE_PROXY_URL=/changeme/
-    bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-    bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
-    ...
+    USE_UI=yes
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/changeme/
+    REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+    REVERSE_PROXY_INTERCEPT_ERRORS=no
     ```
 
-    Important things to note :
+    The variable `enable_ui` can be set to `true` in order to activate the web UI service and the variable `custom_ui` can be used to specify the configuration file for the web UI :
 
-    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace the `/changeme` URLs with a custom one of your choice
+    ```ini
+    [mybunkers]
+    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" enable_ui=true custom_ui="{{ playbook_dir }}/my_ui.env"
+    ```
 
-	You can now create a local `my_ui.env` file containing the settings of the web UI :
-	```env
-	ADMIN_USERNAME=admin
-	ADMIN_PASSWORD=changeme
-	ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-	```
+    Or alternatively, in your playbook file :
 
-    Important things to note :
+    ```yaml
+    - hosts: all
+      become: true
+      vars:
+      - variables_env: "{{ playbook_dir }}/my_variables.env"
+      - enable_ui: true
+      - custom_ui: "{{ playbook_dir }}/my_ui.env"
+      roles:
+      - bunkerity.bunkerweb
+    ```
 
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used when creating the BunkerWeb container)
-    * Replace the username `admin` and password `changeme` with strong ones
-
-	In your Ansible inventory, you can use the `enable_ui` variable to enable the web UI service and the `custom_ui`variable to specify the configuration file for the web UI :
-	```yaml
-	[mybunkers]
-	192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" enable_ui=true custom_ui="{{ playbook_dir }}/my_ui.env"
-	```
-
-	Or alternatively, in your playbook file :
-	```yaml
-	- hosts: all
-	  become: true
-	  vars:
-		- variables_env: "{{ playbook_dir }}/my_variables.env"
-		- enable_ui: true
-		- custom_ui: "{{ playbook_dir }}/my_ui.env"
-	  roles:
-		- bunkerity.bunkerweb
-	```
 
     You can now run the playbook and be able to access the web UI :
+
     ```shell
     ansible-playbook -i inventory.yml playbook.yml
     ```
@@ -787,48 +910,52 @@ Because the web UI is a web application, the recommended installation procedure 
 
     The installation of the web UI using the [Vagrant integration](/1.4/integrations/#vagrant) is pretty straightforward because it is installed with BunkerWeb.
 
-    The first thing to do is to edit the BunkerWeb configuration located at **/etc/bunkerweb/variables.env** to add settings related to the web UI :
+    First of all, you will need to get a shell on your Vagrant box :
+
+    ```shell
+    vagrant ssh
+    ```
+
+    The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
+
+    ```shell
+    systemctl enable bunkerweb
+    ```
+
+    A dedicated environment file located at `/etc/bunkerweb/ui.env` is used to configure the web UI :
+
+    ```conf
+    ADMIN_USERNAME=changeme
+    ADMIN_PASSWORD=changeme
+    ABSOLUTE_URI=http://www.example.com/changeme/
+    ```
+
+    Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
+
+    ```shell
+    systemctl restart bunkerweb-ui
+    ```
+
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/1.5.0-beta/quickstart-guide/#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
+
+    Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
+
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
-    ...
-    SERVER_NAME=bwadm.example.com
+    SERVER_NAME=www.example.com
     MULTISITE=yes
-    USE_API=yes
-    API_WHITELIST_IP=127.0.0.0/8
-    bwadm.example.com_USE_UI=yes
-    bwadm.example.com_USE_REVERSE_PROXY=yes
-    bwadm.example.com_REVERSE_PROXY_URL=/changeme/
-    bwadm.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    bwadm.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-    bwadm.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
-    ...
+    USE_UI=yes
+    USE_REVERSE_PROXY=yes
+    REVERSE_PROXY_URL=/changeme/
+    REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    REVERSE_PROXY_HEADERS=X-Script-Name /changeme # replace with another url
+    REVERSE_PROXY_INTERCEPT_ERRORS=no
     ```
 
-    Important things to note :
+    Don't forget to restart the `bunkerweb` service :
 
-    * `bwadm.example.com` is the dedicated (sub)domain for accessing the web UI
-    * replace the `/changeme` URLs with a custom one of your choice
-
-    Once the configuration file is edited, you will need to restart BunkerWeb :
     ```shell
     systemctl restart bunkerweb
     ```
-
-    You can edit the **/etc/bunkerweb/ui.env** file containing the settings of the web UI :
-    ```conf
-    ADMIN_USERNAME=admin
-    ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http(s)://bwadm.example.com/changeme/
-    ```
-
-    Important things to note :
-
-    * `http(s)://bwadmin.example.com/changeme/` is the full base URL of the web UI (must match the sub(domain) and /changeme URL used in **/etc/bunkerweb/variables.env**)
-    * replace the username `admin` and password `changeme` with strong ones
-
-    Restart the BunkerWeb UI service and you are now ready to access it :
-	```shell
-	systemctl restart bunkerweb-ui
-	```
