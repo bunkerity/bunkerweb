@@ -256,5 +256,4 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: ""
   volumeName: pv-bunkerweb

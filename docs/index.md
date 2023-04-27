@@ -39,9 +39,8 @@ Learn more about the core security features in the [security tuning](/1.5.0-beta
 
 ## Demo
 
-<figure markdown>
-  ![Demo](assets/img/demo.gif){ align=center }
-  <figcaption>Fooling automated tools/scanners</figcaption>
-</figure>
+<p align="center">
+	<iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/ZhYV-QELzA4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.

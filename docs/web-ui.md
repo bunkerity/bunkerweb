@@ -778,7 +778,6 @@ Because the web UI is a web application, the recommended installation procedure 
       resources:
         requests:
           storage: 5Gi
-      storageClassName: ""
       volumeName: pv-bunkerweb
     ---
     apiVersion: networking.k8s.io/v1
