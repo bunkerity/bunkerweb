@@ -72,6 +72,7 @@ class ServiceModal {
           const obj = JSON.parse(servicesSettings);
           this.updateModalData(obj);
           //show modal
+          this.resetFilterInp();
           this.changeSubmitBtnName("EDIT");
           this.openModal();
         }
@@ -94,6 +95,7 @@ class ServiceModal {
           inpServName.value = "";
 
           //show modal
+          this.resetFilterInp();
           this.changeSubmitBtnName("CREATE");
           this.openModal();
         }
@@ -114,6 +116,12 @@ class ServiceModal {
     });
   }
 
+  resetFilterInp() {
+    const inpFilter = document.querySelector('input[name="settings-filter"]');
+    inpFilter.value = "";
+    inpFilter.dispatchEvent(new Event("input"));
+  }
+
   changeSubmitBtnName(text) {
     const submitBtn = document.querySelector(
       "button[data-services-modal-submit]"
@@ -129,7 +137,8 @@ class ServiceModal {
       if (
         inpName === "csrf_token" ||
         inpName === "OLD_SERVER_NAME" ||
-        inpName === "operation"
+        inpName === "operation" ||
+        inpName === "settings-filter"
       )
         return;
 
@@ -270,7 +279,8 @@ class ServiceModal {
           if (
             inpName === "csrf_token" ||
             inpName === "OLD_SERVER_NAME" ||
-            inpName === "operation"
+            inpName === "operation" ||
+            inpName === "settings-filter"
           )
             return;
 
@@ -673,7 +683,8 @@ class Multiple {
         if (
           inpName === "csrf_token" ||
           inpName === "OLD_SERVER_NAME" ||
-          inpName === "operation"
+          inpName === "operation" ||
+          inpName === "settings-filter"
         )
           return;
 
