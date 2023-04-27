@@ -483,12 +483,6 @@ def services():
 
             print(variables, flush=True)
 
-            if len(variables) <= 1:
-                flash(
-                    f"{variables['SERVER_NAME'].split(' ')[0]} was not edited because no values were changed."
-                )
-                return redirect(url_for("loading", next=url_for("services")))
-
             error = app.config["CONFIG"].check_variables(variables)
 
             if error:
