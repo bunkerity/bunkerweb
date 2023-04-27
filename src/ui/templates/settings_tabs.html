@@ -12,11 +12,11 @@
     <button role="tab"
     data-tab-handler="{{ plugin['id'] }}"
     type="button"
-    class="{% if loop.first %} brightness-90 z-[1001]{%else %} {% endif %} border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700  border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
+    class="{% if loop.first %}active{% endif %} settings-tabs-tab-btn"
   >
     <span class="w-full flex justify-between items-center">
       <!-- text and icon -->
-      <span class="text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300"> {{ plugin["name"] }} </span>
+      <span class="settings-tabs-name"> {{ plugin["name"] }} </span>
       <svg
       data-popover-btn="{{ plugin["name"] }}"
         class=" fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
@@ -31,9 +31,9 @@
       <!-- popover -->
       <span
       data-popover-content="{{ plugin["name"] }}"
-        class="top-[60px] min-w-[150px] dark:brightness-90 bg-blue-500 hidden transition z-50 rounded-md p-3 left-0 absolute"
+        class="settings-tabs-popover-container hidden"
       >
-        <span class="font-bold text-sm text-white m-0">{{ plugin['description'] }}</span>
+        <span class="settings-tabs-popover-text">{{ plugin['description'] }}</span>
       </span>
       <!-- end popover -->
     </span>
@@ -47,9 +47,9 @@
   <button
   data-tab-dropdown-btn 
     type="button"
-    class="dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-6 py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md"
+    class="settings-tabs-mobile-btn"
   >
-    <span class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary">{% if current_endpoint == "global-config" %}general {% endif %} </span>
+    <span class="settings-tabs-mobile-btn-text">{% if current_endpoint == "global-config" %}general {% endif %} </span>
     <!-- chevron -->
     <svg
       
@@ -66,7 +66,7 @@
   <!-- dropdown-->
   <div
   data-tab-dropdown
-    class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto  max-h-90"
+    class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto max-h-90"
   >
   {% set first_el = "True" %}
   {% for plugin in plugins %}  {% if current_endpoint == "services" and plugin["settings"]
@@ -79,7 +79,7 @@
     type="button"
     data-select="false"
     id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
-    class="flex justify-between border-t rounded-t border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-1000 dark:bg-primary bg-primary text-gray-300">
+    class="active first settings-tabs-mobile-dropdown-btn">
     {{ plugin["name"] }}
   </button>
   {% else %}
@@ -88,7 +88,7 @@
     type="button"
     data-select="false"
     id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
-    class="flex justify-between {% if loop.index == loop.length %}rounded-b {% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300">
+    class="settings-tabs-mobile-dropdown-btn {% if loop.index == loop.length %}rounded-b {% endif %}">
     {{ plugin["name"] }}
  
   </button>

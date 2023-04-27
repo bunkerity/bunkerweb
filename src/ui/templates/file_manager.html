@@ -19,17 +19,16 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         <li
         data-{{current_endpoint}}-breadcrumb-item
           data-{{current_endpoint}}-back
-          class="mr-2 cursor-pointer text-sm capitalize leading-normal text-gray-700"
+          class="mr-3 cursor-pointer text-sm capitalize leading-normal dark:text-gray-500 text-gray-600"
           aria-current="page"
         >
           <svg
-          class="w-4 hover:brigthness-80"
+          class="w-4.5 h-4.5 hover:brigthness-80"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="w-6 h-6"
         >
           <path
             stroke-linecap="round"
@@ -47,7 +46,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         >
           <button
             type="button"
-            class="dark:text-white dark:opacity-50 text-gray-700 opacity-50 after:float-right after:pl-2 after:text-gray-600 after:content-['/']"
+            class="dark:text-gray-500 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-500 after:content-['/']"
           >
             {{current_endpoint}}
           </button>
@@ -398,7 +397,7 @@ data-{{current_endpoint}}-modal
       >
         <p
         data-{{current_endpoint}}-modal-path-prefix
-          class="mb-0 dark:text-white dark:opacity-75 text-gray-700 opacity-50 text-sm"
+          class="mb-0 dark:text-white/80 text-gray-700/80 text-sm"
         ></p>
         <input
           type="text"
@@ -410,7 +409,7 @@ data-{{current_endpoint}}-modal
         />
         <p
         data-{{current_endpoint}}-modal-path-suffix
-          class="mb-0 dark:text-white dark:opacity-75 text-gray-700 opacity-50 text-sm"
+          class="ml-1 mb-0 dark:text-white/80 text-gray-700/80 text-sm"
         >
           suffix
         </p>

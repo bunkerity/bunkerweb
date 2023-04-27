@@ -1,15 +1,21 @@
 class FolderNav {
   constructor(prefix) {
     this.prefix = prefix;
-    this.breadContainer = document.querySelector(`[data-${this.prefix}-breadcrumb]`);
+    this.breadContainer = document.querySelector(
+      `[data-${this.prefix}-breadcrumb]`
+    );
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
-    this.listContainer = document.querySelector(`[data-${this.prefix}-folders]`);
+    this.listContainer = document.querySelector(
+      `[data-${this.prefix}-folders]`
+    );
     this.els = document.querySelectorAll(`div[data-${this.prefix}-element]`);
     this.files = document.querySelectorAll(
       `div[data-${this.prefix}-element][data-_type='file']`
     );
     this.addFileEl = document.querySelector(`[data-${this.prefix}-add-file]`);
-    this.addFolderEl = document.querySelector(`[data-${this.prefix}-add-folder]`);
+    this.addFolderEl = document.querySelector(
+      `[data-${this.prefix}-add-folder]`
+    );
     this.initSorted();
     this.initNav();
   }
@@ -81,7 +87,9 @@ class FolderNav {
     //remove useless bread
     this.removeBreadElByLvl(+prevLvl);
     const folder = document.querySelector(
-      `div[data-${this.prefix}-element][data-path='${item.getAttribute("data-path")}']`
+      `div[data-${this.prefix}-element][data-path='${item.getAttribute(
+        "data-path"
+      )}']`
     );
     this.updateActions(folder);
   }
@@ -120,7 +128,10 @@ class FolderNav {
       `[data-${this.prefix}-breadcrumb-item]`
     );
     breadcrumbItem.forEach((item) => {
-      if (item.hasAttribute("data-level") && +item.getAttribute("data-level") > lvl)
+      if (
+        item.hasAttribute("data-level") &&
+        +item.getAttribute("data-level") > lvl
+      )
         item.remove();
     });
   }
@@ -160,7 +171,7 @@ class FolderNav {
     //create nested btn el
     const nestedBtnEl = document.createElement("button");
     nestedBtnEl.className =
-      "ml-2 dark:text-white dark:opacity-50 text-gray-700 opacity-50 after:float-right after:pl-2 after:text-gray-600 after:content-['/']";
+      "ml-2 dark:text-gray-500 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-500 after:content-['/']";
     itemEl.appendChild(nestedBtnEl);
     nestedBtnEl.setAttribute("type", "button");
     nestedBtnEl.textContent = name;
@@ -184,7 +195,9 @@ class FolderDropdown {
       //remove when none click
       try {
         if (
-          !e.target.closest("div").hasAttribute(`data-${this.prefix}-action-button`)
+          !e.target
+            .closest("div")
+            .hasAttribute(`data-${this.prefix}-action-button`)
         ) {
           this.hideDropEls();
         }
@@ -192,7 +205,9 @@ class FolderDropdown {
       //show dropdown actions for folders
       try {
         if (
-          e.target.closest("div").hasAttribute(`data-${this.prefix}-action-button`)
+          e.target
+            .closest("div")
+            .hasAttribute(`data-${this.prefix}-action-button`)
         ) {
           const dropEl = e.target
             .closest(`div[data-${this.prefix}-element]`)
@@ -267,15 +282,15 @@ class FolderEditor {
 
   setDarkMode() {
     document.querySelector("html").className.includes("dark")
-      ? this.editor.setTheme("ace/theme/twilight")
-      : this.editor.setTheme("ace/theme/cloud9_day");
+      ? this.editor.setTheme("ace/theme/dracula")
+      : this.editor.setTheme("ace/theme/dawn");
   }
 
   //change theme according to mode
   changeDarkMode(bool) {
     bool
-      ? this.editor.setTheme("ace/theme/twilight")
-      : this.editor.setTheme("ace/theme/cloud9_day");
+      ? this.editor.setTheme("ace/theme/dracula")
+      : this.editor.setTheme("ace/theme/dawn");
   }
 
   readOnlyBool(bool) {
@@ -289,7 +304,9 @@ class FolderModal {
     //container
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
     //add service/file elements
-    this.breadContainer = document.querySelector(`[data-${this.prefix}-breadcrumb]`);
+    this.breadContainer = document.querySelector(
+      `[data-${this.prefix}-breadcrumb]`
+    );
     this.addConfContainer = document.querySelector(
       `[data-${this.prefix}-add-container]`
     );
@@ -299,7 +316,9 @@ class FolderModal {
     this.modalTitle = this.modalEl.querySelector(
       `[data-${this.prefix}-modal-title]`
     );
-    this.modalPath = this.modalEl.querySelector(`[data-${this.prefix}-modal-path]`);
+    this.modalPath = this.modalEl.querySelector(
+      `[data-${this.prefix}-modal-path]`
+    );
     this.modalEditor = this.modalEl.querySelector(
       `[data-${this.prefix}-modal-editor]`
     );
@@ -336,7 +355,9 @@ class FolderModal {
     this.addConfContainer.addEventListener("click", (e) => {
       //add folder
       try {
-        if (e.target.closest("li").hasAttribute(`data-${this.prefix}-add-folder`)) {
+        if (
+          e.target.closest("li").hasAttribute(`data-${this.prefix}-add-folder`)
+        ) {
           this.setModal(
             "new",
             this.getPathFromBread(),
@@ -349,7 +370,9 @@ class FolderModal {
       } catch (err) {}
       //add file
       try {
-        if (e.target.closest("li").hasAttribute(`data-${this.prefix}-add-file`)) {
+        if (
+          e.target.closest("li").hasAttribute(`data-${this.prefix}-add-file`)
+        ) {
           this.setModal(
             "new",
             this.getPathFromBread(),
@@ -368,9 +391,7 @@ class FolderModal {
       //click on file logic
       try {
         if (e.target.closest("div").getAttribute("data-_type") == "file") {
-          const btnEl = e.target
-            .closest("div")
-            .querySelector('button[value]');
+          const btnEl = e.target.closest("div").querySelector("button[value]");
           const [action, path, type, content, name, level] =
             this.getInfoFromActionBtn(btnEl);
           this.setModal(action, path, type, content, name, level);
@@ -414,7 +435,9 @@ class FolderModal {
       //close modal logic
       try {
         if (
-          e.target.closest("button").hasAttribute(`data-${this.prefix}-modal-close`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-modal-close`)
         ) {
           this.closeModal();
         }
@@ -472,7 +495,8 @@ class FolderModal {
   }
 
   getLevelFromBread() {
-    const level = this.breadContainer.lastElementChild.getAttribute("data-level");
+    const level =
+      this.breadContainer.lastElementChild.getAttribute("data-level");
     return level;
   }
   //set all needed data from btn action and folder info
