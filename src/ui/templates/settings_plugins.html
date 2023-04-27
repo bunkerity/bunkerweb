@@ -171,7 +171,7 @@ data-plugin-item="{{plugin['id']}}"
       {% if value["type"] == "check" %}
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0 z-10">
         <input id="{{setting}}" name="{{setting}}"
-        data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}} {% endif %}"
+        data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}}{% endif %}"
         data-default-value="{{global_config[setting]['value']}}" {% if
         setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
         != 'default' %} disabled {% endif %} 
@@ -196,11 +196,7 @@ data-plugin-item="{{plugin['id']}}"
         value="{% if
           setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
           != 'default' %}{{global_config[setting]['value']}}{% else %}no{% endif %}" />
-        <input type="hidden" name="{{setting}}" value="{% if
-          setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-          != 'default' %}{{global_config[setting]['value']}}{% else %}no{% endif %}" data-default-value="{% if
-            setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-            != 'default' %}{{global_config[setting]['value']}}{% else %}no{% endif %}" data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}} {% endif %}" />
+
         <svg
         data-checkbox-handler="{{value['id']}}"
           class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
@@ -403,7 +399,6 @@ data-plugin-item="{{plugin['id']}}"
         dark:disabled:border-gray-800 disabled:text-gray-700
         dark:disabled:text-gray-300" type="checkbox" data-pattern="{{value['regex']|safe}}"
         value="{{value['default']}}" />
-        <input type="hidden" name="{{setting}}_SCHEMA" value="no" data-default-value="no" data-default-method="default" />
         <svg
         data-checkbox-handler="{{value['id']}}"
           class="pointer-events-none absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"

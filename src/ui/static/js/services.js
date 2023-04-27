@@ -144,18 +144,18 @@ class ServiceModal {
 
       //for all other settings values
       const defaultMethod = inp.getAttribute("data-default-method");
-      const defaultVal = inp.getAttribute("data-default-value") || "";
+      const defaultVal = inp.getAttribute("data-default-value");
 
       //SET VALUE
       if (inp.getAttribute("type") === "checkbox") {
         inp.checked = defaultVal === "yes" ? true : false;
         inp.setAttribute("value", defaultVal);
-        inp.value = defaultVal;
         inp.setAttribute("data-method", defaultMethod);
       }
 
       if (inp.getAttribute("type") !== "checkbox") {
         inp.setAttribute("value", defaultVal);
+        inp.value = defaultVal;
         inp.setAttribute("data-method", defaultMethod);
       }
 
@@ -302,14 +302,6 @@ class ServiceModal {
             inp.checked = value === "yes" ? true : false;
             inp.setAttribute("value", value);
             inp.setAttribute("data-method", method);
-
-            if (inp.hasAttribute("disabled")) {
-              const hidden_inp = inp
-                .closest("div[data-checkbox-handler]")
-                .querySelector("input[type='hidden']");
-              hidden_inp.setAttribute("value", value);
-              hidden_inp.setAttribute("data-method", method);
-            }
           }
           //for select
           if (inp.tagName === "SELECT") {
@@ -691,16 +683,15 @@ class Multiple {
         //for settings input
         if (inp.getAttribute("type") === "checkbox") {
           inp.checked = value === "yes" ? true : false;
-          if (inp.hasAttribute("disabled")) {
-            const hidden_inp = inp
-              .closest("div[data-checkbox-handler]")
-              .querySelector("input[type='hidden']");
-            hidden_inp.setAttribute("value", value);
-          }
+          inp.setAttribute("value", value);
+          inp.setAttribute("data-method", method);
         }
 
-        inp.value = value;
-        inp.setAttribute("data-method", method);
+        if (inp.getAttribute("type") !== "checkbox") {
+          inp.setAttribute("value", value);
+          inp.value = value;
+          inp.setAttribute("data-method", method);
+        }
       });
     } catch (err) {}
     //update select
