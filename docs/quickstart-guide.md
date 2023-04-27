@@ -1725,8 +1725,6 @@ Some integrations offer a more convenient way of applying configurations such as
 
 ## PHP
 
-TODO
-
 !!! warning "Support is in beta"
 	At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
 
@@ -1744,88 +1742,96 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 === "Docker"
 
     When using the [Docker integration](/1.4/integrations/#docker), to support PHP applications, you will need to :
-    
-	- Copy your application files into the `www` subfolder of the `bw-data` volume of BunkerWeb
-	- Set up a PHP-FPM container for your application and mount the `bw-data/www` folder
+
+    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
+    - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
-	Create the `bw-data/www` folder :
-	```shell
-	mkdir -p bw-data/www
-	```
+    We will assume that your PHP files are located into a folder named `www`. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
 
-    You can create a Docker network if it's not already created :
     ```shell
-    docker network create bw-net
+    chown -R 33:101 ./www && \
+    find ./www -type f -exec chmod 0640 {} \; && \
+    find ./www -type d -exec chmod 0750 {} \;
     ```
 
-	Now you can copy your application files to the `bw-data/www` folder. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
-	```shell
-	chown -R 101:101 ./bw-data && \
-	chown -R 33:101 ./bw-data/www && \
-    find ./bw-data/www -type f -exec chmod 0640 {} \; && \
-    find ./bw-data/www -type d -exec chmod 0750 {} \;
-	```
+    You can now run BunkerWeb, configure it for your PHP application and also run the PHP apps :
 
-	Let's create the PHP-FPM container, give it a name, connect it to the network and mount the application files :
-    ```shell
-    docker run -d \
-       	   --name myphp \
-       	   --network bw-net \
-       	   -v "${PWD}/bw-data/www:/app" \
-       	   php:fpm
-    ```
-
-    You can now run BunkerWeb and configure it for your PHP application :
-    ```shell
-    docker run -d \
-           --name mybunker \
-    	   --network bw-net \
-    	   -p 80:8080 \
-    	   -p 443:8443 \
-    	   -v "${PWD}/bw-data:/data" \
-    	   -e SERVER_NAME=www.example.com \
-		   -e AUTO_LETS_ENCRYPT=yes \
-		   -e REMOTE_PHP=myphp \
-		   -e REMOTE_PHP_PATH=/app \
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
-
-	Here is the docker-compose equivalent :
     ```yaml
-    version: '3'
+    version: "3.5"
 
     services:
 
-      mybunker:
-    	image: bunkerity/bunkerweb:1.5.0-beta
-    	ports:
-    	  - 80:8080
-    	  - 443:8443
-    	volumes:
-    	  - ./bw-data:/data
-    	environment:
-    	  - SERVER_NAME=www.example.com
-      	  - AUTO_LETS_ENCRYPT=yes
-      	  - REMOTE_PHP=myphp
-      	  - REMOTE_PHP_PATH=/app
-    	networks:
-    	  - bw-net
+      myapp:
+        image: php:fpm
+        volumes:
+          - ./www:/app
+        networks:
+          - bw-services
 
-      myphp:
-    	image: php:fpm
-		volumes:
-		  - ./bw-data/www:/app
-    	networks:
-    	  - bw-net
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          - 80:8080
+          - 443:8443
+        labels:
+          - "bunkerweb.INSTANCE"
+        environment:
+          - SERVER_NAME=www.example.com
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - REMOTE_PHP=myapp
+          - REMOTE_PHP_PATH=/app
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        volumes:
+          - bw-data:/data
+        environment:
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+        networks:
+          - bw-docker
+
+    volumes:
+      bw-data:
 
     networks:
-      bw-net:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
     ```
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/integrations/#docker-autoconf), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP application and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM container.
+    When using the [Docker autoconfintegration](/1.4/integrations/#docker-autoconf), to support PHP applications, you will need to :
+
+    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
+    - Set up a PHP-FPM container for your application and mount the folder containing PHP files
+    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
+
+    Since the Docker autoconf implies using the [multisite mode](/1.5.0-beta/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is 
 
     First of all, create the application folder (e.g. `myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
