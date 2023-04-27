@@ -14,6 +14,8 @@ BunkerWeb offers many security features that you can configure with [settings](/
 
 ### Deny status code
 
+STREAM support :warning:
+
 The first thing to define is the kind of action to do when a client access is denied. You can control the action with the `DENY_HTTP_STATUS` setting which allows the following values :
 
 - `403` : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)
@@ -21,7 +23,11 @@ The first thing to define is the kind of action to do when a client access is de
 
 The default value is `403` and we suggest you set it to `444` only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.
 
+When using stream mode, value is ignored and always set to `444` with effect of closing the connection.
+
 ### Default server
+
+STREAM support :x:
 
 In the HTTP protocol, the Host header is used to determine which server the client wants to send the request to. That header is facultative and may be missing from the request or can be set as an unknown value. This is a common case, a lot of bots are scanning the Internet and are trying to exploit services or simply doing some fingerprinting.
 
@@ -29,25 +35,37 @@ You can disable any request containing undefined or unknown Host value by settin
 
 ### Allowed methods
 
+STREAM support :x:
+
 You can control the allowed HTTP methods by listing them (separated with "|") in the `ALLOWED_METHODS` setting (default : `GET|POST|HEAD`). Clients sending a method which is not listed will get a "405 - Method Not Allowed".
 
 ### Max sizes
+
+STREAM support :x:
 
 You can control the maximum body size with the `MAX_CLIENT_SIZE` setting (default : `10m`). See [here](https://nginx.org/en/docs/syntax.html) for accepted values. You can use the special value `0` to allow a body of infinite size (not recommended).
 
 ### Serve files
 
+STREAM support :x:
+
 To disable serving files from the www folder, you can set `SERVE_FILES` to `no` (default : `yes`). The value `no` is recommended if you use BunkerWeb as a reverse proxy.
 
 ### Headers
+
+STREAM support :x:
 
 Headers are very important when it comes to HTTP security. While some of them might be too verbose, others' verbosity will need to be increased, especially on the client-side.
 
 #### Remove headers
 
+STREAM support :x:
+
 You can automatically remove verbose headers in the HTTP responses by using the `REMOVE_HEADERS` setting (default : `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
 
 #### Cookies
+
+STREAM support :x:
 
 When it comes to cookies security, we can use the following flags :
 
@@ -60,6 +78,8 @@ Cookie flags can be overridden with values of your choice by using the `COOKIE_F
 The Secure flag can be automatically added if HTTPS is used by using the `COOKIE_AUTO_SECURE_FLAG` setting (default : `yes`). The value `no` is not recommended unless you know what you're doing.
 
 #### Security headers
+
+STREAM support :x:
 
 Various security headers are available and most of them can be set using BunkerWeb settings. Here is the list of headers, the corresponding setting and default value :
 
@@ -76,6 +96,8 @@ Various security headers are available and most of them can be set using BunkerW
 
 #### CORS
 
+STREAM support :x:
+
 [Cross-Origin Resource Sharing](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) lets you manage how your service can be contacted from different origins. Please note that you will have to allow the `OPTIONS` HTTP method using the `ALLOWED_METHODS` if you want to enable it (more info [here](https://docs.bunkerweb.io/1.4/security-tuning/#allowed-methods)). Here is the list of settings related to CORS :
 
 |        Setting         |                                      Default                                       | Context |Multiple|                   Description                    |
@@ -88,7 +110,7 @@ Various security headers are available and most of them can be set using BunkerW
 |`CORS_ALLOW_METHODS`    |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header. |
 |`CORS_ALLOW_HEADERS`    |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header. |
 
-## HTTPS
+## HTTPS / SSL/TLS
 
 Besides the HTTPS configuration, the following settings related to HTTPS can be set :
 
@@ -100,7 +122,11 @@ Besides the HTTPS configuration, the following settings related to HTTPS can be 
 |            `HTTP2`            |       `yes`       | When set to `yes`, will enable HTTP2 protocol support when using HTTPS.                                      |
 |         `LISTEN_HTTP`         |       `yes`       | When set to `no`, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.    |
 
+When using stream, the `SSL_PROTOCOLS` can be used which takes the same value as the `HTTPS_PROTOCOLS` one.
+
 ### Let's Encrypt
+
+STREAM support :white_check_mark:
 
 BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal. This is the easiest way of getting HTTPS working out of the box for public-facing web applications. Please note that you will need to set up proper DNS A record(s) for each of your domains pointing to your public IP(s) where BunkerWeb is accessible.
 
@@ -112,7 +138,11 @@ Here is the list of related settings :
 |    `EMAIL_LETS_ENCRYPT`    | `contact@{FIRST_SERVER}` | Email to use when generating certificates. Let's Encrypt will send notifications to that email like certificate expiration.                                        |
 | `USE_LETS_ENCRYPT_STAGING` |           `no`           | When set to `yes`, the staging server of Let's Encrypt will be used instead of the production one. Useful when doing tests to avoid being "blocked" due to limits. |
 
+Full Let's Encrypt automation is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
+
 ### Custom certificate
+
+STREAM support :white_check_mark:
 
 If you want to use your own certificates, here is the list of related settings :
 
@@ -124,7 +154,11 @@ If you want to use your own certificates, here is the list of related settings :
 
 When `USE_CUSTOM_HTTPS` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_HTTPS_CERT` is modified and will reload NGINX if that's the case.
 
+When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
+
 ### Self-signed
+
+STREAM support :white_check_mark:
 
 If you want to quickly test HTTPS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related settings :
 
@@ -134,7 +168,11 @@ If you want to quickly test HTTPS for staging/dev environment you can configure 
 |  `SELF_SIGNED_SSL_EXPIRY`  |         `365`          | Number of days for the certificate expiration (**-days** value used with **openssl**).                                     |
 |   `SELF_SIGNED_SSL_SUBJ`   | `/CN=www.example.com/` | Certificate subject to use (**-subj** value used with **openssl**).                                                        |
 
+When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
+
 ## ModSecurity
+
+STREAM support :x:
 
 ModSecurity is integrated and enabled by default alongside the OWASP Core Rule Set within BunkerWeb. Here is the list of related settings :
 
@@ -172,6 +210,8 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 
 ## Bad behavior
 
+STREAM support :white_check_mark:
+
 When attackers search for and/or exploit vulnerabilities they might generate some "suspicious" HTTP status codes that a "regular" user won’t generate within a period of time. If we detect that kind of behavior we can ban the offending IP address and force the attacker to come up with a new one.
 
 That kind of security measure is implemented and enabled by default in BunkerWeb and is called "Bad behavior". Here is the list of the related settings :
@@ -186,7 +226,11 @@ That kind of security measure is implemented and enabled by default in BunkerWeb
 
 In other words, with the default values, if a client generates more than `10` status codes from the list `400 401 403 404 405 429 444` within `60` seconds their IP address will be banned for `86400` seconds.
 
+When using stream mode, only the `444` status code will count as "bad".
+
 ## Antibot
+
+STREAM support :x:
 
 Attackers will certainly use automated tools to exploit/find some vulnerabilities in your web applications. One countermeasure is to challenge the users to detect if they look like a bot. If the challenge is solved, we consider the client as "legitimate" and they can access the web application.
 
@@ -217,6 +261,8 @@ You can configure blacklisting, whitelisting and greylisting at the same time. I
 
 ### Blacklisting
 
+STREAM support :warning:
+
 You can use the following settings to set up blacklisting :
 
 |           Setting           |                                                            Default                                                             | Description                                                                                   |
@@ -244,7 +290,11 @@ You can use the following settings to set up blacklisting :
 |`BLACKLIST_IGNORE_URI`            |                                                                                                                              |List of URI, separated with spaces, to ignore in the blacklist.                                 |
 |`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
+When using stream mode, only IP, RDNS and ASN checks will be done.
+
 ### Greylisting
+
+STREAM support :warning:
 
 You can use the following settings to set up greylisting :
 
@@ -262,7 +312,11 @@ You can use the following settings to set up greylisting :
 |       `GREYLIST_URI`       |                                                                                                                                | List of requests URI to greylist.                                                            |
 |    `GREYLIST_URI_URLS`     |                                                                                                                                | List of URLs containing request URI to greylist.                                             |
 
+When using stream mode, only IP, RDNS and ASN checks will be done.
+
 ### Whitelisting
+
+STREAM support :warning:
 
 You can use the following settings to set up whitelisting :
 
@@ -279,16 +333,21 @@ You can use the following settings to set up whitelisting :
 | `WHITELIST_USER_AGENT_URLS` |                                                                                                                                                                                              | List of URLs containing User-Agent to whitelist.                                                                         |
 |       `WHITELIST_URI`       |                                                                                                                                                                                              | List of requests URI to whitelist.                                                                                       |
 |    `WHITELIST_URI_URLS`     |                                                                                                                                                                                              | List of URLs containing request(s) URI to whitelist.                                                                     |
-## ReverseScan
 
-ReverseScan" is a feature designed to detect open ports by establishing TCP connections with clients' IP addresses.
+When using stream mode, only IP, RDNS and ASN checks will be done.
+
+## Reverse scan
+
+STREAM support :white_check_mark:
+
+Reverse scan is a feature designed to detect open ports by establishing TCP connections with clients' IP addresses.
 Consider adding this feature if you want to detect possible open proxies or connections from servers.
 
-We provide a list of suspicious ports by default, but it can be modified to fit your needs.Be mindful, Adding too many ports to the list can significantly slow down clients' connections due to the caching process.If a listed port is open, the client's access will be denied.
+We provide a list of suspicious ports by default but it can be modified to fit your needs. Be mindful, adding too many ports to the list can significantly slow down clients' connections due to the network checks. If a listed port is open, the client's access will be denied.
 
 Please be aware, this feature is new and further improvements will be added soon.
 
-Here is the list of settings related to ReverseScan:
+Here is the list of settings related to reverse scan :
 
 |   Setting    |                                   Default                                    | Description                                    |
 | :----------: | :--------------------------------------------------------------------------: | :--------------------------------------------- |
@@ -297,6 +356,8 @@ Here is the list of settings related to ReverseScan:
 | `REVERSE_SCAN_TIMEOUT` | `500`                                                                    | Specify the maximum timeout (in ms) when scanning a port.                |
 
 ## BunkerNet
+
+STREAM support :white_check_mark:
 
 BunkerNet is a crowdsourced database of malicious requests shared between all BunkerWeb instances over the world.
 
@@ -307,6 +368,8 @@ At the moment, that feature should be considered in "beta". We only extract mali
 The setting used to enable or disable BunkerNet is `USE_BUNKERNET` (default : `yes`).
 
 ## DNSBL
+
+STREAM support :white_check_mark:
 
 DNSBL or "DNS BlackList" is an external list of malicious IPs that you query using the DNS protocol. Automatic querying of that kind of blacklist is supported by BunkerWeb. If a remote DNSBL server of your choice says that the IP address of the client is in the blacklist, it will be banned.
 
@@ -330,6 +393,8 @@ In both cases (connections or requests) if the limit is reached, the client will
 
 ### Connections
 
+STREAM support :white_check_mark:
+
 The following settings are related to the Limiting connections feature :
 
 |        Setting         | Default | Description                                                                                |
@@ -337,8 +402,11 @@ The following settings are related to the Limiting connections feature :
 |    `USE_LIMIT_CONN`    |  `yes`  | When set to `yes`, will limit the maximum number of concurrent connections for a given IP. |
 | `LIMIT_CONN_MAX_HTTP1` |  `10`   | Maximum number of concurrent connections when using HTTP1 protocol.                        |
 | `LIMIT_CONN_MAX_HTTP2` |  `100`  | Maximum number of concurrent streams when using HTTP2 protocol.                            |
+| `LIMIT_CONN_MAX_STREAM`|  `10`  | Maximum number of connections per IP when using stream.                                     |
 
 ### Requests
+
+STREAM support :x:
 
 The following settings are related to the Limiting requests feature :
 
@@ -353,6 +421,8 @@ Please note that you can add different rates for different URLs by adding a numb
 Another important thing to note is that `LIMIT_REQ_URL` accepts LUA patterns.
 
 ## Country
+
+STREAM support :white_check_mark:
 
 The country security feature allows you to apply policy based on the country of the IP address of clients :
 
@@ -371,6 +441,9 @@ Using both country blacklist and whitelist at the same time makes no sense. If y
 ## Authentication
 
 ### Auth basic
+
+STREAM support :x:
+
 You can quickly protect sensitive resources like the admin area for example, by requiring HTTP basic authentication. Here is the list of related settings :
 
 |          Setting          |      Default      | Description                                                                                  |
