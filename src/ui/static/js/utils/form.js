@@ -24,6 +24,14 @@ class Checkbox {
           checkboxEl.checked
             ? checkboxEl.setAttribute("value", "yes")
             : checkboxEl.setAttribute("value", "no");
+
+          //set custom input hidden value
+          const newValue = checkboxEl.getAttribute("value");
+          const inpServ = checkboxEl
+            .closest("[data-checkbox-handler]")
+            .querySelector('input[type="hidden"]');
+          inpServ.setAttribute("value", newValue);
+          inpServ.value = newValue;
         }
       } catch (err) {}
     });
