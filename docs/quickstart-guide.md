@@ -1737,8 +1737,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 - `LOCAL_PHP` : Path to the local socket file of PHP-FPM instance.
 - `LOCAL_PHP_PATH` : Root folder containing files in the local PHP-FPM instance.
 
-### Single application
-
 === "Docker"
 
     When using the [Docker integration](/1.4/integrations/#docker), to support PHP applications, you will need to :
@@ -1747,7 +1745,21 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
-    We will assume that your PHP files are located into a folder named `www`. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
+    If you enable the [multisite mode](/1.5.0-beta/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+
+    ```
+    www
+    ├── app1.example.com
+    │   └── index.php
+    ├── app2.example.com
+    │   └── index.php
+    └── app3.example.com
+        └── index.php
+
+    3 directories, 3 files
+    ```
+
+    We will assume that your PHP apps are located into a folder named `www`. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
 
     ```shell
     chown -R 33:101 ./www && \
@@ -1762,10 +1774,24 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
 
-      myapp:
+      myapp1:
         image: php:fpm
         volumes:
-          - ./www:/app
+          - ./www/app1.example.com:/app
+        networks:
+          - bw-services
+
+      myapp2:
+        image: php:fpm
+        volumes:
+          - ./www/app2.example.com:/app
+        networks:
+          - bw-services
+
+      myapp3:
+        image: php:fpm
+        volumes:
+          - ./www/app3.example.com:/app
         networks:
           - bw-services
 
@@ -1777,7 +1803,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         labels:
           - "bunkerweb.INSTANCE"
         environment:
-          - SERVER_NAME=www.example.com
+          - SERVER_NAME=app1.example.com app2.example.com
+          - MULTISITE=yes
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
           - REMOTE_PHP=myapp
           - REMOTE_PHP_PATH=/app
@@ -1825,77 +1852,162 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Docker autoconf"
 
-    When using the [Docker autoconfintegration](/1.4/integrations/#docker-autoconf), to support PHP applications, you will need to :
+    !!! info "Multisite mode enabled"
+        The [Docker autoconf integration](/1.4/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protection multiple ones.
+
+    When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Docker autoconf implies using the [multisite mode](/1.5.0-beta/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is 
+    Since the Docker autoconf implies using the [multisite mode](/1.5.0-beta/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
-    First of all, create the application folder (e.g. `myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
+    ```
+    www
+    ├── app1.example.com
+    │   └── index.php
+    ├── app2.example.com
+    │   └── index.php
+    └── app3.example.com
+        └── index.php
+
+    3 directories, 3 files
+    ```
+
+    Once the folders are created, copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
+
     ```shell
-	chown -R 33:101 ./myapp && \
-    find ./myapp -type f -exec chmod 0640 {} \; && \
-    find ./myapp -type d -exec chmod 0750 {} \;
-	```
+    chown -R 33:101 ./www && \
+    find ./www -type f -exec chmod 0640 {} \; && \
+    find ./www -type d -exec chmod 0750 {} \;
+    ```
 	
-	When you create the BunkerWeb container, simply mount the folder containing your PHP application to a specific endpoint like `/app` :
-	```shell
-	docker run -d \
-	       ...
-		   -v "${PWD}/myapp:/app" \
-		   ...
-		   bunkerity/bunkerweb:1.5.0-beta
-	```
-	
-	Once BunkerWeb and autoconf are ready, you will be able to create the PHP-FPM container, mount the application folder inside the container and configure it using specific labels :
-	```shell
-	docker run -d \
-	       --name myphp \
-	       --network bw-services \
-	       -v "${PWD}/myapp:/app" \
-	       -l bunkerweb.SERVER_NAME=www.example.com \
-	       -l bunkerweb.AUTO_LETS_ENCRYPT=yes \
-		   -l bunkerweb.ROOT_FOLDER=/app \
-	       -l bunkerweb.REMOTE_PHP=myphp \
-	       -l bunkerweb.REMOTE_PHP_PATH=/app \
-	       php:fpm
-	```
+    When you start the BunkerWeb autoconf stack, mount the `www` folder into `/var/www/html` for the BunkerWeb container :
 
-	Here is the docker-compose equivalent :
-	```yaml
-	version: '3'
+    ```yaml
+    version: '3.5'
 
-	services:
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        volumes:
+          - ./www:/var/www/html
+        labels:
+          - "bunkerweb.INSTANCE"
+        environment:
+          - MULTISITE=yes
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+        networks:
+          - bw-universe
+          - bw-services
 
-  	  myphp:
-    	image: php:fpm
-    	volumes:
-      	  - ./myapp:/app
-    	networks:
-      	  bw-services:
-        	aliases:
-            	- myphp
-    	labels:
-      	  - bunkerweb.SERVER_NAME=www.example.com
-		  - bunkerweb.AUTO_LETS_ENCRYPT=yes
-		  - bunkerweb.ROOT_FOLDER=/app
-      	  - bunkerweb.REMOTE_PHP=myphp
-      	  - bunkerweb.REMOTE_PHP_PATH=/app
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
 
-	networks:
-	  bw-services:
-	    external:
-	      name: bw-services
-	```
+      bw-docker:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+        networks:
+          - bw-docker
+
+      bw-db:
+        image: mariadb:10.10
+        environment:
+          - MYSQL_RANDOM_ROOT_PASSWORD=yes
+          - MYSQL_DATABASE=db
+          - MYSQL_USER=bunkerweb
+          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+        volumes:
+          - bw-data:/var/lib/mysql
+        networks:
+          - bw-docker
+
+    volumes:
+      bw-data:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
+    ```
+
+    You can now create your PHP-FPM container, mount the correct subfolder and use labels to configure BunkerWeb :
+
+    ```yaml
+    version: '3.5'
+    services:
+      myapp1:
+          image: php:fpm
+          volumes:
+            - ./www/app1.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp1
+          labels:
+            - "bunkerweb.SERVER_NAME=app1.example.com"
+            - "bunkerweb.REMOTE_PHP=myapp1"
+            - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+      myapp2:
+          image: php:fpm
+          volumes:
+            - ./www/app2.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp2
+          labels:
+            - "bunkerweb.SERVER_NAME=app2.example.com"
+            - "bunkerweb.REMOTE_PHP=myapp2"
+            - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+      myapp3:
+          image: php:fpm
+          volumes:
+            - ./www/app3.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp3
+          labels:
+            - "bunkerweb.SERVER_NAME=app3.example.com"
+            - "bunkerweb.REMOTE_PHP=myapp3"
+            - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+    networks:
+      bw-services:
+        external:
+          name: bw-services
+    ```
 
 === "Swarm"
 
-	!!! info "Shared volume"
-		Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances.
+    !!! info "Shared volume"
+        Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
 
-    When using the [Docker Swarm integration](/integrations/#swarm), your PHP files must not be mounted into the `bw-data/www` folder. Instead, you will need to create a specific folder containing your PHP application and mount it both on the BunkerWeb container (outside the `/data` endpoint) and your PHP-FPM container. As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
+    As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
 
     First of all, create the application folder (e.g. `/shared/myapp`), copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33) is the owner of the files and folders :
     ```shell
