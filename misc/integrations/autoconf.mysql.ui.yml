@@ -76,18 +76,17 @@ services:
       - DATABASE_URI=mysql+pymysql://bunkerweb:changeme@bw-db:3306/db
       - DOCKER_HOST=tcp://bw-docker:2375
       - AUTOCONF_MODE=yes
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=admin
-      - ABSOLUTE_URI=http://www.example.com/admin
+      - ADMIN_USERNAME=changeme
+      - ADMIN_PASSWORD=changeme
+      - ABSOLUTE_URI=http://www.example.com/changeme/
     labels:
       - "bunkerweb.SERVER_NAME=www.example.com"
       - "bunkerweb.USE_UI=yes"
       - "bunkerweb.USE_REVERSE_PROXY=yes"
-      - "bunkerweb.REVERSE_PROXY_URL=/admin"
+      - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-      - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /admin"
-      - "bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 413 429 500 501 502 503 504"
-      - 'bunkerweb.CUSTOM_CONF_MODSEC_CRS_remove_ui_false_positives=SecRule REQUEST_FILENAME "@rx /global_config$$" "id:999,ctl:ruleRemoveByTag=platform-pgsql,nolog"'
+      - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
+      - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
 
 volumes:
   bw-data:

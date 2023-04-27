@@ -17,13 +17,11 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - www.example.com_USE_UI=yes
-      - www.example.com_SERVE_FILES=no
       - www.example.com_USE_REVERSE_PROXY=yes
       - www.example.com_REVERSE_PROXY_URL=/admin/
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin
-      - www.example.com_INTERCEPTED_ERROR_CODES=400 401 405 413 429 500 501 502 503 504
-      - www.example.com_CUSTOM_CONF_MODSEC_CRS_config=SecRule REQUEST_FILENAME "@rx /global_config$$" "id:999,ctl:ruleRemoveByTag=platform-pgsql,nolog"
+      - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
     networks:
       - bw-universe
       - bw-services
@@ -58,7 +56,7 @@ services:
       - DOCKER_HOST=tcp://bw-docker:2375
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the admin user
-      - ABSOLUTE_URI=http://www.example.com/changeme
+      - ABSOLUTE_URI=http://www.example.com/changeme/
     networks:
       - bw-universe
       - bw-docker

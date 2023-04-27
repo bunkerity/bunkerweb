@@ -90,9 +90,9 @@ services:
     environment:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
       - DOCKER_HOST=tcp://bw-docker:2375
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the admin user
-      - ABSOLUTE_URI=http://www.example.com/admin
+      - ADMIN_USERNAME=changeme
+      - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
+      - ABSOLUTE_URI=http://www.example.com/changeme/
     networks:
       - bw-universe
       - bw-docker
@@ -101,10 +101,10 @@ services:
         - bunkerweb.SERVER_NAME=www.example.com
         - bunkerweb.USE_UI=yes
         - bunkerweb.USE_REVERSE_PROXY=yes
-        - bunkerweb.REVERSE_PROXY_URL=/admin
+        - bunkerweb.REVERSE_PROXY_URL=/changeme/
         - bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000
-        - bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /admin
-        - bunkerweb.INTERCEPTED_ERROR_CODES=400 401 405 413 429 500 501 502 503 504
+        - bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+        - bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no
 
 volumes:
   bw-data:

@@ -176,6 +176,7 @@ class Config:
                     "name": "General",
                     "description": "The general settings for the server",
                     "version": "0.1",
+                    "stream": "partial",
                     "external": False,
                     "method": "manual",
                     "page": False,

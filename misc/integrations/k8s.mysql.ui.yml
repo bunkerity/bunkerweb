@@ -290,11 +290,11 @@ spec:
           imagePullPolicy: Always
           env:
             - name: ADMIN_USERNAME
-              value: "admin"
+              value: "changeme"
             - name: "ADMIN_PASSWORD"
               value: "changeme"
             - name: "ABSOLUTE_URI"
-              value: "http://www.example.com/admin/"
+              value: "http://www.example.com/changeme/"
             - name: KUBERNETES_MODE
               value: "YES"
             - name: "DATABASE_URI"
@@ -370,13 +370,14 @@ metadata:
   name: ingress
   annotations:
     bunkerweb.io/www.example.com_USE_UI: "yes"
-    bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /admin"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /changeme"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
 spec:
   rules:
     - host: www.example.com
       http:
         paths:
-          - path: /admin/
+          - path: /changeme/
             pathType: Prefix
             backend:
               service:

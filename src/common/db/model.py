@@ -27,7 +27,7 @@ CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "modsec",
     "modsec_crs",
     "stream",
-    "stream_http",
+    "server_stream",
     name="custom_configs_types_enum",
 )
 LOG_LEVELS_ENUM = Enum(
@@ -60,6 +60,7 @@ class Plugins(Base):
     name = Column(String(128), nullable=False)
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
+    stream = Column(String(16), nullable=False)
     external = Column(Boolean, default=False, nullable=False)
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)

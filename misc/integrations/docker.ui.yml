@@ -14,10 +14,10 @@ services:
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - www.example.com_USE_UI=yes
       - www.example.com_USE_REVERSE_PROXY=yes
-      - www.example.com_REVERSE_PROXY_URL=/admin
+      - www.example.com_REVERSE_PROXY_URL=/changeme/
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /admin
-      - www.example.com_INTERCEPTED_ERROR_CODES=400 401 405 413 429 500 501 502 503 504
+      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+      - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
     networks:
       - bw-universe
       - bw-services
@@ -52,9 +52,9 @@ services:
       - bw-data:/data
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=admin
-      - ABSOLUTE_URI=http://www.example.com/admin
+      - ADMIN_USERNAME=changeme
+      - ADMIN_PASSWORD=changeme
+      - ABSOLUTE_URI=http://www.example.com/changeme/
     networks:
       - bw-universe
       - bw-docker
