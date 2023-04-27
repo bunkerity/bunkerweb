@@ -82,25 +82,14 @@ class Tabs {
     //reset desktop style
     const tabsDesktop = container.querySelectorAll("button[data-tab-handler]");
     tabsDesktop.forEach((tab) => {
-      tab.classList.remove("brightness-90", "z-[1001]");
-      tab.classList.add("z-1000");
+      tab.classList.remove("active");
     });
     //reset mobile style
-    const tabsMobile = container.querySelectorAll("button[data-tab-handler-mobile]");
+    const tabsMobile = container.querySelectorAll(
+      "button[data-tab-handler-mobile]"
+    );
     tabsMobile.forEach((tab) => {
-      tab.classList.add(
-        "bg-white",
-        "dark:bg-slate-700",
-        "text-gray-700",
-        "z-1000"
-      );
-      tab.classList.remove(
-        "dark:bg-primary",
-        "bg-primary",
-        "bg-primary",
-        "text-gray-300",
-        "text-gray-300"
-      );
+      tab.classList.remove("active");
     });
   }
 
@@ -109,18 +98,13 @@ class Tabs {
     const tabDesktop = container.querySelector(
       `button[data-tab-handler='${tabAtt}']`
     );
-    tabDesktop.classList.add("brightness-90", "z-[1001]");
+    tabDesktop.classList.add("active");
 
     //mobile case
     const tabMobile = container.querySelector(
       `button[data-tab-handler-mobile='${tabAtt}']`
     );
-    tabMobile.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
-    tabMobile.classList.remove(
-      "bg-white",
-      "dark:bg-slate-700",
-      "text-gray-700"
-    );
+    tabMobile.classList.add("active");
   }
 
   hideAllSettings(container) {
@@ -246,7 +230,9 @@ class FilterSettings {
     const settingContainer = this.container
       .querySelector(`[data-plugin-item="${tabName}"]`)
       .querySelector(`[data-plugin-settings]`);
-    const settings = settingContainer.querySelectorAll("[data-setting-container]");
+    const settings = settingContainer.querySelectorAll(
+      "[data-setting-container]"
+    );
     return settings;
   }
 }
