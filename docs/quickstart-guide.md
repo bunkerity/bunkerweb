@@ -1106,21 +1106,335 @@ REAL_IP_HEADER=proxy_protocol
 
     Don't forget to restart the BunkerWeb service once it's done.
 
-## Generic UDP/TCP (stream)
+## Protect UDP/TCP applications
 
-TODO
+!!! warning "Feature is in beta"
+		This feature is not production-ready. Feel free to test it and report us any bug using [issues]() in the GitHub repository.
+
+BunkerWeb can also act as **generic UDP/TCP reverse proxy** : you can protect any network-based applications working at least on layer 4 of the OSI model. Behind the hood, it leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX instead of using the "classical" http one.
+
+Please note that not all settings and security features are available when using the stream module. You will find more info about that in the [security tuning](/1.5.0-beta/security-tuning/) and [settings](/1.5.0-beta/settings/) sections of the documentation.
+
+Configuration for a basic reverse proxy is very similar to the HTTP one because it uses the same `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:4242` settings. Even the settings used when BunkerWeb is [behind a Load Balancer](#behind-load-balancer-or-reverse-proxy) are the same (but for obvious reasons, only **PROXY protocol** is supported).
+
+On top of that, the following specific settings are used :
+
+- `SERVER_TYPE=stream` : activate `stream` mode (generic UDP/TCP) instead of `http` one (which is the default)
+- `LISTEN_STREAM_PORT=4242` : the listening "plain" (without SSL/TLS) port that BunkerWeb will listen on
+- `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
+- `USE_UDP=no` : listen for and forward UDP packets instead of TCP
+
+For complete list of settings regarding `stream` mode, please refer to the [settings](/1.5.0-beta/settings/) section of the documentation.
+
+=== "Docker"
+
+    When using Docker integration, the easiest way of protecting existing network applications is to add the services in the `bw-services` network :
+
+    ```yaml
+    version: "3.5"
+
+    services:
+
+      myapp1:
+        image: istio/tcp-echo-server:1.2
+        command: [ "9000", "app1" ]
+        networks:
+          - bw-services
+
+      myapp2:
+        image: istio/tcp-echo-server:1.2
+        command: [ "9000", "app2" ]
+        networks:
+          - bw-services
+
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          - 80:8080 # Keep it if you want to use Let's Encrypt automation
+          - 10000:10000 # app1
+          - 20000:20000 # app2
+        labels:
+          - "bunkerweb.INSTANCE"
+        environment:
+          - SERVER_NAME=app1.example.com app2.example.com
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - MULTISITE=yes
+          - USE_REVERSE_PROXY=yes # Will be applied to all services
+          - SERVER_TYPE=stream # Will be applied to all services
+          - app1.example.com_REVERSE_PROXY_HOST=myapp1:9000
+          - app1.example.com_LISTEN_STREAM_PORT=10000
+          - app2.example.com_REVERSE_PROXY_HOST=myapp2:9000
+          - app2.example.com_LISTEN_STREAM_PORT=20000
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        volumes:
+          - bw-data:/data
+        environment:
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+        networks:
+          - bw-docker
+
+    volumes:
+      bw-data:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
+
+    ```
+
+=== "Docker autoconf"
+
+    Before running the [Docker autoconf integration](/1.4/integrations/#docker-autoconf) stack on your machine, you will need to edit the ports :
+
+    ```yaml
+    version: "3.5"
+
+    services:
+
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          - 80:8080 # Keep it if you want to use Let's Encrypt automation
+          - 10000:10000 # app1
+          - 20000:20000 # app2
+      
+    ...
+    ```
+
+    Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
+
+    ```yaml
+    version: '3.5'
+
+    services:
+      myapp1:
+        image: istio/tcp-echo-server:1.2
+        command: [ "9000", "app1" ]
+        networks:
+          bw-services:
+            aliases:
+              - myapp1
+        labels:
+          - "bunkerweb.SERVER_NAME=app1.example.com"
+          - "bunkerweb.SERVER_KIND=stream"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
+          - "bunkerweb.LISTEN_STREAM_PORT=10000"
+
+      myapp2:
+        image: istio/tcp-echo-server:1.2
+        command: [ "9000", "app2" ]
+        networks:
+          bw-services:
+            aliases:
+              - myapp2
+        labels:
+          - "bunkerweb.SERVER_NAME=app2.example.com"
+          - "bunkerweb.SERVER_KIND=stream"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
+          - "bunkerweb.LISTEN_STREAM_PORT=20000"
+
+    networks:
+      bw-services:
+      external:
+        name: bw-services
+    ```
+
+=== "Swarm"
+
+    Before running the [Swarm integration](/1.4/integrations/#swarm) stack on your machine, you will need to edit the ports :
+
+    ```yaml
+    version: "3.5"
+
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        ports:
+          # Keep it if you want to use Let's Encrypt automation
+          - published: 80
+            target: 8080
+            mode: host
+            protocol: tcp
+          # app1
+          - published: 10000
+            target: 10000
+            mode: host
+            protocol: tcp
+          # app2
+          - published: 10000
+            target: 10000
+            mode: host
+            protocol: tcp
+    ...
+    ```
+
+    Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
+
+    ```yaml
+    version: '3.5'
+
+    services:
+
+      myapp1:
+        image: istio/tcp-echo-server:1.2
+        command: [ "9000", "app1" ]
+        networks:
+          - bw-services
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+            - "bunkerweb.SERVER_NAME=app1.example.com"
+            - "bunkerweb.SERVER_KIND=stream"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
+            - "bunkerweb.LISTEN_STREAM_PORT=10000"
+
+      myapp2:
+        image: istio/tcp-echo-server:1.2
+        command: [ "9000", "app2" ]
+        networks:
+          - bw-services
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+            - "bunkerweb.SERVER_NAME=app2.example.com"
+            - "bunkerweb.SERVER_KIND=stream"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
+            - "bunkerweb.LISTEN_STREAM_PORT=20000"
+
+    networks:
+      bw-services:
+      external:
+        name: bw-services
+    ```
+
+=== "Kubernetes"
+
+Protection TCP/UDP applications using the `stream` feature is not yet supported when using the [Kubernetes integration](/1.5.0-beta/integrations/#kubernetes).
+
+=== "Linux"
+
+    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
+
+    ```conf
+    ...
+    SERVER_NAME=app1.example.com app2.example.com
+    MULTISITE=yes
+    USE_REVERSE_PROXY=yes
+    SERVER_TYPE=stream
+    app1.example.com_REVERSE_PROXY_HOST=myapp1.domain.or.ip:9000
+    app1.example.com_LISTEN_STREAM_PORT=10000
+    app2.example.com_REVERSE_PROXY_HOST=myapp2.domain.or.ip:9000
+    app2.example.com_LISTEN_STREAM_PORT=20000
+    ...
+    ```
+
+    Don't forget to restart the BunkerWeb service once it's done.
+
+=== "Ansible"
+
+    You will need to add the settings to your `my_variables.env` configuration file :
+
+    ```conf
+    ...
+    SERVER_NAME=app1.example.com app2.example.com
+    MULTISITE=yes
+    USE_REVERSE_PROXY=yes
+    SERVER_TYPE=stream
+    app1.example.com_REVERSE_PROXY_HOST=myapp1.domain.or.ip:9000
+    app1.example.com_LISTEN_STREAM_PORT=10000
+    app2.example.com_REVERSE_PROXY_HOST=myapp2.domain.or.ip:9000
+    app2.example.com_LISTEN_STREAM_PORT=20000
+    ...
+    ```
+
+    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
+
+    ```yaml
+    [mybunkers]
+    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
+    ```
+
+	  Or alternatively, in your playbook file :
+
+    ```yaml
+    - hosts: all
+        become: true
+        vars:
+          - variables_env: "{{ playbook_dir }}/my_variables.env"
+        roles:
+          - bunkerity.bunkerweb
+    ```
+
+    Run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
+
+=== "Vagrant"
+
+    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
+
+    ```conf
+    ...
+    SERVER_NAME=app1.example.com app2.example.com
+    MULTISITE=yes
+    USE_REVERSE_PROXY=yes
+    SERVER_TYPE=stream
+    app1.example.com_REVERSE_PROXY_HOST=myapp1.domain.or.ip:9000
+    app1.example.com_LISTEN_STREAM_PORT=10000
+    app2.example.com_REVERSE_PROXY_HOST=myapp2.domain.or.ip:9000
+    app2.example.com_LISTEN_STREAM_PORT=20000
+    ...
+    ```
+
+    Don't forget to restart the BunkerWeb service once it's done.
 
 ## Custom configurations
 
 Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info [here](/1.4/security-tuning/#modsecurity)). Here is the list of custom configurations types :
 
 - **http** : http level of NGINX
-- **server-http** : server level of NGINX
+- **server-http** : http/server level of NGINX
 - **default-server-http** : server level of NGINX (only apply to the "default server" when the name supplied by the client doesn't match any server name in `SERVER_NAME`)
 - **modsec-crs** : before the OWASP Core Rule Set is loaded
 - **modsec** : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
-- **stream** : todo
-- **server-stream** : todo
+- **stream** : stream level of NGINX
+- **server-stream** : stream/server level of NGINX
 
 Custom configurations can be applied globally or only for a specific server when applicable and if the multisite mode is enabled.
 
@@ -1132,19 +1446,21 @@ Some integrations offer a more convenient way of applying configurations such as
 
     When using the [Docker integration](/1.4/integrations/#docker), you have two choices for the addition of custom configurations :
     
-    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (easiest)
-    - Writing .conf files to the volume mounted on /data
+    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
+    - Writing .conf files to the volume mounted on /data of the scheduler
     
     **Using settings**
     
     The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
     
     - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
-    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC` and `MODSEC_CRS`
+    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `STREAM` and `SERVER_STREAM`
     - `<NAME>` : the name of config without the .conf suffix
 
     Here is a dummy example using a docker-compose file :
+
     ```yaml
+    ...
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
       environment:
@@ -1162,11 +1478,13 @@ Some integrations offer a more convenient way of applying configurations such as
     **Using files**
 
     The first thing to do is to create the folders :
+
     ```shell
     mkdir -p ./bw-data/configs/server-http
     ```
 
     You can now write your configurations :
+
     ```shell
     echo "location /hello {
     	default_type 'text/plain';
@@ -1176,22 +1494,15 @@ Some integrations offer a more convenient way of applying configurations such as
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
-    Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
     ```shell
     chown -R root:101 bw-data && \
     chmod -R 770 bw-data
     ```
 
-    When starting the BunkerWeb container, you will need to mount the folder on /data :
-    ```shell
-    docker run \
-    	   ...
-    	   -v "${PWD}/bw-data:/data" \
-    	   ...
-    	   bunkerity/bunkerweb:1.5.0-beta
-    ```
+    When starting the scheduler container, you will need to mount the folder on /data :
 
-    Here is the docker-compose equivalent :
     ```yaml
     mybunker:
       image: bunkerity/bunkerweb:1.5.0-beta
@@ -1205,22 +1516,23 @@ Some integrations offer a more convenient way of applying configurations such as
     When using the [Docker autoconf integration](/1.4/integrations/#docker-autoconf), you have two choices for adding custom configurations :
 
     - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
-    - Writing .conf files to the volume mounted on /data
+    - Writing .conf files to the volume mounted on /data of the scheduler
 
     **Using labels**
 
     !!! warning "Limitations using labels"
-        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http** or any global configurations (like **server-http** for all services) is not possible : you will need to mount files for that purpose.
+        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
 
     The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
     
-    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC` and `MODSEC_CRS`
-    - `<NAME>` : the name of config without the .conf suffix
+    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS` and `SERVER_STREAM`
+    - `<NAME>` : the name of config without the .conf suffix 
 
     Here is a dummy example using a docker-compose file :
+
     ```yaml
     myapp:
-      image: nginxdemos/hello:plain-text
+      image: tutum/hello-world
       labels:
         - |
           bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1235,11 +1547,13 @@ Some integrations offer a more convenient way of applying configurations such as
     **Using files**
 
     The first thing to do is to create the folders :
+  
     ```shell
     mkdir -p ./bw-data/configs/server-http
     ```
 
     You can now write your configurations :
+  
     ```shell
     echo "location /hello {
     	default_type 'text/plain';
@@ -1248,20 +1562,19 @@ Some integrations offer a more convenient way of applying configurations such as
     	}
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
+  
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
 
-    When starting the BunkerWeb autoconf container, you will need to mount the folder on /data :
     ```shell
-    docker run \
-    	   ...
-    	   -v "${PWD}/bw-data:/data" \
-    	   ...
-    	   bunkerity/bunkerweb-autoconf:1.5.0-beta
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
     ```
 
-    Here is the docker-compose equivalent :
+    When starting the scheduler container, you will need to mount the folder on /data :
+
     ```yaml
     myautoconf:
-      image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+      image: bunkerity/bunkerweb-scheduler:1.5.0-beta
       volumes:
         - ./bw-data:/data
       ...
@@ -1275,10 +1588,11 @@ Some integrations offer a more convenient way of applying configurations such as
 
     When creating a Config, you will need to add special labels :
 
-    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)
+    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
     * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
 
     Here is the example :
+
     ```shell
     echo "location /hello {
     	default_type 'text/plain';
@@ -1298,10 +1612,11 @@ Some integrations offer a more convenient way of applying configurations such as
 
     When creating a ConfigMap, you will need to add special labels :
 
-    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec or modsec-crs)
+    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
     * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
 
     Here is the example :
+
     ```yaml
     apiVersion: v1
     kind: ConfigMap
@@ -1324,16 +1639,18 @@ Some integrations offer a more convenient way of applying configurations such as
     When using the [Linux integration](/1.4/integrations/#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
 
     Here is an example for server-http/hello-world.conf :
+
     ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
+    location /hello {
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
+    }
+    ```
 
     Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+
     ```shell
     chown -R root:nginx /etc/bunkerweb/configs && \
     chmod -R 770 /etc/bunkerweb/configs
@@ -1343,26 +1660,29 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Ansible"
 
-    The `custom_configs_path[]` variable is a dictionary with configuration types (`http`, `server-http`, `modsec`, `modsec-crs`) as keys and the corresponding values are path containing the configuration files.
+    The `custom_configs_path[]` variable is a dictionary with configuration types (`http`, `server-http`, `modsec`, `modsec-crs`, `stream` and `server-stream`) as keys and the corresponding values are path containing the configuration files.
 
     Here is an example for server-http/hello-world.conf :
+
     ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
+    location /hello {
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
+    }
+    ```
 
-	And the corresponding `custom_configs_path[server-http]` variable used in your inventory :
-	```yaml
-    [mybunkers]
-    192.168.0.42 custom_configs_path={"server-http": "{{ playbook_dir }}/server-http"}
-	```
+    And the corresponding `custom_configs_path[server-http]` variable used in your inventory :
 
-	Or alternatively, in your playbook file : 
-	```yaml
+    ```yaml
+      [mybunkers]
+      192.168.0.42 custom_configs_path={"server-http": "{{ playbook_dir }}/server-http"}
+    ```
+
+    Or alternatively, in your playbook file :
+
+    ```yaml
     - hosts: all
       become: true
       vars:
@@ -1371,28 +1691,31 @@ Some integrations offer a more convenient way of applying configurations such as
           }
       roles:
         - bunkerity.bunkerweb
-	```
+    ```
 
-	Run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
+    Run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
 
 === "Vagrant"
 
     When using the [Vagrant integration](/1.4/integrations/#vagrant), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
 
     Here is an example for server-http/hello-world.conf :
+
     ```conf
-	location /hello {
-		default_type 'text/plain';
-		content_by_lua_block {
-			ngx.say('world')
-		}
-	}
-	```
+    location /hello {
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
+    }
+    ```
 
     Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+
     ```shell
     chown -R root:nginx /etc/bunkerweb/configs && \
     chmod -R 770 /etc/bunkerweb/configs
@@ -1401,6 +1724,8 @@ Some integrations offer a more convenient way of applying configurations such as
     Don't forget to restart the BunkerWeb service once it's done.
 
 ## PHP
+
+TODO
 
 !!! warning "Support is in beta"
 	At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
