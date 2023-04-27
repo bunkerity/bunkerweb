@@ -109,20 +109,10 @@ class Select {
           const btnEls = dropdownEl.querySelectorAll("button");
 
           btnEls.forEach((btn) => {
-            btn.classList.remove(
-              "dark:bg-primary",
-              "bg-primary",
-              "text-gray-300"
-            );
-            btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
+            btn.classList.remove("active");
           });
           //highlight clicked btn
-          btn.classList.remove(
-            "bg-white",
-            "dark:bg-slate-700",
-            "text-gray-700"
-          );
-          btn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
+          btn.classList.add("active");
 
           //close dropdown
           const dropdownChevron = selectCustom.querySelector(
