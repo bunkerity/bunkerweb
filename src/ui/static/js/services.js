@@ -1,4 +1,3 @@
-import { Checkbox, Select, Password, DisabledPop } from "./utils/form.js";
 import {
   Popover,
   Tabs,
@@ -21,6 +20,9 @@ class ServiceModal {
     this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
     this.formDelete = this.modal.querySelector(
       "[data-services-modal-form-delete]"
+    );
+    this.submitBtn = document.querySelector(
+      "button[data-services-modal-submit]"
     );
     //container
     this.container = document.querySelector("main");
@@ -123,10 +125,7 @@ class ServiceModal {
   }
 
   changeSubmitBtnName(text) {
-    const submitBtn = document.querySelector(
-      "button[data-services-modal-submit]"
-    );
-    submitBtn.textContent = text;
+    this.submitBtn.textContent = text;
   }
 
   setSettingsDefault() {
@@ -148,9 +147,12 @@ class ServiceModal {
 
       //SET VALUE
       if (inp.getAttribute("type") === "checkbox") {
-        inp.checked = defaultVal === "yes" ? true : false;
+        defaultVal === "yes"
+          ? inp.setAttribute("aria-checked", "true")
+          : inp.setAttribute("aria-checked", "false");
         inp.setAttribute("value", defaultVal);
         inp.setAttribute("data-method", defaultMethod);
+        inp.checked = true;
       }
 
       if (inp.getAttribute("type") !== "checkbox") {
@@ -197,9 +199,9 @@ class ServiceModal {
   setForm(action, serviceName, formEl) {
     this.modalTitle.textContent = `${action} ${serviceName}`;
     formEl.setAttribute("id", `form-${action}-${serviceName}`);
-    formEl
-      .querySelector(`input[name="operation"]`)
-      .setAttribute("value", action);
+    const opeInp = formEl.querySelector(`input[name="operation"]`);
+    opeInp.setAttribute("value", action);
+    opeInp.value = action;
 
     if (action === "edit" || action === "new") {
       this.showNewEditForm();
@@ -299,9 +301,12 @@ class ServiceModal {
             inp.tagName === "INPUT" &&
             inp.getAttribute("type") === "checkbox"
           ) {
-            inp.checked = value === "yes" ? true : false;
+            value === "yes"
+              ? inp.setAttribute("aria-checked", "true")
+              : inp.setAttribute("aria-checked", "false");
             inp.setAttribute("value", value);
             inp.setAttribute("data-method", method);
+            inp.checked = true;
           }
           //for select
           if (inp.tagName === "SELECT") {
@@ -682,9 +687,12 @@ class Multiple {
 
         //for settings input
         if (inp.getAttribute("type") === "checkbox") {
-          inp.checked = value === "yes" ? true : false;
+          value === "yes"
+            ? inp.setAttribute("aria-checked", "true")
+            : inp.setAttribute("aria-checked", "false");
           inp.setAttribute("value", value);
           inp.setAttribute("data-method", method);
+          inp.checked = true;
         }
 
         if (inp.getAttribute("type") !== "checkbox") {
@@ -819,11 +827,6 @@ class Multiple {
     el.setAttribute("name", `${value}`);
   }
 }
-
-const setCheckbox = new Checkbox();
-const setSelect = new Select();
-const setPassword = new Password();
-const setDisabledPop = new DisabledPop();
 
 const setPopover = new Popover();
 const setTabs = new Tabs();

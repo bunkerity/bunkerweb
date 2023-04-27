@@ -20,10 +20,21 @@ class Checkbox {
             .closest("div")
             .querySelector('input[type="checkbox"]');
 
+          const prevValue = checkboxEl.getAttribute("value");
+
           //set attribute value for new state
-          checkboxEl.checked
+          prevValue === "no"
             ? checkboxEl.setAttribute("value", "yes")
             : checkboxEl.setAttribute("value", "no");
+
+          //set custom input hidden value
+          const newValue = checkboxEl.getAttribute("value");
+          newValue === "yes"
+            ? checkboxEl.setAttribute("aria-checked", "true")
+            : checkboxEl.setAttribute("aria-checked", "false");
+
+          //force checked for submit
+          checkboxEl.checked = true;
         }
       } catch (err) {}
     });

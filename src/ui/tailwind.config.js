@@ -10,6 +10,11 @@ module.exports = {
   presets: [],
   darkMode: "class",
   theme: {
+    extend: {
+      aria: {
+        checked: 'checked="true"',
+      },
+    },
     screens: {
       sm: "576px",
       "sm-max": { max: "576px" },

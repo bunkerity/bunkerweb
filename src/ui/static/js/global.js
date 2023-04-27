@@ -1,4 +1,4 @@
-import { Checkbox } from "./utils/form.js";
+import { Checkbox, Select, Password, DisabledPop } from "./utils/form.js";
 
 class Menu {
   constructor() {
@@ -211,7 +211,9 @@ class FlashMsg {
     //stop animate if clicked once
     this.openBtn.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("data-flash-sidebar-open")) {
+        if (
+          e.target.closest("button").hasAttribute("data-flash-sidebar-open")
+        ) {
           this.isMsgCheck = true;
         }
       } catch (err) {}
@@ -219,14 +221,17 @@ class FlashMsg {
     //remove flash message and change count
     window.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("data-close-flash-message")) {
+        if (
+          e.target.closest("button").hasAttribute("data-close-flash-message")
+        ) {
           //remove logic
           const closeBtn = e.target.closest("button");
           const flashEl = closeBtn.closest("[data-flash-message]");
           flashEl.remove();
           //update count
-          this.flashCount.textContent =
-            document.querySelectorAll("[data-flash-message]").length;
+          this.flashCount.textContent = document.querySelectorAll(
+            "[data-flash-message]"
+          ).length;
         }
       } catch (err) {}
     });
@@ -296,6 +301,12 @@ const setNewsSidebar = new Sidebar(
   "[data-sidebar-info-open]",
   "[data-sidebar-info-close]"
 );
+
+const setCheckbox = new Checkbox();
+const setSelect = new Select();
+const setPassword = new Password();
+const setDisabledPop = new DisabledPop();
+
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
@@ -303,5 +314,4 @@ const setFlashSidebar = new Sidebar(
 );
 const setNews = new News();
 const setDarkM = new darkMode();
-const setCheckbox = new Checkbox();
 const setFlash = new FlashMsg();
