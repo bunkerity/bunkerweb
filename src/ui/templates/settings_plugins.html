@@ -175,13 +175,8 @@ data-plugin-item="{{plugin['id']}}"
         data-default-value="{{global_config[setting]['value']}}" {% if
         setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
         != 'default' %} disabled {% endif %} 
-        
-
-        {% if
-          setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-          != 'default' %}
+          
           {% if global_config[setting]['value'] == "yes" %}     checked    {% endif %}
-        {% endif %}
 
         id="checkbox-{{value['id']}}" class="cursor-pointer disabled:cursor-default 
         relative dark:border-slate-600 dark:bg-slate-700 z-10 checked:z-0 w-5 h-5 ease
@@ -193,9 +188,7 @@ data-plugin-item="{{plugin['id']}}"
         dark:disabled:border-gray-800 disabled:text-gray-700
         dark:disabled:text-gray-300" type="checkbox" data-pattern="{{value['regex']|safe}}"
         
-        value="{% if
-          setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-          != 'default' %}{{global_config[setting]['value']}}{% else %}no{% endif %}" />
+        value="{{global_config[setting]['value']}}" />
 
         <svg
         data-checkbox-handler="{{value['id']}}"
