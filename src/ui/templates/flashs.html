@@ -1,10 +1,12 @@
 <!-- float button-->
 {% with messages = get_flashed_messages(with_categories=true) %}
-<div class="fixed top-2 sm:top-3 right-19 sm:right-24 xl:right-24 z-990">
+<div
+  class="group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-2 sm:top-3 right-19 sm:right-24 xl:right-24 z-990"
+>
   <button
     type="button"
     data-flash-sidebar-open
-    class="transition scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
+    class="transition scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
   >
     <svg
       class="fill-yellow-500 -translate-y-0.4 h-6 w-6"
@@ -28,12 +30,12 @@
 
 <!-- right sidebar -->
 <aside
-data-flash-sidebar
+  data-flash-sidebar
   class="translate-x-90 -right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
 >
   <!-- close btn-->
   <svg
-  data-flash-sidebar-close
+    data-flash-sidebar-close
     class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 320 512"
@@ -53,7 +55,7 @@ data-flash-sidebar
     <!-- close button -->
     <div class="float-right mt-6">
       <button
-      data-flash-sidebar-close
+        data-flash-sidebar-close
         class="inline-block p-0 mb-4 text-sm font-bold leading-normal text-center uppercase align-middle transition-all ease-in bg-transparent border-0 rounded-lg shadow-none cursor-pointer hover:-translate-y-px tracking-tight-rem bg-150 bg-x-25 active:opacity-85 dark:text-white text-slate-700"
       >
         <i class="fa fa-close"></i>
@@ -71,7 +73,7 @@ data-flash-sidebar
     <!-- flash message-->
     {% for category, message in messages %}
     <div
-    data-flash-message
+      data-flash-message
       class="{% if category == 'error' %}bg-red-500 {%else%} bg-green-500 {%endif %} my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
     >
       <div class="flex justify-between align-top items-start">
@@ -81,7 +83,7 @@ data-flash-sidebar
         <h5 class="text-lg mb-0 text-white">Success</h5>
         {%endif%}
         <button
-        data-close-flash-message
+          data-close-flash-message
           type="button"
           class="absolute right-8 top-2"
         >

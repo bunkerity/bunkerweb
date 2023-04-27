@@ -496,8 +496,6 @@ class Filter {
   }
 }
 
-const setCheckbox = new Checkbox();
-const setSelect = new Select();
 const dropdown = new Dropdown("logs");
 const setLogs = new FetchLogs();
 const setFilter = new Filter("logs");
