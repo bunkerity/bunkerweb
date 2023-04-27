@@ -199,7 +199,6 @@ class FilterSettings {
           this.container
             .querySelector(`[data-plugin-item=${tabName}]`)
             .querySelector("[data-setting-header]")
-
             .classList.add("hidden");
         }
       });

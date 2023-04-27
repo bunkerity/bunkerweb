@@ -61,11 +61,11 @@
 /*---------------------------------------------*/
 
 .active.settings-tabs-tab-btn {
-  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md brightness-90 z-10;
+  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md brightness-90 z-10;
 }
 
 .settings-tabs-tab-btn {
-  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative inline-block px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
+  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
 .settings-tabs-name {
