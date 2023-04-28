@@ -33,7 +33,9 @@ instances_batched %}
     <!-- detail list -->
     <div class="grid grid-cols-1 gap-2 mt-4 mb-6 ml-1">
       <!-- detail -->
-      <div class="flex col-span-1">
+      <div
+        class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0"
+      >
         <p
           class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
         >
@@ -47,7 +49,9 @@ instances_batched %}
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex col-span-1">
+      <div
+        class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0"
+      >
         <p
           class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-90"
         >
@@ -64,7 +68,7 @@ instances_batched %}
     <!-- end detail list-->
 
     <!-- button list-->
-    <div class="relative w-full flex justify-end">
+    <div class="relative w-full flex justify-center sm:justify-end">
       {% if instance._type == "local" and instance.health %}
       <button
         type="submit"

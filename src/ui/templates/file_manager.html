@@ -57,7 +57,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
     <!-- actions -->
     <ul
     data-{{current_endpoint}}-add-container
-      class="col-span-12 md:col-span-4 my-2 md:my-0 w-full flex justify-center md:justify-end items-center mb-3"
+      class="col-span-12 md:col-span-4 mt-4 mb-6 md:mt-0 md:mb-3 w-full flex justify-center md:justify-end items-center"
     >
       <li
       data-{{current_endpoint}}-add-folder
@@ -372,10 +372,10 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- modal -->
 <div
 data-{{current_endpoint}}-modal
-  class="hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
+  class="hidden w-full h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
 >
   <div
-    class="px-4 py-3 w-full max-w-180 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="mx-1 px-4 py-3 w-full max-w-180 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div class="w-full flex justify-between">
       <p
@@ -392,7 +392,7 @@ data-{{current_endpoint}}-modal
       method="POST"
     >
       <div
-        class="mb-2 flex flex-col sm:flex-row justify-start align-middle items-start sm:items-center"
+        class="mb-2 flex flex-wrap justify-start items-center"
         data-{{current_endpoint}}-modal-path
       >
         <p

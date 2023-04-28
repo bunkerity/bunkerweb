@@ -14,6 +14,9 @@ module.exports = {
       aria: {
         checked: 'checked="true"',
       },
+      screens: {
+        xs: "340px",
+      },
     },
     screens: {
       sm: "576px",
