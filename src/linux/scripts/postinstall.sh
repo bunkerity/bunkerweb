@@ -95,4 +95,21 @@ else
     echo "/var/www/html directory already exists, skipping copy..."
 fi
 
+# Create letsencrypt folders if needed
+if [ ! -d /etc/letsencrypt ]
+    mkdir /etc/letsencrypt
+    chown nginx:nginx /etc/letsencrypt
+    chmod 770 /etc/letsencrypt
+fi
+if [ ! -d /var/lib/letsencrypt ]
+    mkdir /var/lib/letsencrypt
+    chown nginx:nginx /var/lib/letsencrypt
+    chmod 770 /var/lib/letsencrypt
+fi
+if [ ! -d /var/log/letsencrypt ]
+    mkdir /var/log/letsencrypt
+    chown nginx:nginx /var/log/letsencrypt
+    chmod 770 /var/log/letsencrypt
+fi
+
 echo "Postinstall successful !"

@@ -1,6 +1,6 @@
 {
   "name": "authelia",
-  "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
+  "kinds": ["docker", "autoconf", "swarm", "linux"],
   "timeout": 60,
   "delay": 60,
   "tests": [
