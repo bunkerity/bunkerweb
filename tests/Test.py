@@ -70,7 +70,7 @@ class Test(ABC):
                     )
             if isdir(f"/tmp/tests/{self._name}"):
                 run(f"sudo rm -rf /tmp/tests/{self._name}", shell=True)
-            copytree(f"./examples/{self._name}/tmp/tests/{self._name}")
+            copytree(f"./examples/{self._name}", f"/tmp/tests/{self._name}")
         except:
             log(
                 "TEST",
