@@ -13,7 +13,7 @@ The following integrations are officially supported :
 - [Docker](/1.5.0-beta/integrations/#docker)
 - [Docker autoconf](/1.5.0-beta/integrations/#docker-autoconf)
 - [Swarm](/1.5.0-beta/integrations/#swarm)
-- [Kubernetes](/1.4/integrations/#kubernetes)
+- [Kubernetes](/1.5.0-beta/integrations/#kubernetes)
 - [Linux](/1.5.0-beta/integrations/#linux)
 - [Ansible](/1.5.0-beta/integrations/#ansible)
 - [Vagrant](/1.5.0-beta/integrations/#vagrant)
@@ -44,7 +44,7 @@ USE_BROTLI=no
 
 !!! info "Going further"
 
-    The complete list of available settings with descriptions and possible values is available in the [settings section](/1.4/settings) of the documentation.
+    The complete list of available settings with descriptions and possible values is available in the [settings section](/1.5.0-beta/settings) of the documentation.
 
 !!! info "Settings generator tool"
 
@@ -79,7 +79,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [quickstart guide](/1.5.0-beta/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [quickstart guide](/1.5.0-beta/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -91,7 +91,7 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [quickstart guide](/1.5.0-beta/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/master/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [quickstart guide](/1.5.0-beta/quickstart-guide) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/examples) directory of the repository.
 
 ## Database
 

@@ -107,7 +107,7 @@ api.global.POST["^/unban$"] = function(self)
 	end
 	local ok, ip = pcall(cjson.decode, data)
 	if not ok then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 	self.datastore:delete("bans_ip_" .. ip["ip"])
 	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
@@ -126,7 +126,7 @@ api.global.POST["^/ban$"] = function(self)
 	end
 	local ok, ip = pcall(cjson.decode, data)
 	if not ok then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. env)
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 	self.datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
 	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")

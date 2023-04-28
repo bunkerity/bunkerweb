@@ -34,7 +34,7 @@ Here is a non-exhaustive list of what you can do :
 - Follow us on [LinkedIn](https://www.linkedin.com/company/bunkerity/), [Twitter](https://twitter.com/bunkerity) and [GitHub](https://github.com/bunkerity)
 - Report bugs and propose new features using [issues](https://github.com/bunkerity/bunkerweb/issues)
 - Contribute to the code using [pull requests](https://github.com/bunkerity/bunkerweb/pulls)
-- Write an awesome [plugin](/1.4/plugins)
+- Write an awesome [plugin](/1.5.0-beta/plugins)
 - Talk about BunkerWeb to your friends/colleagues, on social media, on your blog, ...
 
 ## How to report security issue ?

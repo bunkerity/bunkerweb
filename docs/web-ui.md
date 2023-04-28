@@ -29,11 +29,11 @@ Because the web UI is a web application, the recommended installation procedure 
     * Choose a strong password for the login
     * Put the web UI under a "hard to guess" URI
     * Do not open the web UI on the Internet without any further restrictions
-    * Apply settings listed in the [security tuning section](/1.4/security-tuning/) of the documentation
+    * Apply settings listed in the [security tuning section](/1.5.0-beta/security-tuning/) of the documentation
 
 !!! info "Multisite mode"
 
-    The usage of the web UI implies enabling the [multisite mode](/1.4/concepts/#multisite-mode).
+    The usage of the web UI implies enabling the [multisite mode](/1.5.0-beta/concepts/#multisite-mode).
 
 === "Docker"
 
@@ -61,7 +61,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -89,7 +89,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - www.example.com_REVERSE_PROXY_URL=/changeme/
           - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
           - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-          - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
+          - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
         networks:
           - bw-universe
           - bw-services
@@ -183,7 +183,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -276,7 +276,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
           - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
-          - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
+          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
     volumes:
       bw-data:
@@ -320,7 +320,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -425,13 +425,14 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
         deploy:
           labels:
-            - bunkerweb.SERVER_NAME=www.example.com
-            - bunkerweb.USE_UI=yes
-            - bunkerweb.USE_REVERSE_PROXY=yes
-            - bunkerweb.REVERSE_PROXY_URL=/changeme/
-            - bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000
-            - bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-            - bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no
+            - "bunkerweb.SERVER_NAME=www.example.com"
+            - "bunkerweb.USE_UI=yes"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
+            - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+            - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
+            - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
+            - "INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
     volumes:
       bw-data:
@@ -468,7 +469,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/master/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -522,7 +523,7 @@ Because the web UI is a web application, the recommended installation procedure 
         spec:
           containers:
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.4.6
+              image: bunkerity/bunkerweb:1.5.0-beta
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -592,7 +593,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.4.6
+              image: bunkerity/bunkerweb-autoconf:1.5.0-beta
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -619,7 +620,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.4.6
+              image: bunkerity/bunkerweb-scheduler:1.5.0-beta
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -804,7 +805,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Linux"
 
-    The installation of the web UI using the [Linux integration](/1.4/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Linux integration](/1.5.0-beta/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
 
     The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
 
@@ -836,12 +837,12 @@ Because the web UI is a web application, the recommended installation procedure 
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
     SERVER_NAME=www.example.com
     MULTISITE=yes
-    USE_UI=yes
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/changeme/
-    REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-    REVERSE_PROXY_INTERCEPT_ERRORS=no
+    www.example.com_USE_UI=yes
+    www.example.com_USE_REVERSE_PROXY=yes
+    www.example.com_REVERSE_PROXY_URL=/changeme/
+    www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
     Don't forget to restart the `bunkerweb` service :
@@ -852,7 +853,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Ansible"
 
-    The installation of the web UI using the [Vagrant integration](/1.4/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Vagrant integration](/1.5.0-beta/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
 
     Create a `my_ui.env` filed used to configure the web UI :
 
@@ -870,12 +871,12 @@ Because the web UI is a web application, the recommended installation procedure 
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
     SERVER_NAME=www.example.com
     MULTISITE=yes
-    USE_UI=yes
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/changeme/
-    REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    REVERSE_PROXY_HEADERS=X-Script-Name /changeme
-    REVERSE_PROXY_INTERCEPT_ERRORS=no
+    www.example.com_USE_UI=yes
+    www.example.com_USE_REVERSE_PROXY=yes
+    www.example.com_REVERSE_PROXY_URL=/changeme/
+    www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
     The variable `enable_ui` can be set to `true` in order to activate the web UI service and the variable `custom_ui` can be used to specify the configuration file for the web UI :
@@ -907,7 +908,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Vagrant"
 
-    The installation of the web UI using the [Vagrant integration](/1.4/integrations/#vagrant) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Vagrant integration](/1.5.0-beta/integrations/#vagrant) is pretty straightforward because it is installed with BunkerWeb.
 
     First of all, you will need to get a shell on your Vagrant box :
 
@@ -945,12 +946,12 @@ Because the web UI is a web application, the recommended installation procedure 
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
     SERVER_NAME=www.example.com
     MULTISITE=yes
-    USE_UI=yes
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/changeme/
-    REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    REVERSE_PROXY_HEADERS=X-Script-Name /changeme # replace with another url
-    REVERSE_PROXY_INTERCEPT_ERRORS=no
+    www.example.com_USE_UI=yes
+    www.example.com_USE_REVERSE_PROXY=yes
+    www.example.com_REVERSE_PROXY_URL=/changeme/
+    www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
+    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
     Don't forget to restart the `bunkerweb` service :

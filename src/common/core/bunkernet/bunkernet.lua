@@ -2,7 +2,7 @@ local class		= require "middleclass"
 local plugin	= require "bunkerweb.plugin"
 local utils     = require "bunkerweb.utils"
 local datastore = require "bunkerweb.datastore"
-local json		= require "cjson"
+local cjson		= require "cjson"
 local http		= require "resty.http"
 
 local bunkernet = class("bunkernet", plugin)
@@ -40,7 +40,7 @@ function bunkernet:init()
 		return self:ret(false, "can't read instance id : " .. err)
 	end
 	-- Retrieve instance ID
-	id = f:read("*all"):gsub("[\r\n]", "")
+	local id = f:read("*all"):gsub("[\r\n]", "")
 	f:close()
 	-- Store ID in datastore
 	local ok, err = self.datastore:set("plugin_bunkernet_id", id)
@@ -53,7 +53,7 @@ function bunkernet:init()
 	local db = {
 		ip = {}
 	}
-	f, err = io.open("/var/cache/bunkerweb/bunkernet/ip.list", "r")
+	local f, err = io.open("/var/cache/bunkerweb/bunkernet/ip.list", "r")
 	if not f then
 		ret = false
 	else

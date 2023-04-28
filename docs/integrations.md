@@ -30,7 +30,7 @@ Docker integration key concepts are :
 - **Networks** to expose ports for clients and connect to upstream web services
 
 !!! info "Database backend"
-    Please note that we assume you are using SQLite as database backend (which is the default for the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information.
+    Please note that we assume you are using SQLite as database backend (which is the default for the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) folder of the repostiory for more information.
 
 ### Environment variables
 
@@ -52,7 +52,7 @@ services:
 Please note that the `bunkerweb.INSTANCE` is mandatory to make sure the scheduler can detect BunkerWeb instance(s).
 
 !!! info "Full list"
-    For the complete list of environment variables, see the [settings section](/1.4/settings) of the documentation.
+    For the complete list of environment variables, see the [settings section](/1.5.0-beta/settings) of the documentation.
 
 ### Scheduler
 
@@ -224,10 +224,10 @@ The downside of using environment variables is that the container needs to be re
 Instead of defining environment variables for the BunkerWeb container, you simply add **labels** to your web applications containers and the **autoconf** will "automagically" take care of the rest.
 
 !!! info "Multisite mode"
-    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](/1.4/concepts/#multisite-mode) of the documentation for more information.
+    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](/1.5.0-beta/concepts/#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
-    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information.
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) folder of the repostiory for more information.
 
 Another container, named `bw-autoconf` for example, containing the autoconf service must be added to the stack. Since two services will generate the configuration for BunkerWeb, a "real" database backend (in other words, not SQLite) also needs to be added :
 
@@ -341,7 +341,7 @@ Since we have multiple instances of BunkerWeb running, a shared data store imple
 Using a shared folder or a specific driver for the database volume is left as an exercise for the reader (and depends on your own use-case).
 
 !!! info "Database backend"
-    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
 
 Here is the stack boilerplate that you can deploy using `docker stack deploy` :
 
@@ -510,7 +510,7 @@ The recommended setup is to define **BunkerWeb** as a **[DaemonSet](https://kube
 Since we have multiple instances of BunkerWeb running, a shared data store implemented as a [Redis](https://redis.io/) service must be created : the instances will use it to cache and share data. You will find more information about the Redis settings [here](/1.5.0-beta/settings/#redis)
 
 !!! info "Database backend"
-    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/dev/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/1.5.0-beta/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
 
 Please note that both scheduler and autoconf services needs to access the Kubernetes API. The recommended way of doing it is using [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
@@ -568,7 +568,7 @@ spec:
     spec:
       containers:
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.4.6
+          image: bunkerity/bunkerweb:1.5.0-beta
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -638,7 +638,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.4.6
+          image: bunkerity/bunkerweb-autoconf:1.5.0-beta
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -665,7 +665,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.4.6
+          image: bunkerity/bunkerweb-scheduler:1.5.0-beta
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -780,7 +780,7 @@ spec:
       storage: 5Gi
 ```
 
-Once the BunkerWeb Kubernetes stack is set up and running (see autoconf logs for more information), you will be able to deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/1.4/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
+Once the BunkerWeb Kubernetes stack is set up and running (see autoconf logs for more information), you will be able to deploy web applications in the cluster and declare your Ingress resource. Please note that [settings](/1.5.0-beta/settings) need to be set as annotations for the Ingress resource with the special value **bunkerweb.io** for the domain part :
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -817,7 +817,6 @@ List of supported Linux distros :
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
 - Fedora 37
-- CentOS Stream 8
 - RedHat Enterprise Linux (RHEL) 8.7
 
 Please note that you will need to **install NGINX 1.24.0 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
@@ -827,71 +826,81 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 === "Debian"
 
     The first step is to add NGINX official repository :
+
     ```shell
-	sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
-	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
+    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
-	echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     http://nginx.org/packages/debian `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
-	```
+    ```
 
     You should now be able to install NGINX 1.24.0 :
-	```shell
-	sudo apt update && \
-	sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
-	```
 
-	And finally install BunkerWeb 1.5.0-beta :
+    ```shell
+    sudo apt update && \
+    sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
+    ```
+
+    And finally install BunkerWeb 1.5.0-beta :
+
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
-	sudo apt update && \
-	sudo apt install -y bunkerweb=1.5.0-beta
+    sudo apt update && \
+    sudo apt install -y bunkerweb=1.5.0-beta
     ```
 	
-	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
-	```shell
-	sudo apt-mark hold nginx bunkerweb
-	```
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+
+    ```shell
+    sudo apt-mark hold nginx bunkerweb
+    ```
 
 === "Ubuntu"
 
     The first step is to add NGINX official repository :
+
     ```shell
-	sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
-	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
+    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
-	echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
-	```
+    ```
 
     You should now be able to install NGINX 1.24.0 :
-	```shell
-	sudo apt update && \
-	sudo apt install -y nginx=1.24.0-1~jammy
-	```
 
-	And finally install BunkerWeb 1.5.0-beta :
+    ```shell
+    sudo apt update && \
+    sudo apt install -y nginx=1.24.0-1~jammy
+    ```
+
+    And finally install BunkerWeb 1.5.0-beta :
+
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
-	sudo apt update && \
-	sudo apt install -y bunkerweb=1.5.0-beta
+    sudo apt update && \
+    sudo apt install -y bunkerweb=1.5.0-beta
     ```
 	
-	To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
-	```shell
-	sudo apt-mark hold nginx bunkerweb
-	```
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+
+    ```shell
+    sudo apt-mark hold nginx bunkerweb
+    ```
 
 === "Fedora"
 
     Fedora already provides NGINX 1.24.0 that we support :
-	```shell
-	sudo dnf install -y nginx-1.24.0
-	```
+
+    ```shell
+    sudo dnf install -y nginx-1.24.0
+    ```
 
     And finally install BunkerWeb 1.5.0-beta :
+
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
   	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
@@ -900,12 +909,57 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
   	sudo dnf install -y bunkerweb-1.5.0-beta
     ```
 
-	To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-	```shell
-	sudo dnf versionlock add nginx && \
-	sudo dnf versionlock add bunkerweb
-	```
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
 
+    ```shell
+    sudo dnf versionlock add nginx && \
+    sudo dnf versionlock add bunkerweb
+    ```
+
+=== "RedHat"
+
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+
+    [nginx-mainline]
+    name=nginx mainline repo
+    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=0
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+    ```
+
+    You should now be able to install NGINX 1.24.0 :
+
+    ```shell
+    sudo dnf install nginx-1.24.0
+    ```
+    And finally install BunkerWeb 1.5.0-beta :
+
+    ```shell
+	  dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    sudo dnf check-update && \
+    sudo dnf install -y bunkerweb-1.5.0-beta
+    ```
+
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+
+    ```shell
+    sudo dnf versionlock add nginx && \
+    sudo dnf versionlock add bunkerweb
+    ```
+
+<!---
 === "CentOS Stream"
 
     The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
@@ -926,7 +980,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 	And finally install BunkerWeb 1.5.0-beta :
     ```shell
-	dnf install -y epel-release && \
+	  dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
     sudo dnf install -y bunkerweb-1.5.0-beta
@@ -937,6 +991,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	sudo dnf versionlock add nginx && \
 	sudo dnf versionlock add bunkerweb
 	```
+
 
 === "From source"
 
@@ -952,7 +1007,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	https://github.com/bunkerity/bunkerweb.git /tmp/bunkerweb
 	```
 	
-	BunkerWeb needs some dependencies to be compiled and installed to `/usr/share/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/master/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
+	BunkerWeb needs some dependencies to be compiled and installed to `/usr/share/bunkerweb/deps`, the easiest way to do it is by executing the [install.sh helper script](https://github.com/bunkerity/bunkerweb/blob/1.5.0-beta/deps/install.sh) (please note that you will need to install additional packages which is not covered in this procedure and depends on your own system) :
 	```
 	mkdir /usr/share/bunkerweb/deps && \
 	/tmp/bunkerweb/src/deps/install.sh
@@ -999,6 +1054,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	systemctl enable bunkerweb && \
 	systemctl enable bunkerweb-ui
 	```
+--->
 
 The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
 
