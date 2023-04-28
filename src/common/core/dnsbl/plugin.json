@@ -3,7 +3,7 @@
   "order": 5,
   "name": "DNSBL",
   "description": "Deny access based on external DNSBL servers.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_DNSBL": {

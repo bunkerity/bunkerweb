@@ -3,7 +3,7 @@
   "order": 999,
   "name": "Real IP",
   "description": "Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_REAL_IP": {

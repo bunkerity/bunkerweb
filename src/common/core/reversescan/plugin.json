@@ -3,7 +3,7 @@
   "order": 6,
   "name": "Reverse scan",
   "description": "Scan clients ports to detect proxies or servers.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_REVERSE_SCAN": {

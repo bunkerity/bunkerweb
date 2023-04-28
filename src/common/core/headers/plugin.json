@@ -3,7 +3,7 @@
   "order": 999,
   "name": "Headers",
   "description": "Manage HTTP headers sent to clients.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "no",
   "settings": {
     "CUSTOM_HEADER": {

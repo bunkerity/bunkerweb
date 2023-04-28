@@ -3,7 +3,7 @@
   "order": 999,
   "name": "Errors",
   "description": "Manage default error pages",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "no",
   "settings": {
     "ERRORS": {

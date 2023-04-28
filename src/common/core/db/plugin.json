@@ -3,7 +3,7 @@
   "order": 999,
   "name": "DB",
   "description": "Integrate easily the Database.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "yes",
   "settings": {
     "DATABASE_URI": {

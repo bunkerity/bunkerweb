@@ -3,7 +3,7 @@
   "order": 4,
   "name": "Country",
   "description": "Deny access based on the country of the client IP.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "yes",
   "settings": {
     "BLACKLIST_COUNTRY": {

@@ -3,7 +3,7 @@
 	"order": 999,
 	"name": "ModSecurity",
 	"description": "Management of the ModSecurity WAF.",
-	"version": "0.1",
+	"version": "1.0",
 	"stream": "no",
 	"settings": {
 		"USE_MODSECURITY": {

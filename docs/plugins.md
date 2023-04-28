@@ -28,116 +28,232 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker"
 
-    When using the [Docker integration](/integrations/#docker), plugins must be written to the volume mounted on `/data`.
+    When using the [Docker integration](/integrations/#docker), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
     The first thing to do is to create the plugins folder :
+
     ```shell
     mkdir -p ./bw-data/plugins
     ```
 
     Then, you can drop the plugins of your choice into that folder :
+
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
     ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
+    chown -R 101:101 ./bw-data
     ```
 
-    Here is the docker-compose associated : [Scheduler](/integrations/#scheduler).
+    Then you can mount the volume when starting your Docker stack :
+
+    ```yaml
+    version: '3.5'
+    services:
+    ...
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        volumes:
+          - ./bw-data:/data
+    ...
+    ```
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data`.
+    When using the [Docker autoconf integration](/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
-    The easiest way to do it is by starting the Docker autoconf stack with a folder mounted on `/data` (instead of a named volume). Once the stack is started, you can copy the plugins of your choice to the `plugins` folder from your host :
+
+    The first thing to do is to create the plugins folder :
+
+    ```shell
+    mkdir -p ./bw-data/plugins
+    ```
+
+    Then, you can drop the plugins of your choice into that folder :
+
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    Because BunkerWeb runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
     ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
+    chown -R 101:101 ./bw-data
+    ```
+
+    Then you can mount the volume when starting your Docker stack :
+
+    ```yaml
+    version: '3.5'
+    services:
+    ...
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        volumes:
+          - ./bw-data:/data
+    ...
     ```
 
 === "Swarm"
 
-    When using the [Swarm integration](/integrations/#swarm), the easiest way of installing plugins is by using `docker exec` and downloading the plugins from the container.
+    When using the [Swarm integration](/integrations/#swarm), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
-    Execute a shell inside the autoconf container (use `docker ps` to get the name) :
+    !!! info "Swarm volume"
+        Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` accross all nodes.
+
+    The first thing to do is to create the plugins folder :
+
     ```shell
-    docker exec -it myautoconf /bin/bash
+    mkdir -p /shared/bw-plugins
     ```
 
-    Once you have a shell inside the container, you will be able to drop the plugins of your choice inside the `/data/plugins` folder :
+    Then, you can drop the plugins of your choice into that folder :
+
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
-    cp -rp ./bunkerweb-plugins/* /data/plugins
+    cp -rp ./bunkerweb-plugins/* /shared/bw-plugins
+    ```
+
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
+    ```shell
+    chown -R 101:101 /shared/bw-plugins
+    ```
+
+    Then you can mount the volume when starting your Swarm stack :
+
+    ```yaml
+    version: '3.5'
+    services:
+    ...
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        volumes:
+          - /shared/bw-plugins:/data/plugins
+    ...
     ```
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](/integrations/#kubernetes), the easiest way of installing plugins is by using `kubectl exec` and downloading the plugins from the container.
+    When using the [Kubernetes integration](/integrations/#kubernetes), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
-    Execute a shell inside the autoconf container (use `kubectl get pods` to get the name) :
-    ```shell
-    kubectl exec -it myautoconf -- /bin/bash
+    The fist thing to do is to declare a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that will contain our plugins data :
+
+    ```yaml
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: pvc-bunkerweb-plugins
+    spec:
+      accessModes:
+        - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
     ```
 
-    Once you have a shell inside the container, you will be able to drop the plugins of your choice inside the `/data/plugins` folder :
-    ```shell
-    git clone https://github.com/bunkerity/bunkerweb-plugins && \
-    cp -rp ./bunkerweb-plugins/* /data/plugins
+    You can now add the volume mount and an init containers to automatically provision the volume :
+
+    ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-scheduler
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-scheduler
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-scheduler
+        spec:
+          serviceAccountName: sa-bunkerweb
+          containers:
+            - name: bunkerweb-scheduler
+              image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+              imagePullPolicy: Always
+              env:
+                - name: KUBERNETES_MODE
+                  value: "yes"
+                - name: "DATABASE_URI"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+              volumeMounts:
+                - mountPath: "/data/plugins"
+                  name: vol-plugins
+          initContainers:
+            - name: bunkerweb-scheduler-init
+              image: alpine/git
+              command: ["/bin/sh", "-c"]
+              args: ["git clone https://github.com/bunkerity/bunkerweb-plugins /data/plugins && chown -R 101:101 /data/plugins"]
+              volumeMounts:
+                - mountPath: "/data/plugins"
+                  name: vol-plugins
+          volumes:
+            - name: vol-plugins
+              persistentVolumeClaim:
+                claimName: pvc-bunkerweb-plugins
     ```
 
 === "Linux"
 
     When using the [Linux integration](/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
-    cp -rp ./bunkerweb-plugins/* /data/plugins
+    cp -rp ./bunkerweb-plugins/* /etc/bunkerweb/plugins && \
+    chown -R nginx:nginx /etc/bunkerweb/plugins
     ```
 
 === "Ansible"
+
     When using the [Ansible integration](/integrations/#ansible), you can use the `plugins` variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.
 	
-	Let's assume that you have plugins inside the `bunkerweb-plugins` folder :
-	```shell
-	git clone https://github.com/bunkerity/bunkerweb-plugins
-	```
+    Let's assume that you have plugins inside the `bunkerweb-plugins` folder :
 
-	In your Ansible inventory, you can use the `plugins` variable to set the path of plugins folder : 
+    ```shell
+    git clone https://github.com/bunkerity/bunkerweb-plugins
+    ```
+
+    In your Ansible inventory, you can use the `plugins` variable to set the path of plugins folder :
+
     ```ini
-	[mybunkers]
-	192.168.0.42 ... custom_plugins="{{ playbook_dir }}/bunkerweb-plugins"
+    [mybunkers]
+    192.168.0.42 ... custom_plugins="{{ playbook_dir }}/bunkerweb-plugins"
     ```
 	
-	Or alternatively, in your playbook file :
-	```yaml
-	- hosts: all
-	  become: true
-	  vars:
-		- custom_plugins: "{{ playbook_dir }}/bunkerweb-plugins"
-	  roles:
-		- bunkerity.bunkerweb
-	```
+    Or alternatively, in your playbook file :
 
-	Run the playbook :
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
+    ```yaml
+    - hosts: all
+      become: true
+      vars:
+      - custom_plugins: "{{ playbook_dir }}/bunkerweb-plugins"
+      roles:
+      - bunkerity.bunkerweb
+    ```
+
+    Run the playbook :
+
+    ```shell
+    ansible-playbook -i inventory.yml playbook.yml
+    ```
 
 === "Vagrant"
 
-    When using the [Vagrant integration](/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Vagrant integration](/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder (you will need to do a `vagrant ssh` first) :
+
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
-    cp -rp ./bunkerweb-plugins/* /data/plugins
+    cp -rp ./bunkerweb-plugins/* /etc/bunkerweb/plugins
     ```
 
 ## Writing a plugin
@@ -164,6 +280,7 @@ A file named **plugin.json** and written at the root of the plugin folder must c
 	"name": "My Plugin",
 	"description": "Just an example plugin.",
 	"version": "1.0",
+  "stream": "partial",
 	"settings": {
 		"DUMMY_SETTING": {
 			"context": "multisite",
@@ -194,6 +311,7 @@ Here are the details of the fields :
 |    `name`     |    yes    | string | Name of your plugin.                                                                                                                                                                               |
 | `description` |    yes    | string | Description of your plugin.                                                                                                                                                                        |
 |   `version`   |    yes    | string | Version of your plugin.                                                                                                                                                                            |
+|   `stream`    |    yes    | string | Information about stream support : `no`, `yes` or `partial`.
 |  `settings`   |    yes    |  dict  | List of the settings of your plugin.                                                                                                                                                               |
 |    `jobs`     |    no     |  list  | List of the jobs of your plugin.                                                                                                                                                                   |
 
@@ -207,7 +325,7 @@ Each setting has the following fields (the key is the ID of the settings used in
 |    `id`    |    yes    | string | Internal ID used by the web UI for HTML elements.            |
 |  `label`   |    yes    | string | Label shown by the web UI.                                   |
 |  `regex`   |    yes    | string | The regex used to validate the value provided by the user.   |
-|   `type`   |    yes    | string | The type of the field : `text`, `check` or `select`.         |
+|   `type`   |    yes    | string | The type of the field : `text`, `check`, `select` or `password`.         |
 | `multiple` |    no     | string | Unique ID to group multiple settings with numbers as suffix. |
 |  `select`  |    no     |  list  | List of possible string values when `type` is `select`.      |
 
@@ -221,7 +339,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http` and `default-server-http`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream` and `server-stream`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -253,32 +371,42 @@ local myplugin = class("myplugin", plugin)
 
 function myplugin:initialize()
     plugin.initialize(self, "myplugin")
-    self.dummy="dummy"
+    self.dummy = "dummy"
 end
 
 function myplugin:init()
-    plugin.initialize(self, "myplugin")
-    return self:ret(true,"success")
+    self.logger:log(ngx.NOTICE, "init called")
+    return self:ret(true, "success")
 end
 
 function myplugin:set()
-    self.logger:log(ngx.NOTICE,"set called")
-    return self:ret(true,"success")
+    self.logger:log(ngx.NOTICE, "set called")
+    return self:ret(true, "success")
 end
 
 function myplugin:access()
-    self.logger:log(ngx.NOTICE,"access called")
-    return self:ret(true,"success")
+    self.logger:log(ngx.NOTICE, "access called")
+    return self:ret(true, "success")
 end
 
 function myplugin:log()
-    self.logger:log(ngx.NOTICE,"log called")
+    self.logger:log(ngx.NOTICE, "log called")
     return self:ret(true, "success")
 end
 
 function myplugin:log_default()
-    self.logger:log(ngx.NOTICE,"log_default called")
-    return self:ret(true,"success")
+    self.logger:log(ngx.NOTICE, "log_default called")
+    return self:ret(true, "success")
+end
+
+function myplugin:preread()
+    self.logger:log(ngx.NOTICE, "preread called")
+    return self:ret(true, "success")
+end
+
+function myplugin:log_stream()
+    self.logger:log(ngx.NOTICE, "log_stream called")
+    return self:ret(true, "success")
 end
 
 return myplugin
@@ -290,13 +418,15 @@ The declared functions are automatically called during specific contexts. Here a
 | :------: | :--------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |  `init`  |   [init_by_lua](https://github.com/openresty/lua-nginx-module#init_by_lua)   | Called when NGINX just started or received a reload order. the typical use case is to prepare any data that will be used by your plugin.                  | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>|
 |  `set`  |   [set_by_lua](https://github.com/openresty/lua-nginx-module#set_by_lua)   | Called before each request received by the server.The typical use case is for computing before access phase.                 | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>|
-| `access` | [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua) | Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.                     | `ret`, `msg`,`status`,`redirect`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [http-status-constants](https://github.com/openresty/lua-nginx-module#http-status-constants)</li><li>`redirect` (URL) : if set will redirect to given URL</li></ul> |
+| `access` | [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua) | Called on each request received by the server. The typical use case is to do the security checks here and deny the request if needed.                     | `ret`, `msg`,`status`,`redirect`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [HTTP status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li><li>`redirect` (URL) : if set will redirect to given URL</li></ul> |
 |  `log`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Called when a request has finished (and before it gets logged to the access logs). The typical use case is to make stats or compute counters for example. | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
 |  `log_default`   |    [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)    | Same as `log` but only called on the default server. | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                           |
+| `preread` | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Similar to the `access` function but for stream mode. | `ret`, `msg`,`status`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul> |
+| `log_stream` | [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block) | Similar to the `log` function but for stream mode. | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul> |
 
 #### Libraries
 
-All directives from [NGINX LUA module](https://github.com/openresty/lua-nginx-module) are available. On top of that, you can use the LUA libraries included within BunkerWeb : see [this script](https://github.com/bunkerity/bunkerweb/blob/master/deps/clone.sh) for the complete list.
+All directives from [NGINX LUA module](https://github.com/openresty/lua-nginx-module) and are available and [NGINX stream LUA module](https://github.com/openresty/stream-lua-nginx-module). On top of that, you can use the LUA libraries included within BunkerWeb : see [this script](https://github.com/bunkerity/bunkerweb/blob/master/deps/clone.sh) for the complete list.
 
 If you need additional libraries, you can put them in the root folder of the plugin and access them by prefixing them with your plugin ID. Here is an example file named **mylibrary.lua** :
 
@@ -324,46 +454,41 @@ mylibrary.dummy()
 
 #### Helpers
 
-Some helpers modules provide common helpful functions :
+Some helpers modules provide common helpful helpers :
 
-- self.variables : allows to access and store plugins' attributes.
-- datastore : access the global shared data on one instance (key/value store)
-- clusterstore : access a Redis data store shared beetween BunkerWeb instances (key/value store)
-- logger : generate logs
-- utils : various useful functions
+- `self.variables` : allows to access and store plugins' attributes
+- `self.logger` : print logs
+- `bunkerweb.utils` : various useful functions
+- `bunkerweb.datastore` : access the global shared data on one instance (key/value store)
+- `bunkerweb.clusterstore` : access a Redis data store shared beetween BunkerWeb instances (key/value store)
 
-To access the functions, you first need to **require** the module :
+To access the functions, you first need to **require** the modules :
 
 ```lua
-...
-
-local plugins   = requier "plugins"
-local utils		= require "utils"
-local datastore	= require "bunkerweb.datastore"
-local logger	= require "logger"
-local clustestore   = require "bunkerweb.clustertore"
-...
+local utils       = require "bunkerweb.utils"
+local datastore   = require "bunkerweb.datastore"
+local clustestore = require "bunkerweb.clustertore"
 ```
 
 Retrieve a setting value :
 
 ```lua
-local value, err = self.variables["SOMEVALUE"]
-if not value then
-	self.logger:log(ngx.ERR, "can't retrieve setting DUMMY_SETTING : " .. err)
+local myvar = self.variables["DUMMY_SETTING"]
+if not myvar then
+    self.logger:log(ngx.ERR, "can't retrieve setting DUMMY_SETTING")
 else
-	self.logger:log(ngx.NOTICE, "DUMMY_SETTING = " .. value)
+    self.logger:log(ngx.NOTICE, "DUMMY_SETTING = " .. value)
 end
 ```
 
-Store something in the cache :
+Store something in the local cache :
 
 ```lua
 local ok, err = self.datastore:set("plugin_myplugin_something", "somevalue")
-if not value then
-	self.logger:log(ngx.ERR, "can't save plugin_myplugin_something into datastore : " .. err)
+if not ok then
+    self.logger:log(ngx.ERR, "can't save plugin_myplugin_something into datastore : " .. err)
 else
-	self.logger:log(ngx.NOTICE, "successfully saved plugin_myplugin_something into datastore into datastore")
+    self.logger:log(ngx.NOTICE, "successfully saved plugin_myplugin_something into datastore")
 end
 ```
 
@@ -372,11 +497,11 @@ Check if an IP address is global :
 ```lua
 local ret, err = utils.ip_is_global(ngx.ctx.bw.remote_addr)
 if ret == nil then
-	self.logger:log(ngx.ERR, "error while checking if IP " .. ngx.ctx.bw.remote_addr .. " is global or not : " .. err)
+    self.logger:log(ngx.ERR, "error while checking if IP " .. ngx.ctx.bw.remote_addr .. " is global or not : " .. err)
 elseif not ret then
-	self.logger:log(ngx.NOTICE, "IP " .. ngx.ctx.bw.remote_addr .. " is not global")
+    self.logger:log(ngx.NOTICE, "IP " .. ngx.ctx.bw.remote_addr .. " is not global")
 else
-	self.logger:log(ngx.NOTICE, "IP " .. ngx.ctx.bw.remote_addr .. " is global")
+    self.logger:log(ngx.NOTICE, "IP " .. ngx.ctx.bw.remote_addr .. " is global")
 end
 ```
 

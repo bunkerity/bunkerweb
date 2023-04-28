@@ -3,7 +3,7 @@
   "order": 999,
   "name": "Gzip",
   "description": "Compress HTTP requests with the gzip algorithm.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_GZIP": {

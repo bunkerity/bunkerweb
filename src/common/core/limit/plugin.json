@@ -3,7 +3,7 @@
   "order": 8,
   "name": "Limit",
   "description": "Limit maximum number of requests and connections.",
-  "version": "0.1",
+  "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_LIMIT_REQ": {
