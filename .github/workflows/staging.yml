@@ -158,7 +158,6 @@ jobs:
         code-security,
         build-ubuntu,
         build-debian,
-        build-centos,
         build-fedora,
         build-rhel,
       ]
