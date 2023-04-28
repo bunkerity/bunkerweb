@@ -2292,6 +2292,14 @@ h6 {
   letter-spacing: 0.025em;
 }
 
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(94 114 228 / var(--tw-text-opacity));
@@ -3994,6 +4002,10 @@ h6 {
 
 :is(.dark .dark\:text-white\/80) {
   color: rgb(255 255 255 / 0.8);
+}
+
+:is(.dark .dark\:text-white\/90) {
+  color: rgb(255 255 255 / 0.9);
 }
 
 :is(.dark .dark\:opacity-60) {

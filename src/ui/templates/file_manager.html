@@ -7,7 +7,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 >
   <div class="w-full grid-cols-12 grid">
     <div class="col-span-12 md:col-span-8">
-      <h5 class="mb-2 font-bold dark:text-white">
+      <h5 class="mb-2 font-bold dark:text-white/90">
         {% if current_endpoint == "configs" %} SERVICE MANAGER {% else %} FILE
         MANAGER {% endif %}
       </h5>
