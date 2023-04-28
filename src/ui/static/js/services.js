@@ -75,7 +75,7 @@ class ServiceModal {
           this.updateModalData(obj);
           //show modal
           this.resetFilterInp();
-          this.changeSubmitBtnName("EDIT");
+          this.changeSubmitBtn("EDIT", "edit-btn");
           this.openModal();
         }
       } catch (err) {}
@@ -98,7 +98,7 @@ class ServiceModal {
 
           //show modal
           this.resetFilterInp();
-          this.changeSubmitBtnName("CREATE");
+          this.changeSubmitBtn("CREATE", "valid-btn");
           this.openModal();
         }
       } catch (err) {}
@@ -124,8 +124,15 @@ class ServiceModal {
     inpFilter.dispatchEvent(new Event("input"));
   }
 
-  changeSubmitBtnName(text) {
+  changeSubmitBtn(text, btnType) {
     this.submitBtn.textContent = text;
+    this.submitBtn.classList.remove(
+      "delete-btn",
+      "valid-btn",
+      "edit-btn",
+      "info-btn"
+    );
+    this.submitBtn.classList.add(btnType);
   }
 
   setSettingsDefault() {

@@ -565,12 +565,46 @@ class FolderModal {
 
   //submit text depending action
   setSubmitTxt(action) {
-    if (action === "new") return (this.modalSubmit.textContent = "add");
-    if (action === "view") return (this.modalSubmit.textContent = "ok");
-    if (action === "edit") return (this.modalSubmit.textContent = "edit");
-    if (action === "delete") return (this.modalSubmit.textContent = "delete");
-    if (action === "download")
-      return (this.modalSubmit.textContent = "download");
+    this.delSubmitBtnType();
+    if (action === "new") {
+      this.modalSubmit.textContent = "add";
+      this.setSubmitBtnType("valid-btn");
+      return;
+    }
+    if (action === "view") {
+      this.modalSubmit.textContent = "ok";
+      this.setSubmitBtnType("valid-btn");
+      return;
+    }
+    if (action === "edit") {
+      this.setSubmitBtnType("edit-btn");
+      this.modalSubmit.textContent = "edit";
+      return;
+    }
+
+    if (action === "delete") {
+      this.setSubmitBtnType("delete-btn");
+      this.modalSubmit.textContent = "delete";
+      return;
+    }
+    if (action === "download") {
+      this.setSubmitBtnType("info-btn");
+      this.modalSubmit.textContent = "download";
+      return;
+    }
+  }
+
+  setSubmitBtnType(btnType) {
+    this.modalSubmit.classList.add(btnType);
+  }
+
+  delSubmitBtnType() {
+    this.modalSubmit.classList.remove(
+      "delete-btn",
+      "valid-btn",
+      "edit-btn",
+      "info-btn"
+    );
   }
 
   //show only if type file and display text

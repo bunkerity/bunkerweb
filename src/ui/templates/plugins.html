@@ -6,7 +6,7 @@ include "plugins_modal.html" %}
 <div
   class="p-4 col-span-12 md:col-span-5 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="col-span-12 mb-4 font-bold dark:text-white">INFO</h5>
+  <h5 class="col-span-12 mb-4 font-bold dark:text-white/90">INFO</h5>
   <div class="mx-1 flex items-center my-4">
     <p
       class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
@@ -63,7 +63,7 @@ include "plugins_modal.html" %}
   data-{{current_endpoint}}-upload
   class="p-4 col-span-12 md:col-span-7 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="col-span-12 mb-4 font-bold dark:text-white">UPLOAD / RELOAD</h5>
+  <h5 class="col-span-12 mb-4 font-bold dark:text-white/90">UPLOAD / RELOAD</h5>
 
   <div class="mx-2 p-0 col-span-12 grid grid-cols-12">
     <!-- dropzone -->
@@ -115,7 +115,7 @@ include "plugins_modal.html" %}
   data-{{current_endpoint}}-filter
   class="p-4 col-span-12 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-2 font-bold dark:text-white">FILTER</h5>
+  <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
   <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
     <!-- search inpt-->
     <div class="flex flex-col relative col-span-12">
@@ -206,7 +206,7 @@ include "plugins_modal.html" %}
 <div
   class="min-h-[55vh] max-h-80 overflow-hidden overflow-y-auto p-4 col-span-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-4 mt-2 font-bold dark:text-white mx-2">LIST</h5>
+  <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LIST</h5>
 
   <div data-{{current_endpoint}}-list class="grid grid-cols-12 gap-3">
     {% for plugin in plugins %} {% if plugin['external'] %}

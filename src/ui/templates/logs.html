@@ -6,7 +6,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
   data-{{current_endpoint}}-settings
   class="col-span-12 lg:col-span-8 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-2 font-bold dark:text-white">SETTINGS</h5>
+  <h5 class="mb-2 font-bold dark:text-white/90">SETTINGS</h5>
   <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
     <!-- select instance -->
     <div
@@ -171,7 +171,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         data-submit-date
         type="button"
         id="submit-settings"
-        class="tracking-wide dark:brightness-125 hover:brightness-75 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+        class="tracking-widest dark:brightness-125 hover:brightness-75 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         Submit Date
       </button>
@@ -179,7 +179,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         data-submit-live="no"
         type="button"
         id="submit-settings"
-        class="hidden tracking-wide dark:brightness-125 hover:brightness-75 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+        class="hidden tracking-widest dark:brightness-125 hover:brightness-75 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         Go Live
       </button>
@@ -193,7 +193,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
   data-{{current_endpoint}}-filter
   class="col-span-12 lg:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-2 font-bold dark:text-white">FILTERS</h5>
+  <h5 class="mb-2 font-bold dark:text-white/90">FILTERS</h5>
   <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
     <!-- search inpt-->
     <div class="flex flex-col relative col-span-12">
@@ -308,7 +308,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <div
   class="min-h-50-screen col-span-12 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-4 mt-2 font-bold dark:text-white mx-2">LOGS</h5>
+  <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LOGS</h5>
   <!-- list container-->
   <div class="w-full grid grid-cols-12 rounded p-2">
     <!-- header-->
