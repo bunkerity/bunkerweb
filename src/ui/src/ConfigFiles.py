@@ -12,7 +12,7 @@ from utils import path_to_dict
 def generate_custom_configs(
     custom_configs: List[Dict[str, Any]],
     *,
-    original_path: str = "/data/configs",
+    original_path: str = "/etc/bunkerweb/configs",
 ):
     Path(original_path).mkdir(parents=True, exist_ok=True)
     for custom_config in custom_configs:
@@ -41,7 +41,7 @@ class ConfigFiles:
             if custom_configs:
                 self.__logger.info("Refreshing custom configs ...")
                 # Remove old custom configs files
-                for file in glob("/data/configs/*"):
+                for file in glob("/etc/bunkerweb/configs/*"):
                     if Path(file).is_symlink() or Path(file).is_file():
                         Path(file).unlink()
                     elif Path(file).is_dir():

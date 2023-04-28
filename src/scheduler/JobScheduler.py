@@ -169,12 +169,12 @@ class JobScheduler(ApiCaller):
         if reload:
             try:
                 if self._get_apis():
-                    self.__logger.info("Sending /data/cache folder ...")
-                    if not self._send_files("/data/cache", "/cache"):
+                    self.__logger.info("Sending /var/cache/bunkerweb folder ...")
+                    if not self._send_files("/var/cache/bunkerweb", "/cache"):
                         success = False
-                        self.__logger.error("Error while sending /data/cache folder")
+                        self.__logger.error("Error while sending /var/cache/bunkerweb folder")
                     else:
-                        self.__logger.info("Successfully sent /data/cache folder")
+                        self.__logger.info("Successfully sent /var/cache/bunkerweb folder")
                 if not self.__reload():
                     success = False
             except:

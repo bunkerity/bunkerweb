@@ -15,9 +15,9 @@ class SwarmTest(Test):
         self._domains = {
             r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
             r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
-            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
-            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
-            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
+            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
+            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN2')}",
+            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN3')}",
         }
 
     @staticmethod

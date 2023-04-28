@@ -43,11 +43,11 @@ try:
 
     # Cluster case
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
-        # Create tarball of /data/cache/letsencrypt
+        # Create tarball of /var/cache/bunkerweb/letsencrypt
         tgz = BytesIO()
 
         with tar_open(mode="w:gz", fileobj=tgz) as tf:
-            tf.add("/data/cache/letsencrypt", arcname=".")
+            tf.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 

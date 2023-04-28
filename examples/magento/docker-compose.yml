@@ -61,7 +61,7 @@ services:
       - MAGENTO_ENABLE_HTTPS=yes
       - MAGENTO_ENABLE_ADMIN_HTTPS=yes
       - MAGENTO_DATABASE_HOST=mydb
-      - MAGENTO_DATABASE_NAME=mangentodb
+      - MAGENTO_DATABASE_NAME=magentodb
       - MAGENTO_DATABASE_USER=user
       - MAGENTO_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
       - ELASTICSEARCH_HOST=myelasticsearch

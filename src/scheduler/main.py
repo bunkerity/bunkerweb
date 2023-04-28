@@ -95,7 +95,7 @@ def generate_custom_configs(
     integration: str,
     api_caller: ApiCaller,
     *,
-    original_path: str = "/data/configs",
+    original_path: str = "/etc/bunkerweb/configs",
 ):
     Path(original_path).mkdir(parents=True, exist_ok=True)
     for custom_config in custom_configs:
@@ -108,7 +108,7 @@ def generate_custom_configs(
 
     if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
         logger.info("Sending custom configs to BunkerWeb")
-        ret = api_caller._send_files("/data/configs", "/custom_configs")
+        ret = api_caller._send_files("/etc/bunkerweb/configs", "/custom_configs")
 
         if not ret:
             logger.error(
@@ -121,7 +121,7 @@ def generate_external_plugins(
     integration: str,
     api_caller: ApiCaller,
     *,
-    original_path: str = "/data/plugins",
+    original_path: str = "/etc/bunkerweb/plugins",
 ):
     Path(original_path).mkdir(parents=True, exist_ok=True)
     for plugin in plugins:
@@ -139,7 +139,7 @@ def generate_external_plugins(
 
     if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
         logger.info("Sending plugins to BunkerWeb")
-        ret = api_caller._send_files("/data/plugins", "/plugins")
+        ret = api_caller._send_files("/etc/bunkerweb/plugins", "/plugins")
 
         if not ret:
             logger.error(
@@ -372,11 +372,11 @@ if __name__ == "__main__":
             try:
                 if len(api_caller._get_apis()) > 0:
                     # send cache
-                    logger.info("Sending /data/cache folder ...")
-                    if not api_caller._send_files("/data/cache", "/cache"):
-                        logger.error("Error while sending /data/cache folder")
+                    logger.info("Sending /var/cache/bunkerweb folder ...")
+                    if not api_caller._send_files("/var/cache/bunkerweb", "/cache"):
+                        logger.error("Error while sending /var/cache/bunkerweb folder")
                     else:
-                        logger.info("Successfully sent /data/cache folder")
+                        logger.info("Successfully sent /var/cache/bunkerweb folder")
 
                 # restart nginx
                 if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
@@ -452,7 +452,7 @@ if __name__ == "__main__":
 
                     # Remove old custom configs files
                     logger.info("Removing old custom configs files ...")
-                    for file in glob("/data/configs/*"):
+                    for file in glob("/etc/bunkerweb/configs/*"):
                         if Path(file).is_symlink() or Path(file).is_file():
                             Path(file).unlink()
                         elif Path(file).is_dir():
@@ -496,7 +496,7 @@ if __name__ == "__main__":
 
                     # Remove old external plugins files
                     logger.info("Removing old external plugins files ...")
-                    for file in glob("/data/plugins/*"):
+                    for file in glob("/etc/bunkerweb/plugins/*"):
                         if Path(file).is_symlink() or Path(file).is_file():
                             Path(file).unlink()
                         elif Path(file).is_dir():

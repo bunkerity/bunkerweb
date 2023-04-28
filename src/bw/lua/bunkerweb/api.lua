@@ -48,11 +48,11 @@ api.global.POST["^/confs$"] = function(self)
 	elseif ngx.ctx.bw.uri == "/data" then
 		destination = "/data"
 	elseif ngx.ctx.bw.uri == "/cache" then
-		destination = "/data/cache"
+		destination = "/var/cache/bunkerweb"
 	elseif ngx.ctx.bw.uri == "/custom_configs" then
-		destination = "/data/configs"
+		destination = "/etc/bunkerweb/configs"
 	elseif ngx.ctx.bw.uri == "/plugins" then
-		destination = "/data/plugins"
+		destination = "/etc/bunkerweb/plugins"
 	end
 	local form, err = upload:new(4096)
 	if not form then

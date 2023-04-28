@@ -40,13 +40,13 @@ def install_plugin(plugin_dir) -> bool:
     with open(f"{plugin_dir}/plugin.json", "rb") as f:
         metadata = loads(f.read())
     # Don't go further if plugin is already installed
-    if Path(f"/data/plugins/{metadata['id']}/plugin.json").is_file():
+    if Path(f"/etc/bunkerweb/plugins/{metadata['id']}/plugin.json").is_file():
         logger.warning(
             f"Skipping installation of plugin {metadata['id']} (already installed)",
         )
         return False
     # Copy the plugin
-    copytree(plugin_dir, f"/data/plugins/{metadata['id']}")
+    copytree(plugin_dir, f"/etc/bunkerweb/plugins/{metadata['id']}")
     # Add u+x permissions to jobs files
     for job_file in glob(f"{plugin_dir}/jobs/*"):
         st = stat(job_file)
@@ -118,8 +118,8 @@ try:
 
     external_plugins = []
     external_plugins_ids = []
-    for plugin in listdir("/data/plugins"):
-        path = f"/data/plugins/{plugin}"
+    for plugin in listdir("/etc/bunkerweb/plugins"):
+        path = f"/etc/bunkerweb/plugins/{plugin}"
         if not Path(f"{path}/plugin.json").is_file():
             logger.warning(f"Plugin {plugin} is not valid, deleting it...")
             rmtree(path)

@@ -3,7 +3,7 @@
 ## Overview
 
 <p align="center">
-	<iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/2n4EarhW7-Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	<iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
