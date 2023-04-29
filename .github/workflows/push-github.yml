@@ -49,7 +49,7 @@ jobs:
 
             Changelog : 
             ${{steps.getchangelog.outputs.content}}
-          draft: false
+          draft: true
           prerelease: ${{ inputs.PRERELEASE }}
           name: v${{ inputs.VERSION }}
           tag_name: v${{ inputs.VERSION }}

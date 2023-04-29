@@ -373,7 +373,7 @@ jobs:
 
   # Push doc
   push-doc:
-    needs: [publish-gh]
+    needs: [push-gh]
     permissions:
       contents: write
     uses: ./.github/workflows/push-doc.yml
