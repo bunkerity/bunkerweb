@@ -21,7 +21,7 @@ jobs:
       - name: Install doc requirements
         run: pip install -r docs/requirements.txt
       - name: Install chromium
-        uses: apt install chromium-browser
+        run: apt install chromium-browser
       - name: Install node
         uses: actions/setup-node@v3
         with:
