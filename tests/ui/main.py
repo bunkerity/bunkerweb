@@ -9,7 +9,6 @@ from typing import List, Union
 from requests import get
 from requests.exceptions import RequestException
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
@@ -82,11 +81,11 @@ try:
                 clicked = True
 
     def assert_alert_message(driver, message: str):
-        safe_get_element(driver, By.XPATH, "//button[@flash-sidebar-open='']")
+        safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
 
         sleep(0.3)
 
-        assert_button_click(driver, "//button[@flash-sidebar-open='']")
+        assert_button_click(driver, "//button[@data-flash-sidebar-open='']")
 
         error = False
         while True:
@@ -94,7 +93,7 @@ try:
                 alerts = safe_get_element(
                     driver,
                     By.XPATH,
-                    "//aside[@flash-sidebar='']/div[2]/div",
+                    "//aside[@data-flash-sidebar='']/div[2]/div",
                     multiple=True,
                     error=True,
                 )
@@ -124,7 +123,7 @@ try:
         )
 
         assert_button_click(
-            driver, "//aside[@flash-sidebar='']/*[local-name() = 'svg']"
+            driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']"
         )
 
     def access_page(
@@ -199,7 +198,7 @@ try:
 
         print("Waiting for toast ...", flush=True)
 
-        toast = safe_get_element(driver, By.XPATH, "//div[@flash-message='']")
+        toast = safe_get_element(driver, By.XPATH, "//div[@data-flash-message='']")
 
         print("Toast found", flush=True)
 
@@ -441,7 +440,7 @@ try:
                 safe_get_element(
                     driver,
                     By.XPATH,
-                    "//form[@id='form-edit-global-configs']//div[@setting-container='' and not(contains(@class, 'hidden'))]",
+                    "//form[@id='form-edit-global-configs']//div[@data-setting-container='' and not(contains(@class, 'hidden'))]",
                     multiple=True,
                 )
             )
@@ -465,7 +464,7 @@ try:
 
         try:
             service = safe_get_element(
-                driver, By.XPATH, "//div[@services-service='']", error=True
+                driver, By.XPATH, "//div[@data-services-service='']", error=True
             )
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
@@ -490,7 +489,7 @@ try:
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
-                        "//button[@services-action='delete' and @services-name='www.example.com']",
+                        "//button[@data-services-action='delete' and @services-name='www.example.com']",
                     )
                 )
             )
@@ -508,12 +507,13 @@ try:
         )
 
         assert_button_click(
-            driver, service.find_element(By.XPATH, ".//button[@services-action='edit']")
+            driver,
+            service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
         )
 
         try:
             modal = safe_get_element(
-                driver, By.XPATH, "//div[@services-modal='']", error=True
+                driver, By.XPATH, "//div[@data-services-modal='']", error=True
             )
         except TimeoutException:
             print("Modal not found, exiting ...", flush=True)
@@ -538,11 +538,11 @@ try:
 
         assert_button_click(
             driver,
-            safe_get_element(driver, By.XPATH, "//button[@tab-handler='gzip']"),
+            safe_get_element(driver, By.XPATH, "//button[@data-tab-handler='gzip']"),
         )
 
         gzip_select = safe_get_element(
-            driver, By.XPATH, "//button[@setting-select='gzip-comp-level']"
+            driver, By.XPATH, "//button[@data-setting-select='gzip-comp-level']"
         )
 
         assert_button_click(driver, gzip_select)
@@ -552,14 +552,14 @@ try:
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//button[@setting-select-dropdown-btn='gzip-comp-level' and @value='6']",
+                "//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']",
             ),
         )
 
         access_page(
             driver,
             driver_wait,
-            "//button[@services-modal-submit='']",
+            "//button[@data-services-modal-submit='']",
             "services",
             False,
         )
@@ -571,17 +571,18 @@ try:
 
         try:
             service = safe_get_element(
-                driver, By.XPATH, "//div[@services-service='']", error=True
+                driver, By.XPATH, "//div[@data-services-service='']", error=True
             )
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
             exit(1)
 
         assert_button_click(
-            driver, service.find_element(By.XPATH, ".//button[@services-action='edit']")
+            driver,
+            service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
         )
 
-        modal = safe_get_element(driver, By.XPATH, "//div[@services-modal='']")
+        modal = safe_get_element(driver, By.XPATH, "//div[@data-services-modal='']")
 
         if "hidden" in modal.get_attribute("class"):
             print(
@@ -591,7 +592,7 @@ try:
 
         assert_button_click(
             driver,
-            driver.find_element(By.XPATH, "//button[@tab-handler='gzip']"),
+            driver.find_element(By.XPATH, "//button[@data-tab-handler='gzip']"),
         )
 
         gzip_true_select = safe_get_element(driver, By.ID, "GZIP_COMP_LEVEL")
@@ -617,7 +618,7 @@ try:
                 access_page(
                     driver,
                     driver_wait,
-                    "//button[@services-modal-submit='']",
+                    "//button[@data-services-modal-submit='']",
                     "services",
                     False,
                 )
@@ -643,29 +644,31 @@ try:
 
                 try:
                     service = safe_get_element(
-                        driver, By.XPATH, "//div[@services-service='']", error=True
+                        driver, By.XPATH, "//div[@data-services-service='']", error=True
                     )
                 except TimeoutException:
                     print("Services not found, exiting ...", flush=True)
                     exit(1)
 
-                assert_button_click(service, ".//button[@services-action='edit']")
+                assert_button_click(service, ".//button[@data-services-action='edit']")
 
         print("Creating a new service ...", flush=True)
 
-        assert_button_click(driver, "//button[@services-action='new']")
+        assert_button_click(driver, "//button[@data-services-action='new']")
 
         server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")
         server_name_input.clear()
         server_name_input.send_keys("app1.example.com")
 
-        assert_button_click(driver, "//button[@tab-handler='reverseproxy']")
+        assert_button_click(driver, "//button[@data-tab-handler='reverseproxy']")
 
         assert_button_click(
             driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
         )
 
-        assert_button_click(driver, "//button[@services-multiple-add='reverse-proxy']")
+        assert_button_click(
+            driver, "//button[@data-services-multiple-add='reverse-proxy']"
+        )
 
         safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
             "http://app1:8080"
@@ -675,7 +678,7 @@ try:
         access_page(
             driver,
             driver_wait,
-            "//button[@services-modal-submit='']",
+            "//button[@data-services-modal-submit='']",
             "services",
             False,
         )
@@ -684,7 +687,7 @@ try:
             services = safe_get_element(
                 driver,
                 By.XPATH,
-                "//div[@services-service='']",
+                "//div[@data-services-service='']",
                 multiple=True,
                 error=True,
             )
@@ -717,7 +720,7 @@ try:
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//button[@services-action='edit' and @services-name='www.example.com']//ancestor::div//a",
+                "//button[@data-services-action='edit' and @data-services-name='www.example.com']//ancestor::div//a",
                 error=True,
             )
         except TimeoutException:
@@ -756,7 +759,7 @@ try:
             delete_button = safe_get_element(
                 driver,
                 By.XPATH,
-                "//button[@services-action='delete' and @services-name='app1.example.com']",
+                "//button[@data-services-action='delete' and @data-services-name='app1.example.com']",
                 error=True,
             )
         except TimeoutException:
@@ -776,7 +779,7 @@ try:
         access_page(
             driver,
             driver_wait,
-            "//form[@services-modal-form-delete='']//button[@type='submit']",
+            "//form[@data-services-modal-form-delete='']//button[@type='submit']",
             "services",
             False,
         )
@@ -792,7 +795,7 @@ try:
             services = safe_get_element(
                 driver,
                 By.XPATH,
-                "//div[@services-service='']",
+                "//div[@data-services-service='']",
                 multiple=True,
                 error=True,
             )
@@ -821,15 +824,15 @@ try:
         print("Trying to create a new config ...", flush=True)
 
         assert_button_click(
-            driver, "//div[@configs-element='server-http' and @_type='folder']"
+            driver, "//div[@data-configs-element='server-http' and @_type='folder']"
         )
-        assert_button_click(driver, "//li[@configs-add-file='']/button")
+        assert_button_click(driver, "//li[@data-configs-add-file='']/button")
 
         safe_get_element(
-            driver, By.XPATH, "//div[@configs-modal-path='']/input"
+            driver, By.XPATH, "//div[@data-configs-modal-path='']/input"
         ).send_keys("hello")
         safe_get_element(
-            driver, By.XPATH, "//div[@configs-modal-editor='']/textarea"
+            driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea"
         ).send_keys(
             """
             location /hello {
@@ -842,7 +845,11 @@ try:
         )
 
         access_page(
-            driver, driver_wait, "//button[@configs-modal-submit='']", "configs", False
+            driver,
+            driver_wait,
+            "//button[@data-configs-modal-submit='']",
+            "configs",
+            False,
         )
 
         assert_alert_message(driver, "was successfully created")
@@ -875,16 +882,21 @@ try:
         driver.switch_to.window(driver.window_handles[0])
 
         assert_button_click(
-            driver, "//div[@configs-element='server-http' and @_type='folder']"
+            driver,
+            "//div[@data-configs-element='server-http' and @data-_type='folder']",
         )
-        assert_button_click(driver, "//div[@configs-action-button='hello.conf']")
+        assert_button_click(driver, "//div[@data-configs-action-button='hello.conf']")
         assert_button_click(
             driver,
-            "//div[@configs-action-dropdown='hello.conf']/button[@value='delete' and @configs-action-dropdown-btn='hello.conf']",
+            "//div[@data-configs-action-dropdown='hello.conf']/button[@value='delete' and @data-configs-action-dropdown-btn='hello.conf']",
         )
 
         access_page(
-            driver, driver_wait, "//button[@configs-modal-submit='']", "configs", False
+            driver,
+            driver_wait,
+            "//button[@data-configs-modal-submit='']",
+            "configs",
+            False,
         )
 
         assert_alert_message(driver, "was successfully deleted")
@@ -903,7 +915,7 @@ try:
         print("Trying to reload the plugins without adding any ...", flush=True)
 
         reload_button = safe_get_element(
-            driver, By.XPATH, "//div[@plugins-upload='']//button[@type='submit']"
+            driver, By.XPATH, "//div[@data-plugins-upload='']//button[@type='submit']"
         )
 
         if reload_button.get_attribute("disabled") is None:
@@ -917,7 +929,7 @@ try:
         ).send_keys("Anti")
 
         plugins = safe_get_element(
-            driver, By.XPATH, "//div[@plugins-list='']", multiple=True
+            driver, By.XPATH, "//div[@data-plugins-list='']", multiple=True
         )
 
         if len(plugins) != 1:
@@ -933,7 +945,7 @@ try:
         access_page(
             driver,
             driver_wait,
-            "//div[@plugins-upload='']//button[@type='submit']",
+            "//div[@data-plugins-upload='']//button[@type='submit']",
             "plugins",
             False,
         )
@@ -952,7 +964,7 @@ try:
         access_page(
             driver,
             driver_wait,
-            "//div[@plugins-upload='']//button[@type='submit']",
+            "//div[@data-plugins-upload='']//button[@type='submit']",
             "plugins",
             False,
         )
@@ -960,7 +972,10 @@ try:
         assert_alert_message(driver, "Successfully created plugin")
 
         external_plugins = safe_get_element(
-            driver, By.XPATH, "//div[@plugins-external=' external ']", multiple=True
+            driver,
+            By.XPATH,
+            "//div[@data-plugins-external=' external ']",
+            multiple=True,
         )
 
         if len(external_plugins) != 1:
@@ -971,13 +986,13 @@ try:
 
         assert_button_click(
             driver,
-            "//button[@plugins-action='delete' and @name='discord']",
+            "//button[@data-plugins-action='delete' and @name='discord']",
         )
 
         access_page(
             driver,
             driver_wait,
-            "//form[@plugins-modal-form-delete='']//button[@type='submit']",
+            "//form[@data-plugins-modal-form-delete='']//button[@type='submit']",
             "plugins",
             False,
         )
@@ -985,7 +1000,10 @@ try:
         with suppress(TimeoutException):
             title = WebDriverWait(driver, 2).until(
                 EC.presence_of_element_located(
-                    (By.XPATH, "//button[@plugins-action='delete' and @name='discord']")
+                    (
+                        By.XPATH,
+                        "//button[@data-plugins-action='delete' and @name='discord']",
+                    )
                 )
             )
 
@@ -1003,30 +1021,32 @@ try:
 
         print("Trying to open a cache file ...", flush=True)
 
-        assert_button_click(driver, "//div[@cache-element='mmdb-asn/asn.mmdb']")
+        assert_button_click(driver, "//div[@data-cache-element='mmdb-asn/asn.mmdb']")
 
         if (
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//div[@cache-modal-editor='']/div[@class='ace_scroller']//div[@class='ace_line']",
+                "//div[@data-cache-modal-editor='']/div[@class='ace_scroller']//div[@class='ace_line']",
             ).text.strip()
             != "Download file to view content"
         ):
             print("The cache file content is not correct, exiting ...", flush=True)
             exit(1)
 
-        assert_button_click(driver, "//button[@cache-modal-submit='']")
+        assert_button_click(driver, "//button[@data-cache-modal-submit='']")
 
         print(
             "The cache file content is correct, trying to download it ...", flush=True
         )
 
-        assert_button_click(driver, "//div[@cache-action-button='mmdb-asn/asn.mmdb']")
+        assert_button_click(
+            driver, "//div[@data-cache-action-button='mmdb-asn/asn.mmdb']"
+        )
 
         assert_button_click(
             driver,
-            "//div[@cache-action-dropdown='mmdb-asn/asn.mmdb']/button[@value='download']",
+            "//div[@data-cache-action-dropdown='mmdb-asn/asn.mmdb']/button[@value='download']",
         )
 
         sleep(0.3)
@@ -1045,12 +1065,12 @@ try:
 
         print("Selecting correct instance ...", flush=True)
 
-        assert_button_click(driver, "//button[@logs-setting-select='instances']")
+        assert_button_click(driver, "//button[@data-logs-setting-select='instances']")
 
         instances = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@logs-setting-select-dropdown='instances']/button",
+            "//div[@data-logs-setting-select-dropdown='instances']/button",
             multiple=True,
         )
 
@@ -1066,7 +1086,7 @@ try:
         sleep(3)
 
         logs_list = safe_get_element(
-            driver, By.XPATH, "//ul[@logs-list='']/li", multiple=True
+            driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True
         )
 
         if len(logs_list) == 0:
@@ -1084,7 +1104,7 @@ try:
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//ul[@logs-list='']/li[not(contains(@class, 'hidden'))]",
+                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
                 multiple=True,
             )
         ):
@@ -1099,7 +1119,7 @@ try:
         sleep(3)
 
         logs_list = safe_get_element(
-            driver, By.XPATH, "//ul[@logs-list='']/li", multiple=True
+            driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True
         )
 
         print("Trying filters ...", flush=True)
@@ -1114,7 +1134,7 @@ try:
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//ul[@logs-list='']/li[not(contains(@class, 'hidden'))]",
+                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
                 multiple=True,
             )
         ):
@@ -1125,29 +1145,29 @@ try:
 
         print("Keyword filter is working, trying type filter ...", flush=True)
 
-        assert_button_click(driver, "//button[@logs-setting-select='types']")
+        assert_button_click(driver, "//button[@data-logs-setting-select='types']")
 
         assert_button_click(
             driver,
-            "//div[@logs-setting-select-dropdown='types']/button[@value='warn']",
+            "//div[@data-logs-setting-select-dropdown='types']/button[@value='warn']",
         )
 
         if len(logs_list) == len(
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//ul[@logs-list='']/li[not(contains(@class, 'hidden'))]",
+                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
                 multiple=True,
             )
         ):
             print("The keyword filter is not working, exiting ...", flush=True)
             exit(1)
 
-        assert_button_click(driver, "//button[@logs-setting-select='types']")
+        assert_button_click(driver, "//button[@data-logs-setting-select='types']")
 
         assert_button_click(
             driver,
-            "//div[@logs-setting-select-dropdown='types']/button[@value='all']",
+            "//div[@data-logs-setting-select-dropdown='types']/button[@value='all']",
         )
 
         print("Type filter is working, trying to filter by date ...", flush=True)
@@ -1174,7 +1194,7 @@ try:
         print("Trying to filter jobs ...", flush=True)
 
         jobs_list = safe_get_element(
-            driver, By.XPATH, "//ul[@jobs-list='']/li", multiple=True
+            driver, By.XPATH, "//ul[@data-jobs-list='']/li", multiple=True
         )
 
         if len(jobs_list) == 0:
@@ -1190,7 +1210,7 @@ try:
                 safe_get_element(
                     driver,
                     By.XPATH,
-                    "//ul[@jobs-list='']/li[not(contains(@class, 'hidden'))]",
+                    "//ul[@data-jobs-list='']/li[not(contains(@class, 'hidden'))]",
                     multiple=True,
                     error=True,
                 )
@@ -1207,11 +1227,11 @@ try:
 
         sleep(0.3)
 
-        assert_button_click(driver, "//button[@jobs-setting-select='success']")
+        assert_button_click(driver, "//button[@data-jobs-setting-select='success']")
 
         assert_button_click(
             driver,
-            "//div[@jobs-setting-select-dropdown='success']/button[@value='false']",
+            "//div[@data-jobs-setting-select-dropdown='success']/button[@value='false']",
         )
 
         with suppress(TimeoutException):
@@ -1221,7 +1241,7 @@ try:
                     safe_get_element(
                         driver,
                         By.XPATH,
-                        "//ul[@jobs-list='']/li[not(contains(@class, 'hidden'))]",
+                        "//ul[@data-jobs-list='']/li[not(contains(@class, 'hidden'))]",
                         multiple=True,
                         error=True,
                     )
@@ -1230,7 +1250,7 @@ try:
                 safe_get_element(
                     driver,
                     By.XPATH,
-                    "//ul[@jobs-list='']//p[@jobs-success='false']",
+                    "//ul[@data-jobs-list='']//p[@data-jobs-success='false']",
                     multiple=True,
                     error=True,
                 )
@@ -1238,11 +1258,11 @@ try:
                 print("The success filter is not working, exiting ...", flush=True)
                 exit(1)
 
-        assert_button_click(driver, "//button[@jobs-setting-select='success']")
+        assert_button_click(driver, "//button[@data-jobs-setting-select='success']")
 
         assert_button_click(
             driver,
-            "//div[@jobs-setting-select-dropdown='success']/button[@value='all']",
+            "//div[@data-jobs-setting-select-dropdown='success']/button[@value='all']",
         )
 
         print(
@@ -1252,11 +1272,11 @@ try:
 
         sleep(0.3)
 
-        assert_button_click(driver, "//button[@jobs-setting-select='reload']")
+        assert_button_click(driver, "//button[@data-jobs-setting-select='reload']")
 
         assert_button_click(
             driver,
-            "//div[@jobs-setting-select-dropdown='reload']/button[@value='true']",
+            "//div[@data-jobs-setting-select-dropdown='reload']/button[@value='true']",
         )
 
         with suppress(TimeoutException):
@@ -1266,7 +1286,7 @@ try:
                     safe_get_element(
                         driver,
                         By.XPATH,
-                        "//ul[@jobs-list='']/li[not(contains(@class, 'hidden'))]",
+                        "//ul[@data-jobs-list='']/li[not(contains(@class, 'hidden'))]",
                         multiple=True,
                         error=True,
                     )
@@ -1275,7 +1295,7 @@ try:
                 safe_get_element(
                     driver,
                     By.XPATH,
-                    "//ul[@jobs-list='']//p[@jobs-reload='true']",
+                    "//ul[@data-jobs-list='']//p[@data-jobs-reload='true']",
                     multiple=True,
                     error=True,
                 )
@@ -1283,11 +1303,11 @@ try:
                 print("The reload filter is not working, exiting ...", flush=True)
                 exit(1)
 
-        assert_button_click(driver, "//button[@jobs-setting-select='reload']")
+        assert_button_click(driver, "//button[@data-jobs-setting-select='reload']")
 
         assert_button_click(
             driver,
-            "//div[@jobs-setting-select-dropdown='reload']/button[@value='all']",
+            "//div[@data-jobs-setting-select-dropdown='reload']/button[@value='all']",
         )
 
         print("Reload filter is working, trying jobs cache ...", flush=True)
