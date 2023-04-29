@@ -17,11 +17,10 @@ jobs:
       DOCKERFILE: src/bw/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-bw-386:
     uses: ./.github/workflows/container-build.yml
     with:
@@ -31,11 +30,10 @@ jobs:
       DOCKERFILE: src/bw/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: 386
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build SC amd64 + i386 images
   build-sc-amd64:
@@ -47,11 +45,10 @@ jobs:
       DOCKERFILE: src/scheduler/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-sc-386:
     uses: ./.github/workflows/container-build.yml
     with:
@@ -61,11 +58,10 @@ jobs:
       DOCKERFILE: src/scheduler/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: 386
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build AU amd64 + i386 images
   build-au-amd64:
@@ -77,11 +73,10 @@ jobs:
       DOCKERFILE: src/autoconf/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-au-386:
     uses: ./.github/workflows/container-build.yml
     with:
@@ -91,11 +86,10 @@ jobs:
       DOCKERFILE: src/autoconf/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: 386
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build UI amd64 + i386 images
   build-ui-amd64:
@@ -107,11 +101,10 @@ jobs:
       DOCKERFILE: src/ui/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-ui-386:
     uses: ./.github/workflows/container-build.yml
     with:
@@ -121,11 +114,10 @@ jobs:
       DOCKERFILE: src/ui/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: 386
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build arm64 + arm/v7 images
   build-bw-arm:
@@ -137,11 +129,11 @@ jobs:
       DOCKERFILE: src/bw/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: arm
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      
   build-sc-arm:
     needs: ["build-bw-arm"]
     uses: ./.github/workflows/container-build.yml

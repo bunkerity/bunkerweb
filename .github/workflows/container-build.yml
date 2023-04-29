@@ -23,6 +23,10 @@ on:
         required: false
         type: boolean
         default: true
+      CACHE_SUFFIX:
+        required: false
+        type: boolean
+        default: ""
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -31,6 +35,10 @@ on:
       PRIVATE_REGISTRY:
         required: false
       PRIVATE_REGISTRY_TOKEN:
+        required: false
+      ARM_SSH_KEY:
+        required: false
+      ARM_SSH_CONFIG:
         required: false
 
 jobs:
@@ -54,6 +62,20 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      - name: Setup SSH for ARM node
+        if: inputs.CACHE_SUFFIX == 'arm'
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" > ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Append ARM node to buildx
+        if: inputs.CACHE_SUFFIX == 'arm'
+        run: |
+          docker buildx create --append --name ${{ steps.buildx.outputs.name }} --node arm --platform linux/arm64,linux/arm/v7,linux/arm/v6 ssh://ubuntu@arm
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
@@ -76,7 +98,7 @@ jobs:
           platforms: ${{ inputs.ARCH }}
           load: true
           tags: local/${{ inputs.IMAGE }}
-          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.ARCH }},mode=min
+          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         uses: aquasecurity/trivy-action@master
