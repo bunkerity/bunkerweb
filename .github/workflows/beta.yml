@@ -401,6 +401,7 @@ jobs:
     permissions:
       contents: write
     uses: ./.github/workflow/push-doc.yml
+    with:
       VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
       ALIAS: beta
 
