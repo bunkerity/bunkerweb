@@ -219,7 +219,7 @@ jobs:
       RUNS_ON: "['self-hosted', 'bw-linux']"
     secrets: inherit
   tests-ui:
-    needs: [code-security, build-ui, build-bw, build-sc]
+    needs: [code-security, build-bw, build-sc, build-ui]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: staging
