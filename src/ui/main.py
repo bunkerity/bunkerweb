@@ -483,8 +483,6 @@ def services():
                 ):
                     del variables[variable]
 
-            print(variables, flush=True)
-
             error = app.config["CONFIG"].check_variables(variables)
 
             if error:
@@ -635,8 +633,6 @@ def configs():
         del variables["csrf_token"]
 
         operation = app.config["CONFIGFILES"].check_path(variables["path"])
-
-        print(variables, flush=True)
 
         if operation:
             flash(operation, "error")
