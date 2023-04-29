@@ -68,7 +68,7 @@ jobs:
           cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
       # Build non-cached image
       - name: Build image
-        if: if: inputs.CACHE != true
+        if: inputs.CACHE != true
         uses: docker/build-push-action@v3
         with:
           context: .
