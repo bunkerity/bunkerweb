@@ -8,30 +8,30 @@ on:
 
 jobs:
   # Containers
-  # build-bw:
-  #   uses: ./.github/workflows/container-build.yml
-  #   with:
-  #     RELEASE: staging
-  #     ARCH: linux/amd64
-  #     IMAGE: bunkerweb
-  #     DOCKERFILE: src/bw/Dockerfile
-  #   secrets:
-  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  # build-scheduler:
-  #   uses: ./.github/workflows/container-build.yml
-  #   with:
-  #     RELEASE: staging
-  #     ARCH: linux/amd64
-  #     IMAGE: scheduler
-  #     DOCKERFILE: src/scheduler/Dockerfile
-  #   secrets:
-  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-bw:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: staging
+      ARCH: linux/amd64
+      IMAGE: bunkerweb
+      DOCKERFILE: src/bw/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-scheduler:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: staging
+      ARCH: linux/amd64
+      IMAGE: scheduler
+      DOCKERFILE: src/scheduler/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   # build-autoconf:
   #   uses: ./.github/workflows/container-build.yml
   #   with:
@@ -44,18 +44,18 @@ jobs:
   #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
   #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
   #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  # build-ui:
-  #   uses: ./.github/workflows/container-build.yml
-  #   with:
-  #     RELEASE: staging
-  #     ARCH: linux/amd64
-  #     IMAGE: ui
-  #     DOCKERFILE: src/ui/Dockerfile
-  #   secrets:
-  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-ui:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: staging
+      ARCH: linux/amd64
+      IMAGE: ui
+      DOCKERFILE: src/ui/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Linux
   build-ubuntu:
@@ -219,7 +219,7 @@ jobs:
       RUNS_ON: "['self-hosted', 'bw-linux']"
     secrets: inherit
   tests-ui:
-    needs: [code-security, build-ui]
+    needs: [code-security, build-ui, build-bw, build-sc]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: staging
