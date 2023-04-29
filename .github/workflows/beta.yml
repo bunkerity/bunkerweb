@@ -344,7 +344,7 @@ jobs:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-rhel:
     needs: [wait-builds]
-    uses: ./.github/workflows/staging-push-packagecloud.yml
+    uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: "-"
       SUFFIX: 1.x86_64
