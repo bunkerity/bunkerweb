@@ -366,7 +366,7 @@ jobs:
     needs: [doc-pdf]
     permissions:
       contents: write
-    uses: ./.github/workflow/push-github.yml
+    uses: ./.github/workflows/push-github.yml
     with:
       VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
       PRERELEASE: false
@@ -376,7 +376,7 @@ jobs:
     needs: [publish-gh]
     permissions:
       contents: write
-    uses: ./.github/workflow/push-doc.yml
+    uses: ./.github/workflows/push-doc.yml
     with:
       VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
       ALIAS: latest
