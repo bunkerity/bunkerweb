@@ -223,6 +223,7 @@ jobs:
 
   # Wait for all builds and extract VERSION
   wait-builds:
+    runs-on: ubuntu-latest
     needs: [
       build-bw-amd64, build-bw-386,
       build-sc-amd64, build-sc-386,
@@ -320,7 +321,7 @@ jobs:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-rhel:
     needs: [wait-builds]
-    uses: ./.github/workflows/staging-push-packagecloud.yml
+    uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: "-"
       SUFFIX: 1.x86_64
