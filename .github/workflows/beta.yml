@@ -133,7 +133,8 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-sc-arm:
     needs: ["build-bw-arm"]
     uses: ./.github/workflows/container-build.yml
@@ -147,8 +148,8 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-au-arm:
     needs: ["build-sc-arm"]
     uses: ./.github/workflows/container-build.yml
@@ -162,8 +163,8 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-ui-arm:
     needs: ["build-au-arm"]
     uses: ./.github/workflows/container-build.yml
@@ -177,8 +178,8 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
   # Linux packages
   build-ubuntu:
