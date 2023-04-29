@@ -1,4 +1,4 @@
-name: Push staging packagecloud (REUSABLE)
+name: Push packagecloud (REUSABLE)
 
 on:
   workflow_call:
@@ -21,6 +21,9 @@ on:
       PACKAGE:
         required: true
         type: string
+      BW_VERSION:
+        required: true
+        type: string
     secrets:
       PACKAGECLOUD_TOKEN:
         required: true
@@ -32,10 +35,6 @@ jobs:
       # Prepare
       - name: Check out repository code
         uses: actions/checkout@v3
-      - name: Set variables
-        run: |
-          VER=$(cat src/VERSION | tr -d '\n')
-          echo "VERSION=$VER" >> $GITHUB_ENV
       - name: Install ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -49,7 +48,7 @@ jobs:
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ env.VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
@@ -57,7 +56,7 @@ jobs:
       - name: Push package to packagecloud
         uses: danielmundi/upload-packagecloud@v1
         with:
-          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/bunkerweb${{ inputs.SEPARATOR }}${{ env.VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}

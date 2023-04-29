@@ -1,8 +1,11 @@
-name: Build staging Linux package (REUSABLE)
+name: Build Linux package (REUSABLE)
 
 on:
   workflow_call:
     inputs:
+      RELEASE:
+        required: true
+        type: string
       LINUX:
         required: true
         type: string
@@ -39,8 +42,9 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # Build package image
+      # Build staging package image
       - name: Build package image
+        if: inputs.RELEASE == 'staging'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -50,6 +54,16 @@ jobs:
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
           cache-from: type=registry,ref=bunkerity/cache:${{ inputs.LINUX }}-staging
           cache-to: type=registry,ref=bunkerity/cache:${{ inputs.LINUX }}-staging,mode=min
+      # Build non-staging package image
+      - name: Build package image
+        if: inputs.RELEASE != 'staging'
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          load: true
+          file: src/linux/Dockerfile-${{ inputs.LINUX }}
+          platforms: linux/amd64
+          tags: local/bunkerweb-${{ inputs.LINUX }}:latest
       # Generate package
       - name: Generate package
         run: ./src/linux/package.sh ${{ inputs.LINUX }}
@@ -65,4 +79,4 @@ jobs:
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.LINUX }}-tests:staging
+          tags: ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}

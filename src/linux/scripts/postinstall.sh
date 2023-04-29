@@ -96,17 +96,17 @@ else
 fi
 
 # Create letsencrypt folders if needed
-if [ ! -d /etc/letsencrypt ]
+if [ ! -d /etc/letsencrypt ] ; then
     mkdir /etc/letsencrypt
     chown nginx:nginx /etc/letsencrypt
     chmod 770 /etc/letsencrypt
 fi
-if [ ! -d /var/lib/letsencrypt ]
+if [ ! -d /var/lib/letsencrypt ] ; then
     mkdir /var/lib/letsencrypt
     chown nginx:nginx /var/lib/letsencrypt
     chmod 770 /var/lib/letsencrypt
 fi
-if [ ! -d /var/log/letsencrypt ]
+if [ ! -d /var/log/letsencrypt ] ; then
     mkdir /var/log/letsencrypt
     chown nginx:nginx /var/log/letsencrypt
     chmod 770 /var/log/letsencrypt

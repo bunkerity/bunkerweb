@@ -1,8 +1,14 @@
-name: Build staging container (REUSABLE)
+name: Build container (REUSABLE)
 
 on:
   workflow_call:
     inputs:
+      RELEASE:
+        required: true
+        type: string
+      ARCH:
+        require: true
+        type: string
       IMAGE:
         required: true
         type: string
@@ -39,17 +45,29 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # Build image
-      - name: Build container for amd64
+      # Build staging image
+      - name: Build image
+        if: inputs.RELEASE == 'staging'
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
-          platforms: linux/amd64
+          platforms: ${{ inputs.ARCH }}
           load: true
           tags: local/${{ inputs.IMAGE }}
           cache-from: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-staging
           cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-staging,mode=min
+      # Build non-staging image
+      - name: Build image
+        if: inputs.RELEASE != 'staging'
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: true
+          tags: local/${{ inputs.IMAGE }}
+          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.ARCH }},mode=min
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         uses: aquasecurity/trivy-action@master
@@ -63,4 +81,7 @@ jobs:
           trivyignores: .trivyignore
       # Push image
       - name: Push image
-        run: docker tag local/${{ inputs.IMAGE }} ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.IMAGE }}-tests:staging && docker push ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.IMAGE }}-tests:staging
+        if: inputs.RELEASE == 'staging'
+        run: docker tag local/${{ inputs.IMAGE }} ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.IMAGE }}-tests:$TAG && docker push ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.IMAGE }}-tests:$TAG
+        env:
+          TAG: "${{ inputs.RELEASE }}"

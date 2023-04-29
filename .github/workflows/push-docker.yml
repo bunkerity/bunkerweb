@@ -1,0 +1,67 @@
+name: Push image (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      IMAGE:
+        required: true
+        type: string
+      CACHE_FROM:
+        required: true
+        type: string
+      DOCKERFILE:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: true
+      ARM_SSH_CONFIG:
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Setup Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Setup SSH for ARM node
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" > ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Append ARM node to buildx
+        run: |
+          docker buildx create --append --name ${{ steps.buildx.outputs.name }} --node arm --platform linux/arm64,linux/arm/v7,linux/arm/v6 ssh://ubuntu@arm
+      # Build and push
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ inputs.IMAGE }}
+          cache-from: |
+            type=registry,ref=bunkerity/cache:${{ inputs.CACHE_FROM }}-amd64
+            type=registry,ref=bunkerity/cache:${{ inputs.CACHE_FROM }}-386
+            type=registry,ref=bunkerity/cache:${{ inputs.CACHE_FROM }}-arm

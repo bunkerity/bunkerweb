@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.5.0-beta - 
+
+- Refactoring of almost all the components of the project
+- Dedicated scheduler service to manage jobs and configuration
+- Store configuration in a database backend
+- Improved web UI and make it working with all integrations
+- Improved internal LUA code
+- Add Redis support when using clustered integrations
+- Add RHEL integration
+- Add Vagrant integration
+- Improved CI/CD
+
 ## v1.4.8 - 2023/04/05
 
 - Fix UI bug related to multiple settings

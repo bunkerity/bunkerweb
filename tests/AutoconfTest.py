@@ -204,7 +204,7 @@ class AutoconfTest(Test):
                 shell=True,
             )
             if proc.returncode != 0:
-                raise (Exception("cp bw-data failed"))
+                raise (Exception("rm /tmp/www/* failed"))
             super()._cleanup_test()
         except:
             log(

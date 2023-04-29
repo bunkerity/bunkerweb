@@ -1,0 +1,394 @@
+name: Automatic push (BETA)
+
+permissions: read-all
+
+on:
+  push:
+    branches: [beta]
+
+jobs:
+  # Build BW amd64 + i386 images
+  build-bw-amd64:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/amd64
+      IMAGE: bunkerweb
+      DOCKERFILE: src/bw/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-bw-386:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/386
+      IMAGE: bunkerweb
+      DOCKERFILE: src/bw/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Build SC amd64 + i386 images
+  build-sc-amd64:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/amd64
+      IMAGE: scheduler
+      DOCKERFILE: src/scheduler/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-sc-386:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/386
+      IMAGE: scheduler
+      DOCKERFILE: src/scheduler/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Build AU amd64 + i386 images
+  build-au-amd64:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/amd64
+      IMAGE: autoconf
+      DOCKERFILE: src/autoconf/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-au-386:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/386
+      IMAGE: autoconf
+      DOCKERFILE: src/autoconf/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Build UI amd64 + i386 images
+  build-ui-amd64:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/amd64
+      IMAGE: ui
+      DOCKERFILE: src/ui/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-ui-386:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/386
+      IMAGE: ui
+      DOCKERFILE: src/ui/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Build arm64 + arm/v7 images
+  build-bw-arm:
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/arm64,linux/arm/v7
+      IMAGE: bunkerweb
+      DOCKERFILE: src/bw/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-sc-arm:
+    needs: ["build-bw-arm"]
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/arm64,linux/arm/v7
+      IMAGE: scheduler
+      DOCKERFILE: src/scheduler/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-au-arm:
+    needs: ["build-sc-arm"]
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/arm64,linux/arm/v7
+      IMAGE: autoconf
+      DOCKERFILE: src/autoconf/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-ui-arm:
+    needs: ["build-au-arm"]
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: beta
+      ARCH: linux/arm64,linux/arm/v7
+      IMAGE: ui
+      DOCKERFILE: src/ui/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Linux packages
+  build-ubuntu:
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: beta
+      LINUX: ubuntu
+      PACKAGE: deb
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-debian:
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: beta
+      LINUX: debian
+      PACKAGE: deb
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-centos:
+  #   uses: ./.github/workflows/linux-build.yml
+  #   with:
+  #     RELEASE: beta
+  #     LINUX: centos
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-fedora:
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: beta
+      LINUX: fedora
+      PACKAGE: rpm
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  build-rhel:
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: beta
+      LINUX: rhel
+      PACKAGE: rpm
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Wait for all builds and extract VERSION
+  wait-builds:
+    needs: [
+      build-bw-amd64, build-bw-386,
+      build-sc-amd64, build-sc-386,
+      build-au-amd64, build-au-386,
+      build-ui-amd64, build-ui-386,
+      build-ui-arm,
+      build-ubuntu,
+      build-debian,
+      build-fedora,
+      build-rhel
+    ]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Get VERSION
+        id: getversion
+        run: echo "::set-output name=version::$(cat src/VERSION | tr -d '\n')"
+
+  # Push Docker images
+  push-bunkerweb:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-docker.yml
+    with:
+      IMAGE: bunkerity/bunkerweb:beta,bunkerity/bunkerweb:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: bunkerweb-beta
+      DOCKERFILE: src/bw/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+  push-scheduler:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-docker.yml
+    with:
+      IMAGE: bunkerity/bunkerweb-scheduler:beta,bunkerity/bunkerweb-scheduler:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: scheduler-beta
+      DOCKERFILE: src/scheduler/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+  push-autoconf:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-docker.yml
+    with:
+      IMAGE: bunkerity/bunkerweb-autoconf:beta,bunkerity/bunkerweb-autoconf:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: autoconf-beta
+      DOCKERFILE: src/autoconf/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+  push-ui:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-docker.yml
+    with:
+      IMAGE: bunkerity/bunkerweb-ui:beta,bunkerity/bunkerweb-ui:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: ui-beta
+      DOCKERFILE: src/ui/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+
+  # Push Linux packages
+  push-ubuntu:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-packagecloud.yml
+    with:
+      SEPARATOR: _
+      SUFFIX: amd64
+      REPO: bunkerweb
+      LINUX: ubuntu
+      VERSION: jammy
+      PACKAGE: deb
+      BW_VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+    secrets:
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  push-debian:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-packagecloud.yml
+    with:
+      SEPARATOR: _
+      SUFFIX: amd64
+      REPO: bunkerweb
+      LINUX: debian
+      VERSION: bullseye
+      PACKAGE: deb
+      BW_VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+    secrets:
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  push-rhel:
+    needs: [wait-builds]
+    uses: ./.github/workflows/staging-push-packagecloud.yml
+    with:
+      SEPARATOR: "-"
+      SUFFIX: 1.x86_64
+      REPO: bunkerweb
+      LINUX: el
+      VERSION: 8
+      PACKAGE: rpm
+      BW_VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+    secrets:
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  push-fedora:
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-packagecloud.yml
+    with:
+      SEPARATOR: "-"
+      SUFFIX: 1.x86_64
+      REPO: bunkerweb
+      LINUX: fedora
+      VERSION: 37
+      PACKAGE: rpm
+      BW_VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+    secrets:
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+  
+  # Create tag + release + discussion
+  publish-beta:
+    needs: [
+      push-bunkerweb,
+      push-scheduler,
+      push-autoconf,
+      push-ui,
+      push-ubuntu,
+      push-debian,
+      push-rhel,
+      push-fedora
+    ]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: rickstaa/action-create-tag@v1
+        name: Create tag
+        with:
+          tag: "v${{ jobs.wait-builds.steps.getversion.outputs.version }}"
+          message: "v${{ jobs.wait-builds.steps.getversion.outputs.version }}"
+      - name: Extract changelog
+        id: getchangelog
+        run: echo "::set-output name=content::$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')"
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: |
+            Documentation : https://docs.bunkerweb.io/${{ jobs.wait-builds.steps.getversion.outputs.version }}/
+
+            Docker tags : 
+            - `bunkerity/bunkerweb:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
+            - `bunkerity/bunkerweb-scheduler:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
+            - `bunkerity/bunkerweb-autoconf:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
+            - `bunkerity/bunkerweb-ui:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
+
+            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ jobs.wait-builds.steps.getversion.outputs.version }}&filter=all&dist=
+
+            Changelog : 
+            ${{steps.getchangelog.outputs.content}}
+          draft: false
+          prerelease: true
+          name: v${{ jobs.wait-builds.steps.getversion.outputs.version }}
+          tag_name: v${{ jobs.wait-builds.steps.getversion.outputs.version }}
+          discussion_category_name: Announcements
+
+
