@@ -25,7 +25,7 @@ on:
         default: true
       CACHE_SUFFIX:
         required: false
-        type: boolean
+        type: string
         default: ""
     secrets:
       DOCKER_USERNAME:
