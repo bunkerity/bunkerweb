@@ -17,7 +17,7 @@ jobs:
       DOCKERFILE: src/bw/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: amd64
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -30,7 +30,7 @@ jobs:
       DOCKERFILE: src/bw/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: 386
+      CACHE_SUFFIX: "386"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
       DOCKERFILE: src/scheduler/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: amd64
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -58,7 +58,7 @@ jobs:
       DOCKERFILE: src/scheduler/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: 386
+      CACHE_SUFFIX: "386"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -73,7 +73,7 @@ jobs:
       DOCKERFILE: src/autoconf/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: amd64
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -86,7 +86,7 @@ jobs:
       DOCKERFILE: src/autoconf/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: 386
+      CACHE_SUFFIX: "386"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -101,7 +101,7 @@ jobs:
       DOCKERFILE: src/ui/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: amd64
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -114,7 +114,7 @@ jobs:
       DOCKERFILE: src/ui/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: 386
+      CACHE_SUFFIX: "386"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -129,7 +129,7 @@ jobs:
       DOCKERFILE: src/bw/Dockerfile
       CACHE: false
       PUSH: false
-      CACHE_SUFFIX: arm
+      CACHE_SUFFIX: "arm"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
