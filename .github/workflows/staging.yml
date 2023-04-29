@@ -8,54 +8,54 @@ on:
 
 jobs:
   # Containers
-  build-bw:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-scheduler:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-autoconf:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-ui:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-bw:
+  #   uses: ./.github/workflows/container-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     ARCH: linux/amd64
+  #     IMAGE: bunkerweb
+  #     DOCKERFILE: src/bw/Dockerfile
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-scheduler:
+  #   uses: ./.github/workflows/container-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     ARCH: linux/amd64
+  #     IMAGE: scheduler
+  #     DOCKERFILE: src/scheduler/Dockerfile
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-autoconf:
+  #   uses: ./.github/workflows/container-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     ARCH: linux/amd64
+  #     IMAGE: autoconf
+  #     DOCKERFILE: src/autoconf/Dockerfile
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-ui:
+  #   uses: ./.github/workflows/container-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     ARCH: linux/amd64
+  #     IMAGE: ui
+  #     DOCKERFILE: src/ui/Dockerfile
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Linux
   build-ubuntu:
@@ -146,13 +146,13 @@ jobs:
   #     TYPE: docker
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-autoconf:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: autoconf
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-autoconf:
+  #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: autoconf
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # create-infra-swarm:
   #   needs: [code-security, build-bw, build-scheduler, build-autoconf]
   #   uses: ./.github/workflows/staging-create-infra.yml
@@ -190,13 +190,13 @@ jobs:
   #     TYPE: docker
   #     RUNS_ON: "['self-hosted', 'bw-docker']"
   #   secrets: inherit
-  tests-autoconf:
-    needs: [create-infra-autoconf]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: autoconf
-      RUNS_ON: "['self-hosted', 'bw-autoconf']"
-    secrets: inherit
+  # tests-autoconf:
+  #   needs: [create-infra-autoconf]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: autoconf
+  #     RUNS_ON: "['self-hosted', 'bw-autoconf']"
+  #   secrets: inherit
   # tests-swarm:
   #   needs: [create-infra-swarm]
   #   uses: ./.github/workflows/staging-tests.yml
@@ -220,9 +220,9 @@ jobs:
     secrets: inherit
   tests-ui:
     needs: [code-security, build-ui]
-    uses: ./.github/workflows/staging-tests-ui.yml
+    uses: ./.github/workflows/tests-ui.yml
     with:
-      MODE: staging
+      RELEASE: staging
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
@@ -236,14 +236,14 @@ jobs:
   #     TYPE: docker
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-autoconf:
-    if: ${{ always() }}
-    needs: [tests-autoconf]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: autoconf
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-autoconf:
+  #   if: ${{ always() }}
+  #   needs: [tests-autoconf]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: autoconf
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   # delete-infra-swarm:
   #   if: ${{ always() }}
   #   needs: [tests-swarm]

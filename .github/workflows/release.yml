@@ -1,17 +1,17 @@
-name: Automatic push (BETA)
+name: Automatic push (RELEASE)
 
 permissions: read-all
 
 on:
   push:
-    branches: [beta]
+    branches: [master]
 
 jobs:
   # Build BW amd64 + i386 images
   build-bw-amd64:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/amd64
       IMAGE: bunkerweb
       DOCKERFILE: src/bw/Dockerfile
@@ -20,12 +20,10 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-bw-386:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/386
       IMAGE: bunkerweb
       DOCKERFILE: src/bw/Dockerfile
@@ -34,14 +32,12 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build SC amd64 + i386 images
   build-sc-amd64:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/amd64
       IMAGE: scheduler
       DOCKERFILE: src/scheduler/Dockerfile
@@ -50,12 +46,10 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-sc-386:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/386
       IMAGE: scheduler
       DOCKERFILE: src/scheduler/Dockerfile
@@ -64,14 +58,12 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build AU amd64 + i386 images
   build-au-amd64:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/amd64
       IMAGE: autoconf
       DOCKERFILE: src/autoconf/Dockerfile
@@ -80,12 +72,10 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-au-386:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/386
       IMAGE: autoconf
       DOCKERFILE: src/autoconf/Dockerfile
@@ -94,14 +84,12 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build UI amd64 + i386 images
   build-ui-amd64:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/amd64
       IMAGE: ui
       DOCKERFILE: src/ui/Dockerfile
@@ -110,12 +98,10 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-ui-386:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/386
       IMAGE: ui
       DOCKERFILE: src/ui/Dockerfile
@@ -124,14 +110,12 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build arm64 + arm/v7 images
   build-bw-arm:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/arm64,linux/arm/v7
       IMAGE: bunkerweb
       DOCKERFILE: src/bw/Dockerfile
@@ -140,13 +124,11 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-sc-arm:
     needs: ["build-bw-arm"]
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/arm64,linux/arm/v7
       IMAGE: scheduler
       DOCKERFILE: src/scheduler/Dockerfile
@@ -155,13 +137,11 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-au-arm:
     needs: ["build-sc-arm"]
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/arm64,linux/arm/v7
       IMAGE: autoconf
       DOCKERFILE: src/autoconf/Dockerfile
@@ -170,13 +150,11 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-ui-arm:
     needs: ["build-au-arm"]
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       ARCH: linux/arm64,linux/arm/v7
       IMAGE: ui
       DOCKERFILE: src/ui/Dockerfile
@@ -185,14 +163,12 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Linux packages
   build-ubuntu:
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       LINUX: ubuntu
       PACKAGE: deb
     secrets:
@@ -203,7 +179,7 @@ jobs:
   build-debian:
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       LINUX: debian
       PACKAGE: deb
     secrets:
@@ -214,7 +190,7 @@ jobs:
   # build-centos:
   #   uses: ./.github/workflows/linux-build.yml
   #   with:
-  #     RELEASE: beta
+  #     RELEASE: latest
   #     LINUX: centos
   #     PACKAGE: rpm
   #   secrets:
@@ -225,7 +201,7 @@ jobs:
   build-fedora:
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       LINUX: fedora
       PACKAGE: rpm
     secrets:
@@ -236,7 +212,7 @@ jobs:
   build-rhel:
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: beta
+      RELEASE: latest
       LINUX: rhel
       PACKAGE: rpm
     secrets:
@@ -270,8 +246,8 @@ jobs:
     needs: [wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: bunkerity/bunkerweb:beta,bunkerity/bunkerweb:${{ jobs.wait-builds.steps.getversion.outputs.version }}
-      CACHE_FROM: bunkerweb-beta
+      IMAGE: bunkerity/bunkerweb:latest,bunkerity/bunkerweb:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: bunkerweb-latest
       DOCKERFILE: src/bw/Dockerfile
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -282,8 +258,8 @@ jobs:
     needs: [wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: bunkerity/bunkerweb-scheduler:beta,bunkerity/bunkerweb-scheduler:${{ jobs.wait-builds.steps.getversion.outputs.version }}
-      CACHE_FROM: scheduler-beta
+      IMAGE: bunkerity/bunkerweb-scheduler:latest,bunkerity/bunkerweb-scheduler:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: scheduler-latest
       DOCKERFILE: src/scheduler/Dockerfile
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -294,8 +270,8 @@ jobs:
     needs: [wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: bunkerity/bunkerweb-autoconf:beta,bunkerity/bunkerweb-autoconf:${{ jobs.wait-builds.steps.getversion.outputs.version }}
-      CACHE_FROM: autoconf-beta
+      IMAGE: bunkerity/bunkerweb-autoconf:latest,bunkerity/bunkerweb-autoconf:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: autoconf-latest
       DOCKERFILE: src/autoconf/Dockerfile
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -306,8 +282,8 @@ jobs:
     needs: [wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: bunkerity/bunkerweb-ui:beta,bunkerity/bunkerweb-ui:${{ jobs.wait-builds.steps.getversion.outputs.version }}
-      CACHE_FROM: ui-beta
+      IMAGE: bunkerity/bunkerweb-ui:latest,bunkerity/bunkerweb-ui:${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      CACHE_FROM: ui-latest
       DOCKERFILE: src/ui/Dockerfile
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -370,7 +346,7 @@ jobs:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   
   # Create tag + release + discussion
-  publish-beta:
+  publish-latest:
     needs: [
       push-bunkerweb,
       push-scheduler,
@@ -410,7 +386,7 @@ jobs:
             Changelog : 
             ${{steps.getchangelog.outputs.content}}
           draft: false
-          prerelease: true
+          prerelease: false
           name: v${{ jobs.wait-builds.steps.getversion.outputs.version }}
           tag_name: v${{ jobs.wait-builds.steps.getversion.outputs.version }}
           discussion_category_name: Announcements

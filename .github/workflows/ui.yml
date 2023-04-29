@@ -1,10 +1,10 @@
-name: Automatic tests (DEV)
+name: Automatic tests (UI)
 
 permissions: read-all
 
 on:
   push:
-    branches: [dev]
+    branches: [ui]
 
 jobs:
 
@@ -12,7 +12,7 @@ jobs:
   build-bw:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: dev
+      RELEASE: ui
       ARCH: linux/amd64
       IMAGE: bunkerweb
       DOCKERFILE: src/bw/Dockerfile
@@ -24,7 +24,7 @@ jobs:
   build-sc:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: dev
+      RELEASE: ui
       ARCH: linux/amd64
       IMAGE: scheduler
       DOCKERFILE: src/scheduler/Dockerfile
@@ -33,22 +33,10 @@ jobs:
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-au:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: dev
-      ARCH: linux/amd64
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   build-ui:
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: dev
+      RELEASE: ui
       ARCH: linux/amd64
       IMAGE: ui
       DOCKERFILE: src/ui/Dockerfile
@@ -58,36 +46,12 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
-  # Python code security
-  code-security:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["python"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: ${{ matrix.language }}
-          config-file: ./.github/codeql.yml
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "/language:${{matrix.language}}"
-
   # UI tests
   tests-ui:
     needs: [code-security, build-bw, build-sc, build-ui]
     uses: ./.github/workflows/tests-ui.yml
     with:
-      RELEASE: dev
+      RELEASE: ui
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}

@@ -114,7 +114,7 @@ Here is how you can access the logs, depending on your integration :
 
 ## Permissions
 
-Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](/1.5.0-beta/quickstart-guide/#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
+Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](/current_bw_version/quickstart-guide/#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
 
 ## ModSecurity
 
@@ -205,11 +205,11 @@ As we can see, there are 3 different logs :
 
 One important thing to understand is that rule **949110** is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is **10** in this example). You should never remove the **949110** rule !
 
-If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](/1.5.0-beta/quickstart-guide/#custom-configurations)).
+If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](/current_bw_version/quickstart-guide/#custom-configurations)).
 
 ## Bad Behavior
 
-A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](/1.5.0-beta/security-tuning/#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
+A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](/current_bw_version/security-tuning/#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
 ## IP unban
 
@@ -276,7 +276,7 @@ You can manually unban an IP which can be useful when doing some tests but it ne
 	
 ## Whitelisting
 
-If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](/1.5.0-beta/security-tuning/#blacklisting-and-whitelisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](/current_bw_version/security-tuning/#blacklisting-and-whitelisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook

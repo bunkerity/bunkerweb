@@ -2,7 +2,7 @@
 
 !!! warning "Read this if you were a 1.4.X user"
 
-    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there.
+    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/misc/integrations) folder of the repository.
 
 ## Scheduler
 
@@ -10,7 +10,7 @@ Back to the 1.4.X releases, jobs (like Let's Encrypt certificate generation/rene
 
 Called **Scheduler**, this service also generates the final configuration used by BunkerWeb and acts as an intermediary between autoconf and BunkerWeb. In other words, the scheduler is the **brain of the BunkerWeb 1.5.X stack**.
 
-You will find more information about the scheduler [here](/1.5.0-beta/concepts/#scheduler).
+You will find more information about the scheduler [here](/current_bw_version/concepts/#scheduler).
 
 ## Database
 
@@ -24,7 +24,7 @@ Using a real database offers many advantages :
 
 Please note that we actually support, **SQLite**, **MySQL**, **MariaDB** and **PostgreSQL** as backends.
 
-You will find more information about the database [here](/1.5.0-beta/concepts/#database).
+You will find more information about the database [here](/current_bw_version/concepts/#database).
 
 ## Redis
 
@@ -34,8 +34,8 @@ Security is not the only reason to have a shared data store for clustered integr
 
 We actually support **Redis** as a backend for the shared data store.
 
-See the list of [redis settings](/1.5.0-beta/settings/#redis) and the corresponding documentation of your integration for more information.
+See the list of [redis settings](/current_bw_version/settings/#redis) and the corresponding documentation of your integration for more information.
 
 ## Default values and new settings
 
-The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](/1.5.0-beta/security-tuning) and [settings](/1.5.0-beta/settings) sections of the documentation.
+The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](/current_bw_version/security-tuning) and [settings](/current_bw_version/settings) sections of the documentation.

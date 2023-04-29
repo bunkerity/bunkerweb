@@ -1,9 +1,9 @@
-name: Perform staging tests for UI (REUSABLE)
+name: Perform tests for UI (REUSABLE)
 
 on:
   workflow_call:
     inputs:
-      MODE:
+      RELEASE:
         required: true
         type: string
     secrets:
@@ -25,13 +25,13 @@ jobs:
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging bunkerweb-tests
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
       - name: Pull Scheduler image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging scheduler-tests
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
       - name: Pull UI image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:staging ui-tests
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:${{ inputs.RELEASE }} ui-tests
       # Do tests
       - name: Run tests
         run: ./tests/ui/tests.sh
         env:
-          MODE: ${{ inputs.MODE }}
+          MODE: ${{ inputs.RELEASE }}
