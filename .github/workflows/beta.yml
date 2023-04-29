@@ -368,9 +368,9 @@ jobs:
       BW_VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  
-  # Create tag + release + discussion
-  publish-beta:
+
+  # Create doc PDF
+  doc-pdf:
     needs: [
       push-bunkerweb,
       push-scheduler,
@@ -381,38 +381,30 @@ jobs:
       push-rhel,
       push-fedora
     ]
+    uses: ./.github/workflows/doc-to-pdf.yml
+    with:
+      VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+
+  # Push on GH
+  push-gh:
+    needs: [doc-pdf]
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@v3
-      - uses: rickstaa/action-create-tag@v1
-        name: Create tag
-        with:
-          tag: "v${{ jobs.wait-builds.steps.getversion.outputs.version }}"
-          message: "v${{ jobs.wait-builds.steps.getversion.outputs.version }}"
-      - name: Extract changelog
-        id: getchangelog
-        run: echo "::set-output name=content::$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')"
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          body: |
-            Documentation : https://docs.bunkerweb.io/${{ jobs.wait-builds.steps.getversion.outputs.version }}/
+    uses: ./.github/workflow/push-github.yml
+    with:
+      VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      PRERELEASE: true
 
-            Docker tags : 
-            - `bunkerity/bunkerweb:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
-            - `bunkerity/bunkerweb-scheduler:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
-            - `bunkerity/bunkerweb-autoconf:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
-            - `bunkerity/bunkerweb-ui:${{ jobs.wait-builds.steps.getversion.outputs.version }}`
+  # Push doc
+  push-doc:
+    needs: [publish-gh]
+    permissions:
+      contents: write
+    uses: ./.github/workflow/push-doc.yml
+      VERSION: ${{ jobs.wait-builds.steps.getversion.outputs.version }}
+      ALIAS: beta
 
-            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ jobs.wait-builds.steps.getversion.outputs.version }}&filter=all&dist=
 
-            Changelog : 
-            ${{steps.getchangelog.outputs.content}}
-          draft: false
-          prerelease: true
-          name: v${{ jobs.wait-builds.steps.getversion.outputs.version }}
-          tag_name: v${{ jobs.wait-builds.steps.getversion.outputs.version }}
-          discussion_category_name: Announcements
+
 
 

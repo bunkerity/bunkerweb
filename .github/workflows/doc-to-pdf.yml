@@ -1,0 +1,39 @@
+name: Generate documentation PDF (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install doc requirements
+        run: pip install -r docs/requirements.txt
+      - name: Install chromium
+        uses: apt install chromium-browser
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install puppeteer
+        run: npm i --save puppeteer
+      - name: Run mkdocs serve in background
+        run: mkdocs serve & sleep 10
+      - name: Run pdf script
+        run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+          path: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+

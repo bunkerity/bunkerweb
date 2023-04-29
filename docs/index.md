@@ -9,9 +9,9 @@
 
 BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
 
-Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](/current_bw_version/integrations/#linux), [Docker](/current_bw_version/integrations/#docker), [Swarm](/current_bw_version/integrations/#swarm), [Kubernetes](/current_bw_version/integrations/#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](/current_bw_version/web-ui/) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
+Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](integrations.md#linux), [Docker](integrations.md#docker), [Swarm](integrations.md#swarm), [Kubernetes](integrations.md#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](web-ui.md) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
 
-BunkerWeb contains primary [security features](/current_bw_version/security-tuning/) as part of the core but can be easily extended with additional ones thanks to a [plugin system](/current_bw_version/plugins/).
+BunkerWeb contains primary [security features](security-tuning.md) as part of the core but can be easily extended with additional ones thanks to a [plugin system](plugins.md)).
 
 ## Why BunkerWeb ?
 
@@ -35,7 +35,7 @@ A non-exhaustive list of security features :
 - **Block known bad IPs** with external blacklists and DNSBL
 - And much more ...
 
-Learn more about the core security features in the [security tuning](/current_bw_version/security-tuning) section of the documentation.
+Learn more about the core security features in the [security tuning](security-tuning.md) section of the documentation.
 
 ## Demo
 

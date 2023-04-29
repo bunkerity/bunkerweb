@@ -28,7 +28,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker"
 
-    When using the [Docker integration](current_bw_version/integrations/#docker), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Docker integration](1.5.0-beta/integrations/#docker), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
     The first thing to do is to create the plugins folder :
 
@@ -56,7 +56,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         volumes:
           - ./bw-data:/data
     ...
@@ -64,7 +64,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](current_bw_version/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Docker autoconf integration](1.5.0-beta/integrations/#docker-autoconf), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
 
     The first thing to do is to create the plugins folder :
@@ -93,7 +93,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         volumes:
           - ./bw-data:/data
     ...
@@ -101,7 +101,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Swarm"
 
-    When using the [Swarm integration](current_bw_version/integrations/#swarm), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Swarm integration](1.5.0-beta/integrations/#swarm), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
     !!! info "Swarm volume"
         Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` accross all nodes.
@@ -132,7 +132,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -140,7 +140,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](current_bw_version/integrations/#kubernetes), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Kubernetes integration](1.5.0-beta/integrations/#kubernetes), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
     The fist thing to do is to declare a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that will contain our plugins data :
 
@@ -179,7 +179,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:current_bw_version
+              image: bunkerity/bunkerweb-scheduler:1.5.0-beta
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -205,7 +205,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Linux"
 
-    When using the [Linux integration](current_bw_version/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Linux integration](1.5.0-beta/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
 
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
@@ -215,7 +215,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Ansible"
 
-    When using the [Ansible integration](current_bw_version/integrations/#ansible), you can use the `plugins` variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.
+    When using the [Ansible integration](1.5.0-beta/integrations/#ansible), you can use the `plugins` variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.
 	
     Let's assume that you have plugins inside the `bunkerweb-plugins` folder :
 
@@ -249,7 +249,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Vagrant"
 
-    When using the [Vagrant integration](current_bw_version/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder (you will need to do a `vagrant ssh` first) :
+    When using the [Vagrant integration](1.5.0-beta/integrations/#vagrant), plugins must be written to the `/etc/bunkerweb/plugins` folder (you will need to do a `vagrant ssh` first) :
 
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
@@ -260,7 +260,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 The first step is to create a folder that will contain the plugin :
 
@@ -339,7 +339,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](/current_bw_version/quickstart-guide/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream` and `server-stream`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream` and `server-stream`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -426,7 +426,7 @@ The declared functions are automatically called during specific contexts. Here a
 
 #### Libraries
 
-All directives from [NGINX LUA module](https://github.com/openresty/lua-nginx-module) and are available and [NGINX stream LUA module](https://github.com/openresty/stream-lua-nginx-module). On top of that, you can use the LUA libraries included within BunkerWeb : see [this script](https://github.com/bunkerity/bunkerweb/blob/current_bw_version/src/deps/clone.sh) for the complete list.
+All directives from [NGINX LUA module](https://github.com/openresty/lua-nginx-module) and are available and [NGINX stream LUA module](https://github.com/openresty/stream-lua-nginx-module). On top of that, you can use the LUA libraries included within BunkerWeb : see [this script](https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh) for the complete list.
 
 If you need additional libraries, you can put them in the root folder of the plugin and access them by prefixing them with your plugin ID. Here is an example file named **mylibrary.lua** :
 
@@ -507,7 +507,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
@@ -515,7 +515,7 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 ### Plugin page
 
-Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](/current_bw_version/web-ui).
+Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](web-ui.md).
 
 Everything related to the web UI is located inside a subfolder named **ui** at the root directory of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
 
@@ -554,4 +554,4 @@ def myplugin() :
 
 !!! info "Python libraries"
     You can use Python libraries that are already available like :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blob/current_bw_version/src/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.

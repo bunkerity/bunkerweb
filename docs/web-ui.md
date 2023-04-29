@@ -29,11 +29,11 @@ Because the web UI is a web application, the recommended installation procedure 
     * Choose a strong password for the login
     * Put the web UI under a "hard to guess" URI
     * Do not open the web UI on the Internet without any further restrictions
-    * Apply settings listed in the [security tuning section](/current_bw_version/security-tuning/) of the documentation
+    * Apply settings listed in the [security tuning section](security-tuning.md) of the documentation
 
 !!! info "Multisite mode"
 
-    The usage of the web UI implies enabling the [multisite mode](/current_bw_version/concepts/#multisite-mode).
+    The usage of the web UI implies enabling the [multisite mode](concepts.md#multisite-mode).
 
 === "Docker"
 
@@ -57,11 +57,11 @@ Because the web UI is a web application, the recommended installation procedure 
     - `ADMIN_PASSWORD` : password to access the web UI
     - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/current_bw_version/quickstart-guide/#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -70,7 +70,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - 80:8080
           - 443:8443
@@ -95,7 +95,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -116,7 +116,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:current_bw_version
+        image: bunkerity/bunkerweb-ui:1.5.0-beta
         depends_on:
           - bw-docker
         environment:
@@ -179,11 +179,11 @@ Because the web UI is a web application, the recommended installation procedure 
     - `ADMIN_PASSWORD` : password to access the web UI
     - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/current_bw_version/quickstart-guide/#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -192,7 +192,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - 80:8080
           - 443:8443
@@ -209,7 +209,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:current_bw_version
+        image: bunkerity/bunkerweb-autoconf:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -222,7 +222,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -256,7 +256,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:current_bw_version
+        image: bunkerity/bunkerweb-ui:1.5.0-beta
         networks:
           bw-docker:
           bw-universe:
@@ -316,11 +316,11 @@ Because the web UI is a web application, the recommended installation procedure 
     - `ADMIN_PASSWORD` : password to access the web UI
     - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/current_bw_version/quickstart-guide/#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -329,7 +329,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - published: 80
             target: 8080
@@ -359,7 +359,7 @@ Because the web UI is a web application, the recommended installation procedure 
             - "bunkerweb.INSTANCE"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:current_bw_version
+        image: bunkerity/bunkerweb-autoconf:1.5.0-beta
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -386,7 +386,7 @@ Because the web UI is a web application, the recommended installation procedure 
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -413,7 +413,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:current_bw_version
+        image: bunkerity/bunkerweb-ui:1.5.0-beta
         environment:
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -465,11 +465,11 @@ Because the web UI is a web application, the recommended installation procedure 
     - `ADMIN_PASSWORD` : password to access the web UI
     - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/current_bw_version/quickstart-guide/#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -523,7 +523,7 @@ Because the web UI is a web application, the recommended installation procedure 
         spec:
           containers:
             - name: bunkerweb
-              image: bunkerity/bunkerweb:current_bw_version
+              image: bunkerity/bunkerweb:1.5.0-beta
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -593,7 +593,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:current_bw_version
+              image: bunkerity/bunkerweb-autoconf:1.5.0-beta
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -620,7 +620,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:current_bw_version
+              image: bunkerity/bunkerweb-scheduler:1.5.0-beta
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -704,7 +704,7 @@ Because the web UI is a web application, the recommended installation procedure 
         spec:
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:current_bw_version
+              image: bunkerity/bunkerweb-ui:1.5.0-beta
               imagePullPolicy: Always
               env:
                 - name: ADMIN_USERNAME
@@ -805,7 +805,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Linux"
 
-    The installation of the web UI using the [Linux integration](/current_bw_version/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Linux integration](integrations.md#linux) is pretty straightforward because it is installed with BunkerWeb.
 
     The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
 
@@ -827,7 +827,7 @@ Because the web UI is a web application, the recommended installation procedure 
     systemctl restart bunkerweb-ui
     ```
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/current_bw_version/quickstart-guide/#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
 
     Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
 
@@ -853,7 +853,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Ansible"
 
-    The installation of the web UI using the [Vagrant integration](/current_bw_version/integrations/#linux) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Vagrant integration](integrations.md#linux) is pretty straightforward because it is installed with BunkerWeb.
 
     Create a `my_ui.env` filed used to configure the web UI :
 
@@ -908,7 +908,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 === "Vagrant"
 
-    The installation of the web UI using the [Vagrant integration](/current_bw_version/integrations/#vagrant) is pretty straightforward because it is installed with BunkerWeb.
+    The installation of the web UI using the [Vagrant integration](integrations.md#vagrant) is pretty straightforward because it is installed with BunkerWeb.
 
     First of all, you will need to get a shell on your Vagrant box :
 
@@ -936,7 +936,7 @@ Because the web UI is a web application, the recommended installation procedure 
     systemctl restart bunkerweb-ui
     ```
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](/current_bw_version/quickstart-guide/#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
 
     Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
 

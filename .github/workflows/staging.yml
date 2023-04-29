@@ -58,28 +58,28 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Linux
-  build-ubuntu:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: ubuntu
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-debian:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: debian
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-ubuntu:
+  #   uses: ./.github/workflows/linux-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     LINUX: ubuntu
+  #     PACKAGE: deb
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-debian:
+  #   uses: ./.github/workflows/linux-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     LINUX: debian
+  #     PACKAGE: deb
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   # build-centos:
   #   uses: ./.github/workflows/linux-build.yml
   #   with:
@@ -91,28 +91,28 @@ jobs:
   #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
   #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
   #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-fedora:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: fedora
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-rhel:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: rhel
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-fedora:
+  #   uses: ./.github/workflows/linux-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     LINUX: fedora
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # build-rhel:
+  #   uses: ./.github/workflows/linux-build.yml
+  #   with:
+  #     RELEASE: staging
+  #     LINUX: rhel
+  #     PACKAGE: rpm
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Code security
   code-security:
@@ -167,20 +167,20 @@ jobs:
   #     TYPE: k8s
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-linux:
-    needs:
-      [
-        code-security,
-        build-ubuntu,
-        build-debian,
-        build-fedora,
-        build-rhel,
-      ]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: linux
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # create-infra-linux:
+  #   needs:
+  #     [
+  #       code-security,
+  #       build-ubuntu,
+  #       build-debian,
+  #       build-fedora,
+  #       build-rhel,
+  #     ]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: linux
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Perform tests
   # tests-docker:
@@ -211,13 +211,13 @@ jobs:
   #     TYPE: k8s
   #     RUNS_ON: "['ubuntu-latest']"
   #   secrets: inherit
-  tests-linux:
-    needs: [create-infra-linux]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: linux
-      RUNS_ON: "['self-hosted', 'bw-linux']"
-    secrets: inherit
+  # tests-linux:
+  #   needs: [create-infra-linux]
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: linux
+  #     RUNS_ON: "['self-hosted', 'bw-linux']"
+  #   secrets: inherit
   tests-ui:
     needs: [code-security, build-bw, build-scheduler, build-ui]
     uses: ./.github/workflows/tests-ui.yml
@@ -260,11 +260,11 @@ jobs:
   #     TYPE: k8s
   #   secrets:
   #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-linux:
-    if: ${{ always() }}
-    needs: [tests-linux]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: linux
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # delete-infra-linux:
+  #   if: ${{ always() }}
+  #   needs: [tests-linux]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: linux
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}

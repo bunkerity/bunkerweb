@@ -40,7 +40,7 @@ print(
     file=doc,
 )
 print(
-    "This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](/1.4/concepts) section of the documentation. Please follow the instructions for your own [integration](/1.4/integrations) on how to apply the settings.\n",
+    "This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section of the documentation. Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.\n",
     file=doc,
 )
 print(
