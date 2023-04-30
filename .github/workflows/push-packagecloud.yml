@@ -9,6 +9,9 @@ on:
       SUFFIX:
         required: true
         type: string
+      SUFFIX2:
+        required: true
+        type: string
       REPO:
         required: true
         type: string
@@ -56,7 +59,7 @@ jobs:
       - name: Push package to packagecloud
         uses: danielmundi/upload-packagecloud@v1
         with:
-          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SUFFIX2 }}.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}

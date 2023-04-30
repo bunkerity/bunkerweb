@@ -280,7 +280,7 @@ jobs:
 
   # Push Docker images
   push-bunkerweb:
-    needs: [wait-builds]
+    needs: [create-arm, wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: bunkerity/bunkerweb:beta,bunkerity/bunkerweb:${{ needs.wait-builds.outputs.version }}
@@ -290,9 +290,10 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   push-scheduler:
-    needs: [wait-builds]
+    needs: [create-arm, wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: bunkerity/bunkerweb-scheduler:beta,bunkerity/bunkerweb-scheduler:${{ needs.wait-builds.outputs.version }}
@@ -302,9 +303,10 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   push-autoconf:
-    needs: [wait-builds]
+    needs: [create-arm, wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: bunkerity/bunkerweb-autoconf:beta,bunkerity/bunkerweb-autoconf:${{ needs.wait-builds.outputs.version }}
@@ -314,9 +316,10 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   push-ui:
-    needs: [wait-builds]
+    needs: [create-arm, wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: bunkerity/bunkerweb-ui:beta,bunkerity/bunkerweb-ui:${{ needs.wait-builds.outputs.version }}
@@ -326,6 +329,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
   # Push Linux packages
@@ -335,6 +339,7 @@ jobs:
     with:
       SEPARATOR: _
       SUFFIX: amd64
+      SUFFIX2: -1_amd64
       REPO: bunkerweb
       LINUX: ubuntu
       VERSION: jammy
@@ -348,6 +353,7 @@ jobs:
     with:
       SEPARATOR: _
       SUFFIX: amd64
+      SUFFIX2: -1_amd64
       REPO: bunkerweb
       LINUX: debian
       VERSION: bullseye
@@ -361,6 +367,7 @@ jobs:
     with:
       SEPARATOR: "-"
       SUFFIX: 1.x86_64
+      SUFFIX2: -1.x86_64
       REPO: bunkerweb
       LINUX: el
       VERSION: 8
@@ -374,6 +381,7 @@ jobs:
     with:
       SEPARATOR: "-"
       SUFFIX: 1.x86_64
+      SUFFIX2: -1.x86_64
       REPO: bunkerweb
       LINUX: fedora
       VERSION: 37

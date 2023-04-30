@@ -21,6 +21,8 @@ on:
         required: true
       ARM_SSH_CONFIG:
         required: true
+      ARM_SSH_IP:
+        require: true
 
 jobs:
   push:
@@ -45,9 +47,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
           chmod 600 ~/.ssh/id_rsa_arm
-          echo "$SSH_CONFIG" > ~/.ssh/config
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
         env:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Append ARM node to buildx
         run: |
