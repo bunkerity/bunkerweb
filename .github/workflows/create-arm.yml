@@ -49,8 +49,8 @@ jobs:
       - name: Wait for SSH
         uses: iFaxity/wait-on-action@628831cec646e6dacca502f34a6c6b46e131e51d
         with:
-          resource: tcp://${{ fromJson(steps.scw.outputs.json).public_ip.address }}:22
-          timeout: 600000
+          resource: tcp:${{ fromJson(steps.scw.outputs.json).public_ip.address }}:22
+          timeout: 300000
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
