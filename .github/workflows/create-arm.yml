@@ -5,10 +5,10 @@ on:
     outputs:
       arm_id:
         description: "ARM ID"
-        value: ${{ fromJson(jobs.build.outputs.json).ID }}
+        value: ${{ fromJson(jobs.build.outputs.json).id }}
       arm_ip:
         description: "ARM IP"
-        value: ${{ fromJson(jobs.build.outputs.json).PublicIP.Address }}
+        value: ${{ fromJson(jobs.build.outputs.json).public_ip.address }}
 
     secrets:
       SCW_ACCESS_KEY:
@@ -49,8 +49,8 @@ jobs:
       - name: Wait for SSH
         uses: iFaxity/wait-on-action@628831cec646e6dacca502f34a6c6b46e131e51d
         with:
-          resource: tcp://${{ fromJson(steps.scw.outputs.json).PublicIP.Address }}:22
-          timeout: 30000
+          resource: tcp://${{ fromJson(steps.scw.outputs.json).public_ip.address }}:22
+          timeout: 600000
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
@@ -60,8 +60,8 @@ jobs:
           echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
         env:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-          SSH_IP: ${{ fromJson(steps.scw.outputs.json).PublicIP.Address }}
+          SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Install Docker
-        run: scw instance server ssh ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2 "command=curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
+        run: scw instance server ssh ${{ fromJson(steps.scw.outputs.json).id }} zone=fr-par-2 "command=curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
 
