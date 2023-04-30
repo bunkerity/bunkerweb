@@ -127,6 +127,8 @@ jobs:
       SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
       SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
       SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-bw-arm:
     needs: [create-arm]
     uses: ./.github/workflows/container-build.yml
@@ -142,7 +144,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.arm_ip }}
+      ARM_SSH_IP: ${{ fromJSON(needs.create-arm.outputs.json).PublicIP.Address }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-sc-arm:
     needs: [create-arm, build-bw-arm]
@@ -158,7 +160,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.arm_ip }}
+      ARM_SSH_IP: ${{ fromJSON(needs.create-arm.outputs.json).PublicIP.Address }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-au-arm:
     needs: [create-arm, build-sc-arm]
@@ -174,7 +176,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.arm_ip }}
+      ARM_SSH_IP: ${{ fromJSON(needs.create-arm.outputs.json).PublicIP.Address }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-ui-arm:
     needs: [create-arm, build-au-arm]
@@ -190,7 +192,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.arm_ip }}
+      ARM_SSH_IP: ${{ fromJSON(needs.create-arm.outputs.json).PublicIP.Address }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
   # Linux packages
@@ -420,7 +422,7 @@ jobs:
     needs: [create-arm, push-bunkerweb, push-scheduler, push-autoconf, push-ui]
     uses: ./.github/workflows/rm-arm.yml
     secrets:
-      ARM_ID: ${{ needs.create-arm.outputs.arm_id }}
+      ARM_ID: ${{ fromJSON(needs.create-arm.outputs.json).ID }}
       SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
       SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
       SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
