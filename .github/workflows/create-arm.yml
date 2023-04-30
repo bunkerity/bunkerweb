@@ -7,7 +7,7 @@ on:
         description: "ARM ID"
         value: ${{ fromJson(jobs.build.outputs.json).ID }}
       arm_ip:
-        description: "ARM ID"
+        description: "ARM IP"
         value: ${{ fromJson(jobs.build.outputs.json).PluginIP.Address }}
 
     secrets:
