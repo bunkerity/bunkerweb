@@ -28,9 +28,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      json: ${{ fromJson(steps.scw.outputs.json) }}
-      id: ${{ fromJson(steps.scw.outputs.json).id }}
-      ip: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
+      json: ${{ steps.scw.outputs.json }}
+      id: ${{ steps.getinfo.outputs.id }}
+      ip: ${{ steps.getinfo.outputs.ip }}
     steps:
       # Prepare
       - name: Checkout source code
@@ -46,6 +46,11 @@ jobs:
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
           default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      - name: Get info
+        id: getinfo
+        run: |
+          echo "id=${{ fromJson(steps.scw.outputs.json).id }}" >> "$GITHUB_OUTPUT"
+          echo "ip=${{ fromJson(steps.scw.outputs.json).public_ip.address }}" >> "$GITHUB_OUTPUT"
       - name: Wait for VM
         run: scw instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
