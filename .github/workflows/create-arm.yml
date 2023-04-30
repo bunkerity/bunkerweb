@@ -3,12 +3,12 @@ name: Create ARM node (REUSABLE)
 on:
   workflow_call:
     outputs:
-      arm_id:
+      id:
         description: "ARM ID"
-        value: ${{ fromJson(jobs.build.outputs.json).id }}
-      arm_ip:
+        value: ${{ jobs.build.outputs.id }}
+      ip:
         description: "ARM IP"
-        value: ${{ fromJson(jobs.build.outputs.json).public_ip.address }}
+        value: ${{ jobs.build.outputs.ip }}
 
     secrets:
       SCW_ACCESS_KEY:
@@ -28,7 +28,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      json: steps.scw.outputs.json
+      json: ${{ fromJson(steps.scw.outputs.json) }}
+      id: ${{ fromJson(steps.scw.outputs.json).id }}
+      ip: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
     steps:
       # Prepare
       - name: Checkout source code
