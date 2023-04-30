@@ -102,11 +102,12 @@ jobs:
           context: .
           file: ${{ inputs.DOCKERFILE }}
           platforms: ${{ inputs.ARCH }}
-          load: true
+          load: ${{ inputs.CACHE_SUFFIX != 'arm' }}
           tags: local/${{ inputs.IMAGE }}
           cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
+        if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
         uses: aquasecurity/trivy-action@master
         with:
           vuln-type: os
