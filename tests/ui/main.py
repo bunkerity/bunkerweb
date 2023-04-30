@@ -256,765 +256,765 @@ try:
 
         ### HOME PAGE
 
-        print("Trying instances page ...", flush=True)
-
-        access_page(
-            driver,
-            driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[2]/a",
-            "instances",
-        )
-
-        ### INSTANCES PAGE
-
-        no_errors = True
-        retries = 0
-        while no_errors:
-            print("Trying to reload BunkerWeb instance ...", flush=True)
-
-            try:
-                form = WebDriverWait(driver, 2).until(
-                    EC.presence_of_element_located(
-                        (By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
-                    )
-                )
-            except TimeoutException:
-                print("No instance form found, exiting ...", flush=True)
-                exit(1)
-
-            try:
-                access_page(
-                    driver,
-                    driver_wait,
-                    "//form[starts-with(@id, 'form-instance-')]//button[@value='reload']",
-                    "instances",
-                    False,
-                )
-
-                print(
-                    "Instance was reloaded successfully, checking the message ...",
-                    flush=True,
-                )
-
-                assert_alert_message(driver, "has been reloaded")
-
-                no_errors = False
-            except:
-                if retries >= 3:
-                    exit(1)
-                retries += 1
-
-                print(
-                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
-                )
-
-        print("Trying global config page ...")
-
-        access_page(
-            driver,
-            driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[3]/a",
-            "global config",
-        )
-
-        ### GLOBAL CONFIG PAGE
-
-        no_errors = True
-        retries = 0
-        while no_errors:
-            try:
-                print(
-                    "Trying to save the global config without changing anything ...",
-                    flush=True,
-                )
-
-                safe_get_element(driver, By.ID, "form-edit-global-configs")
-
-                access_page(
-                    driver,
-                    driver_wait,
-                    "//form[@id='form-edit-global-configs']//button[@type='submit']",
-                    "global config",
-                    False,
-                )
-
-                print(
-                    "The page reloaded successfully, checking the message ...",
-                    flush=True,
-                )
-
-                assert_alert_message(
-                    driver,
-                    "The global configuration was not edited because no values were changed.",
-                )
-
-                no_errors = False
-            except:
-                if retries >= 3:
-                    exit(1)
-                retries += 1
-
-                print(
-                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
-                )
-
-        print(
-            'Checking if the "DATASTORE_MEMORY_SIZE" input have the overridden value ...',
-            flush=True,
-        )
-
-        input_datastore = safe_get_element(driver, By.ID, "DATASTORE_MEMORY_SIZE")
-
-        if not input_datastore.get_attribute("disabled"):
-            print(
-                'The input "DATASTORE_MEMORY_SIZE" is not disabled, even though it should be, exiting ...',
-                flush=True,
-            )
-            exit(1)
-        elif input_datastore.get_attribute("value") != "384m":
-            print("The value is not the expected one, exiting ...", flush=True)
-            exit(1)
-
-        print(
-            "The value is the expected one and the input is disabled, trying to edit the global config with wrong values ...",
-            flush=True,
-        )
-
-        input_worker = safe_get_element(driver, By.ID, "WORKER_RLIMIT_NOFILE")
-
-        input_worker.clear()
-        input_worker.send_keys("ZZZ")
-
-        assert_button_click(
-            driver, "//form[@id='form-edit-global-configs']//button[@type='submit']"
-        )
-
-        assert_alert_message(
-            driver,
-            "The global configuration was not edited because no values were changed.",
-        )
-
-        print(
-            "The form was not submitted, trying to edit the global config with good values ...",
-            flush=True,
-        )
-
-        input_worker.clear()
-        input_worker.send_keys("4096")
-
-        access_page(
-            driver,
-            driver_wait,
-            "//form[@id='form-edit-global-configs']//button[@type='submit']",
-            "global config",
-            False,
-        )
-
-        input_worker = safe_get_element(driver, By.ID, "WORKER_RLIMIT_NOFILE")
-
-        if input_worker.get_attribute("value") != "4096":
-            print("The value was not updated, exiting ...", flush=True)
-            exit(1)
-
-        print(
-            "The value was updated successfully, trying to navigate through the global config tabs ...",
-            flush=True,
-        )
-
-        buttons = safe_get_element(
-            driver,
-            By.XPATH,
-            "//div[@data-global-config-tabs-desktop='']/button",
-            multiple=True,
-        )
-        buttons.reverse()
-        for button in buttons:
-            assert_button_click(driver, button)
-
-        print("Trying to filter the global config ...", flush=True)
-
-        safe_get_element(driver, By.ID, "settings-filter").send_keys("Datastore")
-
-        if (
-            len(
-                safe_get_element(
-                    driver,
-                    By.XPATH,
-                    "//form[@id='form-edit-global-configs']//div[@data-setting-container='' and not(contains(@class, 'hidden'))]",
-                    multiple=True,
-                )
-            )
-            != 1
-        ):
-            print("The filter didn't work, exiting ...", flush=True)
-            exit(1)
-
-        print("Trying services page ...")
-
-        access_page(
-            driver,
-            driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[4]/a",
-            "services",
-        )
-
-        ## SERVICES PAGE
-
-        print("Checking the services page ...", flush=True)
-
-        try:
-            service = safe_get_element(
-                driver, By.XPATH, "//div[@data-services-service='']", error=True
-            )
-        except TimeoutException:
-            print("Services not found, exiting ...", flush=True)
-            exit(1)
-
-        if service.find_element(By.TAG_NAME, "h5").text.strip() != "www.example.com":
-            print("The service is not present, exiting ...", flush=True)
-            exit(1)
-
-        if service.find_element(By.TAG_NAME, "h6").text.strip() != "scheduler":
-            print(
-                "The service should have been created by the scheduler, exiting ...",
-                flush=True,
-            )
-            exit(1)
-
-        print("Service www.example.com is present, trying to delete it ...", flush=True)
-
-        delete_button = None
-        with suppress(TimeoutException):
-            delete_button = WebDriverWait(driver, 2).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        "//button[@data-services-action='delete' and @services-name='www.example.com']",
-                    )
-                )
-            )
-
-        if delete_button is not None:
-            print(
-                "Delete button has been found, even though it shouldn't be, exiting ...",
-                flush=True,
-            )
-            exit(1)
-
-        print(
-            "Delete button is not present, as expected, trying to edit it ...",
-            flush=True,
-        )
-
-        assert_button_click(
-            driver,
-            service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
-        )
-
-        try:
-            modal = safe_get_element(
-                driver, By.XPATH, "//div[@data-services-modal='']", error=True
-            )
-        except TimeoutException:
-            print("Modal not found, exiting ...", flush=True)
-            exit(1)
-
-        if "hidden" in modal.get_attribute("class"):
-            print(
-                "Modal is hidden even though it shouldn't be, exiting ...", flush=True
-            )
-            exit(1)
-
-        input_server_name = safe_get_element(driver, By.ID, "SERVER_NAME")
-
-        if input_server_name.get_attribute("value") != "www.example.com":
-            print("The value is not the expected one, exiting ...", flush=True)
-            exit(1)
-
-        print(
-            'The value for the "SERVER_NAME" input is the expected one, trying to edit the config ...',
-            flush=True,
-        )
-
-        assert_button_click(
-            driver,
-            safe_get_element(driver, By.XPATH, "//button[@data-tab-handler='gzip']"),
-        )
-
-        gzip_select = safe_get_element(
-            driver, By.XPATH, "//button[@data-setting-select='gzip-comp-level']"
-        )
-
-        assert_button_click(driver, gzip_select)
-
-        assert_button_click(
-            driver,
-            safe_get_element(
-                driver,
-                By.XPATH,
-                "//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']",
-            ),
-        )
-
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@data-services-modal-submit='']",
-            "services",
-            False,
-        )
-
-        print(
-            "The page reloaded successfully, checking if the setting has been updated ...",
-            flush=True,
-        )
-
-        try:
-            service = safe_get_element(
-                driver, By.XPATH, "//div[@data-services-service='']", error=True
-            )
-        except TimeoutException:
-            print("Services not found, exiting ...", flush=True)
-            exit(1)
-
-        assert_button_click(
-            driver,
-            service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
-        )
-
-        modal = safe_get_element(driver, By.XPATH, "//div[@data-services-modal='']")
-
-        if "hidden" in modal.get_attribute("class"):
-            print(
-                "Modal is hidden even though it shouldn't be, exiting ...", flush=True
-            )
-            exit(1)
-
-        assert_button_click(
-            driver,
-            driver.find_element(By.XPATH, "//button[@data-tab-handler='gzip']"),
-        )
-
-        gzip_true_select = safe_get_element(driver, By.ID, "GZIP_COMP_LEVEL")
-
-        if (
-            safe_get_element(
-                driver, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']"
-            ).get_attribute("value")
-            != "6"
-        ):
-            print("The value is not the expected one, exiting ...", flush=True)
-            exit(1)
-
-        assert_button_click(
-            driver, "//button[@data-services-modal-close='']/*[local-name() = 'svg']"
-        )
-
-        print("Creating a new service ...", flush=True)
-
-        assert_button_click(driver, "//button[@data-services-action='new']")
-
-        server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")
-        server_name_input.clear()
-        server_name_input.send_keys("app1.example.com")
-
-        assert_button_click(driver, "//button[@data-tab-handler='reverseproxy']")
-
-        assert_button_click(
-            driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
-        )
-
-        assert_button_click(
-            driver, "//button[@data-services-multiple-add='reverse-proxy']"
-        )
-
-        safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
-            "http://app1:8080"
-        )
-        safe_get_element(driver, By.ID, "REVERSE_PROXY_URL").send_keys("/")
-
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@data-services-modal-submit='']",
-            "services",
-            False,
-        )
-
-        try:
-            services = safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@data-services-service='']",
-                multiple=True,
-                error=True,
-            )
-        except TimeoutException:
-            print("Services not found, exiting ...", flush=True)
-            exit(1)
-
-        if len(services) < 2:
-            print("The service hasn't been created, exiting ...", flush=True)
-            exit(1)
-
-        service = services[0]
-
-        if service.find_element(By.TAG_NAME, "h5").text.strip() != "app1.example.com":
-            print(
-                'The service "app1.example.com" is not present, exiting ...', flush=True
-            )
-            exit(1)
-
-        if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
-            print(
-                "The service should have been created by the ui, exiting ...",
-                flush=True,
-            )
-            exit(1)
-
-        print("Service app1.example.com is present, trying it ...", flush=True)
-
-        try:
-            safe_get_element(
-                driver,
-                By.XPATH,
-                "//button[@data-services-action='edit' and @data-services-name='www.example.com']//ancestor::div//a",
-                error=True,
-            )
-        except TimeoutException:
-            print(
-                "Delete button hasn't been found, even though it should be, exiting ...",
-                flush=True,
-            )
-            exit(1)
-
-        ready = False
-        retries = 0
-        while not ready:
-            with suppress(RequestException):
-                status_code = get("http://app1.example.com/").status_code
-
-                if status_code > 500:
-                    print("The service is not working, exiting ...", flush=True)
-                    exit(1)
-
-                ready = status_code < 400
-
-            if retries > 10:
-                print("The service took too long to be ready, exiting ...", flush=True)
-                exit(1)
-            elif not ready:
-                retries += 1
-                print(
-                    "Waiting for the service to be ready, retrying in 5s ...",
-                    flush=True,
-                )
-                sleep(5)
-
-        print("The service is working, trying to delete it ...", flush=True)
-
-        try:
-            delete_button = safe_get_element(
-                driver,
-                By.XPATH,
-                "//button[@data-services-action='delete' and @data-services-name='app1.example.com']",
-                error=True,
-            )
-        except TimeoutException:
-            print(
-                "Delete button hasn't been found, even though it should be, exiting ...",
-                flush=True,
-            )
-            exit(1)
-
-        print(
-            "Delete button is present, as expected, deleting the service ...",
-            flush=True,
-        )
-
-        assert_button_click(driver, delete_button)
-
-        access_page(
-            driver,
-            driver_wait,
-            "//form[@data-services-modal-form-delete='']//button[@type='submit']",
-            "services",
-            False,
-        )
-
-        assert_alert_message(driver, "has been deleted.")
-
-        print(
-            "Service app1.example.com has been deleted, checking if it's still present ...",
-            flush=True,
-        )
-
-        try:
-            services = safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@data-services-service='']",
-                multiple=True,
-                error=True,
-            )
-        except TimeoutException:
-            print("Services not found, exiting ...", flush=True)
-            exit(1)
-
-        if len(services) > 1:
-            print("The service hasn't been deleted, exiting ...", flush=True)
-            exit(1)
-
-        print(
-            "The service has been deleted, successfully, trying configs page ...",
-            flush=True,
-        )
-
-        access_page(
-            driver,
-            driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[5]/a",
-            "configs",
-        )
-
-        ### CONFIGS PAGE
-
-        print("Trying to create a new config ...", flush=True)
-
-        assert_button_click(
-            driver,
-            "//div[@data-configs-element='server-http' and @data-_type='folder']",
-        )
-        assert_button_click(driver, "//li[@data-configs-add-file='']/button")
-
-        safe_get_element(
-            driver, By.XPATH, "//div[@data-configs-modal-path='']/input"
-        ).send_keys("hello")
-        safe_get_element(
-            driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea"
-        ).send_keys(
-            """
-            location /hello {
-                default_type 'text/plain';
-                content_by_lua_block {
-                    ngx.say('hello app1')
-                }
-            }
-            """
-        )
-
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@data-configs-modal-submit='']",
-            "configs",
-            False,
-        )
-
-        assert_alert_message(driver, "was successfully created")
-
-        sleep(15)
-
-        driver.execute_script("window.open('http://www.example.com/hello','_blank');")
-        driver.switch_to.window(driver.window_handles[1])
-        driver.switch_to.default_content()
-
-        try:
-            if (
-                safe_get_element(driver, By.XPATH, "//pre", error=True).text.strip()
-                != "hello app1"
-            ):
-                print(
-                    "The config hasn't been created correctly, exiting ...", flush=True
-                )
-                exit(1)
-        except TimeoutException:
-            print("The config hasn't been created, exiting ...", flush=True)
-            exit(1)
-
-        print(
-            "The config has been created and is working, trying to edit it ...",
-            flush=True,
-        )
-
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
-
-        assert_button_click(
-            driver,
-            "//div[@data-configs-element='server-http' and @data-_type='folder']",
-        )
-        assert_button_click(driver, "//div[@data-configs-action-button='hello.conf']")
-        assert_button_click(
-            driver,
-            "//div[@data-configs-action-dropdown='hello.conf']/button[@value='delete' and @data-configs-action-dropdown-btn='hello.conf']",
-        )
-
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@data-configs-modal-submit='']",
-            "configs",
-            False,
-        )
-
-        assert_alert_message(driver, "was successfully deleted")
-
-        print("The config has been deleted, trying plugins page ...", flush=True)
-
-        access_page(
-            driver,
-            driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[6]/a",
-            "plugins",
-        )
-
-        ### PLUGINS PAGE
-
-        print("Trying to reload the plugins without adding any ...", flush=True)
-
-        reload_button = safe_get_element(
-            driver, By.XPATH, "//div[@data-plugins-upload='']//button[@type='submit']"
-        )
-
-        if reload_button.get_attribute("disabled") is None:
-            print("The reload button is not disabled, exiting ...", flush=True)
-            exit(1)
-
-        print("Trying to filter the plugins ...", flush=True)
-
-        safe_get_element(
-            driver, By.XPATH, "//input[@placeholder='key words']"
-        ).send_keys("Anti")
-
-        plugins = safe_get_element(
-            driver, By.XPATH, "//div[@data-plugins-list='']", multiple=True
-        )
-
-        if len(plugins) != 1:
-            print("The filter is not working, exiting ...", flush=True)
-            exit(1)
-
-        print("The filter is working, trying to add a bad plugin ...", flush=True)
-
-        safe_get_element(
-            driver, By.XPATH, "//input[@type='file' and @name='file']"
-        ).send_keys(join(Path.cwd(), "test.zip"))
-
-        access_page(
-            driver,
-            driver_wait,
-            "//div[@data-plugins-upload='']//button[@type='submit']",
-            "plugins",
-            False,
-        )
-
-        assert_alert_message(driver, "is not a valid plugin")
-
-        print(
-            "The bad plugin has been rejected, trying to add a good plugin ...",
-            flush=True,
-        )
-
-        safe_get_element(
-            driver, By.XPATH, "//input[@type='file' and @name='file']"
-        ).send_keys(join(Path.cwd(), "discord.zip"))
-
-        access_page(
-            driver,
-            driver_wait,
-            "//div[@data-plugins-upload='']//button[@type='submit']",
-            "plugins",
-            False,
-        )
-
-        assert_alert_message(driver, "Successfully created plugin")
-
-        external_plugins = safe_get_element(
-            driver,
-            By.XPATH,
-            "//div[@data-plugins-external=' external ']",
-            multiple=True,
-        )
-
-        if len(external_plugins) != 1:
-            print("The plugin hasn't been added, exiting ...", flush=True)
-            exit(1)
-
-        print("The plugin has been added, trying delete it ...", flush=True)
-
-        assert_button_click(
-            driver,
-            "//button[@data-plugins-action='delete' and @name='discord']",
-        )
-
-        access_page(
-            driver,
-            driver_wait,
-            "//form[@data-plugins-modal-form-delete='']//button[@type='submit']",
-            "plugins",
-            False,
-        )
-
-        with suppress(TimeoutException):
-            title = WebDriverWait(driver, 2).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        "//button[@data-plugins-action='delete' and @name='discord']",
-                    )
-                )
-            )
-
-            if title:
-                print("The plugin hasn't been deleted, exiting ...", flush=True)
-                exit(1)
-
-        print("The plugin has been deleted, trying cache page ...", flush=True)
-
-        access_page(
-            driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[7]/a", "cache"
-        )
-
-        ### CACHE PAGE
-
-        print("Trying to open a cache file ...", flush=True)
-
-        assert_button_click(driver, "//div[@data-cache-element='mmdb-asn/asn.mmdb']")
-
-        if (
-            safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@data-cache-modal-editor='']/div[@class='ace_scroller']//div[@class='ace_line']",
-            ).text.strip()
-            != "Download file to view content"
-        ):
-            print("The cache file content is not correct, exiting ...", flush=True)
-            exit(1)
-
-        assert_button_click(driver, "//button[@data-cache-modal-submit='']")
-
-        print(
-            "The cache file content is correct, trying to download it ...", flush=True
-        )
-
-        assert_button_click(
-            driver, "//div[@data-cache-action-button='mmdb-asn/asn.mmdb']"
-        )
-
-        assert_button_click(
-            driver,
-            "//div[@data-cache-action-dropdown='mmdb-asn/asn.mmdb']/button[@value='download']",
-        )
-
-        sleep(0.3)
-
-        if len(driver.window_handles) > 1:
-            print("The cache file hasn't been downloaded, exiting ...", flush=True)
-            exit(1)
-
-        print("The cache file has been downloaded, trying logs page ...", flush=True)
+        # print("Trying instances page ...", flush=True)
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "/html/body/aside[1]/div[1]/div[2]/ul/li[2]/a",
+        #     "instances",
+        # )
+
+        # ### INSTANCES PAGE
+
+        # no_errors = True
+        # retries = 0
+        # while no_errors:
+        #     print("Trying to reload BunkerWeb instance ...", flush=True)
+
+        #     try:
+        #         form = WebDriverWait(driver, 2).until(
+        #             EC.presence_of_element_located(
+        #                 (By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
+        #             )
+        #         )
+        #     except TimeoutException:
+        #         print("No instance form found, exiting ...", flush=True)
+        #         exit(1)
+
+        #     try:
+        #         access_page(
+        #             driver,
+        #             driver_wait,
+        #             "//form[starts-with(@id, 'form-instance-')]//button[@value='reload']",
+        #             "instances",
+        #             False,
+        #         )
+
+        #         print(
+        #             "Instance was reloaded successfully, checking the message ...",
+        #             flush=True,
+        #         )
+
+        #         assert_alert_message(driver, "has been reloaded")
+
+        #         no_errors = False
+        #     except:
+        #         if retries >= 3:
+        #             exit(1)
+        #         retries += 1
+
+        #         print(
+        #             "WARNING: message list doesn't contain the expected message or is empty, retrying..."
+        #         )
+
+        # print("Trying global config page ...")
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "/html/body/aside[1]/div[1]/div[2]/ul/li[3]/a",
+        #     "global config",
+        # )
+
+        # ### GLOBAL CONFIG PAGE
+
+        # no_errors = True
+        # retries = 0
+        # while no_errors:
+        #     try:
+        #         print(
+        #             "Trying to save the global config without changing anything ...",
+        #             flush=True,
+        #         )
+
+        #         safe_get_element(driver, By.ID, "form-edit-global-configs")
+
+        #         access_page(
+        #             driver,
+        #             driver_wait,
+        #             "//form[@id='form-edit-global-configs']//button[@type='submit']",
+        #             "global config",
+        #             False,
+        #         )
+
+        #         print(
+        #             "The page reloaded successfully, checking the message ...",
+        #             flush=True,
+        #         )
+
+        #         assert_alert_message(
+        #             driver,
+        #             "The global configuration was not edited because no values were changed.",
+        #         )
+
+        #         no_errors = False
+        #     except:
+        #         if retries >= 3:
+        #             exit(1)
+        #         retries += 1
+
+        #         print(
+        #             "WARNING: message list doesn't contain the expected message or is empty, retrying..."
+        #         )
+
+        # print(
+        #     'Checking if the "DATASTORE_MEMORY_SIZE" input have the overridden value ...',
+        #     flush=True,
+        # )
+
+        # input_datastore = safe_get_element(driver, By.ID, "DATASTORE_MEMORY_SIZE")
+
+        # if not input_datastore.get_attribute("disabled"):
+        #     print(
+        #         'The input "DATASTORE_MEMORY_SIZE" is not disabled, even though it should be, exiting ...',
+        #         flush=True,
+        #     )
+        #     exit(1)
+        # elif input_datastore.get_attribute("value") != "384m":
+        #     print("The value is not the expected one, exiting ...", flush=True)
+        #     exit(1)
+
+        # print(
+        #     "The value is the expected one and the input is disabled, trying to edit the global config with wrong values ...",
+        #     flush=True,
+        # )
+
+        # input_worker = safe_get_element(driver, By.ID, "WORKER_RLIMIT_NOFILE")
+
+        # input_worker.clear()
+        # input_worker.send_keys("ZZZ")
+
+        # assert_button_click(
+        #     driver, "//form[@id='form-edit-global-configs']//button[@type='submit']"
+        # )
+
+        # assert_alert_message(
+        #     driver,
+        #     "The global configuration was not edited because no values were changed.",
+        # )
+
+        # print(
+        #     "The form was not submitted, trying to edit the global config with good values ...",
+        #     flush=True,
+        # )
+
+        # input_worker.clear()
+        # input_worker.send_keys("4096")
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//form[@id='form-edit-global-configs']//button[@type='submit']",
+        #     "global config",
+        #     False,
+        # )
+
+        # input_worker = safe_get_element(driver, By.ID, "WORKER_RLIMIT_NOFILE")
+
+        # if input_worker.get_attribute("value") != "4096":
+        #     print("The value was not updated, exiting ...", flush=True)
+        #     exit(1)
+
+        # print(
+        #     "The value was updated successfully, trying to navigate through the global config tabs ...",
+        #     flush=True,
+        # )
+
+        # buttons = safe_get_element(
+        #     driver,
+        #     By.XPATH,
+        #     "//div[@data-global-config-tabs-desktop='']/button",
+        #     multiple=True,
+        # )
+        # buttons.reverse()
+        # for button in buttons:
+        #     assert_button_click(driver, button)
+
+        # print("Trying to filter the global config ...", flush=True)
+
+        # safe_get_element(driver, By.ID, "settings-filter").send_keys("Datastore")
+
+        # if (
+        #     len(
+        #         safe_get_element(
+        #             driver,
+        #             By.XPATH,
+        #             "//form[@id='form-edit-global-configs']//div[@data-setting-container='' and not(contains(@class, 'hidden'))]",
+        #             multiple=True,
+        #         )
+        #     )
+        #     != 1
+        # ):
+        #     print("The filter didn't work, exiting ...", flush=True)
+        #     exit(1)
+
+        # print("Trying services page ...")
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "/html/body/aside[1]/div[1]/div[2]/ul/li[4]/a",
+        #     "services",
+        # )
+
+        # ## SERVICES PAGE
+
+        # print("Checking the services page ...", flush=True)
+
+        # try:
+        #     service = safe_get_element(
+        #         driver, By.XPATH, "//div[@data-services-service='']", error=True
+        #     )
+        # except TimeoutException:
+        #     print("Services not found, exiting ...", flush=True)
+        #     exit(1)
+
+        # if service.find_element(By.TAG_NAME, "h5").text.strip() != "www.example.com":
+        #     print("The service is not present, exiting ...", flush=True)
+        #     exit(1)
+
+        # if service.find_element(By.TAG_NAME, "h6").text.strip() != "scheduler":
+        #     print(
+        #         "The service should have been created by the scheduler, exiting ...",
+        #         flush=True,
+        #     )
+        #     exit(1)
+
+        # print("Service www.example.com is present, trying to delete it ...", flush=True)
+
+        # delete_button = None
+        # with suppress(TimeoutException):
+        #     delete_button = WebDriverWait(driver, 2).until(
+        #         EC.presence_of_element_located(
+        #             (
+        #                 By.XPATH,
+        #                 "//button[@data-services-action='delete' and @services-name='www.example.com']",
+        #             )
+        #         )
+        #     )
+
+        # if delete_button is not None:
+        #     print(
+        #         "Delete button has been found, even though it shouldn't be, exiting ...",
+        #         flush=True,
+        #     )
+        #     exit(1)
+
+        # print(
+        #     "Delete button is not present, as expected, trying to edit it ...",
+        #     flush=True,
+        # )
+
+        # assert_button_click(
+        #     driver,
+        #     service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
+        # )
+
+        # try:
+        #     modal = safe_get_element(
+        #         driver, By.XPATH, "//div[@data-services-modal='']", error=True
+        #     )
+        # except TimeoutException:
+        #     print("Modal not found, exiting ...", flush=True)
+        #     exit(1)
+
+        # if "hidden" in modal.get_attribute("class"):
+        #     print(
+        #         "Modal is hidden even though it shouldn't be, exiting ...", flush=True
+        #     )
+        #     exit(1)
+
+        # input_server_name = safe_get_element(driver, By.ID, "SERVER_NAME")
+
+        # if input_server_name.get_attribute("value") != "www.example.com":
+        #     print("The value is not the expected one, exiting ...", flush=True)
+        #     exit(1)
+
+        # print(
+        #     'The value for the "SERVER_NAME" input is the expected one, trying to edit the config ...',
+        #     flush=True,
+        # )
+
+        # assert_button_click(
+        #     driver,
+        #     safe_get_element(driver, By.XPATH, "//button[@data-tab-handler='gzip']"),
+        # )
+
+        # gzip_select = safe_get_element(
+        #     driver, By.XPATH, "//button[@data-setting-select='gzip-comp-level']"
+        # )
+
+        # assert_button_click(driver, gzip_select)
+
+        # assert_button_click(
+        #     driver,
+        #     safe_get_element(
+        #         driver,
+        #         By.XPATH,
+        #         "//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']",
+        #     ),
+        # )
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//button[@data-services-modal-submit='']",
+        #     "services",
+        #     False,
+        # )
+
+        # print(
+        #     "The page reloaded successfully, checking if the setting has been updated ...",
+        #     flush=True,
+        # )
+
+        # try:
+        #     service = safe_get_element(
+        #         driver, By.XPATH, "//div[@data-services-service='']", error=True
+        #     )
+        # except TimeoutException:
+        #     print("Services not found, exiting ...", flush=True)
+        #     exit(1)
+
+        # assert_button_click(
+        #     driver,
+        #     service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
+        # )
+
+        # modal = safe_get_element(driver, By.XPATH, "//div[@data-services-modal='']")
+
+        # if "hidden" in modal.get_attribute("class"):
+        #     print(
+        #         "Modal is hidden even though it shouldn't be, exiting ...", flush=True
+        #     )
+        #     exit(1)
+
+        # assert_button_click(
+        #     driver,
+        #     driver.find_element(By.XPATH, "//button[@data-tab-handler='gzip']"),
+        # )
+
+        # gzip_true_select = safe_get_element(driver, By.ID, "GZIP_COMP_LEVEL")
+
+        # if (
+        #     safe_get_element(
+        #         driver, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']"
+        #     ).get_attribute("value")
+        #     != "6"
+        # ):
+        #     print("The value is not the expected one, exiting ...", flush=True)
+        #     exit(1)
+
+        # assert_button_click(
+        #     driver, "//button[@data-services-modal-close='']/*[local-name() = 'svg']"
+        # )
+
+        # print("Creating a new service ...", flush=True)
+
+        # assert_button_click(driver, "//button[@data-services-action='new']")
+
+        # server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")
+        # server_name_input.clear()
+        # server_name_input.send_keys("app1.example.com")
+
+        # assert_button_click(driver, "//button[@data-tab-handler='reverseproxy']")
+
+        # assert_button_click(
+        #     driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
+        # )
+
+        # assert_button_click(
+        #     driver, "//button[@data-services-multiple-add='reverse-proxy']"
+        # )
+
+        # safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
+        #     "http://app1:8080"
+        # )
+        # safe_get_element(driver, By.ID, "REVERSE_PROXY_URL").send_keys("/")
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//button[@data-services-modal-submit='']",
+        #     "services",
+        #     False,
+        # )
+
+        # try:
+        #     services = safe_get_element(
+        #         driver,
+        #         By.XPATH,
+        #         "//div[@data-services-service='']",
+        #         multiple=True,
+        #         error=True,
+        #     )
+        # except TimeoutException:
+        #     print("Services not found, exiting ...", flush=True)
+        #     exit(1)
+
+        # if len(services) < 2:
+        #     print("The service hasn't been created, exiting ...", flush=True)
+        #     exit(1)
+
+        # service = services[0]
+
+        # if service.find_element(By.TAG_NAME, "h5").text.strip() != "app1.example.com":
+        #     print(
+        #         'The service "app1.example.com" is not present, exiting ...', flush=True
+        #     )
+        #     exit(1)
+
+        # if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
+        #     print(
+        #         "The service should have been created by the ui, exiting ...",
+        #         flush=True,
+        #     )
+        #     exit(1)
+
+        # print("Service app1.example.com is present, trying it ...", flush=True)
+
+        # try:
+        #     safe_get_element(
+        #         driver,
+        #         By.XPATH,
+        #         "//button[@data-services-action='edit' and @data-services-name='www.example.com']//ancestor::div//a",
+        #         error=True,
+        #     )
+        # except TimeoutException:
+        #     print(
+        #         "Delete button hasn't been found, even though it should be, exiting ...",
+        #         flush=True,
+        #     )
+        #     exit(1)
+
+        # ready = False
+        # retries = 0
+        # while not ready:
+        #     with suppress(RequestException):
+        #         status_code = get("http://app1.example.com/").status_code
+
+        #         if status_code > 500:
+        #             print("The service is not working, exiting ...", flush=True)
+        #             exit(1)
+
+        #         ready = status_code < 400
+
+        #     if retries > 10:
+        #         print("The service took too long to be ready, exiting ...", flush=True)
+        #         exit(1)
+        #     elif not ready:
+        #         retries += 1
+        #         print(
+        #             "Waiting for the service to be ready, retrying in 5s ...",
+        #             flush=True,
+        #         )
+        #         sleep(5)
+
+        # print("The service is working, trying to delete it ...", flush=True)
+
+        # try:
+        #     delete_button = safe_get_element(
+        #         driver,
+        #         By.XPATH,
+        #         "//button[@data-services-action='delete' and @data-services-name='app1.example.com']",
+        #         error=True,
+        #     )
+        # except TimeoutException:
+        #     print(
+        #         "Delete button hasn't been found, even though it should be, exiting ...",
+        #         flush=True,
+        #     )
+        #     exit(1)
+
+        # print(
+        #     "Delete button is present, as expected, deleting the service ...",
+        #     flush=True,
+        # )
+
+        # assert_button_click(driver, delete_button)
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//form[@data-services-modal-form-delete='']//button[@type='submit']",
+        #     "services",
+        #     False,
+        # )
+
+        # assert_alert_message(driver, "has been deleted.")
+
+        # print(
+        #     "Service app1.example.com has been deleted, checking if it's still present ...",
+        #     flush=True,
+        # )
+
+        # try:
+        #     services = safe_get_element(
+        #         driver,
+        #         By.XPATH,
+        #         "//div[@data-services-service='']",
+        #         multiple=True,
+        #         error=True,
+        #     )
+        # except TimeoutException:
+        #     print("Services not found, exiting ...", flush=True)
+        #     exit(1)
+
+        # if len(services) > 1:
+        #     print("The service hasn't been deleted, exiting ...", flush=True)
+        #     exit(1)
+
+        # print(
+        #     "The service has been deleted, successfully, trying configs page ...",
+        #     flush=True,
+        # )
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "/html/body/aside[1]/div[1]/div[2]/ul/li[5]/a",
+        #     "configs",
+        # )
+
+        # ### CONFIGS PAGE
+
+        # print("Trying to create a new config ...", flush=True)
+
+        # assert_button_click(
+        #     driver,
+        #     "//div[@data-configs-element='server-http' and @data-_type='folder']",
+        # )
+        # assert_button_click(driver, "//li[@data-configs-add-file='']/button")
+
+        # safe_get_element(
+        #     driver, By.XPATH, "//div[@data-configs-modal-path='']/input"
+        # ).send_keys("hello")
+        # safe_get_element(
+        #     driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea"
+        # ).send_keys(
+        #     """
+        #     location /hello {
+        #         default_type 'text/plain';
+        #         content_by_lua_block {
+        #             ngx.say('hello app1')
+        #         }
+        #     }
+        #     """
+        # )
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//button[@data-configs-modal-submit='']",
+        #     "configs",
+        #     False,
+        # )
+
+        # assert_alert_message(driver, "was successfully created")
+
+        # sleep(15)
+
+        # driver.execute_script("window.open('http://www.example.com/hello','_blank');")
+        # driver.switch_to.window(driver.window_handles[1])
+        # driver.switch_to.default_content()
+
+        # try:
+        #     if (
+        #         safe_get_element(driver, By.XPATH, "//pre", error=True).text.strip()
+        #         != "hello app1"
+        #     ):
+        #         print(
+        #             "The config hasn't been created correctly, exiting ...", flush=True
+        #         )
+        #         exit(1)
+        # except TimeoutException:
+        #     print("The config hasn't been created, exiting ...", flush=True)
+        #     exit(1)
+
+        # print(
+        #     "The config has been created and is working, trying to edit it ...",
+        #     flush=True,
+        # )
+
+        # driver.close()
+        # driver.switch_to.window(driver.window_handles[0])
+
+        # assert_button_click(
+        #     driver,
+        #     "//div[@data-configs-element='server-http' and @data-_type='folder']",
+        # )
+        # assert_button_click(driver, "//div[@data-configs-action-button='hello.conf']")
+        # assert_button_click(
+        #     driver,
+        #     "//div[@data-configs-action-dropdown='hello.conf']/button[@value='delete' and @data-configs-action-dropdown-btn='hello.conf']",
+        # )
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//button[@data-configs-modal-submit='']",
+        #     "configs",
+        #     False,
+        # )
+
+        # assert_alert_message(driver, "was successfully deleted")
+
+        # print("The config has been deleted, trying plugins page ...", flush=True)
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "/html/body/aside[1]/div[1]/div[2]/ul/li[6]/a",
+        #     "plugins",
+        # )
+
+        # ### PLUGINS PAGE
+
+        # print("Trying to reload the plugins without adding any ...", flush=True)
+
+        # reload_button = safe_get_element(
+        #     driver, By.XPATH, "//div[@data-plugins-upload='']//button[@type='submit']"
+        # )
+
+        # if reload_button.get_attribute("disabled") is None:
+        #     print("The reload button is not disabled, exiting ...", flush=True)
+        #     exit(1)
+
+        # print("Trying to filter the plugins ...", flush=True)
+
+        # safe_get_element(
+        #     driver, By.XPATH, "//input[@placeholder='key words']"
+        # ).send_keys("Anti")
+
+        # plugins = safe_get_element(
+        #     driver, By.XPATH, "//div[@data-plugins-list='']", multiple=True
+        # )
+
+        # if len(plugins) != 1:
+        #     print("The filter is not working, exiting ...", flush=True)
+        #     exit(1)
+
+        # print("The filter is working, trying to add a bad plugin ...", flush=True)
+
+        # safe_get_element(
+        #     driver, By.XPATH, "//input[@type='file' and @name='file']"
+        # ).send_keys(join(Path.cwd(), "test.zip"))
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//div[@data-plugins-upload='']//button[@type='submit']",
+        #     "plugins",
+        #     False,
+        # )
+
+        # assert_alert_message(driver, "is not a valid plugin")
+
+        # print(
+        #     "The bad plugin has been rejected, trying to add a good plugin ...",
+        #     flush=True,
+        # )
+
+        # safe_get_element(
+        #     driver, By.XPATH, "//input[@type='file' and @name='file']"
+        # ).send_keys(join(Path.cwd(), "discord.zip"))
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//div[@data-plugins-upload='']//button[@type='submit']",
+        #     "plugins",
+        #     False,
+        # )
+
+        # assert_alert_message(driver, "Successfully created plugin")
+
+        # external_plugins = safe_get_element(
+        #     driver,
+        #     By.XPATH,
+        #     "//div[@data-plugins-external=' external ']",
+        #     multiple=True,
+        # )
+
+        # if len(external_plugins) != 1:
+        #     print("The plugin hasn't been added, exiting ...", flush=True)
+        #     exit(1)
+
+        # print("The plugin has been added, trying delete it ...", flush=True)
+
+        # assert_button_click(
+        #     driver,
+        #     "//button[@data-plugins-action='delete' and @name='discord']",
+        # )
+
+        # access_page(
+        #     driver,
+        #     driver_wait,
+        #     "//form[@data-plugins-modal-form-delete='']//button[@type='submit']",
+        #     "plugins",
+        #     False,
+        # )
+
+        # with suppress(TimeoutException):
+        #     title = WebDriverWait(driver, 2).until(
+        #         EC.presence_of_element_located(
+        #             (
+        #                 By.XPATH,
+        #                 "//button[@data-plugins-action='delete' and @name='discord']",
+        #             )
+        #         )
+        #     )
+
+        #     if title:
+        #         print("The plugin hasn't been deleted, exiting ...", flush=True)
+        #         exit(1)
+
+        # print("The plugin has been deleted, trying cache page ...", flush=True)
+
+        # access_page(
+        #     driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[7]/a", "cache"
+        # )
+
+        # ### CACHE PAGE
+
+        # print("Trying to open a cache file ...", flush=True)
+
+        # assert_button_click(driver, "//div[@data-cache-element='mmdb-asn/asn.mmdb']")
+
+        # if (
+        #     safe_get_element(
+        #         driver,
+        #         By.XPATH,
+        #         "//div[@data-cache-modal-editor='']/div[@class='ace_scroller']//div[@class='ace_line']",
+        #     ).text.strip()
+        #     != "Download file to view content"
+        # ):
+        #     print("The cache file content is not correct, exiting ...", flush=True)
+        #     exit(1)
+
+        # assert_button_click(driver, "//button[@data-cache-modal-submit='']")
+
+        # print(
+        #     "The cache file content is correct, trying to download it ...", flush=True
+        # )
+
+        # assert_button_click(
+        #     driver, "//div[@data-cache-action-button='mmdb-asn/asn.mmdb']"
+        # )
+
+        # assert_button_click(
+        #     driver,
+        #     "//div[@data-cache-action-dropdown='mmdb-asn/asn.mmdb']/button[@value='download']",
+        # )
+
+        # sleep(0.3)
+
+        # if len(driver.window_handles) > 1:
+        #     print("The cache file hasn't been downloaded, exiting ...", flush=True)
+        #     exit(1)
+
+        # print("The cache file has been downloaded, trying logs page ...", flush=True)
 
         access_page(
             driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs"
@@ -1055,7 +1055,9 @@ try:
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(
+            driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]"
+        )
 
         sleep(3)
 
