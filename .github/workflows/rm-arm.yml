@@ -25,7 +25,7 @@ jobs:
       - name: Delete ARM VM
         uses: scaleway/action-scw@bbcfd65cd2af73456ce439088e0d42c1657c4c38
         with:
-          args: instance server delete ${{ secrets.ARM_ID }} zone=fr-par-2 with-ip=true with-volumes=all
+          args: instance server delete ${{ secrets.ARM_ID }} zone=fr-par-2 with-ip=true with-volumes=all force-shutdown=true
           version: v2.13.0
           access-key: ${{ secrets.SCW_ACCESS_KEY }}
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
