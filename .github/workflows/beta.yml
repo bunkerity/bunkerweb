@@ -156,6 +156,7 @@ jobs:
       DOCKERFILE: src/scheduler/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: "arm"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -172,6 +173,7 @@ jobs:
       DOCKERFILE: src/autoconf/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: "arm"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -188,6 +190,7 @@ jobs:
       DOCKERFILE: src/ui/Dockerfile
       CACHE: false
       PUSH: false
+      CACHE_SUFFIX: "arm"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
