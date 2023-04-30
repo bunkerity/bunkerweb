@@ -62,5 +62,7 @@ jobs:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Install Docker
-        run: scw instance server ssh ${{ fromJson(steps.scw.outputs.json).id }} zone=fr-par-2 "command=curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
+        run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
+        env:
+          SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
 

@@ -16,6 +16,7 @@ on:
 
 jobs:
   build:
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       # Prepare
@@ -30,4 +31,3 @@ jobs:
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
           default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-
