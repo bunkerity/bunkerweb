@@ -52,7 +52,6 @@ jobs:
           resource: tcp:${{ fromJson(steps.scw.outputs.json).public_ip.address }}:22
           timeout: 300000
       - name: Setup SSH for ARM node
-        if: inputs.CACHE_SUFFIX == 'arm'
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
