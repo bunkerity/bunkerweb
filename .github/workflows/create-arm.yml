@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Create ARM VM
         id: scw
-        uses: scaleway/action-scw@v0
+        uses: scaleway/action-scw@bbcfd65cd2af73456ce439088e0d42c1657c4c38
         with:
           args: instance server create zone=fr-par-2 type=AMP2-C8
           save_config: true

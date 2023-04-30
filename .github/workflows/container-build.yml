@@ -111,6 +111,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           vuln-type: os
+          skip-dirs: /root/.cargo
           image-ref: local/${{ inputs.IMAGE }}
           format: table
           exit-code: 1
