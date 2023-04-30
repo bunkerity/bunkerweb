@@ -22,7 +22,7 @@ on:
       ARM_SSH_CONFIG:
         required: true
       ARM_SSH_IP:
-        require: true
+        required: true
 
 jobs:
   push:
