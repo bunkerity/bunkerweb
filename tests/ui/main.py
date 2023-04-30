@@ -254,7 +254,7 @@ try:
             "home",
         )
 
-        ## HOME PAGE
+        ### HOME PAGE
 
         print("Trying instances page ...", flush=True)
 
@@ -933,7 +933,7 @@ try:
         external_plugins = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@data-plugins-external='external']",
+            "//div[@data-plugins-external=' external ']",
             multiple=True,
         )
 
