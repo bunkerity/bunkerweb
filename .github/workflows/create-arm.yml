@@ -1,0 +1,47 @@
+name: Create ARM node (REUSABLE)
+
+on:
+  workflow_call:
+    outputs:
+      arm_id:
+        description: "ARM ID"
+        value: ${{ fromJson(jobs.build.outputs.json).ID }}
+      arm_ip:
+        description: "ARM ID"
+        value: ${{ fromJson(jobs.build.outputs.json).PluginIP.Address }}
+
+    secrets:
+      SCW_ACCESS_KEY:
+        required: true
+      SCW_SECRET_KEY:
+        required: true
+      SCW_DEFAULT_PROJECT_ID:
+        required: true
+      SCW_DEFAULT_ORGANIZATION_ID:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      json: steps.scw.outputs.json
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Create ARM VM
+        id: scw
+        uses: scaleway/action-scw@v0
+        with:
+          args: instance server create zone=fr-par-2 type=AMP2-C8
+          save_config: true
+          version: v2.13.0
+          access-key: ${{ secrets.SCW_ACCESS_KEY }}
+          secret-key: ${{ secrets.SCW_SECRET_KEY }}
+          default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+          default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      - name: Wait for VM
+        run: scw instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
+      - name: Install Docker
+        run: scw instance server ssh ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2 "command=curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
+
