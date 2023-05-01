@@ -46,8 +46,14 @@ jobs:
         run: gem install package_cloud
       # Download packages
       - uses: actions/download-artifact@v3
+        if: inputs.LINUX != 'el'
         with:
           name: package-${{ inputs.LINUX }}
+          path: /tmp/${{ inputs.LINUX }}
+      - uses: actions/download-artifact@v3
+        if: inputs.LINUX == 'el'
+        with:
+          name: package-rhel
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
