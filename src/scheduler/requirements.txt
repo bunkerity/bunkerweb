@@ -236,9 +236,9 @@ pytz==2023.3 \
     #   acme
     #   certbot
     #   pyrfc3339
-requests==2.28.2 \
-    --hash=sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa \
-    --hash=sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf
+requests==2.29.0 \
+    --hash=sha256:e8f3c9be120d3333921d213eef078af392fba3933ab7ed2d1cba3b56f2568c3b \
+    --hash=sha256:f2e34a75f4749019bb0e3effb66683630e4ffeaf75819fb51bebef1bf5aef059
     # via acme
 schedule==1.2.0 \
     --hash=sha256:415908febaba0bc9a7c727a32efb407d646fe994367ef9157d123aabbe539ea8 \

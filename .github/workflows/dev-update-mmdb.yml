@@ -1,0 +1,33 @@
+name: Update cached mmdb files
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 5 * *"
+
+jobs:
+  mmdb-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download mmdb files
+        run: |
+          mkdir -p src/bw/misc/
+          cd src/bw/misc/
+          curl -s -o asn.mmdb.gz https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz
+          curl -s -o country.mmdb.gz https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz
+          rm -f asn.mmdb country.mmdb
+          gunzip asn.mmdb.gz
+          gunzip country.mmdb.gz
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: dev
+          commit_message: "Monthly mmdb update"
+          commit_options: "--no-verify"
+          commit_user_name: "GitHub Actions"
+          commit_user_email: "tdiot@bunkerity.com"

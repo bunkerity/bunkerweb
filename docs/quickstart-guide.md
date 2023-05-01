@@ -1,10 +1,10 @@
 # Quickstart guide
 
 !!! info "Prerequisites"
-    We assume that you're already familiar with the [core concepts](/current_bw_version/concepts) and you have followed the [integrations instructions](/current_bw_version/integrations) for your environment.
+    We assume that you're already familiar with the [core concepts](concepts.md) and you have followed the [integrations instructions](integrations.md) for your environment.
 
 !!! tip "Going further"
-		To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/examples) of the repository to get real-world examples.
+		To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/examples) of the repository to get real-world examples.
 
 ## Protect HTTP applications
 
@@ -16,7 +16,7 @@ The following settings can be used :
 - `REVERSE_PROXY_URL` : the public path prefix
 - `REVERSE_PROXY_HOST` : (internal) address of the proxied web application
 
-You will find more settings about reverse proxy in the [settings section](/current_bw_version/settings/#reverse-proxy) of the documentation.
+You will find more settings about reverse proxy in the [settings section](settings.md#reverse-proxy) of the documentation.
 
 ### Single application
 
@@ -35,7 +35,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - 80:8080
           - 443:8443
@@ -52,7 +52,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -92,7 +92,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Docker autoconf"
 
-    We will assume that you already have the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
+    We will assume that you already have the [Docker autoconf integration](integrations.md#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
     version: '3.5'
@@ -118,7 +118,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Swarm"
 
-    We will assume that you already have the [Swarm integration](/current_bw_version/integrations/#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
+    We will assume that you already have the [Swarm integration](integrations.md#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
     version: "3"
@@ -148,7 +148,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Kubernetes"
 
-    We will assume that you already have the [Kubernetes integration](/current_bw_version/integrations/#kubernetes) stack running on your cluster.
+    We will assume that you already have the [Kubernetes integration](integrations.md#kubernetes) stack running on your cluster.
 
     Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster :
 
@@ -213,7 +213,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](/current_bw_version/integrations/#linux) stack running on your machine.
+    We will assume that you already have the [Linux integration](integrations.md#linux) stack running on your machine.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
 
@@ -299,7 +299,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Vagrant"
 
-    We will assume that you already have the [Vagrant integration](/current_bw_version/integrations/#vagrant) stack running on your machine.
+    We will assume that you already have the [Vagrant integration](integrations.md#vagrant) stack running on your machine.
 
     The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
 
@@ -385,7 +385,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - 80:8080
           - 443:8443
@@ -405,7 +405,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -444,7 +444,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Docker autoconf"
 
-    We will assume that you already have the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
+    We will assume that you already have the [Docker autoconf integration](integrations.md#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
     version: '3.5'
@@ -494,7 +494,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Swarm"
 
-    We will assume that you already have the [Swarm integration](/current_bw_version/integrations/#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
+    We will assume that you already have the [Swarm integration](integrations.md#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
     version: "3"
@@ -556,7 +556,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Kubernetes"
 
-    We will assume that you already have the [Kubernetes integration](/current_bw_version/integrations/#kubernetes) stack running on your cluster.
+    We will assume that you already have the [Kubernetes integration](integrations.md#kubernetes) stack running on your cluster.
 
     Let's assume that you have typical Deployments with a Service to access the web applications from within the cluster :
 
@@ -642,7 +642,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](/current_bw_version/integrations/#linux) stack running on your machine.
+    We will assume that you already have the [Linux integration](integrations.md#linux) stack running on your machine.
 
     The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory (repeat it and change the port if you want to test BunkerWeb) :
 
@@ -734,7 +734,7 @@ You will find more settings about reverse proxy in the [settings section](/curre
 
 === "Vagrant"
 
-    We will assume that you already have the [Vagrant integration](/current_bw_version/integrations/#vagrant) stack running on your machine.
+    We will assume that you already have the [Vagrant integration](integrations.md#vagrant) stack running on your machine.
 
 	  First of all, connect to your vagrant machine :
 
@@ -797,7 +797,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
-You will find more settings about real IP in the [settings section](/current_bw_version/settings/#real-ip) of the documentation.
+You will find more settings about real IP in the [settings section](settings.md#real-ip) of the documentation.
 
 ### HTTP header
 
@@ -820,7 +820,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
@@ -831,11 +831,11 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
+    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
@@ -846,11 +846,11 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Swarm"
 
-    Before running the [Swarm integration](/current_bw_version/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
+    Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the BunkerWeb service :
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
@@ -970,7 +970,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
@@ -982,11 +982,11 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
+    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
@@ -998,11 +998,11 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Swarm"
 
-    Before running the [Swarm integration](/current_bw_version/integrations/#swarm) stack, you will need to add the settings for the BunkerWeb service :
+    Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the BunkerWeb service :
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1113,7 +1113,7 @@ REAL_IP_HEADER=proxy_protocol
 
 BunkerWeb can also act as **generic UDP/TCP reverse proxy** : you can protect any network-based applications working at least on layer 4 of the OSI model. Behind the hood, it leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX instead of using the "classical" http one.
 
-Please note that not all settings and security features are available when using the stream module. You will find more info about that in the [security tuning](/current_bw_version/security-tuning/) and [settings](/current_bw_version/settings/) sections of the documentation.
+Please note that not all settings and security features are available when using the stream module. You will find more info about that in the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.
 
 Configuration for a basic reverse proxy is very similar to the HTTP one because it uses the same `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:4242` settings. Even the settings used when BunkerWeb is [behind a Load Balancer](#behind-load-balancer-or-reverse-proxy) are the same (but for obvious reasons, only **PROXY protocol** is supported).
 
@@ -1124,7 +1124,7 @@ On top of that, the following specific settings are used :
 - `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
-For complete list of settings regarding `stream` mode, please refer to the [settings](/current_bw_version/settings/) section of the documentation.
+For complete list of settings regarding `stream` mode, please refer to the [settings](settings.md) section of the documentation.
 
 === "Docker"
 
@@ -1148,7 +1148,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
@@ -1170,7 +1170,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1210,7 +1210,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf) stack on your machine, you will need to edit the ports :
+    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack on your machine, you will need to edit the ports :
 
     ```yaml
     version: "3.5"
@@ -1218,7 +1218,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
@@ -1269,14 +1269,14 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 === "Swarm"
 
-    Before running the [Swarm integration](/current_bw_version/integrations/#swarm) stack on your machine, you will need to edit the ports :
+    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
 
     ```yaml
     version: "3.5"
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         ports:
           # Keep it if you want to use Let's Encrypt automation
           - published: 80
@@ -1343,7 +1343,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 === "Kubernetes"
 
-    Protection TCP/UDP applications using the `stream` feature is not yet supported when using the [Kubernetes integration](/current_bw_version/integrations/#kubernetes).
+    Protection TCP/UDP applications using the `stream` feature is not yet supported when using the [Kubernetes integration](integrations.md#kubernetes).
 
 === "Linux"
 
@@ -1426,7 +1426,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 ## Custom configurations
 
-Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info [here](/current_bw_version/security-tuning/#modsecurity)). Here is the list of custom configurations types :
+Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info [here](security-tuning.md#modsecurity)). Here is the list of custom configurations types :
 
 - **http** : http level of NGINX
 - **server-http** : http/server level of NGINX
@@ -1444,7 +1444,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Docker"
 
-    When using the [Docker integration](/current_bw_version/integrations/#docker), you have two choices for the addition of custom configurations :
+    When using the [Docker integration](integrations.md#docker), you have two choices for the addition of custom configurations :
     
     - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
     - Writing .conf files to the volume mounted on /data of the scheduler
@@ -1462,7 +1462,7 @@ Some integrations offer a more convenient way of applying configurations such as
     ```yaml
     ...
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1505,7 +1505,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:current_bw_version
+      image: bunkerity/bunkerweb:1.5.0-beta
       volumes:
         - ./bw-data:/data
       ...
@@ -1513,7 +1513,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf), you have two choices for adding custom configurations :
+    When using the [Docker autoconf integration](integrations.md#docker-autoconf), you have two choices for adding custom configurations :
 
     - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
     - Writing .conf files to the volume mounted on /data of the scheduler
@@ -1574,7 +1574,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
     ```yaml
     myautoconf:
-      image: bunkerity/bunkerweb-scheduler:current_bw_version
+      image: bunkerity/bunkerweb-scheduler:1.5.0-beta
       volumes:
         - ./bw-data:/data
       ...
@@ -1582,7 +1582,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Swarm"
 
-    When using the [Swarm integration](/current_bw_version/integrations/#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
+    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
     To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
 
@@ -1606,7 +1606,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](/current_bw_version/integrations/#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
     To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
 
@@ -1636,7 +1636,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Linux"
 
-    When using the [Linux integration](/current_bw_version/integrations/#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
 
     Here is an example for server-http/hello-world.conf :
 
@@ -1701,7 +1701,7 @@ Some integrations offer a more convenient way of applying configurations such as
 
 === "Vagrant"
 
-    When using the [Vagrant integration](/current_bw_version/integrations/#vagrant), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
+    When using the [Vagrant integration](integrations.md#vagrant), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
 
     Here is an example for server-http/hello-world.conf :
 
@@ -1750,13 +1750,13 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Docker"
 
-    When using the [Docker integration](/current_bw_version/integrations/#docker), to support PHP applications, you will need to :
+    When using the [Docker integration](integrations.md#docker), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
-    If you enable the [multisite mode](/current_bw_version/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](concepts.md#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1807,7 +1807,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         volumes:
           - ./www:/var/www/html
         ports:
@@ -1830,7 +1830,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1870,15 +1870,15 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 === "Docker autoconf"
 
     !!! info "Multisite mode enabled"
-        The [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
+        The [Docker autoconf integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
 
-    When using the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf), to support PHP applications, you will need to :
+    When using the [Docker autoconf integration](integrations.md#docker-autoconf), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Docker autoconf implies using the [multisite mode](/current_bw_version/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Docker autoconf implies using the [multisite mode](concepts.md#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1907,7 +1907,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         volumes:
           - ./www:/var/www/html
         labels:
@@ -1921,7 +1921,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:current_bw_version
+        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2022,18 +2022,18 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 === "Swarm"
 
     !!! info "Multisite mode enabled"
-        The [Swarm integration](/current_bw_version/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
+        The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
 
     !!! info "Shared volume"
         Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
 
-    When using the [Docker autoconf integration](/current_bw_version/integrations/#docker-autoconf), to support PHP applications, you will need to :
+    When using the [Docker autoconf integration](integrations.md#docker-autoconf), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Swarm integration implies using the [multisite mode](/current_bw_version/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Swarm integration implies using the [multisite mode](concepts.md#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2064,7 +2064,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:current_bw_version
+        image: bunkerity/bunkerweb:1.5.0-beta
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2139,7 +2139,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](/current_bw_version/integrations/#linux) stack running on your machine.
+    We will assume that you already have the [Linux integration](integrations.md#linux) stack running on your machine.
 
     By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP applications. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
@@ -2163,7 +2163,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl restart php-fpm
     ```
 
-    If you enable the [multisite mode](/current_bw_version/concepts/#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](concepts.md#integration), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     /var/www/html
@@ -2224,7 +2224,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     !!! info "Linux"
         Please follow the instruction for Linux integration to create a local `www` folder (permissions are not needed, Ansible will do it for you).
 
-    We will assume that you already have the [Ansible integration](/current_bw_version/integrations/#ansible) setup on your machine.
+    We will assume that you already have the [Ansible integration](integrations.md#ansible) setup on your machine.
 
     Content of the `my_variables.env` configuration file :
 
@@ -2273,7 +2273,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     !!! info "Linux"
         Please follow the instruction for Linux integration to create the `/var/www/html` folder.
 
-    We will assume that you already have the [Vagrant integration](/current_bw_version/integrations/#vagrant) stack running on your machine.
+    We will assume that you already have the [Vagrant integration](integrations.md#vagrant) stack running on your machine.
 
     Once PHP files are copied into the `/var/www/html`folder, you can now edit the `/etc/bunkerweb/variable.env` file :
 

@@ -1,9 +1,9 @@
 # Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](/current_bw_version/settings). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [settings](settings.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
 !!! tip "Other settings"
-    This section only focuses on security tuning, see the [settings section](/current_bw_version/settings) of the documentation for other settings.
+    This section only focuses on security tuning, see the [settings section](settings.md) of the documentation for other settings.
 
 <figure markdown>
   ![Overview](assets/img/core-order.svg){ align=center }
@@ -98,7 +98,7 @@ Various security headers are available and most of them can be set using BunkerW
 
 STREAM support :x:
 
-[Cross-Origin Resource Sharing](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) lets you manage how your service can be contacted from different origins. Please note that you will have to allow the `OPTIONS` HTTP method using the `ALLOWED_METHODS` if you want to enable it (more info [here](https://docs.bunkerweb.io/current_bw_version/security-tuning/#allowed-methods)). Here is the list of settings related to CORS :
+[Cross-Origin Resource Sharing](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) lets you manage how your service can be contacted from different origins. Please note that you will have to allow the `OPTIONS` HTTP method using the `ALLOWED_METHODS` if you want to enable it (more info [here](#allowed-methods)). Here is the list of settings related to CORS :
 
 |        Setting         |                                      Default                                       | Context |Multiple|                   Description                    |
 |------------------------|------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
@@ -183,7 +183,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 
 We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).
 
-Tuning ModSecurity and the CRS can be done using [custom configurations](/current_bw_version/quickstart-guide/#custom-configurations) :
+Tuning ModSecurity and the CRS can be done using [custom configurations](quickstart-guide.md#custom-configurations) :
 
 - modsec-crs : before the OWASP Core Rule Set is loaded
 - modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
@@ -456,7 +456,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/vcurrent_bw_version/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

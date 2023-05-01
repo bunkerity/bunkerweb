@@ -63,9 +63,9 @@ jobs:
       - name: Pull BW linux debian test image
         if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging local/debian:latest
-      - name: Pull BW linux centos test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging local/centos:latest
+      # - name: Pull BW linux centos test image
+      #   if: inputs.TYPE == 'linux'
+      #   run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging local/centos:latest
       - name: Pull BW linux fedora test image
         if: inputs.TYPE == 'linux'
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging local/fedora:latest

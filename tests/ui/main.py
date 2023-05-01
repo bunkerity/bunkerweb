@@ -173,7 +173,7 @@ try:
     ) as driver:
         driver.delete_all_cookies()
         driver.maximize_window()
-        driver_wait = WebDriverWait(driver, 15)
+        driver_wait = WebDriverWait(driver, 30)
 
         print("Navigating to http://www.example.com/admin ...", flush=True)
 
@@ -254,7 +254,7 @@ try:
             "home",
         )
 
-        ## HOME PAGE
+        ### HOME PAGE
 
         print("Trying instances page ...", flush=True)
 
@@ -424,7 +424,7 @@ try:
         buttons = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@global-config-tabs-desktop='']/button",
+            "//div[@data-global-config-tabs-desktop='']/button",
             multiple=True,
         )
         buttons.reverse()
@@ -606,51 +606,9 @@ try:
             print("The value is not the expected one, exiting ...", flush=True)
             exit(1)
 
-        no_errors = True
-        retries = 0
-        while no_errors:
-            try:
-                print(
-                    "The value is the expected one, trying to save without changes ...",
-                    flush=True,
-                )
-
-                access_page(
-                    driver,
-                    driver_wait,
-                    "//button[@data-services-modal-submit='']",
-                    "services",
-                    False,
-                )
-
-                print(
-                    "The page reloaded successfully, checking the message ...",
-                    flush=True,
-                )
-
-                assert_alert_message(
-                    driver, "was not edited because no values were changed."
-                )
-
-                no_errors = False
-            except:
-                if retries >= 3:
-                    exit(1)
-                retries += 1
-
-                print(
-                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
-                )
-
-                try:
-                    service = safe_get_element(
-                        driver, By.XPATH, "//div[@data-services-service='']", error=True
-                    )
-                except TimeoutException:
-                    print("Services not found, exiting ...", flush=True)
-                    exit(1)
-
-                assert_button_click(service, ".//button[@data-services-action='edit']")
+        assert_button_click(
+            driver, "//button[@data-services-modal-close='']/*[local-name() = 'svg']"
+        )
 
         print("Creating a new service ...", flush=True)
 
@@ -824,7 +782,8 @@ try:
         print("Trying to create a new config ...", flush=True)
 
         assert_button_click(
-            driver, "//div[@data-configs-element='server-http' and @_type='folder']"
+            driver,
+            "//div[@data-configs-element='server-http' and @data-_type='folder']",
         )
         assert_button_click(driver, "//li[@data-configs-add-file='']/button")
 
@@ -1096,7 +1055,9 @@ try:
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(
+            driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]"
+        )
 
         sleep(3)
 

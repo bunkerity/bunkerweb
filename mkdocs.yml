@@ -36,9 +36,6 @@ theme:
 extra_css:
   - assets/extra.css
 
-extra_javascript:
-  - assets/extra.js
-
 markdown_extensions:
   - attr_list
   - md_in_html
@@ -68,3 +65,7 @@ extra:
       link: https://www.linkedin.com/company/bunkerity/
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/bunkerity
+
+plugins:
+  - search
+  - print-site

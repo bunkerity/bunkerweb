@@ -483,8 +483,6 @@ def services():
                 ):
                     del variables[variable]
 
-            print(variables, flush=True)
-
             error = app.config["CONFIG"].check_variables(variables)
 
             if error:
@@ -635,8 +633,6 @@ def configs():
         del variables["csrf_token"]
 
         operation = app.config["CONFIGFILES"].check_path(variables["path"])
-
-        print(variables, flush=True)
 
         if operation:
             flash(operation, "error")
@@ -1491,7 +1487,7 @@ def logs_container(container_id):
     tmp_logs = []
     if docker_client:
         try:
-            if integration == "Swarm":
+            if integration != "Swarm":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,
