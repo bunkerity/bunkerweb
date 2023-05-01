@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import getenv, makedirs
+from os import getenv
 from pathlib import Path
 from shutil import copy
 from sys import exit as sys_exit, path as sys_path
@@ -120,7 +120,7 @@ def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
 status = 0
 
 try:
-    makedirs("/var/cache/bunkerweb/customcert/", exist_ok=True)
+    Path("/var/cache/bunkerweb/customcert/").mkdir(parents=True, exist_ok=True)
 
     # Multisite case
     if getenv("MULTISITE") == "yes":
