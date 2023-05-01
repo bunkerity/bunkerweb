@@ -153,7 +153,7 @@ class ApiCaller:
         ret = True
         with BytesIO() as tgz:
             with taropen(
-                mode="w:gz", fileobj=tgz, dereference=True, compresslevel=5
+                mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
             ) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
