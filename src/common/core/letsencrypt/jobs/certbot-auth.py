@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import getenv, makedirs
+from os import getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
@@ -75,7 +75,7 @@ try:
     # Linux case
     else:
         root_dir = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
-        makedirs(root_dir, exist_ok=True)
+        Path(root_dir).mkdir(parents=True, exist_ok=True)
         Path(f"{root_dir}{token}").write_text(validation)
 except:
     status = 1
