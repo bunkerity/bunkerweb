@@ -247,7 +247,7 @@ jobs:
     uses: ./.github/workflows/linux-build.yml
     with:
       RELEASE: beta
-      LINUX: el
+      LINUX: rhel
       PACKAGE: rpm
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
