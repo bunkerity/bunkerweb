@@ -11,19 +11,25 @@ RUN GECKODRIVER_VERSION=`curl -i https://github.com/mozilla/geckodriver/releases
   chmod +x /usr/local/bin/geckodriver && \
   rm geckodriver.tar.gz
 
-RUN wget https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/main.zip && \
-  unzip main.zip && \
-  mv bunkerweb-plugins-main/discord . && \
-  zip -r discord.zip discord && \
-  rm -rf bunkerweb-plugins-main main.zip discord
+WORKDIR /opt/tests_ui
+
+RUN echo '{ \
+  "id": "discord", \
+  "order": 999, \
+  "name": "Discord", \
+  "description": "Send alerts to a Discord channel (using webhooks).", \
+  "version": "0.1", \
+  "stream": "no", \
+  "settings": {} \
+  }' > plugin.json && \
+  zip -r discord.zip plugin.json && \
+  rm plugin.json
 
 # Clean up
 RUN apk del .build-deps && \
   rm -rf /var/cache/apk/*
 
 ENV PYTHONUNBUFFERED=1
-
-WORKDIR /$APP_HOME
 
 COPY requirements.txt .
 

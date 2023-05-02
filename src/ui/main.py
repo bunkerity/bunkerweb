@@ -1487,7 +1487,7 @@ def logs_container(container_id):
     tmp_logs = []
     if docker_client:
         try:
-            if integration == "Swarm":
+            if integration != "Swarm":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,

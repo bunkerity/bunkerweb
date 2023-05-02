@@ -2,7 +2,7 @@
 
 from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, chmod, stat, _exit
+from os import getenv, listdir, chmod, _exit
 from os.path import basename, dirname
 from pathlib import Path
 from stat import S_IEXEC
@@ -49,7 +49,7 @@ def install_plugin(plugin_dir) -> bool:
     copytree(plugin_dir, f"/etc/bunkerweb/plugins/{metadata['id']}")
     # Add u+x permissions to jobs files
     for job_file in glob(f"{plugin_dir}/jobs/*"):
-        st = stat(job_file)
+        st = Path(job_file).stat()
         chmod(job_file, st.st_mode | S_IEXEC)
     logger.info(f"Plugin {metadata['id']} installed")
     return True

@@ -10,7 +10,6 @@ from os import (
     getenv,
     getpid,
     listdir,
-    stat,
     walk,
 )
 from os.path import dirname, join
@@ -134,7 +133,7 @@ def generate_external_plugins(
         Path(tmp_path).unlink()
 
         for job_file in glob(f"{plugin_dir}/jobs/*"):
-            st = stat(job_file)
+            st = Path(job_file).stat()
             chmod(job_file, st.st_mode | S_IEXEC)
 
     if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):

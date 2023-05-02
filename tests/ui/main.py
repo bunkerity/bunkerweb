@@ -254,7 +254,7 @@ try:
             "home",
         )
 
-        ## HOME PAGE
+        ### HOME PAGE
 
         print("Trying instances page ...", flush=True)
 
@@ -933,7 +933,7 @@ try:
         external_plugins = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@data-plugins-external='external']",
+            "//div[@data-plugins-external=' external ']",
             multiple=True,
         )
 
@@ -1055,7 +1055,9 @@ try:
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(
+            driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]"
+        )
 
         sleep(3)
 
