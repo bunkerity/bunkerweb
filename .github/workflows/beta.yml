@@ -416,6 +416,7 @@ jobs:
     needs: [wait-builds, doc-pdf]
     permissions:
       contents: write
+      discussions: write
     uses: ./.github/workflows/push-github.yml
     with:
       VERSION: ${{ needs.wait-builds.outputs.version }}
