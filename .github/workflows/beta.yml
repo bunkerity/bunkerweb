@@ -431,6 +431,8 @@ jobs:
     with:
       VERSION: ${{ needs.wait-builds.outputs.version }}
       ALIAS: beta
+    secrets:
+      BUNKERBOT_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
 
   # Remove ARM VM
   rm-arm:

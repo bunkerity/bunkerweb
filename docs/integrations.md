@@ -899,7 +899,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     sudo dnf install -y nginx-1.24.0
     ```
 
-    And finally install BunkerWeb 1.5.0-beta :
+    And finally install BunkerWeb 1.5.0_beta :
 
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
@@ -949,7 +949,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	  dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.5.0-beta
+    sudo dnf install -y bunkerweb-1.5.0_beta
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
