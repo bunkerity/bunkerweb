@@ -31,7 +31,7 @@ jobs:
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: dev
+          branch: testmmdb
           commit_message: "Monthly mmdb update"
           commit_options: "--no-verify"
           commit_user_name: "BunkerBot"
