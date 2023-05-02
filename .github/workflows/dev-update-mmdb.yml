@@ -5,19 +5,10 @@ permissions:
 
 on:
   workflow_dispatch:
-    secrets:
-      BUNKERBOT_TOKEN:
-        required: true
   schedule:
     - cron: "0 1 5 * *"
-    secrets:
-      BUNKERBOT_TOKEN:
-        required: true
   push:
     branches: [testmmdb]
-    secrets:
-      BUNKERBOT_TOKEN:
-        required: true
 
 jobs:
   mmdb-update:
