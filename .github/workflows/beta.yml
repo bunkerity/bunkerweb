@@ -147,7 +147,7 @@ jobs:
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-sc-arm:
-    needs: [create-arm, build-bw-arm]
+    needs: [create-arm]
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: beta
@@ -164,7 +164,7 @@ jobs:
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-au-arm:
-    needs: [create-arm, build-sc-arm]
+    needs: [create-arm]
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: beta
@@ -181,7 +181,7 @@ jobs:
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
   build-ui-arm:
-    needs: [create-arm, build-au-arm]
+    needs: [create-arm]
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: beta
@@ -263,7 +263,7 @@ jobs:
       build-sc-amd64, build-sc-386,
       build-au-amd64, build-au-386,
       build-ui-amd64, build-ui-386,
-      build-ui-arm,
+      build-bw-arm, build-sc-arm, build-au-arm, build-ui-arm,
       build-ubuntu,
       build-debian,
       build-fedora,
@@ -271,12 +271,16 @@ jobs:
     ]
     outputs:
       version: ${{ steps.getversion.outputs.version }}
+      versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
+      - name: Get VERSION (for RPM based)
+        id: getversionrpm
+        run: echo "versionrpm=$(cat src/VERSION | tr -d '\n' | sed 's/-/_/g')" >> "$GITHUB_OUTPUT"
 
   # Push Docker images
   push-bunkerweb:
@@ -372,7 +376,7 @@ jobs:
       LINUX: el
       VERSION: 8
       PACKAGE: rpm
-      BW_VERSION: ${{ needs.wait-builds.outputs.version }}
+      BW_VERSION: ${{ needs.wait-builds.outputs.versionrpm }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
   push-fedora:
@@ -386,7 +390,7 @@ jobs:
       LINUX: fedora
       VERSION: 37
       PACKAGE: rpm
-      BW_VERSION: ${{ needs.wait-builds.outputs.version }}
+      BW_VERSION: ${{ needs.wait-builds.outputs.versionrpm }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
