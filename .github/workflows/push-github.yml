@@ -21,7 +21,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
-          path: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
       - uses: rickstaa/action-create-tag@v1
         name: Create tag

@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Setup git user
         run: |
           git config --global user.name "github-actions[bot]"
