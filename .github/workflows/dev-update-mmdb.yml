@@ -5,15 +5,29 @@ permissions:
 
 on:
   workflow_dispatch:
+    secrets:
+      BUNKERBOT_TOKEN:
+        required: true
   schedule:
-    - cron: "0 1 5 * *"
+    cron: "0 1 5 * *"
+    secrets:
+      BUNKERBOT_TOKEN:
+        required: true
+  push:
+    branches: [testmmdb]
+    secrets:
+      BUNKERBOT_TOKEN:
+        required: true
 
 jobs:
   mmdb-update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout source code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BUNKERBOT_TOKEN }}
       - name: Download mmdb files
         run: |
           mkdir -p src/bw/misc/
@@ -29,5 +43,5 @@ jobs:
           branch: dev
           commit_message: "Monthly mmdb update"
           commit_options: "--no-verify"
-          commit_user_name: "GitHub Actions"
-          commit_user_email: "tdiot@bunkerity.com"
+          commit_user_name: "BunkerBot"
+          commit_user_email: "bunkerbot@bunkerity.com"
