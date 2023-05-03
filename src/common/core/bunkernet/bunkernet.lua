@@ -1,9 +1,9 @@
-local class		= require "middleclass"
-local plugin	= require "bunkerweb.plugin"
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
 local utils     = require "bunkerweb.utils"
 local datastore = require "bunkerweb.datastore"
-local cjson		= require "cjson"
-local http		= require "resty.http"
+local cjson     = require "cjson"
+local http      = require "resty.http"
 
 local bunkernet = class("bunkernet", plugin)
 
@@ -72,7 +72,9 @@ function bunkernet:init()
 	if not ok then
 		return self:ret(false, "can't store bunkernet database into datastore : " .. err)
 	end
-	return self:ret(true, "successfully connected to the bunkernet service " .. self.server .. " with machine ID " .. id .. " and " .. tostring(i) .. " bad IPs in database")
+	return self:ret(true,
+		"successfully connected to the bunkernet service " ..
+		self.variables["BUNKERNET_SERVER"] .. " with machine ID " .. id .. " and " .. tostring(i) .. " bad IPs in database")
 end
 
 function bunkernet:log(bypass_use_bunkernet)
@@ -105,7 +107,7 @@ function bunkernet:log(bypass_use_bunkernet)
 	-- TODO : check if IP has been reported recently
 	self.integration = ngx.ctx.bw.integration
 	self.version = ngx.ctx.bw.version
-	local function report_callback(premature, obj, ip, reason, method, url, headers)
+	local function report_callback(premature, obj, ip, reason, method, url, headers) -- TODO : fix this
 		local ok, err, status, data = obj:report(ip, reason, method, url, headers, obj.ctx.integration, obj.ctx.version)
 		if status == 429 then
 			obj.logger:log(ngx.WARN, "bunkernet API is rate limiting us")
