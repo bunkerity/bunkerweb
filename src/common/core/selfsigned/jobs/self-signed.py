@@ -25,6 +25,7 @@ db = Database(
 )
 lock = Lock()
 
+status = 0
 
 def generate_cert(first_server, days, subj):
     if Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem").is_file():
@@ -40,6 +41,8 @@ def generate_cert(first_server, days, subj):
     if proc.returncode != 0:
         logger.error(f"Self-signed certificate generation failed for {first_server}")
         return False, 2
+    
+    return True, 1
 
     # Update db
     with lock:
@@ -103,10 +106,7 @@ try:
                     getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
                 ),
             )
-            if not ret:
-                status = ret_status
-            elif ret_status == 1 and ret_status != 2:
-                status = 1
+            status = ret_status
 
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
@@ -116,10 +116,7 @@ try:
             getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
             getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
         )
-        if not ret:
-            status = ret_status
-        elif ret_status == 1 and ret_status != 2:
-            status = 1
+        status = ret_status
 
 except:
     status = 2

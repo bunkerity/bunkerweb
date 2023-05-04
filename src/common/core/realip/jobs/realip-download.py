@@ -107,10 +107,10 @@ try:
                 f"Exception while getting RealIP list from {url} :\n{format_exc()}"
             )
 
-    Path("/var/tmp/bunkerweb/realip-combined.list").write_bytes(content)
+    Path("/var/tmp/bunkerweb/realip/combined.list").write_bytes(content)
 
     # Check if file has changed
-    new_hash = file_hash("/var/tmp/bunkerweb/realip-combined.list")
+    new_hash = file_hash("/var/tmp/bunkerweb/realip/combined.list")
     old_hash = cache_hash("/var/cache/bunkerweb/realip/combined.list", db)
     if new_hash == old_hash:
         logger.info("New file is identical to cache file, reload is not needed")

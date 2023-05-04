@@ -53,7 +53,7 @@ try:
 
     # Ask an ID if needed
     bunkernet_id = None
-    if not not is_cached_file(
+    if not is_cached_file(
             f"/var/cache/bunkerweb/blacklist/{kind}.list", "hour", db
         ):
         logger.info("Registering instance on BunkerNet API ...")
@@ -62,7 +62,7 @@ try:
             logger.error(
                 f"Error while sending register request to BunkerNet API : {data}"
             )
-            _exit(1)
+            _exit(2)
         elif status == 429:
             logger.warning(
                 "BunkerNet API is rate limiting us, trying again later...",
@@ -80,13 +80,13 @@ try:
             logger.error(
                 f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
             )
-            _exit(1)
+            _exit(2)
 
         if status != 200:
             logger.error(
                 f"Error {status} from BunkerNet API : {data['data']}",
             )
-            _exit(1)
+            _exit(2)
         elif data.get("result", "ko") != "ok":
             logger.error(
                 f"Received error from BunkerNet API while sending register request : {data.get('data', {})}"
@@ -133,7 +133,7 @@ try:
             logger.error(
                 f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
             )
-            _exit(1)
+            _exit(2)
 
         if data.get("result", "ko") != "ok":
             logger.error(

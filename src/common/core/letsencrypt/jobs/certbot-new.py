@@ -30,15 +30,15 @@ db = Database(
 lock = Lock()
 status = 0
 
-def folder_to_tgz() :
-    with taropen("/var/tmp/bunkerweb/")
-
 def certbot_new(domains, email):
     environ["PYTHONPATH"] = "/usr/share/bunkerweb/deps/python"
     proc = run(
         [
             "/usr/share/bunkerweb/deps/python/bin/certbot",
             "certonly",
+            "--config-dir=/var/cache/bunkerweb/letsencrypt/etc",
+            "--work-dir=/var/cache/bunkerweb/letsencrypt/lib",
+            "--logs-dir=/var/cache/bunkerweb/letsencrypt/log",
             "--manual",
             "--preferred-challenges=http",
             "--manual-auth-hook",
@@ -62,7 +62,7 @@ def certbot_new(domains, email):
 status = 0
 
 try:
-    # Create directories if they don't exist
+    # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/letsencrypt").mkdir(parents=True, exist_ok=True)
 
     # Extract letsencrypt folder if it exists in db
@@ -132,7 +132,7 @@ try:
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
         domains = getenv("SERVER_NAME", "").replace(" ", ",")
 
-        if Path(f"/var/cache/bunkerweb/letsencrypt/{first_server}/cert.pem").exists():
+        if Path(f"/var/cache/bunkerweb/letsencrypt/etc/live/{first_server}/cert.pem").exists():
             logger.info(f"Certificates already exists for domain(s) {domains}")
         else:
             real_email = getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}")
@@ -154,16 +154,20 @@ try:
     # Put new folder in cache
     if db:
         bio = BytesIO()
-        with tfopen(mode="w:gz", fileobj=bio) as tgz:
+        with tfopen("folder.tgz", mode="w:gz", fileobj=bio) as tgz:
             tgz.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
         bio.seek(0)
         # Put tgz in cache
         cached, err = cache_file(
-            f"/var/cache/bunkerweb/letsencrypt/folder.tgz",
-            f"/var/cache/bunkerweb/blacklist/{kind}.list",
-            new_hash,
-            db,
+            f"certbot-new",
+            f"folder.tgz",
+            bio,
+            db
         )
+        if not cached:
+            logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
+        else:
+            logger.info("Successfully saved Let's Encrypt data to db cache")
 
 except:
     status = 3
