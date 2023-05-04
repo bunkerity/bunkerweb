@@ -56,7 +56,7 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
     if is_cached and cached_file:
         Path(file).write_bytes(cached_file.data)
 
-    return is_cached
+    return is_cached and cached_file
 
 def get_file_in_db(job: str, file: str, db) -> bytes:
     cached_file = db.get_job_cache_file(
@@ -67,8 +67,8 @@ def get_file_in_db(job: str, file: str, db) -> bytes:
         return False
     return cached_file.data
 
-def set_file_in_db(job: str, name: str, bio, db) -> bool:
-    ret, err = true, "success"
+def set_file_in_db(job: str, name: str, bio, db) -> Tuple[bool, str]:
+    ret, err = True, "success"
     try:
         content = bio.read()
         bio.seek(0)
@@ -83,6 +83,14 @@ def set_file_in_db(job: str, name: str, bio, db) -> bool:
 
             if err:
                 ret = False
+    except:
+        return False, f"exception :\n{format_exc()}"
+    return ret, err
+
+def del_file_in_db(job: str, name: str, db) -> Tuple[bool, str]:
+    ret, err = True, "success"
+    try:
+        db.delete_job_cache(job, name)
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err

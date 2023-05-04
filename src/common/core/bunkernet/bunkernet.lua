@@ -218,8 +218,6 @@ function bunkernet:request(method, url, data)
 		}
 	})
 	httpc:close()
-	self.logger:log(ngx.WARN, cjson.encode(all_data))
-	self.logger:log(ngx.WARN, "BunkerWeb/" .. self.version)
 	if not res then
 		return false, "error while sending request : " .. err, nil, nil
 	end

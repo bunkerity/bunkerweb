@@ -49,10 +49,11 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
     ):
         splitted = var.split("=", 1)
         if custom_confs_rx.match(splitted[0]):
+            custom_conf = custom_confs_rx.search(splitted[0]).groups()
             custom_confs.append(
                 {
                     "value": splitted[1],
-                    "exploded": custom_confs_rx.search(splitted[0]).groups(),
+                    "exploded": (custom_conf[0], custom_conf[1], custom_conf[2].replace(".conf", ""))
                 }
             )
         else:
@@ -227,11 +228,16 @@ if __name__ == "__main__":
                 plugins_settings=plugins_settings,
             )
             config_files = config.get_config()
-            custom_confs = [
-                {"value": v, "exploded": custom_confs_rx.search(k).groups()}  # type: ignore
-                for k, v in environ.items()
-                if custom_confs_rx.match(k)
-            ]
+            custom_confs = []
+            for k, v in environ.items():
+                if custom_confs_rx.match(k):
+                    custom_conf = custom_confs_rx.search(k).groups()
+                    custom_confs.append(
+                        {
+                            "value": v,
+                            "exploded": (custom_conf[0], custom_conf[1], custom_conf[2].replace(".conf", ""))
+                        }
+                    )
             root_dirs = listdir("/etc/bunkerweb/configs")
             for root, dirs, files in walk("/etc/bunkerweb/configs", topdown=True):
                 if (
@@ -276,12 +282,11 @@ if __name__ == "__main__":
                 for var in instance.attrs["Config"]["Env"]:
                     splitted = var.split("=", 1)
                     if custom_confs_rx.match(splitted[0]):
+                        custom_conf = custom_confs_rx.search(splitted[0]).groups()
                         custom_confs.append(
                             {
                                 "value": splitted[1],
-                                "exploded": custom_confs_rx.search(
-                                    splitted[0]
-                                ).groups(),
+                                "exploded": (custom_conf[0], custom_conf[1], custom_conf[2].replace(".conf", ""))
                             }
                         )
                     else:

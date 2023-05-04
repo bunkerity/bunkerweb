@@ -18,12 +18,13 @@ sys_path.extend(
 from bunkernet import data
 from Database import Database
 from logger import setup_logger
-from jobs import cache_file, cache_hash, file_hash, is_cached_file
+from jobs import cache_file, cache_hash, file_hash, is_cached_file, get_file_in_db
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
-status = 0
+exit_status = 0
 
 try:
+
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
     # Multisite case
@@ -43,17 +44,27 @@ try:
         logger.info("BunkerNet is not activated, skipping download...")
         _exit(0)
 
+    # Create directory if it doesn't exist
+    Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
+    Path("/var/tmp/bunkerweb").mkdir(parents=True, exist_ok=True)
+
+    # Create empty file in case it doesn't exist
+    if not Path("/var/cache/bunkerweb/bunkernet/ip.list").is_file():
+        Path("/var/cache/bunkerweb/bunkernet/ip.list").write_text("")
+
+    # Get ID from cache
+    bunkernet_id = None
     db = Database(
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
-
-    # Create directory if it doesn't exist
-    Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
-
-    # Create empty file in case it doesn't exist
-    if not Path("/var/tmp/bunkerweb/bunkernet-ip.list").is_file():
-        Path("/var/tmp/bunkerweb/bunkernet-ip.list").write_bytes(b"")
+    if db :
+        bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
+        if bunkernet_id:
+            Path("/var/cache/bunkerweb/bunkernet/bunkernet.id").write_text(bunkernet_id.decode())
+            logger.info("Successfully retrieved BunkerNet ID from db cache")
+        else:
+            logger.info("No BunkerNet ID found in db cache")
 
     # Check if ID is present
     if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
@@ -63,11 +74,15 @@ try:
         _exit(2)
 
     # Don't go further if the cache is fresh
-    if is_cached_file("/var/cache/bunkerweb/bunkernet/ip.list", "day", db):
-        logger.info(
-            "BunkerNet list is already in cache, skipping download...",
-        )
-        _exit(0)
+    if db:
+        if is_cached_file("/var/cache/bunkerweb/bunkernet/ip.list", "day", db):
+            logger.info(
+                "BunkerNet list is already in cache, skipping download...",
+            )
+            _exit(0)
+
+
+        exit_status = 1
 
     # Download data
     logger.info("Downloading BunkerNet data ...")
@@ -94,13 +109,15 @@ try:
         logger.error(
             f"Received invalid data from BunkerNet API while sending db request : {data}",
         )
-        _exit(1)
+        _exit(2)
 
     if data["result"] != "ok":
         logger.error(
             f"Received error from BunkerNet API while sending db request : {data['data']}, removing instance ID",
         )
         _exit(2)
+    
+
     logger.info("Successfully downloaded data from BunkerNet API")
 
     # Writing data to file
@@ -130,10 +147,10 @@ try:
 
     logger.info("Successfully saved BunkerNet data")
 
-    status = 1
+    exit_status = 1
 
 except:
-    status = 2
+    exit_status = 2
     logger.error(f"Exception while running bunkernet-data.py :\n{format_exc()}")
 
-sys_exit(status)
+sys_exit(exit_status)

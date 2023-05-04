@@ -877,6 +877,14 @@ class Database:
 
         return ""
 
+    def delete_job_cache(
+            self,
+            job_name: str,
+            file_name: str
+    ):
+        with self.__db_session() as session:
+            session.query(Jobs_cache).filter_by(job_name=job_name, file_name=file_name).delete()
+
     def update_job_cache(
         self,
         job_name: str,

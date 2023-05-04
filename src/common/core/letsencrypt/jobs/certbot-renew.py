@@ -5,17 +5,21 @@ from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from tarfile import open as tfopen
+from io import BytesIO
+from shutil import rmtree
 
 sys_path.extend(
     (
         "/usr/share/bunkerweb/deps/python",
         "/usr/share/bunkerweb/utils",
+        "/usr/share/bunkerweb/db",
     )
 )
 
 from logger import setup_logger
-
 from Database import Database
+from jobs import get_file_in_db, set_file_in_db
 
 def renew(domain):
     environ["PYTHONPATH"] = "/usr/share/bunkerweb/deps/python"
@@ -52,7 +56,7 @@ try:
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
     if db:
-        tgz = get_file("certbot-new", "folder.tgz", db)
+        tgz = get_file_in_db("certbot-new", "folder.tgz", db)
         if tgz:
             # Delete folder if needed
             if len(listdir("/var/cache/bunkerweb/letsencrypt")) > 0:
@@ -105,7 +109,7 @@ try:
             tgz.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
         bio.seek(0)
         # Put tgz in cache
-        cached, err = cache_file(
+        cached, err = set_file_in_db(
             f"certbot-new",
             f"folder.tgz",
             bio,
@@ -115,6 +119,9 @@ try:
             logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:
             logger.info("Successfully saved Let's Encrypt data to db cache")
+        # Delete lib and log folders to avoid sending them
+        rmtree("/var/cache/bunkerweb/letsencrypt/lib")
+        rmtree("/var/cache/bunkerweb/letsencrypt/log")
 
 except:
     status = 2
