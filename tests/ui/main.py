@@ -901,6 +901,14 @@ try:
             driver, By.XPATH, "//input[@type='file' and @name='file']"
         ).send_keys(join(Path.cwd(), "test.zip"))
 
+        access_page(
+            driver,
+            driver_wait,
+            "//div[@data-plugins-upload='']//button[@type='submit']",
+            "plugins",
+            False,
+        )
+
         print(
             "The bad plugin has been rejected, trying to add a good plugin ...",
             flush=True,
@@ -921,7 +929,7 @@ try:
         external_plugins = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@data-plugins-external='external']",
+            "//div[@data-plugins-external=' external ']",
             multiple=True,
         )
 
