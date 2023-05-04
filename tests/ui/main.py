@@ -921,7 +921,7 @@ try:
         external_plugins = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@data-plugins-external=' external ']",
+            "//div[@data-plugins-external='external']",
             multiple=True,
         )
 
