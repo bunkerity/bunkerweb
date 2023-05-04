@@ -21,6 +21,7 @@ from logger import setup_logger
 from Database import Database
 from jobs import get_file_in_db, set_file_in_db
 
+
 def renew(domain):
     environ["PYTHONPATH"] = "/usr/share/bunkerweb/deps/python"
     proc = run(
@@ -42,11 +43,10 @@ def renew(domain):
     return proc.returncode
 
 
-logger = setup_logger("LETS-ENCRYPT", getenv("LOG_LEVEL", "INFO"))
+logger = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-
     # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/letsencrypt").mkdir(parents=True, exist_ok=True)
 
@@ -60,7 +60,7 @@ try:
         if tgz:
             # Delete folder if needed
             if len(listdir("/var/cache/bunkerweb/letsencrypt")) > 0:
-                rmtree("/var/cache/bunkerweb/letsencrypt")
+                rmtree("/var/cache/bunkerweb/letsencrypt", ignore_errors=True)
             # Extract it
             with tfopen(name="folder.tgz", mode="r:gz", fileobj=BytesIO(tgz)) as tf:
                 tf.extractall("/var/cache/bunkerweb/letsencrypt")
@@ -82,7 +82,9 @@ try:
                     getenv("AUTO_LETS_ENCRYPT", "no"),
                 )
                 != "yes"
-                or not Path(f"/var/cache/bunkerweb/letsencrypt/etc/live/{first_server}/cert.pem").exists()
+                or not Path(
+                    f"/var/cache/bunkerweb/letsencrypt/etc/live/{first_server}/cert.pem"
+                ).exists()
             ):
                 continue
 
@@ -94,7 +96,9 @@ try:
                 )
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and not getenv("SERVER_NAME", ""):
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
-        if Path(f"/var/cache/bunkerweb/letsencrypt/etc/live/{first_server}/cert.pem").exists():
+        if Path(
+            f"/var/cache/bunkerweb/letsencrypt/etc/live/{first_server}/cert.pem"
+        ).exists():
             ret = renew(first_server)
             if ret != 0:
                 status = 2
@@ -109,19 +113,16 @@ try:
             tgz.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
         bio.seek(0)
         # Put tgz in cache
-        cached, err = set_file_in_db(
-            f"certbot-new",
-            f"folder.tgz",
-            bio,
-            db
-        )
+        cached, err = set_file_in_db("certbot-new", "folder.tgz", bio, db)
         if not cached:
             logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:
             logger.info("Successfully saved Let's Encrypt data to db cache")
         # Delete lib and log folders to avoid sending them
-        rmtree("/var/cache/bunkerweb/letsencrypt/lib")
-        rmtree("/var/cache/bunkerweb/letsencrypt/log")
+        if Path("/var/cache/bunkerweb/letsencrypt/lib").exists():
+            rmtree("/var/cache/bunkerweb/letsencrypt/lib", ignore_errors=True)
+        if Path("/var/cache/bunkerweb/letsencrypt/log").exists():
+            rmtree("/var/cache/bunkerweb/letsencrypt/log", ignore_errors=True)
 
 except:
     status = 2
