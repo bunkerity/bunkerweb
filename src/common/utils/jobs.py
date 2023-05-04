@@ -58,6 +58,16 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
 
     return is_cached
 
+def get_file_in_db(job: str, file: str, db) -> bytes:
+    cached_file = db.get_job_cache_file(
+                job,
+                file
+            )
+    if not cached_file:
+        return False
+    return cached_file.data
+
+def set_file_in_db(job: str, file: str, data, db)
 
 def file_hash(file: str) -> str:
     _sha512 = sha512()

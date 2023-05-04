@@ -53,7 +53,9 @@ try:
 
     # Ask an ID if needed
     bunkernet_id = None
-    if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
+    if not not is_cached_file(
+            f"/var/cache/bunkerweb/blacklist/{kind}.list", "hour", db
+        ):
         logger.info("Registering instance on BunkerNet API ...")
         ok, status, data = register()
         if not ok:
