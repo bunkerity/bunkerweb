@@ -135,8 +135,13 @@ elif "ADMIN_PASSWORD" not in vars:
     logger.error("ADMIN_PASSWORD is not set")
     stop(1)
 
-if not vars.get("FLASK_DEBUG", False) and vars["ADMIN_PASSWORD"] == "changeme":
-    logger.error("Please change the default admin password.")
+if not vars.get("FLASK_DEBUG", False) and not re_match(
+    r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#@?!$%^&*-]).{8,}$",
+    vars["ADMIN_PASSWORD"],
+):
+    logger.error(
+        "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+    )
     stop(1)
 
 if not vars["ABSOLUTE_URI"].endswith("/"):
