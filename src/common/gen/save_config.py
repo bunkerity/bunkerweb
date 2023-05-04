@@ -53,7 +53,11 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
             custom_confs.append(
                 {
                     "value": splitted[1],
-                    "exploded": (custom_conf[0], custom_conf[1], custom_conf[2].replace(".conf", ""))
+                    "exploded": (
+                        custom_conf[0],
+                        custom_conf[1],
+                        custom_conf[2].replace(".conf", ""),
+                    ),
                 }
             )
         else:
@@ -235,7 +239,11 @@ if __name__ == "__main__":
                     custom_confs.append(
                         {
                             "value": v,
-                            "exploded": (custom_conf[0], custom_conf[1], custom_conf[2].replace(".conf", ""))
+                            "exploded": (
+                                custom_conf[0],
+                                custom_conf[1],
+                                custom_conf[2].replace(".conf", ""),
+                            ),
                         }
                     )
             root_dirs = listdir("/etc/bunkerweb/configs")
@@ -286,7 +294,11 @@ if __name__ == "__main__":
                         custom_confs.append(
                             {
                                 "value": splitted[1],
-                                "exploded": (custom_conf[0], custom_conf[1], custom_conf[2].replace(".conf", ""))
+                                "exploded": (
+                                    custom_conf[0],
+                                    custom_conf[1],
+                                    custom_conf[2].replace(".conf", ""),
+                                ),
                             }
                         )
                     else:

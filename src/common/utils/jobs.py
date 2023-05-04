@@ -58,14 +58,13 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
 
     return is_cached and cached_file
 
+
 def get_file_in_db(job: str, file: str, db) -> bytes:
-    cached_file = db.get_job_cache_file(
-                job,
-                file
-            )
+    cached_file = db.get_job_cache_file(job, file)
     if not cached_file:
         return False
     return cached_file.data
+
 
 def set_file_in_db(job: str, name: str, bio, db) -> Tuple[bool, str]:
     ret, err = True, "success"
@@ -78,7 +77,7 @@ def set_file_in_db(job: str, name: str, bio, db) -> Tuple[bool, str]:
                 None,
                 name,
                 content,
-                checksum=bytes_hash(bio)
+                checksum=bytes_hash(bio),
             )
 
             if err:
@@ -87,6 +86,7 @@ def set_file_in_db(job: str, name: str, bio, db) -> Tuple[bool, str]:
         return False, f"exception :\n{format_exc()}"
     return ret, err
 
+
 def del_file_in_db(job: str, name: str, db) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
@@ -94,6 +94,7 @@ def del_file_in_db(job: str, name: str, db) -> Tuple[bool, str]:
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err
+
 
 def file_hash(file: str) -> str:
     _sha512 = sha512()
@@ -104,6 +105,7 @@ def file_hash(file: str) -> str:
                 break
             _sha512.update(data)
     return _sha512.hexdigest()
+
 
 def bytes_hash(bio: bytes) -> str:
     _sha512 = sha512()

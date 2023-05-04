@@ -27,6 +27,7 @@ lock = Lock()
 
 status = 0
 
+
 def generate_cert(first_server, days, subj):
     if Path(f"/var/cache/bunkerweb/selfsigned/{first_server}.pem").is_file():
         cmd = f"openssl x509 -checkend 86400 -noout -in /var/cache/bunkerweb/selfsigned/{first_server}.pem"
@@ -41,7 +42,7 @@ def generate_cert(first_server, days, subj):
     if proc.returncode != 0:
         logger.error(f"Self-signed certificate generation failed for {first_server}")
         return False, 2
-    
+
     return True, 1
 
     # Update db

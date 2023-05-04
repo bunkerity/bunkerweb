@@ -24,7 +24,6 @@ logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
 exit_status = 0
 
 try:
-
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
     # Multisite case
@@ -58,10 +57,12 @@ try:
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
-    if db :
+    if db:
         bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
         if bunkernet_id:
-            Path("/var/cache/bunkerweb/bunkernet/bunkernet.id").write_text(bunkernet_id.decode())
+            Path("/var/cache/bunkerweb/bunkernet/bunkernet.id").write_text(
+                bunkernet_id.decode()
+            )
             logger.info("Successfully retrieved BunkerNet ID from db cache")
         else:
             logger.info("No BunkerNet ID found in db cache")
@@ -80,7 +81,6 @@ try:
                 "BunkerNet list is already in cache, skipping download...",
             )
             _exit(0)
-
 
         exit_status = 1
 
@@ -116,7 +116,6 @@ try:
             f"Received error from BunkerNet API while sending db request : {data['data']}, removing instance ID",
         )
         _exit(2)
-    
 
     logger.info("Successfully downloaded data from BunkerNet API")
 

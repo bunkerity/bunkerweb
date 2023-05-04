@@ -176,7 +176,7 @@ try:
                     if not cached:
                         logger.error(f"Error while caching whitelist : {err}")
                         status = 2
-                    else :
+                    else:
                         status = 1
             except:
                 status = 2

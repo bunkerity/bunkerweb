@@ -58,10 +58,12 @@ try:
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
-    if db :
+    if db:
         bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
         if bunkernet_id:
-            Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id.decode())
+            Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(
+                bunkernet_id.decode()
+            )
             logger.info("Successfully retrieved BunkerNet ID from db cache")
         else:
             logger.info("No BunkerNet ID found in db cache")
@@ -121,12 +123,7 @@ try:
     # Update cache with new bunkernet ID
     if db and registered:
         with open("/var/cache/bunkerweb/bunkernet/instance.id", "rb") as f:
-            cached, err = set_file_in_db(
-                f"bunkernet-register",
-                f"instance.id",
-                f,
-                db
-            )
+            cached, err = set_file_in_db(f"bunkernet-register", f"instance.id", f, db)
         if not cached:
             logger.error(f"Error while saving BunkerNet data to db cache : {err}")
         else:
