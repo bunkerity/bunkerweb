@@ -19,6 +19,9 @@ if [ $? -ne 0 ] ; then
     echo "❌ Up failed"
     exit 1
 fi
+
+docker-compose stop ui-tests
+
 i=0
 while [ $i -lt 120 ] ; do
     containers=("ui_bw_1" "ui_bw-scheduler_1" "ui_bw-ui_1")
@@ -44,12 +47,7 @@ if [ $i -ge 120 ] ; then
 fi
 
 # Start tests
-docker-compose -f docker-compose.tests.yml build
-if [ $? -ne 0 ] ; then
-    echo "❌ Build failed"
-    exit 1
-fi
-docker-compose -f docker-compose.tests.yml up --abort-on-container-exit --exit-code-from ui-tests
+docker-compose start ui-tests
 
 # Exit
 exit $?
