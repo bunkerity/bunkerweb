@@ -78,17 +78,6 @@ services:
       bw-services:
         ipv4_address: 192.168.0.4
 
-  ui-tests:
-    build: .
-    environment:
-      - PYTHONUNBUFFERED=1
-    extra_hosts:
-      - "www.example.com:192.168.0.2"
-      - "app1.example.com:192.168.0.2"
-    networks:
-      bw-services:
-        ipv4_address: 192.168.0.3
-
 volumes:
   bw-data:
 
