@@ -7,119 +7,43 @@ on:
     branches: [beta]
 
 jobs:
-  # Build BW amd64 + i386 images
-  build-bw-amd64:
+
+  # Build amd64 + 386 containers images
+  build-containers:
+    strategy:
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui]
+        arch: [linux/amd64, linux/386]
+        include:
+          - release: beta
+            cache: false
+            push: false
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
+          - arch: linux/amd64
+            cache_suffix: amd64
+          - arch: linux/386
+            cache_suffix: "386"
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
-      ARCH: linux/amd64
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  build-bw-386:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/386
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "386"
+      RELEASE: ${{ matrix.release }}
+      ARCH: ${{ matrix.arch }}
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+      CACHE: ${{ matrix.cache }}
+      PUSH: ${{ matrix.push }}
+      CACHE_SUFFIX: ${{ matrix.cache_suffix }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
-  # Build SC amd64 + i386 images
-  build-sc-amd64:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/amd64
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  build-sc-386:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/386
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "386"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-
-  # Build AU amd64 + i386 images
-  build-au-amd64:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/amd64
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  build-au-386:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/386
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "386"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-
-  # Build UI amd64 + i386 images
-  build-ui-amd64:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/amd64
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  build-ui-386:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/386
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "386"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-
-  # Build arm64 + arm/v7 images
+  # Create ARM environment
   create-arm:
     uses: ./.github/workflows/create-arm.yml
     secrets:
@@ -129,68 +53,36 @@ jobs:
       SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  build-bw-arm:
+
+  # Build arm64 + arm/v7 images
+  build-containers-arm:
     needs: [create-arm]
+    strategy:
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui]
+        arch: ["linux/arm64,linux/arm/v7"]
+        include:
+          - release: beta
+            cache: false
+            push: false
+            cache_suffix: arm
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: beta
-      ARCH: linux/arm64,linux/arm/v7
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "arm"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  build-sc-arm:
-    needs: [create-arm]
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/arm64,linux/arm/v7
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "arm"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  build-au-arm:
-    needs: [create-arm]
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/arm64,linux/arm/v7
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "arm"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  build-ui-arm:
-    needs: [create-arm]
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: beta
-      ARCH: linux/arm64,linux/arm/v7
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: "arm"
+      RELEASE: ${{ matrix.release }}
+      ARCH: ${{ matrix.arch }}
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+      CACHE: ${{ matrix.cache }}
+      PUSH: ${{ matrix.push }}
+      CACHE_SUFFIX: ${{ matrix.cache_suffix }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -198,57 +90,26 @@ jobs:
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
-  # Linux packages
-  build-ubuntu:
+  # Build Linux packages
+  build-packages:
+    strategy:
+      matrix:
+        linux: [ubuntu, debian, fedora, rhel]
+        include:
+          - release: beta
+          - linux: ubuntu
+            package: deb
+          - linux: debian
+            package: deb
+          - linux: fedora
+            package: rpm
+          - linux: rhel
+            package: rpm
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: beta
-      LINUX: ubuntu
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-debian:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: beta
-      LINUX: debian
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  # build-centos:
-  #   uses: ./.github/workflows/linux-build.yml
-  #   with:
-  #     RELEASE: beta
-  #     LINUX: centos
-  #     PACKAGE: rpm
-  #   secrets:
-  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-fedora:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: beta
-      LINUX: fedora
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-rhel:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: beta
-      LINUX: rhel
-      PACKAGE: rpm
+      RELEASE: ${{ matrix.release }}
+      LINUX: ${{ matrix.linux }}
+      PACKAGE: ${{ matrix.package }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -258,17 +119,7 @@ jobs:
   # Wait for all builds and extract VERSION
   wait-builds:
     runs-on: ubuntu-latest
-    needs: [
-      build-bw-amd64, build-bw-386,
-      build-sc-amd64, build-sc-386,
-      build-au-amd64, build-au-386,
-      build-ui-amd64, build-ui-386,
-      build-bw-arm, build-sc-arm, build-au-arm, build-ui-arm,
-      build-ubuntu,
-      build-debian,
-      build-fedora,
-      build-rhel
-    ]
+    needs: [build-containers, build-containers-arm, build-packages]
     outputs:
       version: ${{ steps.getversion.outputs.version }}
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
@@ -283,52 +134,30 @@ jobs:
         run: echo "versionrpm=$(cat src/VERSION | tr -d '\n' | sed 's/-/_/g')" >> "$GITHUB_OUTPUT"
 
   # Push Docker images
-  push-bunkerweb:
+  push-images:
     needs: [create-arm, wait-builds]
+    strategy:
+      matrix:
+        image: [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
+        include:
+          - release: beta
+          - image: bunkerweb
+            cache_from: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: bunkerweb-scheduler
+            cache_from: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: bunkerweb-autoconf
+            cache_from: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: bunkerweb-ui
+            cache_from: ui
+            dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: bunkerity/bunkerweb:beta,bunkerity/bunkerweb:${{ needs.wait-builds.outputs.version }}
-      CACHE_FROM: bunkerweb-beta
-      DOCKERFILE: src/bw/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  push-scheduler:
-    needs: [create-arm, wait-builds]
-    uses: ./.github/workflows/push-docker.yml
-    with:
-      IMAGE: bunkerity/bunkerweb-scheduler:beta,bunkerity/bunkerweb-scheduler:${{ needs.wait-builds.outputs.version }}
-      CACHE_FROM: scheduler-beta
-      DOCKERFILE: src/scheduler/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  push-autoconf:
-    needs: [create-arm, wait-builds]
-    uses: ./.github/workflows/push-docker.yml
-    with:
-      IMAGE: bunkerity/bunkerweb-autoconf:beta,bunkerity/bunkerweb-autoconf:${{ needs.wait-builds.outputs.version }}
-      CACHE_FROM: autoconf-beta
-      DOCKERFILE: src/autoconf/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-  push-ui:
-    needs: [create-arm, wait-builds]
-    uses: ./.github/workflows/push-docker.yml
-    with:
-      IMAGE: bunkerity/bunkerweb-ui:beta,bunkerity/bunkerweb-ui:${{ needs.wait-builds.outputs.version }}
-      CACHE_FROM: ui-beta
-      DOCKERFILE: src/ui/Dockerfile
+      IMAGE: bunkerity/${{ matrix.image }}:${{ matrix.release }},bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }}
+      CACHE_FROM: ${{ matrix.cache_from }}-${{ matrix.release }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -337,76 +166,54 @@ jobs:
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
   # Push Linux packages
-  push-ubuntu:
+  push-packages:
     needs: [wait-builds]
+    strategy:
+      matrix:
+        linux: [bubuntu, debian, fedora, el]
+        include:
+          - release: beta
+            repo: bunkerweb
+          - linux: ubuntu
+            separator: _
+            suffix: amd64
+            suffix2: -1_amd64
+            version: jammy
+            package: deb
+          - linux: debian
+            separator: _
+            suffix: amd64
+            suffix2: -1_amd64
+            version: bullseye
+            package: deb
+          - linux: fedora
+            separator: "-"
+            suffix: 1.x86_64
+            suffix2: -1.x86_64
+            version: 37
+            package: rpm
+          - linux: el
+            separator: "-"
+            suffix: 1.x86_64
+            suffix2: -1.x86_64
+            version: 8
+            package: rpm
     uses: ./.github/workflows/push-packagecloud.yml
     with:
-      SEPARATOR: _
-      SUFFIX: amd64
-      SUFFIX2: -1_amd64
-      REPO: bunkerweb
-      LINUX: ubuntu
-      VERSION: jammy
-      PACKAGE: deb
-      BW_VERSION: ${{ needs.wait-builds.outputs.version }}
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-debian:
-    needs: [wait-builds]
-    uses: ./.github/workflows/push-packagecloud.yml
-    with:
-      SEPARATOR: _
-      SUFFIX: amd64
-      SUFFIX2: -1_amd64
-      REPO: bunkerweb
-      LINUX: debian
-      VERSION: bullseye
-      PACKAGE: deb
-      BW_VERSION: ${{ needs.wait-builds.outputs.version }}
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-rhel:
-    needs: [wait-builds]
-    uses: ./.github/workflows/push-packagecloud.yml
-    with:
-      SEPARATOR: "-"
-      SUFFIX: 1.x86_64
-      SUFFIX2: -1.x86_64
-      REPO: bunkerweb
-      LINUX: el
-      VERSION: 8
-      PACKAGE: rpm
-      BW_VERSION: ${{ needs.wait-builds.outputs.versionrpm }}
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-  push-fedora:
-    needs: [wait-builds]
-    uses: ./.github/workflows/push-packagecloud.yml
-    with:
-      SEPARATOR: "-"
-      SUFFIX: 1.x86_64
-      SUFFIX2: -1.x86_64
-      REPO: bunkerweb
-      LINUX: fedora
-      VERSION: 37
-      PACKAGE: rpm
-      BW_VERSION: ${{ needs.wait-builds.outputs.versionrpm }}
+      SEPARATOR: ${{ matrix.separator }}
+      SUFFIX: ${{ matrix.suffix }}
+      SUFFIX2: ${{ matrix.suffix2 }}
+      REPO: ${{ matrix.repo }}
+      LINUX: ${{ matrix.linux }}
+      VERSION: ${{ matrix.separator }}
+      PACKAGE: ${{ matrix.package }}
+      BW_VERSION: ${{ $matrix.package == 'rpm' && needs.wait-builds.outputs.versionrpm || needs.wait-builds.outputs.version }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
   # Create doc PDF
   doc-pdf:
-    needs: [
-      wait-builds,
-      push-bunkerweb,
-      push-scheduler,
-      push-autoconf,
-      push-ui,
-      push-ubuntu,
-      push-debian,
-      push-rhel,
-      push-fedora
-    ]
+    needs: [wait-builds, push-images, push-packages]
     uses: ./.github/workflows/doc-to-pdf.yml
     with:
       VERSION: ${{ needs.wait-builds.outputs.version }}
@@ -437,7 +244,7 @@ jobs:
   # Remove ARM VM
   rm-arm:
     if: ${{ always() }}
-    needs: [create-arm, push-bunkerweb, push-scheduler, push-autoconf, push-ui]
+    needs: [create-arm, push-images]
     uses: ./.github/workflows/rm-arm.yml
     secrets:
       ARM_ID: ${{ needs.create-arm.outputs.id }}

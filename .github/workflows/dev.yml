@@ -9,49 +9,25 @@ on:
 jobs:
 
   # Containers
-  build-bw:
+  build-containers:
+    strategy:
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: dev
       ARCH: linux/amd64
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-sc:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: dev
-      ARCH: linux/amd64
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-au:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: dev
-      ARCH: linux/amd64
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-ui:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: dev
-      ARCH: linux/amd64
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -84,7 +60,7 @@ jobs:
 
   # UI tests
   tests-ui:
-    needs: [code-security, build-bw, build-sc, build-ui]
+    needs: [code-security, build-containers]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: dev
