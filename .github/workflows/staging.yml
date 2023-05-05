@@ -15,6 +15,7 @@ jobs:
       ARCH: linux/amd64
       IMAGE: bunkerweb
       DOCKERFILE: src/bw/Dockerfile
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -27,6 +28,7 @@ jobs:
       ARCH: linux/amd64
       IMAGE: scheduler
       DOCKERFILE: src/scheduler/Dockerfile
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -39,6 +41,7 @@ jobs:
       ARCH: linux/amd64
       IMAGE: autoconf
       DOCKERFILE: src/autoconf/Dockerfile
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -51,6 +54,7 @@ jobs:
       ARCH: linux/amd64
       IMAGE: ui
       DOCKERFILE: src/ui/Dockerfile
+      CACHE_SUFFIX: "amd64"
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -218,14 +222,14 @@ jobs:
       TYPE: linux
       RUNS_ON: "['self-hosted', 'bw-linux']"
     secrets: inherit
-  # tests-ui:
-  #   needs: [code-security, build-bw, build-scheduler, build-ui]
-  #   uses: ./.github/workflows/tests-ui.yml
-  #   with:
-  #     RELEASE: staging
-  #   secrets:
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  tests-ui:
+    needs: [code-security, build-bw, build-scheduler, build-ui]
+    uses: ./.github/workflows/tests-ui.yml
+    with:
+      RELEASE: staging
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
   delete-infra-docker:
