@@ -54,7 +54,8 @@ from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, getenv, getpid, listdir
-from re import match as re_match
+from re import compile as re_compile
+from regex import match as regex_match
 from requests import get
 from shutil import move, rmtree
 from signal import SIGINT, signal, SIGTERM
@@ -135,8 +136,8 @@ elif "ADMIN_PASSWORD" not in vars:
     logger.error("ADMIN_PASSWORD is not set")
     stop(1)
 
-if not vars.get("FLASK_DEBUG", False) and not re_match(
-    r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#@?!$%^&*-]).{8,}$",
+if not vars.get("FLASK_DEBUG", False) and not regex_match(
+    r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
     vars["ADMIN_PASSWORD"],
 ):
     logger.error(
@@ -235,6 +236,8 @@ try:
 except FileNotFoundError as e:
     logger.error(repr(e), e.filename)
     stop(1)
+
+plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
 
 # Declare functions for jinja2
 app.jinja_env.globals.update(check_settings=check_settings)
@@ -1227,7 +1230,7 @@ def upload_plugin():
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin):
-    if not re_match(r"^[a-zA-Z0-9_-]{1,64}$", plugin):
+    if not plugin_id_rx.match(plugin):
         flash(
             f"Invalid plugin id, <b>{plugin}</b> (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)",
             "error",
