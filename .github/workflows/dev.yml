@@ -60,7 +60,7 @@ jobs:
 
   # UI tests
   tests-ui:
-    needs: [code-security, build-container]
+    needs: [code-security, build-containers]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: dev
