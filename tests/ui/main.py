@@ -909,6 +909,8 @@ try:
             False,
         )
 
+        sleep(2)
+
         print(
             "The bad plugin has been rejected, trying to add a good plugin ...",
             flush=True,
