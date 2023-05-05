@@ -5,7 +5,6 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Identity,
-    Integer,
     LargeBinary,
     PrimaryKeyConstraint,
     SmallInteger,
@@ -56,7 +55,7 @@ class Plugins(Base):
     __tablename__ = "bw_plugins"
 
     id = Column(String(64), primary_key=True)
-    order = Column(Integer, nullable=False)
+    order = Column(SmallInteger, nullable=False)
     name = Column(String(128), nullable=False)
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
@@ -180,7 +179,7 @@ class Plugin_pages(Base):
     __tablename__ = "bw_plugin_pages"
 
     id = Column(
-        Integer,
+        SmallInteger,
         Identity(start=1, increment=1),
         primary_key=True,
     )
@@ -202,7 +201,7 @@ class Jobs_cache(Base):
     __table_args__ = (UniqueConstraint("job_name", "service_id", "file_name"),)
 
     id = Column(
-        Integer,
+        SmallInteger,
         Identity(start=1, increment=1),
         primary_key=True,
     )
@@ -233,7 +232,7 @@ class Custom_configs(Base):
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
     id = Column(
-        Integer,
+        SmallInteger,
         Identity(start=1, increment=1),
         primary_key=True,
     )
@@ -268,14 +267,14 @@ class Instances(Base):
     __tablename__ = "bw_instances"
 
     hostname = Column(String(256), primary_key=True)
-    port = Column(Integer, nullable=False)
+    port = Column(SmallInteger, nullable=False)
     server_name = Column(String(256), nullable=False)
 
 
 class Metadata(Base):
     __tablename__ = "bw_metadata"
 
-    id = Column(Integer, primary_key=True, default=1)
+    id = Column(SmallInteger, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
