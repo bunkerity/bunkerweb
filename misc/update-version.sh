@@ -19,4 +19,5 @@ for example in examples/* ; do
     sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" ${example}/*.yml
 done
 # docs
+# TODO : replace X.Y.Z_beta with X.Y.Z-beta (rpm install)
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*.md

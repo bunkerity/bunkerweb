@@ -9,7 +9,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     rm -rf /tmp/req
 
 # Install dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev && \
+RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
     mkdir -p /usr/share/bunkerweb/deps/python && \
@@ -37,7 +37,6 @@ RUN apk add --no-cache bash && \
     mkdir -p /etc/bunkerweb && \
     mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
     mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-    mkdir -p /data/cache/letsencrypt && ln -s /data/cache/letsencrypt /etc/letsencrypt && \
     mkdir -p /data/www && ln -s /data/www /var/www/html && \
     for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \

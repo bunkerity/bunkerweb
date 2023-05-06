@@ -47,7 +47,7 @@ try:
         tgz = BytesIO()
 
         with tar_open(mode="w:gz", fileobj=tgz) as tf:
-            tf.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
+            tf.add("/var/cache/bunkerweb/letsencrypt/etc", arcname="etc")
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 
@@ -102,7 +102,7 @@ try:
     # Linux case
     else:
         proc = run(
-            ["/etc/init.d/nginx", "reload"],
+            ["sudo", "/usr/sbin/nginx", "-s", "reload"],
             stdin=DEVNULL,
             stderr=STDOUT,
         )

@@ -161,6 +161,7 @@ try:
             f"Couldn't update external plugins to database: {err}",
         )
 
+    status = 1
     logger.info("External plugins downloaded and installed")
 
 except:

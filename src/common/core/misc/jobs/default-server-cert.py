@@ -65,6 +65,7 @@ try:
                 )
                 status = 2
             else:
+                status = 1
                 logger.info(
                     "Successfully generated self-signed certificate for default server",
                 )

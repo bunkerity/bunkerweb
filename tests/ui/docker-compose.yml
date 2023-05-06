@@ -55,7 +55,7 @@ services:
     environment:
       ABSOLUTE_URI: "http://www.example.com/admin/"
       ADMIN_USERNAME: "admin"
-      ADMIN_PASSWORD: "admin"
+      ADMIN_PASSWORD: "S$$cr3tP@ssw0rd"
       DOCKER_HOST: "tcp://bw-docker-proxy:2375"
     volumes:
       - bw-data:/data
@@ -80,6 +80,7 @@ services:
 
 volumes:
   bw-data:
+
 
 networks:
   bw-universe:

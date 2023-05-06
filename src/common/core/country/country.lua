@@ -74,7 +74,7 @@ function country:access()
 				if not ok then
 					return self:ret(false, "error while adding item to cache : " .. err)
 				end
-				return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is blacklisted (country = " .. country .. ")", true, utils.get_deny_status())
+				return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is blacklisted (country = " .. country .. ")", utils.get_deny_status())
 			end
 		end
 	end

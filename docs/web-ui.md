@@ -522,6 +522,7 @@ Because the web UI is a web application, the recommended installation procedure 
             bunkerweb.io/INSTANCE: "yes"
         spec:
           containers:
+            # using bunkerweb as name is mandatory
             - name: bunkerweb
               image: bunkerity/bunkerweb:1.5.0-beta
               imagePullPolicy: Always

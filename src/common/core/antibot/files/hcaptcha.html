@@ -257,6 +257,12 @@
       </p></footer>
     </main>
     <!-- end content -->
+    <script>
+      function send_challenge(token) {
+        document.getElementById("token").value = token;
+        document.getElementById("form").submit();
+      }
+    </script>
   </body>
 </html>
 {-raw-}

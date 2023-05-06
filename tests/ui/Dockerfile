@@ -13,6 +13,14 @@ RUN GECKODRIVER_VERSION=`curl -i https://github.com/mozilla/geckodriver/releases
 
 WORKDIR /opt/tests_ui
 
+COPY requirements.txt .
+
+RUN pip install --no-cache -r requirements.txt
+
+RUN touch test.txt && \
+  zip -r test.zip test.txt && \
+  rm test.txt
+
 RUN echo '{ \
   "id": "discord", \
   "order": 999, \
@@ -29,13 +37,8 @@ RUN echo '{ \
 RUN apk del .build-deps && \
   rm -rf /var/cache/apk/*
 
-ENV PYTHONUNBUFFERED=1
-
-COPY requirements.txt .
-
-RUN pip install -r requirements.txt
-
 COPY main.py .
-COPY test.zip .
+
+ENV PYTHONUNBUFFERED=1
 
 CMD ["python3", "main.py"]

@@ -9,6 +9,9 @@ on:
       ALIAS:
         required: true
         type: string
+    secrets:
+      BUNKERBOT_TOKEN:
+        required: true
 
 jobs:
   build:
@@ -16,7 +19,14 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
-        uses: actions/setup-python@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BUNKERBOT_TOKEN }}
+      - name: Setup git user
+        run: |
+          git config --global user.name "BunkerBot"
+          git config --global user.email "bunkerbot@bunkerity.com"
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
       - name: Install doc requirements

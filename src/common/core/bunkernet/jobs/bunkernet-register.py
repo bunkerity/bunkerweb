@@ -19,9 +19,10 @@ sys_path.extend(
 from bunkernet import register, ping, get_id
 from Database import Database
 from logger import setup_logger
+from jobs import get_file_in_db, set_file_in_db, del_file_in_db
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
-status = 0
+exit_status = 0
 
 try:
     # Check if at least a server has BunkerNet activated
@@ -51,8 +52,24 @@ try:
     # Create directory if it doesn't exist
     Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
 
-    # Ask an ID if needed
+    # Get ID from cache
     bunkernet_id = None
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI", None),
+    )
+    if db:
+        bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
+        if bunkernet_id:
+            Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(
+                bunkernet_id.decode()
+            )
+            logger.info("Successfully retrieved BunkerNet ID from db cache")
+        else:
+            logger.info("No BunkerNet ID found in db cache")
+
+    # Register instance
+    registered = False
     if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
         logger.info("Registering instance on BunkerNet API ...")
         ok, status, data = register()
@@ -60,7 +77,7 @@ try:
             logger.error(
                 f"Error while sending register request to BunkerNet API : {data}"
             )
-            _exit(1)
+            _exit(2)
         elif status == 429:
             logger.warning(
                 "BunkerNet API is rate limiting us, trying again later...",
@@ -78,19 +95,22 @@ try:
             logger.error(
                 f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
             )
-            _exit(1)
+            _exit(2)
 
         if status != 200:
             logger.error(
                 f"Error {status} from BunkerNet API : {data['data']}",
             )
-            _exit(1)
+            _exit(2)
         elif data.get("result", "ko") != "ok":
             logger.error(
                 f"Received error from BunkerNet API while sending register request : {data.get('data', {})}"
             )
-            _exit(1)
+            _exit(2)
         bunkernet_id = data["data"]
+        Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
+        registered = True
+        exit_status = 1
         logger.info(
             f"Successfully registered on BunkerNet API with instance id {data['data']}"
         )
@@ -99,6 +119,15 @@ try:
         logger.info(f"Already registered on BunkerNet API with instance id {get_id()}")
 
     sleep(1)
+
+    # Update cache with new bunkernet ID
+    if db and registered:
+        with open("/var/cache/bunkerweb/bunkernet/instance.id", "rb") as f:
+            cached, err = set_file_in_db(f"bunkernet-register", f"instance.id", f, db)
+        if not cached:
+            logger.error(f"Error while saving BunkerNet data to db cache : {err}")
+        else:
+            logger.info("Successfully saved BunkerNet data to db cache")
 
     # Ping
     logger.info("Checking connectivity with BunkerNet API ...")
@@ -118,11 +147,14 @@ try:
             logger.warning(
                 "BunkerNet has banned this instance, retrying a register later...",
             )
+            _exit(2)
         elif status == 401:
             logger.warning(
                 "Instance ID is not registered, removing it and retrying a register later...",
             )
             Path("/var/cache/bunkerweb/bunkernet/instance.id").unlink()
+            if db:
+                del_file_in_db("bunkernet-register", "instance.id", db)
             _exit(2)
 
         try:
@@ -131,11 +163,11 @@ try:
             logger.error(
                 f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
             )
-            _exit(1)
+            _exit(2)
 
         if data.get("result", "ko") != "ok":
             logger.error(
-                f"Received error from BunkerNet API while sending ping request : {data.get('data', {})}, removing instance ID",
+                f"Received error from BunkerNet API while sending ping request : {data.get('data', {})}",
             )
             retry = True
         if not retry:
@@ -144,35 +176,14 @@ try:
         logger.warning("Waiting 1s and trying again ...")
         sleep(1)
 
-    if bunkernet_ping and status != 403:
-        logger.info("Connectivity with BunkerWeb is successful !")
-        status = 1
-        if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
-            Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
-
-            db = Database(
-                logger,
-                sqlalchemy_string=getenv("DATABASE_URI", None),
-            )
-            lock = Lock()
-
-            # Update db
-            with lock:
-                err = db.update_job_cache(
-                    "bunkernet-register",
-                    None,
-                    "instance.id",
-                    bunkernet_id.encode("utf-8"),
-                )
-
-            if err:
-                logger.warning(f"Couldn't update db cache: {err}")
+    if bunkernet_ping:
+        logger.info("Connectivity with BunkerNet is successful !")
     else:
-        logger.error("Connectivity with BunkerWeb failed ...")
-        status = 2
+        logger.error("Connectivity with BunkerNet failed ...")
+        exit_status = 2
 
 except:
-    status = 2
+    exit_status = 2
     logger.error(f"Exception while running bunkernet-register.py :\n{format_exc()}")
 
-sys_exit(status)
+sys_exit(exit_status)

@@ -567,6 +567,7 @@ spec:
         bunkerweb.io/INSTANCE: "yes"
     spec:
       containers:
+        # using bunkerweb as name is mandatory
         - name: bunkerweb
           image: bunkerity/bunkerweb:1.5.0-beta
           imagePullPolicy: Always
@@ -816,7 +817,7 @@ List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 37
+- Fedora 38
 - RedHat Enterprise Linux (RHEL) 8.7
 
 Please note that you will need to **install NGINX 1.24.0 before BunkerWeb**. For all distros, except Fedora, using prebuilt packages from [official NGINX repository](https://nginx.org/en/linux_packages.html) is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.
@@ -899,7 +900,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
     sudo dnf install -y nginx-1.24.0
     ```
 
-    And finally install BunkerWeb 1.5.0-beta :
+    And finally install BunkerWeb 1.5.0_beta :
 
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
@@ -949,7 +950,7 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 	  dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.5.0-beta
+    sudo dnf install -y bunkerweb-1.5.0_beta
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -1082,13 +1083,12 @@ List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 37
-- CentOS Stream 8
+- Fedora 38
 - RedHat Enterprise Linux (RHEL) 8.7
 
 [Ansible](https://docs.ansible.com/ansible/latest/index.html) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
-A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
+A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb).
 
 First of all, download the role from ansible-galaxy :
 ```shell
