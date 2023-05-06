@@ -5,3 +5,4 @@ __pycache__
 env
 node_modules
 /src/ui/*.txt
+.mypy_cache
