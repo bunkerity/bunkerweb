@@ -5,6 +5,7 @@ ENV NGINX_VERSION 1.24.0
 
 # Copy centos repo
 COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" src/linux/centos.repo /etc/yum.repos.d/centos.repo
 
 # Copy RPM-GPG-KEY-CentOS-Official
 COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial

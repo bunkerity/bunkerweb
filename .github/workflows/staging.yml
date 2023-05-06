@@ -7,111 +7,56 @@ on:
     branches: [staging]
 
 jobs:
-  # Containers
-  build-bw:
+
+  # Build Docker images
+  build-containers:
+    strategy:
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: staging
       ARCH: linux/amd64
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-scheduler:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-autoconf:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: autoconf
-      DOCKERFILE: src/autoconf/Dockerfile
-      CACHE_SUFFIX: "amd64"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-ui:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: staging
-      ARCH: linux/amd64
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
-      CACHE_SUFFIX: "amd64"
+      CACHE: true
+      PUSH: true
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
-  # Linux
-  build-ubuntu:
+  # Build Linux packages
+  build-packages:
+    strategy:
+      matrix:
+        linux: [ubuntu, debian, fedora, rhel]
+        include:
+          - linux: ubuntu
+            package: deb
+          - linux: debian
+            package: deb
+          - linux: fedora
+            package: rpm
+          - linux: rhel
+            package: rpm
     uses: ./.github/workflows/linux-build.yml
     with:
       RELEASE: staging
-      LINUX: ubuntu
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-debian:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: debian
-      PACKAGE: deb
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  # build-centos:
-  #   uses: ./.github/workflows/linux-build.yml
-  #   with:
-  #     RELEASE: staging
-  #     LINUX: centos
-  #     PACKAGE: rpm
-  #   secrets:
-  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  #     DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-fedora:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: fedora
-      PACKAGE: rpm
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-rhel:
-    uses: ./.github/workflows/linux-build.yml
-    with:
-      RELEASE: staging
-      LINUX: rhel
-      PACKAGE: rpm
+      LINUX: ${{ matrix.linux }}
+      PACKAGE: ${{ matrix.package }}
+      TEST: true
+      PLATFORMS: linux/amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -143,87 +88,42 @@ jobs:
           category: "/language:${{matrix.language}}"
 
   # Create infrastructures
-  create-infra-docker:
-    needs: [code-security, build-bw, build-scheduler]
+  create-infras:
+    needs: [code-security, build-containers, build-packages]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
-      TYPE: docker
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-autoconf:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: autoconf
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-swarm:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: swarm
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-k8s:
-    needs: [code-security, build-bw, build-scheduler, build-autoconf]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: k8s
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  create-infra-linux:
-    needs:
-      [
-        code-security,
-        build-ubuntu,
-        build-debian,
-        build-fedora,
-        build-rhel,
-      ]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: linux
+      TYPE: ${{ matrix.type }}
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Perform tests
-  tests-docker:
-    needs: [create-infra-docker]
+  create-infras:
+    needs: [create-infras]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+      include:
+        - type: docker
+          runs_on: "['self-hosted', 'bw-docker']"
+        - type: autoconf
+          runs_on: "['self-hosted', 'bw-autoconf']"
+        - type: swarm
+          runs_on: "['self-hosted', 'bw-swarm']"
+        - type: k8s
+          runs_on: "['ubuntu-latest']"
+        - type: linux
+          runs_on: "['self-hosted', 'bw-linux']"
     uses: ./.github/workflows/staging-tests.yml
     with:
-      TYPE: docker
-      RUNS_ON: "['self-hosted', 'bw-docker']"
+      TYPE: ${{ matrix.type }}
+      RUNS_ON: ${{ matrix.runs_on }}
     secrets: inherit
-  tests-autoconf:
-    needs: [create-infra-autoconf]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: autoconf
-      RUNS_ON: "['self-hosted', 'bw-autoconf']"
-    secrets: inherit
-  tests-swarm:
-    needs: [create-infra-swarm]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: swarm
-      RUNS_ON: "['self-hosted', 'bw-swarm']"
-    secrets: inherit
-  tests-k8s:
-    needs: [create-infra-k8s]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: k8s
-      RUNS_ON: "['ubuntu-latest']"
-    secrets: inherit
-  tests-linux:
-    needs: [create-infra-linux]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: linux
-      RUNS_ON: "['self-hosted', 'bw-linux']"
-    secrets: inherit
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   tests-ui:
-    needs: [code-security, build-bw, build-scheduler, build-ui]
+    needs: [create-infras]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: staging
@@ -232,43 +132,14 @@ jobs:
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
-  delete-infra-docker:
+  delete-infras:
     if: ${{ always() }}
-    needs: [tests-docker]
+    needs: [create-infras]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
-      TYPE: docker
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-autoconf:
-    if: ${{ always() }}
-    needs: [tests-autoconf]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: autoconf
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-swarm:
-    if: ${{ always() }}
-    needs: [tests-swarm]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: swarm
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-k8s:
-    if: ${{ always() }}
-    needs: [tests-k8s]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: k8s
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-  delete-infra-linux:
-    if: ${{ always() }}
-    needs: [tests-linux]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: linux
+      TYPE: ${{ matrix.type }}
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
