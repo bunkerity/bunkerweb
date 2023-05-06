@@ -100,7 +100,7 @@ jobs:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Perform tests
-  create-infras:
+  staging-tests:
     needs: [create-infras]
     strategy:
       matrix:
@@ -121,7 +121,6 @@ jobs:
       TYPE: ${{ matrix.type }}
       RUNS_ON: ${{ matrix.runs_on }}
     secrets: inherit
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
   tests-ui:
     needs: [create-infras]
     uses: ./.github/workflows/tests-ui.yml
