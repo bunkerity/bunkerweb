@@ -138,14 +138,16 @@ class ApiCaller:
                         f"Successfully sent API request to {api.get_endpoint()}{url}",
                     )
 
-            if response:
-                instance = api.get_endpoint().replace("http://", "").split(":")[0]
-                if isinstance(resp, dict):
-                    responses[instance] = resp
-                else:
-                    responses[instance] = resp.json()
+                    if response:
+                        instance = (
+                            api.get_endpoint().replace("http://", "").split(":")[0]
+                        )
+                        if isinstance(resp, dict):
+                            responses[instance] = resp
+                        else:
+                            responses[instance] = resp.json()
 
-        if response:
+        if response and responses:
             return ret, responses
         return ret
 

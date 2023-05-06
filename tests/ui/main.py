@@ -245,7 +245,7 @@ try:
         username_input = safe_get_element(driver, By.ID, "username")
         password_input = safe_get_element(driver, By.ID, "password")
         username_input.send_keys("admin")
-        password_input.send_keys("admin")
+        password_input.send_keys("S$cr3tP@ssw0rd")
 
         access_page(
             driver,
@@ -908,6 +908,8 @@ try:
             "plugins",
             False,
         )
+
+        sleep(2)
 
         print(
             "The bad plugin has been rejected, trying to add a good plugin ...",
