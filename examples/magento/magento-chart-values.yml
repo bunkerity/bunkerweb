@@ -5,3 +5,6 @@ magentoEmail: "contact@example.com"
 magentoFirstName: "John"
 magentoLastName: "Doe"
 magentoAdminUri: "admin"
+mariadb:
+  auth:
+    password: "changeme1337"
