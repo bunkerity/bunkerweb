@@ -48,7 +48,7 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
       "id": "greylist-rdns",
       "label": "Greylist reverse DNS",
-      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
+      "regex": "^( *((\\.([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})(?!.* \\3( |$))) *)*$",
       "type": "text"
     },
     "GREYLIST_RDNS_URLS": {
