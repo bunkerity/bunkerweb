@@ -115,15 +115,19 @@ jobs:
       # Generate package
       - name: Generate package
         if: startsWith(env.ARCH, 'arm') == false
-        run: ./src/linux/package.sh ${{ inputs.LINUX }} ${{ inputs.LARCH }}
+        run: ./src/linux/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
+        env:
+          LARCH: ${{ env.LARCH }}
       - name: Generate package (ARM)
         if: startsWith(env.ARCH, 'arm') == true
         run: |
           docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
           scp ./src/linux/package.sh root@arm:/opt/package.sh
           ssh root@arm chmod +x /opt/package.sh
-          ssh root@arm /opt/packages.sh ${{ inputs.LINUX }} ${{ inputs.LARCH }}
+          ssh root@arm /opt/packages.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
           scp -r root@arm:/root/package-${{ inputs.LINUX }} ./package-${{ inputs.LINUX }}
+        env:
+          LARCH: ${{ env.LARCH }}
       - uses: actions/upload-artifact@v3
         with:
           name: package-${{ inputs.LINUX }}-${{ env.ARCH }}
