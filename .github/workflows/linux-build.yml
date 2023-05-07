@@ -124,7 +124,7 @@ jobs:
           docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
           scp ./src/linux/package.sh root@arm:/opt
           ssh root@arm chmod +x /opt/package.sh
-          ssh root@arm /opt/packages.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
+          ssh root@arm /opt/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
           scp -r root@arm:/root/package-${{ inputs.LINUX }} ./package-${{ inputs.LINUX }}
         env:
           LARCH: ${{ env.LARCH }}
