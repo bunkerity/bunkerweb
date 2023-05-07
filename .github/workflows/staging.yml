@@ -133,7 +133,7 @@ jobs:
   # Delete infrastructures
   delete-infras:
     if: ${{ always() }}
-    needs: [create-infras]
+    needs: [staging-tests]
     strategy:
       matrix:
         type: [docker, autoconf, swarm, k8s, linux]
