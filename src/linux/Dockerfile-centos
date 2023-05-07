@@ -27,7 +27,7 @@ RUN dnf install yum-utils redhat-lsb-core -y && \
 
 # Compile and install dependencies
 RUN dnf install -y python39-pip brotli brotli-devel wget gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
-    pip3.9 install --no-cache-dir --upgrade pip=pip==20.2.4 && \
+    pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
