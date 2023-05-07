@@ -23,9 +23,9 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget && 
 # Nginx
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install yum-utils -y && \
-  wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.x86_64.rpm && \
-  dnf install nginx-${NGINX_VERSION}-1.el8.ngx.x86_64.rpm -y && \
-  rm -rf nginx-${NGINX_VERSION}-1.el8.ngx.x86_64.rpm
+  wget https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm && \
+  dnf install nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm -y && \
+  rm -rf nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
