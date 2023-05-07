@@ -231,7 +231,7 @@ function greylist:is_greylisted_ua()
 end
 
 function greylist:is_in_cache(ele)
-	local ok, data = self.cachestore:get("plugin_greylist_" .. ele)
+	local ok, data = self.cachestore:get("plugin_greylist_" .. ngx.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
 	end 
@@ -239,7 +239,7 @@ function greylist:is_in_cache(ele)
 end
 
 function greylist:add_to_cache(ele, value)
-	local ok, err = self.cachestore:set("plugin_greylist_" .. ele, value, 86400)
+	local ok, err = self.cachestore:set("plugin_greylist_" .. ngx.ctx.bw.server_name .. ele, value, 86400)
 	if not ok then
 		return false, err
 	end 
