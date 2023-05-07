@@ -236,6 +236,7 @@ jobs:
       PACKAGE: ${{ matrix.package }}
       BW_VERSION: ${{ matrix.package == 'rpm' && needs.wait-builds.outputs.versionrpm || needs.wait-builds.outputs.version }}
       PACKAGE_ARCH: ${{ matrix.package_arch }}
+      ARCH: ${{ matrix.arch }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
