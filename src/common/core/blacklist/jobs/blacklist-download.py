@@ -23,7 +23,7 @@ from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, is_cached_file, file_hash
 
-rdns_rx = re_compile(rb"^(\.?[a-z\d\-]+)*\.[a-z]{2,}$", IGNORECASE)
+rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
 asn_rx = re_compile(rb"^\d+$")
 uri_rx = re_compile(rb"^/")
 
