@@ -48,7 +48,7 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to block.",
       "id": "blacklist-rdns",
       "label": "Blacklist reverse DNS",
-      "regex": "^( *((\\.([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})(?!.* \\3( |$))) *)*$",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "BLACKLIST_RDNS_URLS": {
@@ -138,7 +138,7 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-rdns",
       "label": "Blacklist ignore reverse DNS",
-      "regex": "^( *((\\.([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})(?!.* \\3( |$))) *)*$",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_RDNS_URLS": {
