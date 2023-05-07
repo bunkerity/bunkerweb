@@ -46,6 +46,7 @@ RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-de
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip3.9 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 #RUN pip3.10 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
