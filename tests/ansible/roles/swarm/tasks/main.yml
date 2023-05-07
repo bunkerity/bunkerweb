@@ -21,6 +21,13 @@
     state: forcereinstall
     executable: pip3
 
+- name: Pin version for urllib
+  pip:
+    name: urllib3<2
+    state: forcereinstall
+    executable: pip3
+    extra_args: 
+
 - name: Init Docker Swarm
   community.general.docker_swarm:
     advertise_addr: "{{ local_ip }}"

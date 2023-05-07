@@ -1,4 +1,4 @@
-FROM fedora:37
+FROM fedora:38
 
 ENV OS=fedora
 ENV NGINX_VERSION 1.24.0
@@ -31,6 +31,7 @@ RUN dnf install -y python3-pip brotli brotli-devel gperftools-devel perl libxslt
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
     # Dirty fix to avoid errors with --target and packages same namespace
     #cp -r /usr/lib64/python3.10/* /usr/lib/python3.10/ && \
@@ -63,7 +64,6 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /var/tmp/bunkerweb/ && \
     mkdir -p /var/www/html && \
     mkdir -p /var/lib/bunkerweb && \
-    mkdir -p /etc/letsencrypt && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \

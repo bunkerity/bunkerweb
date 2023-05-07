@@ -41,10 +41,17 @@ class IngressController(Controller, ConfigCaller):
                     health = True
                     break
         instance["health"] = health
-        instance["env"] = {
-            env.name: env.value or ""
-            for env in controller_instance.spec.containers[0].env
-        }
+        instance["env"] = {}
+        pod = None
+        for container in controller_instance.spec.containers:
+            if container.name == "bunkerweb":
+                pod = container
+                break
+        if not pod:
+            self.__logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
+        else:
+            for env in pod.env:
+                instance["env"][env.name] = env.value or ""
         for controller_service in self._get_controller_services():
             if controller_service.metadata.annotations:
                 for (
@@ -156,8 +163,16 @@ class IngressController(Controller, ConfigCaller):
             ):
                 continue
 
+            pod = None
+            for container in instance.spec.containers:
+                if container.name == "bunkerweb":
+                    pod = container
+                    break
+            if not pod :
+                continue
+
             variables = {
-                env.name: env.value or "" for env in instance.spec.containers[0].env
+                env.name: env.value or "" for env in pod.env
             }
 
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():

@@ -189,7 +189,7 @@ function whitelist:check_cache()
 end
 
 function whitelist:is_in_cache(ele)
-	local ok, data = self.cachestore:get("plugin_whitelist_" .. ele)
+	local ok, data = self.cachestore:get("plugin_whitelist_" .. ngx.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
 	end 
@@ -197,7 +197,7 @@ function whitelist:is_in_cache(ele)
 end
 
 function whitelist:add_to_cache(ele, value)
-	local ok, err = self.cachestore:set("plugin_whitelist_" .. ele, value, 86400)
+	local ok, err = self.cachestore:set("plugin_whitelist_" .. ngx.ctx.bw.server_name .. ele, value, 86400)
 	if not ok then
 		return false, err
 	end

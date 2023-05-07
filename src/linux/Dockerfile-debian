@@ -37,6 +37,7 @@ RUN apt update && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
     # Dirty fix to avoid errors with --target and packages same namespace
@@ -69,8 +70,7 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /var/tmp/bunkerweb/ && \
     mkdir -p /var/www/ && \
     mkdir -p /var/lib/bunkerweb && \
-    mkdir -p /etc/letsencrypt && \
-    #mkdir /var/www/html && \
+    mkdir /var/www/html && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     #It's a find command that will find all files in the bunkerweb directory, excluding the ui/deps directory, and then chmod them to 0740.
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \

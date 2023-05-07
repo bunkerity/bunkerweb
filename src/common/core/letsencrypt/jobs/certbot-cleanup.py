@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from os import getenv
-from os.path import isfile
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
@@ -73,7 +72,7 @@ try:
         challenge_path = (
             f"/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/{token}"
         )
-        if isfile(challenge_path):
+        if Path(challenge_path).exists():
             Path(challenge_path).unlink()
 except:
     status = 1

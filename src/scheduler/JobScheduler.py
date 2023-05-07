@@ -105,10 +105,12 @@ class JobScheduler(ApiCaller):
             f"Executing job {name} from plugin {plugin} ...",
         )
         success = True
+        ret = -1
         try:
             proc = run(
                 f"{path}jobs/{file}", stdin=DEVNULL, stderr=STDOUT, env=self.__env
             )
+            ret = proc.returncode
         except BaseException:
             success = False
             self.__logger.error(
@@ -136,6 +138,7 @@ class JobScheduler(ApiCaller):
             self.__logger.warning(
                 f"Failed to update database for the job {name} from plugin {plugin}: {err}",
             )
+        return ret
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():
@@ -164,7 +167,7 @@ class JobScheduler(ApiCaller):
             ret = job.run()
             if ret == 1:
                 reload = True
-            elif (ret or 2) >= 2:
+            elif ret < 0 or ret >= 2:
                 success = False
         if reload:
             try:
@@ -172,9 +175,13 @@ class JobScheduler(ApiCaller):
                     self.__logger.info("Sending /var/cache/bunkerweb folder ...")
                     if not self._send_files("/var/cache/bunkerweb", "/cache"):
                         success = False
-                        self.__logger.error("Error while sending /var/cache/bunkerweb folder")
+                        self.__logger.error(
+                            "Error while sending /var/cache/bunkerweb folder"
+                        )
                     else:
-                        self.__logger.info("Successfully sent /var/cache/bunkerweb folder")
+                        self.__logger.info(
+                            "Successfully sent /var/cache/bunkerweb folder"
+                        )
                 if not self.__reload():
                     success = False
             except:

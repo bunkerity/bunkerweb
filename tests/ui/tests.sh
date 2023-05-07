@@ -44,12 +44,12 @@ if [ $i -ge 120 ] ; then
 fi
 
 # Start tests
-docker-compose -f docker-compose.tests.yml build
+docker-compose -f docker-compose.test.yml build
 if [ $? -ne 0 ] ; then
     echo "❌ Build failed"
     exit 1
 fi
-docker-compose -f docker-compose.tests.yml up --abort-on-container-exit --exit-code-from ui-tests
+docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
 
 # Exit
 exit $?

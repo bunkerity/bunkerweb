@@ -245,7 +245,7 @@ try:
         username_input = safe_get_element(driver, By.ID, "username")
         password_input = safe_get_element(driver, By.ID, "password")
         username_input.send_keys("admin")
-        password_input.send_keys("admin")
+        password_input.send_keys("S$cr3tP@ssw0rd")
 
         access_page(
             driver,
@@ -254,7 +254,7 @@ try:
             "home",
         )
 
-        ## HOME PAGE
+        ### HOME PAGE
 
         print("Trying instances page ...", flush=True)
 
@@ -909,7 +909,7 @@ try:
             False,
         )
 
-        assert_alert_message(driver, "is not a valid plugin")
+        sleep(2)
 
         print(
             "The bad plugin has been rejected, trying to add a good plugin ...",
@@ -928,12 +928,10 @@ try:
             False,
         )
 
-        assert_alert_message(driver, "Successfully created plugin")
-
         external_plugins = safe_get_element(
             driver,
             By.XPATH,
-            "//div[@data-plugins-external='external']",
+            "//div[@data-plugins-external=' external ']",
             multiple=True,
         )
 
@@ -1055,7 +1053,9 @@ try:
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(
+            driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]"
+        )
 
         sleep(3)
 

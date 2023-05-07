@@ -9,9 +9,6 @@ on:
       SUFFIX:
         required: true
         type: string
-      SUFFIX2:
-        required: true
-        type: string
       REPO:
         required: true
         type: string
@@ -25,6 +22,12 @@ on:
         required: true
         type: string
       BW_VERSION:
+        required: true
+        type: string
+      ARCH:
+        required: true
+        type: string
+      PACKAGE_ARCH:
         required: true
         type: string
     secrets:
@@ -48,16 +51,16 @@ jobs:
       - uses: actions/download-artifact@v3
         if: inputs.LINUX != 'el'
         with:
-          name: package-${{ inputs.LINUX }}
+          name: package-${{ inputs.LINUX }}-${{ inputs.ARCH }}
           path: /tmp/${{ inputs.LINUX }}
       - uses: actions/download-artifact@v3
         if: inputs.LINUX == 'el'
         with:
           name: package-rhel
-          path: /tmp/${{ inputs.LINUX }}
+          path: /tmp/${{ inputs.LINUX }}-${{ inputs.ARCH }}
       # Remove existing packages
       - name: Remove existing package
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}.${{ inputs.PACKAGE }}
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

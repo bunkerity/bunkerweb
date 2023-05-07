@@ -2,6 +2,7 @@
 --name bunkerweb
 --license agpl3
 --version %VERSION%
+--architecture %ARCH%
 --depends bash --depends python3 --depends python3-pip --depends 'nginx = 1.24.0-1~jammy' --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends procps --depends lsof
 --description "BunkerWeb %VERSION% for Ubuntu 22.04"
 --url "https://www.bunkerweb.io"
@@ -10,4 +11,4 @@
 --after-install /usr/share/bunkerweb/scripts/postinstall.sh
 --after-remove /usr/share/bunkerweb/scripts/afterRemoveDEB.sh
 --deb-no-default-config-files
-/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /lib/systemd/system/bunkerweb.service=/lib/systemd/system/bunkerweb.service /lib/systemd/system/bunkerweb-ui.service=/lib/systemd/system/bunkerweb-ui.service /var/lib/bunkerweb=/var/lib/bunkerweb /etc/letsencrypt=/etc/letsencrypt
+/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /lib/systemd/system/bunkerweb.service=/lib/systemd/system/bunkerweb.service /lib/systemd/system/bunkerweb-ui.service=/lib/systemd/system/bunkerweb-ui.service /var/lib/bunkerweb=/var/lib/bunkerweb

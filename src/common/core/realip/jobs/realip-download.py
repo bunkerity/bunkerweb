@@ -64,8 +64,9 @@ try:
         logger.info("RealIP is not activated, skipping download...")
         _exit(0)
 
-    # Create directory if it doesn't exist
+    # Create directories if they don't exist
     Path("/var/cache/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
+    Path("/var/tmp/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
 
     db = Database(
         logger,
@@ -107,10 +108,10 @@ try:
                 f"Exception while getting RealIP list from {url} :\n{format_exc()}"
             )
 
-    Path("/var/tmp/bunkerweb/realip-combined.list").write_bytes(content)
+    Path("/var/tmp/bunkerweb/realip/combined.list").write_bytes(content)
 
     # Check if file has changed
-    new_hash = file_hash("/var/tmp/bunkerweb/realip-combined.list")
+    new_hash = file_hash("/var/tmp/bunkerweb/realip/combined.list")
     old_hash = cache_hash("/var/cache/bunkerweb/realip/combined.list", db)
     if new_hash == old_hash:
         logger.info("New file is identical to cache file, reload is not needed")

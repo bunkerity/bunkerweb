@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from os import getenv, makedirs
-from os.path import isfile
+from os import getenv
+from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -48,8 +48,10 @@ try:
 
     # Generate the self-signed certificate
     if need_default_cert:
-        makedirs("/var/cache/bunkerweb/default-server-cert", exist_ok=True)
-        if not isfile("/var/cache/bunkerweb/default-server-cert/cert.pem"):
+        Path("/var/cache/bunkerweb/default-server-cert").mkdir(
+            parents=True, exist_ok=True
+        )
+        if not Path("/var/cache/bunkerweb/default-server-cert/cert.pem").is_file():
             logger.info("Generating self-signed certificate for default server")
 
             cmd = "openssl req -nodes -x509 -newkey rsa:4096 -keyout /var/cache/bunkerweb/default-server-cert/cert.key -out /var/cache/bunkerweb/default-server-cert/cert.pem -days 3650".split(
@@ -63,6 +65,7 @@ try:
                 )
                 status = 2
             else:
+                status = 1
                 logger.info(
                     "Successfully generated self-signed certificate for default server",
                 )

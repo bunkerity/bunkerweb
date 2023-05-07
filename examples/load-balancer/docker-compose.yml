@@ -18,7 +18,7 @@ services:
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://app
       - |
-        CUSTOM_CONF_HTTP_upstream.conf=
+        CUSTOM_CONF_HTTP_upstream=
         upstream app {
           server app1:80;
           server app2:80;
