@@ -40,7 +40,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
 
 # Compile and install dependencies
 RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
-    pip3.9 install --no-cache-dir --upgrade pip && \
+    pip3.9 install --no-cache-dir --upgrade pip==20.2.4 && \
     pip3.9 install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
