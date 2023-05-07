@@ -19,13 +19,6 @@ on:
         required: false
         type: boolean
         default: false
-      ARM_SSH_KEY:
-        required: false
-      ARM_SSH_IP:
-        required: false
-      ARM_SSH_CONFIG:
-        required: false
-
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -35,6 +28,13 @@ on:
         required: true
       PRIVATE_REGISTRY_TOKEN:
         required: true
+      ARM_SSH_KEY:
+        required: false
+      ARM_SSH_IP:
+        required: false
+      ARM_SSH_CONFIG:
+        required: false
+
 
 jobs:
   build:
