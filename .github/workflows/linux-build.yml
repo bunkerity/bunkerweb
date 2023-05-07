@@ -35,7 +35,6 @@ on:
       ARM_SSH_CONFIG:
         required: false
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,6 +47,18 @@ jobs:
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
         env:
           PLATFORMS: ${{ inputs.PLATFORMS }}
+      - name: Extract linux arch
+        if: inputs.PACKAGE == 'rpm'
+        run : |
+          echo "LARCH=${{ env.ARCH }}" | sed 's/amd64/x86_64/g' | sed 's/arm64/aarch64/g' >> "$GITHUB_ENV"
+        env:
+          ARCH: ${{ env.ARCH }}
+      - name: Extract linux arch
+        if: inputs.PACKAGE == 'deb'
+        run : |
+          echo "LARCH=${{ env.ARCH }}" >> "$GITHUB_ENV"
+        env:
+          ARCH: ${{ env.ARCH }}
       - name: Setup SSH for ARM node
         if: startsWith(env.ARCH, 'arm') == true
         run: |
@@ -103,7 +114,16 @@ jobs:
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
       # Generate package
       - name: Generate package
-        run: ./src/linux/package.sh ${{ inputs.LINUX }}
+        if: startsWith(env.ARCH, 'arm') == false
+        run: ./src/linux/package.sh ${{ inputs.LINUX }} ${{ inputs.LARCH }}
+      - name: Generate package (ARM)
+        if: startsWith(env.ARCH, 'arm') == true
+        run: |
+          docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
+          scp ./src/linux/package.sh root@arm:/opt/package.sh
+          ssh root@arm chmod +x /opt/package.sh
+          ssh root@arm /opt/packages.sh ${{ inputs.LINUX }} ${{ inputs.LARCH }}
+          scp -r root@arm:/root/package-${{ inputs.LINUX }} ./package-${{ inputs.LINUX }}
       - uses: actions/upload-artifact@v3
         with:
           name: package-${{ inputs.LINUX }}-${{ env.ARCH }}
