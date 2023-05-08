@@ -96,7 +96,7 @@ jobs:
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, rhel]
-        platforms: [linux/amd64, linux/arm64, linux/arm/v7]
+        platforms: [linux/amd64, linux/arm64]
         include:
           - release: beta
           - linux: ubuntu
@@ -107,11 +107,6 @@ jobs:
             package: rpm
           - linux: rhel
             package: rpm
-        exclude:
-          - linux: fedora
-            platforms: linux/arm/v7
-          - linux: rhel
-            platforms: linux/arm/v7
     uses: ./.github/workflows/linux-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -183,7 +178,7 @@ jobs:
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el]
-        arch: [amd64, arm64, armv7]
+        arch: [amd64, arm64]
         include:
           - release: beta
             repo: bunkerweb
@@ -229,29 +224,19 @@ jobs:
             arch: arm64
             package_arch: aarch64
           - linux: el
-            arch: amd64
+            arch: arm64
             package_arch: aarch64
-          - linux: ubuntu
-            arch: armv7
-            package_arch: armhf
-          - linux: debian
-            arch: armv7
-            package_arch: armhf
-        exclude:
-          - linux: fedora
-            arch: armv7
-          - linux: el
-            arch: armv7
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}
       SUFFIX: ${{ matrix.suffix }}
       REPO: ${{ matrix.repo }}
       LINUX: ${{ matrix.linux }}
-      VERSION: ${{ matrix.separator }}
+      VERSION: ${{ matrix.version }}
       PACKAGE: ${{ matrix.package }}
-      BW_VERSION: ${{ $matrix.package == 'rpm' && needs.wait-builds.outputs.versionrpm || needs.wait-builds.outputs.version }}
+      BW_VERSION: ${{ matrix.package == 'rpm' && needs.wait-builds.outputs.versionrpm || needs.wait-builds.outputs.version }}
       PACKAGE_ARCH: ${{ matrix.package_arch }}
+      ARCH: ${{ matrix.arch }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 

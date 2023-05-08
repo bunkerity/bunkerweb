@@ -14,6 +14,7 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
   pip install --no-cache-dir --upgrade pip && \
   pip install wheel && \
   mkdir -p /usr/share/bunkerweb/deps/python && \
+  export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
   pip install --no-cache-dir gunicorn && \
   apk del .build-deps

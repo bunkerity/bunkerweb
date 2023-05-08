@@ -15,12 +15,17 @@ function do_and_check_cmd() {
 	return 0
 }
 
-# Check arg
+# Check args
 if [ "$1" = "" ] ; then
 	echo "❌ Missing distro arg"
 	exit 1
 fi
 linux="$1"
+if [ "$2" = "" ] ; then
+	echo "❌ Missing arch arg"
+	exit 1
+fi
+arch="$2"
 
 # Create empty directory
 package_dir="${PWD}/package-$linux"
@@ -30,15 +35,18 @@ fi
 do_and_check_cmd mkdir "$package_dir"
 
 # Generate package
-version="$(cat src/VERSION | tr -d '\n')"
+version="$3"
+if [ -f "src/VERSION" ] ; then
+	version="$(cat src/VERSION | tr -d '\n')"
+fi
 type="deb"
 if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
 	type="rpm"
 fi
 do_and_check_cmd docker run --rm -v "${package_dir}:/data" "local/bunkerweb-${linux}:latest" "$type"
-name="bunkerweb_${version}-1_amd64"
+name="bunkerweb_${version}-1_${arch}"
 if [ "$type" = "rpm" ] ; then
-	name="bunkerweb-${version}-1.x86_64"
+	name="bunkerweb-${version}-1.${arch}"
 fi
 do_and_check_cmd mv "${package_dir}/bunkerweb.$type" "${package_dir}/${name}.${type}"
 

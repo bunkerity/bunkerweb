@@ -51,13 +51,13 @@ jobs:
       - uses: actions/download-artifact@v3
         if: inputs.LINUX != 'el'
         with:
-          name: package-${{ inputs.LINUX }}-${{ inputs.ARCH }}
+          name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
       - uses: actions/download-artifact@v3
         if: inputs.LINUX == 'el'
         with:
-          name: package-rhel
-          path: /tmp/${{ inputs.LINUX }}-${{ inputs.ARCH }}
+          name: package-rhel-${{ inputs.PACKAGE_ARCH }}
+          path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
         run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}

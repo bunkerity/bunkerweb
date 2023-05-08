@@ -37,6 +37,7 @@ RUN apt update && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 # Copy files

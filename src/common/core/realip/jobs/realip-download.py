@@ -64,8 +64,9 @@ try:
         logger.info("RealIP is not activated, skipping download...")
         _exit(0)
 
-    # Create directory if it doesn't exist
+    # Create directories if they don't exist
     Path("/var/cache/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
+    Path("/var/tmp/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
 
     db = Database(
         logger,

@@ -26,7 +26,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     The security of the web UI is really important. If someone manages to gain access to the application, not only he will be able to edit your configurations but he could execute some code in the context of BunkerWeb (with a custom configuration containing LUA code for example). We highly recommend you to follow minimal security best practices like :
 
-    * Choose a strong password for the login
+    * Choose a strong password for the login (**at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char is required**)
     * Put the web UI under a "hard to guess" URI
     * Do not open the web UI on the Internet without any further restrictions
     * Apply settings listed in the [security tuning section](security-tuning.md) of the documentation

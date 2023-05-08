@@ -64,7 +64,9 @@ utils.has_variable = function(var, value)
 				return true, "success"
 			end
 		end
-		return false, "success"
+		if servers ~= "" then
+			return false, "success"
+		end
 	end
 	return check_value == value, "success"
 end
@@ -93,7 +95,9 @@ utils.has_not_variable = function(var, value)
 				return true, "success"
 			end
 		end
-		return false, "success"
+		if servers ~= "" then
+			return false, "success"
+		end
 	end
 	return check_value ~= value, "success"
 end

@@ -6,3 +6,6 @@ wordpressLastName: "LastName"
 wordpressBlogName: "User's Blog!"
 wordpressTablePrefix: "changeme_"
 wordpressScheme: "https"
+mariadb:
+  auth:
+    password: "changeme1337"

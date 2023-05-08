@@ -51,7 +51,7 @@ class IngressController(Controller, ConfigCaller):
             self.__logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
         else:
             for env in pod.env:
-                instance["env"][env.name] = env.value
+                instance["env"][env.name] = env.value or ""
         for controller_service in self._get_controller_services():
             if controller_service.metadata.annotations:
                 for (

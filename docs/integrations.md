@@ -813,7 +813,7 @@ spec:
   <figcaption>Linux integration</figcaption>
 </figure>
 
-List of supported Linux distros :
+List of supported Linux distros (amd64/x86_64 and arm64/aarch64 architectures) :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
@@ -1079,7 +1079,7 @@ BunkerWeb is managed using systemctl :
   <figcaption>Ansible integration</figcaption>
 </figure>
 
-List of supported Linux distros :
+List of supported Linux distros (amd64/x86_64 and arm64/aarch64 architectures) :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
