@@ -130,7 +130,7 @@ jobs:
           LARCH: ${{ env.LARCH }}
       - uses: actions/upload-artifact@v3
         with:
-          name: package-${{ inputs.LINUX }}-${{ env.ARCH }}
+          name: package-${{ inputs.LINUX }}-${{ env.LARCH }}
           path: package-${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Build test image
       - name: Build test image
