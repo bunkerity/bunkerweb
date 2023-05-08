@@ -22,6 +22,7 @@ def print_md_table(settings) -> MarkdownTableWriter:
     )
     return writer
 
+
 def stream_support(support) -> str:
     md = "STREAM support "
     if support == "no":
@@ -31,6 +32,7 @@ def stream_support(support) -> str:
     else:
         md += ":warning:"
     return md
+
 
 doc = StringIO()
 
@@ -72,7 +74,7 @@ for name, data in dict(sorted(core_settings.items())).items():
     print(f"### {data['name']}\n", file=doc)
     print(f"{stream_support(data['stream'])}\n", file=doc)
     print(f"{data['description']}\n", file=doc)
-    print(print_md_table(data['settings']), file=doc)
+    print(print_md_table(data["settings"]), file=doc)
 
 doc.seek(0)
 content = doc.read()

@@ -19,7 +19,7 @@
         <link rel="next" href="../quickstart-guide/">
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.8">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.9">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ded33207.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.85bb2934.min.css">
       
       
 
@@ -1191,6 +1191,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="w">        </span><span class="nt">bunkerweb.io/INSTANCE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># using bunkerweb as name is mandatory</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.5.0-beta</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
@@ -1431,11 +1432,11 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
   </p>
 <figcaption>Linux integration</figcaption>
 </figure>
-<p>List of supported Linux distros :</p>
+<p>List of supported Linux distros (amd64/x86_64 and arm64/aarch64 architectures) :</p>
 <ul>
 <li>Debian 11 "Bullseye"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
-<li>Fedora 37</li>
+<li>Fedora 38</li>
 <li>RedHat Enterprise Linux (RHEL) 8.7</li>
 </ul>
 <p>Please note that you will need to <strong>install NGINX 1.24.0 before BunkerWeb</strong>. For all distros, except Fedora, using prebuilt packages from <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a> is mandatory. Compiling NGINX from source or using packages from different repositories won't work with the official prebuilt packages of BunkerWeb but you can build it from source.</p>
@@ -1639,12 +1640,11 @@ MY_SETTING_2=value2
   </p>
 <figcaption>Ansible integration</figcaption>
 </figure>
-<p>List of supported Linux distros :</p>
+<p>List of supported Linux distros (amd64/x86_64 and arm64/aarch64 architectures) :</p>
 <ul>
 <li>Debian 11 "Bullseye"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
-<li>Fedora 37</li>
-<li>CentOS Stream 8</li>
+<li>Fedora 38</li>
 <li>RedHat Enterprise Linux (RHEL) 8.7</li>
 </ul>
 <p><a href="https://docs.ansible.com/ansible/latest/index.html">Ansible</a> is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.</p>
@@ -1904,7 +1904,7 @@ end
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.51198bba.min.js"></script>
+      <script src="../assets/javascripts/bundle.fac441b0.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
