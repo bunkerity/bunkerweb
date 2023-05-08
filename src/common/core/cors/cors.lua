@@ -1,8 +1,8 @@
-local class		= require "middleclass"
-local plugin	= require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
+local class  = require "middleclass"
+local plugin = require "bunkerweb.plugin"
+local utils  = require "bunkerweb.utils"
 
-local cors		= class("cors", plugin)
+local cors   = class("cors", plugin)
 
 function cors:initialize()
 	-- Call parent initialize
@@ -31,9 +31,21 @@ function cors:header()
 	end
 	ngx.header["Content-Type"] = "text/html"
 	ngx.header["Content-Length"] = "0"
-	
-	-- Send CORS policy with a 204 (no content) status
+
 	return self:ret(true, "sent CORS policy")
+end
+
+function cors:access()
+	-- Check if access is needed
+	if self.variables["USE_CORS"] ~= "yes" then
+		return self:ret(true, "service doesn't use CORS")
+	end
+	if ngx.ctx.bw.request_method ~= "OPTIONS" then
+		return self:ret(true, "method is not OPTIONS")
+	end
+
+	-- Send CORS policy with a 204 (no content) status
+	return self:ret(true, "sent CORS policy", ngx.HTTP_NO_CONTENT)
 end
 
 return cors
