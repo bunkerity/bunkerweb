@@ -35,7 +35,10 @@ fi
 do_and_check_cmd mkdir "$package_dir"
 
 # Generate package
-version="$(cat src/VERSION | tr -d '\n')"
+version="$3"
+if [ -f "src/VERSION" ] ; then
+	version="$(cat src/VERSION | tr -d '\n')"
+fi
 type="deb"
 if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
 	type="rpm"
