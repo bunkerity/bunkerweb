@@ -345,9 +345,9 @@ soupsieve==2.4.1 \
     --hash=sha256:1c1bfee6819544a3447586c889157365a27e10d88cde3ad3da0cf0ddf646feb8 \
     --hash=sha256:89d12b2d5dfcd2c9e8c22326da9d9aa9cb3dfab0a83a024f05704076ee8d35ea
     # via beautifulsoup4
-werkzeug==2.3.3 \
-    --hash=sha256:4866679a0722de00796a74086238bb3b98d90f423f05de039abb09315487254a \
-    --hash=sha256:a987caf1092edc7523edb139edb20c70571c4a8d5eed02e0b547b4739174d091
+werkzeug==2.3.4 \
+    --hash=sha256:1d5a58e0377d1fe39d061a5de4469e414e78ccb1e1e59c0f5ad6fa1c36c52b76 \
+    --hash=sha256:48e5e61472fee0ddee27ebad085614ebedb7af41e88f687aaf881afb723a162f
     # via
     #   flask
     #   flask-login

@@ -95,9 +95,9 @@ charset-normalizer==3.1.0 \
     --hash=sha256:f8303414c7b03f794347ad062c0516cee0e15f7a612abd0ce1e25caf6ceb47df \
     --hash=sha256:fca62a8301b605b954ad2e9c3666f9d97f63872aa4efcae5492baca2056b74ab
     # via requests
-docker==6.1.0 \
-    --hash=sha256:b65c999f87cb5c31700b6944dc17a631071170d1aab3ad6e23506068579f885d \
-    --hash=sha256:cb697eccfeff55d232f7a7f4f88cd3770d27327c38d6c266b8f55c9f14a8491e
+docker==6.1.1 \
+    --hash=sha256:5ec18b9c49d48ee145a5b5824bb126dc32fc77931e18444783fc07a7724badc0 \
+    --hash=sha256:8308b23d3d0982c74f7aa0a3abd774898c0c4fba006e9c3bde4f68354e470fe2
     # via -r requirements.in
 google-auth==2.17.3 \
     --hash=sha256:ce311e2bc58b130fddf316df57c9b3943c2a7b4f6ec31de9663a9333e4064efc \
@@ -235,9 +235,9 @@ pyyaml==6.0 \
     --hash=sha256:e61ceaab6f49fb8bdfaa0f92c4b57bcfbea54c09277b1b4f7ac376bfb7a7c174 \
     --hash=sha256:f84fbc98b019fef2ee9a1cb3ce93e3187a6df0b2538a651bfb890254ba9f90b5
     # via kubernetes
-redis==4.5.4 \
-    --hash=sha256:2c19e6767c474f2e85167909061d525ed65bea9301c0770bb151e041b7ac89a2 \
-    --hash=sha256:73ec35da4da267d6847e47f68730fdd5f62e2ca69e3ef5885c6a78a9374c3893
+redis==4.5.5 \
+    --hash=sha256:77929bc7f5dab9adf3acba2d3bb7d7658f1e0c2f1cafe7eb36434e751c471119 \
+    --hash=sha256:dc87a0bdef6c8bfe1ef1e1c40be7034390c2ae02d92dcd0c7ca1729443899880
     # via -r requirements.in
 requests==2.30.0 \
     --hash=sha256:10e94cc4f3121ee6da529d358cdaeaff2f1c409cd377dbc72b825852f2f7e294 \
