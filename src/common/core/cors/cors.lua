@@ -33,8 +33,10 @@ function cors:header()
 	-- Preflight request
 	if ngx.ctx.bw.request_method == "OPTIONS" then
 		for variable, header in pairs(self.preflight_headers) do
-			if variable == "CORS_ALLOW_CREDENTIALS" and self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
-				ngx.header[header] = "true"
+			if variable == "CORS_ALLOW_CREDENTIALS" then
+				if self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
+					ngx.header[header] = "true"
+				end
 			elseif self.variables[variable] ~= "" then
 				ngx.header[header] = self.variables[variable]
 			end
