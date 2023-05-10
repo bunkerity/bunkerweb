@@ -366,7 +366,10 @@ class Database:
                         .all()
                     )
                     db_ids = [service.id for service in db_services]
-                    services = config.get("SERVER_NAME", "").split(" ")
+                    services = config.pop("SERVER_NAME", [])
+
+                    if isinstance(services, str):
+                        services = services.split(" ")
 
                     if db_services:
                         missing_ids = [
@@ -376,13 +379,14 @@ class Database:
                         ]
 
                         if missing_ids:
-                            # Remove plugins that are no longer in the list
+                            # Remove services that are no longer in the list
                             session.query(Services).filter(
                                 Services.id.in_(missing_ids)
                             ).delete()
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
+                        original_key = deepcopy(key)
                         if self.suffix_rx.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
@@ -475,8 +479,8 @@ class Database:
                                         Services_settings.method: method,
                                     }
                                 )
-                        elif f"{key}_{suffix}" not in global_values:
-                            global_values.append(f"{key}_{suffix}")
+                        elif setting and original_key not in global_values:
+                            global_values.append(original_key)
                             global_value = (
                                 session.query(Global_values)
                                 .with_entities(
@@ -488,9 +492,6 @@ class Database:
                                 )
                                 .first()
                             )
-
-                            if not setting:
-                                continue
 
                             if global_value is None:
                                 if value == setting.default or (
@@ -569,11 +570,6 @@ class Database:
                         )
 
                         if global_value is None:
-                            if value == setting.default or (
-                                not value.strip() and setting.default is None
-                            ):
-                                continue
-
                             to_put.append(
                                 Global_values(
                                     setting_id=key,
@@ -627,12 +623,6 @@ class Database:
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
-                # config = {
-                #     "data": custom_config["value"].replace("\\\n", "\n").encode("utf-8")
-                #     if isinstance(custom_config["value"], str)
-                #     else custom_config["value"].replace(b"\\\n", b"\n"),
-                #     "method": method,
-                # }
                 config = {
                     "data": custom_config["value"].encode("utf-8")
                     if isinstance(custom_config["value"], str)
@@ -805,6 +795,11 @@ class Database:
                                 "method": service_setting.method,
                             }
                         )
+
+            servers = " ".join(service.id for service in session.query(Services).all())
+            config["SERVER_NAME"] = (
+                servers if methods is False else {"value": servers, "method": "default"}
+            )
 
             return config
 
