@@ -21,32 +21,6 @@ class Config:
 
         self.__db = db
 
-    def __env_to_dict(self, filename: str) -> dict:
-        """Converts the content of an env file into a dict
-
-        Parameters
-        ----------
-        filename : str
-            the path to the file to convert to dict
-
-        Returns
-        -------
-        dict
-            The values of the file converted to dict
-        """
-        if not Path(filename).is_file():
-            return {}
-
-        data = {}
-        for line in Path(filename).read_text().split("\n"):
-            if not "=" in line:
-                continue
-            var = line.split("=")[0]
-            val = line.replace(f"{var}=", "", 1)
-            data[var] = val
-
-        return data
-
     def __dict_to_env(self, filename: str, variables: dict) -> None:
         """Converts the content of a dict into an env file
 
