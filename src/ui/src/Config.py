@@ -125,12 +125,10 @@ class Config:
 
             if with_data:
                 plugin_content = BytesIO()
-                with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
-                    tar.add(
-                        foldername,
-                        arcname=basename(foldername),
-                        recursive=True,
-                    )
+                with tar_open(
+                    fileobj=plugin_content, mode="w:gz", compresslevel=9
+                ) as tar:
+                    tar.add(foldername, arcname=basename(foldername), recursive=True)
                 plugin_content.seek(0)
                 value = plugin_content.getvalue()
 

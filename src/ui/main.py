@@ -804,7 +804,9 @@ def plugins():
 
                                     plugin_content = BytesIO()
                                     with tar_open(
-                                        fileobj=plugin_content, mode="w:gz"
+                                        fileobj=plugin_content,
+                                        mode="w:gz",
+                                        compresslevel=9,
                                     ) as tar:
                                         tar.add(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
@@ -888,7 +890,9 @@ def plugins():
 
                                     plugin_content = BytesIO()
                                     with tar_open(
-                                        fileobj=plugin_content, mode="w:gz"
+                                        fileobj=plugin_content,
+                                        mode="w:gz",
+                                        compresslevel=9,
                                     ) as tar:
                                         tar.add(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
@@ -956,7 +960,9 @@ def plugins():
 
                                     plugin_content = BytesIO()
                                     with tar_open(
-                                        fileobj=plugin_content, mode="w:gz"
+                                        fileobj=plugin_content,
+                                        mode="w:gz",
+                                        compresslevel=9,
                                     ) as tar:
                                         tar.add(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
@@ -1040,7 +1046,9 @@ def plugins():
 
                                     plugin_content = BytesIO()
                                     with tar_open(
-                                        fileobj=plugin_content, mode="w:gz"
+                                        fileobj=plugin_content,
+                                        mode="w:gz",
+                                        compresslevel=9,
                                     ) as tar:
                                         tar.add(
                                             f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
