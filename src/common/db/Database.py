@@ -570,6 +570,11 @@ class Database:
                         )
 
                         if global_value is None:
+                            if value == setting.default or (
+                                not value.strip() and setting.default is None
+                            ):
+                                continue
+
                             to_put.append(
                                 Global_values(
                                     setting_id=key,
@@ -960,6 +965,9 @@ class Database:
                         Plugins.name,
                         Plugins.description,
                         Plugins.version,
+                        Plugins.method,
+                        Plugins.data,
+                        Plugins.checksum,
                         Plugins.external,
                     )
                     .filter_by(id=plugin["id"])
