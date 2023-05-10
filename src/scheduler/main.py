@@ -511,6 +511,9 @@ if __name__ == "__main__":
 
                 # check if the config have changed since last time
                 tmp_env = db.get_config()
+                tmp_env["DATABASE_URI"] = environ.get(
+                    "DATABASE_URI", tmp_env["DATABASE_URI"]
+                )
                 if env != tmp_env:
                     logger.info("Config changed, generating ...")
                     logger.debug(f"{tmp_env=}")
