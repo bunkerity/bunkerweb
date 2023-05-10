@@ -105,17 +105,17 @@ jobs:
     strategy:
       matrix:
         type: [docker, autoconf, swarm, k8s, linux]
-      include:
-        - type: docker
-          runs_on: "['self-hosted', 'bw-docker']"
-        - type: autoconf
-          runs_on: "['self-hosted', 'bw-autoconf']"
-        - type: swarm
-          runs_on: "['self-hosted', 'bw-swarm']"
-        - type: k8s
-          runs_on: "['ubuntu-latest']"
-        - type: linux
-          runs_on: "['self-hosted', 'bw-linux']"
+        include:
+          - type: docker
+            runs_on: "['self-hosted', 'bw-docker']"
+          - type: autoconf
+            runs_on: "['self-hosted', 'bw-autoconf']"
+          - type: swarm
+            runs_on: "['self-hosted', 'bw-swarm']"
+          - type: k8s
+            runs_on: "['ubuntu-latest']"
+          - type: linux
+            runs_on: "['self-hosted', 'bw-linux']"
     uses: ./.github/workflows/staging-tests.yml
     with:
       TYPE: ${{ matrix.type }}
@@ -133,7 +133,7 @@ jobs:
   # Delete infrastructures
   delete-infras:
     if: ${{ always() }}
-    needs: [create-infras]
+    needs: [staging-tests]
     strategy:
       matrix:
         type: [docker, autoconf, swarm, k8s, linux]

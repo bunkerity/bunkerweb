@@ -8,3 +8,6 @@ prestashopCountry: "us"
 prestashopLanguage: "en"
 service:
   type: ClusterIP
+mariadb:
+  auth:
+    password: "changeme1337"

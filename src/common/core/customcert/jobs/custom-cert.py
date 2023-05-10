@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from os import getenv
+from os.path import basename
 from pathlib import Path
 from shutil import copy
 from sys import exit as sys_exit, path as sys_path
@@ -85,7 +86,7 @@ def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
                 err = db.update_job_cache(
                     "custom-cert",
                     first_server,
-                    key_cache_path.replace(".hash", "").split("/")[-1],
+                    basename(key_cache_path.replace(".hash", "")),
                     Path(key_path).read_bytes(),
                     checksum=key_hash,
                 )
@@ -99,7 +100,7 @@ def check_cert(cert_path, key_path, first_server: Optional[str] = None) -> bool:
             err = db.update_job_cache(
                 "custom-cert",
                 first_server,
-                cert_cache_path.replace(".hash", "").split("/")[-1],
+                basename(cert_cache_path.replace(".hash", "")),
                 Path(cert_path).read_bytes(),
                 checksum=cert_hash,
             )

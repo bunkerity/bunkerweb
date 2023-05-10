@@ -92,7 +92,7 @@ function country:preread()
 end
 
 function country:is_in_cache(ip)
-	local ok, data = self.cachestore:get("plugin_country_cache_" .. ip)
+	local ok, data = self.cachestore:get("plugin_country_cache_" .. ngx.ctx.bw.server_name .. ip)
 	if not ok then
 		return false, data
 	end 
@@ -100,7 +100,7 @@ function country:is_in_cache(ip)
 end
 
 function country:add_to_cache(ip, country, result)
-	local ok, err = self.cachestore:set("plugin_country_cache_" .. ip, cjson.encode({country = country, result = result}), 86400)
+	local ok, err = self.cachestore:set("plugin_country_cache_" .. ngx.ctx.bw.server_name .. ip, cjson.encode({country = country, result = result}), 86400)
 	if not ok then
 		return false, err
 	end 
