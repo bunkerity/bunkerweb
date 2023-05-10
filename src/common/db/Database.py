@@ -569,6 +569,11 @@ class Database:
                         )
 
                         if global_value is None:
+                            if value == setting.default or (
+                                not value.strip() and setting.default is None
+                            ):
+                                continue
+
                             to_put.append(
                                 Global_values(
                                     setting_id=key,
