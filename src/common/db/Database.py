@@ -546,6 +546,8 @@ class Database:
                             )
                         )
 
+                    config.pop("SERVER_NAME")
+
                     for key, value in config.items():
                         suffix = 0
                         if self.suffix_rx.search(key):
