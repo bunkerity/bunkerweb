@@ -151,6 +151,7 @@ class ServiceModal {
       //for all other settings values
       const defaultMethod = inp.getAttribute("data-default-method");
       const defaultVal = inp.getAttribute("data-default-value");
+      const defaultGlobal = inp.getAttribute("data-default-global");
 
       //SET VALUE
       if (inp.getAttribute("type") === "checkbox") {
@@ -169,13 +170,15 @@ class ServiceModal {
       }
 
       //SET METHOD
-      this.setDisabled(inp, defaultMethod);
+      this.setDisabled(inp, defaultMethod, defaultGlobal);
     });
 
     const selects = this.modal.querySelectorAll("select");
     selects.forEach((select) => {
-      const defaultMethod = "default";
-      const defaultVal = select.getAttribute("data-default-value") || "";
+      //for all other settings values
+      const defaultMethod = select.getAttribute("data-default-method");
+      const defaultVal = select.getAttribute("data-default-value");
+      const defaultGlobal = select.getAttribute("data-default-global");
 
       document
         .querySelector(
@@ -191,15 +194,18 @@ class ServiceModal {
         )
         .click();
 
-      this.setDisabled(select, defaultMethod);
+      this.setDisabled(select, defaultMethod, defaultGlobal);
     });
   }
 
-  setDisabled(inp, method) {
+  setDisabled(inp, method, global) {
+    console.log(inp, method, global);
+    if (global === "true") return inp.removeAttribute("disabled");
+
     if (method === "ui" || method === "default") {
-      inp.removeAttribute("disabled");
+      return inp.removeAttribute("disabled");
     } else {
-      inp.setAttribute("disabled", "");
+      return inp.setAttribute("disabled", "");
     }
   }
 
@@ -285,6 +291,7 @@ class ServiceModal {
         inps.forEach((inp) => {
           //form related values are excludes
           const inpName = inp.getAttribute("name");
+          const inpGlobal = inp.getAttribute("data-default-global");
           if (
             inpName === "csrf_token" ||
             inpName === "OLD_SERVER_NAME" ||
@@ -326,7 +333,7 @@ class ServiceModal {
           }
 
           //check disabled/enabled after setting values and methods
-          this.setDisabled(inp, method);
+          this.setDisabled(inp, method, inpGlobal);
         });
       } catch (err) {}
     }
@@ -385,6 +392,7 @@ class Multiple {
           const sortMultiples =
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
           this.setMultipleToDOM(sortMultiples);
+          this.setDisabledMult();
         }
       } catch (err) {}
       //new button
@@ -440,7 +448,7 @@ class Multiple {
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
           this.changeCloneSuffix(schemaClone, setNum);
-          this.setDisabled();
+          this.setDisabledMult();
           this.showClone(schema, schemaClone);
           //insert new group before first one
           //show all groups
@@ -618,7 +626,7 @@ class Multiple {
     }
 
     //disabled after update values and method
-    this.setDisabled();
+    this.setDisabledMult();
   }
 
   changeCloneSuffix(schemaCtnrClone, suffix) {
@@ -737,7 +745,7 @@ class Multiple {
     schemaCtnrClone.classList.add("grid");
   }
 
-  setDisabled() {
+  setDisabledMult() {
     const multipleCtnr = document.querySelectorAll(
       "[data-services-settings-multiple]"
     );
@@ -749,7 +757,10 @@ class Multiple {
         try {
           const inps = setting.querySelectorAll("input");
           inps.forEach((inp) => {
-            const method = inp.getAttribute("data-method") || "default";
+            const global = inp.getAttribute("data-default-method");
+            if (global === "true") return inp.removeAttribute("disabled");
+
+            const method = inp.getAttribute("data-default-method");
             if (method === "ui" || method === "default") {
               inp.removeAttribute("disabled");
             } else {
@@ -761,15 +772,20 @@ class Multiple {
         try {
           const selects = setting.querySelectorAll("select");
           selects.forEach((select) => {
-            const method = select.getAttribute("data-method") || "default";
+            //get el
             const name = select.getAttribute(
               "data-services-setting-select-default"
             );
             const selDOM = document.querySelector(
               `button[data-services-setting-select='${name}']`
             );
+            //logic
+            const method = select.getAttribute("data-default-method");
+            const global = inp.getAttribute("data-default-method");
+            if (global === "true") return selDOM.removeAttribute("disabled");
+
             if (method === "ui" || method === "default") {
-              selDOM.removeAttribute("disabled", "");
+              selDOM.removeAttribute("disabled");
             } else {
               selDOM.setAttribute("disabled", "");
             }

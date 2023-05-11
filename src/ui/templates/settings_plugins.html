@@ -65,7 +65,9 @@ data-plugin-item="{{plugin['id']}}"
       <div class="relative flex items-center">
         <input
         {% if setting == "SERVER_NAME" %}required{%endif%}
-        data-default-value="{{global_config[setting]['value']}}" data-default-method="{{global_config[setting]['method']}}"
+        data-default-value="{{global_config[setting]['value']}}" 
+        data-default-method="{{global_config[setting]['method']}}"
+        data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}     id="{{setting}}" name="{{setting}}"
         class="regular-input"
         value="{% if global_config[setting]['value'] %} {{global_config[setting]['value']}} {% else %} {{value['default']}} {% endif %}" type="{{value['type']}}"  pattern="{{value['regex']|safe}}" />
@@ -88,7 +90,10 @@ data-plugin-item="{{plugin['id']}}"
       <!-- select -->
       {% if value["type"] == "select" %}
       <!-- default hidden-->
-      <select  data-default-method="{{global_config[setting]['method']}}"    data-default-value="{{value['default']}}"
+      <select  
+      data-default-method="{{global_config[setting]['method']}}"    
+      data-default-value="{{value['default']}}"
+      data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
         id="{{setting}}" name="{{setting}}" data-setting-select-default="{{value['id']}}" data-type="form-select" id="{{setting}}" name="{{setting}}"
           class="hidden">
           {% for item in value['select'] %}
@@ -102,7 +107,9 @@ data-plugin-item="{{plugin['id']}}"
         <button
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}    data-setting-select="{{value['id']}}"
         data-default-value="{{global_config[setting]['value']}}"
-        data-default-method="{{global_config[setting]['method']}}" 
+        data-default-method="{{global_config[setting]['method']}}"
+        data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
+ 
           type="button"
           class="custom-select-btn"
           >
@@ -173,6 +180,8 @@ data-plugin-item="{{plugin['id']}}"
         <input  id="{{setting}}" name="{{setting}}"
         data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}}{% endif %}"
         data-default-value="{{global_config[setting]['value']}}" 
+        data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
+
         
         {% if
         setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
@@ -280,7 +289,12 @@ data-plugin-item="{{plugin['id']}}"
       {% if value["type"] != "select" and value["type"] != "check" %}
       <div class="relative flex items-center">
         <input
-        data-default-value="{{value['default']}}" data-default-method="default" id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
+        data-default-value="{{value['default']}}" 
+        data-default-method="default" 
+        data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
+
+        id="{{setting}}_SCHEMA" 
+        name="{{setting}}_SCHEMA"
         class="regular-input"
         value="{{value['default']}}" type="{{value['type']}}"  pattern="{{value['regex']|safe}}" />
      
@@ -301,7 +315,11 @@ data-plugin-item="{{plugin['id']}}"
       <!-- select -->
       {% if value["type"] == "select" %}
       <!-- default hidden-->
-      <select  data-default-method="default"    data-default-value="{{value['default']}}"
+      <select  
+      data-default-method="default"    
+      data-default-value="{{value['default']}}"
+      data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
+
         id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA" data-select-default="{{value['id']}}" data-type="form-select" id="{{setting}}" name="{{setting}}"
           class="hidden">
           {% for item in value['select'] %}
@@ -315,6 +333,8 @@ data-plugin-item="{{plugin['id']}}"
         <button
         data-setting-select="{{value['id']}}"
         data-default-value="{{value['default']}}"
+        data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
+
           type="button"
           class="custom-select-btn"
           >
@@ -375,6 +395,7 @@ data-plugin-item="{{plugin['id']}}"
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         data-default-method="default"
+        data-default-global="{% if global_config[setting]['global'] == True %}true{% else %}false{%endif%}"
         data-default-value="{{value['default']}}" {% if value['default'] == 'yes' %} checked {%
         endif %} id="checkbox-{{value['id']}}" 
         class="checkbox" type="checkbox" data-pattern="{{value['regex']|safe}}"
