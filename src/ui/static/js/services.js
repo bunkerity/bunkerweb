@@ -174,7 +174,7 @@ class ServiceModal {
 
     const selects = this.modal.querySelectorAll("select");
     selects.forEach((select) => {
-      const defaultMethod = "default";
+      const defaultMethod = select.getAttribute("data-default-method");
       const defaultVal = select.getAttribute("data-default-value");
       //click the custom select dropdown to update select value
       select.parentElement
@@ -762,7 +762,7 @@ class Multiple {
       try {
         const inps = setting.querySelectorAll("input");
         inps.forEach((inp) => {
-          const method = inp.getAttribute("data-method") || "default";
+          const method = inp.getAttribute("data-default-method");
           if (method === "ui" || method === "default") {
             inp.removeAttribute("disabled");
           } else {
@@ -774,7 +774,7 @@ class Multiple {
       try {
         const selects = setting.querySelectorAll("select");
         selects.forEach((select) => {
-          const method = select.getAttribute("data-method") || "default";
+          const method = select.getAttribute("data-default-method");
           const name = select.getAttribute(
             "data-services-setting-select-default"
           );
