@@ -588,6 +588,7 @@ class Multiple {
           multiples[key] = {
             value: data["value"],
             method: data["method"],
+            global: data["global"],
           };
         }
       }
@@ -794,7 +795,6 @@ class Multiple {
   //for already existing services multiples
   //global is check
   setDisabledMultServ(inp, method, global) {
-    console.log(global);
     if (global) return inp.removeAttribute("disabled");
 
     if (method === "ui" || method === "default") {
