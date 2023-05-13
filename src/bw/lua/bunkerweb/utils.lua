@@ -383,7 +383,7 @@ utils.get_ips = function(fqdn)
 	local ips = {}
 	for i, answer in ipairs(answers) do
 		if answer.address then
-			table.insert(ips, answer.addres)
+			table.insert(ips, answer.address)
 		end
 	end
 	return ips, "success"

@@ -22,6 +22,7 @@ function blacklist:initialize()
 		local lists, err = self.datastore:get("plugin_blacklist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
+			self.lists = {}
 		else
 			self.lists = cjson.decode(lists)
 		end
@@ -39,6 +40,9 @@ function blacklist:initialize()
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
+				if not self.lists[kind] then
+					self.lists[kind] = {}
+				end
 				table.insert(self.lists[kind], data)
 			end
 		end
@@ -116,7 +120,7 @@ function blacklist:access()
 		elseif cached and cached ~= "ok" then
 			return self:ret(true, k .. " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status())
 		end
-		if cached then
+		if ok and cached then
 			already_cached[k] = true
 		end
 	end

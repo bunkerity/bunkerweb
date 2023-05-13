@@ -141,12 +141,12 @@ api.global.GET["^/bans$"] = function(self)
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
 					"can't access " .. k .. " from datastore : " + reason)
 			end
-			local ttl, err = self.datastore:ttl(k)
-			if not ttl then
+			local ok, ttl = self.datastore:ttl(k)
+			if not ok then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access ttl " .. k .. " from datastore : " .. err)
+					"can't access ttl " .. k .. " from datastore : " .. ttl)
 			end
-			local ban = { ip = k:sub(9, #k), reason = reason, exp = ttl }
+			local ban = { ip = k:sub(9, #k), reason = reason, exp = math.floor(ttl) }
 			table.insert(data, ban)
 		end
 	end

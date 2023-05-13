@@ -23,6 +23,7 @@ function whitelist:initialize()
 		local lists, err = self.datastore:get("plugin_whitelist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
+			self.lists = {}
 		else
 			self.lists = cjson.decode(lists)
 		end
@@ -35,6 +36,9 @@ function whitelist:initialize()
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
+				if not self.lists[kind] then
+					self.lists[kind] = {}
+				end
 				table.insert(self.lists[kind], data)
 			end
 		end
@@ -166,7 +170,7 @@ function whitelist:check_cache()
 		checks["URI"] = "uri" .. ngx.ctx.bw.uri
 	end
 	local already_cached = {}
-	for i, k in ipairs(checks) do
+	for k, v in pairs(checks) do
 		already_cached[k] = false
 	end
 	for k, v in pairs(checks) do
@@ -176,7 +180,7 @@ function whitelist:check_cache()
 		elseif cached and cached ~= "ok" then
 			return true, k .. " is in cached whitelist (info : " .. cached .. ")"
 		end
-		if cached then
+		if ok and cached then
 			already_cached[k] = true
 		end
 	end

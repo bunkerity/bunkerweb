@@ -21,6 +21,7 @@ function greylist:initialize()
 		local lists, err = self.datastore:get("plugin_greylist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
+			self.lists = {}
 		else
 			self.lists = cjson.decode(lists)
 		end
@@ -33,6 +34,9 @@ function greylist:initialize()
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["GREYLIST_" .. kind]:gmatch("%S+") do
+				if not self.lists[kind] then
+					self.lists[kind] = {}
+				end
 				table.insert(self.lists[kind], data)
 			end
 		end
@@ -98,13 +102,13 @@ function greylist:access()
 		["UA"] = false
 	}
 	for k, v in pairs(checks) do
-		local cached, err = self:is_in_cache(v)
-		if not cached and err ~= "success" then
-			self.logger:log(ngx.ERR, "error while checking cache : " .. err)
-		elseif cached and cached ~= "ok" then
-			return self:ret(true, k .. " is in cached greylist", utils.get_deny_status())
+		local ok, cached = self:is_in_cache(v)
+		if not ok then
+			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
+		elseif cached and cached ~= "ko" then
+			return self:ret(true, k .. " is in cached greylist (info : " .. cached .. ")")
 		end
-		if cached then
+		if ok and cached then
 			already_cached[k] = true
 		end
 	end
@@ -115,23 +119,23 @@ function greylist:access()
 	-- Perform checks
 	for k, v in pairs(checks) do
 		if not already_cached[k] then
-			local greylisted, err = self:is_greylisted(k)
-			if greylisted == nil then
-				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is greylisted : " .. err)
+			local ok, greylisted = self:is_greylisted(k)
+			if ok == nil then
+				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is greylisted : " .. greylisted)
 			else
-				local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted or "ok")
+				local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
-				if greylisted == "ko" then
-					return self:ret(true, k .. " is not in greylist", utils.get_deny_status())
+				if greylisted ~= "ko" then
+					return self:ret(true, k .. " is in greylist")
 				end
 			end
 		end
 	end
 
 	-- Return
-	return self:ret(true, "greylisted")
+	return self:ret(true, "not in greylist", utils.get_deny_status())
 end
 
 function greylist:preread()
