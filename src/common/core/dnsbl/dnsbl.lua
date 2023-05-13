@@ -85,7 +85,7 @@ end
 
 function dnsbl:is_in_dnsbl(ip, server)
 	local request = resolver.arpa_str(ip):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
-	local ips, err = utils.get_ips(request)
+	local ips, err = utils.get_ips(request, false)
 	if not ips then
 		return nil, err
 	end

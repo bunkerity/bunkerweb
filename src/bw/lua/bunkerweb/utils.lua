@@ -345,48 +345,77 @@ utils.get_rdns = function(ip)
 		return false, err
 	end
 	if answers.errcode then
-		return false, answers.errstr
+		return {}, answers.errstr
 	end
-	-- Return first element
+	-- Return all PTR
+	local ptrs = {}
 	for i, answer in ipairs(answers) do
 		if answer.ptrdname then
-			return answer.ptrdname, "success"
+			table.insert(ptrs, answer.ptrdname)
 		end
 	end
-	return false, nil
+	return ptrs, "success"
 end
 
-utils.get_ips = function(fqdn)
+utils.get_ips = function(fqdn, ipv6)
+	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
+	if ipv6 == nil then
+		ipv6 = true
+	end
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
 	if not resolvers then
 		return false, err
 	end
 	-- Instantiante resolver
-	local rdns, err = resolver:new {
+	local res, err = resolver:new {
 		nameservers = resolvers,
 		retrans = 1,
 		timeout = 1000
 	}
-	if not rdns then
+	if not res then
 		return false, err
 	end
-	-- Query FQDN
-	local answers, err = rdns:query(fqdn, nil, {})
-	if not answers then
-		return false, err
+	-- Get query types : AAAA and A if using IPv6 / only A if not using IPv6
+	local qtypes = {}
+	if ipv6 then
+		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
+		if not use_ipv6 then
+			logger:log(ngx.ERR, "can't get USE_IPV6 variable " .. err)
+		elseif use_ipv6 == "yes" then
+			table.insert(qtypes, res.TYPE_AAAA)
+		end
 	end
-	if answers.errcode then
-		return {}, answers.errstr
+	table.insert(qtypes, res.TYPE_A)
+	-- Loop on qtypes
+	local res_answers = {}
+	local res_errors = {}
+	local ans_errors = {}
+	for i, qtype in ipairs(qtypes) do
+		-- Query FQDN
+		local answers, err = res:query(fqdn, { qtype = qtype }, {})
+		local qtype_str = qtype == res.TYPE_AAAA and "AAAA" or "A"
+		if not answers then
+			res_errors[qtype_str] = err
+		elseif answers.errcode then
+			ans_errors[qtype_str] = answers.errstr
+		else
+			table.insert(res_answers, answers)
+		end
+	end
+	if #res_errors == #qtypes then
+		return false, cjson.encode(res_errors)
 	end
 	-- Return all IPs
 	local ips = {}
-	for i, answer in ipairs(answers) do
-		if answer.address then
-			table.insert(ips, answer.address)
+	for i, answers in ipairs(res_answers) do
+		for j, answer in ipairs(answers) do
+			if answer.address then
+				table.insert(ips, answer.address)
+			end
 		end
 	end
-	return ips, "success"
+	return ips, cjson.encode(res_errors) .. " " .. cjson.encode(ans_errors)
 end
 
 utils.get_country = function(ip)

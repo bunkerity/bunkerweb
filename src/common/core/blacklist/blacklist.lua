@@ -224,24 +224,30 @@ function blacklist:is_blacklisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
-		if rdns then
+		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
+		if rdns_list then
 			-- Check if rDNS is in ignore list
 			local ignore = false
-			for i, ignore_suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-				if rdns:sub(-#ignore_suffix) == ignore_suffix then
-					ignore = true
-					break
+			for i, rdns in ipairs(rdns_list) do
+				for j, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
+					if rdns:sub(-#suffix) == suffix then
+						ignore = true
+						break
+					end
 				end
 			end
 			-- Check if rDNS is in blacklist
 			if not ignore then
-				for i, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						return true, "rDNS " .. suffix
+				for i, rdns in ipairs(rdns_list) do
+					for j, suffix in ipairs(self.lists["RDNS"]) do
+						if rdns:sub(-#suffix) == suffix then
+							return true, "rDNS " .. suffix
+						end
 					end
 				end
 			end
+		else
+			self.logger:log(ngx.ERR, "error while getting rdns : " .. err)
 		end
 	end
 
@@ -249,7 +255,7 @@ function blacklist:is_blacklisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, err
+			return nil, "ASN " .. err
 		end
 		local ignore = false
 		for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do

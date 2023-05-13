@@ -184,14 +184,18 @@ function greylist:is_greylisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
+		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
 		-- Check if rDNS is in greylist
-		if rdns then
-			for i, suffix in ipairs(self.lists["RDNS"]) do
-				if rdns:sub(-#suffix) == suffix then
-					return true, "rDNS " .. suffix
+		if rdns_list then
+			for i, rdns in ipairs(rdns_list) do
+				for j, suffix in ipairs(self.lists["RDNS"]) do
+					if rdns:sub(-#suffix) == suffix then
+						return true, "rDNS " .. suffix
+					end
 				end
 			end
+		else
+			self.logger:log(ngx.ERR, "error while getting rdns : " .. err)
 		end
 	end
 
@@ -199,7 +203,7 @@ function greylist:is_greylisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, err
+			return nil,  "ASN " .. err
 		end
 		for i, bl_asn in ipairs(self.lists["ASN"]) do
 			if bl_asn == tostring(asn) then

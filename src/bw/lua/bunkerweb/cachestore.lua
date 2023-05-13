@@ -164,4 +164,8 @@ function cachestore:del_redis(key)
 	return true
 end
 
+function cachestore:purge()
+	return self.cache:purge(true)
+end
+
 return cachestore
