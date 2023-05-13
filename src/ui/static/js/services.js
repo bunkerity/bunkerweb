@@ -169,33 +169,32 @@ class ServiceModal {
       }
 
       //SET METHOD
-      this.setDisabled(inp, defaultMethod);
+      this.setDisabledDefault(inp, defaultMethod);
     });
 
     const selects = this.modal.querySelectorAll("select");
     selects.forEach((select) => {
       const defaultMethod = "default";
-      const defaultVal = select.getAttribute("data-default-value") || "";
-
-      document
-        .querySelector(
-          `[data-setting-select=${select.getAttribute(
-            "data-setting-select-default"
-          )}]`
-        )
-        .removeAttribute("disabled");
-
+      const defaultVal = select.getAttribute("data-default-value");
+      //click the custom select dropdown to update select value
       select.parentElement
         .querySelector(
           `button[data-setting-select-dropdown-btn][value='${defaultVal}']`
         )
         .click();
 
-      this.setDisabled(select, defaultMethod);
+      //set state to custom visible el
+      const btnCustom = document.querySelector(
+        `[data-setting-select=${select.getAttribute(
+          "data-setting-select-default"
+        )}]`
+      );
+
+      this.setDisabledDefault(btnCustom, defaultMethod);
     });
   }
 
-  setDisabled(inp, method) {
+  setDisabledDefault(inp, method) {
     if (method === "ui" || method === "default") {
       inp.removeAttribute("disabled");
     } else {
@@ -279,6 +278,7 @@ class ServiceModal {
       //change format to match id
       const value = data["value"];
       const method = data["method"];
+      const global = data["global"];
       try {
         const inps = this.modal.querySelectorAll(`[name='${key}']`);
 
@@ -326,9 +326,19 @@ class ServiceModal {
           }
 
           //check disabled/enabled after setting values and methods
-          this.setDisabled(inp, method);
+          this.setDisabledServ(inp, method, global);
         });
       } catch (err) {}
+    }
+  }
+
+  setDisabledServ(inp, method, global) {
+    if (global) return inp.removeAttribute("disabled");
+
+    if (method === "ui" || method === "default") {
+      inp.removeAttribute("disabled");
+    } else {
+      inp.setAttribute("disabled", "");
     }
   }
 
@@ -366,7 +376,7 @@ class Multiple {
     });
 
     this.container.addEventListener("click", (e) => {
-      //edit button
+      //edit service button
       try {
         if (
           e.target.closest("button").getAttribute("data-services-action") ===
@@ -387,7 +397,7 @@ class Multiple {
           this.setMultipleToDOM(sortMultiples);
         }
       } catch (err) {}
-      //new button
+      //new service button
       try {
         if (
           e.target.closest("button").getAttribute("data-services-action") ===
@@ -439,8 +449,10 @@ class Multiple {
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
+          //add special attribut for disabled logic
           this.changeCloneSuffix(schemaClone, setNum);
-          this.setDisabled();
+          //set disabled / enabled state
+          this.setDisabledMultNew(schemaClone);
           this.showClone(schema, schemaClone);
           //insert new group before first one
           //show all groups
@@ -609,16 +621,18 @@ class Multiple {
           const settingContainer = schemaCtnrClone.querySelector(
             `[data-setting-container="${name}"]`
           );
-          //replace input info
-          this.setSetting(data["value"], data["method"], settingContainer);
+          //replace input info and disabled state
+          this.setSetting(
+            data["value"],
+            data["method"],
+            data["global"],
+            settingContainer
+          );
         }
         //send schema clone to DOM and show it
         this.showClone(schemaCtnr, schemaCtnrClone);
       }
     }
-
-    //disabled after update values and method
-    this.setDisabled();
   }
 
   changeCloneSuffix(schemaCtnrClone, suffix) {
@@ -677,7 +691,7 @@ class Multiple {
     });
   }
 
-  setSetting(value, method, settingContainer) {
+  setSetting(value, method, global, settingContainer) {
     //update input
     try {
       const inps = settingContainer.querySelectorAll("input");
@@ -707,27 +721,29 @@ class Multiple {
           inp.value = value;
           inp.setAttribute("data-method", method);
         }
+        this.setDisabledMultServ(inp, method, global);
       });
     } catch (err) {}
     //update select
     try {
       const select = settingContainer.querySelector("select");
-      const name = select.getAttribute("data-services-setting-select-default");
-      const selTxt = document.querySelector(
-        `[data-services-setting-select-text='${name}']`
+      select.setAttribute("data-method", method);
+
+      //click the custom select dropdown btn vavlue to update select value
+      select.parentElement
+        .querySelector(
+          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`
+        )
+        .click();
+
+      //set state to custom visible el
+      const btnCustom = document.querySelector(
+        `[data-setting-select=${select.getAttribute(
+          "data-setting-select-default"
+        )}]`
       );
 
-      selTxt.textContent = value;
-      selTxt.setAttribute("value", value);
-      const options = select.options;
-
-      for (let i = 0; i < options.length; i++) {
-        const option = options[i];
-        option.value === value
-          ? option.setAttribute("selected")
-          : option.removeAttribute("selected");
-      }
-      select.setAttribute("data-method", method);
+      this.setDisabledMultServ(btnCustom, method, global);
     } catch (err) {}
   }
 
@@ -737,48 +753,56 @@ class Multiple {
     schemaCtnrClone.classList.add("grid");
   }
 
-  setDisabled() {
-    const multipleCtnr = document.querySelectorAll(
-      "[data-services-settings-multiple]"
-    );
-    multipleCtnr.forEach((container) => {
-      const settings = container.querySelectorAll("[data-setting-container]");
+  //global value isn't check at this point
+  setDisabledMultNew(container) {
+    const settings = container.querySelectorAll("[data-setting-container]");
 
-      settings.forEach((setting) => {
-        //replace input info
-        try {
-          const inps = setting.querySelectorAll("input");
-          inps.forEach((inp) => {
-            const method = inp.getAttribute("data-method") || "default";
-            if (method === "ui" || method === "default") {
-              inp.removeAttribute("disabled");
-            } else {
-              inp.setAttribute("disabled", "");
-            }
-          });
-        } catch (err) {}
-        //or select
-        try {
-          const selects = setting.querySelectorAll("select");
-          selects.forEach((select) => {
-            const method = select.getAttribute("data-method") || "default";
-            const name = select.getAttribute(
-              "data-services-setting-select-default"
-            );
-            const selDOM = document.querySelector(
-              `button[data-services-setting-select='${name}']`
-            );
-            if (method === "ui" || method === "default") {
-              selDOM.removeAttribute("disabled", "");
-            } else {
-              selDOM.setAttribute("disabled", "");
-            }
-          });
-        } catch (err) {}
-      });
+    settings.forEach((setting) => {
+      //replace input info
+      try {
+        const inps = setting.querySelectorAll("input");
+        inps.forEach((inp) => {
+          const method = inp.getAttribute("data-method") || "default";
+          if (method === "ui" || method === "default") {
+            inp.removeAttribute("disabled");
+          } else {
+            inp.setAttribute("disabled", "");
+          }
+        });
+      } catch (err) {}
+      //or select
+      try {
+        const selects = setting.querySelectorAll("select");
+        selects.forEach((select) => {
+          const method = select.getAttribute("data-method") || "default";
+          const name = select.getAttribute(
+            "data-services-setting-select-default"
+          );
+          const selDOM = document.querySelector(
+            `button[data-services-setting-select='${name}']`
+          );
+          if (method === "ui" || method === "default") {
+            selDOM.removeAttribute("disabled", "");
+          } else {
+            selDOM.setAttribute("disabled", "");
+          }
+        });
+      } catch (err) {}
     });
   }
 
+  //for already existing services multiples
+  //global is check
+  setDisabledMultServ(inp, method, global) {
+    console.log(global);
+    if (global) return inp.removeAttribute("disabled");
+
+    if (method === "ui" || method === "default") {
+      inp.removeAttribute("disabled");
+    } else {
+      inp.setAttribute("disabled", "");
+    }
+  }
   //UTILS
 
   getSuffixNumOrFalse(name) {
