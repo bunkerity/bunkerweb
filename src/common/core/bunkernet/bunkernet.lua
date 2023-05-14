@@ -10,8 +10,8 @@ local bunkernet = class("bunkernet", plugin)
 function bunkernet:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "bunkernet")
-	-- Get BunkerNet ID
-	if ngx.get_phase() ~= "init" and self.variables["USE_BUNKERNET"] == "yes" and not self.is_loading then
+	-- Get BunkerNet ID and save info
+	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local id, err = self.datastore:get("plugin_bunkernet_id")
 		if id then
 			self.bunkernet_id = id
@@ -23,19 +23,49 @@ function bunkernet:initialize()
 	end
 end
 
-function bunkernet:init()
-	-- Check if init is needed
+function bunkernet:is_needed()
+	-- Loading case
 	if self.is_loading then
-		return self:ret(true, "bunkerweb is loading")
+		return false
 	end
-	local init_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
-	if init_needed == nil then
-		return self:ret(false, "can't check USE_BUNKERNET variable : " .. err)
+	-- Request phases (no default)
+	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_BUNKERNET"] == "yes"
 	end
-	if not init_needed or self.is_loading then
-		return self:ret(true, "no service uses bunkernet, skipping init")
+	-- Other cases : at least one service uses it
+	local is_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
+	if is_needed == nil then
+		self.logger:log(ngx.ERR, "can't check USE_BUNKERNET variable : " .. err)
 	end
+	return is_needed
+end
 
+function bunkernet:init_worker()
+	-- Check if needed
+	if not self:is_needed() then
+		return self:ret(true, "no service uses BunkerNet, skipping init_worker")
+	end
+	-- Check id
+	if not self.bunkernet_id then
+		return self:ret(false, "missing instance ID")
+	end
+	-- Send ping request
+	local ok, err, status, data = self:ping()
+	if not ok then
+		return self:ret(false, "error while sending request to API : " .. err)
+	end
+	if status ~= 200 then
+		return self:ret(false, "received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id)
+	end
+	self.logger:log(ngx.NOTICE, "connectivity with API using instance ID " .. self.id .. " is successful")
+	return self:ret(true, "connectivity with API using instance ID " .. self.id .. " is successful")
+end
+
+function bunkernet:init()
+	-- Check if needed
+	if not self:is_needed() then
+		return self:ret(true, "no service uses BunkerNet, skipping init")
+	end
 	-- Check if instance ID is present
 	local f, err = io.open("/var/cache/bunkerweb/bunkernet/instance.id", "r")
 	if not f then
@@ -74,23 +104,17 @@ function bunkernet:init()
 	if not ok then
 		return self:ret(false, "can't store bunkernet database into datastore : " .. err)
 	end
-	return self:ret(true,
-		"successfully connected to the bunkernet service " ..
-		self.variables["BUNKERNET_SERVER"] .. " with machine ID " .. id .. " and " .. tostring(i) .. " bad IPs in database")
+	return self:ret(true, "successfully loaded " .. tostring(i) .. " bad IPs using instance ID " .. id)
 end
 
 function bunkernet:access()
-	-- Check if not loading
-	if self.is_loading then
-		return self:ret(true, "bunkerweb is loading")
+	-- Check if needed
+	if not self:is_needed() then
+		return self:ret(true, "service doesn't use BunkerNet, skipping access")
 	end
-	-- Check if enabled
-	if self.variables["USE_BUNKERNET"] ~= "yes" then
-		return self:ret(true, "bunkernet not activated")
-	end
-	-- Check if BunkerNet ID is generated
+	-- Check id
 	if not self.bunkernet_id then
-		return self:ret(false, "bunkernet ID is not generated")
+		return self:ret(false, "missing instance ID")
 	end
 	-- Check if IP is global
 	if not ngx.ctx.bw.ip_is_global then
@@ -120,20 +144,16 @@ function bunkernet:access()
 	return self:ret(true, "not in db")
 end
 
-function bunkernet:log(bypass_use_bunkernet)
-	-- Check if not loading
-	if self.is_loading then
-		return self:ret(true, "bunkerweb is loading")
-	end
-	if not bypass_use_bunkernet then
-		-- Check if BunkerNet is enabled
-		if self.variables["USE_BUNKERNET"] ~= "yes" then
-			return self:ret(true, "bunkernet not activated")
+function bunkernet:log(bypass_checks)
+	if not bypass_checks then
+		-- Check if needed
+		if not self:is_needed() then
+			return self:ret(true, "service doesn't use BunkerNet, skipping log")
 		end
-	end
-	-- Check if BunkerNet ID is generated
-	if not self.bunkernet_id then
-		return self:ret(false, "bunkernet ID is not generated")
+		-- Check id
+		if not self.bunkernet_id then
+			return self:ret(false, "missing instance ID")
+		end
 	end
 	-- Check if IP has been blocked
 	local reason = utils.get_reason()
@@ -168,25 +188,21 @@ function bunkernet:log(bypass_use_bunkernet)
 end
 
 function bunkernet:log_default()
-	-- Check if not loading is needed
-	if self.is_loading then
-		return self:ret(true, "bunkerweb is loading")
+	-- Check if needed
+	if not self:is_needed() then
+		return self:ret(true, "no service uses BunkerNet, skipping log_default")
 	end
-	-- Check if BunkerNet is activated
-	local check, err = utils.has_variable("USE_BUNKERNET", "yes")
-	if check == nil then
-		return false, "error while checking variable USE_BUNKERNET (" .. err .. ")"
-	end
-	if not check then
-		return true, "bunkernet not enabled"
+	-- Check id
+	if not self.bunkernet_id then
+		return self:ret(false, "missing instance ID")
 	end
 	-- Check if default server is disabled
 	local check, err = utils.get_variable("DISABLE_DEFAULT_SERVER", false)
 	if check == nil then
-		return false, "error while getting variable DISABLE_DEFAULT_SERVER (" .. err .. ")"
+		return self:ret(false, "error while getting variable DISABLE_DEFAULT_SERVER : " .. err)
 	end
 	if check ~= "yes" then
-		return true, "default server not disabled"
+		return self:ret(true, "default server is not disabled")
 	end
 	-- Call log method
 	return self:log(true)
@@ -199,15 +215,17 @@ end
 function bunkernet:request(method, url, data)
 	local httpc, err = http.new()
 	if not httpc then
-		return false, "can't instantiate http object : " .. err, nil, nil
+		return false, "can't instantiate http object : " .. err
 	end
 	local all_data = {
 		id = self.bunkernet_id,
 		version = self.version,
 		integration = self.integration
 	}
-	for k, v in pairs(data) do
-		all_data[k] = v
+	if data then
+		for k, v in pairs(data) do
+			all_data[k] = v
+		end
 	end
 	local res, err = httpc:request_uri(self.variables["BUNKERNET_SERVER"] .. url, {
 		method = method,
@@ -219,14 +237,14 @@ function bunkernet:request(method, url, data)
 	})
 	httpc:close()
 	if not res then
-		return false, "error while sending request : " .. err, nil, nil
+		return false, "error while sending request : " .. err
 	end
 	if res.status ~= 200 then
 		return false, "status code != 200", res.status, nil
 	end
 	local ok, ret = pcall(cjson.decode, res.body)
 	if not ok then
-		return false, "error while decoding json : " .. ret, nil, nil
+		return false, "error while decoding json : " .. ret
 	end
 	return true, "success", res.status, ret
 end

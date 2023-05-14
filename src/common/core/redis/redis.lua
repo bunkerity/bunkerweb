@@ -11,25 +11,27 @@ function redis:initialize()
 	plugin.initialize(self, "redis")
 end
 
-function redis:init()
-	-- Check if init is needed
+function redis:init_worker()
+	-- Check if init_worker is needed
 	if self.variables["USE_REDIS"] ~= "yes" or self.is_loading then
-		return self:ret(true, "init not needed")
+		return self:ret(true, "init_worker not needed")
 	end
-	-- Check redis connection ()
+	-- Check redis connection
 	local ok, err = clusterstore:connect()
 	if not ok then
 		return self:ret(false, "redis connect error : " .. err)
 	end
+	-- Send ping
 	local ok, err = clusterstore:call("ping")
 	clusterstore:close()
 	if err then
-		return self:ret(false, "error while sending ping command : " .. err)
+		return self:ret(false, "error while sending ping command to redis server : " .. err)
 	end
 	if not ok then
-		return self:ret(false, "ping command failed")
+		return self:ret(false, "redis ping command failed")
 	end
-	return self:ret(true, "redis ping successful")
+	self.logger:log(ngx.NOTICE, "connectivity with redis server " .. self.variables["REDIS_HOST"] .. " is successful")
+	return self:ret(true, "success")
 end
 
 return redis

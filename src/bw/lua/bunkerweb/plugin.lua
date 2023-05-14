@@ -20,8 +20,17 @@ function plugin:initialize(id)
     end
     -- Store variables
     local metadata = cjson.decode(encoded_metadata)
+    local multisite = false
+    local current_phase = ngx.get_phase()
+    for i, check_phase in ipairs({"set", "access", "log", "preread"}) do
+        if current_phase == check_phase then
+            multisite = true
+            break
+        end
+    end
+    self.is_request = multisite
     for k, v in pairs(metadata.settings) do
-        local value, err = utils.get_variable(k, v.context == "multisite" and ngx.get_phase() ~= "init")
+        local value, err = utils.get_variable(k, v.context == "multisite" and multisite)
         if value == nil then
             self.logger:log(ngx.ERR, "can't get " .. k .. " variable : " .. err)
         end

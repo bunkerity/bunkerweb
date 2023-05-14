@@ -1,4 +1,4 @@
-FROM python:3.11.3-alpine
+FROM python:3.11.3-alpine AS builder
 
 # Copy python requirements
 COPY src/ui/requirements.txt /tmp/req/requirements.txt
@@ -30,7 +30,15 @@ COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/ui /usr/share/bunkerweb/ui
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
-# Add ui user
+FROM python:3.11.3-alpine
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
+# Add ui user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash && \
     addgroup -g 101 ui && \
     adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
@@ -44,12 +52,11 @@ RUN apk add --no-cache bash && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
     chown -R root:ui /data && \
     chmod -R 770 /data && \
-    chown -R root:ui /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/log/nginx && \
-    for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
-    for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
+    chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/log/nginx && \
     chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/log/nginx/ui.log && \
     chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/src/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
-    chmod 660 /usr/share/bunkerweb/INTEGRATION
+    chmod 660 /usr/share/bunkerweb/INTEGRATION && \
+    chown root:ui /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"

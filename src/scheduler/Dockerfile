@@ -1,4 +1,4 @@
-FROM python:3.11.3-alpine
+FROM python:3.11.3-alpine AS builder
 
 # Copy python requirements
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
@@ -33,6 +33,14 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/scheduler /usr/share/bunkerweb/scheduler
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
+FROM python:3.11.3-alpine
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
@@ -50,20 +58,15 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:scheduler /data && \
   chmod -R 770 /data && \
-  chown -R root:scheduler /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
-  find /usr/share/bunkerweb -type f -exec chmod 0740 {} \; && \
-  find /usr/share/bunkerweb -type d -exec chmod 0750 {} \; && \
+  chown -R root:scheduler /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
   mkdir -p /etc/nginx && \
   chown -R scheduler:scheduler /etc/nginx && \
   chmod -R 770 /etc/nginx && \
-  mkdir -p /var/log/letsencrypt /var/lib/letsencrypt && \
-  chown root:scheduler /var/log/letsencrypt /var/lib/letsencrypt && \
-  chmod 770 /var/log/letsencrypt /var/lib/letsencrypt && \
-  ln -s /proc/1/fd/1 /var/log/letsencrypt/letsencrypt.log && \
-  chmod 660 /usr/share/bunkerweb/INTEGRATION
+  chmod 660 /usr/share/bunkerweb/INTEGRATION && \
+  chown root:scheduler /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"

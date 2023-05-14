@@ -17,7 +17,7 @@ function greylist:initialize()
 	end
 	self.use_redis = use_redis == "yes"
 	-- Decode lists
-	if ngx.get_phase() ~= "init" and self.variables["USE_GREYLIST"] == "yes" then
+	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_greylist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
@@ -45,13 +45,26 @@ function greylist:initialize()
 	self.cachestore = cachestore:new(self.use_redis)
 end
 
-function greylist:init()
-	-- Check if init is needed
-	local init_needed, err = utils.has_variable("USE_GREYLIST", "yes")
-	if init_needed == nil then
-		return self:ret(false, "can't check USE_GREYLIST variable : " .. err)
+function greylist:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
 	end
-	if not init_needed or self.is_loading then
+	-- Request phases (no default)
+	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_GREYLIST"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = utils.has_variable("USE_GREYLIST", "yes")
+	if is_needed == nil then
+		self.logger:log(ngx.ERR, "can't check USE_GREYLIST variable : " .. err)
+	end
+	return is_needed
+end
+
+function greylist:init()
+	-- Check if init needed
+	if not self:is_needed() then
 		return self:ret(true, "init not needed")
 	end
 	-- Read greylists
@@ -83,8 +96,8 @@ end
 
 function greylist:access()
 	-- Check if access is needed
-	if self.variables["USE_GREYLIST"] ~= "yes" then
-		return self:ret(true, "greylist not activated")
+	if not self:is_needed() then
+		return self:ret(true, "access not needed")
 	end
 	-- Check the caches
 	local checks = {

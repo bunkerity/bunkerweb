@@ -18,7 +18,7 @@ function blacklist:initialize()
 	end
 	self.use_redis = use_redis == "yes"
 	-- Decode lists
-	if ngx.get_phase() ~= "init" and self.variables["USE_BLACKLIST"] == "yes" then
+	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_blacklist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
@@ -51,13 +51,26 @@ function blacklist:initialize()
 	self.cachestore = cachestore:new(self.use_redis)
 end
 
-function blacklist:init()
-	-- Check if init is needed
-	local init_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
-	if init_needed == nil then
-		return self:ret(false, "can't check USE_BLACKLIST variable : " .. err)
+function blacklist:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
 	end
-	if not init_needed or self.is_loading then
+	-- Request phases (no default)
+	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_BLACKLIST"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = utils.has_variable("USE_BLACKLIST", "yes")
+	if is_needed == nil then
+		self.logger:log(ngx.ERR, "can't check USE_BLACKLIST variable : " .. err)
+	end
+	return is_needed
+end
+
+function blacklist:init()
+	-- Check if init needed
+	if not self:is_needed() then
 		return self:ret(true, "init not needed")
 	end
 
@@ -95,8 +108,8 @@ end
 
 function blacklist:access()
 	-- Check if access is needed
-	if self.variables["USE_BLACKLIST"] ~= "yes" then
-		return self:ret(true, "blacklist not activated")
+	if not self:is_needed() then
+		return self:ret(true, "access not needed")
 	end
 	-- Check the caches
 	local checks = {

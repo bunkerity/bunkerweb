@@ -22,11 +22,6 @@ RUN apk add --no-cache --virtual .build-deps py3-pip && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del .build-deps
 
-FROM nginx:1.24.0-alpine
-
-# Copy dependencies
-COPY --from=builder /usr/share/bunkerweb /usr/share/bunkerweb
-
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY src/bw/entrypoint.sh /usr/share/bunkerweb/entrypoint.sh
@@ -44,6 +39,14 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 COPY misc/*.ascii /usr/share/bunkerweb/misc/
 
+FROM nginx:1.24.0-alpine
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache pcre bash python3 && \
 	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
@@ -55,21 +58,15 @@ RUN apk add --no-cache pcre bash python3 && \
 	for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
 	chown -R root:nginx /data && \
 	chmod -R 770 /data && \
-	chown -R root:nginx /usr/share/bunkerweb /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
-	for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type f -exec chmod 0740 {} \; ; done && \
-	for dir in $(echo "/usr/share/bunkerweb /etc/bunkerweb") ; do find ${dir} -type d -exec chmod 0750 {} \; ; done && \
+	chown -R root:nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
 	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
 	chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/entrypoint.sh /usr/bin/bwcli /usr/share/bunkerweb/deps/python/bin/* && \
 	chown -R root:nginx /etc/nginx && \
 	chmod -R 770 /etc/nginx && \
 	rm -f /var/log/nginx/* && \
-	mkdir /var/log/letsencrypt /var/lib/letsencrypt && \
-	chown root:nginx /var/log/letsencrypt /var/lib/letsencrypt && \
-	chmod 770 /var/log/letsencrypt /var/lib/letsencrypt && \
 	ln -s /proc/1/fd/2 /var/log/nginx/error.log && \
 	ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log && \
-	ln -s /proc/1/fd/1 /var/log/nginx/access.log && \
-	ln -s /proc/1/fd/1 /var/log/nginx/jobs.log
+	ln -s /proc/1/fd/1 /var/log/nginx/access.log
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"

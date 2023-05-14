@@ -19,6 +19,32 @@ function dnsbl:initialize()
 	self.cachestore = cachestore:new(self.use_redis)
 end
 
+function dnsbl:init_worker()
+	-- Check if loading
+	if self.is_loading then
+		return self:ret(false, "BW is loading")
+	end
+	-- Check if at least one service uses it
+	local is_needed, err = utils.has_variable("USE_DNSBL", "yes")
+	if is_needed == nil then
+		return self:ret(false, "can't check USE_DNSBL variable : " .. err)
+	elseif not is_needed then
+		return self:ret(true, "no service uses DNSBL, skipping init_worker")
+	end
+	-- Loop on DNSBL list
+	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
+		local result, err = self:is_in_dnsbl("127.0.0.2", server)
+		if result == nil then
+			self.logger:log(ngx.ERR, "error while sending DNS request to " .. server .. " : " .. err)
+		elseif not result then
+			self.logger:log(ngx.ERR, "dnsbl check for " .. server .. " failed")
+		else
+			self.logger:log(ngx.NOTICE, "dnsbl check for " .. server .. " is successful")
+		end
+	end
+	return self:ret(true, "success")
+end
+
 function dnsbl:access()
 	-- Check if access is needed
 	if self.variables["USE_DNSBL"] ~= "yes" then

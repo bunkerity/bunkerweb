@@ -102,7 +102,7 @@
       "help": "List of URI, separated with spaces, to put into the greylist.",
       "id": "greylist-uri",
       "label": "Greylist URI",
-      "regex": "^( *(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^.*$",
       "type": "text"
     },
     "GREYLIST_URI_URLS": {

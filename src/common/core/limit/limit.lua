@@ -18,7 +18,7 @@ function limit:initialize()
 	self.use_redis = use_redis == "yes"
 	self.clusterstore = clusterstore:new()
 	-- Load rules if needed
-	if ngx.get_phase() ~= "init" and self.variables["USE_LIMIT_REQ"] == "yes" then
+	if ngx.get_phase() ~= "init" and self:is_needed() then
 		-- Get all rules from datastore
 		local limited = false
 		local all_rules, err = self.datastore:get("plugin_limit_rules")
@@ -43,14 +43,27 @@ function limit:initialize()
 	end
 end
 
+function limit:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
+	end
+	-- Request phases (no default)
+	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_LIMIT_REQ"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = utils.has_variable("USE_LIMIT_REQ", "yes")
+	if is_needed == nil then
+		self.logger:log(ngx.ERR, "can't check USE_LIMIT_REQ variable : " .. err)
+	end
+	return is_needed
+end
+
 function limit:init()
 	-- Check if init is needed
-	local init_needed, err = utils.has_variable("USE_LIMIT_REQ", "yes")
-	if init_needed == nil then
-		return self:ret(false, err)
-	end
-	if not init_needed or self.is_loading then
-		return self:ret(true, "no service uses Limit for requests, skipping init")
+	if not self:is_needed() then
+		return self:ret(true, "no service uses limit for requests, skipping init")
 	end
 	-- Get variables
 	local variables, err = utils.get_multiple_variables({"LIMIT_REQ_URL", "LIMIT_REQ_RATE"})
@@ -86,8 +99,8 @@ function limit:access()
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if access is needed
-	if self.variables["USE_LIMIT_REQ"] ~= "yes" then
-		return self:ret(true, "limit req is disabled")
+	if not self:is_needed() then
+		return self:ret(true, "limit request not enabled")
 	end
 	-- Check if URI is limited
 	local rate = nil

@@ -19,7 +19,7 @@ function whitelist:initialize()
 	end
 	self.use_redis = use_redis == "yes"
 	-- Decode lists
-	if ngx.get_phase() ~= "init" and self.variables["USE_WHITELIST"] == "yes" then
+	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_whitelist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
@@ -44,16 +44,29 @@ function whitelist:initialize()
 		end
 	end
 	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis and ngx.get_phase() == "access")
+	self.cachestore = cachestore:new(self.use_redis)
+end
+
+function whitelist:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
+	end
+	-- Request phases (no default)
+	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_WHITELIST"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = utils.has_variable("USE_WHITELIST", "yes")
+	if is_needed == nil then
+		self.logger:log(ngx.ERR, "can't check USE_WHITELIST variable : " .. err)
+	end
+	return is_needed
 end
 
 function whitelist:init()
 	-- Check if init is needed
-	local init_needed, err = utils.has_variable("USE_WHITELIST", "yes")
-	if init_needed == nil then
-		return self:ret(false, "can't check USE_WHITELIST variable : " .. err)
-	end
-	if not init_needed or self.is_loading then
+	if not self:is_needed() then
 		return self:ret(true, "init not needed")
 	end
 	-- Read whitelists
@@ -89,7 +102,7 @@ function whitelist:set()
 	ngx.ctx.bw.is_whitelisted = "no"
 	env.set("is_whitelisted", "no")
 	-- Check if set is needed
-	if self.variables["USE_WHITELIST"] ~= "yes" then
+	if not self:is_needed() then
 		return self:ret(true, "whitelist not activated")
 	end
 	-- Check cache
@@ -107,7 +120,7 @@ end
 
 function whitelist:access()
 	-- Check if access is needed
-	if self.variables["USE_WHITELIST"] ~= "yes" then
+	if not self:is_needed() then
 		return self:ret(true, "whitelist not activated")
 	end
 	-- Check cache
