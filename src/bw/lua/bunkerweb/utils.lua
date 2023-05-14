@@ -352,8 +352,9 @@ utils.get_rdns = function(ip)
 	if not answers then
 		return false, err
 	end
+	local ret_err = "success"
 	if answers.errcode then
-		return {}, answers.errstr
+		ret_err = answers.errstr
 	end
 	-- Extract all PTR
 	local ptrs = {}
@@ -367,7 +368,7 @@ utils.get_rdns = function(ip)
 	if not ok then
 		logger:log(ngx.ERR, "can't set rdns into cachestore : " .. err)
 	end
-	return ptrs, "success"
+	return ptrs, ret_err
 end
 
 utils.get_ips = function(fqdn, ipv6)
