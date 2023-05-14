@@ -45,5 +45,5 @@ services:
 
 networks:
   bw-services:
-    external:
-      name: bw-services
+    external: true
+    name: bw-services

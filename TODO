@@ -2,8 +2,4 @@
 - Vagrant
 - Plugins
 - prepare new antibot challenge when not resolved and "refresh page"
-- fix doc integrations : "The Docker autoconf integration is similar to the Docker autoconf one"
-- add ipv6 to doc
-- edit doc integrations boilerplates : missing autoconf container in docker autoconf, fix syntax for autoconf service example and make them ready to use (copy / paste)
-- edit doc + misc/integrations : network bw-services: network.external.name is deprecated. Please set network.name with external: true
 - fix db warnings (Got an error reading communication packets)

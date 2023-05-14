@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.5.0-beta - 
+## v1.5.0-beta - 2023/05/02
 
 - Refactoring of almost all the components of the project
 - Dedicated scheduler service to manage jobs and configuration
@@ -10,6 +10,8 @@
 - Add Redis support when using clustered integrations
 - Add RHEL integration
 - Add Vagrant integration
+- Init support of generic TCP/UDP (stream)
+- Init support of IPv6
 - Improved CI/CD
 
 ## v1.4.8 - 2023/04/05

@@ -47,6 +47,7 @@ STREAM support :warning:
 |`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).         |
 |`LISTEN_STREAM_PORT_SSL`      |`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).             |
 |`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).               |
+|`USE_IPV6`                    |`no`                                                                                                                    |global   |no      |Enable IPv6 connectivity.                         |
 
 
 ## Core settings
