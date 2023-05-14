@@ -77,17 +77,20 @@ function cachestore:get(key)
 		clusterstore:close()
 		if ret[1] == ngx.null then
 			ret[1] = nil
-		end
-		if ret[2] < 0 then
+			ret[2] = -1
+		elseif ret[2] < 0 then
 			ret[2] = ret[2] + 1
 		end
 		return ret[1], nil, ret[2]
+	end
+	local callback_no_miss = function()
+		return nil, nil, -1
 	end
 	local value, err, hit_level
 	if self.use_redis then
 		value, err, hit_level = self.cache:get(key, nil, callback, key)
 	else
-		value, err, hit_level = self.cache:get(key)
+		value, err, hit_level = self.cache:get(key, nil, callback_no_miss)
 	end
 	if value == nil and err ~= nil then
 		return false, err

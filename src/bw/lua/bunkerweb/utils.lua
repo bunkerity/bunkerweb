@@ -325,6 +325,14 @@ utils.get_resolvers = function()
 end
 
 utils.get_rdns = function(ip)
+	-- Check cache
+	local cachestore = utils.new_cachestore()
+	local ok, value = cachestore:get("rdns_" .. ip)
+	if not ok then
+		logger:log(ngx.ERR, "can't get rdns from cachestore : " .. value)
+	elseif value then
+		return cjson.decode(value), "success"
+	end
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
 	if not resolvers then
@@ -347,17 +355,30 @@ utils.get_rdns = function(ip)
 	if answers.errcode then
 		return {}, answers.errstr
 	end
-	-- Return all PTR
+	-- Extract all PTR
 	local ptrs = {}
 	for i, answer in ipairs(answers) do
 		if answer.ptrdname then
 			table.insert(ptrs, answer.ptrdname)
 		end
 	end
+	-- Save to cache
+	local ok, err = cachestore:set("rdns_" .. ip, cjson.encode(ptrs), 3600)
+	if not ok then
+		logger:log(ngx.ERR, "can't set rdns into cachestore : " .. err)
+	end
 	return ptrs, "success"
 end
 
 utils.get_ips = function(fqdn, ipv6)
+	-- Check cache
+	local cachestore = utils.new_cachestore()
+	local ok, value = cachestore:get("dns_" .. fqdn)
+	if not ok then
+		logger:log(ngx.ERR, "can't get dns from cachestore : " .. value)
+	elseif value then
+		return cjson.decode(value), "success"
+	end
 	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
 	if ipv6 == nil then
 		ipv6 = true
@@ -406,7 +427,7 @@ utils.get_ips = function(fqdn, ipv6)
 	if #res_errors == #qtypes then
 		return false, cjson.encode(res_errors)
 	end
-	-- Return all IPs
+	-- Extract all IPs
 	local ips = {}
 	for i, answers in ipairs(res_answers) do
 		for j, answer in ipairs(answers) do
@@ -414,6 +435,11 @@ utils.get_ips = function(fqdn, ipv6)
 				table.insert(ips, answer.address)
 			end
 		end
+	end
+	-- Save to cache
+	local ok, err = cachestore:set("dns_" .. fqdn, cjson.encode(ips), 3600)
+	if not ok then
+		logger:log(ngx.ERR, "can't set dns into cachestore : " .. err)
 	end
 	return ips, cjson.encode(res_errors) .. " " .. cjson.encode(ans_errors)
 end
@@ -627,6 +653,18 @@ utils.add_ban = function(ip, reason, ttl)
 	end
 	clusterstore:close()
 	return true, "success"
+end
+
+utils.new_cachestore = function()
+	-- Check if redis is used
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		logger:log(ngx.ERR, "can't get USE_REDIS variable : " .. err)
+	else
+		use_redis = use_redis == "yes"
+	end
+	-- Instantiate
+	return require "bunkerweb.cachestore":new(use_redis)
 end
 
 return utils
