@@ -10,7 +10,12 @@ pip install pip --upgrade > /dev/null && pip install pip-compile-multi pip-upgra
 
 echo "Updating requirements.in files"
 
-files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in" "../../tests/requirements.txt" "../../tests/ui/requirements.txt")
+files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
+
+for file in $(find ../../tests -iname "requirements.txt")
+do
+    files+=("$file")
+done
 
 for file in "${files[@]}"
 do
@@ -30,6 +35,8 @@ do
     else
         echo "No need to generate hashes for $file"
     fi
+
+    echo " "
 
     cd -
 done

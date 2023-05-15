@@ -1,0 +1,5 @@
+FROM docker
+
+COPY . .
+
+ENTRYPOINT [ "./tests.sh" ]

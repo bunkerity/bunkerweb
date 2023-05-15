@@ -1,0 +1,69 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.5.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE"
+    volumes:
+      - ./index.html:/var/www/html/index.html
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      HTTP_PORT: "80"
+      HTTPS_PORT: "443"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      LOG_LEVEL: "info"
+      GENERATE_SELF_SIGNED_SSL: "yes"
+      ALLOWED_METHODS: "GET|POST|HEAD|OPTIONS"
+
+      # ? CORS settings
+      USE_CORS: "no"
+      CORS_ALLOW_ORIGIN: "*"
+      CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"
+      CORS_MAX_AGE: "86400"
+      CORS_ALLOW_CREDENTIALS: "no"
+      CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+      CORS_ALLOW_HEADERS: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+      - bw-docker
+    environment:
+      DOCKER_HOST: "tcp://bw-docker:2375"
+      LOG_LEVEL: "info"
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+    networks:
+      - bw-docker
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+  bw-docker:

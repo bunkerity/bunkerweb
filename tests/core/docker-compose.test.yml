@@ -1,0 +1,7 @@
+version: '3.5'
+
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
