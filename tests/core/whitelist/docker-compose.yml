@@ -2,12 +2,8 @@ version: "3.5"
 
 services:
   bw:
-    # TODO: use image
-    # image: bunkerity/bunkerweb:1.5.0-beta
-    # pull_policy: never
-    build:
-      context: /home/theophile/dev/bunkerweb
-      dockerfile: src/bw/Dockerfile
+    image: bunkerity/bunkerweb:1.5.0-beta
+    pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
     volumes:
@@ -42,12 +38,8 @@ services:
         ipv4_address: 1.0.0.2
 
   bw-scheduler:
-    # TODO: use image
-    # image: bunkerity/bunkerweb-scheduler:1.5.0-beta
-    # pull_policy: never
-    build:
-      context: /home/theophile/dev/bunkerweb
-      dockerfile: src/scheduler/Dockerfile
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    pull_policy: never
     depends_on:
       - bw
       - bw-docker
