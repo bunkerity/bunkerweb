@@ -101,7 +101,7 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@GREYLIST_IP_URLS: "http://greylist-api:8080/ip"@GREYLIST_IP_URLS: ""@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@GREYLIST_RDNS: ""@GREYLIST_RDNS: ".bw-services"@' {} \;
     elif [ "$test" = "rdns_global" ] ; then
-        echo "🏴 Running tests when greylist's rdns also scans local ip addresses ..."
+        echo "🏁 Running tests when greylist's rdns also scans local ip addresses ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@GREYLIST_RDNS_GLOBAL: "yes"@GREYLIST_RDNS_GLOBAL: "no"@' {} \;
     elif [ "$test" = "rdns_urls" ] ; then
         echo "🏁 Running tests with greylist's rdns url set to http://greylist-api:8080/rdns ..."
@@ -138,8 +138,14 @@ do
     echo "🏁 Starting stack ..."
     docker compose up -d 2>/dev/null
     if [ $? -ne 0 ] ; then
-        echo "🏁 Up failed ❌"
-        exit 1
+        echo "🏁 Up failed, retrying ... ⚠️"
+        manual=1
+        cleanup_stack
+        manual=0
+        if [ $? -ne 0 ] ; then
+            echo "🏁 Up failed ❌"
+            exit 1
+        fi
     fi
 
     # Check if stack is healthy

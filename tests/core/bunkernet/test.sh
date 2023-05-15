@@ -61,8 +61,14 @@ do
     echo "🕸️ Starting stack ..."
     docker compose up -d 2>/dev/null
     if [ $? -ne 0 ] ; then
-        echo "🕸️ Up failed ❌"
-        exit 1
+        echo "🕸️ Up failed, retrying ... ⚠️"
+        manual=1
+        cleanup_stack
+        manual=0
+        if [ $? -ne 0 ] ; then
+            echo "🕸️ Up failed ❌"
+            exit 1
+        fi
     fi
 
     # Check if stack is healthy
@@ -96,12 +102,12 @@ do
     docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests 2>/dev/null
 
     if [ $? -ne 0 ] ; then
-        echo "🏴 Test \"$test\" failed ❌"
+        echo "🕸️ Test \"$test\" failed ❌"
         echo "🛡️ Showing BunkerWeb, BunkerWeb Scheduler and Custom API logs ..."
         docker compose logs bw bw-scheduler bunkernet-api
         exit 1
     else
-        echo "🏴 Test \"$test\" succeeded ✅"
+        echo "🕸️ Test \"$test\" succeeded ✅"
     fi
 
     manual=1

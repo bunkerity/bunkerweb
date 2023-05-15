@@ -1,16 +1,16 @@
 #!/bin/bash
 
-echo "🔐 Building selfsigned stack ..."
+echo "🔑 Building selfsigned stack ..."
 
 # Starting stack
 docker compose pull bw-docker
 if [ $? -ne 0 ] ; then
-    echo "🔐 Pull failed ❌"
+    echo "🔑 Pull failed ❌"
     exit 1
 fi
 docker compose -f docker-compose.test.yml build
 if [ $? -ne 0 ] ; then
-    echo "🔐 Build failed ❌"
+    echo "🔑 Build failed ❌"
     exit 1
 fi
 
@@ -27,16 +27,16 @@ cleanup_stack () {
         fi
     fi
 
-    echo "🔐 Cleaning up current stack ..."
+    echo "🔑 Cleaning up current stack ..."
 
     docker compose down -v --remove-orphans 2>/dev/null
 
     if [ $? -ne 0 ] ; then
-        echo "🔐 Down failed ❌"
+        echo "🔑 Down failed ❌"
         exit 1
     fi
 
-    echo "🔐 Cleaning up current stack done ✅"
+    echo "🔑 Cleaning up current stack done ✅"
 }
 
 # Cleanup stack on exit
@@ -45,25 +45,31 @@ trap cleanup_stack EXIT
 for test in "deactivated" "activated" "tweaked_options"
 do
     if [ "$test" = "deactivated" ] ; then
-        echo "🔐 Running tests without selfsigned ..."
+        echo "🔑 Running tests without selfsigned ..."
     elif [ "$test" = "activated" ] ; then
-        echo "🔐 Running tests with selfsigned activated ..."
+        echo "🔑 Running tests with selfsigned activated ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@GENERATE_SELF_SIGNED_SSL: "no"@GENERATE_SELF_SIGNED_SSL: "yes"@' {} \;
     elif [ "$test" = "tweaked_options" ] ; then
-        echo "🔐 Running tests with selfsigned's options tweaked ..."
+        echo "🔑 Running tests with selfsigned's options tweaked ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@SELF_SIGNED_SSL_EXPIRY: "365"@SELF_SIGNED_SSL_EXPIRY: "30"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@SELF_SIGNED_SSL_SUBJ: "/CN=www.example.com/"@SELF_SIGNED_SSL_SUBJ: "/CN=example.com/"@' {} \;
     fi
 
-    echo "🔐 Starting stack ..."
+    echo "🔑 Starting stack ..."
     docker compose up -d 2>/dev/null
     if [ $? -ne 0 ] ; then
-        echo "🔐 Up failed ❌"
-        exit 1
+        echo "🔑 Up failed, retrying ... ⚠️"
+        manual=1
+        cleanup_stack
+        manual=0
+        if [ $? -ne 0 ] ; then
+            echo "🔑 Up failed ❌"
+            exit 1
+        fi
     fi
 
     # Check if stack is healthy
-    echo "🔐 Waiting for stack to be healthy ..."
+    echo "🔑 Waiting for stack to be healthy ..."
     i=0
     while [ $i -lt 120 ] ; do
         containers=("selfsigned-bw-1" "selfsigned-bw-scheduler-1")
@@ -76,7 +82,7 @@ do
             fi
         done
         if [ "$healthy" = "true" ] ; then
-            echo "🔐 Docker stack is healthy ✅"
+            echo "🔑 Docker stack is healthy ✅"
             break
         fi
         sleep 1
@@ -84,7 +90,7 @@ do
     done
     if [ $i -ge 120 ] ; then
         docker compose logs
-        echo "🔐 Docker stack is not healthy ❌"
+        echo "🔑 Docker stack is not healthy ❌"
         exit 1
     fi
 
@@ -93,12 +99,12 @@ do
     docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests 2>/dev/null
 
     if [ $? -ne 0 ] ; then
-        echo "🔐 Test \"$test\" failed ❌"
+        echo "🔑 Test \"$test\" failed ❌"
         echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."
         docker compose logs bw bw-scheduler
         exit 1
     else
-        echo "🔐 Test \"$test\" succeeded ✅"
+        echo "🔑 Test \"$test\" succeeded ✅"
     fi
 
     manual=1
@@ -109,4 +115,4 @@ do
 done
 
 end=1
-echo "🔐 Tests are done ! ✅"
+echo "🔑 Tests are done ! ✅"

@@ -52,8 +52,14 @@ do
     echo "🗜️ Starting stack ..."
     docker compose up -d 2>/dev/null
     if [ $? -ne 0 ] ; then
-        echo "🗜️ Up failed ❌"
-        exit 1
+        echo "🗜️ Up failed, retrying ... ⚠️"
+        manual=1
+        cleanup_stack
+        manual=0
+        if [ $? -ne 0 ] ; then
+            echo "🗜️ Up failed ❌"
+            exit 1
+        fi
     fi
 
     # Check if stack is healthy
