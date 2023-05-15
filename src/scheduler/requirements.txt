@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --resolver=backtracking
 #
-acme==2.5.0 \
-    --hash=sha256:416586ed660c5ebcec1e16a134d2e522ac6d6fc4f972955354f0b1a7e61ac97c \
-    --hash=sha256:9c760b115c54f55f692321abe5d09f5c70ce437e61f9f22340341621d9909a5a
+acme==2.6.0 \
+    --hash=sha256:261e8655034f3afe099e68a9c5061304f5ba0c1625ec1b8288fc228315bacbdf \
+    --hash=sha256:607360db73e458150ab63825a82b220bdf04badbd81c6d3218e5d993c6be491c
     # via certbot
-certbot==2.5.0 \
-    --hash=sha256:76e6e5305021d3ee54c42fc471f8f0ed5dba790e6fd7fef6713060b0e42b97d7 \
-    --hash=sha256:a2d730753124508effe79f648264f5cab4d1e9120acfd695a4a0c2b7bab4a966
+certbot==2.6.0 \
+    --hash=sha256:6513b9fb3d266f1fa3803a1713eb7e415bbc250b624c834e02cb71086b26d800 \
+    --hash=sha256:c4de6bb0d092729650ed90a5bdb513932bdc47ec5f7f98049180ab8e4a835dab
     # via -r requirements.in
 certifi==2023.5.7 \
     --hash=sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7 \
@@ -206,8 +206,8 @@ josepy==1.13.0 \
     # via
     #   acme
     #   certbot
-maxminddb==2.2.0 \
-    --hash=sha256:e37707ec4fab115804670e0fb7aedb4b57075a8b6f80052bdc648d3c005184e5
+maxminddb==2.3.0 \
+    --hash=sha256:120920dddd955f32ae48c207c6cef6fd5dc8874a889ba94b0f2c1f736ecdf308
     # via -r requirements.in
 parsedatetime==2.6 \
     --hash=sha256:4cb368fbb18a0b7231f4d76119165451c8d2e35951455dfee97c62a87b04d455 \
