@@ -477,10 +477,12 @@ utils.get_asn = function(ip)
 	return result.autonomous_system_number, "success"
 end
 
-utils.rand = function(nb)
+utils.rand = function(nb, no_numbers)
 	local charset = {}
 	-- lowers, uppers and numbers
-	for i = 48, 57 do table.insert(charset, string.char(i)) end
+	if not no_numbers then
+		for i = 48, 57 do table.insert(charset, string.char(i)) end
+	end
 	for i = 65, 90 do table.insert(charset, string.char(i)) end
 	for i = 97, 122 do table.insert(charset, string.char(i)) end
 	local result = ""
@@ -504,64 +506,20 @@ utils.get_deny_status = function()
 	return tonumber(status)
 end
 
-utils.get_session = function()
+utils.get_session = function(audience)
 	-- Session already in context
 	if ngx.ctx.bw.session then
-		return ngx.ctx.bw.session, ngx.ctx.bw.session_err, ngx.ctx.bw.session_exists, ngx.ctx.bw.session_refreshed
+		ngx.ctx.bw.session:set_audience(audience)
+		return ngx.ctx.bw.session
 	end
 	-- Open session and fill ctx
-	local _session, err, exists, refreshed = session.start()
-	ngx.ctx.bw.session_err = nil
+	local _session, err, exists, refreshed = session.start({audience = audience})
 	if err and err ~= "missing session cookie" and err ~= "no session" then
-		logger:log(ngx.WARN, "can't start session : " .. err)
-		ngx.ctx.bw.session_err = err
+		logger:log(ngx.ERR, "session:start() error : " .. err)
 	end
+	_session:set_audience(audience)
 	ngx.ctx.bw.session = _session
-	ngx.ctx.bw.session_exists = exists
-	ngx.ctx.bw.session_refreshed = refreshed
-	ngx.ctx.bw.session_saved = false
-	ngx.ctx.bw.session_data = _session:get_data()
-	if not ngx.ctx.bw.session_data then
-		ngx.ctx.bw.session_data = {}
-	end
-	return _session, ngx.ctx.bw.session_err, exists, refreshed
-end
-
-utils.save_session = function()
-	-- Check if save is needed
-	if ngx.ctx.bw.session and not ngx.ctx.bw.session_saved then
-		ngx.ctx.bw.session:set_data(ngx.ctx.bw.session_data)
-		local ok, err = ngx.ctx.bw.session:save()
-		if err then
-			logger:log(ngx.ERR, "can't save session : " .. err)
-			return false,  "can't save session : " .. err
-		end
-		ngx.ctx.bw.session_saved = true
-		return true, "session saved"
-	elseif ngx.ctx.bw.session_saved then
-		return true, "session already saved"
-	end
-	return true, "no session"
-end
-
-utils.set_session_var = function(key, value)
-	-- Set new data
-	if ngx.ctx.bw.session then
-		ngx.ctx.bw.session_data[key] = value
-		return true, "value set"
-	end
-	return false, "no session"
-end
-
-utils.get_session_var = function(key)
-	-- Get data
-	if ngx.ctx.bw.session then
-		if ngx.ctx.bw.session_data[key] then
-			return true, "data present", ngx.ctx.bw.session_data[key]
-		end
-		return true, "no data"
-	end
-	return false, "no session"
+	return _session
 end
 
 utils.is_banned = function(ip)

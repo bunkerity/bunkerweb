@@ -1,0 +1,40 @@
+name: Core test (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TEST:
+        required: true
+        type: string
+      RELEASE:
+        required: true
+        type: string
+    secrets:
+      PRIVATE_REGISTRY:
+        required: true
+      PRIVATE_REGISTRY_TOKEN:
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        - name: Login to private repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.PRIVATE_REGISTRY }}
+          username: registry
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+      - name: Pull BW image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
+      - name: Pull Scheduler image
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
+      # Run test
+      - name: Run test
+        run: |
+          cd ./tests/core/${{ inputs.TEST }}
+          find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" {} \;
+          find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" {} \;
+          ./test.sh

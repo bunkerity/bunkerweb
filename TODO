@@ -1,5 +1,6 @@
 - Ansible
 - Vagrant
 - Plugins
-- prepare new antibot challenge when not resolved and "refresh page"
+- sessions helpers in utils
+- sessions security : check IP address, check UA, ...
 - fix db warnings (Got an error reading communication packets)
