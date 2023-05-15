@@ -15,6 +15,7 @@ cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         rm -rf init/plugins
+        rm -rf init/bunkerweb
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@MULTISITE: "yes"$@MULTISITE: "no"@' {} \;
         sed -i 's@bwadm.example.com_USE_REVERSE_PROXY@USE_REVERSE_PROXY@' docker-compose.yml
@@ -60,9 +61,16 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
+echo "💾 Starting stack ..."
+docker compose up -d 2>/dev/null
+if [ $? -ne 0 ] ; then
+    echo "💾 Up failed ❌"
+    exit 1
+fi
+
 echo "💾 Initializing workspace ..."
-rm -rf init/plugins
-mkdir -p init/plugins
+rm -rf init/plugins init/bunkerweb
+mkdir -p init/plugins init/bunkerweb
 docker compose -f docker-compose.init.yml up --build
 if [ $? -ne 0 ] ; then
     echo "💾 Build failed ❌"
@@ -70,7 +78,20 @@ if [ $? -ne 0 ] ; then
 elif ! [[ -d "init/plugins/clamav" ]]; then
     echo "💾 ClamAV plugin not found ❌"
     exit 1
+elif ! [[ -d "init/bunkerweb/core" ]]; then
+    echo "💾 BunkerWeb's core plugins directory not found ❌"
+    exit 1
+elif ! [[ -d "init/bunkerweb/db" ]]; then
+    echo "💾 BunkerWeb's database directory not found ❌"
+    exit 1
+elif ! [[ -f "init/bunkerweb/settings.json" ]]; then
+    echo "💾 BunkerWeb's settings file not found ❌"
+    exit 1
 fi
+
+manual=1
+cleanup_stack
+manual=0
 
 docker compose -f docker-compose.test.yml build
 if [ $? -ne 0 ] ; then

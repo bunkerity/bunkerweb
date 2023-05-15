@@ -5,8 +5,6 @@ services:
     build: .
     volumes:
       - bw-data:/data/lib
-      - bw-db:/opt/tests/db
-      - bw-core-plugins:/opt/tests/core
     environment:
       PYTHONUNBUFFERED: "1"
       DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
@@ -29,10 +27,6 @@ services:
 
 volumes:
   bw-data:
-    external: true
-  bw-db:
-    external: true
-  bw-core-plugins:
     external: true
 
 networks:

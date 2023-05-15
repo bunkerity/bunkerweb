@@ -6,4 +6,10 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
     volumes:
+      - bw-volume:/opt/init/bunkerweb
       - ./init/plugins:/plugins
+      - ./init/bunkerweb:/bunkerweb
+
+volumes:
+  bw-volume:
+    external: true

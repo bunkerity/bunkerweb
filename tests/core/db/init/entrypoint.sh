@@ -13,5 +13,13 @@ echo "ℹ️ Extracting ClamAV plugin ..."
 
 cp -r clamav /plugins/
 
-chown -R root:101 /plugins
-chmod -R 777 /plugins
+cd ..
+
+echo "ℹ️ Extracting settings.json file, db and core directory ..."
+
+cp bunkerweb/settings.json /bunkerweb/
+cp -r bunkerweb/core /bunkerweb/
+cp -r bunkerweb/db /bunkerweb/
+
+chown -R root:101 /plugins /bunkerweb
+chmod -R 777 /plugins /bunkerweb

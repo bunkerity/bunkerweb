@@ -14,9 +14,10 @@ RUN addgroup -g 101 nginx && \
 
 COPY --chown=nginx:nginx main.py .
 ADD ./init/plugins external
+ADD ./init/bunkerweb bunkerweb
 
-RUN chown -R nginx:nginx external && \
-  chmod -R 777 external
+RUN chown -R nginx:nginx external bunkerweb && \
+  chmod -R 777 external bunkerweb
 
 USER nginx:nginx
 

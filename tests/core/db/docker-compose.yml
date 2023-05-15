@@ -31,8 +31,7 @@ services:
       - bw-docker
     volumes:
       - bw-data:/data/lib
-      - bw-db:/usr/share/bunkerweb/db
-      - bw-core-plugins:/usr/share/bunkerweb/core
+      - bw-volume:/usr/share/bunkerweb
       - ./init/plugins:/data/plugins
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
@@ -90,10 +89,8 @@ services:
 volumes:
   bw-data:
     name: bw-data
-  bw-db:
-    name: bw-db
-  bw-core-plugins:
-    name: bw-core-plugins
+  bw-volume:
+    name: bw-volume
 
 networks:
   bw-universe:
