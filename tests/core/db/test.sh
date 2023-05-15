@@ -25,20 +25,20 @@ cleanup_stack () {
         sed -i 's@SERVICE_REVERSE_PROXY_HOST@GLOBAL_REVERSE_PROXY_HOST@' docker-compose.test.yml
         sed -i 's@SERVICE_REVERSE_PROXY_URL@GLOBAL_REVERSE_PROXY_URL@' docker-compose.test.yml
 
-        if [[ $(sed '20!d' docker-compose.yml) = '      bwadm.example.com_SERVER_NAME: "bwadm.example.com"' ]] ; then
+        if [[ $(sed '16!d' docker-compose.yml) = '      bwadm.example.com_SERVER_NAME: "bwadm.example.com"' ]] ; then
+            sed -i '16d' docker-compose.yml
+        fi
+
+        if [[ $(sed '20!d' docker-compose.yml) = "      bwadm.example.com_CUSTOM_CONF_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" ]] ; then
             sed -i '20d' docker-compose.yml
         fi
 
-        if [[ $(sed '24!d' docker-compose.yml) = "      bwadm.example.com_CUSTOM_CONF_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" ]] ; then
-            sed -i '24d' docker-compose.yml
+        if [[ $(sed '16!d' docker-compose.test.yml) = '      SERVICE_SERVER_NAME: "bwadm.example.com"' ]] ; then
+            sed -i '16d' docker-compose.test.yml
         fi
 
-        if [[ $(sed '18!d' docker-compose.test.yml) = '      SERVICE_SERVER_NAME: "bwadm.example.com"' ]] ; then
-            sed -i '18d' docker-compose.test.yml
-        fi
-
-        if [[ $(sed '23!d' docker-compose.test.yml) = "      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" ]] ; then
-            sed -i '23d' docker-compose.test.yml
+        if [[ $(sed '20!d' docker-compose.test.yml) = "      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" ]] ; then
+            sed -i '20d' docker-compose.test.yml
         fi
 
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
@@ -113,13 +113,13 @@ do
     elif [ "$test" = "multisite" ] ; then
         echo "💾 Running tests with MULTISITE set to yes and with multisite settings ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@MULTISITE: "no"$@MULTISITE: "yes"@' {} \;
-        sed -i '20i \      bwadm.example.com_SERVER_NAME: "bwadm.example.com"' docker-compose.yml
-        sed -i "25i \      bwadm.example.com_CUSTOM_CONF_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.yml
+        sed -i '16i \      bwadm.example.com_SERVER_NAME: "bwadm.example.com"' docker-compose.yml
+        sed -i "21i \      bwadm.example.com_CUSTOM_CONF_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.yml
         sed -i 's@USE_REVERSE_PROXY@bwadm.example.com_USE_REVERSE_PROXY@' docker-compose.yml
         sed -i 's@REVERSE_PROXY_HOST@bwadm.example.com_REVERSE_PROXY_HOST@' docker-compose.yml
         sed -i 's@REVERSE_PROXY_URL@bwadm.example.com_REVERSE_PROXY_URL@' docker-compose.yml
-        sed -i '18i \      SERVICE_SERVER_NAME: "bwadm.example.com"' docker-compose.test.yml
-        sed -i "24i \      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.test.yml
+        sed -i '16i \      SERVICE_SERVER_NAME: "bwadm.example.com"' docker-compose.test.yml
+        sed -i "21i \      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.test.yml
         sed -i 's@GLOBAL_USE_REVERSE_PROXY@SERVICE_USE_REVERSE_PROXY@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_HOST@SERVICE_REVERSE_PROXY_HOST@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
