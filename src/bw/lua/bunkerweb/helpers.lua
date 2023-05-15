@@ -107,6 +107,7 @@ helpers.fill_ctx = function()
     data.http_host = ngx.var.http_host
     data.server_name = ngx.var.server_name
     data.http_content_type = ngx.var.http_content_type
+    data.http_origin = ngx.var.http_origin
     -- IP data : global
     local ip_is_global, err = utils.ip_is_global(data.remote_addr)
     if ip_is_global == nil then

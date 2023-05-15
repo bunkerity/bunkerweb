@@ -18,10 +18,10 @@
     "CORS_ALLOW_ORIGIN": {
       "context": "multisite",
       "default": "*",
-      "help": "Value of the Access-Control-Allow-Origin header.",
+      "help": "Allowed origins to make CORS requests (LUA pattern) or *.",
       "id": "cors-allow-origin",
-      "label": "Access-Control-Allow-Origin value",
-      "regex": "^(\\*|https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*|null)$",
+      "label": "Allowed origins",
+      "regex": "^.*$",
       "type": "text"
     },
     "CORS_EXPOSE_HEADERS": {

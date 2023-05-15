@@ -8,7 +8,6 @@ function cors:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "cors")
 	self.all_headers = {
-		["CORS_ALLOW_ORIGIN"] = "Access-Control-Allow-Origin",
 		["CORS_EXPOSE_HEADERS"] = "Access-Control-Expose-Headers"
 	}
 	self.preflight_headers = {
@@ -24,13 +23,38 @@ function cors:header()
 	if self.variables["USE_CORS"] ~= "yes" then
 		return self:ret(true, "service doesn't use CORS")
 	end
-	-- Standard headers
+	-- Skip if Origin header is not present
+	if not ngx.ctx.bw.http_origin then
+		return self:ret(true, "origin header not present")
+	end
+	-- Always include Vary header to prevent caching
+	local vary = ngx.header.Vary
+	if vary then
+		if type(vary) == "string" then
+			ngx.header.Vary = {vary, "Origin"}
+		else
+			table.insert(vary, "Origin")
+			ngx.header.Vary = vary
+		end
+	else
+		ngx.header.Vary = "Origin"
+	end
+	-- Check if Origin is allowed
+	if self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not ngx.ctx.bw.http_origin:match(self.variables["CORS_ALLOW_ORIGIN"]) then
+		self.logger:log(ngx.WARN, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed")
+		return self:ret(true, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed")
+	end
+	-- Set headers
+	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
+		ngx.header["Access-Control-Allow-Origin"] = "*"
+	else
+		ngx.header["Access-Control-Allow-Origin"] = ngx.ctx.bw.http_origin
+	end
 	for variable, header in pairs(self.all_headers) do
 		if self.variables[variable] ~= "" then
 			ngx.header[header] = self.variables[variable]
 		end
 	end
-	-- Preflight request
 	if ngx.ctx.bw.request_method == "OPTIONS" then
 		for variable, header in pairs(self.preflight_headers) do
 			if variable == "CORS_ALLOW_CREDENTIALS" then
@@ -54,7 +78,7 @@ function cors:access()
 		return self:ret(true, "service doesn't use CORS")
 	end
 	-- Send CORS policy with a 204 (no content) status
-	if ngx.ctx.bw.request_method == "OPTIONS" then
+	if ngx.ctx.bw.request_method == "OPTIONS" and ngx.ctx.bw.http_origin then
 		return self:ret(true, "preflight request", ngx.HTTP_NO_CONTENT)
 	end
 	return self:ret(true, "standard request")
