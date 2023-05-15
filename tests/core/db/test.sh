@@ -68,6 +68,7 @@ if [ $? -ne 0 ] ; then
     manual=1
     cleanup_stack
     manual=0
+    docker compose up -d 2>/dev/null
     if [ $? -ne 0 ] ; then
         echo "💾 Up failed ❌"
         exit 1
@@ -143,6 +144,7 @@ do
         manual=1
         cleanup_stack
         manual=0
+        docker compose up -d 2>/dev/null
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed ❌"
             exit 1

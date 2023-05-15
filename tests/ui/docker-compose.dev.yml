@@ -18,7 +18,6 @@ services:
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
-      USE_MODSECURITY: "no"
       DATASTORE_MEMORY_SIZE: "384m"
       www.example.com_USE_UI: "yes"
       www.example.com_SERVE_FILES: "no"
@@ -27,7 +26,6 @@ services:
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
       www.example.com_REVERSE_PROXY_KEEPALIVE: "yes"
       www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
-      www.example.com_CUSTOM_CONF_MODSEC_CRS_config: 'SecRule REQUEST_FILENAME "@rx /global_config$$" "id:999,ctl:ruleRemoveByTag=platform-pgsql,nolog"'
       www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
     labels:
       - "bunkerweb.INSTANCE"
@@ -62,7 +60,7 @@ services:
     environment:
       ABSOLUTE_URI: "http://www.example.com/admin/"
       ADMIN_USERNAME: "admin"
-      ADMIN_PASSWORD: "admin"
+      ADMIN_PASSWORD: "S$$cr3tP@ssw0rd"
       DOCKER_HOST: "tcp://docker-proxy:2375"
     networks:
       - net-docker
@@ -82,16 +80,17 @@ services:
     networks:
       bw-services:
         ipv4_address: 192.168.0.4
-  # ui-tests:
-  #   build: .
-  #   environment:
-  #     - PYTHONUNBUFFERED=1
-  #   extra_hosts:
-  #     - "www.example.com:192.168.0.2"
-  #     - "app1.example.com:192.168.0.2"
-  #   networks:
-  #     bw-services:
-  #       ipv4_address: 192.168.0.3
+
+  ui-tests:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+      - "app1.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
 
 volumes:
   bw-data:

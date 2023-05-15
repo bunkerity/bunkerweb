@@ -57,7 +57,6 @@ try:
             exit(0)
 
         first_cookie = driver.get_cookies()[0]
-        print(first_cookie, flush=True)
 
     print("ℹ️ Reloading BunkerWeb ...", flush=True)
 
