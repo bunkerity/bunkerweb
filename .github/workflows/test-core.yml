@@ -21,7 +21,7 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
-        - name: Login to private repository
+      - name: Login to private repository
         uses: docker/login-action@v2
         with:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
