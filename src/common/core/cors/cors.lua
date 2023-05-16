@@ -31,7 +31,7 @@ function cors:header()
 	local vary = ngx.header.Vary
 	if vary then
 		if type(vary) == "string" then
-			ngx.header.Vary = {vary, "Origin"}
+			ngx.header.Vary = { vary, "Origin" }
 		else
 			table.insert(vary, "Origin")
 			ngx.header.Vary = vary

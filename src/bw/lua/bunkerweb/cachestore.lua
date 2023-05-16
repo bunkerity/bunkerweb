@@ -1,19 +1,19 @@
-local mlcache		= require "resty.mlcache"
-local logger		= require "bunkerweb.logger"
-local class     	= require "middleclass"
-local cachestore	= class("cachestore")
+local mlcache    = require "resty.mlcache"
+local logger     = require "bunkerweb.logger"
+local class      = require "middleclass"
+local cachestore = class("cachestore")
 
 -- Instantiate mlcache object at module level (which will be cached when running init phase)
 -- TODO : custom settings
-local shm		= "cachestore"
-local ipc_shm	= "cachestore_ipc"
-local shm_miss	= "cachestore_miss"
-local shm_locks	= "cachestore_locks"
+local shm        = "cachestore"
+local ipc_shm    = "cachestore_ipc"
+local shm_miss   = "cachestore_miss"
+local shm_locks  = "cachestore_locks"
 if not ngx.shared.cachestore then
-	shm			= "cachestore_stream"
-	ipc_shm		= "cachestore_ipc_stream"
-	shm_miss	= "cachestore_miss_stream"
-	shm_locks	= "cachestore_locks_stream"
+	shm       = "cachestore_stream"
+	ipc_shm   = "cachestore_ipc_stream"
+	shm_miss  = "cachestore_miss_stream"
+	shm_locks = "cachestore_locks_stream"
 end
 local cache, err = mlcache.new(
 	"cachestore",
@@ -108,7 +108,7 @@ function cachestore:set(key, value, ex)
 	end
 	local ok, err
 	if ex then
-		ok, err = self.cache:set(key, {ttl = ex}, value)
+		ok, err = self.cache:set(key, { ttl = ex }, value)
 	else
 		ok, err = self.cache:set(key, nil, value)
 	end

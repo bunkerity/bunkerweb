@@ -1,18 +1,18 @@
-local cdatastore	= require "bunkerweb.datastore"
-local mmdb			= require "bunkerweb.mmdb"
-local clogger		= require "bunkerweb.logger"
+local cdatastore             = require "bunkerweb.datastore"
+local mmdb                   = require "bunkerweb.mmdb"
+local clogger                = require "bunkerweb.logger"
 
-local ipmatcher		= require "resty.ipmatcher"
-local resolver		= require "resty.dns.resolver"
-local session		= require "resty.session"
-local cjson			= require "cjson"
+local ipmatcher              = require "resty.ipmatcher"
+local resolver               = require "resty.dns.resolver"
+local session                = require "resty.session"
+local cjson                  = require "cjson"
 
-local logger		= clogger:new("UTILS")
-local datastore		= cdatastore:new()
+local logger                 = clogger:new("UTILS")
+local datastore              = cdatastore:new()
 
-local utils 		= {}
+local utils                  = {}
 
-utils.get_variable = function(var, site_search)
+utils.get_variable           = function(var, site_search)
 	-- Default site search to true
 	if site_search == nil then
 		site_search = true
@@ -40,7 +40,7 @@ utils.get_variable = function(var, site_search)
 	return value, "success"
 end
 
-utils.has_variable = function(var, value)
+utils.has_variable           = function(var, value)
 	-- Get global variable
 	local check_value, err = datastore:get("variable_" .. var)
 	if not value then
@@ -71,7 +71,7 @@ utils.has_variable = function(var, value)
 	return check_value == value, "success"
 end
 
-utils.has_not_variable = function(var, value)
+utils.has_not_variable       = function(var, value)
 	-- Get global variable
 	local check_value, err = datastore:get("variable_" .. var)
 	if not value then
@@ -132,7 +132,7 @@ utils.get_multiple_variables = function(vars)
 	return result
 end
 
-utils.is_ip_in_networks = function(ip, networks)
+utils.is_ip_in_networks      = function(ip, networks)
 	-- Instantiate ipmatcher
 	local ipm, err = ipmatcher.new(networks)
 	if not ipm then
@@ -146,15 +146,15 @@ utils.is_ip_in_networks = function(ip, networks)
 	return matched
 end
 
-utils.is_ipv4 = function(ip)
+utils.is_ipv4                = function(ip)
 	return ipmatcher.parse_ipv4(ip)
 end
 
-utils.is_ipv6 = function(ip)
+utils.is_ipv6                = function(ip)
 	return ipmatcher.parse_ipv6(ip)
 end
 
-utils.ip_is_global = function(ip)
+utils.ip_is_global           = function(ip)
 	-- Reserved, non public IPs
 	local reserved_ips = {
 		"0.0.0.0/8",
@@ -201,7 +201,7 @@ utils.ip_is_global = function(ip)
 	return not matched, "success"
 end
 
-utils.get_integration = function()
+utils.get_integration        = function()
 	-- Check if already in datastore
 	local integration, err = datastore:get("misc_integration")
 	if integration then
@@ -236,7 +236,7 @@ utils.get_integration = function()
 						if data:find("Alpine") then
 							integration = "docker"
 						end
-					-- Strange case ...
+						-- Strange case ...
 					else
 						integration = "unknown"
 					end
@@ -252,7 +252,7 @@ utils.get_integration = function()
 	return integration
 end
 
-utils.get_version = function()
+utils.get_version            = function()
 	-- Check if already in datastore
 	local version, err = datastore:get("misc_version")
 	if version then
@@ -274,7 +274,7 @@ utils.get_version = function()
 	return version
 end
 
-utils.get_reason = function()
+utils.get_reason             = function()
 	-- ngx.ctx
 	if ngx.ctx.reason then
 		return ngx.ctx.reason
@@ -299,7 +299,7 @@ utils.get_reason = function()
 	return nil
 end
 
-utils.get_resolvers = function()
+utils.get_resolvers          = function()
 	-- Get resolvers from datastore if existing
 	local str_resolvers, err = datastore:get("misc_resolvers")
 	if str_resolvers then
@@ -324,7 +324,7 @@ utils.get_resolvers = function()
 	return resolvers
 end
 
-utils.get_rdns = function(ip)
+utils.get_rdns               = function(ip)
 	-- Check cache
 	local cachestore = utils.new_cachestore()
 	local ok, value = cachestore:get("rdns_" .. ip)
@@ -371,7 +371,7 @@ utils.get_rdns = function(ip)
 	return ptrs, ret_err
 end
 
-utils.get_ips = function(fqdn, ipv6)
+utils.get_ips                = function(fqdn, ipv6)
 	-- Check cache
 	local cachestore = utils.new_cachestore()
 	local ok, value = cachestore:get("dns_" .. fqdn)
@@ -445,7 +445,7 @@ utils.get_ips = function(fqdn, ipv6)
 	return ips, cjson.encode(res_errors) .. " " .. cjson.encode(ans_errors)
 end
 
-utils.get_country = function(ip)
+utils.get_country            = function(ip)
 	-- Check if mmdb is loaded
 	if not mmdb.country_db then
 		return false, "mmdb country not loaded"
@@ -461,7 +461,7 @@ utils.get_country = function(ip)
 	return result.country.iso_code, "success"
 end
 
-utils.get_asn = function(ip)
+utils.get_asn                = function(ip)
 	-- Check if mmdp is loaded
 	if not mmdb.asn_db then
 		return false, "mmdb asn not loaded"
@@ -477,7 +477,7 @@ utils.get_asn = function(ip)
 	return result.autonomous_system_number, "success"
 end
 
-utils.rand = function(nb, no_numbers)
+utils.rand                   = function(nb, no_numbers)
 	local charset = {}
 	-- lowers, uppers and numbers
 	if not no_numbers then
@@ -492,7 +492,7 @@ utils.rand = function(nb, no_numbers)
 	return result
 end
 
-utils.get_deny_status = function()
+utils.get_deny_status        = function()
 	-- Stream case
 	if ngx.ctx.bw and ngx.ctx.bw.kind == "stream" then
 		return 444
@@ -506,14 +506,14 @@ utils.get_deny_status = function()
 	return tonumber(status)
 end
 
-utils.get_session = function(audience)
+utils.get_session            = function(audience)
 	-- Session already in context
 	if ngx.ctx.bw.session then
 		ngx.ctx.bw.session:set_audience(audience)
 		return ngx.ctx.bw.session
 	end
 	-- Open session and fill ctx
-	local _session, err, exists, refreshed = session.start({audience = audience})
+	local _session, err, exists, refreshed = session.start({ audience = audience })
 	if err and err ~= "missing session cookie" and err ~= "no session" then
 		logger:log(ngx.ERR, "session:start() error : " .. err)
 	end
@@ -522,7 +522,7 @@ utils.get_session = function(audience)
 	return _session
 end
 
-utils.is_banned = function(ip)
+utils.is_banned              = function(ip)
 	-- Check on local datastore
 	local reason, err = datastore:get("bans_ip_" .. ip)
 	if not reason and err ~= "not found" then
@@ -585,7 +585,7 @@ utils.is_banned = function(ip)
 	return false, "not banned"
 end
 
-utils.add_ban = function(ip, reason, ttl)
+utils.add_ban                = function(ip, reason, ttl)
 	-- Set on local datastore
 	local ok, err = datastore:set("bans_ip_" .. ip, reason, ttl)
 	if not ok then
@@ -614,7 +614,7 @@ utils.add_ban = function(ip, reason, ttl)
 	return true, "success"
 end
 
-utils.new_cachestore = function()
+utils.new_cachestore         = function()
 	-- Check if redis is used
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then

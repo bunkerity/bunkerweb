@@ -1,11 +1,11 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local cachestore	= require "bunkerweb.cachestore"
-local cjson			= require "cjson"
-local ipmatcher		= require "resty.ipmatcher"
+local class      = require "middleclass"
+local plugin     = require "bunkerweb.plugin"
+local utils      = require "bunkerweb.utils"
+local cachestore = require "bunkerweb.cachestore"
+local cjson      = require "cjson"
+local ipmatcher  = require "resty.ipmatcher"
 
-local greylist = class("greylist", plugin)
+local greylist   = class("greylist", plugin)
 
 function greylist:initialize()
 	-- Call parent initialize
@@ -202,7 +202,7 @@ function greylist:is_greylisted_ip()
 		if rdns_list then
 			for i, rdns in ipairs(rdns_list) do
 				for j, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
+					if rdns:sub(- #suffix) == suffix then
 						return true, "rDNS " .. suffix
 					end
 				end
@@ -216,7 +216,7 @@ function greylist:is_greylisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil,  "ASN " .. err
+			return nil, "ASN " .. err
 		end
 		for i, bl_asn in ipairs(self.lists["ASN"]) do
 			if bl_asn == tostring(asn) then
@@ -255,7 +255,7 @@ function greylist:is_in_cache(ele)
 	local ok, data = self.cachestore:get("plugin_greylist_" .. ngx.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
-	end 
+	end
 	return true, data
 end
 
@@ -263,7 +263,7 @@ function greylist:add_to_cache(ele, value)
 	local ok, err = self.cachestore:set("plugin_greylist_" .. ngx.ctx.bw.server_name .. ele, value, 86400)
 	if not ok then
 		return false, err
-	end 
+	end
 	return true
 end
 

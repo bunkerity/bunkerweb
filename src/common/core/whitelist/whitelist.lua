@@ -1,17 +1,17 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local datastore 	= require "bunkerweb.datastore"
-local cachestore	= require "bunkerweb.cachestore"
-local cjson     	= require "cjson"
-local ipmatcher 	= require "resty.ipmatcher"
-local env			= require "resty.env"
+local class      = require "middleclass"
+local plugin     = require "bunkerweb.plugin"
+local utils      = require "bunkerweb.utils"
+local datastore  = require "bunkerweb.datastore"
+local cachestore = require "bunkerweb.cachestore"
+local cjson      = require "cjson"
+local ipmatcher  = require "resty.ipmatcher"
+local env        = require "resty.env"
 
-local whitelist = class("whitelist", plugin)
+local whitelist  = class("whitelist", plugin)
 
 function whitelist:initialize()
 	-- Call parent initialize
-    plugin.initialize(self, "whitelist")
+	plugin.initialize(self, "whitelist")
 	-- Check if redis is enabled
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
@@ -209,7 +209,7 @@ function whitelist:is_in_cache(ele)
 	local ok, data = self.cachestore:get("plugin_whitelist_" .. ngx.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
-	end 
+	end
 	return true, data
 end
 
@@ -258,7 +258,7 @@ function whitelist:is_whitelisted_ip()
 		if rdns_list then
 			for i, rdns in ipairs(rdns_list) do
 				for j, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
+					if rdns:sub(- #suffix) == suffix then
 						return true, "rDNS " .. suffix
 					end
 				end
@@ -272,7 +272,7 @@ function whitelist:is_whitelisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil,  "ASN " .. err
+			return nil, "ASN " .. err
 		end
 		for i, bl_asn in ipairs(self.lists["ASN"]) do
 			if bl_asn == tostring(asn) then

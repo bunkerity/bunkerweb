@@ -1,13 +1,12 @@
-
 local class     = require "middleclass"
-local datastore	= require "bunkerweb.datastore"
-local utils		= require "bunkerweb.utils"
-local cjson		= require "cjson"
-local upload	= require "resty.upload"
+local datastore = require "bunkerweb.datastore"
+local utils     = require "bunkerweb.utils"
+local cjson     = require "cjson"
+local upload    = require "resty.upload"
 
-local api = class("api")
+local api       = class("api")
 
-api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
+api.global      = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 
 function api:initialize()
 	self.datastore = datastore:new()

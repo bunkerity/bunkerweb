@@ -1,5 +1,5 @@
-local class		= require "middleclass"
-local plugin	= require "bunkerweb.plugin"
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
 local utils     = require "bunkerweb.utils"
 local datastore = require "bunkerweb.datastore"
 local cjson     = require "cjson"
@@ -8,12 +8,12 @@ local base64    = require "base64"
 local sha256    = require "resty.sha256"
 local str       = require "resty.string"
 local http      = require "resty.http"
-local template	= nil
+local template  = nil
 if ngx.shared.datastore then
-	template	= require "resty.template"
+	template = require "resty.template"
 end
 
-local antibot	= class("antibot", plugin)
+local antibot = class("antibot", plugin)
 
 function antibot:initialize()
 	-- Call parent initialize
@@ -173,7 +173,6 @@ function antibot:prepare_challenge()
 end
 
 function antibot:display_challenge()
-
 	-- Check if prepared
 	if not self.session_data.prepared then
 		return false, "challenge not prepared"
@@ -274,7 +273,9 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
-			body = "secret=" .. self.variables["ANTIBOT_RECAPTCHA_SECRET"] .. "&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+			body = "secret=" ..
+			self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
+			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -308,7 +309,9 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
-			body = "secret=" .. self.variables["ANTIBOT_HCAPTCHA_SECRET"] .. "&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+			body = "secret=" ..
+			self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
+			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}

@@ -1,11 +1,11 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local cachestore	= require "bunkerweb.cachestore"
-local cjson			= require "cjson"
-local resolver		= require "resty.dns.resolver"
+local class      = require "middleclass"
+local plugin     = require "bunkerweb.plugin"
+local utils      = require "bunkerweb.utils"
+local cachestore = require "bunkerweb.cachestore"
+local cjson      = require "cjson"
+local resolver   = require "resty.dns.resolver"
 
-local dnsbl			= class("dnsbl", plugin)
+local dnsbl      = class("dnsbl", plugin)
 
 function dnsbl:initialize()
 	-- Call parent initialize
@@ -65,7 +65,8 @@ function dnsbl:access()
 		if cached == "ok" then
 			return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")
 		end
-		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")", utils.get_deny_status())
+		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
+			utils.get_deny_status())
 	end
 	-- Loop on DNSBL list
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
@@ -105,7 +106,7 @@ function dnsbl:add_to_cache(ip, value)
 	local ok, err = self.cachestore:set("plugin_dnsbl_" .. ngx.ctx.bw.server_name .. ip, value, 86400)
 	if not ok then
 		return false, err
-	end 
+	end
 	return true
 end
 

@@ -1,7 +1,7 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local session   	= require "resty.session"
+local class    = require "middleclass"
+local plugin   = require "bunkerweb.plugin"
+local utils    = require "bunkerweb.utils"
+local session  = require "resty.session"
 
 local sessions = class("sessions", plugin)
 

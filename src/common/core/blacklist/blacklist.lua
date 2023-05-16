@@ -1,12 +1,12 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local datastore 	= require "bunkerweb.datastore"
-local cachestore	= require "bunkerweb.cachestore"
-local cjson     	= require "cjson"
-local ipmatcher 	= require "resty.ipmatcher"
+local class      = require "middleclass"
+local plugin     = require "bunkerweb.plugin"
+local utils      = require "bunkerweb.utils"
+local datastore  = require "bunkerweb.datastore"
+local cachestore = require "bunkerweb.cachestore"
+local cjson      = require "cjson"
+local ipmatcher  = require "resty.ipmatcher"
 
-local blacklist = class("blacklist", plugin)
+local blacklist  = class("blacklist", plugin)
 
 function blacklist:initialize()
 	-- Call parent initialize
@@ -161,7 +161,6 @@ function blacklist:access()
 
 	-- Return
 	return self:ret(true, "not blacklisted")
-
 end
 
 function blacklist:preread()
@@ -182,7 +181,7 @@ function blacklist:is_in_cache(ele)
 	local ok, data = self.cachestore:get("plugin_blacklist_" .. ngx.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
-	end 
+	end
 	return true, data
 end
 
@@ -190,7 +189,7 @@ function blacklist:add_to_cache(ele, value)
 	local ok, err = self.cachestore:set("plugin_blacklist_" .. ngx.ctx.bw.server_name .. ele, value, 86400)
 	if not ok then
 		return false, err
-	end 
+	end
 	return true
 end
 
@@ -243,7 +242,7 @@ function blacklist:is_blacklisted_ip()
 			local ignore = false
 			for i, rdns in ipairs(rdns_list) do
 				for j, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
+					if rdns:sub(- #suffix) == suffix then
 						ignore = true
 						break
 					end
@@ -253,7 +252,7 @@ function blacklist:is_blacklisted_ip()
 			if not ignore then
 				for i, rdns in ipairs(rdns_list) do
 					for j, suffix in ipairs(self.lists["RDNS"]) do
-						if rdns:sub(-#suffix) == suffix then
+						if rdns:sub(- #suffix) == suffix then
 							return true, "rDNS " .. suffix
 						end
 					end

@@ -17,7 +17,7 @@ helpers.load_plugin = function(json)
     end
     -- Check fields
     local missing_fields = {}
-    local required_fields = {"id", "order", "name", "description", "version", "settings"}
+    local required_fields = { "id", "order", "name", "description", "version", "settings" }
     for i, field in ipairs(required_fields) do
         if plugin[field] == nil then
             valid_json = false
@@ -72,7 +72,7 @@ helpers.call_plugin = function(plugin, method)
     end
     -- Check values
     local missing_values = {}
-    local required_values = {"ret", "msg"}
+    local required_values = { "ret", "msg" }
     for i, value in ipairs(required_values) do
         if ret[value] == nil then
             table.insert(missing_values, value)
