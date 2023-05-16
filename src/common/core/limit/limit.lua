@@ -75,7 +75,7 @@ function limit:init()
 	local i = 0
 	for srv, vars in pairs(variables) do
 		for var, value in pairs(vars) do
-			if var:match("LIMIT_REQ_URL") then
+			if utils.regex_match(var, "LIMIT_REQ_URL") then
 				local url = value
 				local rate = vars[var:gsub("URL", "RATE")]
 				if data[srv] == nil then
@@ -106,7 +106,7 @@ function limit:access()
 	local rate = nil
 	local uri = nil
 	for k, v in pairs(self.rules) do
-		if k ~= "/" and ngx.ctx.bw.uri:match(k) then
+		if k ~= "/" and utils.regex_match(ngx.ctx.bw.uri, k) then
 			rate = v
 			uri = k
 			break

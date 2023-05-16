@@ -232,7 +232,7 @@ end
 function greylist:is_greylisted_uri()
 	-- Check if URI is in greylist
 	for i, uri in ipairs(self.lists["URI"]) do
-		if ngx.ctx.bw.uri:match(uri) then
+		if utils.regex_match(ngx.ctx.bw.uri, uri) then
 			return true, "URI " .. uri
 		end
 	end
@@ -243,7 +243,7 @@ end
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
 	for i, ua in ipairs(self.lists["USER_AGENT"]) do
-		if ngx.ctx.bw.http_user_agent:match(ua) then
+		if utils.regex_match(ngx.ctx.bw.http_user_agent, ua) then
 			return true, "UA " .. ua
 		end
 	end

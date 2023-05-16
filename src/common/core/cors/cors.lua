@@ -40,7 +40,7 @@ function cors:header()
 		ngx.header.Vary = "Origin"
 	end
 	-- Check if Origin is allowed
-	if self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not ngx.ctx.bw.http_origin:match(self.variables["CORS_ALLOW_ORIGIN"]) then
+	if ngx.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not utils.regex_match(ngx.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"]) then
 		self.logger:log(ngx.WARN, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed")
 		return self:ret(true, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed")
 	end
@@ -78,11 +78,8 @@ function cors:access()
 		return self:ret(true, "service doesn't use CORS")
 	end
 	-- Deny as soon as possible if needed
-	if self.variables["CORS_DENY_REQUEST"] == "yes" and ngx.ctx.bw.http_origin then
-		if self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not ngx.ctx.bw.http_origin:match(self.variables["CORS_ALLOW_ORIGIN"]) then
-			self.logger:log(ngx.WARN, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed")
-			return self:ret(true, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed, denying access", utils.get_deny_status())
-		end
+	if ngx.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not utils.regex_match(ngx.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"]) then
+		return self:ret(true, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed, denying access", utils.get_deny_status())
 	end
 	-- Send CORS policy with a 204 (no content) status
 	if ngx.ctx.bw.request_method == "OPTIONS" and ngx.ctx.bw.http_origin then

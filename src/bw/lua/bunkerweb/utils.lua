@@ -626,4 +626,17 @@ utils.new_cachestore         = function()
 	return require "bunkerweb.cachestore":new(use_redis)
 end
 
+utils.regex_match = function(str, regex, options)
+	local all_options = "o"
+	if options then
+		all_options = all_options .. options
+	end
+	local match, err = ngx.re.match(str, regex, all_options)
+	if err then
+		logger:log(ngx.ERR, "error while matching regex " .. regex .. "with string " .. str)
+		return nil
+	end
+	return match
+end
+
 return utils

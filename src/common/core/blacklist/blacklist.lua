@@ -294,7 +294,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in ignore list
 	local ignore = false
 	for i, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if ngx.ctx.bw.uri:match(ignore_uri) then
+		if utils.regex_match(ngx.ctx.bw.uri, ignore_uri) then
 			ignore = true
 			break
 		end
@@ -302,7 +302,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in blacklist
 	if not ignore then
 		for i, uri in ipairs(self.lists["URI"]) do
-			if ngx.ctx.bw.uri:match(uri) then
+			if utils.regex_match(ngx.ctx.bw.uri, uri) then
 				return true, "URI " .. uri
 			end
 		end
@@ -315,7 +315,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in ignore list
 	local ignore = false
 	for i, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
-		if ngx.ctx.bw.http_user_agent:match(ignore_ua) then
+		if utils.regex_match(ngx.ctx.bw.http_user_agent, ignore_ua) then
 			ignore = true
 			break
 		end
@@ -323,7 +323,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in blacklist
 	if not ignore then
 		for i, ua in ipairs(self.lists["USER_AGENT"]) do
-			if ngx.ctx.bw.http_user_agent:match(ua) then
+			if utils.regex_match(ngx.ctx.bw.http_user_agent, ua) then
 				return true, "UA " .. ua
 			end
 		end

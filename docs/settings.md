@@ -58,15 +58,17 @@ STREAM support :x:
 
 Bot detection by using a challenge.
 
-|          Setting          |  Default   | Context |Multiple|                             Description                             |
-|---------------------------|------------|---------|--------|---------------------------------------------------------------------|
-|`USE_ANTIBOT`              |`no`        |multisite|no      |Activate antibot feature.                                            |
-|`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.|
-|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                      |
-|`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                     |
-|`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                      |
-|`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                      |
-|`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                       |
+|          Setting          |  Default   | Context |Multiple|                                                         Description                                                          |
+|---------------------------|------------|---------|--------|------------------------------------------------------------------------------------------------------------------------------|
+|`USE_ANTIBOT`              |`no`        |multisite|no      |Activate antibot feature.                                                                                                     |
+|`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.                                                         |
+|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                                                               |
+|`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                                                                              |
+|`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
+|`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |
+|`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                                                                                |
+|`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
+|`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 
 ### Auth basic
 
@@ -112,9 +114,9 @@ Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 |`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
 |`BLACKLIST_ASN`                   |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                                           |
 |`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                                   |
-|`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent, separated with spaces, to block.                                            |
+|`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to block.                               |
 |`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.                        |
-|`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI, separated with spaces, to block.                                                   |
+|`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to block.                                      |
 |`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.                               |
 |`BLACKLIST_IGNORE_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to ignore in the blacklist.                          |
 |`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
@@ -122,9 +124,9 @@ Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 |`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
 |`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to ignore in the blacklist.                         |
 |`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
-|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent, separated with spaces, to ignore in the blacklist.                          |
+|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.             |
 |`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
-|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI, separated with spaces, to ignore in the blacklist.                                 |
+|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                    |
 |`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
 ### Brotli
@@ -157,15 +159,16 @@ STREAM support :x:
 
 Cross-Origin Resource Sharing.
 
-|        Setting         |                                      Default                                       | Context |Multiple|                   Description                    |
-|------------------------|------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
-|`USE_CORS`              |`no`                                                                                |multisite|no      |Use CORS                                          |
-|`CORS_ALLOW_ORIGIN`     |`*`                                                                                 |multisite|no      |Value of the Access-Control-Allow-Origin header.  |
-|`CORS_EXPOSE_HEADERS`   |`Content-Length,Content-Range`                                                      |multisite|no      |Value of the Access-Control-Expose-Headers header.|
-|`CORS_MAX_AGE`          |`86400`                                                                             |multisite|no      |Value of the Access-Control-Max-Age header.       |
-|`CORS_ALLOW_CREDENTIALS`|`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header. |
-|`CORS_ALLOW_METHODS`    |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header. |
-|`CORS_ALLOW_HEADERS`    |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header. |
+|        Setting         |                                      Default                                       | Context |Multiple|                            Description                            |
+|------------------------|------------------------------------------------------------------------------------|---------|--------|-------------------------------------------------------------------|
+|`USE_CORS`              |`no`                                                                                |multisite|no      |Use CORS                                                           |
+|`CORS_ALLOW_ORIGIN`     |`*`                                                                                 |multisite|no      |Allowed origins to make CORS requests : PCRE regex or *.           |
+|`CORS_EXPOSE_HEADERS`   |`Content-Length,Content-Range`                                                      |multisite|no      |Value of the Access-Control-Expose-Headers header.                 |
+|`CORS_MAX_AGE`          |`86400`                                                                             |multisite|no      |Value of the Access-Control-Max-Age header.                        |
+|`CORS_ALLOW_CREDENTIALS`|`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header.                  |
+|`CORS_ALLOW_METHODS`    |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header.                  |
+|`CORS_ALLOW_HEADERS`    |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header.                  |
+|`CORS_DENY_REQUEST`     |`yes`                                                                               |multisite|no      |Deny request and don't send it to backend if Origin is not allowed.|
 
 ### Client cache
 
@@ -251,9 +254,9 @@ Allow access while keeping security features based on internal and external IP/n
 |`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.|
 |`GREYLIST_ASN`            |       |multisite|no      |List of ASN numbers, separated with spaces, to put into the greylist.                         |
 |`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist.                 |
-|`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent, separated with spaces, to put into the greylist.                          |
+|`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.             |
 |`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist.     |
-|`GREYLIST_URI`            |       |multisite|no      |List of URI, separated with spaces, to put into the greylist.                                 |
+|`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                    |
 |`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
 
 ### Gzip
@@ -318,15 +321,15 @@ STREAM support :warning:
 
 Limit maximum number of requests and connections.
 
-|        Setting        |Default| Context |Multiple|                                  Description                                   |
-|-----------------------|-------|---------|--------|--------------------------------------------------------------------------------|
-|`USE_LIMIT_REQ`        |`yes`  |multisite|no      |Activate limit requests feature.                                                |
-|`LIMIT_REQ_URL`        |`/`    |multisite|yes     |URL where the limit request will be applied.                                    |
-|`LIMIT_REQ_RATE`       |`2r/s` |multisite|yes     |Rate to apply to the URL (s for second, m for minute, h for hour and d for day).|
-|`USE_LIMIT_CONN`       |`yes`  |multisite|no      |Activate limit connections feature.                                             |
-|`LIMIT_CONN_MAX_HTTP1` |`10`   |multisite|no      |Maximum number of connections per IP when using HTTP/1.X protocol.              |
-|`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                    |
-|`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                         |
+|        Setting        |Default| Context |Multiple|                                         Description                                         |
+|-----------------------|-------|---------|--------|---------------------------------------------------------------------------------------------|
+|`USE_LIMIT_REQ`        |`yes`  |multisite|no      |Activate limit requests feature.                                                             |
+|`LIMIT_REQ_URL`        |`/`    |multisite|yes     |URL (PCRE regex) where the limit request will be applied or special value / for all requests.|
+|`LIMIT_REQ_RATE`       |`2r/s` |multisite|yes     |Rate to apply to the URL (s for second, m for minute, h for hour and d for day).             |
+|`USE_LIMIT_CONN`       |`yes`  |multisite|no      |Activate limit connections feature.                                                          |
+|`LIMIT_CONN_MAX_HTTP1` |`10`   |multisite|no      |Maximum number of connections per IP when using HTTP/1.X protocol.                           |
+|`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                                 |
+|`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                                      |
 
 ### Miscellaneous
 
@@ -522,8 +525,8 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_RDNS_URLS`      |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.|
 |`WHITELIST_ASN`            |`32934`                                                                                                                                                                                     |multisite|no      |List of ASN numbers, separated with spaces, to whitelist.                         |
 |`WHITELIST_ASN_URLS`       |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist.                 |
-|`WHITELIST_USER_AGENT`     |                                                                                                                                                                                            |multisite|no      |List of User-Agent, separated with spaces, to whitelist.                          |
+|`WHITELIST_USER_AGENT`     |                                                                                                                                                                                            |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to whitelist.             |
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
-|`WHITELIST_URI`            |                                                                                                                                                                                            |multisite|no      |List of URI, separated with spaces, to whitelist.                                 |
+|`WHITELIST_URI`            |                                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
 

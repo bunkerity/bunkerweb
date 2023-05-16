@@ -100,15 +100,24 @@ STREAM support :x:
 
 [Cross-Origin Resource Sharing](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) lets you manage how your service can be contacted from different origins. Please note that you will have to allow the `OPTIONS` HTTP method using the `ALLOWED_METHODS` if you want to enable it (more info [here](#allowed-methods)). Here is the list of settings related to CORS :
 
-|        Setting         |                                      Default                                       | Context |Multiple|                   Description                    |
-|------------------------|------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
-|`USE_CORS`              |`no`                                                                                |multisite|no      |Use CORS                                          |
-|`CORS_ALLOW_ORIGIN`     |`*`                                                                                 |multisite|no      |Value of the Access-Control-Allow-Origin header.  |
-|`CORS_EXPOSE_HEADERS`   |`Content-Length,Content-Range`                                                      |multisite|no      |Value of the Access-Control-Expose-Headers header.|
-|`CORS_MAX_AGE`          |`86400`                                                                             |multisite|no      |Value of the Access-Control-Max-Age header.       |
-|`CORS_ALLOW_CREDENTIALS`|`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header. |
-|`CORS_ALLOW_METHODS`    |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header. |
-|`CORS_ALLOW_HEADERS`    |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header. |
+|        Setting         |                                      Default                                       | Context |Multiple|                            Description                            |
+|------------------------|------------------------------------------------------------------------------------|---------|--------|-------------------------------------------------------------------|
+|`USE_CORS`              |`no`                                                                                |multisite|no      |Use CORS                                                           |
+|`CORS_ALLOW_ORIGIN`     |`*`                                                                                 |multisite|no      |Allowed origins to make CORS requests : PCRE regex or *.           |
+|`CORS_EXPOSE_HEADERS`   |`Content-Length,Content-Range`                                                      |multisite|no      |Value of the Access-Control-Expose-Headers header.                 |
+|`CORS_MAX_AGE`          |`86400`                                                                             |multisite|no      |Value of the Access-Control-Max-Age header.                        |
+|`CORS_ALLOW_CREDENTIALS`|`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header.                  |
+|`CORS_ALLOW_METHODS`    |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header.                  |
+|`CORS_ALLOW_HEADERS`    |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header.                  |
+|`CORS_DENY_REQUEST`     |`yes`                                                                               |multisite|no      |Deny request and don't send it to backend if Origin is not allowed.|
+
+Here is some examples of possible values for `CORS_ALLOW_ORIGIN` setting :
+
+- `*` will allow all origin
+- `^https://www\.example\.com$` will allow `https://www.example.com`
+- `^https://.+\.example.com$` will allow any origins when domain ends with `.example.com`
+- `^https://(www\.example1\.com|www\.example2\.com)$` will allow both `https://www.example1.com` and `https://www.example2.com`
+- `^https?://www\.example\.com$` will allow both `https://www.example.com` and `http://www.example.com`
 
 ## HTTPS / SSL/TLS
 
@@ -265,30 +274,30 @@ STREAM support :warning:
 
 You can use the following settings to set up blacklisting :
 
-|           Setting           |                                                            Default                                                             | Description                                                                                   |
-| :-------------------------: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------- |
-|`USE_BLACKLIST`                   |`yes`                                                                                                                         |Activate blacklist feature.                                                                     |
-|`BLACKLIST_IP`                    |                                                                                                                              |List of IP/network, separated with spaces, to block.                                            |
-|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |List of URLs, separated with spaces, containing bad IP/network to block.                        |
-|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |Only perform RDNS blacklist checks on global IP addresses.                                      |
-|`BLACKLIST_RDNS`                  |`.shodan.io .censys.io`                                                                                                       |List of reverse DNS suffixes, separated with spaces, to block.                                  |
-|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
-|`BLACKLIST_ASN`                   |                                                                                                                              |List of ASN numbers, separated with spaces, to block.                                           |
-|`BLACKLIST_ASN_URLS`              |                                                                                                                              |List of URLs, separated with spaces, containing ASN to block.                                   |
-|`BLACKLIST_USER_AGENT`            |                                                                                                                              |List of User-Agent, separated with spaces, to block.                                            |
-|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|List of URLs, separated with spaces, containing bad User-Agent to block.                        |
-|`BLACKLIST_URI`                   |                                                                                                                              |List of URI, separated with spaces, to block.                                                   |
-|`BLACKLIST_URI_URLS`              |                                                                                                                              |List of URLs, separated with spaces, containing bad URI to block.                               |
-|`BLACKLIST_IGNORE_IP`             |                                                                                                                              |List of IP/network, separated with spaces, to ignore in the blacklist.                          |
-|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
-|`BLACKLIST_IGNORE_RDNS`           |                                                                                                                              |List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.                |
-|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
-|`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |List of ASN numbers, separated with spaces, to ignore in the blacklist.                         |
-|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
-|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |List of User-Agent, separated with spaces, to ignore in the blacklist.                          |
-|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
-|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |List of URI, separated with spaces, to ignore in the blacklist.                                 |
-|`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
+|             Setting              |                                                           Default                                                            | Context |Multiple|                                          Description                                           |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------|
+|`USE_BLACKLIST`                   |`yes`                                                                                                                         |multisite|no      |Activate blacklist feature.                                                                     |
+|`BLACKLIST_IP`                    |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to block.                                            |
+|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block.                        |
+|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                                      |
+|`BLACKLIST_RDNS`                  |`.shodan.io .censys.io`                                                                                                       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to block.                                  |
+|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
+|`BLACKLIST_ASN`                   |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                                           |
+|`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                                   |
+|`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to block.                               |
+|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.                        |
+|`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to block.                                      |
+|`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.                               |
+|`BLACKLIST_IGNORE_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to ignore in the blacklist.                          |
+|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
+|`BLACKLIST_IGNORE_RDNS`           |                                                                                                                              |multisite|no      |List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.                |
+|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
+|`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to ignore in the blacklist.                         |
+|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
+|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.             |
+|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
+|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                    |
+|`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
 When using stream mode, only IP, RDNS and ASN checks will be done.
 
@@ -298,19 +307,20 @@ STREAM support :warning:
 
 You can use the following settings to set up greylisting :
 
-|           Setting           |                                                            Default                                                             | Description                                                                                   |
-| :-------------------------: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------- |
-|       `USE_GREYLIST`       |                                                             `no`                                                              | When set to `yes`, will enable greylisting based on various criteria.                        |
-|       `GREYLIST_IP`        |                                                                                                                                | List of IPs and networks to greylist.                                                        |
-|     `GREYLIST_IP_URLS`     |                                                                                           | List of URL containing IP and network to greylist. |
-|      `GREYLIST_RDNS`       |                                                                                                         | List of reverse DNS to greylist.                                                             |
-|    `GREYLIST_RDNS_URLS`    |                                                                                                                                | List of URLs containing reverse DNS to greylist.                                             |
-|       `GREYLIST_ASN`       |                                                                                                                                | List of ASN to greylist.                                                                     |
-|    `GREYLIST_ASN_URLS`     |                                                                                                                                | List of URLs containing ASN to greylist.                                                     |
-|   `GREYLIST_USER_AGENT`    |                                                                                                                                | List of User-Agents to greylist.                                                             |
-| `GREYLIST_USER_AGENT_URLS` |  | List of URLs containing User-Agent(s) to greylist.                                           |
-|       `GREYLIST_URI`       |                                                                                                                                | List of requests URI to greylist.                                                            |
-|    `GREYLIST_URI_URLS`     |                                                                                                                                | List of URLs containing request URI to greylist.                                             |
+|         Setting          |Default| Context |Multiple|                                         Description                                          |
+|--------------------------|-------|---------|--------|----------------------------------------------------------------------------------------------|
+|`USE_GREYLIST`            |`no`   |multisite|no      |Activate greylist feature.                                                                    |
+|`GREYLIST_IP`             |       |multisite|no      |List of IP/network, separated with spaces, to put into the greylist.                          |
+|`GREYLIST_IP_URLS`        |       |global   |no      |List of URLs, separated with spaces, containing good IP/network to put into the greylist.     |
+|`GREYLIST_RDNS_GLOBAL`    |`yes`  |multisite|no      |Only perform RDNS greylist checks on global IP addresses.                                     |
+|`GREYLIST_RDNS`           |       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to put into the greylist.                |
+|`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.|
+|`GREYLIST_ASN`            |       |multisite|no      |List of ASN numbers, separated with spaces, to put into the greylist.                         |
+|`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist.                 |
+|`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.             |
+|`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist.     |
+|`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                    |
+|`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
 
 When using stream mode, only IP, RDNS and ASN checks will be done.
 
@@ -320,19 +330,20 @@ STREAM support :warning:
 
 You can use the following settings to set up whitelisting :
 
-|           Setting           |                                                                                           Default                                                                                            | Description                                                                                                              |
-| :-------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------- |
-|       `USE_WHITELIST`       |                                                                                            `yes`                                                                                             | When set to `yes`, will enable whitelisting based on various criteria.                                                   |
-|       `WHITELIST_IP`        | `20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247 54.208.102.37 107.21.1.8` | List of IP and network to whitelist. The default list contains IP from DuckDuckGo crawler.                               |
-|     `WHITELIST_IP_URLS`     |                                                                                              ``                                                                                              | List of URLs containing IP and network to whitelist.                                                                     |
-|      `WHITELIST_RDNS`       |         `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`         | List of reverse DNS to whitelist. Default list contains various reverse DNS of search engines and social media crawlers. |
-|    `WHITELIST_RDNS_URLS`    |                                                                                                                                                                                              | List of URLs containing reverse DNS to whitelist.                                                                        |
-|       `WHITELIST_ASN`       |                                                                                           `32934`                                                                                            | List of ASN to whitelist. The default list contains the ASN of Facebook.                                                 |
-|    `WHITELIST_ASN_URLS`     |                                                                                                                                                                                              | List of URL containing ASN to whitelist.                                                                                 |
-|   `WHITELIST_USER_AGENT`    |                                                                                                                                                                                              | List of User-Agent to whitelist.                                                                                         |
-| `WHITELIST_USER_AGENT_URLS` |                                                                                                                                                                                              | List of URLs containing User-Agent to whitelist.                                                                         |
-|       `WHITELIST_URI`       |                                                                                                                                                                                              | List of requests URI to whitelist.                                                                                       |
-|    `WHITELIST_URI_URLS`     |                                                                                                                                                                                              | List of URLs containing request(s) URI to whitelist.                                                                     |
+|          Setting          |                                                                                          Default                                                                                           | Context |Multiple|                                   Description                                    |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|----------------------------------------------------------------------------------|
+|`USE_WHITELIST`            |`yes`                                                                                                                                                                                       |multisite|no      |Activate whitelist feature.                                                       |
+|`WHITELIST_IP`             |`20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247 54.208.102.37 107.21.1.8`|multisite|no      |List of IP/network, separated with spaces, to put into the whitelist.             |
+|`WHITELIST_IP_URLS`        |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good IP/network to whitelist.     |
+|`WHITELIST_RDNS_GLOBAL`    |`yes`                                                                                                                                                                                       |multisite|no      |Only perform RDNS whitelist checks on global IP addresses.                        |
+|`WHITELIST_RDNS`           |`.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`                |multisite|no      |List of reverse DNS suffixes, separated with spaces, to whitelist.                |
+|`WHITELIST_RDNS_URLS`      |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.|
+|`WHITELIST_ASN`            |`32934`                                                                                                                                                                                     |multisite|no      |List of ASN numbers, separated with spaces, to whitelist.                         |
+|`WHITELIST_ASN_URLS`       |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist.                 |
+|`WHITELIST_USER_AGENT`     |                                                                                                                                                                                            |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to whitelist.             |
+|`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
+|`WHITELIST_URI`            |                                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
+|`WHITELIST_URI_URLS`       |                                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
 
 When using stream mode, only IP, RDNS and ASN checks will be done.
 
@@ -410,15 +421,19 @@ STREAM support :x:
 
 The following settings are related to the Limiting requests feature :
 
-|     Setting      | Default | Description                                                                                                                                                                                |
-| :--------------: | :-----: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_REQ`  |  `yes`  | When set to `yes`, will limit the number of requests for a given IP on each URL within a period of time.                                                                                     |
-| `LIMIT_REQ_URL`  |   `/`   | The URL that will be limited. The special URL `/` will define a default limit for all URLs.                                                                                                |
-| `LIMIT_REQ_RATE` | `2r/s`  | The limit to apply to the corresponding URL. Syntax is `Xr/Y` where **X** is the number of request(s) and **Y** the period of time (s for second, m for minute, h for hour and d for day). |
+|        Setting        |Default| Context |Multiple|                                         Description                                         |
+|-----------------------|-------|---------|--------|---------------------------------------------------------------------------------------------|
+|`USE_LIMIT_REQ`        |`yes`  |multisite|no      |Activate limit requests feature.                                                             |
+|`LIMIT_REQ_URL`        |`/`    |multisite|yes     |URL (PCRE regex) where the limit request will be applied or special value / for all requests.|
+|`LIMIT_REQ_RATE`       |`2r/s` |multisite|yes     |Rate to apply to the URL (s for second, m for minute, h for hour and d for day).             |
+|`USE_LIMIT_CONN`       |`yes`  |multisite|no      |Activate limit connections feature.                                                          |
+|`LIMIT_CONN_MAX_HTTP1` |`10`   |multisite|no      |Maximum number of connections per IP when using HTTP/1.X protocol.                           |
+|`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                                 |
+|`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                                      |
 
-Please note that you can add different rates for different URLs by adding a number as a suffix to the settings for example : `LIMIT_REQ_URL_1=/url1`, `LIMIT_REQ_RATE_1=5r/d`, `LIMIT_REQ_URL_2=/url2`, `LIMIT_REQ_RATE_2=1r/m`, ...
+Please note that you can add different rates for different URLs by adding a number as a suffix to the settings for example : `LIMIT_REQ_URL_1=^/url1$`, `LIMIT_REQ_RATE_1=5r/d`, `LIMIT_REQ_URL_2=^/url2/subdir/.*$`, `LIMIT_REQ_RATE_2=1r/m`, ...
 
-Another important thing to note is that `LIMIT_REQ_URL` accepts LUA patterns.
+Another important thing to note is that `LIMIT_REQ_URL` values are PCRE regex.
 
 ## Country
 
