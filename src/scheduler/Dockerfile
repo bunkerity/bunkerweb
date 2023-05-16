@@ -68,6 +68,11 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
   chown root:scheduler /usr/share/bunkerweb/INTEGRATION
 
+COPY --chown=root:scheduler src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
+
 # Fix CVEs
 RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
 
