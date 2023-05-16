@@ -25,9 +25,9 @@ function reversescan:access()
     -- Loop on ports
     for port in self.variables["REVERSE_SCAN_PORTS"]:gmatch("%S+") do
         -- Check if the scan is already cached
-        local cached, err = self:is_in_cache(ngx.ctx.bw.remote_addr .. ":" .. port)
-        if cached == nil then
-            return self:ret(false, "error getting cache from datastore : " .. err)
+        local ok, cached = self:is_in_cache(ngx.ctx.bw.remote_addr .. ":" .. port)
+        if not ok then
+            return self:ret(false, "error getting cache from datastore : " .. cached)
         end
         if cached == "open" then
             return self:ret(true, "port " .. port .. " is opened for IP " .. ngx.ctx.bw.remote_addr, utils.get_deny_status())
