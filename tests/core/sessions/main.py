@@ -3,9 +3,7 @@ from os import getenv
 from requests import get, post
 from requests.exceptions import RequestException
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 from traceback import format_exc
 
@@ -72,7 +70,7 @@ try:
         print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
         exit(1)
 
-    sleep(10)
+    sleep(5)
 
     print("ℹ️ Starting Firefox again ...", flush=True)
     with webdriver.Firefox(options=firefox_options) as driver:
@@ -84,8 +82,11 @@ try:
 
         cookie = driver.get_cookies()[0]
 
-        if sessions_name == "random" and first_cookie["name"] == cookie["name"]:
-            print("❌ The cookie name has not been changed, exiting ...", flush=True)
+        if sessions_name == "random" and first_cookie["name"] != cookie["name"]:
+            print(
+                "❌ The cookie name shouldn't have changed after a simple reload, exiting ...",
+                flush=True,
+            )
             exit(1)
 except SystemExit as e:
     exit(e.code)
