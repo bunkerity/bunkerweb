@@ -3,5 +3,4 @@
 - Plugins
 - sessions helpers in utils
 - sessions security : check IP address, check UA, ...
-- CORS : edit security tuning doc + edit example
 - fix db warnings (Got an error reading communication packets)

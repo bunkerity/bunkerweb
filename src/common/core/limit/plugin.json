@@ -18,7 +18,7 @@
     "LIMIT_REQ_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "URL where the limit request will be applied.",
+      "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
       "id": "limit-req-url",
       "label": "Limit request URL",
       "regex": "^[\\w\\].~:/^%?#[@!$&'()*+,;=-]+$",
