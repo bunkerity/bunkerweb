@@ -15,8 +15,8 @@ function bunkernet:initialize()
 		local id, err = self.datastore:get("plugin_bunkernet_id")
 		if id then
 			self.bunkernet_id = id
-			self.version = ngx.ctx.bw and ngx.ctx.bw.version or utils.get_version()
-			self.integration = ngx.ctx.bw and ngx.ctw.bw.integration or utils.get_integration()
+			self.version = (ngx.ctx.bw and ngx.ctx.bw.version) or utils.get_version()
+			self.integration = (ngx.ctx.bw and ngx.ctx.bw.integration) or utils.get_integration()
 		else
 			self.logger:log(ngx.ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end
