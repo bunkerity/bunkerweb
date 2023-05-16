@@ -77,6 +77,13 @@ function cors:access()
 	if self.variables["USE_CORS"] ~= "yes" then
 		return self:ret(true, "service doesn't use CORS")
 	end
+	-- Deny as soon as possible if needed
+	if self.variables["CORS_DENY_REQUEST"] == "yes" and ngx.ctx.bw.http_origin then
+		if self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not ngx.ctx.bw.http_origin:match(self.variables["CORS_ALLOW_ORIGIN"]) then
+			self.logger:log(ngx.WARN, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed")
+			return self:ret(true, "origin " .. ngx.ctx.bw.http_origin .. " is not allowed, denying access", utils.get_deny_status())
+		end
+	end
 	-- Send CORS policy with a 204 (no content) status
 	if ngx.ctx.bw.request_method == "OPTIONS" and ngx.ctx.bw.http_origin then
 		return self:ret(true, "preflight request", ngx.HTTP_NO_CONTENT)

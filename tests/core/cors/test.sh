@@ -20,7 +20,7 @@ cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_CORS: "yes"@USE_CORS: "no"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "http://www.example.com"@CORS_ALLOW_ORIGIN: "\*"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "https://www%.example%.com"@CORS_ALLOW_ORIGIN: "\*"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_EXPOSE_HEADERS: "X-Test"@CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_MAX_AGE: "3600"@CORS_MAX_AGE: "86400"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_CREDENTIALS: "yes"@CORS_ALLOW_CREDENTIALS: "no"@' {} \;
@@ -54,11 +54,11 @@ do
         echo "🛰️ Running tests with cors ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_CORS: "no"@USE_CORS: "yes"@' {} \;
     elif [ "$test" = "allow_origin" ] ; then
-        echo "🛰️ Running tests with cors allow origin set to http://www.example.com ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "\*"@CORS_ALLOW_ORIGIN: "http://www.example.com"@' {} \;
+        echo "🛰️ Running tests with cors allow origin set to https://www.example.com ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "\*"@CORS_ALLOW_ORIGIN: "https://www%.example%.com"@' {} \;
     elif [ "$test" = "expose_headers" ] ; then
         echo "🛰️ Running tests with cors expose headers set to X-Test ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "http://www.example.com"@CORS_ALLOW_ORIGIN: "\*"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "https://www%.example%.com"@CORS_ALLOW_ORIGIN: "\*"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"@CORS_EXPOSE_HEADERS: "X-Test"@' {} \;
     elif [ "$test" = "max_age" ] ; then
         echo "🛰️ Running tests with cors max age set to 3600 ..."

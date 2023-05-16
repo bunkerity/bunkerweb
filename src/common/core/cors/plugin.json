@@ -68,6 +68,15 @@
       "label": "Access-Control-Allow-Headers value",
       "regex": "^(\\*|(?![, ])(,? ?([\\w-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
+    },
+    "CORS_DENY_REQUEST": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Deny request and don't send it to backend if Origin is not allowed.",
+      "id": "cors-deny-request",
+      "label": "Deny request",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   }
 }

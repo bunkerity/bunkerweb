@@ -15,8 +15,8 @@ function bunkernet:initialize()
 		local id, err = self.datastore:get("plugin_bunkernet_id")
 		if id then
 			self.bunkernet_id = id
-			self.version = ngx.ctx.bw.version
-			self.integration = ngx.ctx.bw.integration
+			self.version = ngx.ctx.bw and ngx.ctx.bw.version or utils.get_version()
+			self.integration = ngx.ctx.bw and ngx.ctw.bw.integration or utils.get_integration()
 		else
 			self.logger:log(ngx.ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end
@@ -57,8 +57,8 @@ function bunkernet:init_worker()
 	if status ~= 200 then
 		return self:ret(false, "received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id)
 	end
-	self.logger:log(ngx.NOTICE, "connectivity with API using instance ID " .. self.id .. " is successful")
-	return self:ret(true, "connectivity with API using instance ID " .. self.id .. " is successful")
+	self.logger:log(ngx.NOTICE, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
+	return self:ret(true, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
 end
 
 function bunkernet:init()
