@@ -39,7 +39,7 @@ try:
     firefox_options.add_argument("--headless")
 
     use_cors = getenv("USE_CORS", "no")
-    cors_allow_origin = getenv("CORS_ALLOW_ORIGIN", "*").replace("%.", ".")
+    cors_allow_origin = getenv("CORS_ALLOW_ORIGIN", "*").replace("\\", "").replace("^", "").replace("$", "")
     cors_expose_headers = getenv("CORS_EXPOSE_HEADERS", "Content-Length,Content-Range")
     cors_max_age = getenv("CORS_MAX_AGE", "86400")
     cors_allow_credentials = getenv("CORS_ALLOW_CREDENTIALS", "no") == "yes"
