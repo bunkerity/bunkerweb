@@ -251,7 +251,7 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_settings: List[dict]) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
         if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
@@ -269,7 +269,7 @@ class Database:
 
         to_put = []
         with self.__db_session() as session:
-            for plugins in default_settings:
+            for plugins in default_plugins:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 

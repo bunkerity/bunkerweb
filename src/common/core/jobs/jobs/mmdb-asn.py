@@ -6,6 +6,7 @@ from hashlib import sha1
 from os import _exit, getenv
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from threading import Lock
 from traceback import format_exc
 
 sys_path.extend(
@@ -25,6 +26,7 @@ from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("JOBS.mmdb-asn", getenv("LOG_LEVEL", "INFO"))
 status = 0
+lock = Lock()
 
 try:
     dl_mmdb = True
@@ -33,7 +35,8 @@ try:
 
     # Don't go further if the cache match the latest version
     if Path("/var/tmp/bunkerweb/asn.mmdb").exists():
-        response = get("https://db-ip.com/db/download/ip-to-asn-lite")
+        with lock:
+            response = get("https://db-ip.com/db/download/ip-to-asn-lite")
 
         if response.status_code == 200:
             _sha1 = sha1()

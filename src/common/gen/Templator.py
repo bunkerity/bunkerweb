@@ -1,16 +1,24 @@
-from copy import deepcopy
 from glob import glob
 from importlib import import_module
 from os.path import basename, dirname
 from pathlib import Path
 from random import choice
 from string import ascii_letters, digits
+from typing import Any, Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader
 
 
 class Templator:
-    def __init__(self, templates, core, plugins, output, target, config):
+    def __init__(
+        self,
+        templates: str,
+        core: str,
+        plugins: str,
+        output: str,
+        target: str,
+        config: Dict[str, Any],
+    ):
         self.__templates = templates
         self.__core = core
         self.__plugins = plugins
@@ -25,13 +33,13 @@ class Templator:
 
     def render(self):
         self.__render_global()
-        servers = [self.__config.get("SERVER_NAME", "")]
+        servers = [self.__config.get("SERVER_NAME", "").strip()]
         if self.__config.get("MULTISITE", "no") == "yes":
-            servers = self.__config.get("SERVER_NAME", "").split(" ")
+            servers = self.__config.get("SERVER_NAME", "").strip().split(" ")
         for server in servers:
             self.__render_server(server)
 
-    def __load_jinja_env(self):
+    def __load_jinja_env(self) -> Environment:
         searchpath = [self.__templates]
         for subpath in glob(f"{self.__core}/*") + glob(f"{self.__plugins}/*"):
             if Path(subpath).is_dir():
@@ -42,7 +50,7 @@ class Templator:
             trim_blocks=True,
         )
 
-    def __find_templates(self, contexts):
+    def __find_templates(self, contexts) -> List[str]:
         templates = []
         for template in self.__jinja_env.list_templates():
             if "global" in contexts and "/" not in template:
@@ -53,14 +61,11 @@ class Templator:
                     templates.append(template)
         return templates
 
-    def __write_config(self, subpath=None, config=None):
-        real_path = self.__output
-        if subpath != None:
-            real_path += f"{subpath}/"
-        real_path += "variables.env"
-        real_config = self.__config
-        if config != None:
-            real_config = config
+    def __write_config(
+        self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None
+    ):
+        real_path = self.__output + (f"{subpath}/" if subpath else "") + "variables.env"
+        real_config = config or self.__config
         Path(dirname(real_path)).mkdir(parents=True, exist_ok=True)
         Path(real_path).write_text(
             "\n".join(f"{k}={v}" for k, v in real_config.items())
@@ -74,23 +79,24 @@ class Templator:
         for template in templates:
             self.__render_template(template)
 
-    def __render_server(self, server):
+    def __render_server(self, server: str):
         templates = self.__find_templates(
             ["modsec", "modsec-crs", "server-http", "server-stream"]
         )
         if self.__config.get("MULTISITE", "no") == "yes":
-            config = deepcopy(self.__config)
+            config = self.__config.copy()
             for variable, value in self.__config.items():
                 if variable.startswith(f"{server}_"):
                     config[variable.replace(f"{server}_", "", 1)] = value
             self.__write_config(subpath=server, config=config)
+
         for template in templates:
             subpath = None
             config = None
             name = None
             if self.__config.get("MULTISITE", "no") == "yes":
                 subpath = server
-                config = deepcopy(self.__config)
+                config = self.__config.copy()
                 for variable, value in self.__config.items():
                     if variable.startswith(f"{server}_"):
                         config[variable.replace(f"{server}_", "", 1)] = value
@@ -98,6 +104,7 @@ class Templator:
                 server_key = f"{server}_SERVER_NAME"
                 if server_key not in self.__config:
                     config["SERVER_NAME"] = server
+
             root_confs = [
                 "server.conf",
                 "access-lua.conf",
@@ -114,53 +121,50 @@ class Templator:
                     break
             self.__render_template(template, subpath=subpath, config=config, name=name)
 
-    def __render_template(self, template, subpath=None, config=None, name=None):
+    def __render_template(
+        self,
+        template: str,
+        subpath: Optional[str] = None,
+        config: Optional[Dict[str, Any]] = None,
+        name: Optional[str] = None,
+    ):
         # Get real config and output folder in case it's a server config and we are in multisite mode
-        real_config = deepcopy(self.__config)
-        if config:
-            real_config = deepcopy(config)
-        real_config["all"] = deepcopy(real_config)
+        real_config = config.copy() if config else self.__config.copy()
+        real_config["all"] = real_config.copy()
         real_config["import"] = import_module
         real_config["is_custom_conf"] = Templator.is_custom_conf
         real_config["has_variable"] = Templator.has_variable
         real_config["random"] = Templator.random
         real_config["read_lines"] = Templator.read_lines
-        real_output = self.__output
-        if subpath:
-            real_output += f"/{subpath}/"
-        real_name = template
-        if name:
-            real_name = name
+        real_path = (
+            self.__output + (f"/{subpath}/" if subpath else "") + (name or template)
+        )
         jinja_template = self.__jinja_env.get_template(template)
-        Path(dirname(f"{real_output}{real_name}")).mkdir(parents=True, exist_ok=True)
-        Path(f"{real_output}{real_name}").write_text(jinja_template.render(real_config))
+        Path(dirname(real_path)).mkdir(parents=True, exist_ok=True)
+        Path(real_path).write_text(jinja_template.render(real_config))
 
     @staticmethod
-    def is_custom_conf(path):
-        return glob(f"{path}/*.conf")
+    def is_custom_conf(path: str) -> bool:
+        return bool(glob(f"{path}/*.conf"))
 
     @staticmethod
-    def has_variable(all_vars, variable, value):
-        if variable in all_vars and all_vars[variable] == value:
+    def has_variable(all_vars: Dict[str, Any], variable: str, value: Any) -> bool:
+        if all_vars.get(variable) == value:
             return True
-        if all_vars.get("MULTISITE", "no") == "yes":
-            for server_name in all_vars["SERVER_NAME"].split(" "):
-                if (
-                    f"{server_name}_{variable}" in all_vars
-                    and all_vars[f"{server_name}_{variable}"] == value
-                ):
+        elif all_vars.get("MULTISITE", "no") == "yes":
+            for server_name in all_vars["SERVER_NAME"].strip().split(" "):
+                if all_vars.get(f"{server_name}_{variable}") == value:
                     return True
         return False
 
     @staticmethod
-    def random(nb):
+    def random(nb: int) -> str:
         characters = ascii_letters + digits
         return "".join(choice(characters) for _ in range(nb))
 
     @staticmethod
-    def read_lines(file):
+    def read_lines(file: str) -> List[str]:
         try:
-            with open(file, "r") as f:
-                return f.readlines()
+            return Path(file).read_text().splitlines()
         except:
             return []

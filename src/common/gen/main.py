@@ -9,6 +9,7 @@ from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
+from typing import Any, Dict
 
 if "/usr/share/bunkerweb/deps/python" not in sys_path:
     sys_path.append("/usr/share/bunkerweb/deps/python")
@@ -131,10 +132,9 @@ if __name__ == "__main__":
 
             # Compute the config
             logger.info("Computing config ...")
-            config = Configurator(
+            config: Dict[str, Any] = Configurator(
                 args.settings, args.core, args.plugins, args.variables, logger
-            )
-            config = config.get_config()
+            ).get_config()
         else:
             if "/usr/share/bunkerweb/db" not in sys_path:
                 sys_path.append("/usr/share/bunkerweb/db")
@@ -145,7 +145,7 @@ if __name__ == "__main__":
                 logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),
             )
-            config = db.get_config()
+            config: Dict[str, Any] = db.get_config()
 
         # Remove old files
         logger.info("Removing old files ...")

@@ -163,6 +163,7 @@ PLUGIN_KEYS = [
     "name",
     "description",
     "version",
+    "stream",
     "settings",
 ]
 
