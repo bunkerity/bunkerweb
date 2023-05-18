@@ -59,7 +59,7 @@ do
         echo "🗃️ Running tests when misc settings have tweaked values ..."
         echo "ℹ️ Keeping the ssl generated in self signed ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DISABLE_DEFAULT_SERVER: "no"@DISABLE_DEFAULT_SERVER: "yes"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@ALLOWED_METHODS: ".*"$@ALLOWED_METHODS: "GET|POST|HEAD|OPTIONS"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@ALLOWED_METHODS: ".*"$@ALLOWED_METHODS: "POST|HEAD"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@MAX_CLIENT_SIZE: "5m"@MAX_CLIENT_SIZE: "10m"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@SERVE_FILES: "yes"@SERVE_FILES: "no"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@HTTP2: "yes"@HTTP2: "no"@' {} \;
