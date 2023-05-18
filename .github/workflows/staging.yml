@@ -144,6 +144,7 @@ jobs:
   tests-core:
     needs: prepare-tests-core
     strategy:
+      fail-fast: false
       matrix:
         test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/test-core.yml
