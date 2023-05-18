@@ -5,6 +5,7 @@ services:
     build: .
     environment:
       PYTHONUNBUFFERED: "1"
+      GENERATE_SELF_SIGNED_SSL: "no"
       USE_CORS: "no"
       CORS_ALLOW_ORIGIN: "*"
       CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"
