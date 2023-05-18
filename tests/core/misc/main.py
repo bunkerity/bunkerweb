@@ -148,6 +148,7 @@ try:
     response = options(
         f"http{'s' if ssl_generated else ''}://www.example.com",
         headers={"Host": "www.example.com"},
+        verify=False,
     )
 
     if response.status_code == 405:
