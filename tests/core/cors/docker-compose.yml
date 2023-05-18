@@ -17,6 +17,7 @@ services:
       LOG_LEVEL: "info"
       GENERATE_SELF_SIGNED_SSL: "no"
       ALLOWED_METHODS: "GET|POST|HEAD|OPTIONS"
+      CUSTOM_CONF_SEVER_HTTP_main: "location /options { default_type 'text/plain'; content_by_lua_block { if ngx.var.request_method == \"OPTIONS\" then ngx.say(\"Hello, world!\") end } }"
 
       # ? CORS settings
       USE_CORS: "no"

@@ -113,19 +113,20 @@ try:
     sleep(1)
 
     print(
-        f"ℹ️ Sending a preflight request to http{'s' if ssl else ''}://www.example.com ...",
+        f"ℹ️ Sending a preflight request to http{'s' if ssl else ''}://www.example.com/options ...",
         flush=True,
     )
 
     response = options(
-        f"http{'s' if ssl else ''}://www.example.com",
+        f"http{'s' if ssl else ''}://www.example.com/options",
         headers={
             "Host": "www.example.com",
             "Origin": f"http{'s' if ssl else ''}://bwadm.example.com",
         },
         verify=False,
     )
-    response.raise_for_status()
+    if response.status_code != 404:
+        response.raise_for_status()
 
     if use_cors:
         if (
