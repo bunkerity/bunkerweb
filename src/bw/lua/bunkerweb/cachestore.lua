@@ -1,5 +1,6 @@
 local mlcache    = require "resty.mlcache"
 local logger     = require "bunkerweb.logger"
+local utils      = require "bunkerweb.utils"
 local class      = require "middleclass"
 local cachestore = class("cachestore")
 
@@ -42,7 +43,7 @@ end
 
 function cachestore:initialize(use_redis)
 	self.cache = cache
-	self.use_redis = use_redis or false
+	self.use_redis = (use_redis and utils.is_cosocket_available()) or false
 	self.logger = module_logger
 end
 
@@ -101,7 +102,7 @@ end
 
 function cachestore:set(key, value, ex)
 	if self.use_redis then
-		local ok, err = self.set_redis(key, value, ex)
+		local ok, err = self:set_redis(key, value, ex)
 		if not ok then
 			self.logger:log(ngx.ERR, err)
 		end

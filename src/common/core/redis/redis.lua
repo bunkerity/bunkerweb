@@ -9,6 +9,7 @@ local redis        = class("redis", plugin)
 function redis:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "redis")
+	self.clusterstore = clusterstore:new()
 end
 
 function redis:init_worker()
@@ -17,13 +18,13 @@ function redis:init_worker()
 		return self:ret(true, "init_worker not needed")
 	end
 	-- Check redis connection
-	local ok, err = clusterstore:connect()
+	local ok, err = self.clusterstore:connect()
 	if not ok then
 		return self:ret(false, "redis connect error : " .. err)
 	end
 	-- Send ping
-	local ok, err = clusterstore:call("ping")
-	clusterstore:close()
+	local ok, err = self.clusterstore:call("ping")
+	self.clusterstore:close()
 	if err then
 		return self:ret(false, "error while sending ping command to redis server : " .. err)
 	end

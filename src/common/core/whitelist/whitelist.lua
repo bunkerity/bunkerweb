@@ -256,11 +256,32 @@ function whitelist:is_whitelisted_ip()
 		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
 		-- Check if rDNS is in whitelist
 		if rdns_list then
+			local forward_check = nil
+			local rdns_suffix = nil
 			for i, rdns in ipairs(rdns_list) do
 				for j, suffix in ipairs(self.lists["RDNS"]) do
 					if rdns:sub(- #suffix) == suffix then
-						return true, "rDNS " .. suffix
+						forward_check = rdns
+						rdns_suffix = suffix
+						break
 					end
+				end
+				if forward_check then
+					break
+				end
+			end
+			if forward_check then
+				local forward_ok = false
+				local ip_list, err = utils.get_ips(forward_check)
+				if ip_list then
+					for i, ip in ipairs(ip_list) do
+						if ip == ngx.ctx.bw.remote_addr then
+							return true, "rDNS " .. rdns_suffix
+						end
+					end
+					self.logger:log(ngx.WARN, "IP " .. ngx.ctx.bw.remote_addr .. " may spoof reverse DNS " .. forward_check)
+				else
+					self.logger:log(ngx.ERR, "error while getting rdns (forward check) : " .. err)
 				end
 			end
 		else

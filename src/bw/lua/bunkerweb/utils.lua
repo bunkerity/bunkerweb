@@ -324,7 +324,7 @@ utils.get_resolvers          = function()
 	return resolvers
 end
 
-utils.get_rdns               = function(ip)
+utils.get_rdns = function(ip)
 	-- Check cache
 	local cachestore = utils.new_cachestore()
 	local ok, value = cachestore:get("rdns_" .. ip)
@@ -347,20 +347,24 @@ utils.get_rdns               = function(ip)
 	if not rdns then
 		return false, err
 	end
+	-- Our results
+	local ptrs = {}
+	local ret_err = "success"
 	-- Do rDNS query
 	local answers, err = rdns:reverse_query(ip)
 	if not answers then
-		return false, err
-	end
-	local ret_err = "success"
-	if answers.errcode then
-		ret_err = answers.errstr
-	end
-	-- Extract all PTR
-	local ptrs = {}
-	for i, answer in ipairs(answers) do
-		if answer.ptrdname then
-			table.insert(ptrs, answer.ptrdname)
+		logger:log(ngx.ERR, "error while doing reverse DNS query for " .. ip .. " : " .. err)
+		ret_err = err
+	else
+		if answers.errcode then
+			ret_err = answers.errstr
+		end
+		-- Extract all PTR
+		for i, answer in ipairs(answers) do
+			if answer.ptrdname then
+				table.insert(ptrs, answer.ptrdname)
+				logger:log(ngx.ERR, answer.ptrdname)
+			end
 		end
 	end
 	-- Save to cache
@@ -371,7 +375,7 @@ utils.get_rdns               = function(ip)
 	return ptrs, ret_err
 end
 
-utils.get_ips                = function(fqdn, ipv6)
+utils.get_ips = function(fqdn, ipv6)
 	-- Check cache
 	local cachestore = utils.new_cachestore()
 	local ok, value = cachestore:get("dns_" .. fqdn)
@@ -425,8 +429,8 @@ utils.get_ips                = function(fqdn, ipv6)
 			table.insert(res_answers, answers)
 		end
 	end
-	if #res_errors == #qtypes then
-		return false, cjson.encode(res_errors)
+	for qtype, error in pairs(res_errors) do
+		logger:log(ngx.ERR, "error while doing " .. qtype .. " DNS query for " .. fqdn .. " : " .. error)
 	end
 	-- Extract all IPs
 	local ips = {}
@@ -651,6 +655,21 @@ utils.get_phases = function()
 		"log_stream",
 		"log_default"
 	}
+end
+
+utils.is_cosocket_available = function()
+	local phases = {
+		"timer",
+		"access",
+		"preread"
+	}
+	local current_phase = ngx.get_phase()
+	for i, phase in ipairs(phases) do
+		if current_phase == phase then
+			return true
+		end
+	end
+	return false
 end
 
 return utils
