@@ -135,13 +135,21 @@ def cache_hash(cache: str, db=None) -> Optional[str]:
 
 
 def cache_file(
-    file: str, cache: str, _hash: str, db=None, *, service_id: Optional[str] = None
+    file: str,
+    cache: str,
+    _hash: Optional[str],
+    db=None,
+    *,
+    service_id: Optional[str] = None,
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
         content = Path(file).read_bytes()
         Path(cache).write_bytes(content)
         Path(file).unlink()
+
+        if not _hash:
+            _hash = file_hash(cache)
 
         if db:
             with lock:

@@ -1,6 +1,5 @@
 {
   "id": "misc",
-  "order": 999,
   "name": "Miscellaneous",
   "description": "Miscellaneous settings.",
   "version": "1.0",

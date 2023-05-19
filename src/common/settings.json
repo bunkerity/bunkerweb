@@ -279,5 +279,14 @@
     "label": "Listen UDP",
     "regex": "^(yes|no)$",
     "type": "check"
+  },
+  "USE_IPV6": {
+    "context": "global",
+    "default": "no",
+    "help": "Enable IPv6 connectivity.",
+    "id": "use-ipv6",
+    "label": "Use IPv6",
+    "regex": "^(yes|no)$",
+    "type": "check"
   }
 }

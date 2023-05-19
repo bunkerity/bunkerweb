@@ -1,6 +1,5 @@
 {
   "id": "errors",
-  "order": 999,
   "name": "Errors",
   "description": "Manage default error pages",
   "version": "1.0",

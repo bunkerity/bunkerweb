@@ -251,7 +251,7 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_settings: List[dict]) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
         if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
@@ -269,7 +269,7 @@ class Database:
 
         to_put = []
         with self.__db_session() as session:
-            for plugins in default_settings:
+            for plugins in default_plugins:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
@@ -281,7 +281,6 @@ class Database:
                         settings = plugin
                         plugin = {
                             "id": "general",
-                            "order": 999,
                             "name": "General",
                             "description": "The general settings for the server",
                             "version": "0.1",
@@ -546,6 +545,8 @@ class Database:
                             )
                         )
 
+                    config.pop("SERVER_NAME")
+
                     for key, value in config.items():
                         suffix = 0
                         if self.suffix_rx.search(key):
@@ -570,6 +571,11 @@ class Database:
                         )
 
                         if global_value is None:
+                            if value == setting.default or (
+                                not value.strip() and setting.default is None
+                            ):
+                                continue
+
                             to_put.append(
                                 Global_values(
                                     setting_id=key,
@@ -960,10 +966,13 @@ class Database:
                 db_plugin = (
                     session.query(Plugins)
                     .with_entities(
-                        Plugins.order,
                         Plugins.name,
+                        Plugins.stream,
                         Plugins.description,
                         Plugins.version,
+                        Plugins.method,
+                        Plugins.data,
+                        Plugins.checksum,
                         Plugins.external,
                     )
                     .filter_by(id=plugin["id"])
@@ -979,8 +988,8 @@ class Database:
 
                     updates = {}
 
-                    if plugin["order"] != db_plugin.order:
-                        updates[Plugins.order] = plugin["order"]
+                    if plugin["stream"] != db_plugin.stream:
+                        updates[Plugins.stream] = plugin["stream"]
 
                     if plugin["name"] != db_plugin.name:
                         updates[Plugins.name] = plugin["name"]
@@ -1374,7 +1383,7 @@ class Database:
                 session.query(Plugins)
                 .with_entities(
                     Plugins.id,
-                    Plugins.order,
+                    Plugins.stream,
                     Plugins.name,
                     Plugins.description,
                     Plugins.version,
@@ -1383,20 +1392,18 @@ class Database:
                     Plugins.data,
                     Plugins.checksum,
                 )
-                .order_by(Plugins.order)
                 .all()
                 if with_data
                 else session.query(Plugins)
                 .with_entities(
                     Plugins.id,
-                    Plugins.order,
+                    Plugins.stream,
                     Plugins.name,
                     Plugins.description,
                     Plugins.version,
                     Plugins.external,
                     Plugins.method,
                 )
-                .order_by(Plugins.order)
                 .all()
             ):
                 if external and not plugin.external:
@@ -1410,7 +1417,7 @@ class Database:
                 )
                 data = {
                     "id": plugin.id,
-                    "order": plugin.order,
+                    "stream": plugin.stream,
                     "name": plugin.name,
                     "description": plugin.description,
                     "version": plugin.version,

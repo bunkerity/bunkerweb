@@ -1,6 +1,6 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils			= require "bunkerweb.utils"
+local class       = require "middleclass"
+local plugin      = require "bunkerweb.plugin"
+local utils       = require "bunkerweb.utils"
 
 local badbehavior = class("badbehavior", plugin)
 
@@ -34,7 +34,9 @@ function badbehavior:log()
 		return self:ret(true, "already banned")
 	end
 	-- Call increase function later and with cosocket enabled
-	local ok, err = ngx.timer.at(0, badbehavior.increase, ngx.ctx.bw.remote_addr, tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]), tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]), tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]), self.use_redis)
+	local ok, err = ngx.timer.at(0, badbehavior.increase, ngx.ctx.bw.remote_addr,
+		tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]), tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]),
+		tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]), self.use_redis)
 	if not ok then
 		return self:ret(false, "can't create increase timer : " .. err)
 	end
@@ -93,9 +95,11 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 			logger:log(ngx.ERR, "(increase) can't save ban : " .. err)
 			return
 		end
-		logger:log(ngx.WARN, "IP " .. ip .. " is banned for " .. ban_time .. "s (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
+		logger:log(ngx.WARN,
+			"IP " .. ip .. " is banned for " .. ban_time .. "s (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
 	end
-	logger:log(ngx.NOTICE, "increased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
+	logger:log(ngx.NOTICE,
+		"increased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
 end
 
 function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
@@ -136,7 +140,8 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 			return
 		end
 	end
-	logger:log(ngx.NOTICE, "decreased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
+	logger:log(ngx.NOTICE,
+		"decreased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")")
 end
 
 function badbehavior.redis_increase(ip, count_time, ban_time)
@@ -169,7 +174,9 @@ function badbehavior.redis_increase(ip, count_time, ban_time)
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err = clusterstore:call("eval", redis_script, 2, "bad_behavior_" .. ip, "bans_ip" .. ip, count_time, ban_time)
+	local counter, err = clusterstore:call("eval", redis_script, 2, "plugin_bad_behavior_" .. ip, "bans_ip" .. ip,
+		count_time,
+		ban_time)
 	if not counter then
 		clusterstore:close()
 		return false, err
@@ -208,7 +215,7 @@ function badbehavior.redis_decrease(ip, count_time)
 	if not ok then
 		return false, err
 	end
-	local counter, err = clusterstore:call("eval", redis_script, 1, "bad_behavior_" .. ip, count_time)
+	local counter, err = clusterstore:call("eval", redis_script, 1, "plugin_bad_behavior_" .. ip, count_time)
 	if not counter then
 		clusterstore:close()
 		return false, err

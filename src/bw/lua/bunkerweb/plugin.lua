@@ -2,7 +2,7 @@ local class     = require "middleclass"
 local logger    = require "bunkerweb.logger"
 local datastore = require "bunkerweb.datastore"
 local utils     = require "bunkerweb.utils"
-local cjson		= require "cjson"
+local cjson     = require "cjson"
 local plugin    = class("plugin")
 
 function plugin:initialize(id)
@@ -20,8 +20,17 @@ function plugin:initialize(id)
     end
     -- Store variables
     local metadata = cjson.decode(encoded_metadata)
+    local multisite = false
+    local current_phase = ngx.get_phase()
+    for i, check_phase in ipairs({ "set", "access", "log", "preread" }) do
+        if current_phase == check_phase then
+            multisite = true
+            break
+        end
+    end
+    self.is_request = multisite
     for k, v in pairs(metadata.settings) do
-        local value, err = utils.get_variable(k, v.context == "multisite" and ngx.get_phase() ~= "init")
+        local value, err = utils.get_variable(k, v.context == "multisite" and multisite)
         if value == nil then
             self.logger:log(ngx.ERR, "can't get " .. k .. " variable : " .. err)
         end
@@ -45,7 +54,7 @@ function plugin:get_id()
 end
 
 function plugin:ret(ret, msg, status, redirect)
-    return {ret = ret, msg = msg, status = status, redirect = redirect}
+    return { ret = ret, msg = msg, status = status, redirect = redirect }
 end
 
 return plugin

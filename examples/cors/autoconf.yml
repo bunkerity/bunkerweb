@@ -16,7 +16,7 @@ services:
     labels:
       - bunkerweb.SERVER_NAME=app1.example.com
       - bunkerweb.USE_CORS=yes
-      - bunkerweb.CORS_ALLOW_ORIGIN=https://app2.example.com
+      - bunkerweb.CORS_ALLOW_ORIGIN=^https://app2\.example\.com$$
       - bunkerweb.REMOTE_PHP=myapp1
       - bunkerweb.REMOTE_PHP_PATH=/app
 
@@ -56,5 +56,5 @@ services:
 
 networks:
   bw-services:
-    external:
-      name: bw-services
+    external: true
+    name: bw-services

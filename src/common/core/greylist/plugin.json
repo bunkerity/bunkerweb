@@ -1,6 +1,5 @@
 {
   "id": "greylist",
-  "order": 3,
   "name": "Greylist",
   "description": "Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.",
   "version": "1.0",
@@ -81,7 +80,7 @@
     "GREYLIST_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent, separated with spaces, to put into the greylist.",
+      "help": "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
       "id": "greylist-user-agent",
       "label": "Greylist User-Agent",
       "regex": "^.*$",
@@ -99,10 +98,10 @@
     "GREYLIST_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI, separated with spaces, to put into the greylist.",
+      "help": "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
       "id": "greylist-uri",
       "label": "Greylist URI",
-      "regex": "^( *(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^.*$",
       "type": "text"
     },
     "GREYLIST_URI_URLS": {

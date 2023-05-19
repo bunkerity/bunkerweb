@@ -1,10 +1,10 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local cachestore 	= require "bunkerweb.cachestore"
-local cjson			= require "cjson"
+local class      = require "middleclass"
+local plugin     = require "bunkerweb.plugin"
+local utils      = require "bunkerweb.utils"
+local cachestore = require "bunkerweb.cachestore"
+local cjson      = require "cjson"
 
-local country	= class("country", plugin)
+local country    = class("country", plugin)
 
 function country:initialize()
 	-- Call parent initialize
@@ -28,9 +28,13 @@ function country:access()
 	if data then
 		data = cjson.decode(data)
 		if data.result == "ok" then
-			return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in country cache (not blacklisted, country = " .. data.country .. ")")
+			return self:ret(true,
+				"client IP " ..
+				ngx.ctx.bw.remote_addr .. " is in country cache (not blacklisted, country = " .. data.country .. ")")
 		end
-		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in country cache (blacklisted, country = " .. data.country .. ")", utils.get_deny_status())
+		return self:ret(true,
+			"client IP " .. ngx.ctx.bw.remote_addr .. " is in country cache (blacklisted, country = " .. data.country .. ")",
+			utils.get_deny_status())
 	end
 
 	-- Don't go further if IP is not global
@@ -47,7 +51,7 @@ function country:access()
 	if not country then
 		return self:ret(false, "can't get country of client IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
 	end
-	
+
 	-- Process whitelist first
 	if self.variables["WHITELIST_COUNTRY"] ~= "" then
 		for wh_country in self.variables["WHITELIST_COUNTRY"]:gmatch("%S+") do
@@ -63,9 +67,10 @@ function country:access()
 		if not ok then
 			return self:ret(false, "error while adding item to cache : " .. err)
 		end
-		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is not whitelisted (country = " .. country .. ")", utils.get_deny_status())
+		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is not whitelisted (country = " .. country .. ")",
+			utils.get_deny_status())
 	end
-	
+
 	-- And then blacklist
 	if self.variables["BLACKLIST_COUNTRY"] ~= "" then
 		for bl_country in self.variables["BLACKLIST_COUNTRY"]:gmatch("%S+") do
@@ -74,7 +79,8 @@ function country:access()
 				if not ok then
 					return self:ret(false, "error while adding item to cache : " .. err)
 				end
-				return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is blacklisted (country = " .. country .. ")", utils.get_deny_status())
+				return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is blacklisted (country = " .. country .. ")",
+					utils.get_deny_status())
 			end
 		end
 	end
@@ -92,18 +98,19 @@ function country:preread()
 end
 
 function country:is_in_cache(ip)
-	local ok, data = self.cachestore:get("plugin_country_cache_" .. ngx.ctx.bw.server_name .. ip)
+	local ok, data = self.cachestore:get("plugin_country_" .. ngx.ctx.bw.server_name .. ip)
 	if not ok then
 		return false, data
-	end 
+	end
 	return true, data
 end
 
 function country:add_to_cache(ip, country, result)
-	local ok, err = self.cachestore:set("plugin_country_cache_" .. ngx.ctx.bw.server_name .. ip, cjson.encode({country = country, result = result}), 86400)
+	local ok, err = self.cachestore:set("plugin_country_" .. ngx.ctx.bw.server_name .. ip,
+		cjson.encode({ country = country, result = result }), 86400)
 	if not ok then
 		return false, err
-	end 
+	end
 	return true
 end
 

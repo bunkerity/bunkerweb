@@ -1,6 +1,5 @@
 {
   "id": "dnsbl",
-  "order": 5,
   "name": "DNSBL",
   "description": "Deny access based on external DNSBL servers.",
   "version": "1.0",

@@ -1,19 +1,20 @@
-local mlcache		= require "resty.mlcache"
-local logger		= require "bunkerweb.logger"
-local class     	= require "middleclass"
-local cachestore	= class("cachestore")
+local mlcache    = require "resty.mlcache"
+local logger     = require "bunkerweb.logger"
+local utils      = require "bunkerweb.utils"
+local class      = require "middleclass"
+local cachestore = class("cachestore")
 
 -- Instantiate mlcache object at module level (which will be cached when running init phase)
 -- TODO : custom settings
-local shm		= "cachestore"
-local ipc_shm	= "cachestore_ipc"
-local shm_miss	= "cachestore_miss"
-local shm_locks	= "cachestore_locks"
+local shm        = "cachestore"
+local ipc_shm    = "cachestore_ipc"
+local shm_miss   = "cachestore_miss"
+local shm_locks  = "cachestore_locks"
 if not ngx.shared.cachestore then
-	shm			= "cachestore_stream"
-	ipc_shm		= "cachestore_ipc_stream"
-	shm_miss	= "cachestore_miss_stream"
-	shm_locks	= "cachestore_locks_stream"
+	shm       = "cachestore_stream"
+	ipc_shm   = "cachestore_ipc_stream"
+	shm_miss  = "cachestore_miss_stream"
+	shm_locks = "cachestore_locks_stream"
 end
 local cache, err = mlcache.new(
 	"cachestore",
@@ -42,7 +43,7 @@ end
 
 function cachestore:initialize(use_redis)
 	self.cache = cache
-	self.use_redis = use_redis or false
+	self.use_redis = (use_redis and utils.is_cosocket_available()) or false
 	self.logger = module_logger
 end
 
@@ -77,17 +78,20 @@ function cachestore:get(key)
 		clusterstore:close()
 		if ret[1] == ngx.null then
 			ret[1] = nil
-		end
-		if ret[2] < 0 then
+			ret[2] = -1
+		elseif ret[2] < 0 then
 			ret[2] = ret[2] + 1
 		end
 		return ret[1], nil, ret[2]
+	end
+	local callback_no_miss = function()
+		return nil, nil, -1
 	end
 	local value, err, hit_level
 	if self.use_redis then
 		value, err, hit_level = self.cache:get(key, nil, callback, key)
 	else
-		value, err, hit_level = self.cache:get(key)
+		value, err, hit_level = self.cache:get(key, nil, callback_no_miss)
 	end
 	if value == nil and err ~= nil then
 		return false, err
@@ -98,14 +102,14 @@ end
 
 function cachestore:set(key, value, ex)
 	if self.use_redis then
-		local ok, err = self.set_redis(key, value, ex)
+		local ok, err = self:set_redis(key, value, ex)
 		if not ok then
 			self.logger:log(ngx.ERR, err)
 		end
 	end
 	local ok, err
 	if ex then
-		ok, err = self.cache:set(key, {ttl = ex}, value)
+		ok, err = self.cache:set(key, { ttl = ex }, value)
 	else
 		ok, err = self.cache:set(key, nil, value)
 	end
@@ -162,6 +166,10 @@ function cachestore:del_redis(key)
 	end
 	clusterstore:close()
 	return true
+end
+
+function cachestore:purge()
+	return self.cache:purge(true)
 end
 
 return cachestore

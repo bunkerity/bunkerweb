@@ -22,8 +22,8 @@ services:
 
 networks:
   bw-services:
-    external:
-      name: bw-services
+    external: true
+    name: bw-services
 
 volumes:
   ghost_data:

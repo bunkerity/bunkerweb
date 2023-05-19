@@ -1,7 +1,7 @@
-local class     = require "middleclass"
-local utils     = require "bunkerweb.utils"
-local logger    = require "bunkerweb.logger"
-local redis     = require "resty.redis"
+local class        = require "middleclass"
+local utils        = require "bunkerweb.utils"
+local logger       = require "bunkerweb.logger"
+local redis        = require "resty.redis"
 
 local clusterstore = class("clusterstore")
 
@@ -42,7 +42,8 @@ function clusterstore:connect()
         return false, err
     end
     -- Set timeouts
-    redis_client:set_timeouts(tonumber(self.variables["REDIS_TIMEOUT"]), tonumber(self.variables["REDIS_TIMEOUT"]), tonumber(self.variables["REDIS_TIMEOUT"]))
+    redis_client:set_timeouts(tonumber(self.variables["REDIS_TIMEOUT"]), tonumber(self.variables["REDIS_TIMEOUT"]),
+        tonumber(self.variables["REDIS_TIMEOUT"]))
     -- Connect
     local options = {
         ssl = self.variables["REDIS_SSL"] == "yes",
@@ -74,7 +75,8 @@ end
 function clusterstore:close()
     if self.redis_client then
         -- Equivalent to close but keep a pool of connections
-        local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
+        local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
+            tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
         self.redis_client = nil
         return ok, err
     end

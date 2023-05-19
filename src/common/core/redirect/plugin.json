@@ -1,6 +1,5 @@
 {
   "id": "redirect",
-  "order": 999,
   "name": "Redirect",
   "description": "Manage HTTP redirects.",
   "version": "1.0",

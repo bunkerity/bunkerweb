@@ -46,9 +46,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
         if asn_rx.match(real_line):
             return True, real_line
     elif kind == "USER_AGENT":
-        return True, line.replace(b"\\ ", b" ").replace(b"\\.", b"%.").replace(
-            b"\\\\", b"\\"
-        ).replace(b"-", b"%-")
+        return True, b"(?:\\b)" + line + b"(?:\\b)"
     elif kind == "URI":
         if uri_rx.match(line):
             return True, line

@@ -1,5 +1,5 @@
 local class     = require "middleclass"
-local datastore	= class("datastore")
+local datastore = class("datastore")
 
 function datastore:initialize()
 	self.dict = ngx.shared.datastore

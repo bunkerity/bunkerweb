@@ -1,6 +1,5 @@
 {
   "id": "reverseproxy",
-  "order": 999,
   "name": "Reverse proxy",
   "description": "Manage reverse proxy configurations.",
   "version": "1.0",

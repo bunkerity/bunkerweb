@@ -1,6 +1,5 @@
 {
   "id": "authbasic",
-  "order": 999,
   "name": "Auth basic",
   "description": "Enforce login before accessing a resource or the whole site using HTTP basic auth method.",
   "version": "1.0",

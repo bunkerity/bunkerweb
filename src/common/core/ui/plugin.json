@@ -1,6 +1,5 @@
 {
   "id": "ui",
-  "order": 999,
   "name": "UI",
   "description": "Integrate easily the BunkerWeb UI.",
   "version": "1.0",
