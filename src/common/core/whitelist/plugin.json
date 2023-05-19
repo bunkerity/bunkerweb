@@ -1,6 +1,5 @@
 {
   "id": "whitelist",
-  "order": 1,
   "name": "Whitelist",
   "description": "Allow access based on internal and external IP/network/rDNS/ASN whitelists.",
   "version": "1.0",

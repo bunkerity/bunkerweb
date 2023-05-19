@@ -1,6 +1,5 @@
 {
   "id": "redis",
-  "order": 999,
   "name": "Redis",
   "description": "Redis server configuration when using BunkerWeb in cluster mode.",
   "version": "1.0",

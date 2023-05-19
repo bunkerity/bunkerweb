@@ -1,6 +1,5 @@
 {
   "id": "clientcache",
-  "order": 999,
   "name": "Client cache",
   "description": "Manage caching for clients.",
   "version": "1.0",

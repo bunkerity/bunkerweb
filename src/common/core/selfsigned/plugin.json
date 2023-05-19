@@ -1,6 +1,5 @@
 {
   "id": "selfsigned",
-  "order": 999,
   "name": "Self-signed certificate",
   "description": "Generate self-signed certificate.",
   "version": "1.0",

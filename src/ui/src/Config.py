@@ -144,7 +144,6 @@ class Config:
                 0,
                 {
                     "id": "general",
-                    "order": 999,
                     "name": "General",
                     "description": "The general settings for the server",
                     "version": "0.1",

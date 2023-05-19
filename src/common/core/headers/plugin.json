@@ -1,6 +1,5 @@
 {
   "id": "headers",
-  "order": 999,
   "name": "Headers",
   "description": "Manage HTTP headers sent to clients.",
   "version": "1.0",

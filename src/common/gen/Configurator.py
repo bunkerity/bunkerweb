@@ -102,7 +102,6 @@ class Configurator:
         return loads(Path(path).read_text())
 
     def __load_plugins(self, path: str, _type: str = "core") -> List[Dict[str, Any]]:
-        orders = {}
         plugins = []
         files = glob(f"{path}/*/plugin.json")
         for file in files:
@@ -115,16 +114,6 @@ class Configurator:
                         f"Ignoring plugin {file} : {msg}",
                     )
                     continue
-
-                if data["order"] not in orders:
-                    orders[data["order"]] = [data["id"]]
-                else:
-                    if len(orders[data["order"]]) > 1 and data["order"] != 999:
-                        self.__logger.warning(
-                            f"Plugin {data['id']} have the same order than {', '.join(orders[data['order']])}. Therefor, the execution order will be random."
-                        )
-
-                    orders[data["order"]].append(data["id"])
 
                 if _type == "external":
                     plugin_content = BytesIO()
@@ -275,7 +264,6 @@ class Configurator:
             key in plugin.keys()
             for key in [
                 "id",
-                "order",
                 "name",
                 "description",
                 "version",
@@ -285,7 +273,7 @@ class Configurator:
         ):
             return (
                 False,
-                f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, order, name, description, version, stream, settings)",
+                f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, name, description, version, stream, settings)",
             )
 
         if not self.__plugin_id_rx.match(plugin["id"]):
@@ -293,8 +281,6 @@ class Configurator:
                 False,
                 f"Invalid id for plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 64))",
             )
-        elif not isinstance(plugin["order"], int):
-            return False, f"Invalid order for plugin {plugin['id']}, must be a number"
         elif len(plugin["name"]) > 128:
             return (
                 False,

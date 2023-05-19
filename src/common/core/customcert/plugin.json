@@ -1,6 +1,5 @@
 {
   "id": "customcert",
-  "order": 999,
   "name": "Custom HTTPS certificate",
   "description": "Choose custom certificate for HTTPS.",
   "version": "1.0",

@@ -1,6 +1,5 @@
 {
   "id": "cors",
-  "order": 999,
   "name": "CORS",
   "description": "Cross-Origin Resource Sharing.",
   "version": "1.0",

@@ -639,4 +639,18 @@ utils.regex_match = function(str, regex, options)
 	return match
 end
 
+utils.get_phases = function()
+	return {
+		"init",
+		"init_worker",
+		"set",
+		"access",
+		"header",
+		"log",
+		"preread",
+		"log_stream",
+		"log_default"
+	}
+end
+
 return utils

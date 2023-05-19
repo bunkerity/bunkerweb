@@ -1,6 +1,5 @@
 {
   "id": "brotli",
-  "order": 999,
   "name": "Brotli",
   "description": "Compress HTTP requests with the brotli algorithm.",
   "version": "1.0",

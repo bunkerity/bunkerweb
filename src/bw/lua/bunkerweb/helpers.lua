@@ -7,7 +7,7 @@ helpers.load_plugin = function(json)
     -- Open file
     local file, err, nb = io.open(json, "r")
     if not file then
-        return false, "can't load JSON at " .. json .. " : " .. err .. "(nb = " .. tostring(nb) .. ")"
+        return false, "can't load JSON at " .. json .. " : " .. err .. " (nb = " .. tostring(nb) .. ")"
     end
     -- Decode JSON
     local ok, plugin = pcall(cjson.decode, file:read("*a"))
@@ -17,18 +17,78 @@ helpers.load_plugin = function(json)
     end
     -- Check fields
     local missing_fields = {}
-    local required_fields = { "id", "order", "name", "description", "version", "settings" }
+    local required_fields = { "id", "name", "description", "version", "settings", "stream" }
     for i, field in ipairs(required_fields) do
         if plugin[field] == nil then
-            valid_json = false
             table.insert(missing_fields, field)
         end
     end
     if #missing_fields > 0 then
         return false, "missing field(s) " .. cjson.encode(missing_fields) .. " for JSON at " .. json
     end
+    -- Try require
+    local plugin_lua, err = helpers.require_plugin(plugin.id)
+    if plugin_lua == false then
+        return false, err
+    end
+    -- Fill phases
+    local phases = utils.get_phases()
+    plugin.phases = {}
+    if plugin_lua then
+        for i, phase in ipairs(phases) do
+            if plugin_lua[phase] ~= nil then
+                table.insert(plugin.phases, phase)
+            end
+        end
+    end
     -- Return plugin
     return true, plugin
+end
+
+helpers.order_plugins = function(plugins)
+    -- Extract orders
+    local file, err, nb = io.open("/usr/share/bunkerweb/core/order.json", "r")
+    if not file then
+        return false, err .. " (nb = " .. tostring(nb) .. ")"
+    end
+    local ok, orders = pcall(cjson.decode, file:read("*a"))
+    file:close()
+    if not ok then
+        return false, "invalid order.json : " .. err
+    end
+    -- Compute plugins/id/phases table
+    local plugins_phases = {}
+    for i, plugin in ipairs(plugins) do
+        plugins_phases[plugin.id] = {}
+        for j, phase in ipairs(plugin.phases) do
+            plugins_phases[plugin.id][phase] = true
+        end
+    end
+    -- Order result
+    local result_orders = {}
+    for i, phase in ipairs(utils.get_phases()) do
+        result_orders[phase] = {}
+    end
+    -- Fill order first
+    for phase, order in pairs(orders) do
+        for i, id in ipairs(order) do
+            local plugin = plugins_phases[id]
+            if plugin and plugin[phase] then
+                table.insert(result_orders[phase], id)
+                plugin[phase] = nil
+            end
+        end
+    end
+    -- Then append missing plugins to the end
+    for i, phase in ipairs(utils.get_phases()) do
+        for id, plugin in pairs(plugins_phases) do
+            if plugin[phase] then
+                table.insert(result_orders[phase], id)
+                plugin[phase] = nil
+            end
+        end
+    end
+    return true, result_orders
 end
 
 helpers.require_plugin = function(id)
@@ -45,7 +105,7 @@ helpers.require_plugin = function(id)
         return false, "missing new() method for plugin " .. id
     end
     -- Return plugin
-    return plugin_lua, "new() call successful for plugin " .. id
+    return plugin_lua, "require() call successful for plugin " .. id
 end
 
 helpers.new_plugin = function(plugin_lua)

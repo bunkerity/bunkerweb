@@ -281,7 +281,6 @@ class Database:
                         settings = plugin
                         plugin = {
                             "id": "general",
-                            "order": 999,
                             "name": "General",
                             "description": "The general settings for the server",
                             "version": "0.1",
@@ -963,8 +962,8 @@ class Database:
                 db_plugin = (
                     session.query(Plugins)
                     .with_entities(
-                        Plugins.order,
                         Plugins.name,
+                        Plugins.stream,
                         Plugins.description,
                         Plugins.version,
                         Plugins.method,
@@ -985,8 +984,8 @@ class Database:
 
                     updates = {}
 
-                    if plugin["order"] != db_plugin.order:
-                        updates[Plugins.order] = plugin["order"]
+                    if plugin["stream"] != db_plugin.stream:
+                        updates[Plugins.stream] = plugin["stream"]
 
                     if plugin["name"] != db_plugin.name:
                         updates[Plugins.name] = plugin["name"]
@@ -1380,7 +1379,7 @@ class Database:
                 session.query(Plugins)
                 .with_entities(
                     Plugins.id,
-                    Plugins.order,
+                    Plugins.stream,
                     Plugins.name,
                     Plugins.description,
                     Plugins.version,
@@ -1389,20 +1388,18 @@ class Database:
                     Plugins.data,
                     Plugins.checksum,
                 )
-                .order_by(Plugins.order)
                 .all()
                 if with_data
                 else session.query(Plugins)
                 .with_entities(
                     Plugins.id,
-                    Plugins.order,
+                    Plugins.stream,
                     Plugins.name,
                     Plugins.description,
                     Plugins.version,
                     Plugins.external,
                     Plugins.method,
                 )
-                .order_by(Plugins.order)
                 .all()
             ):
                 if external and not plugin.external:
@@ -1416,7 +1413,7 @@ class Database:
                 )
                 data = {
                     "id": plugin.id,
-                    "order": plugin.order,
+                    "stream": plugin.stream,
                     "name": plugin.name,
                     "description": plugin.description,
                     "version": plugin.version,

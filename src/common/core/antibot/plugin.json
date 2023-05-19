@@ -1,6 +1,5 @@
 {
   "id": "antibot",
-  "order": 9,
   "name": "Antibot",
   "description": "Bot detection by using a challenge.",
   "version": "1.0",

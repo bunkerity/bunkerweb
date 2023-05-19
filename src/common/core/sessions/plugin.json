@@ -1,6 +1,5 @@
 {
   "id": "sessions",
-  "order": 999,
   "name": "Sessions",
   "description": "Management of session used by other plugins.",
   "version": "1.0",

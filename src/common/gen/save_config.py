@@ -187,23 +187,6 @@ if __name__ == "__main__":
                 )
                 sys_exit(1)
 
-        # Check core plugins orders
-        logger.info("Checking core plugins orders ...")
-        core_plugins = {}
-        files = glob(f"{args.core}/*/plugin.json")
-        for file in files:
-            try:
-                core_plugin = loads(Path(file).read_text())
-
-                if core_plugin["order"] not in core_plugins:
-                    core_plugins[core_plugin["order"]] = []
-
-                core_plugins[core_plugin["order"]].append(core_plugin)
-            except:
-                logger.error(
-                    f"Exception while loading JSON from {file} : {format_exc()}",
-                )
-
         if args.variables:
             logger.info(f"Variables : {args.variables}")
 

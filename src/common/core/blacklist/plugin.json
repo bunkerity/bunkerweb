@@ -1,6 +1,5 @@
 {
   "id": "blacklist",
-  "order": 2,
   "name": "Blacklist",
   "description": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
   "version": "1.0",

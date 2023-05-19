@@ -159,7 +159,6 @@ login_manager.login_view = "login"
 user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWORD"])
 PLUGIN_KEYS = [
     "id",
-    "order",
     "name",
     "description",
     "version",
