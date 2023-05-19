@@ -1,6 +1,6 @@
 from os import getenv
 from subprocess import run
-from requests import ConnectionError, head, options, post
+from requests import ConnectionError, get, head, post
 from socket import create_connection
 from ssl import CERT_NONE, create_default_context
 from time import sleep
@@ -141,19 +141,20 @@ try:
     allowed_methods = getenv("ALLOWED_METHODS", "GET|POST|HEAD")
 
     print(
-        f"ℹ️ Sending a OPTIONS request to http{'s' if ssl_generated else ''}://www.example.com to test ALLOWED_METHODS",
+        f"ℹ️ Sending a GET request to http{'s' if ssl_generated else ''}://www.example.com to test ALLOWED_METHODS",
         flush=True,
     )
 
-    response = options(
+    response = get(
         f"http{'s' if ssl_generated else ''}://www.example.com",
         headers={"Host": "www.example.com"},
+        verify=False,
     )
 
     if response.status_code == 405:
-        if "OPTIONS" in allowed_methods:
+        if "GET" in allowed_methods:
             print(
-                "❌ Request got rejected, even if OPTIONS is in allowed methods, exiting ...",
+                "❌ Request got rejected, even if GET is in allowed methods, exiting ...",
                 flush=True,
             )
             exit(1)
@@ -163,9 +164,9 @@ try:
         if response.status_code != 404:
             response.raise_for_status()
 
-        if "OPTIONS" not in allowed_methods:
+        if "GET" not in allowed_methods:
             print(
-                "❌ Request didn't get rejected, even if OPTIONS is not in allowed methods, exiting ...",
+                "❌ Request didn't get rejected, even if GET is not in allowed methods, exiting ...",
                 flush=True,
             )
             exit(1)
