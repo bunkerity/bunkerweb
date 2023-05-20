@@ -49,6 +49,7 @@ if "geckodriver" not in listdir(Path.cwd()):
 
 print("Starting Firefox ...", flush=True)
 
+
 def safe_get_element(
     driver, by: By, _id: str, *, multiple: bool = False, error: bool = False
 ) -> Union[WebElement, List[WebElement]]:
@@ -62,10 +63,9 @@ def safe_get_element(
         if error:
             raise e
 
-        print(
-            f'Element searched by {by}: "{_id}" not found, exiting ...', flush=True
-        )
+        print(f'Element searched by {by}: "{_id}" not found, exiting ...', flush=True)
         exit(1)
+
 
 def assert_button_click(driver, button: Union[str, WebElement]):
     clicked = False
@@ -78,6 +78,7 @@ def assert_button_click(driver, button: Union[str, WebElement]):
 
             button.click()
             clicked = True
+
 
 def assert_alert_message(driver, message: str):
     safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
@@ -117,13 +118,12 @@ def assert_alert_message(driver, message: str):
         )
         exit(1)
 
-    print(
-        f'Message "{message}" found in one of the messages in the list', flush=True
-    )
+    print(f'Message "{message}" found in one of the messages in the list', flush=True)
 
     assert_button_click(
         driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']"
     )
+
 
 def access_page(
     driver,
@@ -149,9 +149,7 @@ def access_page(
     except TimeoutException:
         if retries < 3 and driver.current_url.split("/")[-1].startswith("/loading"):
             sleep(2)
-            access_page(
-                driver, driver_wait, button, name, message, retries=retries + 1
-            )
+            access_page(driver, driver_wait, button, name, message, retries=retries + 1)
 
         print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
         exit(1)
@@ -161,6 +159,7 @@ def access_page(
             f"{name.title()} page loaded successfully",
             flush=True,
         )
+
 
 with webdriver.Firefox(
     service=Service(
@@ -901,6 +900,8 @@ with webdriver.Firefox(
             driver, By.XPATH, "//input[@type='file' and @name='file']"
         ).send_keys(join(Path.cwd(), "test.zip"))
 
+        sleep(2)
+
         access_page(
             driver,
             driver_wait,
@@ -908,8 +909,6 @@ with webdriver.Firefox(
             "plugins",
             False,
         )
-
-        sleep(2)
 
         print(
             "The bad plugin has been rejected, trying to add a good plugin ...",
@@ -919,6 +918,8 @@ with webdriver.Firefox(
         safe_get_element(
             driver, By.XPATH, "//input[@type='file' and @name='file']"
         ).send_keys(join(Path.cwd(), "discord.zip"))
+
+        sleep(2)
 
         access_page(
             driver,
