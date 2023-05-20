@@ -181,7 +181,7 @@ class Database:
             try:
                 metadata = session.query(Metadata).get(1)
 
-                if metadata is None:
+                if not metadata:
                     return "The metadata are not set yet, try again"
 
                 metadata.autoconf_loaded = value
@@ -435,11 +435,11 @@ class Database:
                                 .first()
                             )
 
-                            if service_setting is None:
+                            if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    value == setting.default
-                                    or (not value.strip() and setting.default is None)
+                                    (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
+                                    or (not value.strip() and not setting.default)
                                 ):
                                     continue
 
@@ -456,10 +456,10 @@ class Database:
                                 method in (service_setting.method, "autoconf")
                                 and service_setting.value != value
                             ):
-                                if (
-                                    value == setting.default
-                                    or (not value.strip() and setting.default is None)
+                                if key != "SERVER_NAME" and (
+                                    (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
+                                    or (not value.strip() and not setting.default)
                                 ):
                                     session.query(Services_settings).filter(
                                         Services_settings.service_id == server_name,
@@ -492,9 +492,9 @@ class Database:
                                 .first()
                             )
 
-                            if global_value is None:
+                            if not global_value:
                                 if value == setting.default or (
-                                    not value.strip() and setting.default is None
+                                    not value.strip() and not setting.default
                                 ):
                                     continue
 
@@ -511,7 +511,7 @@ class Database:
                                 and global_value.value != value
                             ):
                                 if value == setting.default or (
-                                    not value.strip() and setting.default is None
+                                    not value.strip() and not setting.default
                                 ):
                                     session.query(Global_values).filter(
                                         Global_values.setting_id == key,
@@ -570,9 +570,9 @@ class Database:
                             .first()
                         )
 
-                        if global_value is None:
+                        if not global_value:
                             if value == setting.default or (
-                                not value.strip() and setting.default is None
+                                not value.strip() and not setting.default
                             ):
                                 continue
 
@@ -589,7 +589,7 @@ class Database:
                             and value != global_value.value
                         ):
                             if value == setting.default or (
-                                not value.strip() and setting.default is None
+                                not value.strip() and not setting.default
                             ):
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
@@ -676,7 +676,7 @@ class Database:
                     .first()
                 )
 
-                if custom_conf is None:
+                if not custom_conf:
                     to_put.append(Custom_configs(**config))
                 elif config["checksum"] != custom_conf.checksum and method in (
                     custom_conf.method,
@@ -874,7 +874,7 @@ class Database:
                 .first()
             )
 
-            if job is None:
+            if not job:
                 return "Job not found"
 
             job.last_run = datetime.now()
@@ -912,7 +912,7 @@ class Database:
                 .first()
             )
 
-            if cache is None:
+            if not cache:
                 session.add(
                     Jobs_cache(
                         job_name=job_name,
@@ -1056,7 +1056,7 @@ class Database:
                             .first()
                         )
 
-                        if setting not in db_ids or db_setting is None:
+                        if setting not in db_ids or not db_setting:
                             for select in value.pop("select", []):
                                 to_put.append(
                                     Selects(setting_id=value["id"], value=select)
@@ -1151,7 +1151,7 @@ class Database:
                             .first()
                         )
 
-                        if job["name"] not in db_names or db_job is None:
+                        if job["name"] not in db_names or not db_job:
                             job["file_name"] = job.pop("file")
                             job["reload"] = job.get("reload", False)
                             to_put.append(
@@ -1201,7 +1201,7 @@ class Database:
                                 .first()
                             )
 
-                            if db_plugin_page is None:
+                            if not db_plugin_page:
                                 template = Path(f"{path_ui}/template.html").read_bytes()
                                 actions = Path(f"{path_ui}/actions.py").read_bytes()
 
@@ -1318,7 +1318,7 @@ class Database:
                                 .first()
                             )
 
-                            if db_plugin_page is None:
+                            if not db_plugin_page:
                                 template = Path(f"{path_ui}/template.html").read_bytes()
                                 actions = Path(f"{path_ui}/actions.py").read_bytes()
 
@@ -1638,7 +1638,7 @@ class Database:
                 .first()
             )
 
-            if page is None:
+            if not page:
                 return None
 
             return page.actions_file
@@ -1653,7 +1653,7 @@ class Database:
                 .first()
             )
 
-            if page is None:
+            if not page:
                 return None
 
             return page.template_file
