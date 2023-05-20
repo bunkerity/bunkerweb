@@ -267,20 +267,21 @@ function blacklist:is_blacklisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, "ASN " .. err
-		end
-		local ignore = false
-		for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
-			if ignore_asn == tostring(asn) then
-				ignore = true
-				break
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
+		else
+			local ignore = false
+			for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
+				if ignore_asn == tostring(asn) then
+					ignore = true
+					break
+				end
 			end
-		end
-		-- Check if ASN is in blacklist
-		if not ignore then
-			for i, bl_asn in ipairs(self.lists["ASN"]) do
-				if bl_asn == tostring(asn) then
-					return true, "ASN " .. bl_asn
+			-- Check if ASN is in blacklist
+			if not ignore then
+				for i, bl_asn in ipairs(self.lists["ASN"]) do
+					if bl_asn == tostring(asn) then
+						return true, "ASN " .. bl_asn
+					end
 				end
 			end
 		end

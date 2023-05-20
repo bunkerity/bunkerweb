@@ -26,9 +26,15 @@ function antibot:access()
 		return self:ret(true, "antibot not activated")
 	end
 
-	-- Get session and data
-	self.session = utils.get_session("antibot")
-	self:get_session_data()
+	-- Get session data
+	local session, err = utils.get_session("antibot")
+	if not session then
+		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
+	end
+	self.session = session
+	self.session_data = utils.get_session_data(self.session)
+	-- Check if session is valid
+	self:check_session()
 
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
@@ -48,6 +54,11 @@ function antibot:access()
 	-- Redirect to challenge page
 	if ngx.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
 		return self:ret(true, "redirecting client to the challenge uri", nil, self.variables["ANTIBOT_URI"])
+	end
+
+	-- Cookie case : don't display challenge page
+	if self.session_data.resolved then
+		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
 	-- Display challenge needed
@@ -89,13 +100,25 @@ function antibot:content()
 	if self.variables["USE_ANTIBOT"] == "no" then
 		return self:ret(true, "antibot not activated")
 	end
+
 	-- Check if display content is needed
 	if not ngx.ctx.bw.antibot_display_content then
 		return self:ret(true, "display content not needed", nil, "/")
 	end
-	-- Get session and data
-	self.session = utils.get_session("antibot")
-	self:get_session_data(true)
+
+	-- Get session data
+	local session, err = utils.get_session("antibot")
+	if not session then
+		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
+	end
+	self.session = session
+	self.session_data = utils.get_session_data(self.session)
+
+	-- Direct access without session
+	if not self.session_data.prepared then
+		return self:ret(true, "no session", nil, "/")
+	end
+
 	-- Display content
 	local ok, err = self:display_challenge()
 	if not ok then
@@ -104,50 +127,42 @@ function antibot:content()
 	return self:ret(true, "content displayed")
 end
 
-function antibot:get_session_data(no_check)
-	local session_data = self.session:get_data()
-	if session_data[ngx.ctx.bw.server_name] then
-		local data = cjson.decode(session_data[ngx.ctx.bw.server_name])
-		if no_check then
-			self.session_data = data
-			return
-		end
-		if not data.time_resolve and not data.time_valid then
-			self.session_data = {}
-			self.session_updated = true
-			return
-		end
-		local time = ngx.now()
-		self.session_data = data
-		-- Check valid time
-		if data.resolved and (data.time_valid > time or time - data.time_valid > tonumber(self.variables["ANTIBOT_TIME_VALID"])) then
-			self.session_data.resolved = false
-			self.session_data.prepared = false
-			self.session_updated = true
-			return
-		end
-		-- Check resolve time
-		if not data.resolved and (data.time_resolve > time or time - data.time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"])) then
-			self.session_data.prepared = false
-			self.session_updated = true
-			return
-		end
-		-- Session is valid
+function antibot:check_session()
+	-- Get values
+	local time_resolve = self.session_data.time_resolve
+	local time_valid = self.session_data.time_valid
+	-- Not resolved and not prepared
+	if not time_resolve and not time_valid then
+		self.session_data = {}
+		self.session_updated = true
 		return
 	end
-	self.session_data = {}
-	self.session_updated = true
-	return
+	-- Check if still valid
+	local time = ngx.now()
+	local resolved = self.session_data.resolved
+	if resolved and (time_valid > time or time - time_valid > tonumber(self.variables["ANTIBOT_TIME_VALID"])) then
+		self.session_data = {}
+		self.session_updated = true
+		return
+	end
+	-- Check if new prepare is needed
+	if not resolved and (time_resolve > time or time - time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"])) then
+		self.session_data = {}
+		self.session_updated = true
+		return
+	end
 end
 
 function antibot:set_session_data()
 	if self.session_updated then
-		local session_data = self.session:get_data()
-		session_data[ngx.ctx.bw.server_name] = cjson.encode(self.session_data)
-		self.session:set_data(session_data)
-		return self.session:save()
+		local ok, err = utils.set_session_data(self.session, self.session_data)
+		if not ok then
+			return false, err
+		end
+		self.session_updated = false
+		return true, "updated"
 	end
-	return true, "no updates"
+	return true, "no update"
 end
 
 function antibot:prepare_challenge()

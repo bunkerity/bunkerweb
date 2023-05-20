@@ -22,7 +22,7 @@ function plugin:initialize(id)
     local metadata = cjson.decode(encoded_metadata)
     local multisite = false
     local current_phase = ngx.get_phase()
-    for i, check_phase in ipairs({ "set", "access", "log", "preread" }) do
+    for i, check_phase in ipairs({ "set", "access", "content", "header", "log", "preread", "log_stream", "log_default" }) do
         if current_phase == check_phase then
             multisite = true
             break

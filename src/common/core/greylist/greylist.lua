@@ -216,11 +216,12 @@ function greylist:is_greylisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, "ASN " .. err
-		end
-		for i, bl_asn in ipairs(self.lists["ASN"]) do
-			if bl_asn == tostring(asn) then
-				return true, "ASN " .. bl_asn
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
+		else
+			for i, bl_asn in ipairs(self.lists["ASN"]) do
+				if bl_asn == tostring(asn) then
+					return true, "ASN " .. bl_asn
+				end
 			end
 		end
 	end
