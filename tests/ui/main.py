@@ -21,156 +21,155 @@ from selenium.common.exceptions import (
     TimeoutException,
 )
 
-try:
-    ready = False
-    retries = 0
-    while not ready:
-        with suppress(RequestException):
-            status_code = get("http://www.example.com/admin").status_code
+ready = False
+retries = 0
+while not ready:
+    with suppress(RequestException):
+        status_code = get("http://www.example.com/admin").status_code
 
-            if status_code > 500:
-                print("An error occurred with the server, exiting ...", flush=True)
-                exit(1)
-
-            ready = status_code < 400
-
-        if retries > 10:
-            print("UI took too long to be ready, exiting ...", flush=True)
-            exit(1)
-        elif not ready:
-            retries += 1
-            print("Waiting for UI to be ready, retrying in 5s ...", flush=True)
-            sleep(5)
-
-    print("UI is ready, starting tests ...", flush=True)
-
-    firefox_options = Options()
-    if "geckodriver" not in listdir(Path.cwd()):
-        firefox_options.add_argument("--headless")
-
-    print("Starting Firefox ...", flush=True)
-
-    def safe_get_element(
-        driver, by: By, _id: str, *, multiple: bool = False, error: bool = False
-    ) -> Union[WebElement, List[WebElement]]:
-        try:
-            return WebDriverWait(driver, 4).until(
-                EC.presence_of_element_located((by, _id))
-                if not multiple
-                else EC.presence_of_all_elements_located((by, _id))
-            )
-        except TimeoutException as e:
-            if error:
-                raise e
-
-            print(
-                f'Element searched by {by}: "{_id}" not found, exiting ...', flush=True
-            )
+        if status_code > 500:
+            print("An error occurred with the server, exiting ...", flush=True)
             exit(1)
 
-    def assert_button_click(driver, button: Union[str, WebElement]):
-        clicked = False
-        while not clicked:
-            with suppress(ElementClickInterceptedException):
-                if isinstance(button, str):
-                    button = safe_get_element(driver, By.XPATH, button)
+        ready = status_code < 400
 
-                sleep(0.5)
+    if retries > 10:
+        print("UI took too long to be ready, exiting ...", flush=True)
+        exit(1)
+    elif not ready:
+        retries += 1
+        print("Waiting for UI to be ready, retrying in 5s ...", flush=True)
+        sleep(5)
 
-                button.click()
-                clicked = True
+print("UI is ready, starting tests ...", flush=True)
 
-    def assert_alert_message(driver, message: str):
-        safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
+firefox_options = Options()
+if "geckodriver" not in listdir(Path.cwd()):
+    firefox_options.add_argument("--headless")
 
-        sleep(0.3)
+print("Starting Firefox ...", flush=True)
 
-        assert_button_click(driver, "//button[@data-flash-sidebar-open='']")
 
-        error = False
-        while True:
-            try:
-                alerts = safe_get_element(
-                    driver,
-                    By.XPATH,
-                    "//aside[@data-flash-sidebar='']/div[2]/div",
-                    multiple=True,
-                    error=True,
-                )
-                break
-            except TimeoutException:
-                if error:
-                    print("Messages list not found, exiting ...", flush=True)
-                    exit(1)
-                error = True
-                driver.refresh()
-
-        is_in = False
-        for alert in alerts:
-            if message in alert.text:
-                is_in = True
-                break
-
-        if not is_in:
-            print(
-                f'Message "{message}" not found in one of the messages in the list, exiting ...',
-                flush=True,
-            )
-            exit(1)
-
-        print(
-            f'Message "{message}" found in one of the messages in the list', flush=True
+def safe_get_element(
+    driver, by: By, _id: str, *, multiple: bool = False, error: bool = False
+) -> Union[WebElement, List[WebElement]]:
+    try:
+        return WebDriverWait(driver, 4).until(
+            EC.presence_of_element_located((by, _id))
+            if not multiple
+            else EC.presence_of_all_elements_located((by, _id))
         )
+    except TimeoutException as e:
+        if error:
+            raise e
 
-        assert_button_click(
-            driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']"
-        )
+        print(f'Element searched by {by}: "{_id}" not found, exiting ...', flush=True)
+        exit(1)
 
-    def access_page(
-        driver,
-        driver_wait: WebDriverWait,
-        button: Union[str, WebElement],
-        name: str,
-        message: bool = True,
-        *,
-        retries: int = 0,
-    ):
-        assert_button_click(driver, button)
 
+def assert_button_click(driver, button: Union[str, WebElement]):
+    clicked = False
+    while not clicked:
+        with suppress(ElementClickInterceptedException):
+            if isinstance(button, str):
+                button = safe_get_element(driver, By.XPATH, button)
+
+            sleep(0.5)
+
+            button.click()
+            clicked = True
+
+
+def assert_alert_message(driver, message: str):
+    safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
+
+    sleep(0.3)
+
+    assert_button_click(driver, "//button[@data-flash-sidebar-open='']")
+
+    error = False
+    while True:
         try:
-            title = driver_wait.until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "/html/body/div/header/div/nav/h6")
-                )
+            alerts = safe_get_element(
+                driver,
+                By.XPATH,
+                "//aside[@data-flash-sidebar='']/div[2]/div",
+                multiple=True,
+                error=True,
             )
-
-            if title.text != name.replace(" ", "_").title():
-                print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
-                exit(1)
+            break
         except TimeoutException:
-            if retries < 3 and driver.current_url.split("/")[-1].startswith("/loading"):
-                sleep(2)
-                access_page(
-                    driver, driver_wait, button, name, message, retries=retries + 1
-                )
+            if error:
+                print("Messages list not found, exiting ...", flush=True)
+                exit(1)
+            error = True
+            driver.refresh()
 
-            print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
-            exit(1)
+    is_in = False
+    for alert in alerts:
+        if message in alert.text:
+            is_in = True
+            break
 
-        if message:
-            print(
-                f"{name.title()} page loaded successfully",
-                flush=True,
+    if not is_in:
+        print(
+            f'Message "{message}" not found in one of the messages in the list, exiting ...',
+            flush=True,
+        )
+        exit(1)
+
+    print(f'Message "{message}" found in one of the messages in the list', flush=True)
+
+    assert_button_click(
+        driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']"
+    )
+
+
+def access_page(
+    driver,
+    driver_wait: WebDriverWait,
+    button: Union[str, WebElement],
+    name: str,
+    message: bool = True,
+    *,
+    retries: int = 0,
+):
+    assert_button_click(driver, button)
+
+    try:
+        title = driver_wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "/html/body/div/header/div/nav/h6")
             )
+        )
 
-    with webdriver.Firefox(
-        service=Service(
-            executable_path="./geckodriver"
-            if "geckodriver" in listdir(Path.cwd())
-            else "/usr/local/bin/geckodriver"
-        ),
-        options=firefox_options,
-    ) as driver:
+        if title.text != name.replace(" ", "_").title():
+            print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
+            exit(1)
+    except TimeoutException:
+        if retries < 3 and driver.current_url.split("/")[-1].startswith("/loading"):
+            sleep(2)
+            access_page(driver, driver_wait, button, name, message, retries=retries + 1)
+
+        print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
+        exit(1)
+
+    if message:
+        print(
+            f"{name.title()} page loaded successfully",
+            flush=True,
+        )
+
+
+with webdriver.Firefox(
+    service=Service(
+        executable_path="./geckodriver"
+        if "geckodriver" in listdir(Path.cwd())
+        else "/usr/local/bin/geckodriver"
+    ),
+    options=firefox_options,
+) as driver:
+    try:
         driver.delete_all_cookies()
         driver.maximize_window()
         driver_wait = WebDriverWait(driver, 30)
@@ -901,6 +900,8 @@ try:
             driver, By.XPATH, "//input[@type='file' and @name='file']"
         ).send_keys(join(Path.cwd(), "test.zip"))
 
+        sleep(2)
+
         access_page(
             driver,
             driver_wait,
@@ -908,8 +909,6 @@ try:
             "plugins",
             False,
         )
-
-        sleep(2)
 
         print(
             "The bad plugin has been rejected, trying to add a good plugin ...",
@@ -919,6 +918,8 @@ try:
         safe_get_element(
             driver, By.XPATH, "//input[@type='file' and @name='file']"
         ).send_keys(join(Path.cwd(), "discord.zip"))
+
+        sleep(2)
 
         access_page(
             driver,
@@ -1300,10 +1301,11 @@ try:
             exit(1)
 
         print("Successfully logged out, tests are done", flush=True)
-except SystemExit:
-    exit(1)
-except:
-    print(f"Something went wrong, exiting ...\n{format_exc()}", flush=True)
-    exit(1)
+    except SystemExit:
+        exit(1)
+    except:
+        print(f"Something went wrong, exiting ...\n{format_exc()}", flush=True)
+        driver.save_screenshot("error.png")
+        exit(1)
 
 exit(0)

@@ -98,62 +98,19 @@ class Config:
     def get_plugins(
         self, *, external: bool = False, with_data: bool = False
     ) -> List[dict]:
-        plugins = []
-
-        for foldername in list(iglob("/etc/bunkerweb/plugins/*")) + (
-            list(iglob("/usr/share/bunkerweb/core/*") if not external else [])
-        ):
-            content = listdir(foldername)
-            if "plugin.json" not in content:
-                continue
-
-            with open(f"{foldername}/plugin.json", "r") as f:
-                plugin = json_load(f)
-
-            plugin.update(
-                {
-                    "page": False,
-                    "external": foldername.startswith("/etc/bunkerweb/plugins"),
-                }
-            )
-
-            plugin["method"] = "ui" if plugin["external"] else "manual"
-
-            if "ui" in content:
-                if "template.html" in listdir(f"{foldername}/ui"):
-                    plugin["page"] = True
-
-            if with_data:
-                plugin_content = BytesIO()
-                with tar_open(
-                    fileobj=plugin_content, mode="w:gz", compresslevel=9
-                ) as tar:
-                    tar.add(foldername, arcname=basename(foldername), recursive=True)
-                plugin_content.seek(0)
-                value = plugin_content.getvalue()
-
-                plugin["data"] = value
-                plugin["checksum"] = sha256(value).hexdigest()
-
-            plugins.append(plugin)
+        plugins = self.__db.get_plugins(external=external, with_data=with_data)
 
         plugins.sort(key=lambda x: x["name"])
 
-        with open("/usr/share/bunkerweb/settings.json", "r") as f:
-            plugins.insert(
-                0,
-                {
-                    "id": "general",
-                    "name": "General",
-                    "description": "The general settings for the server",
-                    "version": "0.1",
-                    "stream": "partial",
-                    "external": False,
-                    "method": "manual",
-                    "page": False,
-                    "settings": json_load(f),
-                },
-            )
+        general_plugin = None
+        for plugin in plugins.copy():
+            if plugin["id"] == "general":
+                general_plugin = plugin
+                plugins.remove(plugin)
+                break
+
+        if general_plugin:
+            plugins.insert(0, general_plugin)
 
         return plugins
 

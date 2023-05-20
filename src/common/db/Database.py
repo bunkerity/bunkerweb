@@ -725,7 +725,7 @@ class Database:
                 config[setting.id] = (
                     default
                     if methods is False
-                    else {"value": default, "method": "default"}
+                    else {"value": default, "global": True, "method": "default"}
                 )
 
                 global_values = (
@@ -750,6 +750,7 @@ class Database:
                         if methods is False
                         else {
                             "value": global_value.value,
+                            "global": True,
                             "method": global_value.method,
                         }
                     )
@@ -798,13 +799,16 @@ class Database:
                             if methods is False
                             else {
                                 "value": service_setting.value,
+                                "global": False,
                                 "method": service_setting.method,
                             }
                         )
 
             servers = " ".join(service.id for service in session.query(Services).all())
             config["SERVER_NAME"] = (
-                servers if methods is False else {"value": servers, "method": "default"}
+                servers
+                if methods is False
+                else {"value": servers, "global": True, "method": "default"}
             )
 
             return config
@@ -852,7 +856,7 @@ class Database:
                         tmp_config.pop(key)
                     else:
                         tmp_config[key] = (
-                            {"value": value["value"], "method": "default"}
+                            {"value": value["value"], "global": True, "method": "default"}
                             if methods is True
                             else value
                         )
