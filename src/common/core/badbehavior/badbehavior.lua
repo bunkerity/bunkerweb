@@ -174,7 +174,8 @@ function badbehavior.redis_increase(ip, count_time, ban_time)
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err = clusterstore:call("eval", redis_script, 2, "bad_behavior_" .. ip, "bans_ip" .. ip, count_time,
+	local counter, err = clusterstore:call("eval", redis_script, 2, "plugin_bad_behavior_" .. ip, "bans_ip" .. ip,
+		count_time,
 		ban_time)
 	if not counter then
 		clusterstore:close()
@@ -214,7 +215,7 @@ function badbehavior.redis_decrease(ip, count_time)
 	if not ok then
 		return false, err
 	end
-	local counter, err = clusterstore:call("eval", redis_script, 1, "bad_behavior_" .. ip, count_time)
+	local counter, err = clusterstore:call("eval", redis_script, 1, "plugin_bad_behavior_" .. ip, count_time)
 	if not counter then
 		clusterstore:close()
 		return false, err

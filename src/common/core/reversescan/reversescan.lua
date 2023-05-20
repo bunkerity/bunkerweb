@@ -34,7 +34,7 @@ function reversescan:access()
                 utils.get_deny_status())
         elseif not cached then
             -- Do the scan
-            local res, err = self:scan(ngx.ctx.bw.remote_addr, tonumber(port),
+            local res = self:scan(ngx.ctx.bw.remote_addr, tonumber(port),
                 tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
             -- Cache the result
             local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr .. ":" .. port, res)
@@ -62,13 +62,13 @@ function reversescan:scan(ip, port, timeout)
     local ok, err = tcpsock:connect(ip, port)
     tcpsock:close()
     if not ok then
-        return "close", err
+        return "close"
     end
-    return "open", nil
+    return "open"
 end
 
 function reversescan:is_in_cache(ip_port)
-    local ok, data = self.cachestore:get("plugin_reversescan_cache_" .. ip_port)
+    local ok, data = self.cachestore:get("plugin_reverse_scan_" .. ip_port)
     if not ok then
         return false, data
     end
@@ -76,7 +76,7 @@ function reversescan:is_in_cache(ip_port)
 end
 
 function reversescan:add_to_cache(ip_port, value)
-    local ok, err = self.cachestore:set("plugin_reversescan_cache_" .. ip_port, value, 86400)
+    local ok, err = self.cachestore:set("plugin_reverse_scan_" .. ip_port, value, 86400)
     if not ok then
         return false, err
     end

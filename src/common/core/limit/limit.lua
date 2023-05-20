@@ -154,7 +154,7 @@ function limit:limit_req(rate_max, rate_time)
 			timestamps = redis_timestamps
 			-- Save the new timestamps
 			local ok, err = self.datastore:set(
-			"plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri,
+				"plugin_limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri,
 				cjson.encode(timestamps), delay)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
@@ -177,8 +177,8 @@ end
 
 function limit:limit_req_local(rate_max, rate_time)
 	-- Get timestamps
-	local timestamps, err = self.datastore:get("plugin_limit_cache_" ..
-	ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
+	local timestamps, err = self.datastore:get("plugin_limit_" ..
+		ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -190,7 +190,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	-- Save new timestamps if needed
 	if updated then
 		local ok, err = self.datastore:set(
-		"plugin_limit_cache_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri,
+			"plugin_limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri,
 			cjson.encode(new_timestamps), delay)
 		if not ok then
 			return nil, err
@@ -256,7 +256,7 @@ function limit:limit_req_redis(rate_max, rate_time)
 	end
 	-- Execute script
 	local timestamps, err = self.clusterstore:call("eval", redis_script, 1,
-		"limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, rate_max, rate_time,
+		"plugin_limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, rate_max, rate_time,
 		os.time(os.date("!*t")))
 	if not timestamps then
 		self.clusterstore:close()

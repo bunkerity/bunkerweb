@@ -297,7 +297,6 @@ try:
 
     core_plugins = {
         "general": {
-            "order": 999,
             "name": "General",
             "description": "The general settings for the server",
             "version": "0.1",
@@ -332,7 +331,6 @@ try:
             session.query(Plugins)
             .with_entities(
                 Plugins.id,
-                Plugins.order,
                 Plugins.name,
                 Plugins.description,
                 Plugins.version,
@@ -356,14 +354,13 @@ try:
                 exit(1)
 
             if (
-                plugin.order != current_plugin[plugin.id]["order"]
-                or plugin.name != current_plugin[plugin.id]["name"]
+                plugin.name != current_plugin[plugin.id]["name"]
                 or plugin.description != current_plugin[plugin.id]["description"]
                 or plugin.version != current_plugin[plugin.id]["version"]
                 or plugin.stream != current_plugin[plugin.id]["stream"]
             ):
                 print(
-                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n{dumps({'order': plugin.order, 'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})} (database) != {dumps({'order': current_plugin[plugin.id]['order'], 'name': current_plugin[plugin.id]['name'], 'description': current_plugin[plugin.id]['description'], 'version': current_plugin[plugin.id]['version'], 'stream': current_plugin[plugin.id]['stream']})} (file)",
+                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n{dumps({'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})} (database) != {dumps({'name': current_plugin[plugin.id]['name'], 'description': current_plugin[plugin.id]['description'], 'version': current_plugin[plugin.id]['version'], 'stream': current_plugin[plugin.id]['stream']})} (file)",
                     flush=True,
                 )
                 exit(1)
