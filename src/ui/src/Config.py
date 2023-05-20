@@ -102,6 +102,16 @@ class Config:
 
         plugins.sort(key=lambda x: x["name"])
 
+        general_plugin = None
+        for plugin in plugins.copy():
+            if plugin["id"] == "general":
+                general_plugin = plugin
+                plugins.remove(plugin)
+                break
+
+        if general_plugin:
+            plugins.insert(0, general_plugin)
+
         return plugins
 
     def get_settings(self) -> dict:
