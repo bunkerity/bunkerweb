@@ -12,12 +12,6 @@ local whitelist  = class("whitelist", plugin)
 function whitelist:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "whitelist")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
 	-- Decode lists
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_whitelist_lists")
@@ -43,8 +37,6 @@ function whitelist:initialize()
 			end
 		end
 	end
-	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function whitelist:is_needed()

@@ -10,13 +10,6 @@ local limit        = class("limit", plugin)
 function limit:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "limit")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
-	self.clusterstore = clusterstore:new()
 	-- Load rules if needed
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		-- Get all rules from datastore

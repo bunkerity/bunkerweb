@@ -680,7 +680,7 @@ utils.new_cachestore         = function()
 		use_redis = use_redis == "yes"
 	end
 	-- Instantiate
-	return require "bunkerweb.cachestore":new(use_redis)
+	return require "bunkerweb.cachestore":new(use_redis, true)
 end
 
 utils.regex_match = function(str, regex, options)
@@ -723,6 +723,22 @@ utils.is_cosocket_available = function()
 		end
 	end
 	return false
+end
+
+utils.kill_all_threads = function(threads)
+	for i, thread in ipairs(threads) do
+		local ok, err = ngx.thread.kill(thread)
+		if not ok then
+			logger:log(ngx.ERR, "error while killing thread : " .. err)
+		end
+	end
+end
+
+utils.get_ctx_obj = function(obj)
+	if ngx.ctx and ngx.ctx.bw then
+		return ngx.ctx.bw[obj]
+	end
+	return nil
 end
 
 return utils

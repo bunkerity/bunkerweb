@@ -10,12 +10,6 @@ local greylist   = class("greylist", plugin)
 function greylist:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "greylist")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
 	-- Decode lists
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_greylist_lists")
@@ -41,8 +35,6 @@ function greylist:initialize()
 			end
 		end
 	end
-	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function greylist:is_needed()

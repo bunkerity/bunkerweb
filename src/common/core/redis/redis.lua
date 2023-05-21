@@ -9,7 +9,6 @@ local redis        = class("redis", plugin)
 function redis:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "redis")
-	self.clusterstore = clusterstore:new()
 end
 
 function redis:init_worker()
