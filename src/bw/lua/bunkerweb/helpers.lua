@@ -148,7 +148,6 @@ end
 helpers.fill_ctx = function()
     -- Return errors as table
     local errors = {}
-    local use_redis = nil
     -- Check if ctx is already filled
     if not ngx.ctx.bw then
         -- Instantiate bw table
@@ -180,15 +179,14 @@ helpers.fill_ctx = function()
         -- Misc info
         data.integration = utils.get_integration()
         data.version = utils.get_version()
-        -- Common objects
-        use_redis, err = utils.get_variable("USE_REDIS", false)
-        if not use_redis then
-            table.insert(errors, "can't get variable from datastore : " .. err)
-        end
         -- Fill ctx
         ngx.ctx.bw = data
     end
     -- Always create new objects for current phases in case of cosockets
+    local use_redis, err = utils.get_variable("USE_REDIS", false)
+    if not use_redis then
+        table.insert(errors, "can't get variable from datastore : " .. err)
+    end
     ngx.ctx.bw.datastore = require "bunkerweb.datastore":new()
     ngx.ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
     ngx.ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes")

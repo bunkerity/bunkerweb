@@ -169,7 +169,6 @@ function dnsbl:is_in_dnsbl(ip, server)
 	end
 	for i, ip in ipairs(ips) do
 		if ip:find("^127%.0%.0%.") then
-			ngx.sleep(5)
 			return true, server
 		end
 	end
