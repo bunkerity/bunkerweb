@@ -48,15 +48,17 @@ function cachestore:initialize(use_redis, new_cs)
 	self.logger = module_logger
 	if new_cs then
 		self.clusterstore = clusterstore:new(false)
+		self.shared_cs = false
 	else
 		self.clusterstore = utils.get_ctx_obj("clusterstore")
+		self.shared_cs = true
 	end
 end
 
 function cachestore:get(key)
-	local callback = function(key)
+	local callback = function(key, cs)
 		-- Connect to redis
-		local clusterstore = require "bunkerweb.clusterstore":new(false)
+		local clusterstore = cs or require "bunkerweb.clusterstore":new(false)
 		local ok, err, reused = clusterstore:connect()
 		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
@@ -95,7 +97,11 @@ function cachestore:get(key)
 	end
 	local value, err, hit_level
 	if self.use_redis and utils.is_cosocket_available() then
-		value, err, hit_level = self.cache:get(key, nil, callback, key)
+		local cs = nil
+		if self.shared_cs then
+			cs = self.clusterstore
+		end
+		value, err, hit_level = self.cache:get(key, nil, callback, key, cs)
 	else
 		value, err, hit_level = self.cache:get(key, nil, callback_no_miss)
 	end
