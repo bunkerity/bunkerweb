@@ -8,14 +8,18 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 > /usr/share/bunkerweb/deps/requirements.txt && \
     rm -rf /tmp/req
 
-# Install dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev && \
+# Install python dependencies
+RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
+
+# Install python requirements
+RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install wheel && \
+    pip install --no-cache-dir --upgrade wheel && \
     mkdir -p /usr/share/bunkerweb/deps/python && \
-    export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
-    apk del .build-deps
+    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+
+# Remove build dependencies
+RUN apk del .build-deps
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
