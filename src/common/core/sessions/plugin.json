@@ -1,6 +1,5 @@
 {
   "id": "sessions",
-  "order": 999,
   "name": "Sessions",
   "description": "Management of session used by other plugins.",
   "version": "1.0",
@@ -47,9 +46,27 @@
       "default": "86400",
       "help": "Maximum time (in seconds) before a session is destroyed.",
       "id": "sessions-absolute-timeout",
-      "label": "SessionS absolute timeout",
+      "label": "Sessions absolute timeout",
       "regex": "^\\d+$",
       "type": "text"
+    },
+    "SESSIONS_CHECK_IP": {
+      "context": "global",
+      "default": "yes",
+      "help": "Destroy session if IP address is different than original one.",
+      "id": "sessions-check-ip",
+      "label": "Sessions check IP",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "SESSIONS_CHECK_USER_AGENT": {
+      "context": "global",
+      "default": "yes",
+      "help": "Destroy session if User-Agent is different than original one.",
+      "id": "sessions-user-agent",
+      "label": "Sessions check User-Agent",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   }
 }

@@ -26,7 +26,7 @@ def format_remaining_time(seconds):
     if minutes > 0:
         time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
     if seconds > 0:
-        time_parts.append(f"{seconds:.2f} second{'' if seconds == 1 else 's'}")
+        time_parts.append(f"{seconds} second{'' if seconds == 1 else 's'}")
 
     if len(time_parts) > 1:
         time_parts[-1] = f"and {time_parts[-1]}"

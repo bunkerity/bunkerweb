@@ -23,13 +23,13 @@ from Database import Database
 from logger import setup_logger
 from jobs import cache_file, cache_hash, is_cached_file, file_hash
 
-rdns_rx = re_compile(rb"^(\.?[a-z\d\-]+)*\.[a-z]{2,}$", IGNORECASE)
+rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
 asn_rx = re_compile(rb"^\d+$")
 uri_rx = re_compile(rb"^/")
 
 
 def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
-    if kind == "IP":
+    if kind in ("IP", "IGNORE_IP"):
         if b"/" in line:
             with suppress(ValueError):
                 ip_network(line.decode("utf-8"))
@@ -38,18 +38,16 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
             with suppress(ValueError):
                 ip_address(line.decode("utf-8"))
                 return True, line
-    elif kind == "RDNS":
+    elif kind in ("RDNS", "IGNORE_RDNS"):
         if rdns_rx.match(line):
             return True, line.lower()
-    elif kind == "ASN":
+    elif kind in ("ASN", "IGNORE_ASN"):
         real_line = line.replace(b"AS", b"").replace(b"as", b"")
         if asn_rx.match(real_line):
             return True, real_line
-    elif kind == "USER_AGENT":
-        return True, line.replace(b"\\ ", b" ").replace(b"\\.", b"%.").replace(
-            b"\\\\", b"\\"
-        ).replace(b"-", b"%-")
-    elif kind == "URI":
+    elif kind in ("USER_AGENT", "IGNORE_USER_AGENT"):
+        return True, b"(?:\\b)" + line + b"(?:\\b)"
+    elif kind in ("URI", "IGNORE_URI"):
         if uri_rx.match(line):
             return True, line
 

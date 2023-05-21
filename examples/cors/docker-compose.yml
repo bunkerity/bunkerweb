@@ -23,7 +23,7 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - app1.example.com_USE_CORS=yes
-      - app1.example.com_CORS_ALLOW_ORIGIN=https://app2.example.com
+      - app1.example.com_CORS_ALLOW_ORIGIN=^https://app2\.example\.com$$
       - app1.example.com_ALLOWED_METHODS=GET|POST|HEAD|OPTIONS
       - app1.example.com_REMOTE_PHP=myapp1
       - app1.example.com_REMOTE_PHP_PATH=/app

@@ -1,6 +1,5 @@
 {
   "id": "limit",
-  "order": 8,
   "name": "Limit",
   "description": "Limit maximum number of requests and connections.",
   "version": "1.0",
@@ -18,7 +17,7 @@
     "LIMIT_REQ_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "URL where the limit request will be applied.",
+      "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
       "id": "limit-req-url",
       "label": "Limit request URL",
       "regex": "^[\\w\\].~:/^%?#[@!$&'()*+,;=-]+$",

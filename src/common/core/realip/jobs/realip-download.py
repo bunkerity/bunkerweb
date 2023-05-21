@@ -119,7 +119,7 @@ try:
 
     # Put file in cache
     cached, err = cache_file(
-        "/var/tmp/bunkerweb/realip-combined.list",
+        "/var/tmp/bunkerweb/realip/combined.list",
         "/var/cache/bunkerweb/realip/combined.list",
         new_hash,
         db,

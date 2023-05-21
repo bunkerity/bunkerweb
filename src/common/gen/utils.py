@@ -13,7 +13,7 @@ from stat import (
 from typing import List
 
 
-def has_permissions(path: str, need_permissions: List[str]):
+def has_permissions(path: str, need_permissions: List[str]) -> bool:
     uid = geteuid()
     gid = getegid()
     statinfo = stat(path)

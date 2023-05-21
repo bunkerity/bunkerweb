@@ -154,6 +154,11 @@ do_and_check_cmd cp /tmp/bunkerweb/deps/src/lua-resty-openssl/lib/resty/openssl.
 echo "ℹ️ Installing lua-ffi-zlib"
 do_and_check_cmd cp /tmp/bunkerweb/deps/src/lua-ffi-zlib/lib/ffi-zlib.lua /usr/share/bunkerweb/deps/lib/lua
 
+# Installing lua-resty-signal
+echo "ℹ️ Installing lua-resty-signal"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-signal" do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps -j $NTASK
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-signal" do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
+
 # Compile dynamic modules
 echo "ℹ️ Compiling and installing dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"

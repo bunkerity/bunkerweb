@@ -129,6 +129,31 @@ jobs:
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  prepare-tests-core:
+    needs: [create-infras]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - id: set-matrix
+        run: |
+          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+          echo "::set-output name=tests::$tests"
+    outputs:
+      tests: ${{ steps.set-matrix.outputs.tests }}
+  tests-core:
+    needs: prepare-tests-core
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+    uses: ./.github/workflows/test-core.yml
+    with:
+      TEST: ${{ matrix.test }}
+      RELEASE: staging
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
   delete-infras:

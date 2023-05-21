@@ -55,7 +55,6 @@ class Plugins(Base):
     __tablename__ = "bw_plugins"
 
     id = Column(String(64), primary_key=True)
-    order = Column(Integer, nullable=False)
     name = Column(String(128), nullable=False)
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)

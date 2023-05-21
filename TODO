@@ -1,6 +1,5 @@
-- YT video demo web UI
-- README
 - Ansible
 - Vagrant
 - Plugins
-- prepare new antibot challenge when not resolved and "refresh page"
+- Find a way to do rdns in background
+- fix db warnings (Got an error reading communication packets)

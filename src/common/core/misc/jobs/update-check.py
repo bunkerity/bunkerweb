@@ -27,7 +27,7 @@ try:
 
     if current_version != latest_version:
         logger.warning(
-            f"\n\n🚨 A new version of BunkerWeb is available: {latest_version} (current: {current_version}) 🚨\n\n",
+            f"* \n* \n* 🚨 A new version of BunkerWeb is available: {latest_version} (current: {current_version}) 🚨\n* \n* ",
         )
 except:
     status = 2

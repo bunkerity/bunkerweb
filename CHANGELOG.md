@@ -1,16 +1,23 @@
 # Changelog
 
-## v1.5.0-beta - 
+## v1.5.0-beta - 2023/05/02
 
 - Refactoring of almost all the components of the project
 - Dedicated scheduler service to manage jobs and configuration
 - Store configuration in a database backend
 - Improved web UI and make it working with all integrations
 - Improved internal LUA code
+- Improved internal cache of BW
 - Add Redis support when using clustered integrations
 - Add RHEL integration
 - Add Vagrant integration
-- Improved CI/CD
+- Init support of generic TCP/UDP (stream)
+- Init support of IPv6
+- Improved CI/CD : UI tests, core tests and release automation
+- Reduce Docker images size
+- Fix and improved core plugins : antibot, cors, dnsbl, ...
+- Use PCRE regex instead of LUA patterns
+- Connectivity tests at startup/reload with logging
 
 ## v1.4.8 - 2023/04/05
 

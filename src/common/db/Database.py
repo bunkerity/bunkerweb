@@ -181,7 +181,7 @@ class Database:
             try:
                 metadata = session.query(Metadata).get(1)
 
-                if metadata is None:
+                if not metadata:
                     return "The metadata are not set yet, try again"
 
                 metadata.autoconf_loaded = value
@@ -251,7 +251,7 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_settings: List[dict]) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
         if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
@@ -269,7 +269,7 @@ class Database:
 
         to_put = []
         with self.__db_session() as session:
-            for plugins in default_settings:
+            for plugins in default_plugins:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
@@ -281,7 +281,6 @@ class Database:
                         settings = plugin
                         plugin = {
                             "id": "general",
-                            "order": 999,
                             "name": "General",
                             "description": "The general settings for the server",
                             "version": "0.1",
@@ -366,7 +365,10 @@ class Database:
                         .all()
                     )
                     db_ids = [service.id for service in db_services]
-                    services = config.get("SERVER_NAME", "").split(" ")
+                    services = config.pop("SERVER_NAME", [])
+
+                    if isinstance(services, str):
+                        services = services.split(" ")
 
                     if db_services:
                         missing_ids = [
@@ -376,13 +378,14 @@ class Database:
                         ]
 
                         if missing_ids:
-                            # Remove plugins that are no longer in the list
+                            # Remove services that are no longer in the list
                             session.query(Services).filter(
                                 Services.id.in_(missing_ids)
                             ).delete()
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
+                        original_key = deepcopy(key)
                         if self.suffix_rx.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
@@ -432,11 +435,11 @@ class Database:
                                 .first()
                             )
 
-                            if service_setting is None:
+                            if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    value == setting.default
-                                    or (not value.strip() and setting.default is None)
+                                    (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
+                                    or (not value.strip() and not setting.default)
                                 ):
                                     continue
 
@@ -453,10 +456,10 @@ class Database:
                                 method in (service_setting.method, "autoconf")
                                 and service_setting.value != value
                             ):
-                                if (
-                                    value == setting.default
-                                    or (not value.strip() and setting.default is None)
+                                if key != "SERVER_NAME" and (
+                                    (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
+                                    or (not value.strip() and not setting.default)
                                 ):
                                     session.query(Services_settings).filter(
                                         Services_settings.service_id == server_name,
@@ -475,8 +478,8 @@ class Database:
                                         Services_settings.method: method,
                                     }
                                 )
-                        elif f"{key}_{suffix}" not in global_values:
-                            global_values.append(f"{key}_{suffix}")
+                        elif setting and original_key not in global_values:
+                            global_values.append(original_key)
                             global_value = (
                                 session.query(Global_values)
                                 .with_entities(
@@ -489,12 +492,9 @@ class Database:
                                 .first()
                             )
 
-                            if not setting:
-                                continue
-
-                            if global_value is None:
+                            if not global_value:
                                 if value == setting.default or (
-                                    not value.strip() and setting.default is None
+                                    not value.strip() and not setting.default
                                 ):
                                     continue
 
@@ -511,7 +511,7 @@ class Database:
                                 and global_value.value != value
                             ):
                                 if value == setting.default or (
-                                    not value.strip() and setting.default is None
+                                    not value.strip() and not setting.default
                                 ):
                                     session.query(Global_values).filter(
                                         Global_values.setting_id == key,
@@ -545,6 +545,8 @@ class Database:
                             )
                         )
 
+                    config.pop("SERVER_NAME")
+
                     for key, value in config.items():
                         suffix = 0
                         if self.suffix_rx.search(key):
@@ -568,7 +570,12 @@ class Database:
                             .first()
                         )
 
-                        if global_value is None:
+                        if not global_value:
+                            if value == setting.default or (
+                                not value.strip() and not setting.default
+                            ):
+                                continue
+
                             to_put.append(
                                 Global_values(
                                     setting_id=key,
@@ -582,7 +589,7 @@ class Database:
                             and value != global_value.value
                         ):
                             if value == setting.default or (
-                                not value.strip() and setting.default is None
+                                not value.strip() and not setting.default
                             ):
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
@@ -622,12 +629,6 @@ class Database:
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
-                # config = {
-                #     "data": custom_config["value"].replace("\\\n", "\n").encode("utf-8")
-                #     if isinstance(custom_config["value"], str)
-                #     else custom_config["value"].replace(b"\\\n", b"\n"),
-                #     "method": method,
-                # }
                 config = {
                     "data": custom_config["value"].encode("utf-8")
                     if isinstance(custom_config["value"], str)
@@ -675,7 +676,7 @@ class Database:
                     .first()
                 )
 
-                if custom_conf is None:
+                if not custom_conf:
                     to_put.append(Custom_configs(**config))
                 elif config["checksum"] != custom_conf.checksum and method in (
                     custom_conf.method,
@@ -724,7 +725,7 @@ class Database:
                 config[setting.id] = (
                     default
                     if methods is False
-                    else {"value": default, "method": "default"}
+                    else {"value": default, "global": True, "method": "default"}
                 )
 
                 global_values = (
@@ -749,6 +750,7 @@ class Database:
                         if methods is False
                         else {
                             "value": global_value.value,
+                            "global": True,
                             "method": global_value.method,
                         }
                     )
@@ -797,9 +799,17 @@ class Database:
                             if methods is False
                             else {
                                 "value": service_setting.value,
+                                "global": False,
                                 "method": service_setting.method,
                             }
                         )
+
+            servers = " ".join(service.id for service in session.query(Services).all())
+            config["SERVER_NAME"] = (
+                servers
+                if methods is False
+                else {"value": servers, "global": True, "method": "default"}
+            )
 
             return config
 
@@ -846,7 +856,7 @@ class Database:
                         tmp_config.pop(key)
                     else:
                         tmp_config[key] = (
-                            {"value": value["value"], "method": "default"}
+                            {"value": value["value"], "global": True, "method": "default"}
                             if methods is True
                             else value
                         )
@@ -864,7 +874,7 @@ class Database:
                 .first()
             )
 
-            if job is None:
+            if not job:
                 return "Job not found"
 
             job.last_run = datetime.now()
@@ -902,7 +912,7 @@ class Database:
                 .first()
             )
 
-            if cache is None:
+            if not cache:
                 session.add(
                     Jobs_cache(
                         job_name=job_name,
@@ -956,10 +966,13 @@ class Database:
                 db_plugin = (
                     session.query(Plugins)
                     .with_entities(
-                        Plugins.order,
                         Plugins.name,
+                        Plugins.stream,
                         Plugins.description,
                         Plugins.version,
+                        Plugins.method,
+                        Plugins.data,
+                        Plugins.checksum,
                         Plugins.external,
                     )
                     .filter_by(id=plugin["id"])
@@ -975,8 +988,8 @@ class Database:
 
                     updates = {}
 
-                    if plugin["order"] != db_plugin.order:
-                        updates[Plugins.order] = plugin["order"]
+                    if plugin["stream"] != db_plugin.stream:
+                        updates[Plugins.stream] = plugin["stream"]
 
                     if plugin["name"] != db_plugin.name:
                         updates[Plugins.name] = plugin["name"]
@@ -1043,7 +1056,7 @@ class Database:
                             .first()
                         )
 
-                        if setting not in db_ids or db_setting is None:
+                        if setting not in db_ids or not db_setting:
                             for select in value.pop("select", []):
                                 to_put.append(
                                     Selects(setting_id=value["id"], value=select)
@@ -1138,7 +1151,7 @@ class Database:
                             .first()
                         )
 
-                        if job["name"] not in db_names or db_job is None:
+                        if job["name"] not in db_names or not db_job:
                             job["file_name"] = job.pop("file")
                             job["reload"] = job.get("reload", False)
                             to_put.append(
@@ -1188,7 +1201,7 @@ class Database:
                                 .first()
                             )
 
-                            if db_plugin_page is None:
+                            if not db_plugin_page:
                                 template = Path(f"{path_ui}/template.html").read_bytes()
                                 actions = Path(f"{path_ui}/actions.py").read_bytes()
 
@@ -1305,7 +1318,7 @@ class Database:
                                 .first()
                             )
 
-                            if db_plugin_page is None:
+                            if not db_plugin_page:
                                 template = Path(f"{path_ui}/template.html").read_bytes()
                                 actions = Path(f"{path_ui}/actions.py").read_bytes()
 
@@ -1370,7 +1383,7 @@ class Database:
                 session.query(Plugins)
                 .with_entities(
                     Plugins.id,
-                    Plugins.order,
+                    Plugins.stream,
                     Plugins.name,
                     Plugins.description,
                     Plugins.version,
@@ -1379,20 +1392,18 @@ class Database:
                     Plugins.data,
                     Plugins.checksum,
                 )
-                .order_by(Plugins.order)
                 .all()
                 if with_data
                 else session.query(Plugins)
                 .with_entities(
                     Plugins.id,
-                    Plugins.order,
+                    Plugins.stream,
                     Plugins.name,
                     Plugins.description,
                     Plugins.version,
                     Plugins.external,
                     Plugins.method,
                 )
-                .order_by(Plugins.order)
                 .all()
             ):
                 if external and not plugin.external:
@@ -1406,7 +1417,7 @@ class Database:
                 )
                 data = {
                     "id": plugin.id,
-                    "order": plugin.order,
+                    "stream": plugin.stream,
                     "name": plugin.name,
                     "description": plugin.description,
                     "version": plugin.version,
@@ -1627,7 +1638,7 @@ class Database:
                 .first()
             )
 
-            if page is None:
+            if not page:
                 return None
 
             return page.actions_file
@@ -1642,7 +1653,7 @@ class Database:
                 .first()
             )
 
-            if page is None:
+            if not page:
                 return None
 
             return page.template_file

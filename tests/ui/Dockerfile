@@ -18,19 +18,18 @@ COPY requirements.txt .
 RUN pip install --no-cache -r requirements.txt
 
 RUN touch test.txt && \
-  zip -r test.zip test.txt && \
+  zip test.zip test.txt && \
   rm test.txt
 
 RUN echo '{ \
   "id": "discord", \
-  "order": 999, \
   "name": "Discord", \
   "description": "Send alerts to a Discord channel (using webhooks).", \
   "version": "0.1", \
   "stream": "no", \
   "settings": {} \
   }' > plugin.json && \
-  zip -r discord.zip plugin.json && \
+  zip discord.zip plugin.json && \
   rm plugin.json
 
 # Clean up

@@ -1,6 +1,5 @@
 {
   "id": "blacklist",
-  "order": 2,
   "name": "Blacklist",
   "description": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
   "version": "1.0",
@@ -48,7 +47,7 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to block.",
       "id": "blacklist-rdns",
       "label": "Blacklist reverse DNS",
-      "regex": "^( *((\\.([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})(?!.* \\3( |$))) *)*$",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "BLACKLIST_RDNS_URLS": {
@@ -81,7 +80,7 @@
     "BLACKLIST_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent, separated with spaces, to block.",
+      "help": "List of User-Agent (PCRE regex), separated with spaces, to block.",
       "id": "blacklist-user-agent",
       "label": "Blacklist User-Agent",
       "regex": "^.*$",
@@ -99,7 +98,7 @@
     "BLACKLIST_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI, separated with spaces, to block.",
+      "help": "List of URI (PCRE regex), separated with spaces, to block.",
       "id": "blacklist-uri",
       "label": "Blacklist URI",
       "regex": "^( *(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)(?!.*\\2(?!.)) *)*$",
@@ -138,7 +137,7 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-rdns",
       "label": "Blacklist ignore reverse DNS",
-      "regex": "^( *((\\.([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})(?!.* \\3( |$))) *)*$",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_RDNS_URLS": {
@@ -171,7 +170,7 @@
     "BLACKLIST_IGNORE_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent, separated with spaces, to ignore in the blacklist.",
+      "help": "List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-user-agent",
       "label": "Blacklist ignore User-Agent",
       "regex": "^.*$",
@@ -189,7 +188,7 @@
     "BLACKLIST_IGNORE_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI, separated with spaces, to ignore in the blacklist.",
+      "help": "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-uri",
       "label": "Blacklist ignore URI",
       "regex": "^( *(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)(?!.*\\2(?!.)) *)*$",

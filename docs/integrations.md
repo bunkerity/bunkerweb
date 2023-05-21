@@ -88,6 +88,7 @@ volumes:
 
     The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
     But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
+
     ```shell
     mkdir bw-data && \
     chown root:101 bw-data && \
@@ -95,26 +96,30 @@ volumes:
     ```
 
     Alternatively, if the folder already exists :
+
     ```shell
     chown -R root:101 bw-data && \
     chmod -R 770 bw-data
     ```
 
     If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
-	```shell
-	grep ^$(whoami): /etc/subuid && \
-	grep ^$(whoami): /etc/subgid
-	```
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
 
     For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+  
     ```shell
     mkdir bw-data && \
     sudo chgrp 100100 bw-data && \
     chmod 770 bw-data
     ```
 	
-	Or if the folder already exists :
-	```shell
+	  Or if the folder already exists :
+  
+	  ```shell
     sudo chgrp -R 100100 bw-data && \
     chmod -R 770 bw-data
     ```
@@ -174,13 +179,16 @@ For defense in depth purposes, we strongly recommend to create at least three di
 - `bw-universe` : for BunkerWeb and scheduler
 - `bw-docker` : for scheduler and the Docker API proxy
 
-The scheduler needs to contact the API of BunkerWeb and for obvious security reason BunkerWeb needs to check if the caller is authorized to make API calls. The `API_WHITELIST_IP` setting lets you choose allowed IP addresses and subnets : usage of a static subnet for the `bw-universe` is strongly advised :
+The scheduler needs to contact the API of BunkerWeb and for obvious security reason BunkerWeb needs to check if the caller is authorized to make API calls. The `API_WHITELIST_IP` setting lets you choose allowed IP addresses and subnets, usage of a static subnet for the `bw-universe` is strongly advised :
 
 ```yaml
 ...
 services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.0-beta
+    ports:
+      - 80:8080
+      - 443:8443
     networks:
       - bw-services
       - bw-universe
@@ -196,6 +204,64 @@ services:
     networks:
       - bw-docker
 ...
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-docker:
+    name: bw-docker
+```
+
+### Full compose file
+
+```yaml
+version: "3.5"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.5.0-beta
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE"
+    environment:
+      - SERVER_NAME=www.example.com
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    volumes:
+      - bw-data:/data
+    environment:
+      - DOCKER_HOST=tcp://bw-docker:2375
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - bw-docker
+
+volumes:
+  bw-data:
+
 networks:
   bw-universe:
     name: bw-universe
@@ -227,37 +293,57 @@ Instead of defining environment variables for the BunkerWeb container, you simpl
     The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](concepts.md#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
-    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) folder of the repostiory for more information.
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) folder of the repostiory for more information.
 
 Another container, named `bw-autoconf` for example, containing the autoconf service must be added to the stack. Since two services will generate the configuration for BunkerWeb, a "real" database backend (in other words, not SQLite) also needs to be added :
 
 ```yaml
-...
+version: "3.5"
+
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.5.0-beta
+    ports:
+      - 80:8080
+      - 443:8443
     labels:
       - "bunkerweb.INSTANCE"
     environment:
+      - SERVER_NAME=
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+      - AUTOCONF_MODE=yes
       - MULTISITE=yes
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
     networks:
       - bw-universe
       - bw-services
-...
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+      - AUTOCONF_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+    networks:
+      - bw-universe
+      - bw-docker
+
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.0-beta
     depends_on:
       - bunkerweb
       - bw-docker
     environment:
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
       - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
     networks:
       - bw-universe
       - bw-docker
-...
+
   bw-docker:
     image: tecnativa/docker-socket-proxy
     volumes:
@@ -266,14 +352,14 @@ services:
       - CONTAINERS=1
     networks:
       - bw-docker
-...
+
   bw-db:
     image: mariadb:10.10
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=db
       - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+      - MYSQL_PASSWORD=changeme
     volumes:
       - bw-data:/var/lib/mysql
     networks:
@@ -301,23 +387,23 @@ networks:
 Once the stack is set up, you will be able to create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically set up BunkerWeb :
 
 ```yaml
-...
+version: "3.5"
+
 services:
   myapp:
     image: mywebapp:4.2
-      networks:
-        bw-services:
-          aliases:
-            - myapp
-      labels:
-        - "bunkerweb.MY_SETTING_1=value1"
-        - "bunkerweb.MY_SETTING_2=value2"
-...
+    networks:
+      bw-services:
+        aliases:
+          - myapp
+    labels:
+      - "bunkerweb.MY_SETTING_1=value1"
+      - "bunkerweb.MY_SETTING_2=value2"
+
 networks:
   bw-services:
-    external:
-      name: bw-services
-...
+    external: true
+    name: bw-services
 ```
 
 ## Swarm
@@ -328,9 +414,9 @@ networks:
 </figure>
 
 !!! info "Docker autoconf"
-    The Docker autoconf integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
+    The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
 
-To automatically configure BunkerWeb instances, a special service called **autoconf**, will be scheduled on a manager node. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime. It also monitors other Swarm objects like [configs](https://docs.docker.com/engine/swarm/configs/) for custom configurations.
+To automatically configure BunkerWeb instances, a special service called **autoconf** needs to have access to the Docker API. That service will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime. It also monitors other Swarm objects like [configs](https://docs.docker.com/engine/swarm/configs/) for custom configurations.
 
 Like the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined by using labels starting with the special **bunkerweb.** prefix.
 
@@ -341,7 +427,7 @@ Since we have multiple instances of BunkerWeb running, a shared data store imple
 Using a shared folder or a specific driver for the database volume is left as an exercise for the reader (and depends on your own use-case).
 
 !!! info "Database backend"
-    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want : see docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
 
 Here is the stack boilerplate that you can deploy using `docker stack deploy` :
 
@@ -492,8 +578,8 @@ services:
 
 networks:
   bw-services:
-    external:
-      name: bw-services
+    external: true
+    name: bw-services
 ```
 
 ## Kubernetes
@@ -510,7 +596,7 @@ The recommended setup is to define **BunkerWeb** as a **[DaemonSet](https://kube
 Since we have multiple instances of BunkerWeb running, a shared data store implemented as a [Redis](https://redis.io/) service must be created : the instances will use it to cache and share data. You will find more information about the Redis settings [here](settings.md#redis)
 
 !!! info "Database backend"
-    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want to : see yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
+    Please note that we assume you are using MariaDB as database backend (which is defined using the `DATABASE_URI` setting). Other backends for this integration are still possible if you want : see yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) folder of the repostiory for more information. Clustered database backends setup are out-of-the-scope of this documentation.
 
 Please note that both scheduler and autoconf services needs to access the Kubernetes API. The recommended way of doing it is using [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 

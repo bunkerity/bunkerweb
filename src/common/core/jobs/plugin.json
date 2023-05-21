@@ -1,6 +1,5 @@
 {
   "id": "jobs",
-  "order": 999,
   "name": "Jobs",
   "description": "Fake core plugin for internal jobs.",
   "version": "1.0",

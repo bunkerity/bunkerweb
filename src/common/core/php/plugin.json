@@ -1,6 +1,5 @@
 {
   "id": "php",
-  "order": 999,
   "name": "PHP",
   "description": "Manage local or remote PHP-FPM.",
   "version": "1.0",

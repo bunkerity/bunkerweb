@@ -1,6 +1,5 @@
 {
   "id": "cors",
-  "order": 999,
   "name": "CORS",
   "description": "Cross-Origin Resource Sharing.",
   "version": "1.0",
@@ -18,10 +17,10 @@
     "CORS_ALLOW_ORIGIN": {
       "context": "multisite",
       "default": "*",
-      "help": "Value of the Access-Control-Allow-Origin header.",
+      "help": "Allowed origins to make CORS requests : PCRE regex or *.",
       "id": "cors-allow-origin",
-      "label": "Access-Control-Allow-Origin value",
-      "regex": "^(\\*|https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*|null)$",
+      "label": "Allowed origins",
+      "regex": "^.*$",
       "type": "text"
     },
     "CORS_EXPOSE_HEADERS": {
@@ -68,6 +67,15 @@
       "label": "Access-Control-Allow-Headers value",
       "regex": "^(\\*|(?![, ])(,? ?([\\w-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
+    },
+    "CORS_DENY_REQUEST": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Deny request and don't send it to backend if Origin is not allowed.",
+      "id": "cors-deny-request",
+      "label": "Deny request",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   }
 }

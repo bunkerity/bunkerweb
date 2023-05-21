@@ -26,7 +26,7 @@ def generate_custom_configs(
 
 class ConfigFiles:
     def __init__(self, logger, db):
-        self.__name_regex = re_compile(r"^[a-zA-Z0-9_\-.]{1,64}$")
+        self.__name_regex = re_compile(r"^[\w.-]{1,64}$")
         self.__root_dirs = [
             child["name"]
             for child in path_to_dict("/etc/bunkerweb/configs")["children"]

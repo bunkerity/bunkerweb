@@ -1,6 +1,5 @@
 {
   "id": "letsencrypt",
-  "order": 999,
   "name": "Let's Encrypt",
   "description": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
   "version": "1.0",

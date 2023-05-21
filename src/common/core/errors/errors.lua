@@ -1,13 +1,13 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local cjson			= require "cjson"
-local template		= nil
+local class    = require "middleclass"
+local plugin   = require "bunkerweb.plugin"
+local utils    = require "bunkerweb.utils"
+local cjson    = require "cjson"
+local template = nil
 if ngx.shared.datastore then
-	template		= require "resty.template"
+	template = require "resty.template"
 end
 
-local errors		= class("errors", plugin)
+local errors = class("errors", plugin)
 
 function errors:initialize()
 	-- Call parent initialize

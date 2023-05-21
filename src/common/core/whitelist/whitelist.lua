@@ -1,28 +1,23 @@
-local class			= require "middleclass"
-local plugin		= require "bunkerweb.plugin"
-local utils     	= require "bunkerweb.utils"
-local datastore 	= require "bunkerweb.datastore"
-local cachestore	= require "bunkerweb.cachestore"
-local cjson     	= require "cjson"
-local ipmatcher 	= require "resty.ipmatcher"
-local env			= require "resty.env"
+local class      = require "middleclass"
+local plugin     = require "bunkerweb.plugin"
+local utils      = require "bunkerweb.utils"
+local datastore  = require "bunkerweb.datastore"
+local cachestore = require "bunkerweb.cachestore"
+local cjson      = require "cjson"
+local ipmatcher  = require "resty.ipmatcher"
+local env        = require "resty.env"
 
-local whitelist = class("whitelist", plugin)
+local whitelist  = class("whitelist", plugin)
 
 function whitelist:initialize()
 	-- Call parent initialize
-    plugin.initialize(self, "whitelist")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
+	plugin.initialize(self, "whitelist")
 	-- Decode lists
-	if ngx.get_phase() ~= "init" and self.variables["USE_WHITELIST"] == "yes" then
+	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_whitelist_lists")
 		if not lists then
 			self.logger:log(ngx.ERR, err)
+			self.lists = {}
 		else
 			self.lists = cjson.decode(lists)
 		end
@@ -35,21 +30,35 @@ function whitelist:initialize()
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
+				if not self.lists[kind] then
+					self.lists[kind] = {}
+				end
 				table.insert(self.lists[kind], data)
 			end
 		end
 	end
-	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis and ngx.get_phase() == "access")
+end
+
+function whitelist:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
+	end
+	-- Request phases (no default)
+	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_WHITELIST"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = utils.has_variable("USE_WHITELIST", "yes")
+	if is_needed == nil then
+		self.logger:log(ngx.ERR, "can't check USE_WHITELIST variable : " .. err)
+	end
+	return is_needed
 end
 
 function whitelist:init()
 	-- Check if init is needed
-	local init_needed, err = utils.has_variable("USE_WHITELIST", "yes")
-	if init_needed == nil then
-		return self:ret(false, "can't check USE_WHITELIST variable : " .. err)
-	end
-	if not init_needed or self.is_loading then
+	if not self:is_needed() then
 		return self:ret(true, "init not needed")
 	end
 	-- Read whitelists
@@ -85,7 +94,7 @@ function whitelist:set()
 	ngx.ctx.bw.is_whitelisted = "no"
 	env.set("is_whitelisted", "no")
 	-- Check if set is needed
-	if self.variables["USE_WHITELIST"] ~= "yes" then
+	if not self:is_needed() then
 		return self:ret(true, "whitelist not activated")
 	end
 	-- Check cache
@@ -103,7 +112,7 @@ end
 
 function whitelist:access()
 	-- Check if access is needed
-	if self.variables["USE_WHITELIST"] ~= "yes" then
+	if not self:is_needed() then
 		return self:ret(true, "whitelist not activated")
 	end
 	-- Check cache
@@ -121,7 +130,7 @@ function whitelist:access()
 		if not already_cached[k] then
 			local ok, whitelisted = self:is_whitelisted(k)
 			if ok == nil then
-				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is whitelisted : " .. err)
+				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is whitelisted : " .. whitelisted)
 			else
 				local ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
 				if not ok then
@@ -166,7 +175,7 @@ function whitelist:check_cache()
 		checks["URI"] = "uri" .. ngx.ctx.bw.uri
 	end
 	local already_cached = {}
-	for i, k in ipairs(checks) do
+	for k, v in pairs(checks) do
 		already_cached[k] = false
 	end
 	for k, v in pairs(checks) do
@@ -176,7 +185,7 @@ function whitelist:check_cache()
 		elseif cached and cached ~= "ok" then
 			return true, k .. " is in cached whitelist (info : " .. cached .. ")"
 		end
-		if cached then
+		if ok and cached then
 			already_cached[k] = true
 		end
 	end
@@ -192,7 +201,7 @@ function whitelist:is_in_cache(ele)
 	local ok, data = self.cachestore:get("plugin_whitelist_" .. ngx.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
-	end 
+	end
 	return true, data
 end
 
@@ -236,14 +245,38 @@ function whitelist:is_whitelisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
+		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
 		-- Check if rDNS is in whitelist
-		if rdns then
-			for i, suffix in ipairs(self.lists["RDNS"]) do
-				if rdns:sub(-#suffix) == suffix then
-					return true, "rDNS " .. suffix
+		if rdns_list then
+			local forward_check = nil
+			local rdns_suffix = nil
+			for i, rdns in ipairs(rdns_list) do
+				for j, suffix in ipairs(self.lists["RDNS"]) do
+					if rdns:sub(- #suffix) == suffix then
+						forward_check = rdns
+						rdns_suffix = suffix
+						break
+					end
+				end
+				if forward_check then
+					break
 				end
 			end
+			if forward_check then
+				local ip_list, err = utils.get_ips(forward_check)
+				if ip_list then
+					for i, ip in ipairs(ip_list) do
+						if ip == ngx.ctx.bw.remote_addr then
+							return true, "rDNS " .. rdns_suffix
+						end
+					end
+					self.logger:log(ngx.WARN, "IP " .. ngx.ctx.bw.remote_addr .. " may spoof reverse DNS " .. forward_check)
+				else
+					self.logger:log(ngx.ERR, "error while getting rdns (forward check) : " .. err)
+				end
+			end
+		else
+			self.logger:log(ngx.ERR, "error while getting rdns : " .. err)
 		end
 	end
 
@@ -251,11 +284,12 @@ function whitelist:is_whitelisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, err
-		end
-		for i, bl_asn in ipairs(self.lists["ASN"]) do
-			if bl_asn == tostring(asn) then
-				return true, "ASN " .. bl_asn
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
+		else
+			for i, bl_asn in ipairs(self.lists["ASN"]) do
+				if bl_asn == tostring(asn) then
+					return true, "ASN " .. bl_asn
+				end
 			end
 		end
 	end
@@ -267,7 +301,7 @@ end
 function whitelist:is_whitelisted_uri()
 	-- Check if URI is in whitelist
 	for i, uri in ipairs(self.lists["URI"]) do
-		if ngx.ctx.bw.uri:match(uri) then
+		if utils.regex_match(ngx.ctx.bw.uri, uri) then
 			return true, "URI " .. uri
 		end
 	end
@@ -278,7 +312,7 @@ end
 function whitelist:is_whitelisted_ua()
 	-- Check if UA is in whitelist
 	for i, ua in ipairs(self.lists["USER_AGENT"]) do
-		if ngx.ctx.bw.http_user_agent:match(ua) then
+		if utils.regex_match(ngx.ctx.bw.http_user_agent, ua) then
 			return true, "UA " .. ua
 		end
 	end

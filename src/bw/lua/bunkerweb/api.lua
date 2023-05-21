@@ -1,16 +1,44 @@
-
 local class     = require "middleclass"
-local datastore	= require "bunkerweb.datastore"
-local utils		= require "bunkerweb.utils"
-local cjson		= require "cjson"
-local upload	= require "resty.upload"
+local datastore = require "bunkerweb.datastore"
+local utils     = require "bunkerweb.utils"
+local logger	= require "bunkerweb.logger"
+local cjson     = require "cjson"
+local upload    = require "resty.upload"
+local rsignal	= require "resty.signal"
+local process	= require "ngx.process"
 
-local api = class("api")
+local api       = class("api")
 
-api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
+api.global      = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 
 function api:initialize()
 	self.datastore = datastore:new()
+	self.logger = logger:new("API")
+end
+
+function api:log_cmd(cmd, status, stdout, stderr)
+	local level = ngx.NOTICE
+	local prefix = "success"
+	if status ~= 0 then
+		level = ngx.ERR
+		prefix = "error"
+	end
+	self.logger:log(level, prefix .. " while running command " .. command)
+	self.logger:log(level, "stdout = " .. stdout)
+	self.logger:log(level, "stdout = " .. stderr)
+end
+
+-- TODO : use this if we switch to OpenResty
+function api:cmd(cmd)
+	-- Non-blocking command
+	local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 10000)
+	self.logger:log_cmd(cmd, status, stdout, stderr)
+	-- Timeout
+	if ok == nil then
+		return nil, reason
+	end
+	-- Other cases : exit 0, exit !0 and killed by signal
+	return status == 0, reason, status
 end
 
 function api:response(http_status, api_status, msg)
@@ -25,19 +53,21 @@ api.global.GET["^/ping$"] = function(self)
 end
 
 api.global.POST["^/reload$"] = function(self)
-	local status = os.execute("nginx -s reload")
-	if status == 0 then
-		return self:response(ngx.HTTP_OK, "success", "reload successful")
+	-- Send HUP signal to master process
+	local ok, err = rsignal.kill(process.get_master_pid(), "HUP")
+	if not ok then
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
 	end
-	return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+	return self:response(ngx.HTTP_OK, "success", "reload successful")
 end
 
 api.global.POST["^/stop$"] = function(self)
-	local status = os.execute("nginx -s quit")
-	if status == 0 then
-		return self:response(ngx.HTTP_OK, "success", "stop successful")
+	-- Send QUIT signal to master process
+	local ok, err = rsignal.kill(process.get_master_pid(), "QUIT")
+	if not ok then
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
 	end
-	return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+	return self:response(ngx.HTTP_OK, "success", "stop successful")
 end
 
 api.global.POST["^/confs$"] = function(self)
@@ -75,13 +105,15 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	file:flush()
 	file:close()
-	local status = os.execute("rm -rf " .. destination .. "/*")
-	if status ~= 0 then
-		return self:response(ngx.HTTP_BAD_REQUEST, "error", "can't remove old files")
-	end
-	status = os.execute("tar xzf " .. tmp .. " -C " .. destination)
-	if status ~= 0 then
-		return self:response(ngx.HTTP_BAD_REQUEST, "error", "can't extract archive")
+	local cmds = {
+		"rm -rf " .. destination .. "/*",
+		"tar xzf " .. tmp .. " -C " .. destination
+	}
+	for i, cmd in ipairs(cmds) do
+		local status = os.execute(cmd)
+		if status ~= 0 then
+			return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+		end
 	end
 	return self:response(ngx.HTTP_OK, "success", "saved data at " .. destination)
 end
@@ -141,12 +173,12 @@ api.global.GET["^/bans$"] = function(self)
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
 					"can't access " .. k .. " from datastore : " + reason)
 			end
-			local ttl, err = self.datastore:ttl(k)
-			if not ttl then
+			local ok, ttl = self.datastore:ttl(k)
+			if not ok then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access ttl " .. k .. " from datastore : " .. err)
+					"can't access ttl " .. k .. " from datastore : " .. ttl)
 			end
-			local ban = { ip = k:sub(9, #k), reason = reason, exp = ttl }
+			local ban = { ip = k:sub(9, #k), reason = reason, exp = math.floor(ttl) }
 			table.insert(data, ban)
 		end
 	end

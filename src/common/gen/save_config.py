@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser
 from glob import glob
-from itertools import chain
 from json import loads
 from os import R_OK, X_OK, access, environ, getenv, listdir, walk
 from os.path import join
@@ -160,15 +159,12 @@ if __name__ == "__main__":
         db = None
         apis = []
 
-        plugins = args.plugins
-        plugins_settings = None
+        external_plugins = args.plugins
         if not Path("/usr/sbin/nginx").exists() and args.method == "ui":
             db = Database(logger)
-            plugins = {}
-            plugins_settings = []
+            external_plugins = []
             for plugin in db.get_plugins():
-                plugins_settings.append(plugin)
-                plugins.update(plugin["settings"])
+                external_plugins.append(plugin)
 
         # Check existences and permissions
         logger.info("Checking arguments ...")
@@ -191,33 +187,6 @@ if __name__ == "__main__":
                 )
                 sys_exit(1)
 
-        # Check core plugins orders
-        logger.info("Checking core plugins orders ...")
-        core_plugins = {}
-        files = glob(f"{args.core}/*/plugin.json")
-        for file in files:
-            try:
-                core_plugin = loads(Path(file).read_text())
-
-                if core_plugin["order"] not in core_plugins:
-                    core_plugins[core_plugin["order"]] = []
-
-                core_plugins[core_plugin["order"]].append(core_plugin)
-            except:
-                logger.error(
-                    f"Exception while loading JSON from {file} : {format_exc()}",
-                )
-
-        core_settings = {}
-        for order in core_plugins:
-            if len(core_plugins[order]) > 1 and order != 999:
-                logger.warning(
-                    f"Multiple plugins have the same order ({order}) : {', '.join(plugin['id'] for plugin in core_plugins[order])}. Therefor, the execution order will be random.",
-                )
-
-            for plugin in core_plugins[order]:
-                core_settings.update(plugin["settings"])
-
         if args.variables:
             logger.info(f"Variables : {args.variables}")
 
@@ -225,11 +194,10 @@ if __name__ == "__main__":
             logger.info("Computing config ...")
             config = Configurator(
                 args.settings,
-                core_settings,
-                plugins,
+                args.core,
+                external_plugins,
                 args.variables,
                 logger,
-                plugins_settings=plugins_settings,
             )
             config_files = config.get_config()
             custom_confs = []
@@ -329,11 +297,10 @@ if __name__ == "__main__":
             logger.info("Computing config ...")
             config = Configurator(
                 args.settings,
-                core_settings,
-                plugins,
+                args.core,
+                external_plugins,
                 tmp_config,
                 logger,
-                plugins_settings=plugins_settings,
             )
             config_files = config.get_config()
 
@@ -344,8 +311,8 @@ if __name__ == "__main__":
             ret, err = db.init_tables(
                 [
                     config.get_settings(),
-                    list(chain.from_iterable(core_plugins.values())),
-                    config.get_plugins_settings(),
+                    config.get_plugins("core"),
+                    config.get_plugins("external"),
                 ]
             )
 

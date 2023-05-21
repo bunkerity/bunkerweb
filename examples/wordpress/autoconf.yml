@@ -31,7 +31,6 @@ services:
           t:none,\
           setvar:tx.crs_exclusions_wordpress=1"
 
-
   mydb:
     image: mariadb
     volumes:
@@ -52,5 +51,5 @@ volumes:
 
 networks:
   bw-services:
-    external:
-      name: bw-services
+    external: true
+    name: bw-services

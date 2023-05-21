@@ -265,13 +265,13 @@ if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd cp deps/misc/lua-pack.Makefile deps/src/lua-pack/Makefile
 fi
 
-# lua-resty-openssl v0.8.21
+# lua-resty-openssl v0.8.22
 echo "ℹ️ Downloading lua-resty-openssl"
 dopatch="no"
 if [ ! -d "deps/src/lua-resty-openssl" ] ; then
 	dopatch="yes"
 fi
-git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "15bc59b97feb5acf25fbdd9426cf73870cf7c838"
+git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "484907935e60273d31626ac849b23a2d218173de"
 if [ "$dopatch" == "yes" ] ; then
 	do_and_check_cmd rm -r deps/src/lua-resty-openssl/t
 fi
@@ -286,6 +286,10 @@ git_secure_clone "https://github.com/hamishforbes/lua-ffi-zlib.git" "1fb69ca5054
 if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/lua-ffi-zlib/lib/ffi-zlib.lua deps/misc/lua-ffi-zlib.patch
 fi
+
+# lua-resty-signal v0.03
+echo "ℹ️ Downloading lua-resty-signal"
+git_secure_clone "https://github.com/openresty/lua-resty-signal.git" "d07163e8cfa673900e66048cd2a1f18523aecf16"
 
 # ModSecurity v3.0.9
 echo "ℹ️ Downloading ModSecurity"

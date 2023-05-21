@@ -1,6 +1,5 @@
 {
   "id": "whitelist",
-  "order": 1,
   "name": "Whitelist",
   "description": "Allow access based on internal and external IP/network/rDNS/ASN whitelists.",
   "version": "1.0",
@@ -48,7 +47,7 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to whitelist.",
       "id": "whitelist-rdns",
       "label": "Whitelist reverse DNS",
-      "regex": "^( *((\\.([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})(?!.* \\3( |$))) *)*$",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "WHITELIST_RDNS_URLS": {
@@ -81,7 +80,7 @@
     "WHITELIST_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent, separated with spaces, to whitelist.",
+      "help": "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
       "id": "whitelist-user-agent",
       "label": "Whitelist User-Agent",
       "regex": "^.*$",
@@ -99,7 +98,7 @@
     "WHITELIST_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI, separated with spaces, to whitelist.",
+      "help": "List of URI (PCRE regex), separated with spaces, to whitelist.",
       "id": "whitelist-uri",
       "label": "Whitelist URI",
       "regex": "^( *(/[\\w\\].~:/?#[@!$&'()*+,;=-]*)(?!.*\\2(?!.)) *)*$",

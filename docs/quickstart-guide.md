@@ -112,8 +112,8 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     networks:
       bw-services:
-    	external:
-    	  name: bw-services
+        external: true
+        name: bw-services
     ```
 
 === "Swarm"
@@ -142,8 +142,8 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     networks:
       bw-services:
-    	external:
-    	  name: bw-services
+        external: true
+        name: bw-services
     ```
 
 === "Kubernetes"
@@ -488,8 +488,8 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     networks:
       bw-services:
-    	external:
-    	  name: bw-services
+        external: true
+        name: bw-services
     ```
 
 === "Swarm"
@@ -550,8 +550,8 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     networks:
       bw-services:
-    	external:
-    	  name: bw-services
+        external: true
+        name: bw-services
     ```
 
 === "Kubernetes"
@@ -1109,7 +1109,7 @@ REAL_IP_HEADER=proxy_protocol
 ## Protect UDP/TCP applications
 
 !!! warning "Feature is in beta"
-		This feature is not production-ready. Feel free to test it and report us any bug using [issues]() in the GitHub repository.
+		This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
 BunkerWeb can also act as **generic UDP/TCP reverse proxy** : you can protect any network-based applications working at least on layer 4 of the OSI model. Behind the hood, it leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX instead of using the "classical" http one.
 
@@ -1263,7 +1263,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     networks:
       bw-services:
-      external:
+        external: true
         name: bw-services
     ```
 
@@ -1337,7 +1337,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     networks:
       bw-services:
-      external:
+        external: true
         name: bw-services
     ```
 
@@ -2015,8 +2015,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     networks:
       bw-services:
-        external:
-          name: bw-services
+        external: true
+        name: bw-services
     ```
 
 === "Swarm"
@@ -2128,8 +2128,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
       networks:
         bw-services:
-          external:
-            name: bw-services
+          external: true
+          name: bw-services
     ```
 
 === "Kubernetes"
@@ -2307,4 +2307,101 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     ```shell
     systemctl start bunkerweb
+    ```
+
+## IPv6
+
+!!! warning "Feature is in beta"
+		This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+
+By default, BunkerWeb will only listen on IPv4 adresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set `USE_IPV6=yes`. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.
+
+=== "Docker"
+
+    First of all, you will need to configure your Docker daemon to enable IPv6 support for containers and use ip6tables if needed. Here is sample configuration for your `/etc/docker/daemon.json` file :
+
+    ```json
+    {
+      "experimental": true,
+      "ipv6": true,
+      "ip6tables": true,
+      "fixed-cidr-v6": "fd00:dead:beef::/48"
+    }
+    ```
+
+    You can now restart the Docker service to apply the changes :
+
+    ```shell
+    systemctl restart docker
+    ```
+
+    Once Docker is setup to support IPv6 you can add the `USE_IPV6` setting and configure the `bw-services` for IPv6 :
+
+    ```yaml
+    version: '3.5'
+
+    services:
+
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        environment:
+          - USE_IPv6=yes
+    
+    ...
+
+    networks:
+      bw-services:
+        name: bw-services
+        enable_ipv6: true
+        ipam:
+          config:
+            - subnet: fd00:13:37::/48
+              gateway: fd00:13:37::1
+
+    ...
+    ```
+
+=== "Docker autoconf"
+
+    First of all, you will need to configure your Docker daemon to enable IPv6 support for containers and use ip6tables if needed. Here is sample configuration for your `/etc/docker/daemon.json` file :
+
+    ```json
+    {
+      "experimental": true,
+      "ipv6": true,
+      "ip6tables": true,
+      "fixed-cidr-v6": "fd00:dead:beef::/48"
+    }
+    ```
+
+    You can now restart the Docker service to apply the changes :
+
+    ```shell
+    systemctl restart docker
+    ```
+
+    Once Docker is setup to support IPv6 you can add the `USE_IPV6` setting and configure the IPv6 for the `bw-services` network :
+
+    ```yaml
+    version: '3.5'
+
+    services:
+
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.0-beta
+        environment:
+          - USE_IPv6=yes
+    
+    ...
+
+    networks:
+      bw-services:
+        name: bw-services
+        enable_ipv6: true
+        ipam:
+          config:
+            - subnet: fd00:13:37::/48
+              gateway: fd00:13:37::1
+    
+    ...
     ```
