@@ -55,7 +55,7 @@ try:
             f'❌ Redis ban list not found in the output of "bans", exiting ...\noutput: {result.output.decode()}'
         )
         exit(1)
-    elif b"1 hour" not in result.output or b"59 minutes" not in result.output:
+    elif b"1 hour" not in result.output and b"59 minutes" not in result.output:
         print(
             f"❌ Ban duration isn't 1 hour, exiting ...\noutput: {result.output.decode()}"
         )
