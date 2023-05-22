@@ -49,4 +49,4 @@
       ansible.builtin.pause:
         seconds: 60
     - name: Restart GH runner
-      shell: systemctl restart actions.runner.*
+      shell: chown -R user:user /opt/actions-runner/ && systemctl restart actions.runner.*
