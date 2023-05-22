@@ -344,7 +344,7 @@ if __name__ == "__main__":
                 if Path(file).is_symlink() or Path(file).is_file():
                     Path(file).unlink()
                 elif Path(file).is_dir():
-                    rmtree(file, ignore_errors=False)
+                    rmtree(file, ignore_errors=True)
 
             generate_external_plugins(
                 db.get_plugins(external=True, with_data=True),
@@ -504,7 +504,7 @@ if __name__ == "__main__":
                         if Path(file).is_symlink() or Path(file).is_file():
                             Path(file).unlink()
                         elif Path(file).is_dir():
-                            rmtree(file, ignore_errors=False)
+                            rmtree(file, ignore_errors=True)
 
                     logger.info("Generating new custom configs ...")
                     generate_custom_configs(custom_configs, integration, api_caller)
@@ -548,7 +548,7 @@ if __name__ == "__main__":
                         if Path(file).is_symlink() or Path(file).is_file():
                             Path(file).unlink()
                         elif Path(file).is_dir():
-                            rmtree(file, ignore_errors=False)
+                            rmtree(file, ignore_errors=True)
 
                     logger.info("Generating new external plugins ...")
                     generate_external_plugins(

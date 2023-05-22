@@ -122,7 +122,7 @@ try:
         path = f"/etc/bunkerweb/plugins/{plugin}"
         if not Path(f"{path}/plugin.json").is_file():
             logger.warning(f"Plugin {plugin} is not valid, deleting it...")
-            rmtree(path)
+            rmtree(path, ignore_errors=True)
             continue
 
         plugin_file = loads(Path(f"{path}/plugin.json").read_text())
@@ -169,6 +169,6 @@ except:
     logger.error(f"Exception while running download-plugins.py :\n{format_exc()}")
 
 for plugin_tmp in glob("/var/tmp/bunkerweb/plugins-*/"):
-    rmtree(plugin_tmp)
+    rmtree(plugin_tmp, ignore_errors=True)
 
 sys_exit(status)
