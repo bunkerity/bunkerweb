@@ -93,7 +93,7 @@ jobs:
       # Build staging package image
       - name: Build package image
         if: inputs.RELEASE == 'staging'
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           load: true
@@ -105,7 +105,7 @@ jobs:
       # Build non-staging package image
       - name: Build package image
         if: inputs.RELEASE != 'staging'
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           load: true
@@ -135,7 +135,7 @@ jobs:
       # Build test image
       - name: Build test image
         if: inputs.TEST == true
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}
