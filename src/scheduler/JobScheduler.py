@@ -141,7 +141,7 @@ class JobScheduler(ApiCaller):
                 self.__logger.info("Successfully reloaded nginx")
             else:
                 self.__logger.error(
-                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode()}",
+                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}",
                 )
         else:
             self.__logger.info("Reloading nginx ...")

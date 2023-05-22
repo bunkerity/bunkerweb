@@ -462,11 +462,11 @@ if __name__ == "__main__":
                                 logger.info("Successfully started nginx")
                             else:
                                 logger.error(
-                                    f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                                    f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
                                 )
                     else:
                         logger.error(
-                            f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                            f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
                         )
                 else:
                     if api_caller._send_to_apis("POST", "/reload"):
@@ -529,7 +529,7 @@ if __name__ == "__main__":
                             logger.info("Successfully reloaded nginx")
                         else:
                             logger.error(
-                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8')}",
+                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
                             )
                     else:
                         need_reload = True
