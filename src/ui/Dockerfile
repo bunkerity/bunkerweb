@@ -10,7 +10,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     rm -rf /tmp/req
 
 # Install python dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file
+RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
