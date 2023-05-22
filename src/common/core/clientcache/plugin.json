@@ -38,7 +38,7 @@
       "help": "Value of the Cache-Control HTTP header.",
       "id": "client-cache-control",
       "label": "Cache-Control header",
-      "regex": "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\5))+$",
+      "regex": "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
       "type": "text"
     }
   }
