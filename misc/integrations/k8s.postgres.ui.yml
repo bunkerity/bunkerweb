@@ -305,18 +305,6 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: pv-bunkerweb
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc-bunkerweb
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
