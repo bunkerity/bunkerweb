@@ -61,7 +61,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -70,7 +70,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0-beta
+        image: bunkerity/bunkerweb:1.5.0
         ports:
           - 80:8080
           - 443:8443
@@ -95,7 +95,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.5.0
         depends_on:
           - bunkerweb
           - bw-docker
@@ -116,7 +116,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0-beta
+        image: bunkerity/bunkerweb-ui:1.5.0
         depends_on:
           - bw-docker
         environment:
@@ -183,7 +183,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -192,7 +192,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0-beta
+        image: bunkerity/bunkerweb:1.5.0
         ports:
           - 80:8080
           - 443:8443
@@ -209,7 +209,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+        image: bunkerity/bunkerweb-autoconf:1.5.0
         depends_on:
           - bunkerweb
           - bw-docker
@@ -222,7 +222,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.5.0
         depends_on:
           - bunkerweb
           - bw-docker
@@ -256,7 +256,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0-beta
+        image: bunkerity/bunkerweb-ui:1.5.0
         networks:
           bw-docker:
           bw-universe:
@@ -320,7 +320,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -329,7 +329,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0-beta
+        image: bunkerity/bunkerweb:1.5.0
         ports:
           - published: 80
             target: 8080
@@ -359,7 +359,7 @@ Because the web UI is a web application, the recommended installation procedure 
             - "bunkerweb.INSTANCE"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+        image: bunkerity/bunkerweb-autoconf:1.5.0
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -386,7 +386,7 @@ Because the web UI is a web application, the recommended installation procedure 
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.5.0
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -413,7 +413,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0-beta
+        image: bunkerity/bunkerweb-ui:1.5.0
         environment:
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -469,7 +469,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0-beta/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -524,7 +524,7 @@ Because the web UI is a web application, the recommended installation procedure 
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.5.0-beta
+              image: bunkerity/bunkerweb:1.5.0
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -594,7 +594,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.5.0-beta
+              image: bunkerity/bunkerweb-autoconf:1.5.0
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -621,7 +621,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.0-beta
+              image: bunkerity/bunkerweb-scheduler:1.5.0
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -705,7 +705,7 @@ Because the web UI is a web application, the recommended installation procedure 
         spec:
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.5.0-beta
+              image: bunkerity/bunkerweb-ui:1.5.0
               imagePullPolicy: Always
               env:
                 - name: ADMIN_USERNAME
@@ -833,6 +833,7 @@ Because the web UI is a web application, the recommended installation procedure 
     Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
 
     ```conf
+    API_LISTEN_IP=127.0.0.1
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
