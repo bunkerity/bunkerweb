@@ -498,6 +498,8 @@ Management of session used by other plugins.
 |`SESSIONS_IDLING_TIMEOUT`  |`1800`  |global |no      |Maximum time (in seconds) of inactivity before the session is invalidated.       |
 |`SESSIONS_ROLLING_TIMEOUT` |`3600`  |global |no      |Maximum time (in seconds) before a session must be renewed.                      |
 |`SESSIONS_ABSOLUTE_TIMEOUT`|`86400` |global |no      |Maximum time (in seconds) before a session is destroyed.                         |
+|`SESSIONS_CHECK_IP`        |`yes`   |global |no      |Destroy session if IP address is different than original one.                    |
+|`SESSIONS_CHECK_USER_AGENT`|`yes`   |global |no      |Destroy session if User-Agent is different than original one.                    |
 
 ### UI
 

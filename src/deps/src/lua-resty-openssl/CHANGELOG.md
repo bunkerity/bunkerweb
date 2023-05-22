@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="0.8.22"></a>
+## [0.8.22] - 2023-04-26
+### bug fixes
+- **crypto:** use OPENSSL_free in BoringSSL ([#107](https://github.com/fffonion/lua-resty-openssl/issues/107)) [7830212](https://github.com/fffonion/lua-resty-openssl/commit/78302123ac744f2d0b6de1156e459e9ea72b7edb)
+
+
 <a name="0.8.21"></a>
 ## [0.8.21] - 2023-03-24
 ### features
@@ -491,7 +497,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.21...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.22...HEAD
+[0.8.22]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.21...0.8.22
 [0.8.21]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.20...0.8.21
 [0.8.20]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.19...0.8.20
 [0.8.19]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.18...0.8.19

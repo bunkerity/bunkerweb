@@ -7,12 +7,6 @@ local badbehavior = class("badbehavior", plugin)
 function badbehavior:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "badbehavior")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
 end
 
 function badbehavior:log()
@@ -146,7 +140,7 @@ end
 
 function badbehavior.redis_increase(ip, count_time, ban_time)
 	-- Instantiate objects
-	local clusterstore = require "bunkerweb.clusterstore":new()
+	local clusterstore = require "bunkerweb.clusterstore":new(false)
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_incr = redis.pcall("INCR", KEYS[1])
@@ -188,7 +182,7 @@ end
 
 function badbehavior.redis_decrease(ip, count_time)
 	-- Instantiate objects
-	local clusterstore = require "bunkerweb.clusterstore":new()
+	local clusterstore = require "bunkerweb.clusterstore":new(false)
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_decr = redis.pcall("DECR", KEYS[1])

@@ -253,14 +253,19 @@ That kind of security is implemented but not enabled by default in BunkerWeb and
 
 Here is the list of related settings :
 
-|                          Setting                           |   Default    | Description                                                                                                                                                                     |
-| :--------------------------------------------------------: | :----------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|                       `USE_ANTIBOT`                        |     `no`     | Accepted values to enable Antibot feature : `cookie`, `javascript`, `captcha`, `hcaptcha` and `recaptcha`.                                                                      |
-|                       `ANTIBOT_URI`                        | `/challenge` | URI that clients will be redirected to in order to solve the challenge. Be sure that it isn't used in your web application.                                                     |
-|                  `ANTIBOT_SESSION_SECRET`                  |   `random`   | The secret used to encrypt cookies when using Antibot. The special value `random` will generate one for you. Be sure to set it when you use a clustered integration (32 chars). |
-| `ANTIBOT_HCAPTCHA_SITEKEY` and `ANTIBOT_RECAPTCHA_SITEKEY` |              | The Sitekey value to use when `USE_ANTIBOT` is set to `hcaptcha` or `recaptcha`.                                                                                                |
-|  `ANTIBOT_HCAPTCHA_SECRET` and `ANTIBOT_RECAPTCHA_SECRET`  |              | The Secret value to use when `USE_ANTIBOT` is set to `hcaptcha` or `recaptcha`.                                                                                                 |
-|                 `ANTIBOT_RECAPTCHA_SCORE`                  |    `0.7`     | The minimum score that clients must have when `USE_ANTIBOT` is set to `recaptcha`.                                                                                              |
+|          Setting          |  Default   | Context |Multiple|                                                         Description                                                          |
+|---------------------------|------------|---------|--------|------------------------------------------------------------------------------------------------------------------------------|
+|`USE_ANTIBOT`              |`no`        |multisite|no      |Activate antibot feature.                                                                                                     |
+|`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.                                                         |
+|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                                                               |
+|`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                                                                              |
+|`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
+|`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |
+|`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                                                                                |
+|`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
+|`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
+
+Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](settings.md#sessions).
 
 ## Blacklisting, whitelisting and greylisting
 

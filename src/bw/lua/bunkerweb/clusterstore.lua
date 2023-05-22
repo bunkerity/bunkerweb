@@ -5,7 +5,7 @@ local redis        = require "resty.redis"
 
 local clusterstore = class("clusterstore")
 
-function clusterstore:initialize()
+function clusterstore:initialize(pool)
     -- Instantiate logger
     self.logger = logger:new("CLUSTERSTORE")
     -- Get variables
@@ -29,12 +29,13 @@ function clusterstore:initialize()
     end
     -- Don't instantiate a redis object for now
     self.redis_client = nil
+    self.pool = pool == nil or pool
 end
 
 function clusterstore:connect()
     -- Check if we are already connected
-    if self.redis_client ~= nil then
-        return true, "already connected"
+    if self.redis_client then
+        return true, "already connected", self.redis_client:get_reused_times()
     end
     -- Instantiate object
     local redis_client, err = redis:new()
@@ -42,42 +43,50 @@ function clusterstore:connect()
         return false, err
     end
     -- Set timeouts
-    redis_client:set_timeouts(tonumber(self.variables["REDIS_TIMEOUT"]), tonumber(self.variables["REDIS_TIMEOUT"]),
-        tonumber(self.variables["REDIS_TIMEOUT"]))
+    redis_client:set_timeout(tonumber(self.variables["REDIS_TIMEOUT"]))
     -- Connect
     local options = {
         ssl = self.variables["REDIS_SSL"] == "yes",
-        pool = "bw",
-        pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
     }
+    if self.pool then
+        options.pool = "bw-redis"
+        options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
+    end
     local ok, err = redis_client:connect(self.variables["REDIS_HOST"], tonumber(self.variables["REDIS_PORT"]), options)
     if not ok then
         return false, err
     end
-    -- Save client
     self.redis_client = redis_client
     -- Select database if needed
-    local times, err = redis_client:get_reused_times()
+    local times, err = self.redis_client:get_reused_times()
     if err then
         self:close()
         return false, err
     end
     if times == 0 then
-        local select, err = redis_client:select(tonumber(self.variables["REDIS_DATABASE"]))
+        local select, err = self.redis_client:select(tonumber(self.variables["REDIS_DATABASE"]))
         if err then
             self:close()
             return false, err
         end
     end
-    return true, "success"
+    return true, "success", times
 end
 
 function clusterstore:close()
     if self.redis_client then
         -- Equivalent to close but keep a pool of connections
-        local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
-            tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
-        self.redis_client = nil
+        if self.pool then
+            local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
+            self.redis_client = nil
+            if not ok then
+                require "bunkerweb.logger":new("clusterstore-close"):log(ngx.ERR, err)
+            end
+            return ok, err
+        end
+        -- Close
+        local ok, err = self.redis_client:close()
+        self.redis_client.redis_client = nil
         return ok, err
     end
     return false, "not connected"

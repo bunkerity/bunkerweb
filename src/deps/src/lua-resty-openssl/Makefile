@@ -11,6 +11,7 @@ all: ;
 
 install: all
 	cp -rpv lib/resty/openssl/. $(DESTDIR)$(LUA_LIB_DIR)/resty/openssl
+	cp -pv lib/resty/openssl.lua $(DESTDIR)$(LUA_LIB_DIR)/resty/
 	
 test: all
 	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t

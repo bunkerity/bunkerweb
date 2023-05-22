@@ -1,4 +1,5 @@
 local mlcache    = require "resty.mlcache"
+local clusterstore = require "bunkerweb.clusterstore"
 local logger     = require "bunkerweb.logger"
 local utils      = require "bunkerweb.utils"
 local class      = require "middleclass"
@@ -41,17 +42,24 @@ if not cache then
 	module_logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
 end
 
-function cachestore:initialize(use_redis)
+function cachestore:initialize(use_redis, new_cs)
 	self.cache = cache
-	self.use_redis = (use_redis and utils.is_cosocket_available()) or false
+	self.use_redis = use_redis or false
 	self.logger = module_logger
+	if new_cs then
+		self.clusterstore = clusterstore:new(false)
+		self.shared_cs = false
+	else
+		self.clusterstore = utils.get_ctx_obj("clusterstore")
+		self.shared_cs = true
+	end
 end
 
 function cachestore:get(key)
-	local callback = function(key)
+	local callback = function(key, cs)
 		-- Connect to redis
-		local clusterstore = require "bunkerweb.clusterstore":new()
-		local ok, err = clusterstore:connect()
+		local clusterstore = cs or require "bunkerweb.clusterstore":new(false)
+		local ok, err, reused = clusterstore:connect()
 		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
 		end
@@ -88,8 +96,12 @@ function cachestore:get(key)
 		return nil, nil, -1
 	end
 	local value, err, hit_level
-	if self.use_redis then
-		value, err, hit_level = self.cache:get(key, nil, callback, key)
+	if self.use_redis and utils.is_cosocket_available() then
+		local cs = nil
+		if self.shared_cs then
+			cs = self.clusterstore
+		end
+		value, err, hit_level = self.cache:get(key, nil, callback, key, cs)
 	else
 		value, err, hit_level = self.cache:get(key, nil, callback_no_miss)
 	end
@@ -101,7 +113,7 @@ function cachestore:get(key)
 end
 
 function cachestore:set(key, value, ex)
-	if self.use_redis then
+	if self.use_redis and utils.is_cosocket_available() then
 		local ok, err = self:set_redis(key, value, ex)
 		if not ok then
 			self.logger:log(ngx.ERR, err)
@@ -121,24 +133,23 @@ end
 
 function cachestore:set_redis(key, value, ex)
 	-- Connect to redis
-	local clusterstore = require "bunkerweb.clusterstore":new()
-	local ok, err = clusterstore:connect()
+	local ok, err, reused = self.clusterstore:connect()
 	if not ok then
 		return false, "can't connect to redis : " .. err
 	end
 	-- Set value with ttl
 	local default_ex = ex or 30
-	local ok, err = clusterstore:call("set", key, value, "EX", default_ex)
+	local ok, err = self.clusterstore:call("set", key, value, "EX", default_ex)
 	if err then
-		clusterstore:close()
+		self.clusterstore:close()
 		return false, "SET failed : " .. err
 	end
-	clusterstore:close()
+	self.clusterstore:close()
 	return true
 end
 
 function cachestore:delete(key, value, ex)
-	if self.use_redis then
+	if self.use_redis and utils.is_cosocket_available() then
 		local ok, err = self.del_redis(key)
 		if not ok then
 			self.logger:log(ngx.ERR, err)
@@ -153,18 +164,17 @@ end
 
 function cachestore:del_redis(key)
 	-- Connect to redis
-	local clusterstore = require "bunkerweb.clusterstore":new()
-	local ok, err = clusterstore:connect()
+	local ok, err = self.clusterstore:connect()
 	if not ok then
 		return false, "can't connect to redis : " .. err
 	end
 	-- Set value with ttl
-	local ok, err = clusterstore:del(key)
+	local ok, err = self.clusterstore:del(key)
 	if err then
-		clusterstore:close()
+		self.clusterstore:close()
 		return false, "DEL failed : " .. err
 	end
-	clusterstore:close()
+	self.clusterstore:close()
 	return true
 end
 

@@ -12,12 +12,6 @@ local whitelist  = class("whitelist", plugin)
 function whitelist:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "whitelist")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
 	-- Decode lists
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_whitelist_lists")
@@ -43,8 +37,6 @@ function whitelist:initialize()
 			end
 		end
 	end
-	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function whitelist:is_needed()
@@ -271,7 +263,6 @@ function whitelist:is_whitelisted_ip()
 				end
 			end
 			if forward_check then
-				local forward_ok = false
 				local ip_list, err = utils.get_ips(forward_check)
 				if ip_list then
 					for i, ip in ipairs(ip_list) do
@@ -293,11 +284,12 @@ function whitelist:is_whitelisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, "ASN " .. err
-		end
-		for i, bl_asn in ipairs(self.lists["ASN"]) do
-			if bl_asn == tostring(asn) then
-				return true, "ASN " .. bl_asn
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
+		else
+			for i, bl_asn in ipairs(self.lists["ASN"]) do
+				if bl_asn == tostring(asn) then
+					return true, "ASN " .. bl_asn
+				end
 			end
 		end
 	end

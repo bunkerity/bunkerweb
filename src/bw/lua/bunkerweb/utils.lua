@@ -12,6 +12,8 @@ local datastore              = cdatastore:new()
 
 local utils                  = {}
 
+math.randomseed(os.time())
+
 utils.get_variable           = function(var, site_search)
 	-- Default site search to true
 	if site_search == nil then
@@ -363,7 +365,6 @@ utils.get_rdns = function(ip)
 		for i, answer in ipairs(answers) do
 			if answer.ptrdname then
 				table.insert(ptrs, answer.ptrdname)
-				logger:log(ngx.ERR, answer.ptrdname)
 			end
 		end
 	end
@@ -510,20 +511,72 @@ utils.get_deny_status        = function()
 	return tonumber(status)
 end
 
+utils.check_session = function()
+	local _session, err, exists, refreshed = session.start({audience = "metadata"})
+	if exists then
+		for i, check in ipairs(ngx.ctx.bw.sessions_checks) do
+			local key = check[1]
+			local value = check[2]
+			if _session:get(key) ~= value then
+				local ok, err = _session:destroy()
+				if not ok then
+					_session:close()
+					return false,  "session:destroy() error : " .. err
+				end
+				logger:log(ngx.WARN, "session check " .. key .. " failed, destroying session")
+				return utils.check_session()
+			end
+		end
+	else
+		for i, check in ipairs(ngx.ctx.bw.sessions_checks) do
+			_session:set(check[1], check[2])
+		end
+		local ok, err = _session:save()
+		if not ok then
+			_session:close()
+			return false, "session:save() error : " .. err
+		end
+	end
+	ngx.ctx.bw.sessions_is_checked = true
+	_session:close()
+	return true, exists
+end
+
 utils.get_session            = function(audience)
-	-- Session already in context
-	if ngx.ctx.bw.session then
-		ngx.ctx.bw.session:set_audience(audience)
-		return ngx.ctx.bw.session
+	-- Check session
+	if not ngx.ctx.bw.sessions_is_checked then
+		local ok, err = utils.check_session()
+		if not ok then
+			return false, "error while checking session, " .. err
+		end
 	end
-	-- Open session and fill ctx
-	local _session, err, exists, refreshed = session.start({ audience = audience })
-	if err and err ~= "missing session cookie" and err ~= "no session" then
-		logger:log(ngx.ERR, "session:start() error : " .. err)
+	-- Open session with specific audience
+	local _session, err, exists = session.open({audience = audience})
+	if err then
+		logger:log(ngx.INFO, "session:open() error : " .. err)
 	end
-	_session:set_audience(audience)
-	ngx.ctx.bw.session = _session
 	return _session
+end
+
+utils.get_session_data	= function(_session, site)
+	local site_only = site == nil or site
+	local data = _session:get_data()
+	if site_only then
+		return data[ngx.ctx.bw.server_name] or {}
+	end
+	return data
+end
+
+utils.set_session_data = function(_session, data, site)
+	local site_only = site == nil or site
+	if site_only then
+		local all_data = _session:get_data()
+		all_data[ngx.ctx.bw.server_name] = data
+		_session:set_data(all_data)
+		return _session:save()
+	end
+	_session:set_data(data)
+	return _session:save()
 end
 
 utils.is_banned              = function(ip)
@@ -627,7 +680,7 @@ utils.new_cachestore         = function()
 		use_redis = use_redis == "yes"
 	end
 	-- Instantiate
-	return require "bunkerweb.cachestore":new(use_redis)
+	return require "bunkerweb.cachestore":new(use_redis, true)
 end
 
 utils.regex_match = function(str, regex, options)
@@ -670,6 +723,22 @@ utils.is_cosocket_available = function()
 		end
 	end
 	return false
+end
+
+utils.kill_all_threads = function(threads)
+	for i, thread in ipairs(threads) do
+		local ok, err = ngx.thread.kill(thread)
+		if not ok then
+			logger:log(ngx.ERR, "error while killing thread : " .. err)
+		end
+	end
+end
+
+utils.get_ctx_obj = function(obj)
+	if ngx.ctx and ngx.ctx.bw then
+		return ngx.ctx.bw[obj]
+	end
+	return nil
 end
 
 return utils

@@ -146,45 +146,50 @@ helpers.call_plugin = function(plugin, method)
 end
 
 helpers.fill_ctx = function()
-    -- Check if ctx is already filled
-    if ngx.ctx.bw then
-        return true, "already filled"
-    end
     -- Return errors as table
     local errors = {}
-    -- Instantiate bw table
-    local data = {}
-    -- Common vars
-    data.kind = "http"
-    if ngx.shared.datastore_stream then
-        data.kind = "stream"
+    -- Check if ctx is already filled
+    if not ngx.ctx.bw then
+        -- Instantiate bw table
+        local data = {}
+        -- Common vars
+        data.kind = "http"
+        if ngx.shared.datastore_stream then
+            data.kind = "stream"
+        end
+        data.remote_addr = ngx.var.remote_addr
+        data.uri = ngx.var.uri
+        data.request_uri = ngx.var.request_uri
+        data.request_method = ngx.var.request_method
+        data.http_user_agent = ngx.var.http_user_agent
+        data.http_host = ngx.var.http_host
+        data.server_name = ngx.var.server_name
+        data.http_content_type = ngx.var.http_content_type
+        data.http_origin = ngx.var.http_origin
+        -- IP data : global
+        local ip_is_global, err = utils.ip_is_global(data.remote_addr)
+        if ip_is_global == nil then
+            table.insert(errors, "can't check if IP is global : " .. err)
+        else
+            data.ip_is_global = ip_is_global
+        end
+        -- IP data : v4 / v6
+        data.ip_is_ipv4 = utils.is_ipv4(data.ip)
+        data.ip_is_ipv6 = utils.is_ipv6(data.ip)
+        -- Misc info
+        data.integration = utils.get_integration()
+        data.version = utils.get_version()
+        -- Fill ctx
+        ngx.ctx.bw = data
     end
-    data.remote_addr = ngx.var.remote_addr
-    data.uri = ngx.var.uri
-    data.request_uri = ngx.var.request_uri
-    data.request_method = ngx.var.request_method
-    data.http_user_agent = ngx.var.http_user_agent
-    data.http_host = ngx.var.http_host
-    data.server_name = ngx.var.server_name
-    data.http_content_type = ngx.var.http_content_type
-    data.http_origin = ngx.var.http_origin
-    -- IP data : global
-    local ip_is_global, err = utils.ip_is_global(data.remote_addr)
-    if ip_is_global == nil then
-        table.insert(errors, "can't check if IP is global : " .. err)
-    else
-        data.ip_is_global = ip_is_global
+    -- Always create new objects for current phases in case of cosockets
+    local use_redis, err = utils.get_variable("USE_REDIS", false)
+    if not use_redis then
+        table.insert(errors, "can't get variable from datastore : " .. err)
     end
-    -- IP data : v4 / v6
-    data.ip_is_ipv4 = utils.is_ipv4(data.ip)
-    data.ip_is_ipv6 = utils.is_ipv6(data.ip)
-    -- Misc info
-    data.integration = utils.get_integration()
-    data.version = utils.get_version()
-    -- Plugins
-    data.plugins = {}
-    -- Fill ctx
-    ngx.ctx.bw = data
+    ngx.ctx.bw.datastore = require "bunkerweb.datastore":new()
+    ngx.ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
+    ngx.ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes")
     return true, "ctx filled", errors
 end
 

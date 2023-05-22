@@ -9,13 +9,6 @@ local country    = class("country", plugin)
 function country:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "country")
-	-- Instantiate cachestore
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
-	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function country:access()

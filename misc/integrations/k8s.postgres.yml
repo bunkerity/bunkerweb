@@ -124,7 +124,7 @@ spec:
             - name: KUBERNETES_MODE
               value: "yes"
             - name: "DATABASE_URI"
-              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+              value: "postgresql://bunkerweb:changeme@svc-bunkerweb-db:5432/db"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -150,7 +150,7 @@ spec:
             - name: KUBERNETES_MODE
               value: "yes"
             - name: "DATABASE_URI"
-              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+              value: "postgresql://bunkerweb:changeme@svc-bunkerweb-db:5432/db"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -200,6 +200,8 @@ spec:
               value: "bunkerweb"
             - name: "POSTGRES_PASSWORD"
               value: "changeme"
+            - name: "PGDATA"
+              value: "/var/lib/postgresql/data/pgdata"
           volumeMounts:
             - mountPath: "/var/lib/postgresql/data"
               name: vol-db
@@ -255,4 +257,3 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: pv-bunkerweb

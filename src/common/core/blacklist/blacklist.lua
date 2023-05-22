@@ -11,12 +11,6 @@ local blacklist  = class("blacklist", plugin)
 function blacklist:initialize()
 	-- Call parent initialize
 	plugin.initialize(self, "blacklist")
-	-- Check if redis is enabled
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
 	-- Decode lists
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_blacklist_lists")
@@ -47,8 +41,6 @@ function blacklist:initialize()
 			end
 		end
 	end
-	-- Instantiate cachestore
-	self.cachestore = cachestore:new(self.use_redis)
 end
 
 function blacklist:is_needed()
@@ -267,20 +259,21 @@ function blacklist:is_blacklisted_ip()
 	if ngx.ctx.bw.ip_is_global then
 		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
 		if not asn then
-			return nil, "ASN " .. err
-		end
-		local ignore = false
-		for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
-			if ignore_asn == tostring(asn) then
-				ignore = true
-				break
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
+		else
+			local ignore = false
+			for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
+				if ignore_asn == tostring(asn) then
+					ignore = true
+					break
+				end
 			end
-		end
-		-- Check if ASN is in blacklist
-		if not ignore then
-			for i, bl_asn in ipairs(self.lists["ASN"]) do
-				if bl_asn == tostring(asn) then
-					return true, "ASN " .. bl_asn
+			-- Check if ASN is in blacklist
+			if not ignore then
+				for i, bl_asn in ipairs(self.lists["ASN"]) do
+					if bl_asn == tostring(asn) then
+						return true, "ASN " .. bl_asn
+					end
 				end
 			end
 		end
