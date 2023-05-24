@@ -54,7 +54,7 @@ from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, getenv, getpid, listdir
-from os.path import basename
+from os.path import basename, dirname
 from re import compile as re_compile
 from regex import match as regex_match
 from requests import get
@@ -1231,11 +1231,52 @@ def upload_plugin():
 
     Path("/var/tmp/bunkerweb/ui").mkdir(parents=True, exist_ok=True)
 
-    for file in request.files.values():
-        if not file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
+    for uploaded_file in request.files.values():
+        if not uploaded_file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
             return {"status": "ko"}, 422
 
-        Path(f"/var/tmp/bunkerweb/ui/{file.filename}").write_bytes(file.read())
+        with BytesIO(uploaded_file.read()) as io:
+            io.seek(0, 0)
+            plugins = []
+            if uploaded_file.filename.endswith(".zip"):
+                with ZipFile(io) as zip_file:
+                    for file in zip_file.namelist():
+                        if file.endswith("plugin.json"):
+                            plugins.append(basename(dirname(file)))
+                    if len(plugins) > 1:
+                        zip_file.extractall("/var/tmp/bunkerweb/ui/")
+                folder_name = uploaded_file.filename.replace(".zip", "")
+            else:
+                with tar_open(fileobj=io) as tar_file:
+                    for file in tar_file.getnames():
+                        if file.endswith("plugin.json"):
+                            plugins.append(basename(dirname(file)))
+                    if len(plugins) > 1:
+                        tar_file.extractall("/var/tmp/bunkerweb/ui/")
+                folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(
+                    ".tar.xz", ""
+                )
+
+            if len(plugins) <= 1:
+                io.seek(0, 0)
+                Path(f"/var/tmp/bunkerweb/ui/{uploaded_file.filename}").write_bytes(
+                    io.read()
+                )
+                return {"status": "ok"}, 201
+
+        for plugin in plugins:
+            with BytesIO() as tgz:
+                with tar_open(
+                    mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
+                ) as tf:
+                    tf.add(
+                        f"/var/tmp/bunkerweb/ui/{folder_name}/{plugin}",
+                        arcname=plugin,
+                    )
+                tgz.seek(0, 0)
+                Path(f"/var/tmp/bunkerweb/ui/{plugin}.tar.gz").write_bytes(tgz.read())
+
+        rmtree(f"/var/tmp/bunkerweb/ui/{folder_name}", ignore_errors=True)
 
     return {"status": "ok"}, 201
 
