@@ -16,7 +16,6 @@ if "/usr/share/bunkerweb/api" not in sys_path:
 if "/usr/share/bunkerweb/db" not in sys_path:
     sys_path.append("/usr/share/bunkerweb/db")
 
-from hashlib import sha256
 from bs4 import BeautifulSoup
 from contextlib import suppress
 from copy import deepcopy
@@ -46,6 +45,7 @@ from flask_login import (
     logout_user,
 )
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, dumps, load as json_load
@@ -54,6 +54,7 @@ from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
 from os import _exit, getenv, getpid, listdir
+from os.path import basename
 from re import compile as re_compile
 from regex import match as regex_match
 from requests import get
@@ -345,14 +346,16 @@ def home():
 
     try:
         r = get(
-            "https://raw.githubusercontent.com/bunkerity/bunkerweb/master/VERSION",
+            "https://github.com/bunkerity/bunkerweb/releases/latest",
+            allow_redirects=True,
         )
+        r.raise_for_status()
     except BaseException:
         r = None
     remote_version = None
 
     if r and r.status_code == 200:
-        remote_version = r.text.strip()
+        remote_version = basename(r.url).strip().replace("v", "")
 
     instances = app.config["INSTANCES"].get_instances()
     services = app.config["CONFIG"].get_services()
@@ -551,6 +554,8 @@ def services():
                 "SERVE_FILES": service["SERVE_FILES"],
                 "REMOTE_PHP": service["REMOTE_PHP"],
                 "AUTO_LETS_ENCRYPT": service["AUTO_LETS_ENCRYPT"],
+                "USE_CUSTOM_SSL": service["USE_CUSTOM_SSL"],
+                "GENERATE_SELF_SIGNED_SSL": service["GENERATE_SELF_SIGNED_SSL"],
                 "USE_MODSECURITY": service["USE_MODSECURITY"],
                 "USE_BAD_BEHAVIOR": service["USE_BAD_BEHAVIOR"],
                 "USE_LIMIT_REQ": service["USE_LIMIT_REQ"],
