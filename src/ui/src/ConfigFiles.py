@@ -45,7 +45,7 @@ class ConfigFiles:
                     if Path(file).is_symlink() or Path(file).is_file():
                         Path(file).unlink()
                     elif Path(file).is_dir():
-                        rmtree(file, ignore_errors=False)
+                        rmtree(file, ignore_errors=True)
 
                 generate_custom_configs(custom_configs)
                 self.__logger.info("Custom configs refreshed successfully")
@@ -118,7 +118,7 @@ class ConfigFiles:
             if Path(path).is_file() or Path(f"{path}.conf").is_file():
                 Path(f"{path}.conf").unlink()
             else:
-                rmtree(path)
+                rmtree(path, ignore_errors=True)
         except OSError:
             return f"Could not delete {path}", 1
 

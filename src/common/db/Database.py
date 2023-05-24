@@ -292,7 +292,17 @@ class Database:
                         jobs = plugin.pop("jobs", [])
                         page = plugin.pop("page", False)
 
-                    to_put.append(Plugins(**plugin))
+                    to_put.append(
+                        Plugins(
+                            id=plugin["id"],
+                            name=plugin["name"],
+                            description=plugin["description"],
+                            version=plugin["version"],
+                            stream=plugin["stream"],
+                            external=plugin.get("external", False),
+                            method=plugin.get("method"),
+                        )
+                    )
 
                     for setting, value in settings.items():
                         value.update(
@@ -856,7 +866,11 @@ class Database:
                         tmp_config.pop(key)
                     else:
                         tmp_config[key] = (
-                            {"value": value["value"], "global": True, "method": "default"}
+                            {
+                                "value": value["value"],
+                                "global": True,
+                                "method": "default",
+                            }
                             if methods is True
                             else value
                         )
@@ -1251,7 +1265,19 @@ class Database:
 
                     continue
 
-                to_put.append(Plugins(**plugin))
+                to_put.append(
+                    Plugins(
+                        id=plugin["id"],
+                        name=plugin["name"],
+                        description=plugin["description"],
+                        version=plugin["version"],
+                        stream=plugin["stream"],
+                        external=True,
+                        method=plugin["method"],
+                        data=plugin.get("data"),
+                        checksum=plugin.get("checksum"),
+                    )
+                )
 
                 for setting, value in settings.items():
                     db_setting = session.query(Settings).filter_by(id=setting).first()
