@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Open Sans";
+  src: url("../webfonts/OpenSans.ttf");
+}
+
+* {
+  font-family: "Open Sans", sans-serif !important;
+}
+
 .close-btn {
   @apply dark:brightness-90  inline-block px-6 py-3 font-bold text-center text-red-500 border border-red-500 uppercase align-middle transition-all rounded-lg cursor-pointer dark:bg-gray-200 dark:hover:brightness-75 bg-white hover:bg-white/80 focus:bg-white/80 leading-normal ease-in tracking-tight-rem shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
 }
