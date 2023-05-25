@@ -275,30 +275,29 @@ A file named **plugin.json** and written at the root of the plugin folder must c
 
 ```json
 {
-	"id": "myplugin",
-	"order": 42,
-	"name": "My Plugin",
-	"description": "Just an example plugin.",
-	"version": "1.0",
+  "id": "myplugin",
+  "name": "My Plugin",
+  "description": "Just an example plugin.",
+  "version": "1.0",
   "stream": "partial",
-	"settings": {
-		"DUMMY_SETTING": {
-			"context": "multisite",
-			"default": "1234",
-			"help": "Here is the help of the setting.",
-			"id": "dummy-id",
-			"label": "Dummy setting",
-			"regex": "^.*$",
-			"type": "text"
-		}
-	},
-	"jobs": [
-		{
-			"name": "my-job",
-			"file": "my-job.py",
-			"every": "hour"
-		}
-	]
+  "settings": {
+    "DUMMY_SETTING": {
+      "context": "multisite",
+      "default": "1234",
+      "help": "Here is the help of the setting.",
+      "id": "dummy-id",
+      "label": "Dummy setting",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "my-job",
+      "file": "my-job.py",
+      "every": "hour"
+    }
+  ]
 }
 ```
 
@@ -307,7 +306,6 @@ Here are the details of the fields :
 |     Field     | Mandatory |  Type  | Description                                                                                                                                                                                        |
 | :-----------: | :-------: | :----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |     `id`      |    yes    | string | Internal ID for the plugin : must be unique among other plugins (including "core" ones) and contain only lowercase chars.                                                                          |
-|    `order`    |    yes    |  int   | When the plugin should be executed during the access phase : `1` for whitelisting, `2` for blacklisting, `3` for "standard security feature" or `999` if your settings don't use the access phase. |
 |    `name`     |    yes    | string | Name of your plugin.                                                                                                                                                                               |
 | `description` |    yes    | string | Description of your plugin.                                                                                                                                                                        |
 |   `version`   |    yes    | string | Version of your plugin.                                                                                                                                                                            |
