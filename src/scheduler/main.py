@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from copy import deepcopy
-from glob import glob, iglob
+from glob import glob
 from hashlib import sha256
 from io import BytesIO
 from json import load as json_load
@@ -100,20 +100,19 @@ def generate_custom_configs(
     *,
     original_path: str = join(sep, "etc", "bunkerweb", "configs"),
 ):
+    logger.info("Generating new custom configs ...")
     Path(original_path).mkdir(parents=True, exist_ok=True)
     for custom_config in custom_configs:
-        tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
+        tmp_path = join(original_path, custom_config["type"].replace("_", "-"))
         if custom_config["service_id"]:
-            tmp_path += f"/{custom_config['service_id']}"
-        tmp_path += f"/{custom_config['name']}.conf"
+            tmp_path = join(tmp_path, custom_config["service_id"])
+        tmp_path = join(tmp_path, f"{custom_config['name'].conf}")
         Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
         Path(tmp_path).write_bytes(custom_config["data"])
 
     if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
         logger.info("Sending custom configs to BunkerWeb")
-        ret = api_caller._send_files(
-            join(sep, "etc", "bunkerweb", "configs"), "/custom_configs"
-        )
+        ret = api_caller._send_files(original_path, "/custom_configs")
 
         if not ret:
             logger.error(
@@ -126,11 +125,12 @@ def generate_external_plugins(
     integration: str,
     api_caller: ApiCaller,
     *,
-    original_path: str = "/etc/bunkerweb/plugins",
+    original_path: str = join(sep, "etc", "bunkerweb", "plugins"),
 ):
+    logger.info("Generating new external plugins ...")
     Path(original_path).mkdir(parents=True, exist_ok=True)
     for plugin in plugins:
-        tmp_path = f"{original_path}/{plugin['id']}/{plugin['name']}.tar.gz"
+        tmp_path = join(original_path, plugin["id"], f"{plugin['name']}.tar.gz")
         plugin_dir = dirname(tmp_path)
         Path(plugin_dir).mkdir(parents=True, exist_ok=True)
         Path(tmp_path).write_bytes(plugin["data"])
@@ -138,13 +138,13 @@ def generate_external_plugins(
             tar.extractall(original_path)
         Path(tmp_path).unlink()
 
-        for job_file in glob(f"{plugin_dir}/jobs/*"):
+        for job_file in glob(join(plugin_dir, "jobs", "*")):
             st = Path(job_file).stat()
             chmod(job_file, st.st_mode | S_IEXEC)
 
     if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
         logger.info("Sending plugins to BunkerWeb")
-        ret = api_caller._send_files("/etc/bunkerweb/plugins", "/plugins")
+        ret = api_caller._send_files(original_path, "/plugins")
 
         if not ret:
             logger.error(
@@ -175,13 +175,7 @@ if __name__ == "__main__":
         generate = False
         integration = "Linux"
         api_caller = ApiCaller()
-
-        # Define db here because otherwhise it will be undefined for Linux
-        db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-        )
-        # END Define db because otherwhise it will be undefined for Linux
+        db_configs = None
 
         logger.info("Scheduler started ...")
 
@@ -194,7 +188,7 @@ if __name__ == "__main__":
 
             db = Database(
                 logger,
-                sqlalchemy_string=env.get("DATABASE_URI", None),
+                sqlalchemy_string=env.get("DATABASE_URI", getenv("DATABASE_URI", None)),
             )
 
             while not db.is_initialized():
@@ -202,6 +196,8 @@ if __name__ == "__main__":
                     "Database is not initialized, retrying in 5s ...",
                 )
                 sleep(5)
+
+            db_configs = db.get_custom_configs()
         else:
             # Read from database
             integration = "Docker"
@@ -215,6 +211,9 @@ if __name__ == "__main__":
                 sqlalchemy_string=getenv("DATABASE_URI", None),
             )
 
+            if db.is_initialized():
+                db_configs = db.get_custom_configs()
+
             if integration in (
                 "Swarm",
                 "Kubernetes",
@@ -225,9 +224,10 @@ if __name__ == "__main__":
                         "Autoconf is not loaded yet in the database, retrying in 5s ...",
                     )
                     sleep(5)
-            elif integration == "Docker" and (
-                not Path("/var/tmp/bunkerweb/variables.env").exists()
-                or db.get_config() != dotenv_values("/var/tmp/bunkerweb/variables.env")
+            elif not Path(
+                "/var/tmp/bunkerweb/variables.env"
+            ).exists() or db.get_config() != dotenv_values(
+                "/var/tmp/bunkerweb/variables.env"
             ):
                 # run the config saver
                 proc = subprocess_run(
@@ -251,6 +251,9 @@ if __name__ == "__main__":
                 )
                 sleep(5)
 
+            if not db_configs:
+                db_configs = db.get_custom_configs()
+
             env = db.get_config()
             while not db.is_first_config_saved() or not env:
                 logger.warning(
@@ -262,52 +265,62 @@ if __name__ == "__main__":
             env["DATABASE_URI"] = db.get_database_uri()
 
         # Checking if any custom config has been created by the user
-        custom_confs = []
-        root_dirs = listdir(join(sep, "etc", "bunkerweb", "configs"))
-        for root, dirs, files in walk(
-            join(sep, "etc", "bunkerweb", "configs"), topdown=True
-        ):
-            if (
-                root != "configs"
-                and (dirs and not root.split("/")[-1] in root_dirs)
-                or files
-            ):
+        custom_configs = []
+        configs_path = join(sep, "etc", "bunkerweb", "configs")
+        root_dirs = listdir(configs_path)
+        for root, dirs, files in walk(configs_path):
+            if files or (dirs and basename(root) not in root_dirs):
                 path_exploded = root.split("/")
                 for file in files:
                     with open(join(root, file), "r") as f:
-                        custom_confs.append(
-                            {
-                                "value": f.read(),
-                                "exploded": (
-                                    f"{path_exploded.pop()}"
-                                    if path_exploded[-1] not in root_dirs
-                                    else "",
-                                    path_exploded[-1],
-                                    file.replace(".conf", ""),
-                                ),
-                            }
-                        )
+                        custom_conf = {
+                            "value": f.read(),
+                            "exploded": (
+                                f"{path_exploded.pop()}"
+                                if path_exploded[-1] not in root_dirs
+                                else None,
+                                path_exploded[-1],
+                                file.replace(".conf", ""),
+                            ),
+                        }
 
-        old_configs = None
-        if custom_confs:
-            old_configs = db.get_custom_configs()
+                    saving = True
+                    for db_conf in db_configs:
+                        if (
+                            db_conf["method"] != "manual"
+                            and db_conf["service_id"] == custom_conf["exploded"][0]
+                            and db_conf["name"] == custom_conf["exploded"][2]
+                        ):
+                            saving = False
+                            break
 
-            err = db.save_custom_configs(custom_confs, "manual")
-            if err:
-                logger.error(
-                    f"Couldn't save some manually created custom configs to database: {err}",
-                )
+                    if saving:
+                        custom_configs.append(custom_conf)
 
-        custom_configs = db.get_custom_configs()
+        err = db.save_custom_configs(custom_configs, "manual")
+        if err:
+            logger.error(
+                f"Couldn't save some manually created custom configs to database: {err}",
+            )
 
-        if old_configs != custom_configs:
-            generate_custom_configs(custom_configs, integration, api_caller)
+        # Remove old custom configs files
+        logger.info("Removing old custom configs files ...")
+        for file in glob(join(configs_path, "*", "*")):
+            if Path(file).is_symlink() or Path(file).is_file():
+                Path(file).unlink()
+            elif Path(file).is_dir():
+                rmtree(file, ignore_errors=True)
+
+        db_configs = db.get_custom_configs()
+
+        if db_configs:
+            logger.info("Generating new custom configs ...")
+            generate_custom_configs(db_configs, integration, api_caller)
 
         # Check if any external plugin has been added by the user
         external_plugins = []
-        for filename in iglob(
-            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
-        ):
+        plugins_dir = join(sep, "etc", "bunkerweb", "plugins")
+        for filename in glob(join(plugins_dir, "*", "plugin.json")):
             with open(filename, "r") as f:
                 _dir = dirname(filename)
                 plugin_content = BytesIO()
@@ -322,7 +335,7 @@ if __name__ == "__main__":
                     json_load(f)
                     | {
                         "external": True,
-                        "page": Path(f"{_dir}/ui").exists(),
+                        "page": Path(_dir, "ui").exists(),
                         "method": "manual",
                         "data": value,
                         "checksum": sha256(value).hexdigest(),
@@ -340,7 +353,7 @@ if __name__ == "__main__":
         if external_plugins:
             # Remove old external plugins files
             logger.info("Removing old external plugins files ...")
-            for file in glob(join(sep, "etc", "bunkerweb", "plugins", "*")):
+            for file in glob(join(plugins_dir, "*")):
                 if Path(file).is_symlink() or Path(file).is_file():
                     Path(file).unlink()
                 elif Path(file).is_dir():
@@ -350,13 +363,16 @@ if __name__ == "__main__":
                 db.get_plugins(external=True, with_data=True),
                 integration,
                 api_caller,
+                original_path=plugins_dir,
             )
 
         logger.info("Executing scheduler ...")
 
         generate = not Path(
-            "/var/tmp/bunkerweb/variables.env"
-        ).exists() or env != dotenv_values("/var/tmp/bunkerweb/variables.env")
+            sep, "var", "tmp", "bunkerweb", "variables.env"
+        ).exists() or env != dotenv_values(
+            join(sep, "var", "tmp", "bunkerweb", "variables.env")
+        )
 
         if not generate:
             logger.warning(
@@ -491,23 +507,27 @@ if __name__ == "__main__":
                 sleep(1)
 
                 # check if the custom configs have changed since last time
-                tmp_custom_configs = db.get_custom_configs()
-                if custom_configs != tmp_custom_configs:
+                tmp_db_configs = db.get_custom_configs()
+                if db_configs != tmp_db_configs:
                     logger.info("Custom configs changed, generating ...")
-                    logger.debug(f"{tmp_custom_configs=}")
-                    logger.debug(f"{custom_configs=}")
-                    custom_configs = deepcopy(tmp_custom_configs)
+                    logger.debug(f"{tmp_db_configs=}")
+                    logger.debug(f"{db_configs=}")
+                    db_configs = deepcopy(tmp_db_configs)
 
                     # Remove old custom configs files
                     logger.info("Removing old custom configs files ...")
-                    for file in glob("/etc/bunkerweb/configs/*"):
+                    for file in glob(join(configs_path, "*", "*")):
                         if Path(file).is_symlink() or Path(file).is_file():
                             Path(file).unlink()
                         elif Path(file).is_dir():
                             rmtree(file, ignore_errors=True)
 
-                    logger.info("Generating new custom configs ...")
-                    generate_custom_configs(custom_configs, integration, api_caller)
+                    generate_custom_configs(
+                        db_configs,
+                        integration,
+                        api_caller,
+                        original_path=configs_path,
+                    )
 
                     # reload nginx
                     logger.info("Reloading nginx ...")
@@ -544,7 +564,7 @@ if __name__ == "__main__":
 
                     # Remove old external plugins files
                     logger.info("Removing old external plugins files ...")
-                    for file in glob(join(sep, "etc", "bunkerweb", "plugins", "*")):
+                    for file in glob(join(plugins_dir, "*")):
                         if Path(file).is_symlink() or Path(file).is_file():
                             Path(file).unlink()
                         elif Path(file).is_dir():
@@ -555,6 +575,7 @@ if __name__ == "__main__":
                         db.get_plugins(external=True, with_data=True),
                         integration,
                         api_caller,
+                        original_path=plugins_dir,
                     )
                     need_reload = True
 
