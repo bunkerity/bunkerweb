@@ -2,8 +2,8 @@
 
 from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, chmod, _exit
-from os.path import basename, dirname
+from os import getenv, listdir, chmod, _exit, sep
+from os.path import basename, dirname, join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
@@ -37,18 +37,17 @@ status = 0
 
 def install_plugin(plugin_dir) -> bool:
     # Load plugin.json
-    with open(f"{plugin_dir}/plugin.json", "rb") as f:
-        metadata = loads(f.read())
+    metadata = loads(Path(plugin_dir, "plugin.json").read_text())
     # Don't go further if plugin is already installed
-    if Path(f"/etc/bunkerweb/plugins/{metadata['id']}/plugin.json").is_file():
+    if Path("etc", "bunkerweb", "plugins", metadata["id"], "plugin.json").is_file():
         logger.warning(
             f"Skipping installation of plugin {metadata['id']} (already installed)",
         )
         return False
     # Copy the plugin
-    copytree(plugin_dir, f"/etc/bunkerweb/plugins/{metadata['id']}")
+    copytree(plugin_dir, join(sep, "etc", "bunkerweb", "plugins", metadata["id"]))
     # Add u+x permissions to jobs files
-    for job_file in glob(f"{plugin_dir}/jobs/*"):
+    for job_file in glob(join(plugin_dir, "jobs", "*")):
         st = Path(job_file).stat()
         chmod(job_file, st.st_mode | S_IEXEC)
     logger.info(f"Plugin {metadata['id']} installed")
@@ -57,7 +56,7 @@ def install_plugin(plugin_dir) -> bool:
 
 try:
     # Check if we have plugins to download
-    plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "")
+    plugin_urls = getenv("EXTERNAL_PLUGIN_URLS")
     if not plugin_urls:
         logger.info("No external plugins to download")
         _exit(0)
@@ -84,7 +83,7 @@ try:
             continue
 
         # Extract it to tmp folder
-        temp_dir = f"/var/tmp/bunkerweb/plugins-{uuid4()}"
+        temp_dir = join(sep, "var", "tmp", "bunkerweb", "plugins", str(uuid4()))
         try:
             Path(temp_dir).mkdir(parents=True, exist_ok=True)
             with ZipFile(BytesIO(req.content)) as zf:
@@ -98,7 +97,7 @@ try:
 
         # Install plugins
         try:
-            for plugin_dir in glob(f"{temp_dir}/**/plugin.json", recursive=True):
+            for plugin_dir in glob(join(temp_dir, "**", "plugin.json"), recursive=True):
                 try:
                     if install_plugin(dirname(plugin_dir)):
                         plugin_nbr += 1
@@ -118,17 +117,18 @@ try:
 
     external_plugins = []
     external_plugins_ids = []
-    for plugin in listdir("/etc/bunkerweb/plugins"):
-        path = f"/etc/bunkerweb/plugins/{plugin}"
-        if not Path(f"{path}/plugin.json").is_file():
+    plugins_dir = join(sep, "etc", "bunkerweb", "plugins")
+    for plugin in listdir(plugins_dir):
+        path = join(plugins_dir, plugin)
+        if not Path(path, "plugin.json").is_file():
             logger.warning(f"Plugin {plugin} is not valid, deleting it...")
             rmtree(path, ignore_errors=True)
             continue
 
-        plugin_file = loads(Path(f"{path}/plugin.json").read_text())
+        plugin_file = loads(Path(path, "plugin.json").read_text())
 
         plugin_content = BytesIO()
-        with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
+        with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
             tar.add(path, arcname=basename(path))
         plugin_content.seek(0)
         value = plugin_content.getvalue()
@@ -168,7 +168,7 @@ except:
     status = 2
     logger.error(f"Exception while running download-plugins.py :\n{format_exc()}")
 
-for plugin_tmp in glob("/var/tmp/bunkerweb/plugins-*/"):
+for plugin_tmp in glob(join(sep, "var", "tmp", "bunkerweb", "plugins-*")):
     rmtree(plugin_tmp, ignore_errors=True)
 
 sys_exit(status)

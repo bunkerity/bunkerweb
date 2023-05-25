@@ -1,10 +1,12 @@
+#!/usr/bin/python3
+
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import listdir
-from os.path import basename, dirname
+from os import listdir, sep
+from os.path import basename, dirname, join
 from pathlib import Path
 from re import compile as re_compile, search as re_search
 from sys import path as sys_path
@@ -12,8 +14,8 @@ from tarfile import open as tar_open
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
+if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
+    sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
 
 class Configurator:
@@ -103,7 +105,7 @@ class Configurator:
 
     def __load_plugins(self, path: str, _type: str = "core") -> List[Dict[str, Any]]:
         plugins = []
-        files = glob(f"{path}/*/plugin.json")
+        files = glob(join(path, "*", "plugin.json"))
         for file in files:
             try:
                 data = self.__load_settings(file)
@@ -128,7 +130,9 @@ class Configurator:
 
                     data.update(
                         {
-                            "external": path.startswith("/etc/bunkerweb/plugins"),
+                            "external": path.startswith(
+                                join(sep, "etc", "bunkerweb", "plugins")
+                            ),
                             "page": "ui" in listdir(dirname(file)),
                             "method": "manual",
                             "data": value,

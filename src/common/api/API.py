@@ -1,52 +1,48 @@
+#!/usr/bin/python3
+
+from typing import Literal, Optional, Union
 from requests import request
 
 
 class API:
-    def __init__(self, endpoint, host="bwapi"):
+    def __init__(self, endpoint: str, host: str = "bwapi"):
         self.__endpoint = endpoint
         self.__host = host
 
-    def get_endpoint(self):
+    def get_endpoint(self) -> str:
         return self.__endpoint
 
-    def get_host(self):
+    def get_host(self) -> str:
         return self.__host
 
-    def request(self, method, url, data=None, files=None, timeout=(10, 30)):
+    def request(
+        self,
+        method: Union[Literal["POST"], Literal["GET"]],
+        url: str,
+        data: Optional[Union[dict, bytes]] = None,
+        files=None,
+        timeout=(10, 30),
+    ) -> tuple[bool, str, Optional[int], Optional[dict]]:
         try:
-            headers = {}
-            headers["User-Agent"] = "bwapi"
-            headers["Host"] = self.__host
+            kwargs = {}
             if isinstance(data, dict):
-                resp = request(
-                    method,
-                    f"{self.__endpoint}{url}",
-                    json=data,
-                    timeout=timeout,
-                    headers=headers,
-                )
+                kwargs["json"] = data
             elif isinstance(data, bytes):
-                resp = request(
-                    method,
-                    f"{self.__endpoint}{url}",
-                    data=data,
-                    timeout=timeout,
-                    headers=headers,
-                )
-            elif files:
-                resp = request(
-                    method,
-                    f"{self.__endpoint}{url}",
-                    files=files,
-                    timeout=timeout,
-                    headers=headers,
-                )
-            elif not data:
-                resp = request(
-                    method, f"{self.__endpoint}{url}", timeout=timeout, headers=headers
-                )
-            else:
-                return False, "unsupported data type", None, None
+                kwargs["data"] = data
+            elif data is not None:
+                return False, f"Unsupported data type: {type(data)}", None, None
+
+            if files:
+                kwargs["files"] = files
+
+            resp = request(
+                method,
+                f"{self.__endpoint}{url}",
+                timeout=timeout,
+                headers={"User-Agent": "bwapi", "Host": self.__host},
+                **kwargs,
+            )
         except Exception as e:
-            return False, str(e), None, None
+            return False, f"Request failed: {e}", None, None
+
         return True, "ok", resp.status_code, resp.json()

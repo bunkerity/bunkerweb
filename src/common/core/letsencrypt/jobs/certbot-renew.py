@@ -56,7 +56,7 @@ try:
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
     if db:
-        tgz = get_file_in_db("certbot-new", "folder.tgz", db)
+        tgz = get_file_in_db("folder.tgz", db)
         if tgz:
             # Delete folder if needed
             if len(listdir("/var/cache/bunkerweb/letsencrypt")) > 0:
@@ -113,7 +113,7 @@ try:
             tgz.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
         bio.seek(0)
         # Put tgz in cache
-        cached, err = set_file_in_db("certbot-new", "folder.tgz", bio, db)
+        cached, err = set_file_in_db("folder.tgz", bio, db)
         if not cached:
             logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:

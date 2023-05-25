@@ -1,13 +1,21 @@
-from os import getenv
-from time import sleep
+#!/usr/bin/python3
 
-from ConfigCaller import ConfigCaller
-from Database import Database
-from logger import setup_logger
+from os import getenv
+from threading import Lock
+from time import sleep
+from typing import Literal, Optional, Union
+
+from ConfigCaller import ConfigCaller  # type: ignore
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 class Config(ConfigCaller):
-    def __init__(self, ctrl_type, lock=None):
+    def __init__(
+        self,
+        ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
+        lock: Optional[Lock] = None,
+    ):
         super().__init__()
         self.__ctrl_type = ctrl_type
         self.__lock = lock
@@ -77,6 +85,9 @@ class Config(ConfigCaller):
             )
             sleep(5)
 
+        if self.__lock:
+            self.__lock.acquire()
+
         # update instances in database
         err = self._db.update_instances(self.__instances)
         if err:
@@ -97,5 +108,8 @@ class Config(ConfigCaller):
             self.__logger.error(
                 f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected",
             )
+
+        if self.__lock:
+            self.__lock.release()
 
         return success

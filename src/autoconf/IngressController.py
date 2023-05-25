@@ -1,13 +1,16 @@
+#!/usr/bin/python3
+
 from os import getenv
 from time import sleep
 from traceback import format_exc
+from typing import List
 from kubernetes import client, config, watch
 from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
 
 from Controller import Controller
-from ConfigCaller import ConfigCaller
-from logger import setup_logger
+from ConfigCaller import ConfigCaller  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 class IngressController(Controller, ConfigCaller):
@@ -20,7 +23,7 @@ class IngressController(Controller, ConfigCaller):
         self.__internal_lock = Lock()
         self.__logger = setup_logger("Ingress-controller", getenv("LOG_LEVEL", "INFO"))
 
-    def _get_controller_instances(self):
+    def _get_controller_instances(self) -> list:
         return [
             pod
             for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items
@@ -30,7 +33,7 @@ class IngressController(Controller, ConfigCaller):
             )
         ]
 
-    def _to_instances(self, controller_instance):
+    def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
         instance["name"] = controller_instance.metadata.name
         instance["hostname"] = controller_instance.status.pod_ip
@@ -48,7 +51,9 @@ class IngressController(Controller, ConfigCaller):
                 pod = container
                 break
         if not pod:
-            self.__logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
+            self.__logger.warning(
+                f"Missing container bunkerweb in pod {controller_instance.metadata.name}"
+            )
         else:
             for env in pod.env:
                 instance["env"][env.name] = env.value or ""
@@ -65,10 +70,10 @@ class IngressController(Controller, ConfigCaller):
                         instance["env"][variable] = value
         return [instance]
 
-    def _get_controller_services(self):
+    def _get_controller_services(self) -> list:
         return self.__networkingv1.list_ingress_for_all_namespaces(watch=False).items
 
-    def _to_services(self, controller_service):
+    def _to_services(self, controller_service) -> List[dict]:
         if not controller_service.spec or not controller_service.spec.rules:
             return []
 
@@ -145,15 +150,15 @@ class IngressController(Controller, ConfigCaller):
                         continue
 
                     variable = annotation.replace("bunkerweb.io/", "", 1)
-                    server_name = service["SERVER_NAME"].split(" ")[0]
+                    server_name = service["SERVER_NAME"].strip().split(" ")[0]
                     if not variable.startswith(f"{server_name}_"):
                         continue
                     variable = variable.replace(f"{server_name}_", "", 1)
-                    if self._is_multisite_setting(variable):
+                    if self._is_setting_context(variable, "multisite"):
                         service[variable] = value
         return services
 
-    def _get_static_services(self):
+    def _get_static_services(self) -> List[dict]:
         services = []
         variables = {}
         for instance in self.__corev1.list_pod_for_all_namespaces(watch=False).items:
@@ -168,12 +173,10 @@ class IngressController(Controller, ConfigCaller):
                 if container.name == "bunkerweb":
                     pod = container
                     break
-            if not pod :
+            if not pod:
                 continue
 
-            variables = {
-                env.name: env.value or "" for env in pod.env
-            }
+            variables = {env.name: env.value or "" for env in pod.env}
 
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
             for server_name in variables["SERVER_NAME"].strip().split(" "):
@@ -181,14 +184,14 @@ class IngressController(Controller, ConfigCaller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_multisite_setting(
-                        real_variable
+                    if prefix == server_name and self._is_setting_context(
+                        real_variable, "multisite"
                     ):
                         service[real_variable] = value
                 services.append(service)
         return services
 
-    def get_configs(self):
+    def get_configs(self) -> dict:
         configs = {config_type: {} for config_type in self._supported_config_types}
         for configmap in self.__corev1.list_config_map_for_all_namespaces(
             watch=False
@@ -302,7 +305,7 @@ class IngressController(Controller, ConfigCaller):
                     self.__logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
-    def apply_config(self):
+    def apply_config(self) -> bool:
         return self._config.apply(
             self._instances, self._services, configs=self._configs
         )

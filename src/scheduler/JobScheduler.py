@@ -3,8 +3,8 @@ from functools import partial
 from glob import glob
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv
-from os.path import basename, dirname
+from os import cpu_count, environ, getenv, sep
+from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
 from typing import Any, Dict, Optional
@@ -19,11 +19,15 @@ from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 
-sys_path.extend(("/usr/share/bunkerweb/utils", "/usr/share/bunkerweb/db"))
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from Database import Database
-from logger import setup_logger
-from ApiCaller import ApiCaller
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
 
 
 class JobScheduler(ApiCaller):
@@ -49,11 +53,11 @@ class JobScheduler(ApiCaller):
 
     def __get_jobs(self):
         jobs = {}
-        for plugin_file in list(
-            glob("/usr/share/bunkerweb/core/*/plugin.json")  # core plugins
-        ) + list(
-            glob("/etc/bunkerweb/plugins/*/plugin.json")  # external plugins
-        ):
+        for plugin_file in glob(
+            join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")
+        ) + glob(  # core plugins
+            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
+        ):  # external plugins
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
             try:
@@ -104,7 +108,7 @@ class JobScheduler(ApiCaller):
                         plugin_jobs.pop(x)
                         continue
 
-                    plugin_jobs[x]["path"] = f"{dirname(plugin_file)}/"
+                    plugin_jobs[x]["path"] = dirname(plugin_file)
 
                 jobs[plugin_name] = plugin_jobs
             except FileNotFoundError:
@@ -131,7 +135,7 @@ class JobScheduler(ApiCaller):
         if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
             self.__logger.info("Reloading nginx ...")
             proc = run(
-                ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=PIPE,
                 env=self.__env,
@@ -160,7 +164,7 @@ class JobScheduler(ApiCaller):
         ret = -1
         try:
             proc = run(
-                f"{path}jobs/{file}", stdin=DEVNULL, stderr=STDOUT, env=self.__env
+                join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env
             )
             ret = proc.returncode
         except BaseException:
@@ -230,16 +234,13 @@ class JobScheduler(ApiCaller):
         if reload:
             try:
                 if self._get_apis():
-                    self.__logger.info("Sending /var/cache/bunkerweb folder ...")
-                    if not self._send_files("/var/cache/bunkerweb", "/cache"):
+                    cache_path = join(sep, "var", "cache", "bunkerweb")
+                    self.__logger.info(f"Sending {cache_path} folder ...")
+                    if not self._send_files(cache_path, "/cache"):
                         success = False
-                        self.__logger.error(
-                            "Error while sending /var/cache/bunkerweb folder"
-                        )
+                        self.__logger.error(f"Error while sending {cache_path} folder")
                     else:
-                        self.__logger.info(
-                            "Successfully sent /var/cache/bunkerweb folder"
-                        )
+                        self.__logger.info(f"Successfully sent {cache_path} folder")
                 if not self.__reload():
                     success = False
             except:

@@ -1,14 +1,22 @@
+#!/usr/bin/python3
+
 from abc import ABC, abstractmethod
 from os import getenv
+from threading import Lock
 from time import sleep
+from typing import Literal, Optional, Union
 
 from Config import Config
 
-from logger import setup_logger
+from logger import setup_logger  # type: ignore
 
 
 class Controller(ABC):
-    def __init__(self, ctrl_type, lock=None):
+    def __init__(
+        self,
+        ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
+        lock: Optional[Lock] = None,
+    ):
         self._type = ctrl_type
         self._instances = []
         self._services = []
@@ -27,7 +35,7 @@ class Controller(ABC):
         self._config = Config(ctrl_type, lock)
         self.__logger = setup_logger("Controller", getenv("LOG_LEVEL", "INFO"))
 
-    def wait(self, wait_time):
+    def wait(self, wait_time: int) -> list:
         all_ready = False
         while not all_ready:
             self._instances = self.get_instances()
@@ -59,8 +67,7 @@ class Controller(ABC):
     def get_instances(self):
         instances = []
         for controller_instance in self._get_controller_instances():
-            for instance in self._to_instances(controller_instance):
-                instances.append(instance)
+            instances.extend(self._to_instances(controller_instance))
         return instances
 
     @abstractmethod
@@ -86,10 +93,8 @@ class Controller(ABC):
     def get_services(self):
         services = []
         for controller_service in self._get_controller_services():
-            for service in self._to_services(controller_service):
-                services.append(service)
-        for static_service in self._get_static_services():
-            services.append(static_service)
+            services.extend(self._to_services(controller_service))
+        services.extend(self._get_static_services())
         return services
 
     @abstractmethod
@@ -106,8 +111,8 @@ class Controller(ABC):
 
     def _is_service_present(self, server_name):
         for service in self._services:
-            if not "SERVER_NAME" in service or service["SERVER_NAME"] == "":
+            if not "SERVER_NAME" in service or not service["SERVER_NAME"]:
                 continue
-            if server_name == service["SERVER_NAME"].split(" ")[0]:
+            if server_name == service["SERVER_NAME"].strip().split(" ")[0]:
                 return True
         return False

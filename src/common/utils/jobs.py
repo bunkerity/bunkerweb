@@ -1,14 +1,17 @@
+#!/usr/bin/python3
+
 from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
 from inspect import getsourcefile
+from io import BufferedReader
 from json import dumps, loads
 from os.path import basename
 from pathlib import Path
 from sys import _getframe
 from threading import Lock
 from traceback import format_exc
-from typing import Optional, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 lock = Lock()
 
@@ -20,11 +23,16 @@ lock = Lock()
 """
 
 
-def is_cached_file(file: str, expire: str, db=None) -> bool:
+def is_cached_file(
+    file: str,
+    expire: Union[Literal["hour"], Literal["day"], Literal["week"], Literal["month"]],
+    db=None,
+) -> bool:
     is_cached = False
     cached_file = None
     try:
-        if not Path(f"{file}.md").is_file():
+        file_path = Path(f"{file}.md")
+        if not file_path.is_file():
             if not db:
                 return False
             cached_file = db.get_job_cache_file(
@@ -37,7 +45,7 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
                 return False
             cached_time = cached_file.last_update.timestamp()
         else:
-            cached_time = loads(Path(f"{file}.md").read_text())["date"]
+            cached_time = loads(file_path.read_text())["date"]
 
         current_time = datetime.now().timestamp()
         if current_time < cached_time:
@@ -48,6 +56,8 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
                 is_cached = diff_time < 3600
             elif expire == "day":
                 is_cached = diff_time < 86400
+            elif expire == "week":
+                is_cached = diff_time < 604800
             elif expire == "month":
                 is_cached = diff_time < 2592000
     except:
@@ -59,14 +69,16 @@ def is_cached_file(file: str, expire: str, db=None) -> bool:
     return is_cached and cached_file
 
 
-def get_file_in_db(job: str, file: str, db) -> bytes:
-    cached_file = db.get_job_cache_file(job, file)
+def get_file_in_db(file: str, db) -> bytes:
+    cached_file = db.get_job_cache_file(
+        basename(getsourcefile(_getframe(1))).replace(".py", ""), file
+    )
     if not cached_file:
         return False
     return cached_file.data
 
 
-def set_file_in_db(job: str, name: str, bio, db) -> Tuple[bool, str]:
+def set_file_in_db(name: str, bio: BufferedReader, db) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
         content = bio.read()
@@ -87,10 +99,12 @@ def set_file_in_db(job: str, name: str, bio, db) -> Tuple[bool, str]:
     return ret, err
 
 
-def del_file_in_db(job: str, name: str, db) -> Tuple[bool, str]:
+def del_file_in_db(name: str, db) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
-        db.delete_job_cache(job, name)
+        db.delete_job_cache(
+            basename(getsourcefile(_getframe(1))).replace(".py", ""), name
+        )
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err

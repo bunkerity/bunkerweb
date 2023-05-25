@@ -1,10 +1,16 @@
+#!/usr/bin/python3
+
 from glob import glob
 from importlib import import_module
-from os.path import basename, dirname
+from os.path import basename, join
 from pathlib import Path
 from random import choice
 from string import ascii_letters, digits
+from sys import path as sys_path
 from typing import Any, Dict, List, Optional
+
+if join("usr", "share", "bunkerweb", "deps", "python") in sys_path:
+    sys_path.append(join("usr", "share", "bunkerweb", "deps", "python"))
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -23,11 +29,7 @@ class Templator:
         self.__core = core
         self.__plugins = plugins
         self.__output = output
-        if not self.__output.endswith("/"):
-            self.__output += "/"
         self.__target = target
-        if not self.__target.endswith("/"):
-            self.__target += "/"
         self.__config = config
         self.__jinja_env = self.__load_jinja_env()
 
@@ -41,9 +43,9 @@ class Templator:
 
     def __load_jinja_env(self) -> Environment:
         searchpath = [self.__templates]
-        for subpath in glob(f"{self.__core}/*") + glob(f"{self.__plugins}/*"):
+        for subpath in glob(join(self.__core, "*")) + glob(join(self.__plugins, "*")):
             if Path(subpath).is_dir():
-                searchpath.append(f"{subpath}/confs")
+                searchpath.append(join(subpath, "confs"))
         return Environment(
             loader=FileSystemLoader(searchpath=searchpath),
             lstrip_blocks=True,
@@ -57,18 +59,17 @@ class Templator:
                 templates.append(template)
                 continue
             for context in contexts:
-                if template.startswith(f"{context}/"):
+                if template.startswith(context):
                     templates.append(template)
         return templates
 
     def __write_config(
         self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None
     ):
-        real_path = self.__output + (f"{subpath}/" if subpath else "") + "variables.env"
-        real_config = config or self.__config
-        Path(dirname(real_path)).mkdir(parents=True, exist_ok=True)
-        Path(real_path).write_text(
-            "\n".join(f"{k}={v}" for k, v in real_config.items())
+        real_path = Path(self.__output, subpath or "", "variables.env")
+        real_path.parent.mkdir(parents=True, exist_ok=True)
+        real_path.write_text(
+            "\n".join(f"{k}={v}" for k, v in (config or self.__config).items())
         )
 
     def __render_global(self):
@@ -100,12 +101,12 @@ class Templator:
                 for variable, value in self.__config.items():
                     if variable.startswith(f"{server}_"):
                         config[variable.replace(f"{server}_", "", 1)] = value
-                config["NGINX_PREFIX"] = f"{self.__target}{server}/"
+                config["NGINX_PREFIX"] = join(self.__target, server) + "/"
                 server_key = f"{server}_SERVER_NAME"
                 if server_key not in self.__config:
                     config["SERVER_NAME"] = server
 
-            root_confs = [
+            for root_conf in (
                 "server.conf",
                 "access-lua.conf",
                 "init-lua.conf",
@@ -114,9 +115,8 @@ class Templator:
                 "log-stream-lua.conf",
                 "preread-stream-lua.conf",
                 "server-stream.conf",
-            ]
-            for root_conf in root_confs:
-                if template.endswith(f"/{root_conf}"):
+            ):
+                if template.endswith(root_conf):
                     name = basename(template)
                     break
             self.__render_template(template, subpath=subpath, config=config, name=name)
@@ -136,16 +136,14 @@ class Templator:
         real_config["has_variable"] = Templator.has_variable
         real_config["random"] = Templator.random
         real_config["read_lines"] = Templator.read_lines
-        real_path = (
-            self.__output + (f"/{subpath}/" if subpath else "") + (name or template)
-        )
+        real_path = Path(self.__output, subpath or "", name or template)
         jinja_template = self.__jinja_env.get_template(template)
-        Path(dirname(real_path)).mkdir(parents=True, exist_ok=True)
-        Path(real_path).write_text(jinja_template.render(real_config))
+        real_path.parent.mkdir(parents=True, exist_ok=True)
+        real_path.write_text(jinja_template.render(real_config))
 
     @staticmethod
     def is_custom_conf(path: str) -> bool:
-        return bool(glob(f"{path}/*.conf"))
+        return bool(glob(join(path, "*.conf")))
 
     @staticmethod
     def has_variable(all_vars: Dict[str, Any], variable: str, value: Any) -> bool:

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from os import getegid, geteuid, stat
 from stat import (
     S_IRGRP,

@@ -2,7 +2,8 @@
 
 from argparse import ArgumentParser
 from glob import glob
-from os import R_OK, W_OK, X_OK, access, getenv
+from os import R_OK, W_OK, X_OK, access, getenv, sep
+from os.path import join, normpath
 from pathlib import Path
 from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, run
@@ -11,14 +12,14 @@ from time import sleep
 from traceback import format_exc
 from typing import Any, Dict
 
-if "/usr/share/bunkerweb/deps/python" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/deps/python")
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
-if "/usr/share/bunkerweb/api" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/api")
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",), ("api",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from logger import setup_logger
+from logger import setup_logger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
 
@@ -32,37 +33,37 @@ if __name__ == "__main__":
         parser = ArgumentParser(description="BunkerWeb config generator")
         parser.add_argument(
             "--settings",
-            default="/usr/share/bunkerweb/settings.json",
+            default=join(sep, "usr", "share", "bunkerweb", "settings.json"),
             type=str,
             help="file containing the main settings",
         )
         parser.add_argument(
             "--templates",
-            default="/usr/share/bunkerweb/confs",
+            default=join(sep, "usr", "share", "bunkerweb", "confs"),
             type=str,
             help="directory containing the main template files",
         )
         parser.add_argument(
             "--core",
-            default="/usr/share/bunkerweb/core",
+            default=join(sep, "usr", "share", "bunkerweb", "core"),
             type=str,
             help="directory containing the core plugins",
         )
         parser.add_argument(
             "--plugins",
-            default="/etc/bunkerweb/plugins",
+            default=join(sep, "etc", "bunkerweb", "plugins"),
             type=str,
             help="directory containing the external plugins",
         )
         parser.add_argument(
             "--output",
-            default="/etc/nginx",
+            default=join(sep, "etc", "nginx"),
             type=str,
             help="where to write the rendered files",
         )
         parser.add_argument(
             "--target",
-            default="/etc/nginx",
+            default=join(sep, "etc", "nginx"),
             type=str,
             help="where nginx will search for configurations files",
         )
@@ -76,46 +77,55 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()
 
+        settings_path = Path(normpath(args.settings))
+        templates_path = Path(normpath(args.templates))
+        core_path = Path(normpath(args.core))
+        plugins_path = Path(normpath(args.plugins))
+        output_path = Path(normpath(args.output))
+        target_path = Path(normpath(args.target))
+
         logger.info("Generator started ...")
-        logger.info(f"Settings : {args.settings}")
-        logger.info(f"Templates : {args.templates}")
-        logger.info(f"Core : {args.core}")
-        logger.info(f"Plugins : {args.plugins}")
-        logger.info(f"Output : {args.output}")
-        logger.info(f"Target : {args.target}")
+        logger.info(f"Settings : {settings_path}")
+        logger.info(f"Templates : {templates_path}")
+        logger.info(f"Core : {core_path}")
+        logger.info(f"Plugins : {plugins_path}")
+        logger.info(f"Output : {output_path}")
+        logger.info(f"Target : {target_path}")
 
         integration = "Linux"
+        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+        os_release_path = Path(sep, "etc", "os-release")
         if getenv("KUBERNETES_MODE", "no").lower() == "yes":
             integration = "Kubernetes"
         elif getenv("SWARM_MODE", "no").lower() == "yes":
             integration = "Swarm"
         elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
             integration = "Autoconf"
-        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
-            integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
-        elif (
-            Path("/etc/os-release").is_file()
-            and "Alpine" in Path("/etc/os-release").read_text()
-        ):
+        elif integration_path.is_file():
+            integration = integration_path.read_text().strip()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
             integration = "Docker"
 
+        del integration_path, os_release_path
+
         if args.variables:
-            logger.info(f"Variables : {args.variables}")
+            variables_path = Path(normpath(args.variables))
+            logger.info(f"Variables : {variables_path}")
 
             # Check existences and permissions
             logger.info("Checking arguments ...")
-            files = [args.settings, args.variables]
-            paths_rx = [args.core, args.plugins, args.templates]
-            paths_rwx = [args.output]
+            files = [settings_path, variables_path]
+            paths_rx = [core_path, plugins_path, templates_path]
+            paths_rwx = [output_path]
             for file in files:
-                if not Path(file).is_file():
+                if not file.is_file():
                     logger.error(f"Missing file : {file}")
                     sys_exit(1)
                 elif not access(file, R_OK):
                     logger.error(f"Can't read file : {file}")
                     sys_exit(1)
             for path in paths_rx + paths_rwx:
-                if not Path(path).is_dir():
+                if not path.is_dir():
                     logger.error(f"Missing directory : {path}")
                     sys_exit(1)
                 elif not access(path, R_OK | X_OK):
@@ -133,13 +143,17 @@ if __name__ == "__main__":
             # Compute the config
             logger.info("Computing config ...")
             config: Dict[str, Any] = Configurator(
-                args.settings, args.core, args.plugins, args.variables, logger
+                str(settings_path),
+                str(core_path),
+                str(plugins_path),
+                str(variables_path),
+                logger,
             ).get_config()
         else:
-            if "/usr/share/bunkerweb/db" not in sys_path:
-                sys_path.append("/usr/share/bunkerweb/db")
+            if join(sep, "usr", "share", "bunkerweb", "db") not in sys_path:
+                sys_path.append(join(sep, "usr", "share", "bunkerweb", "db"))
 
-            from Database import Database
+            from Database import Database  # type: ignore
 
             db = Database(
                 logger,
@@ -149,21 +163,22 @@ if __name__ == "__main__":
 
         # Remove old files
         logger.info("Removing old files ...")
-        files = glob(f"{args.output}/*")
+        files = glob(join(args.output, "*"))
         for file in files:
-            if Path(file).is_symlink() or Path(file).is_file():
-                Path(file).unlink()
-            elif Path(file).is_dir():
-                rmtree(file, ignore_errors=False)
+            file = Path(file)
+            if file.is_symlink() or file.is_file():
+                file.unlink()
+            elif file.is_dir():
+                rmtree(str(file), ignore_errors=True)
 
         # Render the templates
         logger.info("Rendering templates ...")
         templator = Templator(
-            args.templates,
-            args.core,
-            args.plugins,
-            args.output,
-            args.target,
+            str(templates_path),
+            str(core_path),
+            str(plugins_path),
+            str(output_path),
+            str(target_path),
             config,
         )
         templator.render()
@@ -173,7 +188,7 @@ if __name__ == "__main__":
             and not args.no_linux_reload
         ):
             retries = 0
-            while not Path("/var/tmp/bunkerweb/nginx.pid").exists():
+            while not Path(sep, "var", "tmp", "bunkerweb", "nginx.pid").exists():
                 if retries == 5:
                     logger.error(
                         "BunkerWeb's nginx didn't start in time.",
@@ -187,7 +202,7 @@ if __name__ == "__main__":
                 sleep(5)
 
             proc = run(
-                ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=STDOUT,
             )

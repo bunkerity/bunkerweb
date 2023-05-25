@@ -58,7 +58,7 @@ try:
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
     if db:
-        bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
+        bunkernet_id = get_file_in_db("instance.id", db)
         if bunkernet_id:
             Path("/var/cache/bunkerweb/bunkernet/bunkernet.id").write_text(
                 bunkernet_id.decode()

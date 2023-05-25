@@ -59,7 +59,7 @@ try:
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
     if db:
-        bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
+        bunkernet_id = get_file_in_db("instance.id", db)
         if bunkernet_id:
             Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(
                 bunkernet_id.decode()
@@ -123,7 +123,7 @@ try:
     # Update cache with new bunkernet ID
     if db and registered:
         with open("/var/cache/bunkerweb/bunkernet/instance.id", "rb") as f:
-            cached, err = set_file_in_db(f"bunkernet-register", f"instance.id", f, db)
+            cached, err = set_file_in_db(f"instance.id", f, db)
         if not cached:
             logger.error(f"Error while saving BunkerNet data to db cache : {err}")
         else:
@@ -154,7 +154,7 @@ try:
             )
             Path("/var/cache/bunkerweb/bunkernet/instance.id").unlink()
             if db:
-                del_file_in_db("bunkernet-register", "instance.id", db)
+                del_file_in_db("instance.id", db)
             _exit(2)
 
         try:
