@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from flask_login import UserMixin
 from bcrypt import checkpw, hashpw, gensalt
 

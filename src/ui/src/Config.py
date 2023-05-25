@@ -1,24 +1,22 @@
+#!/usr/bin/python3
+
 from copy import deepcopy
-from hashlib import sha256
-from io import BytesIO
+from os import sep
+from os.path import join
 from flask import flash
-from glob import iglob
-from json import load as json_load
-from os import listdir
-from os.path import basename
+from json import loads as json_loads
 from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
-from tarfile import open as tar_open
 from typing import List, Tuple
 from uuid import uuid4
 
 
 class Config:
     def __init__(self, db) -> None:
-        with open("/usr/share/bunkerweb/settings.json", "r") as f:
-            self.__settings: dict = json_load(f)
-
+        self.__settings = json_loads(
+            Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text()
+        )
         self.__db = db
 
     def __dict_to_env(self, filename: str, variables: dict) -> None:
@@ -69,14 +67,14 @@ class Config:
             servers.append(server_name)
 
         conf["SERVER_NAME"] = " ".join(servers)
-        env_file = f"/tmp/{uuid4()}.env"
+        env_file = Path(sep, "tmp", f"{uuid4()}.env")
         self.__dict_to_env(env_file, conf)
         proc = run(
             [
                 "python3",
-                "/usr/share/bunkerweb/gen/save_config.py",
+                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
                 "--variables",
-                env_file,
+                str(env_file),
                 "--method",
                 "ui",
             ],
@@ -87,7 +85,7 @@ class Config:
         if proc.returncode != 0:
             raise Exception(f"Error from generator (return code = {proc.returncode})")
 
-        Path(env_file).unlink()
+        env_file.unlink()
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -99,7 +97,6 @@ class Config:
         self, *, external: bool = False, with_data: bool = False
     ) -> List[dict]:
         plugins = self.__db.get_plugins(external=external, with_data=with_data)
-
         plugins.sort(key=lambda x: x["name"])
 
         general_plugin = None

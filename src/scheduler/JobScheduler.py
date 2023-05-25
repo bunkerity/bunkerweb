@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from copy import deepcopy
 from functools import partial
 from glob import glob
