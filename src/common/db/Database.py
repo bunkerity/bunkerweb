@@ -459,7 +459,6 @@ class Database:
                                 if key != "SERVER_NAME" and (
                                     (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
-                                    or (not value.strip() and not setting.default)
                                 ):
                                     continue
 
@@ -479,7 +478,6 @@ class Database:
                                 if key != "SERVER_NAME" and (
                                     (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
-                                    or (not value.strip() and not setting.default)
                                 ):
                                     session.query(Services_settings).filter(
                                         Services_settings.service_id == server_name,
@@ -513,9 +511,7 @@ class Database:
                             )
 
                             if not global_value:
-                                if value == setting.default or (
-                                    not value.strip() and not setting.default
-                                ):
+                                if value == setting.default:
                                     continue
 
                                 to_put.append(
@@ -530,9 +526,7 @@ class Database:
                                 method in (global_value.method, "autoconf")
                                 and global_value.value != value
                             ):
-                                if value == setting.default or (
-                                    not value.strip() and not setting.default
-                                ):
+                                if value == setting.default:
                                     session.query(Global_values).filter(
                                         Global_values.setting_id == key,
                                         Global_values.suffix == suffix,
@@ -591,9 +585,7 @@ class Database:
                         )
 
                         if not global_value:
-                            if value == setting.default or (
-                                not value.strip() and not setting.default
-                            ):
+                            if value == setting.default:
                                 continue
 
                             to_put.append(
@@ -608,9 +600,7 @@ class Database:
                             global_value.method == method
                             and value != global_value.value
                         ):
-                            if value == setting.default or (
-                                not value.strip() and not setting.default
-                            ):
+                            if value == setting.default:
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
                                     Global_values.suffix == suffix,
