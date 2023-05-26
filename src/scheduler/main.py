@@ -387,6 +387,14 @@ if __name__ == "__main__":
 
         first_run = True
         while True:
+            ret = db.checked_changes()
+
+            if ret:
+                logger.error(
+                    f"An error occurred when setting the changes to checked in the database : {changes}"
+                )
+                stop(1)
+
             # Instantiate scheduler
             scheduler = JobScheduler(
                 env=env.copy() | environ.copy(),
@@ -511,6 +519,8 @@ if __name__ == "__main__":
             generate = True
             scheduler.setup()
             need_reload = False
+            configs_need_generation = False
+            plugins_need_generation = False
             first_run = False
 
             # infinite schedule for the jobs
@@ -520,13 +530,34 @@ if __name__ == "__main__":
                 scheduler.run_pending()
                 sleep(1)
 
+                changes = db.check_changes()
+
+                if isinstance(changes, str):
+                    logger.error(
+                        f"An error occurred when checking for changes in the database : {changes}"
+                    )
+                    stop(1)
+
                 # check if the custom configs have changed since last time
-                tmp_db_configs: Dict[str, Any] = db.get_custom_configs()
-                if db_configs != tmp_db_configs:
+                if changes["custom_configs_changed"]:
                     logger.info("Custom configs changed, generating ...")
-                    logger.debug(f"{tmp_db_configs=}")
-                    logger.debug(f"{db_configs=}")
-                    db_configs = tmp_db_configs.copy()
+                    configs_need_generation = True
+                    need_reload = True
+
+                # check if the plugins have changed since last time
+                if changes["external_plugins_changed"]:
+                    logger.info("External plugins changed, generating ...")
+                    plugins_need_generation = True
+                    need_reload = True
+
+                # check if the config have changed since last time
+                if changes["config_changed"]:
+                    logger.info("Config changed, generating ...")
+                    need_reload = True
+
+            if need_reload:
+                if configs_need_generation:
+                    db_configs = db.get_custom_configs()
 
                     # Remove old custom configs files
                     logger.info("Removing old custom configs files ...")
@@ -544,40 +575,10 @@ if __name__ == "__main__":
                         original_path=configs_path,
                     )
 
-                    # reload nginx
-                    logger.info("Reloading nginx ...")
-                    if integration not in (
-                        "Autoconf",
-                        "Swarm",
-                        "Kubernetes",
-                        "Docker",
-                    ):
-                        # Reloading the nginx server.
-                        proc = subprocess_run(
-                            # Reload nginx
-                            ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
-                            stdin=DEVNULL,
-                            stderr=STDOUT,
-                            env=env.copy(),
-                        )
-                        if proc.returncode == 0:
-                            logger.info("Successfully reloaded nginx")
-                        else:
-                            logger.error(
-                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
-                            )
-                    else:
-                        need_reload = True
-
-                # check if the plugins have changed since last time
-                tmp_external_plugins: List[Dict[str, Any]] = db.get_plugins(
-                    external=True
-                )
-                if external_plugins != tmp_external_plugins:
-                    logger.info("External plugins changed, generating ...")
-                    logger.debug(f"{tmp_external_plugins=}")
-                    logger.debug(f"{external_plugins=}")
-                    external_plugins = tmp_external_plugins.copy()
+                if plugins_need_generation:
+                    external_plugins: List[Dict[str, Any]] = db.get_plugins(
+                        external=True, with_data=True
+                    )
 
                     # Remove old external plugins files
                     logger.info("Removing old external plugins files ...")
@@ -588,26 +589,14 @@ if __name__ == "__main__":
                         elif file.is_dir():
                             rmtree(str(file), ignore_errors=True)
 
-                    logger.info("Generating new external plugins ...")
                     generate_external_plugins(
-                        db.get_plugins(external=True, with_data=True),
+                        external_plugins,
                         integration,
                         api_caller,
                         original_path=plugins_dir,
                     )
-                    need_reload = True
 
-                # check if the config have changed since last time
-                tmp_env: Dict[str, Any] = db.get_config()
-                tmp_env["DATABASE_URI"] = environ.get(
-                    "DATABASE_URI", tmp_env["DATABASE_URI"]
-                )
-                if env != tmp_env:
-                    logger.info("Config changed, generating ...")
-                    logger.debug(f"{tmp_env=}")
-                    logger.debug(f"{env=}")
-                    env = tmp_env.copy()
-                    need_reload = True
+                env = db.get_config()
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

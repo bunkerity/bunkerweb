@@ -257,6 +257,48 @@ class Database:
 
         return ""
 
+    def check_changes(self) -> Dict[str, bool]:
+        """Check if either the config, the custom configs or plugins have changed inside the database"""
+        with self.__db_session() as session:
+            try:
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(
+                        Metadata.custom_configs_changed,
+                        Metadata.external_plugins_changed,
+                        Metadata.config_changed,
+                    )
+                    .filter_by(id=1)
+                    .first()
+                )
+                return dict(
+                    custom_configs_changed=metadata is not None
+                    and metadata.custom_configs_changed,
+                    external_plugins_changed=metadata is not None
+                    and metadata.external_plugins_changed,
+                    config_changed=metadata is not None and metadata.config_changed,
+                )
+            except BaseException:
+                return format_exc()
+
+    def checked_changes(self) -> str:
+        """Set that the config, the custom configs and the plugins didn't change"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.config_changed = False
+                metadata.custom_configs_changed = False
+                metadata.external_plugins_changed = False
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
     def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
@@ -615,8 +657,10 @@ class Database:
 
             with suppress(ProgrammingError, OperationalError):
                 metadata = session.query(Metadata).get(1)
-                if metadata is not None and not metadata.first_config_saved:
-                    metadata.first_config_saved = True
+                if metadata is not None:
+                    if not metadata.first_config_saved:
+                        metadata.first_config_saved = True
+                    metadata.config_changed = bool(to_put)
 
             try:
                 session.add_all(to_put)
@@ -708,6 +752,12 @@ class Database:
                             else {}
                         )
                     )
+
+            if to_put:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.custom_configs_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1400,6 +1450,13 @@ class Database:
                                     session.query(Plugin_pages).filter(
                                         Plugin_pages.plugin_id == plugin["id"]
                                     ).update(updates)
+
+            if to_put:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.external_plugins_changed = True
+
             try:
                 session.add_all(to_put)
                 session.commit()
