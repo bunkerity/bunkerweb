@@ -36,10 +36,10 @@ services:
     networks:
       - bw-services
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=moodle
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
       - MARIADB_CHARACTER_SET=utf8mb4
       - MARIADB_COLLATE=utf8mb4_unicode_ci
     deploy:

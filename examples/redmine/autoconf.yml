@@ -33,7 +33,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=redminedb
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match REDMINE_DB_PASSWORD)
 
 volumes:
   redmine-data:

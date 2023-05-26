@@ -50,7 +50,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=magentodb
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
     deploy:
       placement:
         constraints:
