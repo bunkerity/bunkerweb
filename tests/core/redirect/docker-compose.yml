@@ -4,8 +4,6 @@ services:
   bw:
     image: bunkerity/bunkerweb:1.5.0
     pull_policy: never
-    ports:
-      - 80:80
     labels:
       - "bunkerweb.INSTANCE"
     environment:

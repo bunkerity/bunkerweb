@@ -4,9 +4,6 @@ services:
   bw:
     image: bunkerity/bunkerweb:1.5.0
     pull_policy: never
-    ports:
-      - 80:80
-      - 443:443
     labels:
       - "bunkerweb.INSTANCE"
     volumes:
@@ -20,7 +17,7 @@ services:
       LOG_LEVEL: "info"
 
       # ? CUSTOM_CERT settings
-      USE_CUSTOM_SSL: "no"
+      USE_CUSTOM_SSL: "yes"
       CUSTOM_SSL_CERT: "/certs/certificate.pem"
       CUSTOM_SSL_KEY: "/certs/privatekey.key"
     networks:
