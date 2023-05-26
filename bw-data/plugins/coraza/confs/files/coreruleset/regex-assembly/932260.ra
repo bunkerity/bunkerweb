@@ -1,0 +1,12 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932260 (RCE Unix command injection)
+
+##!+ i
+
+##!> assemble
+  ##!> include unix-shell-evasion-prefix-start-of-string
+
+  ##!> include-except unix-shell-4andup-with-params unix-shell-fps
+##!<

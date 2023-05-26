@@ -1,0 +1,154 @@
+---
+meta:
+  author: "terjanq, Franziska Bühler"
+  description: "Detects basic SQL authentication bypass attempts 4.1/4"
+  enabled: true
+  name: 942522.yaml
+tests:
+  - test_title: 942522-1
+    desc: "Blocks bypass with escaped quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            # \'or'1
+            data: "var=%5C'or'1"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942522"
+  - test_title: 942522-2
+    desc: "Blocks bypass with escaped quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            # \"or"1
+            data: "var=%5C%22or%221"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942522"
+  - test_title: 942522-3
+    desc: "Blocks bypass with escaped quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            # \`or`1
+            data: "var=%5C%60or%601"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942522"
+  - test_title: 942522-4
+    desc: "Blocks bypass with: \\'and"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=%5C'and"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942522"
+  - test_title: 942522-5
+    desc: "Negative test: doesn't block normal SQLi"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='or'1"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942522"
+  - test_title: 942522-6
+    desc: "Negative test: doesn't block escaped quotes without following (and|or)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=%5C' foo or"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942522"
+  - test_title: 942522-7
+    desc: "New line bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=newline%0A%5C' and 1"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942522"
+  - test_title: 942522-8
+    desc: "Negative test: Wikipedia article about SQLi"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=Incorrectly%20constructed%20SQL%20statements%0AThis%20form%20of%20injection%20relies%20on%20the%20fact%20that%20SQL%20statements%20consist%20of%20both%20data%20used%20by%20the%20SQL%20statement%20and%20commands%20that%20control%20how%20the%20SQL%20statement%20is%20executed.%20For%20example%2C%20in%20the%20SQL%20statement%20select%20*%20from%20person%20where%20name%20%3D%20'susan'%20and%20age%20%3D%202%20the%20string%20'susan'%20is%20data%20and%20the%20fragment%20and%20age%20%3D%202%20is%20an%20example%20of%20a%20command%20(the%20value%202%20is%20also%20data%20in%20this%20example).%0A%0ASQL%20injection%20occurs%20when%20specially%20crafted%20user%20input%20is%20processed%20by%20the%20receiving%20program%20in%20a%20way%20that%20allows%20the%20input%20to%20exit%20a%20data%20context%20and%20enter%20a%20command%20context.%20This%20allows%20the%20attacker%20to%20alter%20the%20structure%20of%20the%20SQL%20statement%20which%20is%20executed.%0A%0AAs%20a%20simple%20example%2C%20imagine%20that%20the%20data%20'susan'%20in%20the%20above%20statement%20was%20provided%20by%20user%20input.%20The%20user%20entered%20the%20string%20'susan'%20(without%20the%20apostrophes)%20in%20a%20web%20form%20text%20entry%20field%2C%20and%20the%20program%20used%20string%20concatenation%20statements%20to%20form%20the%20above%20SQL%20statement%20from%20the%20three%20fragments%20select%20*%20from%20person%20where%20name%3D'%2C%20the%20user%20input%20of%20'susan'%2C%20and%20'%20and%20age%20%3D%202.%0A%0ANow%20imagine%20that%20instead%20of%20entering%20'susan'%20the%20attacker%20entered%20'%20or%201%3D1%3B%20--.%0A%0AThe%20program%20will%20use%20the%20same%20string%20concatenation%20approach%20with%20the%203%20fragments%20of%20select%20*%20from%20person%20where%20name%3D'%2C%20the%20user%20input%20of%20'%20or%201%3D1%3B%20--%2C%20and%20'%20and%20age%20%3D%202%20and%20construct%20the%20statement%20select%20*%20from%20person%20where%20name%3D''%20or%201%3D1%3B%20--%20and%20age%20%3D%202.%20Many%20databases%20will%20ignore%20the%20text%20after%20the%20'--'%20string%20as%20this%20denotes%20a%20comment.%20The%20structure%20of%20the%20SQL%20command%20is%20now%20select%20*%20from%20person%20where%20name%3D''%20or%201%3D1%3B%20and%20this%20will%20select%20all%20person%20rows%20rather%20than%20just%20those%20named%20'susan'%20whose%20age%20is%202.%20The%20attacker%20has%20managed%20to%20craft%20a%20data%20string%20which%20exits%20the%20data%20context%20and%20entered%20a%20command%20context.%0A%0AA%20more%20complex%20example%20is%20now%20presented.%0A%0AImagine%20a%20program%20creates%20a%20SQL%20statement%20using%20the%20following%20string%20assignment%20command%20%3A%0A%0Avar%20statement%20%3D%20%22SELECT%20*%20FROM%20users%20WHERE%20name%20%3D%20'%22%20%2B%20userName%20%2B%20%22'%22%3B%0A%0AThis%20SQL%20code%20is%20designed%20to%20pull%20up%20the%20records%20of%20the%20specified%20username%20from%20its%20table%20of%20users.%20However%2C%20if%20the%20%22userName%22%20variable%20is%20crafted%20in%20a%20specific%20way%20by%20a%20malicious%20user%2C%20the%20SQL%20statement%20may%20do%20more%20than%20the%20code%20author%20intended.%20For%20example%2C%20setting%20the%20%22userName%22%20variable%20as%3A%0A%0A'%20OR%20'1'%3D'1%0Aor%20using%20comments%20to%20even%20block%20the%20rest%20of%20the%20query%20(there%20are%20three%20types%20of%20SQL%20comments%5B14%5D).%20All%20three%20lines%20have%20a%20space%20at%20the%20end%3A%0A%0A'%20OR%20'1'%3D'1'%20--%0A'%20OR%20'1'%3D'1'%20%7B%0A'%20OR%20'1'%3D'1'%20%2F*%20"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942522"
+  - test_title: 942522-9
+    desc: "Detect admin%40juice-sh.op'and%20likely%20(id)--"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "admin%2540juice-sh.op%5C%27and%2520likely%2520%28id%29--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942522"

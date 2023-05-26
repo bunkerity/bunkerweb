@@ -1,0 +1,39 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942251.yaml
+tests:
+  - test_title: 942251-1
+    desc: "Detects having injections: ' HAVING COUNT(CustomerID) > 5'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%20HAVING%20COUNT%28CustomerID%29%20%3E%205"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942251"
+  - test_title: 942251-2
+    desc: "Detects having injections negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=having%20fun"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942251"

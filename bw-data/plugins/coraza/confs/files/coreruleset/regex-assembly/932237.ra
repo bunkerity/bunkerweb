@@ -1,0 +1,11 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regexp_assemble/.
+
+##!+ i
+
+##!^ \b
+
+##!$ \b
+
+##!> include unix-shell-upto3
+##!> include unix-shell-4andup-with-params

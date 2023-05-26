@@ -1,0 +1,127 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920350.yaml"
+  description: "Description"
+tests:
+  - test_title: 920350-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "127.0.0.1"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            log_contains: "id \"920350\""
+  - test_title: 920350-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            no_log_contains: "id \"920350\""
+  - test_title: 920350-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "1.2.3.4"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            log_contains: "id \"920350\""
+  - test_title: 920350-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "[::1]"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            log_contains: "id \"920350\""
+  - test_title: 920350-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "[fe80::f1:01:fe01:1]"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            log_contains: "id \"920350\""
+  - test_title: 920350-6
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "[fe80::f1:01:fe01:1]:80"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            log_contains: "id \"920350\""
+  - test_title: 920350-7
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "deadbeef.de:8080"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            no_log_contains: "id \"920350\""
+  - test_title: 920350-8
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "deadbeef.de"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            no_log_contains: "id \"920350\""

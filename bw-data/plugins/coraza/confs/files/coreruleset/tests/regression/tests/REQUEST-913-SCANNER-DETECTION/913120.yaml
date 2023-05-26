@@ -1,0 +1,57 @@
+---
+meta:
+  author: csanders-git
+  description: None
+  enabled: true
+  name: 913120.yaml
+tests:
+  - test_title: 913120-1
+    desc: Request Indicates a Security Scanner Scanned the Site (913120) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /nessustest
+            version: HTTP/1.0
+          output:
+            log_contains: id "913120"
+  - test_title: 913120-2
+    desc: IBM fingerprint from (http://www-01.ibm.com/support/docview.wss?uid=swg21293132)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: /AppScan_fingerprint/MAC_ADDRESS_01234567890.html?9ABCDG1
+            version: HTTP/1.0
+          output:
+            log_contains: id "913120"
+  - test_title: 913120-3
+    desc: "Scanner identification based on uri"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              version: HTTP/1.0
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/nessus_is_probing_you_"
+          output:
+            log_contains: id "913120"

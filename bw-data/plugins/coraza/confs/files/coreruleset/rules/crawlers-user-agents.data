@@ -1,0 +1,82 @@
+# Search engine crawlers and other bots
+# crawler
+# https://80legs.com/
+80legs
+# scraping framework
+# https://ache.readthedocs.io/en/latest/
+# User-Agent: (Mozilla/5.0 (compatible; ACME/VERSION; +OPERATOR_CONTACT_URL; +OPERATOR_CONTACT_EMAIL)
+ACHE/
+# SEO
+# https://ahrefs.com/robot
+AhrefsBot
+# site ripper
+# http://www.softbytelabs.com/en/BlackWidow/
+black widow
+blackwidow
+# security crawler
+# User-Agent: Censys: Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)
+CensysInspect
+# scraping framework
+# http://go-colly.org/
+# User-Agent: colly - https://github.com/gocolly/colly/v2
+colly -
+# scraping framework
+# https://github.com/yasserg/crawler4j
+# User-Agent: crawler4j (https://github.com/yasserg/crawler4j/)
+crawler4j
+# SEO
+# advertising targeting
+# https://www.grapeshot.com/crawler/
+grapeFX
+GrapeshotCrawler/2.0
+# scraping framework
+# https://github.com/internetarchive/heritrix3
+# User-Agent: "Mozilla/5.0 (compatible; heritrix/VERSION +OPERATOR_CONTACT_URL)
+heritrix/
+# User-Agent: Krzana bot
+# https://krzana.com/
+Krzana bot
+# misbehaving spider
+Lingewoud-550-Spyder
+# scraping framework
+# http://docs.seattlerb.org/mechanize/Mechanize.html
+Mechanize
+# SEO
+# http://www.majestic12.co.uk/projects/dsearch/mj12bot.php
+MJ12bot
+# scraping framework
+# https://nutch.apache.org/
+# User-Agent: NutchCVS/VERSION (Nutch; http://lucene.apache.org/nutch/bot.html; nutch-agent@lucene.apache.org)
+NutchCVS/
+# news service
+Owlin bot
+# people database
+# https://pipl.com/bot/
+PiplBot
+# crawler
+# 2006
+prowebwalker
+# generic crawler
+pymills-spider/
+# scraping framework
+# https://docs.pyspider.org/en/latest/
+# User-Agent: pyspider/VERSION (+http://pyspider.org/)
+pyspider/
+# SEO
+# https://moz.com/help/guides/moz-procedures/what-is-rogerbot
+rogerbot
+# SEO
+# http://www.searchmetrics.com/searchmetricsbot/
+SearchmetricsBot
+# SEO
+# https://www.semrush.com/bot/
+SemrushBot
+# SEO
+# User-Agent: Mozilla/5.0 (compatible; seoscanners.net/1; +spider@seoscanners.net)
+seoscanners.net
+# scraping framework
+# https://scrapy.org/
+# User-Agent: Scrapy/VERSION (+https://scrapy.org)
+Scrapy/
+# https://www.wappalyzer.com/
+Wappalyzer

@@ -1,0 +1,70 @@
+---
+meta:
+  author: "zmallen"
+  enabled: true
+  name: "941140.yaml"
+  description: "Tests to trigger, or not trigger 941130"
+tests:
+  - test_title: 941140-1
+    desc: XSS vectors making use of javascript uri and tags, e.g., <p style="background:url(javascript:alert(1))">, in ARGS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/foo'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: '9411400-1=%3Cp%20style%3D%22background%3Aurl(javascript%3Aalert(1))%22%3E'
+          output:
+            log_contains: id "941140"
+  - test_title: 941140-2
+    desc: XSS vectors making use of javascript uri and tags, e.g., <p style="background:url(javascript:alert(1))">, in ARGS_NAMES
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/bar'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: '%3Cp%20style%3D%22background%3Aurl(javascript%3Aalert(1))%22%3E=941140-2'
+          output:
+            log_contains: id "941140"
+  - test_title: 941140-3
+    desc: XSS vectors making use of javascript uri and tags, e.g., <p style="background:url(javascript:alert(1))">, in COOKIE
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/bar'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Cookie: '%3Cp%20style%3D%22background%3Aurl(javascript%3Aalert(1))%22%3E=941140-2'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941140"
+  - test_title: 941140-4
+    desc: "Status Page Test -  x=x:url(javascript as GET variable"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/bar?test=x%3Dx%3Aurl%28javascript'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941140"

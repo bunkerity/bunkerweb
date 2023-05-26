@@ -1,0 +1,26 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+\)\s*?when\s*?\d+\s*?then
+[\"'`]\s*?#
+[\"'`]\s*?--
+[\"'`]\s*?{
+\/\*!\s?\d+
+\bbinary\s*?\(\s*?\d
+\bchar\s*?\(\s*?\d
+\bchr\s*?\(\s*?\d
+\band\s+\s*?\w+\(
+\bnand\s+\s*?\w+\(
+\bor\s+\s*?\w+\(
+\bxor\s+\s*?\w+\(
+\bxxor\s+\s*?\w+\(
+\bdiv\s+\s*?\w+\(
+\blike\s+\s*?\w+\(
+\bbetween\s+\s*?\w+\(
+\bnot\s+\s*?\w+\(
+\bregexp\s+\s*?\w+\(
+\brlike\s+\s*?\w+\(
+\|\|\s+\s*?\w+\(
+\&\&\s+\s*?\w+\(

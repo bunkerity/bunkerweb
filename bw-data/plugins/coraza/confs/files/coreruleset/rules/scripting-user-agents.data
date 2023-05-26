@@ -1,0 +1,68 @@
+# Generic HTTP clients (popular libraries)
+
+# http library
+# https://docs.aiohttp.org/en/stable/
+# User-Agent: Python/VERSION aiohttp/VERSION
+aiohttp/
+
+# http library
+# http://search.cpan.org/~opera/HTTP-DAV/DAV.pm
+dav.pm/v
+
+# http library
+# https://pkg.go.dev/net/http
+# User-Agent: Go http package
+# User-Agent: Go 1.1 package http
+# User-Agent: Go-http-client/VERSION
+Go http package
+Go 1.1 package http
+Go-http-client/
+
+# http library
+# http://search.cpan.org/dist/libwww-perl/lib/LWP.pm
+libwww-perl
+# generic
+mozilla/4.0 (compatible)
+mozilla/4.0 (compatible; msie 6.0; win32)
+mozilla/5.0 sf/
+mozilla/5.0 sf//
+
+# http library
+# https://pypi.python.org/pypi/httplib2
+python-httplib2
+
+# http library
+# https://www.python-httpx.org/
+# User-Agent: python-httpx/VERSION
+python-httpx/
+
+# http library
+# http://docs.python-requests.org/en/master/
+python-requests
+
+# http library
+# https://docs.python.org/2/library/urllib.html
+Python-urllib
+
+# http library
+# https://github.com/typhoeus/typhoeus
+typhoeus
+
+# http library
+# https://msdn.microsoft.com/en-us/library/windows/desktop/aa382925%28v=vs.85%29.aspx
+winhttp.winhttprequest
+
+# http library
+# https://kong.github.io/unirest-java/
+# User-Agent: unirest-java/VERSION
+unirest-java/
+
+# http library (deprecated since 2022)
+# https://index.scala-lang.org/scalaj/scalaj-http
+# User-Agent: scalaj-http/VERSION
+scalaj-http/
+
+# http library
+# https://http4s.org/
+# User-Agent: http4s-ember
+http4s-ember

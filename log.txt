@@ -1,0 +1,179 @@
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:05] - ENTRYPOINT - ℹ️ - Starting the job scheduler v1.5.0 ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:05] - ENTRYPOINT - ℹ️ - Setup and check /data folder ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:05] - ENTRYPOINT - ℹ️  - Executing scheduler ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:06] - SCHEDULER - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:06] - SCHEDULER - ℹ️  - Scheduler started ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:06] - SCHEDULER - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Save config started ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Settings : /usr/share/bunkerweb/settings.json
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Core : /usr/share/bunkerweb/core
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Plugins : /etc/bunkerweb/plugins
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Init : False
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Checking arguments ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Computing config ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Database not initialized, initializing ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Database tables initialized
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Database initialized
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Config successfully saved to database
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:07] - GENERATOR - ℹ️  - Config saver successfully executed !
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Sending custom configs to BunkerWeb
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - API - ℹ️  - Successfully sent API request to http://bunkerweb-mybunker-1:5000/custom_configs
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ❌ - Couldn't save some manually added plugins to database: Traceback (most recent call last):
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 1932, in _exec_single_context
+bunkerweb-bw-scheduler-1  |     self.dialect.do_executemany(
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/default.py", line 917, in do_executemany
+bunkerweb-bw-scheduler-1  |     cursor.executemany(statement, parameters)
+bunkerweb-bw-scheduler-1  | sqlite3.IntegrityError: UNIQUE constraint failed: bw_selects.setting_id, bw_selects.value
+bunkerweb-bw-scheduler-1  | 
+bunkerweb-bw-scheduler-1  | The above exception was the direct cause of the following exception:
+bunkerweb-bw-scheduler-1  | 
+bunkerweb-bw-scheduler-1  | Traceback (most recent call last):
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/db/Database.py", line 1370, in update_external_plugins
+bunkerweb-bw-scheduler-1  |     session.commit()
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/session.py", line 1906, in commit
+bunkerweb-bw-scheduler-1  |     trans.commit(_to_root=True)
+bunkerweb-bw-scheduler-1  |   File "<string>", line 2, in commit
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/state_changes.py", line 137, in _go
+bunkerweb-bw-scheduler-1  |     ret_value = fn(self, *arg, **kw)
+bunkerweb-bw-scheduler-1  |                 ^^^^^^^^^^^^^^^^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/session.py", line 1221, in commit
+bunkerweb-bw-scheduler-1  |     self._prepare_impl()
+bunkerweb-bw-scheduler-1  |   File "<string>", line 2, in _prepare_impl
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/state_changes.py", line 137, in _go
+bunkerweb-bw-scheduler-1  |     ret_value = fn(self, *arg, **kw)
+bunkerweb-bw-scheduler-1  |                 ^^^^^^^^^^^^^^^^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/session.py", line 1196, in _prepare_impl
+bunkerweb-bw-scheduler-1  |     self.session.flush()
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/session.py", line 4154, in flush
+bunkerweb-bw-scheduler-1  |     self._flush(objects)
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/session.py", line 4290, in _flush
+bunkerweb-bw-scheduler-1  |     with util.safe_reraise():
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/util/langhelpers.py", line 147, in __exit__
+bunkerweb-bw-scheduler-1  |     raise exc_value.with_traceback(exc_tb)
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/session.py", line 4251, in _flush
+bunkerweb-bw-scheduler-1  |     flush_context.execute()
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/unitofwork.py", line 467, in execute
+bunkerweb-bw-scheduler-1  |     rec.execute(self)
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/unitofwork.py", line 644, in execute
+bunkerweb-bw-scheduler-1  |     util.preloaded.orm_persistence.save_obj(
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/persistence.py", line 93, in save_obj
+bunkerweb-bw-scheduler-1  |     _emit_insert_statements(
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/orm/persistence.py", line 1040, in _emit_insert_statements
+bunkerweb-bw-scheduler-1  |     result = connection.execute(
+bunkerweb-bw-scheduler-1  |              ^^^^^^^^^^^^^^^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 1413, in execute
+bunkerweb-bw-scheduler-1  |     return meth(
+bunkerweb-bw-scheduler-1  |            ^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/sql/elements.py", line 483, in _execute_on_connection
+bunkerweb-bw-scheduler-1  |     return connection._execute_clauseelement(
+bunkerweb-bw-scheduler-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
+bunkerweb-bw-scheduler-1  |     ret = self._execute_context(
+bunkerweb-bw-scheduler-1  |           ^^^^^^^^^^^^^^^^^^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 1841, in _execute_context
+bunkerweb-bw-scheduler-1  |     return self._exec_single_context(
+bunkerweb-bw-scheduler-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
+bunkerweb-bw-scheduler-1  |     self._handle_dbapi_exception(
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 2339, in _handle_dbapi_exception
+bunkerweb-bw-scheduler-1  |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/base.py", line 1932, in _exec_single_context
+bunkerweb-bw-scheduler-1  |     self.dialect.do_executemany(
+bunkerweb-bw-scheduler-1  |   File "/usr/share/bunkerweb/deps/python/sqlalchemy/engine/default.py", line 917, in do_executemany
+bunkerweb-bw-scheduler-1  |     cursor.executemany(statement, parameters)
+bunkerweb-bw-scheduler-1  | sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: bw_selects.setting_id, bw_selects.value
+bunkerweb-bw-scheduler-1  | [SQL: INSERT INTO bw_selects (setting_id, value) VALUES (?, ?)]
+bunkerweb-bw-scheduler-1  | [parameters: [('CORAZA_SEC_AUDIT_ENGINE', 'On'), ('CORAZA_SEC_AUDIT_ENGINE', 'RelevantOnly'), ('CORAZA_SEC_AUDIT_ENGINE', 'Off'), ('CORAZA_SEC_RULE_ENGINE', 'On'), ('CORAZA_SEC_RULE_ENGINE', 'DetectionOnly'), ('CORAZA_SEC_RULE_ENGINE', 'Off')]]
+bunkerweb-bw-scheduler-1  | (Background on this error at: https://sqlalche.me/e/20/gkpj)
+bunkerweb-bw-scheduler-1  | 
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Removing old external plugins files ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Sending plugins to BunkerWeb
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - API - ℹ️  - Successfully sent API request to http://bunkerweb-mybunker-1:5000/plugins
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing scheduler ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job whitelist-download from plugin whitelist ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job default-server-cert from plugin misc ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job certbot-new from plugin letsencrypt ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job bunkernet-register from plugin bunkernet ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job custom-cert from plugin customcert ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job blacklist-download from plugin blacklist ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job mmdb-country from plugin jobs ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job self-signed from plugin selfsigned ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job greylist-download from plugin greylist ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - SCHEDULER - ℹ️  - Executing job realip-download from plugin realip ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:08] - DEFAULT-SERVER-CERT - ℹ️  - Skipping generation of self-signed certificate for default server (not needed)
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - SCHEDULER - ℹ️  - Successfully updated database for the job default-server-cert from plugin misc
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - SCHEDULER - ℹ️  - Executing job update-check from plugin misc ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - SELF-SIGNED - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - LETS-ENCRYPT.NEW - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - LETS-ENCRYPT.NEW - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - LETS-ENCRYPT.NEW - ℹ️  - No Let's Encrypt data found in db cache
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:09] - LETS-ENCRYPT.NEW - ℹ️  - Successfully saved Let's Encrypt data to db cache
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - CUSTOM-CERT - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - UPDATE-CHECK - ⚠️  - * 
+bunkerweb-bw-scheduler-1  | * 
+bunkerweb-bw-scheduler-1  | * 🚨 A new version of BunkerWeb is available: 404: Not Found (current: 1.5.0) 🚨
+bunkerweb-bw-scheduler-1  | * 
+bunkerweb-bw-scheduler-1  | * 
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - BLACKLIST - ℹ️  - Blacklist is not activated, skipping downloads...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - REALIP - ℹ️  - RealIP is not activated, skipping download...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - WHITELIST - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - BUNKERNET - ℹ️  - BunkerNet is not activated, skipping registration...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job blacklist-download from plugin blacklist
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job realip-download from plugin realip
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job bunkernet-register from plugin bunkernet
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Executing job bunkernet-data from plugin bunkernet ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job self-signed from plugin selfsigned
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - WHITELIST - ℹ️  - Whitelist for IP is not cached, processing downloads..
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - WHITELIST - ℹ️  - Whitelist for RDNS is not cached, processing downloads..
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - WHITELIST - ℹ️  - Whitelist for ASN is not cached, processing downloads..
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - WHITELIST - ℹ️  - Whitelist for USER_AGENT is not cached, processing downloads..
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - WHITELIST - ℹ️  - Whitelist for URI is not cached, processing downloads..
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job update-check from plugin misc
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - GREYLIST - ℹ️  - Greylist is not activated, skipping downloads...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job greylist-download from plugin greylist
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job certbot-new from plugin letsencrypt
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Executing job certbot-renew from plugin letsencrypt ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job custom-cert from plugin customcert
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job whitelist-download from plugin whitelist
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - JOBS.MMDB-COUNTRY - ℹ️  - country.mmdb is already the latest version, skipping download...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - JOBS.MMDB-COUNTRY - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - JOBS.MMDB-COUNTRY - ℹ️  - Checking if mmdb file is valid ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - JOBS.MMDB-COUNTRY - ℹ️  - Moving mmdb file to cache ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Successfully updated database for the job mmdb-country from plugin jobs
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - SCHEDULER - ℹ️  - Executing job mmdb-asn from plugin jobs ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:10] - BUNKERNET - ℹ️  - BunkerNet is not activated, skipping download...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - LETS-ENCRYPT.RENEW - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - SCHEDULER - ℹ️  - Successfully updated database for the job bunkernet-data from plugin bunkernet
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - LETS-ENCRYPT.RENEW - ℹ️  - Successfully retrieved Let's Encrypt data from db cache
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - LETS-ENCRYPT.RENEW - ℹ️  - Successfully saved Let's Encrypt data to db cache
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - SCHEDULER - ℹ️  - Successfully updated database for the job certbot-renew from plugin letsencrypt
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - JOBS.MMDB-ASN - ℹ️  - asn.mmdb is already the latest version, skipping download...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - JOBS.MMDB-ASN - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - JOBS.MMDB-ASN - ℹ️  - Checking if mmdb file is valid ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - JOBS.MMDB-ASN - ℹ️  - Moving mmdb file to cache ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - SCHEDULER - ℹ️  - Successfully updated database for the job mmdb-asn from plugin jobs
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:11] - SCHEDULER - ℹ️  - Executing job download-plugins from plugin jobs ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - JOBS.DOWNLOAD-PLUGINS - ℹ️  - No external plugins to download
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - SCHEDULER - ℹ️  - Successfully updated database for the job download-plugins from plugin jobs
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - SCHEDULER - ℹ️  - All jobs in run_once() were successful
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Generator started ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Settings : /usr/share/bunkerweb/settings.json
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Templates : /usr/share/bunkerweb/confs
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Core : /usr/share/bunkerweb/core
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Plugins : /etc/bunkerweb/plugins
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Output : /etc/nginx
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:12] - GENERATOR - ℹ️  - Target : /etc/nginx
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - GENERATOR - ℹ️  - Database connection established
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - GENERATOR - ℹ️  - Removing old files ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - GENERATOR - ℹ️  - Rendering templates ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - GENERATOR - ℹ️  - Generator successfully executed !
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - SCHEDULER - ℹ️  - Sending /etc/nginx folder ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - API - ℹ️  - Successfully sent API request to http://bunkerweb-mybunker-1:5000/confs
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:13] - SCHEDULER - ℹ️  - Sending /var/cache/bunkerweb folder ...
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:14] - API - ℹ️  - Successfully sent API request to http://bunkerweb-mybunker-1:5000/cache
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:14] - SCHEDULER - ℹ️  - Successfully sent /var/cache/bunkerweb folder
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:14] - API - ℹ️  - Successfully sent API request to http://bunkerweb-mybunker-1:5000/reload
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:14] - SCHEDULER - ℹ️  - Successfully reloaded nginx
+bunkerweb-bw-scheduler-1  | [2023-05-23 14:02:14] - SCHEDULER - ℹ️  - Executing job scheduler ...

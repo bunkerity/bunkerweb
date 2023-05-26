@@ -5,12 +5,14 @@
         "blacklist",
         "greylist",
         "bunkernet",
-        "limit"
+        "limit",
+	    "coraza"
     ],
     "init_worker": [
         "redis",
         "bunkernet",
-        "dnsbl"
+        "dnsbl",
+	    "coraza"
     ],
     "set": [
         "whitelist"
@@ -27,7 +29,8 @@
         "limit",
         "misc",
         "cors",
-        "antibot"
+        "antibot",
+	    "coraza"
     ],
     "headers": [
         "cors"

@@ -1,0 +1,159 @@
+---
+meta:
+  author: fzipi
+  description: "Remote Command Execution: SMTP Command Injection test cases"
+  enabled: true
+  name: 932300.yaml
+tests:
+  - test_title: 932300-1
+    desc: "SMTP MAIL FROM Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aMAIL%20FROM%3A%3Ca%40b.com%3E
+            version: HTTP/1.0
+          output:
+            log_contains: id "932300"
+  - test_title: 932300-2
+    desc: "SMTP MAIL FROM Command Injection true negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=We%20received%20this%20mail%20from%20Mars
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932300"
+  - test_title: 932300-3
+    desc: "SMTP Command Injection negative test 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Hello%21%20We%20finally%20received%20this%20mail%20from%3A%3Ctest%40coreruleset.org%3E%2C%20which%20means%20that%20we%20can%20do%20this%20finally.
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932300"
+  - test_title: 932300-4
+    desc: "SMTP EHLO Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aEHLO%20test.com
+            version: HTTP/1.0
+          output:
+            log_contains: id "932300"
+  - test_title: 932300-5
+    desc: "SMTP Command EHLO Injection negative test using ehlo typo in text"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Hello%21%20This%20text%20introduces%20a%20typo%20when%20saying%20%22hello%22%20so%20we%20say%20ehlo%3A%20coreruleset.org%20to%20all%21
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932300"
+  - test_title: 932300-6
+    desc: "SMTP RCPT TO Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aRCPT%20TO%3A%3CPostmaster%3E
+            version: HTTP/1.0
+          output:
+            log_contains: id "932300"
+  - test_title: 932300-7
+    desc: "SMTP RCPT TO Command Injection true negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Hello%21%20This%20text%20introduces%20a%20typo%20when%20saying%20%22receipt%20to%22%20so%20we%20say%20rcpt%20to%3A%20%3Ccoreruleset.org%3E
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932300"
+  - test_title: 932300-8
+    desc: "SMTP VRFY TO Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aRCPT%20TO%3A%3CPostmaster%3E
+            version: HTTP/1.0
+          output:
+            log_contains: id "932300"
+  - test_title: 932300-9
+    desc: "SMTP Command Injection Full SMTP dialog negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=S%3A%20220%20foo.com%20Simple%20Mail%20Transfer%20Service%20Ready%0AC%3A%20EHLO%20bar.com%0AS%3A%20250-foo.com%20greets%20bar.com%0AS%3A%20250-8BITMIME%0AS%3A%20250-SIZE%0AS%3A%20250-DSN%0AS%3A%20250%20HELP%0AC%3A%20MAIL%20FROM%3A%3CSmith%40bar.com%3E%0AS%3A%20250%20OK%0AC%3A%20RCPT%20TO%3A%3CJones%40foo.com%3E%0AS%3A%20250%20OK%0AC%3A%20RCPT%20TO%3A%3CGreen%40foo.com%3E%0AS%3A%20550%20No%20such%20user%20here%0AC%3A%20RCPT%20TO%3A%3CBrown%40foo.com%3E%0AS%3A%20250%20OK%0AC%3A%20DATA%0AS%3A%20354%20Start%20mail%20input%3B%20end%20with%20%3CCRLF%3E.%3CCRLF%3E%0AC%3A%20Blah%20blah%20blah...%0AC%3A%20...etc.%20etc.%20etc.%0AC%3A%20.%0AS%3A%20250%20OK%0AC%3A%20QUIT%0AS%3A%20221%20foo.com%20Service%20closing%20transmission%20channel
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932300"

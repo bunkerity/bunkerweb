@@ -1,0 +1,241 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932115 (RCE Windows command injection part 2/2)
+##!
+##! To prevent some FP for a command, you can require command parameters
+##! after a command. Only do this if the command regularly causes FP and if
+##! allowing the bare command (without parameters) is not too dangerous.
+##! (Note: due to \b following the regexp, a word boundary is also required
+##! further on, so some letter/number is needed for a match). Example:
+##!
+##!   diff@
+
+##!+ i
+
+##! Note: the quoting prefixes are part of the command prefixes, except for ^
+##!       which, for unknown reasons, is not part of the expression
+
+##! extension/switches suffix
+##! cmd.com, cmd.exe, etc.
+##!$ (?:\.[\"\^]*\w+)?
+##! cmd/h
+##!$ \b
+
+##! starting tokens prefix
+##!> assemble
+  ##! time cmd
+  ##!> cmdline windows
+    time
+  ##!<
+  ##! ;cmd
+  ;
+  ##! {cmd
+  \{
+  ##! |cmd
+  \|
+  ##! ||cmd
+  \|\|
+  ##! &cmd
+  &
+  ##! &&cmd
+  &&
+  ##! \ncmd
+  \n
+  ##! \rcmd
+  \r
+  ##! `cmd
+  `
+  ##!=>
+
+  ##! match possible white space between prefix expressions
+  \s*
+  ##!=>
+
+  ##! commands prefix
+  ##!> assemble
+    ##! (cmd)
+    \(
+    ##! ,cmd
+    ,
+    ##! @cmd
+    @
+    ##! 'cmd'
+    '
+    ##! "cmd"
+    \"
+    ##! spacing+cmd
+    \s
+  ##!<
+  ##!=>
+
+  *
+  ##!=>
+
+  ##! paths prefix
+  ##!> assemble
+    ##! /path/cmd
+    [\w'\"\./]+/
+    ##! C:\Program Files\cmd
+    [\x5c'\"\^]*\w[\x5c'\"\^]*:.*\x5c
+    ##! \\net\share\dir\cmd
+    [\^\.\w '\"/\x5c]*\x5c
+  ##!<
+  ##!=>
+
+  ?[\"\^]*
+  ##!=>
+
+
+  ##!> cmdline windows
+
+    odbcad32
+    odbcconf
+    openfiles
+    path@
+    pathping
+    perfmon
+    perl
+    perl5
+    perlsh
+    php
+    php5
+    php7
+    ping
+    pkgmgr
+    popd
+    portqry
+    powercfg
+    powershell
+    powershell_ise
+    print@
+    printbrm
+    prncnfg
+    prnmngr
+    prompt
+    psexec
+    psfile
+    psgetsid
+    psinfo
+    pskill
+    pslist
+    psloggedon
+    psloglist
+    pspasswd
+    psping
+    psservice
+    psshutdown
+    pssuspend
+    pushd
+    python
+    python2
+    python3
+    python3m
+    qgrep
+    qprocess
+    query@
+    qwinsta
+    rar@
+    rasdial
+    rasphone
+    rd@
+    recdisc
+    recover
+    reg@
+    regedit
+    regini
+    regsvr32
+    rekeywiz
+    ren@
+    rename@
+    replace@
+    reset@
+    rm@
+    rmdir@
+    rmtshare
+    robocopy
+    route@
+    rstrui
+    rsync
+    ruby1
+    ruby18
+    ruby19
+    ruby20
+    ruby21
+    ruby22
+    runas
+    rundll32
+    schtasks
+    sclist
+    secpol
+    select
+    set@
+    setlocal
+    setx@
+    sfc
+    share
+    shellrunas
+    shift
+    shortcut
+    showgrps
+    showmbrs
+    shrpubw
+    shutdown
+    sigverif
+    sleep
+    slmgr
+    sort@
+    start@
+    subinacl
+    subst
+    svn
+    sysdm
+    syskey
+    systeminfo
+    systempropertiesadvanced
+    systempropertiesdataexecutionprevention
+    systempropertieshardware
+    systempropertiesperformance
+    takeown
+    taskkill
+    tasklist
+    taskmgr
+    taskschd
+    telnet
+    timeout
+    tlist
+    tpminit
+    tracert
+    tree
+    tsdiscon
+    tsshutdn
+    type@
+    typeperf
+    unrar
+    unzip
+    useraccountcontrolsettings
+    usrstat
+    verify
+    vol@
+    waitfor
+    wevtutil
+    wget
+    ##! disabled for FP: where@
+    whoami
+    windiff
+    winmsdp
+    winrm
+    winrs
+    winvar
+    wmic
+    wmimgmt
+    wscript
+    wscui
+    wuapp
+    wuauclt
+    wusa
+    xcacls
+    xcopy
+    zip@
+  ##!<
+##!<

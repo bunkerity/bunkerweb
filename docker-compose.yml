@@ -1,0 +1,86 @@
+version: "3.5"
+
+services:
+  mybunker:
+    build:
+      context: .
+      dockerfile: src/bw/Dockerfile
+    ports:
+      - 8080:8080
+      - 8443:8443
+    environment:
+      SERVER_NAME: demo.bunkerweb.io
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 10.10.1.191"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      LOG_LEVEL: "info"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1"
+      REVERSE_PROXY_URL: "/"
+      USE_CORAZA: "yes"
+      
+
+
+
+      USE_MODSECURITY: "no"
+      USE_MODSECURITY_CRS: "no"
+    labels:
+      - "bunkerweb.INSTANCE"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    build:
+      context: .
+      dockerfile: src/scheduler/Dockerfile
+    depends_on:
+      - mybunker
+    volumes:
+      - ./bw-data/plugins:/data/plugins
+    environment:
+      DOCKER_HOST: "tcp://docker-proxy:2375"
+    networks:
+      - bw-universe
+      - net-docker
+    
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    networks:
+      - net-docker
+
+  app1:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+  
+
+  golang:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+  mariadb:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  net-docker:

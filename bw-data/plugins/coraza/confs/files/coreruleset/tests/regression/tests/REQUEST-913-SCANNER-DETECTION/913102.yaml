@@ -1,0 +1,23 @@
+---
+meta:
+  author: airween
+  description: "Crawler User-Agents test - this test does not need any negative case"
+  enabled: true
+  name: 913102.yaml
+tests:
+  - test_title: 913102-1
+    desc: "Crawler User-Agents test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "blackwidow"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "913102"

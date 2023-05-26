@@ -1,0 +1,145 @@
+---
+meta:
+  author: fzipi
+  description: "Remote Command Execution: IMAP Command Injection test cases"
+  enabled: true
+  name: 932310.yaml
+tests:
+  - test_title: 932310-1
+    desc: "IMAP APPEND Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0D%0AA003%20APPEND%20saved-messages%20(%5CSeen)%20%7B310%7D%0D%0A%20Date%3A%20Mon%2C%207%20Feb%201994%2021%3A52%3A25%20-0800%20(PST)%0D%0A%20From%3A%20Test%20CRS%20%3Ctest%40coreruleset.org%3E%0D%0A%20Subject%3A%20Appending%0D%0A%20To%3A%20test%40coreruleset.org%0D%0A%20Message-Id%3A%20%3CB27397-0100000%40coreruleset.org%3E%0D%0A%20MIME-Version%3A%201.0%0D%0A%20Content-Type%3A%20TEXT%2FPLAIN%3B%20CHARSET%3DUS-ASCII%0D%0A%20%0D%0A%20Hello%20World%2C%20can%20I%20append%3F
+            version: HTTP/1.0
+          output:
+            log_contains: id "932310"
+  - test_title: 932310-2
+    desc: "IMAP APPEND Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=I%20wanted%20to%20append%20something%20%28annoying%29%20%7Bclosed%7D
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932310"
+  - test_title: 932310-3
+    desc: "IMAP AUTHENTICATE Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0D%0Aa001%20authenticate%20PLAIN%0D%0A
+            version: HTTP/1.0
+          output:
+            log_contains: id "932310"
+  - test_title: 932310-4
+    desc: "IMAP AUTHENTICATE Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=Cannot%20authenticate%20anyways
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932310"
+  - test_title: 932310-5
+    desc: "IMAP STATUS Command injection positive test"
+    # STATUS [a-zA-Z0-9\"\./%\*&]+? (?:\((UNSEEN|UIDNEXT|MESSAGES|UIDVALIDITY|RECENT| )+\))?
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0D%0Aa001%20STATUS%20INBOX%20(MESSAGES)
+            version: HTTP/1.0
+          output:
+            log_contains: id "932310"
+  - test_title: 932310-6
+    desc: "IMAP STATUS Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=Please%20send%20me%20an%20update%20status%20all%20messages%20are%20being%20denied
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932310"
+  - test_title: 932310-7
+    desc: "IMAP UID Command injection positive test"
+    # UID (COPY|FETCH|STORE) [0-9,:\*]+?
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0D%0Aa001%20uid%20store%20231%3A233%0D%0A
+            version: HTTP/1.0
+          output:
+            log_contains: id "932310"
+  - test_title: 932310-8
+    desc: "IMAP UID Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=The%20uid%20is%020not%020working
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932310"

@@ -1,0 +1,39 @@
+---
+meta:
+  author: airween
+  description: None
+  enabled: true
+  name: 913101.yaml
+tests:
+  - test_title: 913101-1
+    desc: "Scripting/generic user agents test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "libwww-perl"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "913101"
+  - test_title: 913101-2
+    desc: "Scripting/generic user agents negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            uri: /
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "913101"

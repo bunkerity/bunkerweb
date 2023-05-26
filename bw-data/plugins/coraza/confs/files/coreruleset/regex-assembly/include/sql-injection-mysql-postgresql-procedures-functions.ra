@@ -1,0 +1,23 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+create\s+function\s*?\w+\s*?\(\s*?\)\s*?-
+create\s+procedure\s*?\w+\s*?\(\s*?\)\s*?-
+declare[^\w]+[@#]\s*?\w+
+div\s*?\([+-]*[\d.\s]+,[+-]*[\d.\s]+\)
+exec\s*?\(\s*?@
+lo_import\s*?\(
+lo_get\s*?\(
+procedure\s+analyse\s*?\(
+;\s*?declare\s+[\w-]+
+;\s*?open\s+[\w-]+
+::bigint
+::bool
+::double\s+precision
+::int
+::integer
+::numeric
+::oid
+::real
+::text
+::smallint

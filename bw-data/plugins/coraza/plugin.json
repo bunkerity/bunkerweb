@@ -1,0 +1,66 @@
+{
+	"id": "coraza",
+	"name": "Coraza",
+	"description": "Use Coraza as a library to inspect client request",
+	"version": "0.1",
+	"stream":"no",
+	"settings": {
+		"USE_CORAZA": {
+			"context": "multisite",
+			"default": "no",
+			"help": "Activate Coraza library",
+			"id": "use coraza library",
+			"label": "Coraza",
+			"regex": "^(no|yes)$",
+			"type": "check"
+		},
+        "CORAZA_API": {
+			"context": "global",
+			"default": "http://bunkerweb-golang-1:8090",
+			"help": "Address of the CORAZA API.",
+			"id": "coraza-api",
+			"label": "Coraza Api",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"USE_OWASP_CRS":{
+			"context":"global", 
+			"default":"yes",
+			"help":"Enable OWASP Core Rule Set.",
+			"id":"OWASP_coreruleset",
+			"label":"Coreruleset",
+			"regex": "^.*$",
+			"type": "text"
+		},
+		"CORAZA_SEC_AUDIT_ENGINE": {
+			"context": "multisite",
+			"default": "On",
+			"help": "SecAuditEngine directive of coraza.",
+			"id": "coraza-sec-audit-engine",
+			"label": "SecAuditEngine",
+			"regex": "^(On|RelevantOnly|Off)$",
+			"type": "select",
+       "select": ["On", "RelevantOnly", "Off"]
+		},
+		"CORAZA_SEC_RULE_ENGINE": {
+			"context": "multisite",
+			"default": "On",
+			"help": "SecRuleEngine directive of coraza.",
+			"id": "coraza-sec-rule-engine",
+			"label": "SecRuleEngine",
+			"regex": "^(On|DetectionOnly|Off)$",
+			"type": "select",
+      "select": ["On", "DetectionOnly", "Off"]
+		},
+		"CORAZA_SEC_AUDIT_LOG_PARTS": {
+			"context": "multisite",
+			"default": "ABCFHZ",
+			"help": "SecAuditLogParts directive of coraza.",
+			"id": "coraza-sec-audit-log-parts",
+			"label": "SecAuditLogParts",
+			"regex": "^A(([B-K])(?!.*\\2))+Z$",
+			"type": "text"
+		}
+
+	}
+}

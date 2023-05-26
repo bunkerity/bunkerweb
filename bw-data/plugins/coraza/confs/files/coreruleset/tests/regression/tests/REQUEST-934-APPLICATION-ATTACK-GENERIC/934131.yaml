@@ -1,0 +1,39 @@
+---
+meta:
+  author: "lifeforms"
+  enabled: true
+  name: "934131.yaml"
+  description: "Tests for rule 934131"
+tests:
+  - test_title: 934131-1
+    desc: negative test case
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "I really like a constructor"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "934131"
+  - test_title: 934131-2
+    desc: positive test case with GET parameter, String.constructor
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?x=x&x[constructor][__parseStyleElement][innerHTML]=<img/src/onerror%3dalert(1)>"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934131"

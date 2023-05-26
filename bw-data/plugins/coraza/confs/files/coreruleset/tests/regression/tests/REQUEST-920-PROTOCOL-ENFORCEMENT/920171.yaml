@@ -1,0 +1,76 @@
+---
+meta:
+  author: airween
+  enabled: true
+  name: 920171.yaml
+  description: "A Selection of tests to trigger rule 920171"
+tests:
+  - # POST Request with data (valid)
+    test_title: 920171-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            # this sends a chunked POST request with content "Hi CRS" in two lines
+            # POST / HTTP/1.1\r
+            # Accept: */*\r
+            # Host: localhost\r
+            # Transfer-Encoding: chunked\r
+            # User-Agent: "OWASP CRS test agent"\r
+            # \r
+            # 3\r
+            # Hi \r
+            # 3\r
+            # CRS\r
+            # 0\r
+            # \r
+            encoded_request: "UE9TVCAvIEhUVFAvMS4xDQpBY2NlcHQ6ICovKg0KSG9zdDogbG9jYWxob3N0DQpUcmFuc2Zlci1F\nbmNvZGluZzogY2h1bmtlZA0KVXNlci1BZ2VudDogTW9kU2VjdXJpdHkgQ1JTIDMgVGVzdHMNCg0K\nMw0KSGkgDQozDQpDUlMNCjANCg0K"
+          output:
+            no_log_contains: "id \"920171\""
+  - # GET Request with chunked data (invalid)
+    test_title: 920171-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            # this sends a chunked GET request with content "Hi CRS" in two lines
+            # GET / HTTP/1.1\r
+            # Accept: */*\r
+            # Host: localhost\r
+            # Transfer-Encoding: chunked\r
+            # User-Agent: "OWASP CRS test agent"\r
+            # \r
+            # 3\r
+            # Hi \r
+            # 3\r
+            # CRS\r
+            # 0\r
+            # \r
+            encoded_request: "R0VUIC8gSFRUUC8xLjENCkFjY2VwdDogKi8qDQpIb3N0OiBsb2NhbGhvc3QNClRyYW5zZmVyLUVu\nY29kaW5nOiBjaHVua2VkDQpVc2VyLUFnZW50OiBNb2RTZWN1cml0eSBDUlMgMyBUZXN0cw0KDQoz\nDQpIaSANCjMNCkNSUw0KMA0KDQo="
+          output:
+            log_contains: "id \"920171\""
+  - # HEAD Request with chunked data (invalid)
+    test_title: 920171-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            # this sends a chunked HEAD request with content "Hi CRS" in two lines
+            # HEAD / HTTP/1.1\r
+            # Accept: */*\r
+            # Host: localhost\r
+            # Transfer-Encoding: chunked\r
+            # User-Agent: "OWASP CRS test agent"\r
+            # \r
+            # 3\r
+            # Hi \r
+            # 3\r
+            # CRS\r
+            # 0\r
+            # \r
+            encoded_request: "SEVBRCAvIEhUVFAvMS4xDQpBY2NlcHQ6ICovKg0KSG9zdDogbG9jYWxob3N0DQpUcmFuc2Zlci1F\nbmNvZGluZzogY2h1bmtlZA0KVXNlci1BZ2VudDogTW9kU2VjdXJpdHkgQ1JTIDMgVGVzdHMNCg0K\nMw0KSGkgDQozDQpDUlMNCjANCg0K"
+          output:
+            log_contains: "id \"920171\""

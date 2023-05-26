@@ -1,0 +1,932 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920120.yaml"
+  description: "Tests to trigger rule 920120"
+tests:
+  - test_title: 920120-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Language: "en"
+              Connection: "close"
+              Referer: "http://localhost/"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="file=.txt"
+              Content-Type: text/plain
+
+              555-555-0199@example.com
+              ----------397236876--
+            protocol: "http"
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-2
+    desc: Attempted multipart/form-data bypass (920120) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: gzip, deflate
+              Accept-Language: en-us,en;q=0.5
+              Connection: keep-alive
+              Content-Type: multipart/form-data; boundary=---------------------------627652292512397580456702590
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /cgi-bin/fup.cgi
+            version: HTTP/1.1
+            data: |
+              -----------------------------627652292512397580456702590
+              Content-Disposition: form-data; name="fi=le"; filename="test"
+              Content-Type: text/plain
+
+              email: security@modsecurity.org
+
+              -----------------------------627652292512397580456702590
+              Content-Disposition: form-data; name="note"
+
+              Contact info.
+              -----------------------------627652292512397580456702590--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-3
+    desc: Invalid Request Body (920120)  from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.1
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="fi;le"; filename="test"
+              Content-Type: application/octet-stream
+
+              Rotem & Ayala
+
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="name"
+
+              tt2
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="B1"
+
+              Submit
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-4
+    desc: Attempted multipart/form-data bypass (920120). Negative test.
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="file"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-5
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name=";zzzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-6
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="amp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-7
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="mp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-8
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="p;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-9
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="Zamp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-10
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="Zmp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-11
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="Zp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-12
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="Z;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-13
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="ZZZamp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-14
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="ZZZmp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-15
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="ZZZp;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-16
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="ZZZ;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-17
+    desc: Attempted multipart/form-data bypass (920120).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="mZ;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-18
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[aeiouy]uml;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&auml;&euml;&iuml;&ouml;&uuml;&yuml;&Auml;&Euml;&Iuml;&Ouml;&Uuml;&Yuml;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-19
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[aeiouy]uml;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&auml;&euml;&iuml;&ouml;&uuml;&yuml;&Auml;&Euml;&Iuml;&Ouml;&Uuml;&Yuml;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-20
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[aeioucghjswy]circ;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&acirc;&ecirc;&icirc;&ocirc;&ucirc;&ccirc;&gcirc;&hcirc;&jcirc;&scirc;&wcirc;&ycirc;&Acirc;&Ecirc;&Icirc;&Ocirc;&Ucirc;&Ccirc;&Gcirc;&Hcirc;&Jcirc;&Scirc;&Wcirc;&Ycirc;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-21
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[aeioucghjswy]circ;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&acirc;&ecirc;&icirc;&ocirc;&ucirc;&ccirc;&gcirc;&hcirc;&jcirc;&scirc;&wcirc;&ycirc;&Acirc;&Ecirc;&Icirc;&Ocirc;&Ucirc;&Ccirc;&Gcirc;&Hcirc;&Jcirc;&Scirc;&Wcirc;&Ycirc;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-22
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[aeiouclnrszg]acute;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&aacute;&eacute;&iacute;&oacute;&uacute;&cacute;&lacute;&nacute;&racute;&sacute;&zacute;&gacute;&Aacute;&Eacute;&Iacute;&Oacute;&Uacute;&Cacute;&Lacute;&Nacute;&Racute;&Sacute;&Zacute;&Gacute;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-23
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[aeiouclnrszg]acute;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&aacute;&eacute;&iacute;&oacute;&uacute;&cacute;&lacute;&nacute;&racute;&sacute;&zacute;&gacute;&Aacute;&Eacute;&Iacute;&Oacute;&Uacute;&Cacute;&Lacute;&Nacute;&Racute;&Sacute;&Zacute;&Gacute;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-24
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[aeiou]grave;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&agrave;&egrave;&igrave;&ograve;&ugrave;&Agrave;&Egrave;&Igrave;&Ograve;&Ugrave;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-25
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[aeiou]grave;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&agrave;&egrave;&igrave;&ograve;&ugrave;&Agrave;&Egrave;&Igrave;&Ograve;&Ugrave;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-26
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[cgklnrst]cedil;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&ccedil;&gcedil;&kcedil;&lcedil;&ncedil;&rcedil;&scedil;&tcedil;&Ccedil;&Gcedil;&Kcedil;&Lcedil;&Ncedil;&Rcedil;&Scedil;&Tcedil;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-27
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[cgklnrst]cedil;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&ccedil;&gcedil;&kcedil;&lcedil;&ncedil;&rcedil;&scedil;&tcedil;&Ccedil;&Gcedil;&Kcedil;&Lcedil;&Ncedil;&Rcedil;&Scedil;&Tcedil;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-28
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[anoi]tilde;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&atilde;&ntilde;&otilde;&itilde;&Atilde;&Ntilde;&Otilde;&Itilde;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-29
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[anoi]tilde;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&atilde;&ntilde;&otilde;&itilde;&Atilde;&Ntilde;&Otilde;&Itilde;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-30
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[cdelnrstz]caron;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&ccaron;&dcaron;&ecaron;&lcaron;&ncaron;&rcaron;&scaron;&tcaron;&zcaron;&Ccaron;&Dcaron;&Ecaron;&Lcaron;&Ncaron;&Rcaron;&Scaron;&Tcaron;&Zcaron;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-31
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[cdelnrstz]caron;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&ccaron;&dcaron;&ecaron;&lcaron;&ncaron;&rcaron;&scaron;&tcaron;&zcaron;&Ccaron;&Dcaron;&Ecaron;&Lcaron;&Ncaron;&Rcaron;&Scaron;&Tcaron;&Zcaron;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-32
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &[au]ring;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&aring;&uring;&Aring;&Uring;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-33
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[au]ring;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&aring;&uring;&Aring;&Uring;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-34
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities in values: &oslash;,&amp;,&nbsp;,&apos;.'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&oslash;&Oslash;&amp;&AMP;&nbsp;&apos;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-35
+    desc: 'Attempted multipart/form-data bypass (920120). Negative test for HTML entities at beginning of value: &[au]ring;'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&oslash;&Oslash;&amp;&AMP;&nbsp;&apos;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-36
+    desc: "Attempted multipart/form-data bypass (920120). Still match ; that aren't part of an HTML entity in FILES."
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="&amp;fi;zzz"; filename="test"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-37
+    desc: "Attempted multipart/form-data bypass (920120). Still match ; that aren't part of an HTML entity in FILES_NAMES."
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="test"; filename="&amp;fi;zzz"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            log_contains: id "920120"
+  - test_title: 920120-38
+    desc: "Attempted multipart/form-data bypass (920120). Don't match ; that are part of HTML entities in both FILES and FILES_NAMES."
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name="zzz&amp;zzz"; filename="zzz&amp;zzz"
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"
+  - test_title: 920120-39
+    desc: "Attempted multipart/form-data bypass (920120). Allow empty fields."
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=---------------------------265001916915724
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /
+            data: |
+              -----------------------------265001916915724
+              Content-Disposition: form-data; name=""; filename=""
+              Content-Type: application/octet-stream
+
+              helloworld
+              -----------------------------265001916915724--
+          output:
+            no_log_contains: id "920120"

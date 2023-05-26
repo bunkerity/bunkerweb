@@ -1,0 +1,109 @@
+---
+meta:
+  author: "Max Leske"
+  description: Unix shell RCE using pipe for less than 4 chars
+  enabled: true
+  name: 932220.yaml
+tests:
+  - test_title: 932220-1
+    desc: "TEST=echo | php7.4"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: "/post"
+            data: "TEST=echo | php7.4"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-2
+    desc: "TEST=echo | ${php7.4}php7.4"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: "/post"
+            data: "TEST=echo | ${php7.4}php7.4"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-3
+    desc: "whxami|sh+``"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            data: "whxami|sh+``"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-4
+    desc: "whxami|fish+``"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            data: "whxami|fish+``"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-5
+    desc: "Negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            data: "echo | curx"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932220"
+  - test_title: 932220-6
+    desc: |
+      Test for BB finding 9P5LL13Y
+      echo "foo;whxam"i | tr x o | sh #"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            uri: "/post"
+            port: 80
+            data: |
+              echo "foo;whxam"i | tr x o | sh #"
+            version: HTTP/1.1
+          output:
+            log_contains: id "932220"

@@ -1,0 +1,57 @@
+
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This assembly constructs the prefix used by 932250 and 932260
+
+##! ifconfig
+^
+##! ={ifconfig}
+=
+##!=>
+
+##! match possible white space between prefix expressions
+\s*
+##!=>
+
+##! commands prefix
+##!> assemble
+  ##! time ifconfig
+  ##!> cmdline unix
+    time
+  ##!<
+  ##! { ifconfig }
+  \{
+  ##! ( ifconfig )
+  \s*\(\s*
+  ##! VARNAME=xyz ifconfig
+  \w+=(?:[^\s]*|\$.*|\$.*|<.*|>.*|\'.*\'|\".*\")\s+
+  ##! ! ifconfig
+  !\s*
+  ##! $ifconfig
+  \$
+##!<
+##!=>
+
+*
+##!=>
+
+##! match possible white space between prefix expressions
+\s*
+##!=>
+
+##! quoting prefix
+##!> assemble
+  ##! 'ifconfig'
+  '
+  ##! "ifconfig"
+  \"
+##!<
+##!=>
+
+*
+##!=>
+
+##! paths prefix (+ evasion prevention suffix [\x5c'\"]*)
+(?:[\?\*\[\]\(\)\-\|+\w'\"\./\x5c]+/)?[\x5c'\"]*
+##!=>

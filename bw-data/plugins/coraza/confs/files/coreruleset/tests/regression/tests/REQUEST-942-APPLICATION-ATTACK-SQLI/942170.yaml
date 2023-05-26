@@ -1,0 +1,71 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942170.yaml
+tests:
+  - test_title: 942170-1
+    desc: "Detects SQL benchmark and sleep injection attempts including conditional queries: 'SELECT BENCHMARK(1000000,1+1);'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=SELECT%20BENCHMARK%281000000%2C1%2B1%29%3B"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942170"
+  - test_title: 942170-2
+    desc: "Detects SQL benchmark and sleep injection attempts including conditional queries: '; sleep(0)'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%3B%20sleep%280%29"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942170"
+  - test_title: 942170-3
+    desc: "Detects SQL benchmark and sleep injection attempts including conditional queries: negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=I%20sleep%20well%21"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942170"
+  - test_title: 942170-4
+    desc: "Status Page Test - SQL injection test with select if(x"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?test=select+if(x"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942170"

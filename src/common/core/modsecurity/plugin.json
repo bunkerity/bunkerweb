@@ -31,7 +31,7 @@
 			"label": "SecAuditEngine",
 			"regex": "^(On|RelevantOnly|Off)$",
 			"type": "select",
-      "select": ["On", "RelevantOnly", "Off"]
+       "select": ["On", "RelevantOnly", "Off"]
 		},
 		"MODSECURITY_SEC_RULE_ENGINE": {
 			"context": "multisite",

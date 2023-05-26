@@ -1,0 +1,218 @@
+---
+meta:
+  author: "Christian S.J. Peron, Christoph Hansen"
+  description: None
+  enabled: true
+  name: 942320.yaml
+tests:
+  - test_title: 942320-1
+    desc: "Detects MySQL and PostgreSQL stored procedure/function injections"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=procedure%20analyse%20%28"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-2
+    desc: "Detects MySQL and PostgreSQL stored procedure/function injections"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "pay=exec+%28%40%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-3
+    desc: "Detects MySQL and PostgreSQL stored procedure/function injections"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "pay=declare+%40b%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-4
+    desc: "Detects MySQL and PostgreSQL stored procedure/function injections"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "pay=DECLARE%2F%2A%2A%2F%40x%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-5
+    desc: "Detects PostgreSQL data conversion with ::int"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=password::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-6
+    desc: "Detects PostgreSQL data conversion with ::bool"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?no=2&id=1%27%20and%20unistr(password)::bool--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-7
+    desc: "Detects PostgreSQL bypass attempt with div(23,-2) - issue #2910"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=div(23,-2)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-8
+    desc: "Detects PostgreSQL bypass attempt with div (23.23 , 2) - issue #2910"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=div+(23.23+,+2)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-9
+    desc: "Detects PostgreSQL bypass attempt lo_import'( - issue #2912"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=lo_import(%27/etc%27%20||%20%27/pass%27%20||%20%27wd%27)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-10
+    desc: "Detects PostgreSQL bypass attempt with lo_get(16400) - issue #2924"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=lo_get(16400)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-11
+    desc: "Detects PostgreSQL bypass attempt function(foo)::text - issue #2924"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=function(foo)::text"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-12
+    desc: "Detects PostgreSQL bypass attempt function(foo)::bigint - issue #2924"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=function(foo)::bigint"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"
+  - test_title: 942320-13
+    desc: "Detects PostgreSQL bypass attempt function(foo)::double precision - issue #2924"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=function(foo)::double%20precision"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942320"

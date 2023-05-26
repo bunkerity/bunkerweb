@@ -1,0 +1,109 @@
+---
+meta:
+  author: fzipi
+  description: "Remote Command Execution: POP3 PL3 Command Injection test cases"
+  enabled: true
+  name: 932321.yaml
+tests:
+  - test_title: 932321-1
+    desc: "POP3 QUIT/STAT/NOOP/RSET/CAPA Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aQUIT
+            version: HTTP/1.0
+          output:
+            log_contains: id "932321"
+  - test_title: 932321-2
+    desc: "POP3 QUIT Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=Don't%20quit
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932321"
+  - test_title: 932321-3
+    desc: "POP3 CAPA Command Injection negative test 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=we%20do%20not%20have%20that%20capability
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932321"
+  - test_title: 932321-4
+    desc: "POP3 STAT Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Hi%20lestat!
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932321"
+  - test_title: 932321-5
+    desc: "POP3 NOOP Command injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0aSeriously%2C%20noop
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932321"
+  - test_title: 932321-6
+    desc: "POP3 RSET Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Someone%20bought%20this%20nice%20lerset
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932321"

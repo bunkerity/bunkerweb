@@ -1,0 +1,192 @@
+---
+meta:
+  author: Franziska Buehler
+  description: Windows shell command injections
+  enabled: true
+  name: 932115.yaml
+tests:
+  - test_title: 932115-1
+    desc: |
+      Windows shell command injection with 'sort': view=image.jpg%26sort < file.txt
+      Match input redirection to sort
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?view%3Dimage.jpg%26sort%20%3C%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932115"
+  - test_title: 932115-2
+    desc: |
+      Windows shell command injection with 'sort': view=image.jpg%26sort /r file.txt
+      Match sort with normal argument
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?view%3Dimage.jpg%26sort%20%2Fr%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932115"
+  - test_title: 932115-3
+    desc: |
+      Windows shell command injection with 'sort': view=image.jpg%26sort/r file.txt
+      Match sort with argument without preceding space
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?view%3Dimage.jpg%26sort%2Fr%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932115"
+  - test_title: 932115-4
+    desc: |
+      Windows shell command injection with 'sort': view=image.jpg%26sort  /r file.txt
+      Match sort with argument with multiple preceding space
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?view%3Dimage.jpg%26sort%20%20%2Fr%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932115"
+  - test_title: 932115-5
+    desc: |
+      Windows shell command injection with 'sort' (false positive): sort%3Dex%26sortdir%3Dascending
+      Do not match query parameter
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /www/delivery/lg.php?bannerid=18&campaignid=1&zoneid=4&loc=https%3A%2F%2Fwww.example.com%2Ffoo%2Fbar%2Fx-x%2Fx%3Fs%3D2014-11-01%26e%3D2020-10-31%26ex%3D7%26page%3D1%26sort%3Dex%26sortdir%3Ddescending&referer=https%3A%2F%2Fwww.example.com%2Ffoo%2Fbar%2Fx-x%2Fx%3Fs%3D2014-11-01%26e%3D2020-10-31%26ex%3D7%26page%3D1%26sort%3Dex%26sortdir%3Dascending&cb=7de91ea349
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932115"
+  - test_title: 932115-6
+    desc: |
+      Windows shell command injection with 'sort' (false positive): sort%3D0
+      Do not match encoded path
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /url%2Fbla%3Ftest%3D1%26sort%3D0
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932115"
+  - test_title: 932115-7
+    desc: "Windows shell command injection using 'type'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test@coreruleset.org\"|type %SYSTEMROOT%\\win.ini"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932115"
+  - test_title: 932115-8
+    desc: Windows Command Injection bypass with time
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/?foo=time+tracert"
+            version: HTTP/1.1
+          output:
+            log_contains: "id \"932115\""
+  - test_title: 932115-9
+    desc: Windows Command Injection bypass with time negative test
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/?foo=time+warner+"
+            version: HTTP/1.1
+          output:
+            no_log_contains: "id \"932115\""
+  - test_title: 932115-10
+    desc: Windows Command Injection test for BB finding 935E1D91 - evasion attempt
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/?foo=ti^me+tracert"
+            version: HTTP/1.1
+          output:
+            log_contains: "id \"932115\""

@@ -1,0 +1,30 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Helpers
+##!> define single_or_double_quotes ['"]
+##!> define string_in_round_brackets \(.+\)
+##!$ (?:;|$)?
+
+##!> assemble
+  ##! example payload: (system)(ls)
+  {{string_in_round_brackets}}{{string_in_round_brackets}}
+
+  ##! example payload: (sys)"tem"(ls)
+  {{string_in_round_brackets}}{{single_or_double_quotes}}[a-zA-Z-_0-9]+{{single_or_double_quotes}}{{string_in_round_brackets}}
+
+  ##! example payload: $_GET[0]("ls")
+  \[\d+\]{{string_in_round_brackets}}
+
+  ##! example payload: {0}("ls")
+  \{\d+\}{{string_in_round_brackets}}
+
+  ##! example payload: $a("ls")
+  \$[^(\),.;\x5c/]+{{string_in_round_brackets}}
+
+  ##! example payload: "system"("ls")
+  {{single_or_double_quotes}}[a-zA-Z0-9-_\x5c]+{{single_or_double_quotes}}{{string_in_round_brackets}}
+
+  ##! example payload: (string)system("ls")
+  \([^\)]*string[^\)]*\)[a-zA-Z-_0-9\"'.{}\[\]\s]+\([^\)]*\)
+##!<

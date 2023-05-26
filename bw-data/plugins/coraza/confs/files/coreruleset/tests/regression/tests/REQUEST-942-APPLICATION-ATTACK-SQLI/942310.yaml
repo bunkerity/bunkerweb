@@ -1,0 +1,63 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 942310.yaml
+tests:
+  - test_title: 942310-1
+    desc: |
+      Chained SQL injection attempts 2/2.
+      This test originally checked the expression `[\"'`]\s+and\s*?=\W`. We opted to remove that expression as it
+      does not appear to match anything useful (https://github.com/coreruleset/coreruleset/issues/2118).
+      This test now checks that no match occurs for something that would have matched the original expression.
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%22%27%20and%20%3d%20bar"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942310"
+  - test_title: 942310-2
+    desc: |
+      Chained SQL injection attempts 2/2.
+      This test checks for a positive match of `\(\s*?select\s*?\w+\s*?\(`.
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var='%20and%201%20in%20(select%20min(name)%20from%20sysobjects%20where%20xtype%20%3D%20'U'%20and%20name%20%3E%20'.')%20--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942310"
+  - test_title: 942310-3
+    desc: |
+      Chained SQL injection attempts 2/2.
+      This test checks for a positive match of `order\s+by\s+if\w*?\s*?\(`.
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=order%20by%20if(1%3D1%2C1%2Csleep(1))"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942310"

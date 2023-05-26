@@ -1,0 +1,387 @@
+---
+meta:
+  author: "terjanq, Franziska Bühler"
+  description: "Detects basic SQL authentication bypass attempts 4.1/4"
+  enabled: true
+  name: 942521.yaml
+tests:
+  - test_title: 942521-1
+    desc: "Detects the most basic authentication bypass with 'or'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=a'or'a"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-2
+    desc: "Detects basic SQLite authentication bypass with 'or?'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=a'or?--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-3
+    desc: "False-positive: Detects or-based authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=is%20this%20your%20parents'%20or%20yours?"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-4
+    desc: "Detects basic SQL auth bypass and-based"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=user'and%20id%20is%20not?--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-5
+    desc: "False-positve: is it your parents' or yours"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=it%20is%20your%20parents'%20and%20yours"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-6
+    desc: "Negative test: bob's or alice's"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=bob's%20or%20alice's"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-7
+    desc: "Negative test: mother or daugher"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=mother%20or%20daughter"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-8
+    desc: "Negative test: 'oreo"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='oreo"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-9
+    desc: "Negative test: 'fork"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='fork"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-10
+    desc: "Negative test: 'for"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='%20for"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-11
+    desc: "Negative test: ''or"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=''or"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-12
+    desc: "Negative test: 'books' or 'applles'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=''or"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-13
+    desc: "Negative test: bob's presentation's 'or'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=''or"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-14
+    desc: "Bypass with '''or 1"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='''or%201"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-15
+    desc: "False-negative: Not detected with escapes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=%5C'lol'%20or%20'1"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-16
+    desc: "Negative test: Wikipedia article about SQLi"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=Incorrectly%20constructed%20SQL%20statements%0AThis%20form%20of%20injection%20relies%20on%20the%20fact%20that%20SQL%20statements%20consist%20of%20both%20data%20used%20by%20the%20SQL%20statement%20and%20commands%20that%20control%20how%20the%20SQL%20statement%20is%20executed.%20For%20example%2C%20in%20the%20SQL%20statement%20select%20*%20from%20person%20where%20name%20%3D%20'susan'%20and%20age%20%3D%202%20the%20string%20'susan'%20is%20data%20and%20the%20fragment%20and%20age%20%3D%202%20is%20an%20example%20of%20a%20command%20(the%20value%202%20is%20also%20data%20in%20this%20example).%0A%0ASQL%20injection%20occurs%20when%20specially%20crafted%20user%20input%20is%20processed%20by%20the%20receiving%20program%20in%20a%20way%20that%20allows%20the%20input%20to%20exit%20a%20data%20context%20and%20enter%20a%20command%20context.%20This%20allows%20the%20attacker%20to%20alter%20the%20structure%20of%20the%20SQL%20statement%20which%20is%20executed.%0A%0AAs%20a%20simple%20example%2C%20imagine%20that%20the%20data%20'susan'%20in%20the%20above%20statement%20was%20provided%20by%20user%20input.%20The%20user%20entered%20the%20string%20'susan'%20(without%20the%20apostrophes)%20in%20a%20web%20form%20text%20entry%20field%2C%20and%20the%20program%20used%20string%20concatenation%20statements%20to%20form%20the%20above%20SQL%20statement%20from%20the%20three%20fragments%20select%20*%20from%20person%20where%20name%3D'%2C%20the%20user%20input%20of%20'susan'%2C%20and%20'%20and%20age%20%3D%202.%0A%0ANow%20imagine%20that%20instead%20of%20entering%20'susan'%20the%20attacker%20entered%20'%20or%201%3D1%3B%20--.%0A%0AThe%20program%20will%20use%20the%20same%20string%20concatenation%20approach%20with%20the%203%20fragments%20of%20select%20*%20from%20person%20where%20name%3D'%2C%20the%20user%20input%20of%20'%20or%201%3D1%3B%20--%2C%20and%20'%20and%20age%20%3D%202%20and%20construct%20the%20statement%20select%20*%20from%20person%20where%20name%3D''%20or%201%3D1%3B%20--%20and%20age%20%3D%202.%20Many%20databases%20will%20ignore%20the%20text%20after%20the%20'--'%20string%20as%20this%20denotes%20a%20comment.%20The%20structure%20of%20the%20SQL%20command%20is%20now%20select%20*%20from%20person%20where%20name%3D''%20or%201%3D1%3B%20and%20this%20will%20select%20all%20person%20rows%20rather%20than%20just%20those%20named%20'susan'%20whose%20age%20is%202.%20The%20attacker%20has%20managed%20to%20craft%20a%20data%20string%20which%20exits%20the%20data%20context%20and%20entered%20a%20command%20context.%0A%0AA%20more%20complex%20example%20is%20now%20presented.%0A%0AImagine%20a%20program%20creates%20a%20SQL%20statement%20using%20the%20following%20string%20assignment%20command%20%3A%0A%0Avar%20statement%20%3D%20%22SELECT%20*%20FROM%20users%20WHERE%20name%20%3D%20'%22%20%2B%20userName%20%2B%20%22'%22%3B%0A%0AThis%20SQL%20code%20is%20designed%20to%20pull%20up%20the%20records%20of%20the%20specified%20username%20from%20its%20table%20of%20users.%20However%2C%20if%20the%20%22userName%22%20variable%20is%20crafted%20in%20a%20specific%20way%20by%20a%20malicious%20user%2C%20the%20SQL%20statement%20may%20do%20more%20than%20the%20code%20author%20intended.%20For%20example%2C%20setting%20the%20%22userName%22%20variable%20as%3A%0A%0A'%20OR%20'1'%3D'1%0Aor%20using%20comments%20to%20even%20block%20the%20rest%20of%20the%20query%20(there%20are%20three%20types%20of%20SQL%20comments%5B14%5D).%20All%20three%20lines%20have%20a%20space%20at%20the%20end%3A%0A%0A'%20OR%20'1'%3D'1'%20--%0A'%20OR%20'1'%3D'1'%20%7B%0A'%20OR%20'1'%3D'1'%20%2F*%20"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-17
+    desc: "Performance test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=%21%21%21%21%21%27...%22%21%21%27.%22.%60...%27.....%27%40%60%21%21%21%21%21%60....%22%40%40%40%40%40%60%21%21%21%21%21%27%40%60%40%40%40%40%40%27...%22%27%40%40%40%40%40%27%22...%27%21%21%21%60%21%21%60%40%40%22%27%40%40%60..%27%21%21%27%40%40%40%40%22%40%40%40%40%40%60%21%21%21%21%27%21%22%40%40%40%40%40%27%21%21%21%60%21%21%21%21%22%21%21%21%22%21%21%21%21%21%27....%27%27%40%27%22.%60%40%40%40%40%60%27%21%21%22%40%60%40%40%40%40%27%21%27%21%27.....%27%21%21%21%60%40%40%40%60.%27%21%21%60%21%27%21%21%21%60%21%21%21%21%21%60%22%40%60%40%40%40%60%21%21%21%27%40%60%40%40%40%40%22...%22%21%21%21%21%21%27%40%40%40%27%21%27.....%27%21%21%21%27....%60%40%40%40%60%40%22...%60...%27%40%40%40%40%40%60...%22%40%40%40%40%22..%22%40%40%40%60%60%21%22%40%40%40%22%40%40%40%22%40%40%40%22..%22%27....%60%21%21%27%40%22...%27%40%40%40%40%22%40%40%40%22%21%21%21%21%21%27...%60...%22%21%21%21%21%60%40%40%40%27%21%27%40%40%40%40%40%22%40%40%40%60.....%22....%22%27....%22%22%21%21%21%21%22%40%40%27%21%21%21%21%21%22....%27%21%21%21%21%21%22%21%21%21%60%40%40%40%40%22%40%22%40%40%40%27%40%40%40%40%40%22%21%21%21%21%21%22%60%21%21%21%21%22%40%40%40%40%27%60%60%60..%22...%22%21%21%21%27%21%60%22%40%40%40%60%21%21%21%60%22%40%40%40%40%27%27%60%40%40%40%40%22.....%27%27..%22%40%40%40%22%21%21%21%21%60%40%40%40%40%40%27%21%21%21%21%22.%60%40%40%40%40%40%60%60%21%21%60%21%21%21%21%22%21%21%22.%60%27%40%40%27%40%40%40%60%21%21%21%21%21%22%21%21%21%21%21%27%40%40%40%40%27%21%21%21%21%21%60%40%40%40%40%40%22.....%60%60.%22%40%40%22.%27%21%21%21%21%21%27%21%21%27%40%40%40%22%60.....%60%40%40%27%22%40%40%40%40%60%27%22%40%40%40%40%60%21%21%21%21%27%22%21%21%21%21%60%21%60%40%40%40%40%22%40%40%40%40%22%21%21%22%21%21%21%21%21%27%40%40%22...%60%22%27.%60%22%40%22%40%40%40%40%40%22%21%21%22%21%21%21%21%22%40%40%40%60%40%40%27%21%21%22.....%60%21%21%21%60%40%40%22%40%60%40%40%40%60%27....%27%40%40%40%22%60%40%40%40%40%40%60%60%21%21%22%40%22..%27%21%21%21%21%21%60%40%40%40%40%27....%22.....%27%60%21%21%21%27%21%22%40%60%60%27%60%27%40%27%40%40%40%40%27%21%21%27%40%40%60%21%22%60%21%21%21%27..%22%27%40%40%40%60%60.....%27.....%27%40%40%22%22%27.....%22.%60%21%60%40%40%60%21%60%40%40%40%40%27%40%40%40%27%22..%60%21%60%40%40%40%60%60%40%40%40%40%22%21%21%21%21%21%22.%60%21%21%27%60%40%40%40%40%60%40%40%40%40%40%27%22.%22...%27...%27.....%27%40%40%40%40%40%60.%27%40%40%40%27%21%21%21%21%21%22%40%22%40%60%27%21%21%21%27%40%27%40%40%40%40%60%40%40%40%40%60%27%40%40%40%40%40%60%21%21%21%60%40%40%22...%60..%27.....%27.%27%27%21%60.%22%22%21%21%21%27.....%22%40%40%40%22%40%40%40%40%40%60...%27.%60%22..%27%21%60%21%21%21%21%60..%60....%22%27%40%40%40%40%22..%27.%27....%27%40%40%60...%22%21%22%22%21%60%21%21%21%21%21%27%21%21%27%22%27....%27%22%21%21%21%27%40%40%40%27.....%22...%60..%60%40%40%40%40%40%60%22%40%40%60.%27%21%27%21%21%21%21%21%27....%60%21%21%21%27%21%27%40%60%60...%22%21%21%21%21%60%27%40%22%22%40%22...%60%40%40%27..%22%21%21%21%21%60..%27%40%40%27%40%40%27..%22%40%40%40%40%60....%60%40%40%40%60%40%40%40%40%60%22%21%21%21%60%21%60%40%40%40%22..%27%40%40%40%60%40%40%60%60%22%40%40%40%40%22%21%21%60%40%40%22%40%60%21%21%60%27.....%27%40%40%40%40%40%22.%60%21%21%21%21%60%21%21%60.....%22%21%21%27%27%21%22%40%40%40%27%27%22%40%40%40%40%60....%60%22.%27%21%21%21%27%40%40%40%40%60...%27..%60%21%21%60...%60%21%60%40%40%27.....%27%40%40%27%27%40%40%27..%27.%27%40%22%27%21%22%40%40%22%21%21%21%27%60.....%60.....%22.%60%40%60%40%40%40%60..%22.....%60%40%40%40%40%22%27%21%21%21%21%21%60%40%40%40%40%22%40%40%40%40%40%27....%60.%27....%27%21%21%21%60%21%21%21%21%21%60..%27.%27%40%40%22%60%40%40%40%60.....%27...%27%21%21%21%21%60..%60....%60%40%40%40%27%21%21%21%27%60%21%21%21%21%27...%60%40%40%40%60....%60%27%40%40%40%40%27%40%40%60..%27%40%40%27..%27%22%21%22%40%40%40%27...%22%21%21%21%21%21%60%40%40%40%40%40%22%40%40%40%40%22%60%21%27..%60%21%21%21%27%40%40%40%22%21%21%21%21%27%40%40%40%40%22%40%60%22.....%22.....%27%40%40%40%40%40%27%21%21%21%21%27%40%27%40%40%40%40%40%27%60%27%22%21%22%21%21%21%21%60%40%40%40%40%40%27..%22.%60%40%40%40%40%40%22.%60%60%21%21%21%21%21%60%21%21%21%22...%60%40%22%21%21%21%21%22%21%21%60%40%40%40%40%60%21%21%21%21%22%40%27%21%21%21%60%27%40%40%40%40%22.....%60....%22...%60%21%21%21%21%60%21%21%21%21%21%27%40%40%60%40%40%40%40%27%40%60%21%22.....%22%21%21%21%27%40%40%40%40%27....%22%40%40%40%40%40%60%40%27.....%22%21%21%21%60%40%40%60%21%21%21%21%21%22%60%40%40%40%40%27%21%21%21%22...%60%40%60...%27...%60%21%21%21%22%21%21%21%21%27%21%27%21%21%60.%60%21%21%60..%22..%60.....%22..%22....%27%21%21%21%21%27%60%40%40%40%40%40%22%21%21%21%21%22%40%40%40%40%40%27%40%40%40%40%40%60.%60....%60%60%40%40%40%40%22%27%40%27%40%60%21%21%21%21%21%27...%27%40%40%40%40%40%27.%27.....%60%21%21%60%21%21%21%21%21%22%22%40%40%40%27%40%60%21%21%21%22%21%21%21%21%21%27..%22....%27%21%21%21%21%21%27...%60.....%60%40%22%21%21%21%21%27%27%21%21%21%21%21%22%60%27%21%21%21%27..%60%40%60%21%21%21%21%21%27%60%27%21%21%27%21%21%21%60%21%21%21%21%27%40%60%22%21%60.....%27%40%40%40%40%40%27.....%60%21%21%60%40%40%40%27...%60%21%21%21%60%40%40%40%22%22%21%21%21%21%21%22%40%40%40%40%27%40%22.%22.%22%40%40%40%40%40%22%40%60....%60....%27%21%21%21%21%21%22%21%21%21%21%60%21%21%21%21%21%27....%27%21%21%21%21%60%22%60%40%40%40%40%40%60...%22%40%60%40%40%22%40%40%40%40%40%27%21%21%27%22%40%40%60%27%22%40%40%40%22%21%60%27%21%21%21%21%21%60...%27%40%40%22%21%21%21%27%21%27%21%21%21%60%21%21%21%21%21%60%22.....%22%21%21%21%21%27%40%40%40%40%60%21%21%27.....%22%21%21%21%22%21%21%22%21%21%22%40%40%27%21%21%21%21%22%40%40%40%40%27%40%40%40%40%27....%60%40%40%40%60%40%22...%27.....%27%40%40%22%40%40%40%22%21%21%21%21%21%22...%27..%22%21%22%40%40%40%40%40%27....%60%40%40%40%40%22%27%21%21%21%21%21%60%40%40%22%27%40%40%40%40%40%60%21%21%21%27%40%40%40%27%60.%27%21%21%21%22....%60%40%27.....%22%40%40%40%40%40%27%40%60%40%40%40%40%60%40%40%40%60%21%21%21%21%21%60%27%21%21%21%27....%22%22%21%21%27...%27%21%21%21%27...%27%40%22....%22%40%40%27%21%21%21%21%27.....%22%40%40%40%40%27%22....%22...%27%21%21%21%60....%22%40%40%40%22...%27%40%27..%60%21%21%27%40%40%40%40%40%60%40%60%21%21%21%21%21%27.....%60%27%22%22%27%27.%22%60%21%21%22%40%40%60%21%22%60%21%21%27..%60%21%21%21%21%60%21%21%21%21%21%60%40%40%22%21%21%21%21%21%60%40%40%60....%60%40%40%40%40%40%22%40%40%40%40%60.....%60%27%27...%27%22%22%40%40%60.....%22%22%27%40%60%27%27.....%22%40%27%60.....%60%40%22%40%40%40%40%27%21%21%21%21%60%40%40%40%27%40%40%40%40%40%22%21%21%21%21%60.%22%21%21%27%40%27%22%21%21%21%21%60%40%40%27%40%40%40%40%27%21%21%27%27..%27%27%21%21%21%21%21%27%40%27.%60%21%21%21%21%21%27%40%40%40%40%27%21%21%27%40%40%40%40%22...%22%60%27%40%40%40%22%40%40%40%22%22%21%21%21%22%21%21%60...%27.....%60%40%40%40%60%21%21%21%60%40%40%40%40%40%22%22%21%21%21%60%21%21%21%21%21%27%27%21%21%21%21%22....%27%21%21%21%21%21%27%21%21%21%22%21%21%21%21%21%27%22....%60%27%40%40%27%21%27.....%22%21%22%21%21%21%21%21%22%21%21%21%21%22...%27%22%40%40%40%60%40%40%40%40%40%27%27%21%21%27....%22.....%22%21%21%21%22%40%40%40%40%40%27%21%21%21%21%60%22.....%60..%60%22%21%21%21%22%22%27...%27%40%40%40%40%27.....%27%21%21%21%60...%27.%22%21%21%21%21%21%27%21%27%21%21%21%22%40%27.....%27%21%21%21%21%22%40%27...%27%21%21%27%40%40%22%40%40%40%40%40%60..%27%21%27.....%22%22%21%21%21%21%21%27%40%40%40%40%22%40%40%40%60.....%60%21%21%21%21%21%27....%27%27%40%40%40%40%27.....%27%21%60....%22...%22%21%21%21%21%27%21%21%22%40%27%40%40%40%40%40%27%21%21%21%22%21%21%21%21%27%21%21%21%21%60%27%27..%22%22%21%21%21%27%22%21%60..%22%27%27%60..%22%21%22%21%21%21%21%21%27..%27..%27.%27%27%21%21%21%21%60%27%21%21%21%21%60..%27%21%21%22.....%22%21%21%21%21%27%21%21%21%27....%60.....%22...%22%22%22.%22%27.%60%21%21%21%21%22%60%40%22.....%27%21%21%21%21%22%40%60...%22.%22.....%27%27..%22%27%21%21%21%21%21%60....%22%21%21%21%22..%60%21%21%21%21%60%21%21%21%21%27....%60%27%40%40%40%22%27.%27....%22%40%40%40%60%21%21%21%21%22%40%40%40%40%40%27%21%21%21%60%40%40%40%40%60.%22..%22%40%40%22%21%60%22%21%21%21%21%27%27%27.%27%22%40%40%40%22%40%40%40%27....%22%21%21%21%21%21%22%21%21%21%21%22%21%27%60%27%21%21%21%60%21%27...%60%21%21%21%21%27...%27%40%40%40%40%40%60%21%21%60%21%21%21%22%40%60%40%40%40%40%40%60%27%60..%22%22%21%21%27%22%40%40%27...%22..%22....%22%27%60%40%40%27....%27%40%40%40%40%22%60%21%21%60.%60%40%27%21%60%21%22...%27...%27.....%27%21%21%22..%22%22%40%27%21%21%21%27%40%40%22.%27%21%21%21%60%40%60%60%21%21%21%60%21%21%22...%27.%22%21%21%21%27...%22%21%21%21%21%60%40%40%40%40%60%22.%27%21%21%60.....%60%21%21%60%21%21%21%21%21%27.%27%40%40%40%40%40%22%21%21%21%60..%27%21%21%21%21%21%27%21%21%60%40%40%27%21%21%21%27.%22%21%21%21%21%22.%22%40%40%40%40%40%22%21%21%21%22%21%21%22%22%21%21%21%60%27%21%21%60%40%40%40%40%40%27..%27%40%60.....%22%21%21%21%27.%27%21%21%21%21%27%27....%22%40%40%27%40%40%40%40%40%60%60or"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-18
+    desc: "Performance test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'or"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-19
+    desc: "Negative test: performance test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'.'or"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942521"
+  - test_title: 942521-20
+    desc: "Detect admin%40juice-sh.op'and%20likely%20(id)--"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "admin%2540juice-sh.op%5C%27and%2520likely%2520%28id%29--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-21
+    desc: "Detects odd number of quotes in request headers"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "1' and starts_with(password) and 'true"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-22
+    desc: "Detects odd number of quotes in request headers"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "1' and lo_import('/etc' || '/pass' || 'wd')::int::bool and 'true"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-23
+    desc: "Detects odd number of quotes in request headers"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "1' and lo_get(16400)::text::bool and 'true"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"
+  - test_title: 942521-24
+    desc: "Detects odd number of quotes in request headers"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "1'and json_search (json_array(password),0b11000010110110001101100,'t_______________')#"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: id "942521"

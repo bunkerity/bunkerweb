@@ -1,0 +1,215 @@
+---
+meta:
+  author: Christian S.J. Peron, Federico G. Schwindt
+  description: US-ASCII Malformed Encoding XSS Filter
+  enabled: true
+  name: 941310.yaml
+tests:
+  - test_title: 941310-1
+    desc: Positive test using single byte
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xbcscript\xbealert(\xa2XSS\xa2)\xbc/script\xbe
+          output:
+            log_contains: id "941310"
+  - test_title: 941310-2
+    desc: Positive test using utf-8
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xc2\xbcscript\xc2\xbealert(\xc2\xa2XSS\xc2\xa2)\xc2\xbc/script\xc2\xbe
+          output:
+            log_contains: id "941310"
+  - test_title: 941310-3
+    desc: Positive test using alternate utf-8
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xd0\xbcscript\xd0\xbealert(\xc2\xa2XSS\xc2\xa2)\xd0\xbc/script\xd0\xbe
+          output:
+            log_contains: id "941310"
+  - test_title: 941310-4
+    desc: Real world false positive for old rule with Russian utf-8 characters
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            # Reported in https://github.com/coreruleset/coreruleset/issues/1942 as "абвгдеёжзийклмнопрстуфхцчшщъыэюя"
+            data: var=\xd0\xb0\xd0\xb1\xd0\xb2\xd0\xb3\xd0\xb4\xd0\xb5\xd1\x91\xd0\xb6\xd0\xb7\xd0\xb8\xd0\xb9\xd0\xba\xd0\xbb\xd0\xbc\xd0\xbd\xd0\xbe\xd0\xbf\xd1\x80\xd1\x81\xd1\x82\xd1\x83\xd1\x84\xd1\x85\xd1\x86\xd1\x87\xd1\x88\xd1\x89\xd1\x8a\xd1\x8b\xd1\x8d\xd1\x8e\xd1\x8f
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-5
+    desc: Real world false positive for old rule with German utf-8 characters
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            # Reported in https://github.com/coreruleset/coreruleset/issues/1645 as "de_matten & sitzbez\xc3\xbcge > fu\xc3\x9fmatten_mt"
+            data: var=de_matten & sitzbez\xc3\x83\xc2\xbcge > fu\xc3\x83\xc2\x9fmatten_mt
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-6
+    desc: Negative test for opening tag
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xbc\xbc
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-7
+    desc: Negative test for closing tag
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xbe\xbe
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-8
+    desc: Negative for missing end tag, opening tag
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xd0\xbcscript\xd0\xbealert(\xc2\xa2XSS\xc2\xa2)\xd0\xbc/script\xd0
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-9
+    desc: Negative for missing end tag, closing tag
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: var=\xd0\xbcscript\xd0\xbealert(\xc2\xa2XSS\xc2\xa2)\xd0/script\xd0\xbe
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-10
+    desc: Negative using real world Russian example in utf-8
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            # Reported in https://github.com/coreruleset/coreruleset/issues/1942 as "абвгдеёжзийклмнпрстуфхцчшщъыэюя"
+            data: var=\xd0\xb0\xd0\xb1\xd0\xb2\xd0\xb3\xd0\xb4\xd0\xb5\xd1\x91\xd0\xb6\xd0\xb7\xd0\xb8\xd0\xb9\xd0\xba\xd0\xbb\xd0\xbc\xd0\xbd\xd0\xbf\xd1\x80\xd1\x81\xd1\x82\xd1\x83\xd1\x84\xd1\x85\xd1\x86\xd1\x87\xd1\x88\xd1\x89\xd1\x8a\xd1\x8b\xd1\x8d\xd1\x8e\xd1\x8f
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-11
+    desc: Negative using real world Russian example in utf-8, variant
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded; charset=us-ascii"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            # Reported in https://github.com/coreruleset/coreruleset/issues/1942 as "абвгдеёжзийклнопрстуфхцчшщъыэюя"
+            data: var=\xd0\xb0\xd0\xb1\xd0\xb2\xd0\xb3\xd0\xb4\xd0\xb5\xd1\x91\xd0\xb6\xd0\xb7\xd0\xb8\xd0\xb9\xd0\xba\xd0\xbb\xd0\xbd\xd0\xbe\xd0\xbf\xd1\x80\xd1\x81\xd1\x82\xd1\x83\xd1\x84\xd1\x85\xd1\x86\xd1\x87\xd1\x88\xd1\x89\xd1\x8a\xd1\x8b\xd1\x8d\xd1\x8e\xd1\x8f
+          output:
+            no_log_contains: id "941310"
+  - test_title: 941310-12
+    desc: "Status Page Test - US-ASCII Malformed Encoding XSS Filter Attack"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Content-Type: "application/x-www-form-urlencoded"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: /
+            data: test=\xbctest\xbetest(\xa2XSS\xa2)\xbc/test\xbe
+          output:
+            log_contains: id "941310"

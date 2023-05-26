@@ -1,0 +1,17 @@
+---
+meta:
+  author: "spartantri"
+  enabled: true
+  name: "944200.yaml"
+  description: "Description"
+tests:
+  - test_title: 944200-1
+    desc: Argument test includes java serialization magic bytes, base64 encoded request
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            encoded_request: "UE9TVCAvIEhUVFAvMS4wDQpIb3N0OiBsb2NhbGhvc3QNClVzZXItQWdlbnQ6IE9XQVNQIE1vZFNlY3VyaXR5IENvcmUgUnVsZSBTZXQNCkFjY2VwdDogdGV4dC94bWwsYXBwbGljYXRpb24veG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCx0ZXh0L2h0bWw7cT0wLjksdGV4dC9wbGFpbjtxPTAuOCxpbWFnZS9wbmcsKi8qO3E9MC41DQpBY2NlcHQtQ2hhcnNldDogSVNPLTg4NTktMSx1dGYtODtxPTAuNywqO3E9MC43DQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsZGVmbGF0ZQ0KQWNjZXB0LUxhbmd1YWdlOiBlbi11cyxlbjtxPTAuNQ0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi94LXd3dy1mb3JtLXVybGVuY29kZWQNCkNvbnRlbnQtTGVuZ3RoOiA5DQoNCnRlc3Q9rO0ABQ0KDQo="
+          output:
+            log_contains: "id \"944200\""

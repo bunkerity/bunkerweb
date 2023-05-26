@@ -1,0 +1,155 @@
+---
+meta:
+  author: csanders-git
+  description: None
+  enabled: true
+  name: 942290.yaml
+tests:
+  - test_title: 942290-1
+    desc: Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: /mongo/show.php?u_id[$ne]=2
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-2
+    desc: "basic MongoDB NOSQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?mongoQ=%5b%24lte%5dasdfsd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-3
+    desc: "basic MongoDB NOSQL injection attempts 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/mongo/show.php?u_id[$regex]=2"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-4
+    desc: "basic MongoDB NOSQL injection attempts 3"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/mongo/show.php?u_id[$regex]=2"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-5
+    desc: "basic MongoDB NOSQL injection attempts 4"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"$not": "foo"}'
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-6
+    desc: "basic MongoDB NOSQL injection attempts 5"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"$nor": "foo"}'
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-7
+    desc: "basic MongoDB NOSQL injection attempts 6"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"$where": "foo"}'
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-8
+    desc: "basic MongoDB NOSQL injection attempts 7"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"$elemMatch": "foo"}'
+          output:
+            log_contains: id "942290"
+  - test_title: 942290-9
+    desc: "basic MongoDB NOSQL injection attempts 8"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"$text": "foo"}'
+          output:
+            log_contains: id "942290"

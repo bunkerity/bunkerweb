@@ -1,0 +1,85 @@
+---
+meta:
+  author: csanders-git
+  description: None
+  enabled: true
+  name: 943110.yaml
+tests:
+  - test_title: 943110-1
+    desc: Session Fixation Attack (943110) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http://www.attackersite.com/test
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /login.php?jsessionid=74B0CB414BD77D17B5680A6386EF1666
+            version: HTTP/1.1
+          output:
+            log_contains: id "943110"
+  - test_title: 943110-2
+    desc: "session fixation attack"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Referer: "https://localhost.attackersite.com/"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?phpsessid=asdfdasfadsads"
+            version: HTTP/1.0
+          output:
+            log_contains: id "943110"
+  - test_title: 943110-3
+    desc: "session fixation attack"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Referer: "https://attackersite.com/"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?phpsessid=asdfdasfadsads"
+            version: HTTP/1.0
+          output:
+            log_contains: id "943110"
+  - test_title: 943110-4
+    desc: Session Fixation Attack (943110) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Referer: http://localhost/test
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /login.php?jsessionid=74B0CB414BD77D17B5680A6386EF1666
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "943110"

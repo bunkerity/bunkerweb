@@ -1,0 +1,87 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "941190.yaml"
+  description: "Tests to trigger, or not trigger 941190"
+tests:
+  - test_title: 941190-1
+    desc: Node-validator deny list keywords, ARGS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/foo'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "941190-1=<STYLE>@import'http://xss.rocks/xss.css';</STYLE>"
+          output:
+            log_contains: id "941190"
+  - test_title: 941190-2
+    desc: Node-validator deny list keywords, ARGS_NAMES
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/bar'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "x=<STYLE>@im\\port'\\ja\vasc\\ript:alert('XSS')';</STYLE>"
+          output:
+            log_contains: id "941190"
+  - test_title: 941190-3
+    desc: Node-validator deny list keywords, COOKIES_NAMES
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/baz'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Cookie: '<STYLE>BODY{-moz-binding:url("http://xss.rocks/xssmoz.xml#xss")}</STYLE>'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941190"
+  - test_title: 941190-4
+    desc: Test first replaced backslash match (\x5c)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Cookie: 'My-Cookie=<STYLE>@\\\\'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941190"
+  - test_title: 941190-5
+    desc: Test second replaced backslash match (\x5c)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Cookie: 'My-Cookie=<STYLE>=\\\\'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941190"
