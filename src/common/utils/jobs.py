@@ -162,6 +162,7 @@ def cache_file(
     _hash: Optional[str],
     db=None,
     *,
+    delete_file: bool = True,
     service_id: Optional[str] = None,
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
@@ -173,7 +174,9 @@ def cache_file(
 
         content = file.read_bytes()
         cache.write_bytes(content)
-        file.unlink()
+
+        if delete_file:
+            file.unlink()
 
         if not _hash:
             _hash = file_hash(str(cache))

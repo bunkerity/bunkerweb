@@ -59,7 +59,9 @@ def check_cert(
         if old_hash == cert_hash:
             return False
 
-        cached, err = cache_file(cert_path, cert_cache_path, cert_hash, db)
+        cached, err = cache_file(
+            cert_path, cert_cache_path, cert_hash, db, delete_file=False
+        )
         if not cached:
             logger.error(f"Error while caching custom-cert cert.pem file : {err}")
 
@@ -70,7 +72,9 @@ def check_cert(
         key_hash = file_hash(key_path)
         old_hash = cache_hash(key_cache_path, db)
         if old_hash != key_hash:
-            cached, err = cache_file(key_path, key_cache_path, key_hash, db)
+            cached, err = cache_file(
+                key_path, key_cache_path, key_hash, db, delete_file=False
+            )
             if not cached:
                 logger.error(f"Error while caching custom-cert cert.key file : {err}")
 
