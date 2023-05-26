@@ -1,42 +1,46 @@
 #!/usr/bin/python3
 
 from io import BytesIO
-from os import getenv
+from os import getenv, sep
+from os.path import join
 from pathlib import Path
-from subprocess import run, DEVNULL, STDOUT
+from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("api",),
+        ("db",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from Database import Database
-from logger import setup_logger
-from API import API
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
+from API import API  # type: ignore
 
-logger = setup_logger("Lets-encrypt", getenv("LOG_LEVEL", "INFO"))
+logger = setup_logger("Lets-encrypt.deploy", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
     # Get env vars
-    bw_integration = None
-    if getenv("KUBERNETES_MODE", "no").lower() == "yes":
+    bw_integration = "Linux"
+    integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+    if getenv("KUBERNETES_MODE") == "yes":
         bw_integration = "Kubernetes"
-    elif getenv("SWARM_MODE", "no").lower() == "yes":
+    elif getenv("SWARM_MODE") == "yes":
         bw_integration = "Swarm"
-    elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
+    elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
-    elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
-        with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-            bw_integration = f.read().strip()
+    elif integration_path.is_file():
+        integration = integration_path.read_text().strip()
     token = getenv("CERTBOT_TOKEN", "")
 
     logger.info(f"Certificates renewal for {getenv('RENEWED_DOMAINS')} successful")
@@ -46,8 +50,11 @@ try:
         # Create tarball of /var/cache/bunkerweb/letsencrypt
         tgz = BytesIO()
 
-        with tar_open(mode="w:gz", fileobj=tgz) as tf:
-            tf.add("/var/cache/bunkerweb/letsencrypt/etc", arcname="etc")
+        with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
+            tf.add(
+                join(sep, "var", "cache", "bunkerweb", "letsencrypt", "etc"),
+                arcname="etc",
+            )
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 
@@ -73,45 +80,44 @@ try:
                 logger.error(
                     f"Can't send API request to {api.get_endpoint()}/lets-encrypt/certificates : {err}"
                 )
+            elif status != 200:
+                status = 1
+                logger.error(
+                    f"Error while sending API request to {api.get_endpoint()}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}"
+                )
             else:
-                if status != 200:
+                logger.info(
+                    f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/certificates",
+                )
+                sent, err, status, resp = api.request("POST", "/reload")
+                if not sent:
                     status = 1
                     logger.error(
-                        f"Error while sending API request to {api.get_endpoint()}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}"
+                        f"Can't send API request to {api.get_endpoint()}/reload : {err}"
+                    )
+                elif status != 200:
+                    status = 1
+                    logger.error(
+                        f"Error while sending API request to {api.get_endpoint()}/reload : status = {resp['status']}, msg = {resp['msg']}"
                     )
                 else:
                     logger.info(
-                        f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/certificates",
+                        f"Successfully sent API request to {api.get_endpoint()}/reload"
                     )
-                    sent, err, status, resp = api.request("POST", "/reload")
-                    if not sent:
-                        status = 1
-                        logger.error(
-                            f"Can't send API request to {api.get_endpoint()}/reload : {err}"
-                        )
-                    else:
-                        if status != 200:
-                            status = 1
-                            logger.error(
-                                f"Error while sending API request to {api.get_endpoint()}/reload : status = {resp['status']}, msg = {resp['msg']}"
-                            )
-                        else:
-                            logger.info(
-                                f"Successfully sent API request to {api.get_endpoint()}/reload"
-                            )
     # Linux case
     else:
-        proc = run(
-            ["sudo", "/usr/sbin/nginx", "-s", "reload"],
-            stdin=DEVNULL,
-            stderr=STDOUT,
-        )
-        if proc.returncode != 0:
+        if (
+            run(
+                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+            ).returncode
+            != 0
+        ):
             status = 1
             logger.error("Error while reloading nginx")
         else:
             logger.info("Successfully reloaded nginx")
-
 except:
     status = 1
     logger.error(f"Exception while running certbot-deploy.py :\n{format_exc()}")

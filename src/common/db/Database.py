@@ -4,12 +4,13 @@ from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
+from inspect import getsourcefile
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import dirname, join
+from os.path import basename, dirname, join
 from pathlib import Path
 from re import compile as re_compile
-from sys import path as sys_path
+from sys import _getframe, path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
 from time import sleep
 from traceback import format_exc
@@ -901,7 +902,8 @@ class Database:
 
         return ""
 
-    def delete_job_cache(self, job_name: str, file_name: str):
+    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None):
+        job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
         with self.__db_session() as session:
             session.query(Jobs_cache).filter_by(
                 job_name=job_name, file_name=file_name
@@ -909,14 +911,15 @@ class Database:
 
     def update_job_cache(
         self,
-        job_name: str,
         service_id: Optional[str],
         file_name: str,
         data: bytes,
         *,
+        job_name: Optional[str] = None,
         checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
+        job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
         with self.__db_session() as session:
             cache = (
                 session.query(Jobs_cache)

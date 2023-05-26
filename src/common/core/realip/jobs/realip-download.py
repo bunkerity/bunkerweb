@@ -2,24 +2,27 @@
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
-from os import _exit, getenv
+from os import _exit, getenv, sep
+from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/db",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("db",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from requests import get
 
-from Database import Database
-from logger import setup_logger
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 
@@ -65,8 +68,10 @@ try:
         _exit(0)
 
     # Create directories if they don't exist
-    Path("/var/cache/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
-    Path("/var/tmp/bunkerweb/realip").mkdir(parents=True, exist_ok=True)
+    realip_path = Path(sep, "var", "cache", "bunkerweb", "realip")
+    realip_path.mkdir(parents=True, exist_ok=True)
+    tmp_realip_path = Path(sep, "var", "tmp", "bunkerweb", "realip")
+    tmp_realip_path.mkdir(parents=True, exist_ok=True)
 
     db = Database(
         logger,
@@ -74,7 +79,7 @@ try:
     )
 
     # Don't go further if the cache is fresh
-    if is_cached_file("/var/cache/bunkerweb/realip/combined.list", "hour", db):
+    if is_cached_file(realip_path.joinpath("combined.list"), "hour", db):
         logger.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
@@ -108,19 +113,19 @@ try:
                 f"Exception while getting RealIP list from {url} :\n{format_exc()}"
             )
 
-    Path("/var/tmp/bunkerweb/realip/combined.list").write_bytes(content)
+    tmp_realip_path.joinpath("combined.list").write_bytes(content)
 
     # Check if file has changed
-    new_hash = file_hash("/var/tmp/bunkerweb/realip/combined.list")
-    old_hash = cache_hash("/var/cache/bunkerweb/realip/combined.list", db)
+    new_hash = file_hash(tmp_realip_path.joinpath("combined.list"))
+    old_hash = cache_hash(realip_path.joinpath("combined.list"), db)
     if new_hash == old_hash:
         logger.info("New file is identical to cache file, reload is not needed")
         _exit(0)
 
     # Put file in cache
     cached, err = cache_file(
-        "/var/tmp/bunkerweb/realip/combined.list",
-        "/var/cache/bunkerweb/realip/combined.list",
+        tmp_realip_path.joinpath("combined.list"),
+        realip_path.joinpath("combined.list"),
         new_hash,
         db,
     )

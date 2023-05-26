@@ -16,19 +16,22 @@ from tarfile import open as tar_open
 from traceback import format_exc
 from zipfile import ZipFile
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("api",),
+        ("db",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from requests import get
 
-from Database import Database
-from logger import setup_logger
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 logger = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
@@ -60,12 +63,6 @@ try:
     if not plugin_urls:
         logger.info("No external plugins to download")
         _exit(0)
-
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI"),
-    )
-    lock = Lock()
 
     plugin_nbr = 0
 
@@ -148,6 +145,12 @@ try:
 
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])
+
+    db = Database(
+        logger,
+        sqlalchemy_string=getenv("DATABASE_URI"),
+    )
+    lock = Lock()
 
     for plugin in db.get_plugins(external=True, with_data=True):
         if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:

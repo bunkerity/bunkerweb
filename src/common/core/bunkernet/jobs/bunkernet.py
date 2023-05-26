@@ -1,4 +1,6 @@
-from os import getenv
+#!/usr/bin/python3
+
+from os import getenv, sep
 from pathlib import Path
 from requests import request as requests_request, ReadTimeout
 from typing import Literal, Optional, Tuple, Union
@@ -36,42 +38,43 @@ def request(
     return True, status, raw_data
 
 
-def register():
+def register() -> Tuple[bool, Optional[int], Union[str, dict]]:
     return request("POST", "/register")
 
 
-def ping(_id=None):
-    return request("GET", "/ping", _id=get_id() if _id is None else _id)
+def ping(_id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
+    return request("GET", "/ping", _id=_id or get_id())
 
 
-def data():
+def data() -> Tuple[bool, Optional[int], Union[str, dict]]:
     return request("GET", "/db", _id=get_id())
 
 
-def get_id():
-    with open("/var/cache/bunkerweb/bunkernet/instance.id", "r") as f:
-        return f.read().strip()
+def get_id() -> str:
+    return (
+        Path(sep, "var", "cache", "bunkerweb", "bunkernet", "instance.id")
+        .read_text()
+        .strip()
+    )
 
 
-def get_version():
-    with open("/usr/share/bunkerweb/VERSION", "r") as f:
-        return f.read().strip()
+def get_version() -> str:
+    return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
 
 
-def get_integration():
+def get_integration() -> str:
     try:
+        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+        os_release_path = Path(sep, "etc", "os-release")
         if getenv("KUBERNETES_MODE", "no").lower() == "yes":
             return "kubernetes"
         elif getenv("SWARM_MODE", "no").lower() == "yes":
             return "swarm"
         elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
             return "autoconf"
-        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
-            return Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip().lower()
-        elif (
-            Path("/etc/os-release").is_file()
-            and "Alpine" in Path("/etc/os-release").read_text()
-        ):
+        elif integration_path.is_file():
+            return integration_path.read_text().strip().lower()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
             return "docker"
 
         return "linux"

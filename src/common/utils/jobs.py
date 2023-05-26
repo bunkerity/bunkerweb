@@ -6,7 +6,7 @@ from hashlib import sha512
 from inspect import getsourcefile
 from io import BufferedReader
 from json import dumps, loads
-from os.path import basename
+from os.path import basename, normpath
 from pathlib import Path
 from sys import _getframe
 from threading import Lock
@@ -24,13 +24,14 @@ lock = Lock()
 
 
 def is_cached_file(
-    file: str,
+    file: Union[str, Path],
     expire: Union[Literal["hour"], Literal["day"], Literal["week"], Literal["month"]],
     db=None,
 ) -> bool:
     is_cached = False
     cached_file = None
     try:
+        file = normpath(file)
         file_path = Path(f"{file}.md")
         if not file_path.is_file():
             if not db:
@@ -69,27 +70,34 @@ def is_cached_file(
     return is_cached and cached_file
 
 
-def get_file_in_db(file: str, db) -> bytes:
+def get_file_in_db(file: Union[str, Path], db) -> bytes:
     cached_file = db.get_job_cache_file(
-        basename(getsourcefile(_getframe(1))).replace(".py", ""), file
+        basename(getsourcefile(_getframe(1))).replace(".py", ""), normpath(file)
     )
     if not cached_file:
         return False
     return cached_file.data
 
 
-def set_file_in_db(name: str, bio: BufferedReader, db) -> Tuple[bool, str]:
+def set_file_in_db(
+    name: str,
+    content: bytes,
+    db,
+    *,
+    job_name: Optional[str] = None,
+    service_id: Optional[str] = None,
+    checksum: Optional[str] = None,
+) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
-        content = bio.read()
-        bio.seek(0)
         with lock:
             err = db.update_job_cache(
-                basename(getsourcefile(_getframe(1))).replace(".py", ""),
-                None,
+                service_id,
                 name,
                 content,
-                checksum=bytes_hash(bio),
+                job_name=job_name
+                or basename(getsourcefile(_getframe(1))).replace(".py", ""),
+                checksum=checksum,
             )
 
             if err:
@@ -103,16 +111,16 @@ def del_file_in_db(name: str, db) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
         db.delete_job_cache(
-            basename(getsourcefile(_getframe(1))).replace(".py", ""), name
+            name, job_name=basename(getsourcefile(_getframe(1))).replace(".py", "")
         )
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err
 
 
-def file_hash(file: str) -> str:
+def file_hash(file: Union[str, Path]) -> str:
     _sha512 = sha512()
-    with open(file, "rb") as f:
+    with open(normpath(file), "rb") as f:
         while True:
             data = f.read(1024)
             if not data:
@@ -121,7 +129,7 @@ def file_hash(file: str) -> str:
     return _sha512.hexdigest()
 
 
-def bytes_hash(bio: bytes) -> str:
+def bytes_hash(bio: BufferedReader) -> str:
     _sha512 = sha512()
     while True:
         data = bio.read(1024)
@@ -132,13 +140,13 @@ def bytes_hash(bio: bytes) -> str:
     return _sha512.hexdigest()
 
 
-def cache_hash(cache: str, db=None) -> Optional[str]:
+def cache_hash(cache: Union[str, Path], db=None) -> Optional[str]:
     with suppress(BaseException):
-        return loads(Path(f"{cache}.md").read_text()).get("checksum", None)
+        return loads(Path(normpath(f"{cache}.md")).read_text()).get("checksum", None)
     if db:
         cached_file = db.get_job_cache_file(
             basename(getsourcefile(_getframe(1))).replace(".py", ""),
-            basename(cache),
+            basename(normpath(cache)),
             with_info=True,
             with_data=False,
         )
@@ -149,8 +157,8 @@ def cache_hash(cache: str, db=None) -> Optional[str]:
 
 
 def cache_file(
-    file: str,
-    cache: str,
+    file: Union[str, Path],
+    cache: Union[str, Path],
     _hash: Optional[str],
     db=None,
     *,
@@ -158,25 +166,27 @@ def cache_file(
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
-        content = Path(file).read_bytes()
-        Path(cache).write_bytes(content)
-        Path(file).unlink()
+        if not isinstance(file, Path):
+            file = Path(normpath(file))
+        if not isinstance(cache, Path):
+            cache = Path(normpath(cache))
+
+        content = file.read_bytes()
+        cache.write_bytes(content)
+        file.unlink()
 
         if not _hash:
-            _hash = file_hash(cache)
+            _hash = file_hash(str(cache))
 
         if db:
-            with lock:
-                err = db.update_job_cache(
-                    basename(getsourcefile(_getframe(1))).replace(".py", ""),
-                    service_id,
-                    basename(cache),
-                    content,
-                    checksum=_hash,
-                )
-
-                if err:
-                    ret = False
+            return set_file_in_db(
+                basename(str(cache)),
+                content,
+                db,
+                job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""),
+                service_id=service_id,
+                checksum=_hash,
+            )
         else:
             Path(f"{cache}.md").write_text(
                 dumps(dict(date=datetime.now().timestamp(), checksum=_hash))
