@@ -17,7 +17,7 @@ services:
       LOG_LEVEL: "info"
 
       # ? CUSTOM_CERT settings
-      USE_CUSTOM_SSL: "yes"
+      USE_CUSTOM_SSL: "no"
       CUSTOM_SSL_CERT: "/certs/certificate.pem"
       CUSTOM_SSL_KEY: "/certs/privatekey.key"
     networks:
